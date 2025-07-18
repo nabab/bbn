@@ -3331,12 +3331,13 @@ class Db implements Db\Actions
    *
    * @param string $source The source database name
    * @param string $target The target database name
+   * @param bool $withData If true, the data will be copied too
    * @return bool True if it succeeded
    */
-  public function duplicateDatabase(string $source, string $target): bool
+  public function duplicateDatabase(string $source, string $target, bool $withData = true): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
-    return $this->language->duplicateDatabase($source, $target);
+    return $this->language->duplicateDatabase($source, $target, $withData);
   }
 
 

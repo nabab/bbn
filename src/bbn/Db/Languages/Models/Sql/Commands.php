@@ -11,11 +11,18 @@ trait Commands {
   use Formatters;
 
 
-  protected function emulatePreparesAndQuery(string $sql)
+  protected function emulatePreparesAndQuery(string|array $sql)
   {
     $att = true;
+    $emode = null;
+    $res = false;
     try {
       $att = $this->pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES);
+    }
+    catch (Exception $e) {}
+
+    try {
+      $emode = $this->pdo->getAttribute(PDO::ATTR_ERRMODE);
     }
     catch (Exception $e) {}
 
@@ -23,9 +30,26 @@ trait Commands {
       $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
     }
 
-    $res = (bool)$this->rawQuery($sql);
+    $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    if (is_string($sql)) {
+      $res = $this->rawQuery($sql);
+    }
+    else {
+      $res = true;
+      foreach ($sql as $s) {
+        if (!$this->rawQuery($s)) {
+          $res = false;
+          break;
+        }
+      }
+    }
+
     if (empty($att)) {
       $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    }
+
+    if (!is_null($emode)) {
+      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, $emode);
     }
 
     return $res;
@@ -158,17 +182,18 @@ trait Commands {
    *
    * @param string $source
    * @param string $target
+   * @param bool $withData
    * @return bool
    * @throws Exception
    */
-  public function duplicateDatabase(string $source, string $target): bool
+  public function duplicateDatabase(string $source, string $target, bool $withData): bool
   {
     if ($this->check()) {
       if (!Str::checkName($source) || !Str::checkName($target)) {
         throw new Exception(X::_("Wrong database name '%s' or '%s'", $source, $target));
       }
 
-      if ($sql = $this->getDuplicateDatabase($source, $target)) {
+      if ($sql = $this->getDuplicateDatabase($source, $target, $withData)) {
         try {
           $this->disableKeys();
           $res = (bool)$this->emulatePreparesAndQuery($sql);
@@ -353,6 +378,7 @@ trait Commands {
   public function getTableCharset(string $table): ?string
   {
     if ($this->check()
+      && method_exists($this, 'getCharsetTable')
       && ($sql = $this->getCharsetTable($table))
       && ($r = $this->getRow($sql))
     ) {

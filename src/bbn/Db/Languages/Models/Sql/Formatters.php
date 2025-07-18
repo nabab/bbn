@@ -45,19 +45,33 @@ trait Formatters {
    * Returns the SQL statement to duplicate a database.
    * @param string $oldName The name of the database to duplicate.
    * @param string $newName The name of the new database.
+   * @param bool $withData Whether to include data in the duplication.
    * @return string The SQL statement to duplicate the database, or an empty string if the names are invalid.
    */
-  public function getDuplicateDatabase(string $source, string $target): string
+  public function getDuplicateDatabase(string $source, string $target, bool $withData = true): string
   {
     if (Str::checkName($source) && Str::checkName($target)) {
-      $sql = $this->getCreateDatabase($target).PHP_EOL;
+      $sql = $this->getCreateDatabase($target, $this->getDatabaseCharset($source), $this->getDatabaseCollation($source)).PHP_EOL;
       if ($tables = $this->getTables($source)) {
-        foreach ($tables as $table) {
-          $sql .= $this->getDuplicateTable("$source.$table", "$target.$table", false).PHP_EOL;
+        foreach ($tables as $i => $table) {
+          $sql .= $this->getDuplicateTable("$source.$table", "$target.$table", false). (!empty($tables[$i + 1]) ? PHP_EOL : '');
         }
 
-        foreach ($tables as $i => $table) {
-          $sql .= ($i ? PHP_EOL : '') . "INSERT INTO " . $this->escape("$target.$table") . " SELECT * FROM " . $this->escape("$source.$table") . ";";
+        if ($withData) {
+          foreach ($tables as $i => $table) {
+            $columns = array_map(
+              fn($c) => $this->escape($c),
+              array_keys(
+                array_filter(
+                  $this->getColumns("$source.$table"),
+                  fn($c) => empty($c['virtual'])
+                )
+              )
+            );
+            if ($columns) {
+              $sql .= "INSERT INTO " . $this->escape("$target.$table") . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape("$source.$table") . ";" . (!empty($tables[$i + 1]) ? PHP_EOL : '');
+            }
+          }
         }
       }
 
@@ -114,22 +128,24 @@ trait Formatters {
    * @param array|null $cfg
    * @param bool $createKeys
    * @param bool $createConstraints
+   * @param bool $anonymize
    * @return string
    */
   public function getCreateTableRaw(
     string $table,
     ?array $cfg = null,
     bool $createKeys = true,
-    bool $createConstraints = true
+    bool $createConstraints = true,
+    bool $anonymize = false
     ): string
   {
     if ($sql = $this->getCreateTable($table, $cfg)) {
       if ($createKeys) {
-        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg);
+        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg, $anonymize);
       }
 
       if ($createConstraints) {
-        $sql .= PHP_EOL.$this->getCreateConstraints($table, $cfg);
+        $sql .= PHP_EOL.$this->getCreateConstraints($table, $cfg, $anonymize);
       }
 
       return $sql;
@@ -194,25 +210,45 @@ trait Formatters {
    * @param string $source The name of the source table.
    * @param string $target The name of the target table.
    * @param bool $withData Whether to include data in the duplication.
-   * @return string The SQL statement to duplicate the table, or an empty string if the parameters are invalid.
+   * @return array The SQL statements to duplicate the table, or null if the source table does not exist.
    */
-  public function getDuplicateTable(string $source, string $target, bool $withData = true): string
+  public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
   {
-    if (Str::checkName($source) && Str::checkName($target)) {
-      $sql = $this->getCreateTable($source);
+    if ($sql = $this->getCreateTableRaw($source, null, true, false, true)) {
       $sql = str_replace(
         'CREATE TABLE '.$this->escape($source),
         'CREATE TABLE ' . $this->escape($target),
         $sql
       );
-      if ($withData) {
-        $sql .= PHP_EOL . "INSERT INTO " . $this->escape($target) . " SELECT * FROM " . $this->escape($source) . ";";
+      $ret = [$sql];
+      if ($sql = $this->getCreateConstraints($source, null, true)) {
+        $sql = str_replace(
+          'ALTER TABLE '.$this->escape($source),
+          'ALTER TABLE ' . $this->escape($target),
+          $sql
+        );
+        $ret[] = PHP_EOL . $sql;
       }
-die(var_dump($sql));
-      return $sql;
+
+      if ($withData) {
+        $columns = array_map(
+          fn($c) => $this->escape($c),
+          array_keys(
+            array_filter(
+              $this->getColumns($source),
+              fn($c) => empty($c['virtual'])
+            )
+          )
+        );
+        if ($columns) {
+          $sql[] = PHP_EOL."INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
+        }
+      }
+
+      return $ret;
     }
 
-    return '';
+    return null;
   }
 
 

@@ -381,14 +381,14 @@ class Pgsql extends Sql
    * @param string $database
    * @return string
    */
-  public function getDuplicateDatabase(string $source, string $target): string
+  /* public function getDuplicateDatabase(string $source, string $target): string
   {
     if (Str::checkName($source) && Str::checkName($target)) {
       return "CREATE DATABASE ".$this->escape($target)." WITH TEMPLATE ".$this->escape($source).";";
     }
 
     return '';
-  }
+  } */
 
 
   /**
@@ -1149,9 +1149,10 @@ PGSQL
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateKeys(string $table, ?array $cfg = null): string
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -1170,7 +1171,7 @@ PGSQL
             $st .= '  ADD PRIMARY KEY';
           }
           else {
-            $st .= '  ADD CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
+            $st .= '  ADD' . (empty($anonymize) ? (' CONSTRAINT ' . $this->escape($name)) : '') . ' UNIQUE';
           }
 
           $st .= ' ('.implode(
@@ -1194,9 +1195,10 @@ PGSQL
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateConstraints(string $table, ?array $cfg = null): string
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -1226,15 +1228,15 @@ PGSQL
             "WHERE table_catalog = '" . $db . "' AND table_name = '" . $k['ref_table'] . "')".PHP_EOL. '  THEN'.PHP_EOL.
             '    ALTER TABLE ' . $this->escape($table) . PHP_EOL;
 
-          $st .= '      ADD CONSTRAINT ' . $this->escape($k['constraint']) .
-            ' FOREIGN KEY (' . $cols . ') ' .
+          $st .= '      ADD ' . (empty($anonymize) ? ('CONSTRAINT ' . $this->escape($k['constraint']) . ' ') : '') .
+            'FOREIGN KEY (' . $cols . ') ' .
             'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
             (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
             (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
             ';'.PHP_EOL.'  END IF;'.PHP_EOL;
         }
 
-        $st .= 'END'.PHP_EOL.'$constraints$;'.PHP_EOL;
+        $st .= 'END'.PHP_EOL.'$constraints$;';
       }
     }
 

@@ -2430,7 +2430,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               $tmp = [
                 'keys' => $keys['keys'],
                 'cols' => $keys['cols'],
-                'fields' => $cols
+                'fields' => $cols,
+                'charset' => $this->getTableCharset($item),
+                'collation' => $this->getTableCollation($item)
               ];
             }
             break;

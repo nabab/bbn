@@ -647,10 +647,11 @@ class Sqlite extends Sql
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, ?array $cfg = null): string
+  public function getCreateTable(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     if (!$cfg) {
       $cfg = $this->modelize($table);
@@ -679,12 +680,51 @@ class Sqlite extends Sql
       ) . ')';
     }
 
-    if ($c = $this->getCreateConstraintsOnly($table, $cfg)) {
+    if ($c = $this->getCreateConstraintsOnly($table, $cfg, $anonymize)) {
       $st .= ',' . PHP_EOL . $c;
     }
 
-    $st .= PHP_EOL . '); PRAGMA encoding=' . $this->qte . (empty($cfg['charset']) ? static::$defaultCharset : $cfg['charset']) . $this->qte . ';';
+    $st .= PHP_EOL . ');';
     return $st;
+  }
+
+
+  /**
+   * Returns the SQL statement to duplicate a table.
+   * This method generates a CREATE TABLE statement for the target table based on the source table.
+   * @param string $source The name of the source table.
+   * @param string $target The name of the target table.
+   * @param bool $withData Whether to include data in the duplication.
+   * @return array The SQL statements to duplicate the table, or null if the source table does not exist.
+   */
+  public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
+  {
+    if ($sql = $this->getCreateTableRaw($source, null, true, true, true)) {
+      $sql = str_replace(
+        'CREATE TABLE '.$this->escape($source),
+        'CREATE TABLE ' . $this->escape($target),
+        $sql
+      );
+      $ret = [$sql];
+      if ($withData) {
+        $columns = array_map(
+          fn($c) => $this->escape($c),
+          array_keys(
+            array_filter(
+              $this->getColumns($source),
+              fn($c) => empty($c['virtual'])
+            )
+          )
+        );
+        if ($columns) {
+          $ret[] = PHP_EOL."INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
+        }
+      }
+
+      return $ret;
+    }
+
+    return null;
   }
 
 
@@ -707,10 +747,11 @@ class Sqlite extends Sql
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    * @throws Exception
    */
-  public function getCreateKeys(string $table, ?array $cfg = null): string
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -759,13 +800,15 @@ class Sqlite extends Sql
    * @param array|null $cfg
    * @param bool $createKeys
    * @param bool $createConstraints
+   * @param bool $anonymize
    * @return string
    */
   public function getCreateTableRaw(
     string $table,
     ?array $cfg = null,
     bool $createKeys = true,
-    bool $createConstraints = true
+    bool $createConstraints = true,
+    bool $anonymize = false
   ): string
   {
     if (empty($cfg)) {
@@ -793,9 +836,11 @@ class Sqlite extends Sql
       }
     }
 
-    if ($sql = $this->getCreateTable($table, $cfg)) {
-      if ($createKeys) {
-        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg);
+    if ($sql = $this->getCreateTable($table, $cfg, $anonymize)) {
+      if ($createKeys
+        && ($s = $this->getCreateKeys($table, $cfg, $anonymize))
+      ) {
+        $sql .= PHP_EOL . $s;
       }
 
       return $sql;
@@ -1105,9 +1150,10 @@ class Sqlite extends Sql
    *
    * @param string $oldDatabase
    * @param string $newDatabase
+   * @param bool $withData
    * @return bool
    */
-  public function duplicateDatabase(string $oldDatabase, string $newDatabase): bool
+  public function duplicateDatabase(string $oldDatabase, string $newDatabase, bool $withData = true): bool
   {
     return static::duplicateDatabaseOnHost($oldDatabase, $newDatabase, $this->host);
   }
@@ -1233,9 +1279,10 @@ class Sqlite extends Sql
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateConstraintsOnly(string $table, ?array $cfg = null): string
+  public function getCreateConstraintsOnly(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -1256,8 +1303,8 @@ class Sqlite extends Sql
           $refCols = is_array($k['ref_column']) ?
             implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
             $this->escape($k['ref_column']);
-          $st .= '  CONSTRAINT ' . $this->escape($k['constraint']) .
-            ' FOREIGN KEY (' . $cols . ') ' .
+          $st .= '  ' . (empty($anonymize) ? ('CONSTRAINT ' . $this->escape($k['constraint']) . ' ') : '') .
+            'FOREIGN KEY (' . $cols . ') ' .
             'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
             (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
             (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
@@ -1273,9 +1320,10 @@ class Sqlite extends Sql
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateConstraints(string $table, ?array $cfg = null): string
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -1294,8 +1342,8 @@ class Sqlite extends Sql
       );
       if (!empty($keys)) {
         $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
-        $st .= $this->getCreateTable($tmpTable, $cfg);
-        $st .= $this->getCreateKeys($tmpTable, $cfg);
+        $st .= $this->getCreateTable($tmpTable, $cfg, $anonymize);
+        $st .= $this->getCreateKeys($tmpTable, $cfg, $anonymize);
         $st .= 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';'.PHP_EOL;
         $st .= 'DROP TABLE '.$this->escape($table).';'.PHP_EOL;
         $st .= 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';'.PHP_EOL;

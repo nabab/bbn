@@ -749,7 +749,10 @@ MYSQL;
           ];
           if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
             $r[$f]['default']           = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
-            $r[$f]['defaultExpression'] = $row['EXTRA'] === 'DEFAULT_GENERATED';
+            $r[$f]['defaultExpression'] = ($row['EXTRA'] === 'DEFAULT_GENERATED')
+              || (!empty($row['COLUMN_DEFAULT'])
+                && ((strtolower($row['COLUMN_DEFAULT']) === 'current_timestamp')
+                  || (strtolower($row['COLUMN_DEFAULT']) === 'current_timestamp()')));
           }
 
           if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
@@ -976,13 +979,14 @@ MYSQL
    */
   public function getCharsetTable(string $table): string
   {
-    if (Str::checkName($table)) {
+    [$db, $table] = X::split($this->tableFullName($table), '.');
+    if (Str::checkName($db) && Str::checkName($table)) {
       return <<<SQL
         SELECT CCSA.`character_set_name` AS charset
         FROM information_schema.`TABLES` T,
             information_schema.`COLLATION_CHARACTER_SET_APPLICABILITY` CCSA
         WHERE CCSA.`collation_name` = T.`table_collation`
-          AND T.`TABLE_SCHEMA` = DATABASE()
+          AND T.`TABLE_SCHEMA` = "$db"
           AND T.`TABLE_NAME` = "$table";
       SQL;
     }
@@ -999,11 +1003,13 @@ MYSQL
    */
   public function getCollationTable(string $table): string
   {
-    if (Str::checkName($table)) {
+    [$db, $table] = X::split($this->tableFullName($table), '.');
+    if (Str::checkName($db) && Str::checkName($table)) {
       return <<<SQL
         SELECT `TABLE_COLLATION` as collation
         FROM `information_schema`.`TABLES`
-        WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = "$table";
+        WHERE `TABLE_SCHEMA` = "$db"
+          AND `TABLE_NAME` = "$table";
       SQL;
     }
 
@@ -1040,7 +1046,7 @@ MYSQL
    * @param array|null $cfg
    * @return string
    */
-  public function getCreateConstraints(string $table, ?array $cfg = null): string
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {
@@ -1048,13 +1054,18 @@ MYSQL
     }
 
     if ($cfg && !empty($cfg['keys'])) {
-      $keys = array_values(array_filter(
-        $cfg['keys'],
-        fn($a) => !empty($a['columns'])
+      $keys = [];
+      foreach ($cfg['keys'] as $a) {
+        if (!empty($a['columns'])
           && !empty($a['constraint'])
           && !empty($a['ref_table'])
           && !empty($a['ref_column'])
-      ));
+          && is_null(X::search($keys, ['constraint' => $a['constraint']]))
+        ) {
+          $keys[] = $a;
+        }
+      }
+
       if ($last = count($keys)) {
         $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
         $i   = 0;
@@ -1064,8 +1075,8 @@ MYSQL
           $refCols = is_array($k['ref_column']) ?
             implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
             $this->escape($k['ref_column']);
-          $st .= '  ADD CONSTRAINT ' . $this->escape($k['constraint']) .
-            ' FOREIGN KEY (' . $cols . ') ' .
+          $st .= '  ADD CONSTRAINT ' . (empty($anonymize) ? ($this->escape($k['constraint']) . ' ') : '') .
+            'FOREIGN KEY (' . $cols . ') ' .
             'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
             (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
             (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
@@ -1081,9 +1092,10 @@ MYSQL
   /**
    * @param string $table
    * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateKeys(string $table, ?array $cfg = null): string
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string
   {
     $st = '';
     if (!$cfg) {

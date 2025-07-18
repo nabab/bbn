@@ -105,31 +105,36 @@ interface SqlFormatters
    * Fetches the database and returns an array of objects
    *
    * @param string $table The table for which to create the statement
-   * @param array|null $model
+   * @param array|null $cfg
+   * @param bool $createKeys
+   * @param bool $createConstraints
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true): string;
+  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true, bool $anonymize = false): string;
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
    */
   public function getCreateTable(string $table, ?array $cfg = null): string;
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateKeys(string $table, array|null $model = null): string;
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string;
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
+   * @param bool $anonymize
    * @return string
    */
-  public function getCreateConstraints(string $table, array|null $model = null): string;
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string;
 
   /**
    * @param string $table
