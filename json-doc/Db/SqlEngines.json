@@ -226,7 +226,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createUser(string $user, string $pass, string $db = null): bool;",
+            "code": "  public function createUser(string $user, string $pass, string|null $db = null): bool;",
             "parent": false,
             "trait": false,
             "startLine": 35,
@@ -590,7 +590,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createColumn(string $table, string $column, array $col): bool;",
+            "code": "  public function createColumn(string $table, string $column, array $columnCfg): bool;",
             "parent": false,
             "trait": false,
             "startLine": 80,
@@ -637,7 +637,7 @@
                     "default_name": ""
                 },
                 {
-                    "name": "col",
+                    "name": "columnCfg",
                     "position": 2,
                     "type": "array",
                     "type_arr": [
@@ -648,7 +648,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "fg"
                 }
             ],
             "doc": {
@@ -667,12 +668,13 @@
                     {
                         "tag": "param",
                         "type": "array",
-                        "name": "$col"
+                        "name": "$column",
+                        "description": "fg"
                     }
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/"
+            "comments": "  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $columnCfg\n   * @return bool\n   *\/"
         },
         "dropColumn": {
             "name": "dropColumn",
@@ -762,7 +764,7 @@
         "\/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/",
         "\/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/",
         "\/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/",
-        "\/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/",
+        "\/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $columnCfg\n   * @return bool\n   *\/",
         "\/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/"
     ],
     "summary": "",

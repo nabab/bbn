@@ -188,7 +188,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\tpublic function scan(string $dir, string $type = null, &$res = [], int $timeout = 0): array\n  {\n    $res = [];\n    if ( $dirs = $this->listFiles($dir) ){\n      foreach ( $dirs as $d ){\n        if ( $type &&\n                (strpos($type, 'file') === 0) &&\n                !isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else if ( $type &&\n                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&\n                isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else{\n          $res[] = $d['name'];\n        }\n        if ( isset($d['num']) ){\n          $this->scan($d['name'], $type, $res);\n        }\n      }\n    }\n    return $res;\n\t}",
+            "code": "\tpublic function scan(string $dir, string|null $type = null, &$res = [], int $timeout = 0): array\n  {\n    $res = [];\n    if ( $dirs = $this->listFiles($dir) ){\n      foreach ( $dirs as $d ){\n        if ( $type &&\n                (strpos($type, 'file') === 0) &&\n                !isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else if ( $type &&\n                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&\n                isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else{\n          $res[] = $d['name'];\n        }\n        if ( isset($d['num']) ){\n          $this->scan($d['name'], $type, $res);\n        }\n      }\n    }\n    return $res;\n\t}",
             "parent": false,
             "trait": false,
             "startLine": 165,

@@ -3,13 +3,13 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Permission",
+    "name": "bbn\\Appui\\Option\\Internal\\Permission",
     "namespace": true,
     "realName": "Permission",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Permission.php",
+    "fileName": "\/Appui\/Option\/Internal\/Permission.php",
     "startLine": 7,
     "endLine": 77,
     "numMethods": 2,
@@ -28,7 +28,7 @@
     "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Permission",
     "contentConstructor": null,
     "methods": {
@@ -42,8 +42,8 @@
                     "content": "X::dump($opt->hasPermission('bbn_ide'));\n\/\/ (bool) true"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Permission",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Permission.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Permission",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Permission.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -101,8 +101,8 @@
                     "content": "X::dump($opt->findPermissions());\n\/* Returns a full tree of permissions for all options\narray []"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Permission",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Permission.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Permission",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Permission.php",
             "static": false,
             "visibility": "public",
             "final": false,

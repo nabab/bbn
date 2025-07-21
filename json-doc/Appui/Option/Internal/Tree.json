@@ -3,16 +3,16 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Tree",
+    "name": "bbn\\Appui\\Option\\Internal\\Tree",
     "namespace": true,
     "realName": "Tree",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Tree.php",
+    "fileName": "\/Appui\/Option\/Internal\/Tree.php",
     "startLine": 7,
-    "endLine": 144,
-    "numMethods": 3,
+    "endLine": 152,
+    "numMethods": 4,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -28,7 +28,7 @@
     "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Tree",
     "contentConstructor": null,
     "methods": {
@@ -46,8 +46,8 @@
                     "content": "X::dump($opt->treeIds(12));\n\/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Tree",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Tree.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -127,8 +127,8 @@
                     "content": "X::dump($opt->tree(12));\n\/*\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Tree",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Tree.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -189,16 +189,16 @@
                     "content": "X::dump($opt->fullTree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Tree",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Tree.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function fullTree($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($res = $this->option($id))\n    ) {\n      if ($opts = $this->items($id)) {\n        $res['items'] = [];\n        foreach ($opts as $o){\n          if ($t = $this->fullTree($o)) {\n            $res['items'][] = $t;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "code": "  public function fullTree($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($res = $this->option($id))\n    ) {\n      $res['items'] = $this->_fullTree($id);\n      return $res;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 125,
-            "endLine": 143,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -240,6 +240,51 @@
                 "return": "Tree's array or false if the option cannot be found"
             },
             "comments": "  \/**\n   * Returns a full hierarchical structure of options from a given option\n   *\n   * ```php\n   * X::dump($opt->fullTree(12));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'myProperty' => \"My property's value\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'myProperty' => \"My property's value\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/"
+        },
+        "_fullTree": {
+            "name": "_fullTree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Tree.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _fullTree(string $id): ?array\n  {\n    if (Str::isUid($id)) {\n      if ($opts = $this->fullOptions($id)) {\n        foreach ($opts as &$o){\n          $o['items'] = $this->_fullTree($o['id']);\n        }\n        unset($o);\n      }\n\n      return $opts;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 137,
+            "endLine": 151,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_fullTree",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": null,

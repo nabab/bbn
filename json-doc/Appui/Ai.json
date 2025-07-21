@@ -8,16 +8,17 @@
     "realName": "Ai",
     "realNamespace": "bbn\\Appui",
     "traits": [
-        "bbn\\Models\\Tts\\DbActions"
+        "bbn\\Models\\Tts\\DbActions",
+        "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
     "fileName": "\/Appui\/Ai.php",
-    "startLine": 18,
-    "endLine": 599,
-    "numMethods": 50,
-    "numProperties": 19,
-    "numConstants": 0,
-    "numStaticProperties": 2,
+    "startLine": 20,
+    "endLine": 863,
+    "numMethods": 82,
+    "numProperties": 32,
+    "numConstants": 1,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitAliases": [],
@@ -32,9 +33,7 @@
             "table": "bbn_ai_prompt",
             "tables": {
                 "ai_prompt": "bbn_ai_prompt",
-                "ai_prompt_items": "bbn_ai_prompt_items",
-                "notes_versions": "bbn_notes_versions",
-                "notes": "bbn_notes"
+                "ai_prompt_items": "bbn_ai_prompt_items"
             },
             "arch": {
                 "ai_prompt": {
@@ -55,79 +54,18 @@
                     "mime": "mime",
                     "ai": "ai"
                 },
-                "notes_versions": {
-                    "id_note": "id_note",
-                    "version": "version",
-                    "latest": "latest",
-                    "title": "title",
-                    "content": "content",
-                    "excerpt": "excerpt",
-                    "id_user": "id_user",
-                    "creation": "creation"
-                },
-                "notes": {
+                "ai_prompt_settings": {
                     "id": "id",
-                    "id_parent": "id_parent",
-                    "id_alias": "id_alias",
-                    "id_type": "id_type",
-                    "id_option": "id_option",
-                    "mime": "mime",
-                    "lang": "lang",
-                    "private": "private",
-                    "locked": "locked",
-                    "pinned": "pinned",
-                    "important": "important",
-                    "creator": "creator",
-                    "active": "active"
+                    "id_prompt": "id_prompt",
+                    "id_model": "id_model",
+                    "def": "def",
+                    "last_use": "last_use",
+                    "cfg": "cfg"
                 }
             }
         },
-        "responseFormats": [
-            {
-                "value": "rte",
-                "text": "Rich Text Editor",
-                "prompt": "Your response needs to be in rich text format",
-                "component": "bbn-rte"
-            },
-            {
-                "value": "markdown",
-                "text": "Markdown",
-                "prompt": "Your response needs to be in Markdown format",
-                "component": "bbn-markdown"
-            },
-            {
-                "value": "textarea",
-                "text": "Text Multiline",
-                "prompt": "Your response needs to be returned as multiple lines of text",
-                "component": "bbn-textarea"
-            },
-            {
-                "value": "code-php",
-                "text": "Code PHP",
-                "prompt": "Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format",
-                "component": "bbn-code"
-            },
-            {
-                "value": "code-js",
-                "text": "Code JS",
-                "prompt": "Your response needs to be pure code in Javascript",
-                "component": "bbn-code"
-            },
-            {
-                "value": "single-line",
-                "text": "Single Line",
-                "prompt": "Your response needs to be entered as a single line of text",
-                "component": "bbn-input"
-            },
-            {
-                "value": "json-editor",
-                "text": "JSON",
-                "prompt": "Your response needs to use this grammar : root   ::= object\n\nobject ::= \"{\" ws ( string \":\" ws value (\",\" ws string \":\" ws value)* )? \"}\"\n\nvalue  ::= object | array | string | number | (\"true\" | \"false\" | \"null\") ws\n\narray  ::= \"[\" ws ( value (\",\" ws value)* )? \"]\" ws\n\nstring ::= \"\\\"\" ( [a-zA-Z0-9] )* \"\\\"\" ws\n\nnumber ::= (\"-\"? ([0-9] | [1-9] [0-9]*)) (\".\" [0-9]+)? ([eE] [-+]? [0-9]+)? ws\n\nws ::= ([ \\t\\n] ws)?",
-                "component": "bbn-json-editor"
-            }
-        ],
-        "ai": null,
-        "note": null,
+        "optional_is_init": false,
+        "option_root_id": null,
         "db": null,
         "errors": [],
         "error": false,
@@ -141,8 +79,10 @@
         "class_table": null,
         "class_table_index": null,
         "rootFilterCfg": [],
+        "dbTraitFilterCfg": [],
         "dbTraitRelations": [],
-        "dbTraitStructure": []
+        "dbTraitStructure": [],
+        "options": null
     },
     "isIterable": false,
     "extensionName": false,
@@ -162,7 +102,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function __construct(Db $db, array $cfg = [])\n  {\n    parent::__construct($db);\n    $this->initClassCfg($cfg);\n    if (!defined(\"BBN_OPENAI_KEY\")) {\n      throw new Exception(\"The OpenAI key is not defined\");\n    }\n    $this->ai = new OpenAi(BBN_OPENAI_KEY);\n    $this->ai->setBaseURL('http:\/\/192.168.1.115:1234');\n    \n    $this->note = new Note($this->db);\n  }",
+            "code": "  public function __construct(Db $db, array $cfg = [])\n  {\n    parent::__construct($db);\n    $this->initClassCfg($cfg);\n    self::init();\n    if (!defined(\"BBN_OPENAI_KEY\")) {\n      throw new Exception(\"The OpenAI key is not defined\");\n    }\n\n    $this->user = User::getInstance();\n    $this->prefs = Preferences::getInstance();\n    $this->note = new Note($this->db);\n    $this->pass = new Passwords($this->db);\n    $this->fs = new System();\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
@@ -220,8 +160,8 @@
                 "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
             "trait": false,
-            "startLine": 167,
-            "endLine": 178,
+            "startLine": 110,
+            "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -289,8 +229,392 @@
             },
             "comments": "  \/**\n   * Ai constructor.\n   *\n   * @param Db $db The database connection\n   * @param array $cfg Configuration array for the class\n   *\n   * @throws Exception If OpenAI key is not defined\n   *\/"
         },
-        "getPromptResponse": {
-            "name": "getPromptResponse",
+        "init": {
+            "name": "init",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function init()\n  {\n    if (!self::$optional_is_init) {\n      self::optionalInit();\n      self::$responseFormats = self::getOptions('formats');\n    }\n  } ",
+            "parent": false,
+            "trait": false,
+            "startLine": 126,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "init",
+            "returns": [],
+            "arguments": []
+        },
+        "setEndpoint": {
+            "name": "setEndpoint",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setEndpoint(string|null $id = null, $model = null) {\n    if ($endpoint = $this->getEndpoint($id)) {\n      $pass = $this->pass->userGet($endpoint['data']['id'], $this->user);\n      if (!$pass) {\n        throw new Exception(\"Password not found\");\n      }\n    }\n\n    if (!$endpoint) {\n      throw new Exception(\"Endpoint not found\");\n    }\n\n    $this->ai = new OpenAi($pass);\n    $this->ai->setBaseURL($endpoint['data']['url']);\n    if (!$model) {\n      $model = $endpoint['models'][0]['text'];\n    }\n\n    $this->endpoint = $id;\n    $this->setModel($model);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 134,
+            "endLine": 154,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "setEndpoint",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "setModel": {
+            "name": "setModel",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setModel(string|null $modelName = null) {\n    $this->model = $modelName;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 156,
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "setModel",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "modelName",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "setCfg": {
+            "name": "setCfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setCfg(array $cfg): void\n  {\n\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 160,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setCfg",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getModels": {
+            "name": "getModels",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getModels() {\n    $res = $this->ai->listModels();\n    if ($res && is_string($res)) {\n      $res = json_decode($res, true);\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 166,
+            "endLine": 173,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getModels",
+            "returns": [],
+            "arguments": []
+        },
+        "syncModels": {
+            "name": "syncModels",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function syncModels(): bool\n  {\n    if (isset($this->endpoint) && ($models = $this->getModels())) {\n      $endpoint = $this->getEndpoint($this->endpoint);\n      $currentModels = $endpoint['models'] ?? [];\n      $idModels = self::getOptionId('models');\n      foreach ($models['data'] as $model) {\n        if (!X::getRow($currentModels, ['text' => $model['id']])) {\n          $this->prefs->addBit($this->endpoint, [\n            'text' => $model['id'],\n            'id_option' => $idModels\n          ]);\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 177,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "syncModels",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
+        "getEndpoints": {
+            "name": "getEndpoints",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getEndpoints()\n  {\n    if ($idEndpoint = self::getOptionId('endpoints')) {\n      return $this->prefs->getAll($idEndpoint);\n    }\n\n    throw new Exception(X::_(\"Endpoints not found\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 198,
+            "endLine": 205,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getEndpoints",
+            "returns": [],
+            "arguments": []
+        },
+        "getEndpoint": {
+            "name": "getEndpoint",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getEndpoint(string $id): ?array\n  {\n    if ($endpoint = $this->prefs->get($id)) {\n      $models = $this->prefs->getBits($id);\n      X::sortBy($models, [\n        [\n          'field' => 'last_used',\n          'dir' => 'DESC'\n        ], [\n          'field' => 'text',\n          'dir' => 'ASC'\n        ]\n      ]);\n      return [\n        'data' => $endpoint,\n        'models' => $models\n      ];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 207,
+            "endLine": 227,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getEndpoint",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addEndpoint": {
+            "name": "addEndpoint",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function addEndpoint(string $name, string $url, string $pass, bool $public = false): ?array\n  {\n    if ($idEndpoint = self::getOptionId('endpoints')) {\n      $this->ai = new OpenAi($pass);\n      $this->ai->setBaseURL($url);\n      if (\n        ($idPref = $this->prefs->addToGroup($idEndpoint, [\n          'text' => $name,\n          'url' => $url,\n          'public' => $public ? 1 : 0\n        ]))\n        && ($this->pass->userStore($pass, $idPref, $this->user))\n      ) {\n        $this->setEndpoint($idPref);\n        $this->syncModels();\n\n        return $this->getEndpoint($idPref);\n      }\n      else {\n        throw new Exception(\"Models not found\");\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 229,
+            "endLine": 253,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "addEndpoint",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "pass",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "public",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getPromptResponseFromId": {
+            "name": "getPromptResponseFromId",
             "summary": "Gets the AI prompt response based on input, response type, and prompt ID",
             "description": "",
             "description_parts": [],
@@ -299,20 +623,20 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getPromptResponse(string $id_prompt, string $input, bool $insert = true): array\n  {\n    \/\/ check if input and id_prompt are not empty and not null\n    if (empty($input) || empty($id_prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Input and prompt ID cannot be empty',\n      ];\n    }\n    \n    $prompt = $this->dbTraitRselect($id_prompt);\n    \n    if (empty($prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Prompt not found',\n      ];\n    }\n    \n    \/\/$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];\n    $build_prompt = $this->buildPrompt($prompt);\n    \n    X::log($build_prompt, 'ai_logs');\n    \n    $response = $this->request($build_prompt, $input);\n    if (!empty($response) && $insert) {\n      $this->insertItem($id_prompt, $input, false);\n      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);\n    }\n    \n    return [\n      'success' => !isset($response['error']),\n      'input' => $build_prompt,\n      'result' => $response['result'] ?? $response['error'],\n    ];\n    \n  }",
+            "code": "  public function getPromptResponseFromId(string $id_prompt, string $input, bool $insert = true, ?array $cfg = null): array\n  {\n    \/\/ check if input and id_prompt are not empty and not null\n    if (empty($input) || empty($id_prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Input and prompt ID cannot be empty',\n      ];\n    }\n\n\n    $prompt = $this->dbTraitRselect($id_prompt);\n    \n    if (empty($prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Prompt not found',\n      ];\n    }\n    \n    \/\/$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];\n    $response = $this->getPromptResponse($prompt, $input, $cfg);\n    if (!empty($response) && !empty($response['success']) && $insert) {\n      $this->insertItem($id_prompt, $input, false);\n      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);\n    }\n    \n    return $response;\n    \n  }",
             "parent": false,
             "trait": false,
-            "startLine": 188,
-            "endLine": 224,
+            "startLine": 263,
+            "endLine": 292,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "shortName": "getPromptResponse",
+            "shortName": "getPromptResponseFromId",
             "returns": [
                 "array"
             ],
@@ -361,6 +685,21 @@
                     "default": true,
                     "default_name": "",
                     "description": "type Response type"
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
                 }
             ],
             "doc": {
@@ -389,6 +728,1034 @@
             },
             "comments": "  \/**\n   * Gets the AI prompt response based on input, response type, and prompt ID\n   *\n   * @param string $id_prompt ID of the AI prompt\n   * @param string $input Input string\n   * @param string $response_type Response type\n   * @return array Response array containing success flag and result or error message\n   *\/"
         },
+        "getPromptResponse": {
+            "name": "getPromptResponse",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPromptResponse(array $prompt, string $input, ?array $cfg = null): array\n  {\n    \/\/ check if input and id_prompt are not empty and not null\n    if (empty($input) || empty($prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Input and prompt cannot be empty',\n      ];\n    }\n    \n    \/\/$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];\n    $built_prompt = $this->buildPromptFromRow($prompt);\n    \n    X::log($built_prompt, 'ai_logs');\n    \n    $response = $this->request($built_prompt, $input, $cfg);\n\n    $res = [\n      'success' => !isset($response['error']),\n      'input' => $built_prompt,\n      'result' => $response['result'],\n    ];\n\n    if (!empty($response['error'])) {\n      $res['error'] = $response['error'];\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 294,
+            "endLine": 322,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getPromptResponse",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "prompt",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "input",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "createMessages": {
+            "name": "createMessages",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createMessages(string $input, string $prompt = ''): array\n  {\n    $messages = [];\n    \n    if ($prompt) {\n      $messages[] = [\n        'role' => 'system',\n        'content' => $prompt\n      ];\n    }\n    \n    $messages[] = [\n      'role' => 'user',\n      'content' => $input\n    ];\n    \n    return $messages;\n\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 324,
+            "endLine": 342,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "createMessages",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "input",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "prompt",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createRequest": {
+            "name": "createRequest",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createRequest(array $messages, array $cfg): array\n  {\n    $config = new Gpt3TokenizerConfig();\n    $tokenizer = new Gpt3Tokenizer($config);\n    $max_tokens = self::MAX_TOKENS;\n    foreach ($messages as $message) {\n      $max_tokens -= $tokenizer->count($message['content']);\n    }\n    $request = [\n      \"model\" => $this->model,\n      \"messages\" => $messages,\n      \"max_tokens\" => $max_tokens,\n    ];\n\n    if (array_key_exists('temperature', $cfg)) {\n      $request['temperature'] = $cfg['temperature'];\n    }\n    if (array_key_exists('top_p', $cfg)) {\n      $request['top_p'] = $cfg['top_p'];\n    }\n    if (array_key_exists('frequency', $cfg)) {\n      $request['frequency_penalty'] = $cfg['frequency'];\n    }\n    if (array_key_exists('presence', $cfg)) {\n      $request['presence_penalty'] = $cfg['presence'];\n    }\n\n    return $request;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 344,
+            "endLine": 372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "createRequest",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "messages",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "request": {
+            "name": "request",
+            "summary": "Sends a request to the OpenAI API and returns the response",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function request(array $query): array\n  {\n    if ($complete = $this->ai->chat($query)) {\n      $complete = json_decode($complete, true);\n    }\n\n    X::log(['request' => $query, 'complete' => $complete], 'ai_logs');\n    \n    if (!$complete || !empty($complete['error'])) {\n      return [\n        'success' => false,\n        'error' => $complete['error'] ?? 'Error in the request'\n      ];\n    }\n    \n    $content = $complete['choices'][0]['message']['content'];\n    X::log($content, 'ai_logs');\n    \n    return [\n      'success' => true,\n      'result' => $complete['choices'][0]['message'],\n      'response' => $complete,\n      'request' => $query\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 380,
+            "endLine": 404,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "request",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Prompt string to send to the API"
+                }
+            ],
+            "doc": {
+                "description": "Sends a request to the OpenAI API and returns the response\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$prompt",
+                        "description": "Prompt string to send to the API"
+                    }
+                ],
+                "return": "Response array containing success flag and result or error message"
+            },
+            "comments": "  \/**\n   * Sends a request to the OpenAI API and returns the response\n   *\n   * @param string $prompt Prompt string to send to the API\n   * @return array Response array containing success flag and result or error message\n   *\/"
+        },
+        "getChatTitle": {
+            "name": "getChatTitle",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getChatTitle(string $text) : string\n  {\n    return Str::genpwd(10);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 406,
+            "endLine": 409,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getChatTitle",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getTags": {
+            "name": "getTags",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTags(string $text): array\n  {\n    \/\/ This method should return an array of tags based on the input text\n    \/\/ For now, we will return an empty array\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 411,
+            "endLine": 416,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTags",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "chat": {
+            "name": "chat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function chat(string $input, array $cfg, string $id = ''): array\n  {\n    $startTime = time();\n    $messages = $this->createMessages($input);\n    $query = $this->createRequest($messages, $cfg);\n    $result = $this->request($query);\n    if ($result['success']) {\n      $responseTime = time();\n      $result['text']    = $result['result']['content'];\n      $fullText = '';\n      $messages[] = [\n        'role' => 'assistant',\n        'content' => $result['text']\n      ];\n\n      foreach ($messages as $message) {\n        $fullText .= \"**Message by $message[role]**\" . PHP_EOL . $message['content'] . PHP_EOL . PHP_EOL . PHP_EOL;\n      }\n\n      $result['id']      = $id ?: Str::genpwd(10);\n      $result['date']    = $startTime;\n      $result['rdate']   = $responseTime;\n      $result['input']   = $input;\n      $result['request'] = $result;\n      $result['title']   = $this->getChatTitle($fullText);\n      $path           = $this->user->getDataPath('appui-ai') . 'chat';\n      $summaryFile    = 'conversations.json';\n      $this->fs->cd($path);\n      $this->fs->createPath('conversations');\n      $summary     = $this->fs->exists($summaryFile) ? $this->fs->decodeContents($summaryFile, 'json', true) : [];\n      $summaryHash = md5(serialize($summary));\n      $index       = X::search($summary, ['id' => $id]);\n      $row         = $summary[$index] ?? null;\n      if ($row) {\n        if ($index !== 0) {\n          array_splice($summary, $index, 1);\n        }\n\n        $conversation = $this->fs->decodeContents($row['file'], 'json', true);\n      }\n      else {\n        $subpath = substr(X::makeStoragePath('conversations', 'Y', 100, $this->fs), strlen($path) + 1);\n        $row = [\n          'title' => $result['title'],\n          'id'    => $result['id'],\n          'file'  => $subpath . $result['id'] . '.json'\n        ];\n\n        $conversation = [\n          'id' => $result['id'],\n          'title' => $result['title'],\n          'num' => 0,\n          'tags' => [],\n          'creation' => $startTime,\n          'last' => $responseTime,\n          'conversation' => []\n        ];\n      }\n\n      $conversation['num']++;\n      $conversation['last'] = $responseTime;\n      $lastMessage = [\n        'messages' => [\n          ...$query['messages'], \n          [\n            'role' => 'assistant',\n            'content' => $result['text']\n          ]\n        ],\n        'title'        => $result['title'],\n        'asked'        => $startTime,\n        'responded'    => $responseTime,\n        'id' => $result['id'],\n        'tags' => $this->getTags($fullText),\n        'model' => $cfg['model'],\n        'language' => $cfg['language'],\n        'aiFormat' => $cfg['aiFormat'],\n        'cfg' => [\n          'temperature' => $cfg['temperature'] ?? 0.7,\n          'top_p' => $cfg['top_p'] ?? 0.9,\n          'presence_penalty' => $cfg['presence'] ?? 0.7,\n          'frequency_penalty' => $cfg['frequency'] ?? 0.3,\n        ]\n      ];\n\n      $conversation['conversation'][] = $lastMessage;\n      $result['conversation'] = $id ? end($conversation['conversation']) : $conversation;\n\n      $this->fs->encodeContents($conversation, $row['file'], 'json');\n\n      if ($index !== 0) {\n        array_unshift($summary, $row);\n      }\n\n      if (md5(serialize($summary)) !== $summaryHash) {\n        $this->fs->encodeContents($summary, $summaryFile, 'json');\n      }\n    }\n    elseif (empty($resutl['error'])) {\n      $result['error'] = X::_(\"Unknown error\");\n    }\n\n\n\n    return $result;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 418,
+            "endLine": 523,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "chat",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "input",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "saveConversation": {
+            "name": "saveConversation",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function saveConversation(\n    string $path,\n    string $date,\n    string $userFormat,\n    string $prompt,\n    ?string $response,\n    ?array $cfg = null\n  ): array {\n    $timestamp = time();\n    $fs = new System();\n    if ($fs->exists($path)) {\n      $jsonData = $fs->decodeContents($path, 'json', true);\n  \n    } else {\n      $jsonData = [];\n    }\n\n    $d = [[\n      \"ai\" => 0,\n      \"creation_date\" => $date,\n      \"text\" => $prompt,\n      'id' => bin2hex(random_bytes(10)),\n      'format' => $userFormat ?? 'textarea'\n    ], [\n      \"ai\" => 1,\n      \"creation_date\" => $timestamp,\n      \"text\" => $response,\n      'id' => bin2hex(random_bytes(10)),\n    ]];\n\n    if ($cfg) {\n      $d[1]['cfg'] = $cfg;\n    }\n    if (isset($jsonData['conversation'])) {\n      array_push($jsonData['conversation'], ...$d);\n    } else {\n      array_push($jsonData, ...$d);\n    }\n\n    $fs->encodeContents($jsonData, $path, 'json');\n    return $d;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 528,
+            "endLine": 569,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 5,
+            "shortName": "saveConversation",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "userFormat",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "prompt",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "response",
+                    "position": 4,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 5,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @throws Exception\n   *\/"
+        },
+        "clearConversation": {
+            "name": "clearConversation",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function clearConversation(string $id) : bool {\n    if (empty($id)) {\n      return false;\n    }\n    \n    if (!$this->getPromptById($id)) {\n      return false;\n    }\n    \n    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [\n      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id\n    ]);\n    \n    return true;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 572,
+            "endLine": 586,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "clearConversation",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getPrompts": {
+            "name": "getPrompts",
+            "summary": "Retrieves prompts based on the specified conditions.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPrompts(bool $private = true): array\n  {\n    $where = [\n    ];\n    \n    \/*if ($private) {\n      \/\/ If private, search only for prompts where shortcode is null\n      $where[] = [\n        'field' => $this->class_cfg['arch']['ai_prompt']['shortcode'],\n        'operator' => 'isnull'\n      ];\n    }*\/\n    \n    $prompts = $this->db->rselectAll([\n      'tables' => [$this->class_cfg['tables']['ai_prompt']],\n      'where' => $where,\n      'order' => [[\n        'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],\n        'dir' => 'DESC'\n      ]],\n    ]);\n    \n    foreach ($prompts as &$p) {\n      $note = $this->note->get($p['id_note']);\n      $p['title'] = $note['title'];\n      $p['content'] = $note['content'];\n      $p['lang'] = $note['lang'];\n    }\n    \n    return $prompts;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 595,
+            "endLine": 625,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPrompts",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "private",
+                    "position": 0,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "Determines if private prompts should be included."
+                }
+            ],
+            "doc": {
+                "description": "Retrieves prompts based on the specified conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$private",
+                        "description": "Determines if private prompts should be included."
+                    }
+                ],
+                "return": "An array of prompts matching the conditions."
+            },
+            "comments": "  \/**\n   * Retrieves prompts based on the specified conditions.\n   *\n   * @param bool $private Determines if private prompts should be included.\n   * @return array An array of prompts matching the conditions.\n   *\/"
+        },
+        "getPromptByShortcode": {
+            "name": "getPromptByShortcode",
+            "summary": "Retrieves a prompt based on the specified shortcode.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPromptByShortcode(string $shortcode)\n  {\n    $prompt = $this->dbTraitRselect([\n      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],\n      'where' => [\n        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode\n]\n    ]);\n    \n    if (!empty($prompt)) {\n      $note = $this->note->get($prompt['id_note']);\n      $prompt['title'] = $note['title'];\n      $prompt['content'] = $note['content'];\n      $prompt['lang'] = $note['lang'];\n    }\n    \n    return $prompt;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 633,
+            "endLine": 650,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getPromptByShortcode",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "shortcode",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The shortcode of the prompt."
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a prompt based on the specified shortcode.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$shortcode",
+                        "description": "The shortcode of the prompt."
+                    }
+                ],
+                "return": "The prompt data if found, otherwise null."
+            },
+            "comments": "  \/**\n   * Retrieves a prompt based on the specified shortcode.\n   *\n   * @param string $shortcode The shortcode of the prompt.\n   * @return mixed The prompt data if found, otherwise null.\n   *\/"
+        },
+        "getPromptById": {
+            "name": "getPromptById",
+            "summary": "Retrieves a prompt based on the specified ID.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPromptById(string $id)\n  {\n    \n    $prompt = $this->dbTraitRselect($id);\n    \n    if (!empty($prompt)) {\n      $note = $this->note->get($prompt['id_note']);\n      $prompt['title'] = $note['title'];\n      $prompt['content'] = $note['content'];\n      $prompt['lang'] = $note['lang'];\n    }\n    \n    return $prompt;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 658,
+            "endLine": 671,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getPromptById",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the prompt."
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a prompt based on the specified ID.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The ID of the prompt."
+                    }
+                ],
+                "return": "The prompt data if found, otherwise null."
+            },
+            "comments": "  \/**\n   * Retrieves a prompt based on the specified ID.\n   *\n   * @param string $id The ID of the prompt.\n   * @return mixed The prompt data if found, otherwise null.\n   *\/"
+        },
+        "insertPrompt": {
+            "name": "insertPrompt",
+            "summary": "Inserts a new prompt into the database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function insertPrompt(array $data)\n  {\n    $option = Option::getInstance();\n    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {\n      throw new Exception(\"Missing required data\");\n    }\n\n    $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');\n    $id_note = $this->note->insert($data['title'], $data['content'], $id_option, true, false, NULL, NULL, 'text\/plain', $data['lang']);\n\n    return $this->dbTraitInsert([\n      $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,\n      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],\n      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],\n      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'] ?: null,\n      $this->class_cfg['arch']['ai_prompt']['cfg'] => $cfg ? json_encode($cfg) : null\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 684,
+            "endLine": 701,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "insertPrompt",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The title of the prompt."
+                }
+            ],
+            "doc": {
+                "description": "Inserts a new prompt into the database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title",
+                        "description": "The title of the prompt."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$content",
+                        "description": "The content of the prompt."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$lang",
+                        "description": "The language of the prompt."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$input",
+                        "description": "The input of the prompt."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$output",
+                        "description": "The output of the prompt."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$shortcode",
+                        "description": "The shortcode of the prompt (optional)."
+                    }
+                ],
+                "return": "The ID of the inserted prompt if successful, otherwise null."
+            },
+            "comments": "  \/**\n   * Inserts a new prompt into the database.\n   *\n   * @param string $title The title of the prompt.\n   * @param string $content The content of the prompt.\n   * @param string $lang The language of the prompt.\n   * @param string $input The input of the prompt.\n   * @param string $output The output of the prompt.\n   * @param string|null $shortcode The shortcode of the prompt (optional).\n   * @return mixed The ID of the inserted prompt if successful, otherwise null.\n   *\/"
+        },
+        "updatePrompt": {
+            "name": "updatePrompt",
+            "summary": "Updates an existing prompt in the database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updatePrompt(string $id, array $data): bool\n  {\n    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {\n      throw new Exception(\"Missing required data\");\n    }\n\n    $prompt = $this->getPromptById($id);\n    if (empty($prompt)) {\n      throw new Exception(\"Unrecognized prompt ID\");\n    }\n    \n    $note = $this->note->get($prompt['id_note']);\n    if (empty($note)) {\n      throw new Exception(\"The corresponding notedoes not exist\");\n    }\n    \n    \/\/ Update the title and content of the associated note\n    $noteUpdate = [];\n    if (isset($data['lang']) && ($data['lang'] !== $note['lang'])) {\n      $noteUpdate['lang'] = $data['lang'];\n    }\n\n    if ($data['title'] !== $note['title']) {\n      $noteUpdate['title'] = $data['title'];\n    }\n\n    if ($data['content'] !== $note['content']) {\n      $noteUpdate['content'] = $data['content'];\n    }\n\n    $res1 = false;\n    if (!empty($noteUpdate)) {\n      $res1 = $this->note->update($note['id'], $noteUpdate);\n    }\n\n    \/\/ Update the prompt with the provided ID, input, and output values\n    $res2 = $this->dbTraitUpdate($id, [\n      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],\n      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],\n      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'],\n    ]);\n    \n    return (bool)($res1 || $res2);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 710,
+            "endLine": 753,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "updatePrompt",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the prompt to update."
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The updated data of the prompt."
+                }
+            ],
+            "doc": {
+                "description": "Updates an existing prompt in the database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The ID of the prompt to update."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data",
+                        "description": "The updated data of the prompt."
+                    }
+                ],
+                "return": "True if the update was successful, false otherwise."
+            },
+            "comments": "  \/**\n   * Updates an existing prompt in the database.\n   *\n   * @param string $id The ID of the prompt to update.\n   * @param array $data The updated data of the prompt.\n   * @return bool True if the update was successful, false otherwise.\n   *\/"
+        },
+        "deletePrompt": {
+            "name": "deletePrompt",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function deletePrompt(string $id) {\n    $prompt = $this->getPromptById($id);\n  \n    if (empty($prompt)) {\n      \/\/ If the prompt does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    $note = $this->note->get($prompt['id_note']);\n    \n    if (empty($note)) {\n      \/\/ If the associated note does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [\n      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id\n    ]);\n  \n    $this->dbTraitDelete($id);\n    \n    return true;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 755,
+            "endLine": 777,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "deletePrompt",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insertSettings": {
+            "name": "insertSettings",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function insertSettings(string $id_prompt, string $id_model, ?array $cfg = null): ?string\n  {\n    if (empty($id_prompt) || empty($id_model)) {\n      return false;\n    }\n    \n    if ($this->db->insert($this->class_cfg['tables']['ai_prompt_settings'], [\n      $this->class_cfg['arch']['ai_prompt_settings']['id_prompt'] => $id_prompt,\n      $this->class_cfg['arch']['ai_prompt_settings']['id_model'] => $id_model,\n      $this->class_cfg['arch']['ai_prompt_settings']['cfg'] => json_encode($cfg),\n    ])) {\n      return $this->db->lastId();\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 780,
+            "endLine": 795,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "insertSettings",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id_prompt",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_model",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
         "insertItem": {
             "name": "insertItem",
             "summary": "Inserts an AI prompt item into the database",
@@ -402,8 +1769,8 @@
             "code": "  private function insertItem(string $id_prompt, string $text, string $ai)\n  {\n    $tf = $this->class_cfg['arch']['ai_prompt_items'];\n    $user = User::getInstance();\n    $this->db->insert($this->class_cfg['tables']['ai_prompt_items'], [\n      $tf['id_prompt'] => $id_prompt,\n      $tf['text'] => $text,\n      $tf['author'] => $user->getId(),\n      $tf['ai'] => $ai ? 1 : 0,\n    ]);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 235,
-            "endLine": 245,
+            "startLine": 806,
+            "endLine": 816,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -487,8 +1854,8 @@
             },
             "comments": "  \/**\n   * Inserts an AI prompt item into the database\n   *\n   * @param string $id_prompt ID of the AI prompt to insert the item into\n   * @param string $text Text of the AI prompt item\n   * @param string $ai AI response of the prompt item\n   *\n   * @return void\n   *\/"
         },
-        "buildPrompt": {
-            "name": "buildPrompt",
+        "buildPromptFromRow": {
+            "name": "buildPromptFromRow",
             "summary": "Builds the AI prompt based on input, content, prompt, and separator",
             "description": "",
             "description_parts": [],
@@ -497,11 +1864,11 @@
             "static": false,
             "visibility": "private",
             "final": false,
-            "code": "  private function buildPrompt(array $prompt): string | null\n  {\n    $note = $this->note->get($prompt['id_note']);\n    \n    if (empty($note) || empty($note['content'])) {\n      return null;\n    }\n    \n    $option = Option::getInstance();\n    $build_prompt = $note['content'];\n    $build_prompt .= \"\\n\";\n    \n    $format = X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt');\n    \n    if ($format) {\n      $build_prompt .= $format . \"\\n\";\n    }\n    \n    if (!empty($note['lang'])) {\n      $build_prompt .= \"The language of the response must be in \" . $option->text($note['lang'], 'languages', 'i18n', 'appui');\n    }\n    \n    return $build_prompt;\n  }",
+            "code": "  private function buildPromptFromRow(array $prompt): string | null\n  {\n    $note = $this->note->get($prompt['id_note']);\n    if (empty($note) || empty($note['content'])) {\n      return null;\n    }\n\n    return $this->buildPrompt($note['content'], $prompt['output'], $note['lang']);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 257,
-            "endLine": 280,
+            "startLine": 828,
+            "endLine": 836,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -510,7 +1877,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "shortName": "buildPrompt",
+            "shortName": "buildPromptFromRow",
             "returns": [
                 null,
                 "string"
@@ -564,53 +1931,38 @@
             },
             "comments": "  \/**\n   * Builds the AI prompt based on input, content, prompt, and separator\n   *\n   * @param string $input Input string\n   * @param string $prompt Prompt string\n   * @param string $responseFormat Response format\n   * @param string $separator Separator string\n   * @return string Built prompt string\n   *\/"
         },
-        "request": {
-            "name": "request",
-            "summary": "Sends a request to the OpenAI API and returns the response",
+        "buildPrompt": {
+            "name": "buildPrompt",
+            "summary": "Builds the AI prompt based on input, content, prompt, and separator",
             "description": "",
             "description_parts": [],
             "class": "bbn\\Appui\\Ai",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "  public function request(string | null $prompt , string $input): array\n  {\n    \/\/ check if prompt is not empty but can be null\n    if (empty($prompt) && !is_null($prompt)) {\n      return [\n        'success' => false,\n        'error' => 'Prompt cannot be empty',\n      ];\n    }\n    \n    $config = new Gpt3TokenizerConfig();\n    $tokenizer = new Gpt3Tokenizer($config);\n    \n    \n    if (!$prompt) {\n      \n      $max_tokens = 4000 - $tokenizer->count($input);\n      \n      $complete = $this->ai->chat(\n        [\n          \"model\" => \"gpt-3.5-turbo\",\n          \"messages\" => [\n            [\n              \"role\" => \"user\",\n              \"content\" => $input\n            ]\n          ],\n          \"max_tokens\" => $max_tokens,\n        ],\n      );\n      \n    } else {\n      \n      $max_tokens = 4000 - $tokenizer->count($input . $prompt);\n      \n      $complete = $this->ai->chat(\n        [\n          \"model\" => \"gpt-3.5-turbo\",\n          \"messages\" => [\n            [\n              \"role\" => \"system\",\n              \"content\" => $prompt\n            ],\n            [\n              \"role\" => \"user\",\n              \"content\" => $input\n            ]\n          ],\n          \"max_tokens\" => $max_tokens,\n        ]\n      );\n    }\n    \n    \n    $complete = json_decode($complete, true);\n    \n    if (!$complete || !empty($complete['error'])) {\n      return [\n        'success' => false,\n        'error' => $complete['error'] ?? 'Error in the request'\n      ];\n    }\n    \n    $content = $complete['choices'][0]['message']['content'];\n    X::log($content, 'ai_logs');\n    \n    return [\n      'success' => true,\n      'result' => $complete['choices'][0]['message']\n    ];\n  }",
+            "code": "  private function buildPrompt(string $prompt, string $format = 'textarea', string|null $lang = null, array|null $cfg = null): string | null\n  {\n    $output = $prompt;\n    $output .= \"\\n\\n\";\n    \n    if ($format) {\n      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . \"\\n\\n\";\n    }\n\n    if ($lang) {\n      $option = Option::getInstance();\n      $output .= \"The language of the response must be in \" . $option->text($lang, 'languages', 'i18n', 'appui');\n    }\n    \n    return $output;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 288,
-            "endLine": 358,
+            "startLine": 847,
+            "endLine": 862,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "shortName": "request",
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "buildPrompt",
             "returns": [
-                "array"
+                null,
+                "string"
             ],
             "arguments": [
                 {
                     "name": "prompt",
                     "position": 0,
-                    "type": "null|string",
-                    "type_arr": [
-                        "null",
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Prompt string to send to the API"
-                },
-                {
-                    "name": "input",
-                    "position": 1,
                     "type": "string",
                     "type_arr": [
                         "string"
@@ -620,707 +1972,81 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
+                    "default_name": "",
+                    "description": "Prompt string"
+                },
+                {
+                    "name": "format",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "textarea",
+                    "default_name": "",
+                    "description": "ormat Response format"
+                },
+                {
+                    "name": "lang",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Separator string"
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ],
             "doc": {
-                "description": "Sends a request to the OpenAI API and returns the response\n",
+                "description": "Builds the AI prompt based on input, content, prompt, and separator\n",
                 "params": [
                     {
                         "tag": "param",
                         "type": "string",
                         "name": "$prompt",
-                        "description": "Prompt string to send to the API"
+                        "description": "Prompt string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$response",
+                        "description": "ormat Response format"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$separator",
+                        "description": "Separator string"
                     }
                 ],
-                "return": "Response array containing success flag and result or error message"
+                "return": "Built prompt string"
             },
-            "comments": "  \/**\n   * Sends a request to the OpenAI API and returns the response\n   *\n   * @param string $prompt Prompt string to send to the API\n   * @return array Response array containing success flag and result or error message\n   *\/"
-        },
-        "getPrompts": {
-            "name": "getPrompts",
-            "summary": "Retrieves prompts based on the specified conditions.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function getPrompts(bool $private = true): array\n  {\n    $where = [\n      'bbn_active' => 1,\n    ];\n    \n    \/*if ($private) {\n      \/\/ If private, search only for prompts where shortcode is null\n      $where[] = [\n        'field' => $this->class_cfg['arch']['ai_prompt']['shortcode'],\n        'operator' => 'isnull'\n      ];\n    }*\/\n    \n    $prompts = $this->db->rselectAll([\n      'tables' => [$this->class_cfg['tables']['ai_prompt']],\n      'where' => $where,\n      'order' => [[\n        'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],\n        'dir' => 'DESC'\n      ]],\n      'join' => [[\n        'table' => 'bbn_history_uids',\n        'on' => [\n          'conditions' => [[\n            'field' => 'bbn_uid',\n            'exp' => 'id'\n          ]]\n        ]\n      ]],\n    ]);\n    \n    foreach ($prompts as &$p) {\n      $note = $this->note->get($p['id_note']);\n      $p['title'] = $note['title'];\n      $p['content'] = $note['content'];\n      $p['lang'] = $note['lang'];\n    }\n    \n    X::log(\"Prompts:\", 'ai_logs');\n    X::log($prompts, 'ai_logs');\n    return $prompts;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 366,
-            "endLine": 408,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "shortName": "getPrompts",
-            "returns": [
-                "array"
-            ],
-            "arguments": [
-                {
-                    "name": "private",
-                    "position": 0,
-                    "type": "bool",
-                    "type_arr": [
-                        "bool"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": true,
-                    "default_name": "",
-                    "description": "Determines if private prompts should be included."
-                }
-            ],
-            "doc": {
-                "description": "Retrieves prompts based on the specified conditions.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$private",
-                        "description": "Determines if private prompts should be included."
-                    }
-                ],
-                "return": "An array of prompts matching the conditions."
-            },
-            "comments": "  \/**\n   * Retrieves prompts based on the specified conditions.\n   *\n   * @param bool $private Determines if private prompts should be included.\n   * @return array An array of prompts matching the conditions.\n   *\/"
-        },
-        "getPromptByShortcode": {
-            "name": "getPromptByShortcode",
-            "summary": "Retrieves a prompt based on the specified shortcode.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function getPromptByShortcode(string $shortcode)\n  {\n    $prompt = $this->dbTraitRselect([\n      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],\n      'where' => [\n        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode\n]\n    ]);\n    \n    if (!empty($prompt)) {\n      $note = $this->note->get($prompt['id_note']);\n      $prompt['title'] = $note['title'];\n      $prompt['content'] = $note['content'];\n      $prompt['lang'] = $note['lang'];\n    }\n    \n    return $prompt;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 416,
-            "endLine": 433,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "getPromptByShortcode",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "shortcode",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The shortcode of the prompt."
-                }
-            ],
-            "doc": {
-                "description": "Retrieves a prompt based on the specified shortcode.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$shortcode",
-                        "description": "The shortcode of the prompt."
-                    }
-                ],
-                "return": "The prompt data if found, otherwise null."
-            },
-            "comments": "  \/**\n   * Retrieves a prompt based on the specified shortcode.\n   *\n   * @param string $shortcode The shortcode of the prompt.\n   * @return mixed The prompt data if found, otherwise null.\n   *\/"
-        },
-        "getPromptById": {
-            "name": "getPromptById",
-            "summary": "Retrieves a prompt based on the specified ID.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function getPromptById(string $id)\n  {\n    \n    $prompt = $this->dbTraitRselect($id);\n    \n    if (!empty($prompt)) {\n      $note = $this->note->get($prompt['id_note']);\n      $prompt['title'] = $note['title'];\n      $prompt['content'] = $note['content'];\n      $prompt['lang'] = $note['lang'];\n    }\n    \n    return $prompt;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 441,
-            "endLine": 454,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "getPromptById",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The ID of the prompt."
-                }
-            ],
-            "doc": {
-                "description": "Retrieves a prompt based on the specified ID.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The ID of the prompt."
-                    }
-                ],
-                "return": "The prompt data if found, otherwise null."
-            },
-            "comments": "  \/**\n   * Retrieves a prompt based on the specified ID.\n   *\n   * @param string $id The ID of the prompt.\n   * @return mixed The prompt data if found, otherwise null.\n   *\/"
-        },
-        "insertPrompt": {
-            "name": "insertPrompt",
-            "summary": "Inserts a new prompt into the database.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function insertPrompt(string $title, string $content, string $lang, string $input, string $output, string $shortcode = null)\n  {\n    $option = Option::getInstance();\n    \n    \/\/ Get the option ID for 'prompt' type from the 'types' table in the 'note' application UI\n    $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');\n    \n    \/\/ Insert a new note with the provided title, content, option ID, plain text format, and language\n    $id_note = $this->note->insert($title, $content, $id_option, true, false, NULL, NULL, 'text\/plain', $lang);\n    \n    \/\/ Insert the prompt into the database with the note ID, input, output, and shortcode\n    return $this->dbTraitInsert([\n      $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,\n      $this->class_cfg['arch']['ai_prompt']['input'] => $input,\n      $this->class_cfg['arch']['ai_prompt']['output'] => $output,\n      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,\n    ]);\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 467,
-            "endLine": 484,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 6,
-            "numberOfRequiredParameters": 5,
-            "shortName": "insertPrompt",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "title",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The title of the prompt."
-                },
-                {
-                    "name": "content",
-                    "position": 1,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The content of the prompt."
-                },
-                {
-                    "name": "lang",
-                    "position": 2,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The language of the prompt."
-                },
-                {
-                    "name": "input",
-                    "position": 3,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The input of the prompt."
-                },
-                {
-                    "name": "output",
-                    "position": 4,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The output of the prompt."
-                },
-                {
-                    "name": "shortcode",
-                    "position": 5,
-                    "type": "null|string",
-                    "type_arr": [
-                        "null",
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": "",
-                    "description": "The shortcode of the prompt (optional)."
-                }
-            ],
-            "doc": {
-                "description": "Inserts a new prompt into the database.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$title",
-                        "description": "The title of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$content",
-                        "description": "The content of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$lang",
-                        "description": "The language of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$input",
-                        "description": "The input of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$output",
-                        "description": "The output of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|null",
-                        "name": "$shortcode",
-                        "description": "The shortcode of the prompt (optional)."
-                    }
-                ],
-                "return": "The ID of the inserted prompt if successful, otherwise null."
-            },
-            "comments": "  \/**\n   * Inserts a new prompt into the database.\n   *\n   * @param string $title The title of the prompt.\n   * @param string $content The content of the prompt.\n   * @param string $lang The language of the prompt.\n   * @param string $input The input of the prompt.\n   * @param string $output The output of the prompt.\n   * @param string|null $shortcode The shortcode of the prompt (optional).\n   * @return mixed The ID of the inserted prompt if successful, otherwise null.\n   *\/"
-        },
-        "updatePrompt": {
-            "name": "updatePrompt",
-            "summary": "Updates an existing prompt in the database.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function updatePrompt(string $id, string $title, string $content, string $input, string $output, string $shortcode = null): bool\n  {\n    $prompt = $this->getPromptById($id);\n    \n    if (empty($prompt)) {\n      \/\/ If the prompt does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    $note = $this->note->get($prompt['id_note']);\n    \n    if (empty($note)) {\n      \/\/ If the associated note does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    \/\/ Update the title and content of the associated note\n    $this->note->update($note['id'], $title, $content);\n    \n    \/\/ Update the prompt with the provided ID, input, and output values\n    $this->dbTraitUpdate($id, [\n      $this->class_cfg['arch']['ai_prompt']['input'] => $input,\n      $this->class_cfg['arch']['ai_prompt']['output'] => $output,\n      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,\n    ]);\n    \n    return true;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 496,
-            "endLine": 523,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 6,
-            "numberOfRequiredParameters": 5,
-            "shortName": "updatePrompt",
-            "returns": [
-                "bool"
-            ],
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The ID of the prompt to update."
-                },
-                {
-                    "name": "title",
-                    "position": 1,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The updated title of the prompt."
-                },
-                {
-                    "name": "content",
-                    "position": 2,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The updated content of the prompt."
-                },
-                {
-                    "name": "input",
-                    "position": 3,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The updated input of the prompt."
-                },
-                {
-                    "name": "output",
-                    "position": 4,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The updated output of the prompt."
-                },
-                {
-                    "name": "shortcode",
-                    "position": 5,
-                    "type": "null|string",
-                    "type_arr": [
-                        "null",
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ],
-            "doc": {
-                "description": "Updates an existing prompt in the database.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The ID of the prompt to update."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$title",
-                        "description": "The updated title of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$content",
-                        "description": "The updated content of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$input",
-                        "description": "The updated input of the prompt."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$output",
-                        "description": "The updated output of the prompt."
-                    }
-                ],
-                "return": "True if the update was successful, false otherwise."
-            },
-            "comments": "  \/**\n   * Updates an existing prompt in the database.\n   *\n   * @param string $id The ID of the prompt to update.\n   * @param string $title The updated title of the prompt.\n   * @param string $content The updated content of the prompt.\n   * @param string $input The updated input of the prompt.\n   * @param string $output The updated output of the prompt.\n   * @return bool True if the update was successful, false otherwise.\n   *\/"
-        },
-        "deletePrompt": {
-            "name": "deletePrompt",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function deletePrompt(string $id) {\n    $prompt = $this->getPromptById($id);\n  \n    if (empty($prompt)) {\n      \/\/ If the prompt does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    $note = $this->note->get($prompt['id_note']);\n    \n    if (empty($note)) {\n      \/\/ If the associated note does not exist, return false to indicate the failure\n      return false;\n    }\n    \n    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [\n      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id\n    ]);\n  \n    $this->dbTraitDelete($id);\n    \n    return true;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 525,
-            "endLine": 547,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "deletePrompt",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "saveConversation": {
-            "name": "saveConversation",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function saveConversation($path, $date, $userFormat, $aiFormat, $prompt, $response) {\n    $timestamp = time();\n    $fs = new System();\n    if ($fs->exists($path)) {\n      $jsonString = $fs->getContents($path);\n      $jsonData = json_decode($jsonString, true);\n  \n    } else {\n      $jsonData = [];\n  \n    }\n    $jsonData[] = [\n      \"ai\" => 0,\n      \"creation_date\" => $date,\n      \"text\" => $prompt,\n      'id' => bin2hex(random_bytes(10)),\n      'format' => $userFormat ?? 'textarea'\n    ];\n    $jsonData[] = [\n      \"ai\" => 1,\n      \"creation_date\" => $timestamp,\n      \"text\" => $response,\n      'id' => bin2hex(random_bytes(10)),\n      'format' => $aiFormat ?? 'textarea'\n    ];\n    $jsonData = json_encode($jsonData);\n    $fs->putContents($path, $jsonData);\n  \n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 553,
-            "endLine": 581,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 6,
-            "numberOfRequiredParameters": 6,
-            "shortName": "saveConversation",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "path",
-                    "position": 0,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "date",
-                    "position": 1,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "userFormat",
-                    "position": 2,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "aiFormat",
-                    "position": 3,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "prompt",
-                    "position": 4,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "response",
-                    "position": 5,
-                    "type": "",
-                    "type_arr": [],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ],
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": "",
-                "throws": {
-                    "tag": "throws",
-                    "type": "Exception"
-                }
-            },
-            "comments": "  \/**\n   * @throws Exception\n   *\/"
-        },
-        "clearConversation": {
-            "name": "clearConversation",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Ai",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ai.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function clearConversation(string $id) : bool {\n    if (empty($id)) {\n      return false;\n    }\n    \n    if (!$this->getPromptById($id)) {\n      return false;\n    }\n    \n    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [\n      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id\n    ]);\n    \n    return true;\n  }",
-            "parent": false,
-            "trait": false,
-            "startLine": 584,
-            "endLine": 598,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "clearConversation",
-            "returns": [
-                "bool"
-            ],
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
+            "comments": "  \/**\n   * Builds the AI prompt based on input, content, prompt, and separator\n   *\n   * @param string $prompt Prompt string\n   * @param string $responseFormat Response format\n   * @param string $separator Separator string\n   * @return string Built prompt string\n   *\/"
         },
         "test": {
             "name": "test",
@@ -2149,7 +2875,7 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(' . $this->db->csn($col, true);\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", \"' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '\"';\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n      \n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
+            "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,\"{}\")';\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", \"' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '\"';\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n\n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\DbActions",
             "startLine": 109,
@@ -2907,7 +3633,7 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitGetRelations(string $id, string $table = null): ?array\n  {\n    if ($this->dbTraitExists($id)) {\n      $db =& $this->db;\n      $res = [];\n      foreach ($this->dbTraitGetTableRelations($table) as $rel) {\n        if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {\n          $res[$rel['table']] = [\n            'col' => $rel['col'],\n            'primary' => $rel['primary'],\n            'values' => $all\n          ];\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "code": "  protected function dbTraitGetRelations(string $id, string|null $table = null): ?array\n  {\n    if ($this->dbTraitExists($id)) {\n      $db =& $this->db;\n      $res = [];\n      foreach ($this->dbTraitGetTableRelations($table) as $rel) {\n        if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {\n          $res[$rel['table']] = [\n            'col' => $rel['col'],\n            'primary' => $rel['primary'],\n            'values' => $all\n          ];\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\DbActions",
             "startLine": 246,
@@ -3345,11 +4071,11 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function initClassCfg(array $cfg = null)\n  {\n$arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n    foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "code": "  protected function initClassCfg(array|null $cfg = null)\n  {\n    $arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n\n      foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 59,
-            "endLine": 114,
+            "endLine": 115,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3403,8 +4129,8 @@
             "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 117,
-            "endLine": 120,
+            "startLine": 118,
+            "endLine": 121,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3432,8 +4158,8 @@
             "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $k => $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 39,
-            "endLine": 92,
+            "startLine": 41,
+            "endLine": 94,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3495,8 +4221,8 @@
             "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $k => $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 94,
-            "endLine": 134,
+            "startLine": 96,
+            "endLine": 136,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3539,8 +4265,8 @@
             "code": "  protected function dbTraitSetFilterCfg(array $cfg): void\n  {\n    $this->dbTraitFilterCfg = $cfg;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 142,
-            "endLine": 145,
+            "startLine": 144,
+            "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3597,8 +4323,8 @@
             "code": "  protected function dbTraitResetFilterCfg(): void\n  {\n    $this->dbTraitFilterCfg = [];\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 150,
-            "endLine": 153,
+            "startLine": 152,
+            "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3631,8 +4357,8 @@
             "code": "  protected function dbTraitGetFilterCfg(array $cfg): array\n  {\n    $conditions = [];\n    if (!empty($this->rootFilterCfg)) {\n      $conditions[] = $this->rootFilterCfg;\n    }\n\n    if (!empty($this->dbTraitFilterCfg)) {\n      $conditions[] = $this->dbTraitFilterCfg;\n    }\n\n    if (!empty($cfg)) {\n      $conditions[] = $cfg;\n    }\n\n    \/\/ Return empty array if no conditions exist\n    if (empty($conditions)) {\n      return [];\n    }\n\n    \/\/ Return single condition if only one exists\n    if (count($conditions) === 1) {\n      return $conditions[0];\n    }\n\n    \/\/ Combine all conditions with 'AND' logic\n    return array_map(function ($a) {\n      return [\n        'logic' => 'AND',\n        'conditions' => $a\n      ];\n    }, $conditions);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 162,
-            "endLine": 194,
+            "startLine": 164,
+            "endLine": 196,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3686,11 +4412,11 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitGetStructure(string $table = null): array\n  {\n    if (!$table) {\n      $cfg = $this->getClassCfg();\n      $table = $cfg['table'];\n    }\n\n    if (!isset($this->dbTraitStructure[$table])) {\n      $this->dbTraitStructure[$table] = $this->db->modelize($table);\n    }\n\n    return $this->dbTraitStructure[$table];\n  }",
+            "code": "  protected function dbTraitGetStructure(string|null $table = null): array\n  {\n    if (!$table) {\n      $cfg = $this->getClassCfg();\n      $table = $cfg['table'];\n    }\n\n    if (!isset($this->dbTraitStructure[$table])) {\n      $this->dbTraitStructure[$table] = $this->db->modelize($table);\n    }\n\n    return $this->dbTraitStructure[$table];\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 203,
-            "endLine": 215,
+            "startLine": 205,
+            "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3745,11 +4471,11 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitGetTableRelations(string $table = null): array\n  {\n    $cfg = $this->getClassCfg();\n    if (!$table) {\n      $table = $cfg['table'];\n    }\n    $idx = array_flip($cfg['tables'])[$table];\n    if ($idx && !isset($this->dbTraitRelations[$table])) {\n      $arc = &$cfg['arch'][$idx];\n      $this->dbTraitRelations[$table] = [];\n      if (!empty($arc['id'])) {\n        $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));\n        foreach ($refs as $ref) {\n          [$db, $tab, $col] = X::split($ref, '.');\n          $model = $this->db->modelize($tab);\n          $this->dbTraitRelations[$table][] = [\n            'db' => $db,\n            'table' => $tab,\n            'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,\n            'col' => $col,\n            'model' => $model\n          ];\n        }\n      }\n    }\n\n    return $this->dbTraitRelations[$table];\n  }",
+            "code": "  protected function dbTraitGetTableRelations(string|null $table = null): array\n  {\n    $cfg = $this->getClassCfg();\n    if (!$table) {\n      $table = $cfg['table'];\n    }\n    $idx = array_flip($cfg['tables'])[$table];\n    if ($idx && !isset($this->dbTraitRelations[$table])) {\n      $arc = &$cfg['arch'][$idx];\n      $this->dbTraitRelations[$table] = [];\n      if (!empty($arc['id'])) {\n        $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));\n        foreach ($refs as $ref) {\n          [$db, $tab, $col] = X::split($ref, '.');\n          $model = $this->db->modelize($tab);\n          $this->dbTraitRelations[$table][] = [\n            'db' => $db,\n            'table' => $tab,\n            'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,\n            'col' => $col,\n            'model' => $model\n          ];\n        }\n      }\n    }\n\n    return $this->dbTraitRelations[$table];\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 224,
-            "endLine": 251,
+            "startLine": 226,
+            "endLine": 253,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3807,8 +4533,8 @@
             "code": "  private function dbTraitSelection(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    string $mode = 'array',\n    array $fields = []\n  ): array\n  {\n    $returnObject = $mode === 'object';\n    $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');\n    $res = $this->db->$method($req);\n    if ($res) {\n      if (!empty($f['cfg'])) {\n        foreach ($res as &$r) {\n          if ($returnObject && !empty($r->{$f['cfg']})) {\n            $cfg = json_decode($r->{$f['cfg']});\n            $r = X::mergeObjects($cfg, $r);\n            unset($r->{$f['cfg']});\n          }\n          elseif (!$returnObject && !empty($r[$f['cfg']])) {\n            $cfg = json_decode($r[$f['cfg']], true);\n            $r = array_merge($cfg, $r);\n            unset($r[$f['cfg']]);\n          }\n        }\n\n        unset($r);\n      }\n\n      return $res;\n    }\n\n    return [];\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 265,
-            "endLine": 301,
+            "startLine": 267,
+            "endLine": 303,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3970,8 +4696,8 @@
             "code": "  private function dbTraitGetRequestCfg(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    array $fields = []\n  ): array\n  {\n    \/\/ Ensure table index is defined\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    \/\/ Validate fields\n    if (!empty($fields)) {\n      foreach (array_values($fields) as $f) {\n        if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {\n          throw new Exception(X::_(\"The field %s does not exist\", $f));\n        }\n      }\n\n      $properFields = $fields;\n    }\n    else {\n      $fields = $this->class_cfg['arch'][$this->class_table_index];\n    }\n\n    $ccfg = $this->getClassCfg();\n    if (isset($fields['cfg']) && !empty($ccfg['cfg'])) {\n      $cfgCol = $fields['cfg'];\n      unset($fields['cfg']);\n      if (!isset($properFields)) {\n        $properFields = array_values($fields);\n      }\n\n      foreach ($ccfg['cfg'] as $v) {\n        if ($v['field'] && !in_array($v['field'], $properFields)) {\n          $properFields[$v['field']] = \"IF(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              . \"') = 'null', NULL, JSON_UNQUOTE(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              .\"')))\";\n        }\n      }\n    }\n    elseif (!isset($properFields)) {\n      $properFields = array_values($fields);\n    }\n\n    \/\/ Build the request configuration\n    $req = [\n      'table' => $this->class_table,\n      'fields' => $properFields,\n      'where' => $this->dbTraitGetFilterCfg($filter),\n      'order' => $order\n    ];\n\n    if ($limit) {\n      $req['limit'] = $limit;\n      $req['start'] = $start;\n    }\n\n    return $req;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 315,
-            "endLine": 378,
+            "startLine": 317,
+            "endLine": 380,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4103,6 +4829,754 @@
                 }
             },
             "comments": "  \/**\n   * Prepares the request configuration for a database query.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param array $fields Fields to select.\n   *\n   * @return array The request configuration.\n   * @throws Exception If the table index is not defined or a field does not exist.\n   *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array|null $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      $cls = false;\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      if (!$path) {\n        $tmp = explode('\\\\', __CLASS__);\n        $cls = strtolower(end($tmp));\n        $path = [$cls, 'appui', 'plugins'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      \/\/X::ddump($path, self::$option_root_id);\n      if (!self::$option_root_id) {\n        if (empty($cls)) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array|null $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!$path) {\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 78,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array|null $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 104,
+            "endLine": 112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
+        },
+        "getOptionRoot": {
+            "name": "getOptionRoot",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 115,
+            "endLine": 119,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
+            "returns": [],
+            "arguments": []
+        },
+        "getOptionsObject": {
+            "name": "getOptionsObject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 122,
+            "endLine": 130,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
+            "returns": [
+                "bbn\\Appui\\Option"
+            ],
+            "arguments": []
+        },
+        "getOptionId": {
+            "name": "getOptionId",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionId(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fromCode(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 139,
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
+        },
+        "getOptionsIds": {
+            "name": "getOptionsIds",
+            "summary": "Undocumented function",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsIds(...$codes): array\n  {\n    $codes[] = self::getOptionRoot();\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...$codes),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 152,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
+        },
+        "getOptionsTree": {
+            "name": "getOptionsTree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTree(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return ($tree = self::getOptionsObject()->fullTree(...$codes)) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 166,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTreeRef": {
+            "name": "getOptionsTreeRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTreeRef(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return ($tree = self::getOptionsObject()->fullTreeRef(...$codes)) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 173,
+            "endLine": 177,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptions": {
+            "name": "getOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptions(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fullOptions(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 184,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSimpleOptions": {
+            "name": "getSimpleOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getSimpleOptions(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->options(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 187,
+            "endLine": 191,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSimpleOptions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsRef": {
+            "name": "getOptionsRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsRef(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fullOptionsRef(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 194,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOption": {
+            "name": "getOption",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOption(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->option(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 201,
+            "endLine": 205,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTextValue": {
+            "name": "getOptionsTextValue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTextValue(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array\n  {\n    if (is_string($id) && !Str::isUid($id)) {\n      $id = [$id];\n    }\n\n    if (is_array($id)) {\n      $id[] = self::getOptionRoot();\n    }\n\n    return $id ? self::getOptionsObject()->textValueOptions($id, $text, $value, ...$additionalFields) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 208,
+            "endLine": 219,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getOptionsTextValue",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": ""
+                },
+                {
+                    "name": "additionalFields",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTextValueRef": {
+            "name": "getOptionsTextValueRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ai",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTextValueRef(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array\n  {\n    if (is_string($id) && !Str::isUid($id)) {\n      $id = self::getOptionId($id);\n    }\n\n    return $id ? self::getOptionsObject()->textValueOptionsRef($id, $text, $value, ...$additionalFields) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 222,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getOptionsTextValueRef",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": ""
+                },
+                {
+                    "name": "additionalFields",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": {
@@ -4133,9 +5607,7 @@
                 "table": "bbn_ai_prompt",
                 "tables": {
                     "ai_prompt": "bbn_ai_prompt",
-                    "ai_prompt_items": "bbn_ai_prompt_items",
-                    "notes_versions": "bbn_notes_versions",
-                    "notes": "bbn_notes"
+                    "ai_prompt_items": "bbn_ai_prompt_items"
                 },
                 "arch": {
                     "ai_prompt": {
@@ -4156,30 +5628,13 @@
                         "mime": "mime",
                         "ai": "ai"
                     },
-                    "notes_versions": {
-                        "id_note": "id_note",
-                        "version": "version",
-                        "latest": "latest",
-                        "title": "title",
-                        "content": "content",
-                        "excerpt": "excerpt",
-                        "id_user": "id_user",
-                        "creation": "creation"
-                    },
-                    "notes": {
+                    "ai_prompt_settings": {
                         "id": "id",
-                        "id_parent": "id_parent",
-                        "id_alias": "id_alias",
-                        "id_type": "id_type",
-                        "id_option": "id_option",
-                        "mime": "mime",
-                        "lang": "lang",
-                        "private": "private",
-                        "locked": "locked",
-                        "pinned": "pinned",
-                        "important": "important",
-                        "creator": "creator",
-                        "active": "active"
+                        "id_prompt": "id_prompt",
+                        "id_model": "id_model",
+                        "def": "def",
+                        "last_use": "last_use",
+                        "cfg": "cfg"
                     }
                 }
             }
@@ -4188,7 +5643,7 @@
             "trait": false,
             "static": true,
             "readonly": false,
-            "type": "",
+            "type": "array",
             "declaring": {
                 "name": "bbn\\Appui\\Ai"
             },
@@ -4207,62 +5662,19 @@
                 ]
             },
             "parent": false,
-            "value": [
-                {
-                    "value": "rte",
-                    "text": "Rich Text Editor",
-                    "prompt": "Your response needs to be in rich text format",
-                    "component": "bbn-rte"
-                },
-                {
-                    "value": "markdown",
-                    "text": "Markdown",
-                    "prompt": "Your response needs to be in Markdown format",
-                    "component": "bbn-markdown"
-                },
-                {
-                    "value": "textarea",
-                    "text": "Text Multiline",
-                    "prompt": "Your response needs to be returned as multiple lines of text",
-                    "component": "bbn-textarea"
-                },
-                {
-                    "value": "code-php",
-                    "text": "Code PHP",
-                    "prompt": "Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format",
-                    "component": "bbn-code"
-                },
-                {
-                    "value": "code-js",
-                    "text": "Code JS",
-                    "prompt": "Your response needs to be pure code in Javascript",
-                    "component": "bbn-code"
-                },
-                {
-                    "value": "single-line",
-                    "text": "Single Line",
-                    "prompt": "Your response needs to be entered as a single line of text",
-                    "component": "bbn-input"
-                },
-                {
-                    "value": "json-editor",
-                    "text": "JSON",
-                    "prompt": "Your response needs to use this grammar : root   ::= object\n\nobject ::= \"{\" ws ( string \":\" ws value (\",\" ws string \":\" ws value)* )? \"}\"\n\nvalue  ::= object | array | string | number | (\"true\" | \"false\" | \"null\") ws\n\narray  ::= \"[\" ws ( value (\",\" ws value)* )? \"]\" ws\n\nstring ::= \"\\\"\" ( [a-zA-Z0-9] )* \"\\\"\" ws\n\nnumber ::= (\"-\"? ([0-9] | [1-9] [0-9]*)) (\".\" [0-9]+)? ([eE] [-+]? [0-9]+)? ws\n\nws ::= ([ \\t\\n] ws)?",
-                    "component": "bbn-json-editor"
-                }
-            ]
+            "value": null
         },
         "ai": {
             "trait": false,
             "static": false,
             "readonly": false,
-            "type": "",
+            "type": "Orhanerday\\OpenAi\\OpenAi",
             "declaring": {
                 "name": "bbn\\Appui\\Ai"
             },
             "declaring_trait": "bbn\\Appui\\Ai",
             "promoted": false,
-            "visibility": "private",
+            "visibility": "protected",
             "doc": {
                 "description": "OpenAI API instance\n",
                 "tags": [
@@ -4276,11 +5688,26 @@
             "parent": false,
             "value": null
         },
+        "prefs": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\User\\Preferences",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
         "note": {
             "trait": false,
             "static": false,
             "readonly": false,
-            "type": "",
+            "type": "bbn\\Appui\\Note",
             "declaring": {
                 "name": "bbn\\Appui\\Ai"
             },
@@ -4288,15 +5715,132 @@
             "promoted": false,
             "visibility": "private",
             "doc": {
-                "description": "Note instance\n",
-                "tags": [
-                    {
-                        "tag": "var",
-                        "type": "Note",
-                        "name": "$note"
-                    }
-                ]
+                "description": "@var Note $note Note instance",
+                "tags": []
             },
+            "parent": false,
+            "value": null
+        },
+        "pass": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Appui\\Passwords",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var Passwords $pass",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "fs": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\File\\System",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "user": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\User",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "endpoint": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "model": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "baseUrl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "key": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Appui\\Ai",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
             "parent": false,
             "value": null
         },
@@ -4717,6 +6261,21 @@
             "parent": false,
             "value": []
         },
+        "dbTraitFilterCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
         "dbTraitRelations": {
             "trait": false,
             "static": false,
@@ -4764,6 +6323,78 @@
             },
             "parent": false,
             "value": []
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ai"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
         }
     },
     "staticProperties": {
@@ -4771,9 +6402,7 @@
             "table": "bbn_ai_prompt",
             "tables": {
                 "ai_prompt": "bbn_ai_prompt",
-                "ai_prompt_items": "bbn_ai_prompt_items",
-                "notes_versions": "bbn_notes_versions",
-                "notes": "bbn_notes"
+                "ai_prompt_items": "bbn_ai_prompt_items"
             },
             "arch": {
                 "ai_prompt": {
@@ -4794,91 +6423,49 @@
                     "mime": "mime",
                     "ai": "ai"
                 },
-                "notes_versions": {
-                    "id_note": "id_note",
-                    "version": "version",
-                    "latest": "latest",
-                    "title": "title",
-                    "content": "content",
-                    "excerpt": "excerpt",
-                    "id_user": "id_user",
-                    "creation": "creation"
-                },
-                "notes": {
+                "ai_prompt_settings": {
                     "id": "id",
-                    "id_parent": "id_parent",
-                    "id_alias": "id_alias",
-                    "id_type": "id_type",
-                    "id_option": "id_option",
-                    "mime": "mime",
-                    "lang": "lang",
-                    "private": "private",
-                    "locked": "locked",
-                    "pinned": "pinned",
-                    "important": "important",
-                    "creator": "creator",
-                    "active": "active"
+                    "id_prompt": "id_prompt",
+                    "id_model": "id_model",
+                    "def": "def",
+                    "last_use": "last_use",
+                    "cfg": "cfg"
                 }
             }
         },
-        "responseFormats": [
-            {
-                "value": "rte",
-                "text": "Rich Text Editor",
-                "prompt": "Your response needs to be in rich text format",
-                "component": "bbn-rte"
-            },
-            {
-                "value": "markdown",
-                "text": "Markdown",
-                "prompt": "Your response needs to be in Markdown format",
-                "component": "bbn-markdown"
-            },
-            {
-                "value": "textarea",
-                "text": "Text Multiline",
-                "prompt": "Your response needs to be returned as multiple lines of text",
-                "component": "bbn-textarea"
-            },
-            {
-                "value": "code-php",
-                "text": "Code PHP",
-                "prompt": "Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format",
-                "component": "bbn-code"
-            },
-            {
-                "value": "code-js",
-                "text": "Code JS",
-                "prompt": "Your response needs to be pure code in Javascript",
-                "component": "bbn-code"
-            },
-            {
-                "value": "single-line",
-                "text": "Single Line",
-                "prompt": "Your response needs to be entered as a single line of text",
-                "component": "bbn-input"
-            },
-            {
-                "value": "json-editor",
-                "text": "JSON",
-                "prompt": "Your response needs to use this grammar : root   ::= object\n\nobject ::= \"{\" ws ( string \":\" ws value (\",\" ws string \":\" ws value)* )? \"}\"\n\nvalue  ::= object | array | string | number | (\"true\" | \"false\" | \"null\") ws\n\narray  ::= \"[\" ws ( value (\",\" ws value)* )? \"]\" ws\n\nstring ::= \"\\\"\" ( [a-zA-Z0-9] )* \"\\\"\" ws\n\nnumber ::= (\"-\"? ([0-9] | [1-9] [0-9]*)) (\".\" [0-9]+)? ([eE] [-+]? [0-9]+)? ws\n\nws ::= ([ \\t\\n] ws)?",
-                "component": "bbn-json-editor"
-            }
-        ]
+        "optional_is_init": false,
+        "option_root_id": null
     },
-    "constants": null,
+    "constants": {
+        "MAX_TOKENS": {
+            "name": "MAX_TOKENS",
+            "value": 4000,
+            "class": "bbn\\Appui\\Ai",
+            "parent": false,
+            "private": false,
+            "protected": true,
+            "public": false,
+            "final": false,
+            "doc": {
+                "description": "",
+                "tags": []
+            }
+        }
+    },
     "uses": {
-        "bbn\\Models\\Tts\\DbActions": "DbActions",
-        "bbn\\Models\\Cls\\Db": "DbCls",
-        "bbn\\Db": "Db",
-        "Orhanerday\\OpenAi\\OpenAi": "OpenAi",
         "Exception": "Exception",
+        "bbn\\Db": "Db",
         "bbn\\X": "X",
+        "bbn\\Str": "Str",
         "bbn\\User": "User",
-        "Gioni06\\Gpt3Tokenizer\\Gpt3TokenizerConfig": "Gpt3TokenizerConfig",
-        "Gioni06\\Gpt3Tokenizer\\Gpt3Tokenizer": "Gpt3Tokenizer",
+        "bbn\\User\\Preferences": "Preferences",
         "bbn\\File\\System": "System",
-        "DOMDocument": "DOMDocument"
+        "bbn\\Models\\Tts\\DbActions": "DbActions",
+        "bbn\\Models\\Tts\\Optional": "Optional",
+        "bbn\\Models\\Cls\\Db": "DbCls",
+        "Orhanerday\\OpenAi\\OpenAi": "OpenAi",
+        "Gioni06\\Gpt3Tokenizer\\Gpt3TokenizerConfig": "Gpt3TokenizerConfig",
+        "Gioni06\\Gpt3Tokenizer\\Gpt3Tokenizer": "Gpt3Tokenizer"
     },
     "dummyComments": [],
     "summary": "",

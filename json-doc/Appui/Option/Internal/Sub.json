@@ -3,13 +3,13 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Sub",
+    "name": "bbn\\Appui\\Option\\Internal\\Sub",
     "namespace": true,
     "realName": "Sub",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Sub.php",
+    "fileName": "\/Appui\/Option\/Internal\/Sub.php",
     "startLine": 8,
     "endLine": 91,
     "numMethods": 2,
@@ -28,7 +28,7 @@
     "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Sub",
     "contentConstructor": null,
     "methods": {
@@ -42,8 +42,8 @@
                     "content": "X::dump($opt->soptions(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\",\n  31 => \"My option 31\",\n  32 => \"My option 32\",\n  35 => \"My option 35\",\n  37 => \"My option 37\"\n]"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Sub",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Sub.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Sub",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Sub.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -104,8 +104,8 @@
                     "content": "X::dump($opt->fullSoptions(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 20, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 20, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 20, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 20, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"],\n  ['id' => 31, 'id_parent' => 30, 'title' => \"My option 31\", 'myProperty' =>  \"88%\"],\n  ['id' => 32, 'id_parent' => 30, 'title' => \"My option 32\", 'myProperty' =>  \"97%\"],\n  ['id' => 35, 'id_parent' => 30, 'title' => \"My option 35\", 'myProperty' =>  \"12%\"],\n  ['id' => 37, 'id_parent' => 30, 'title' => \"My option 37\", 'myProperty' =>  \"4%\"]\n]"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Sub",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Sub.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Sub",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Sub.php",
             "static": false,
             "visibility": "public",
             "final": false,

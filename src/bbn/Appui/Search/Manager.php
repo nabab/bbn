@@ -67,7 +67,7 @@ class Manager
     $this->conditions  = $conditions;
     $this->fs          = new System();
     $this->uid         = $uid;
-    $this->logFileBase = $this->ctrl->pluginTmpPath('appui-search') . "config/{$this->uid}";
+    $this->logFileBase = $this->ctrl->inc->user->getTmpPath('appui-search') . "config/{$this->uid}";
     $this->filePath    = "{$this->logFileBase}.json";
     $this->fs->createPath(dirname($this->logFileBase));
     // Write the first condition into the JSON file
@@ -260,6 +260,7 @@ class Manager
 
     // Delete the condition file if it still exists
     if ($this->fs->exists($this->filePath)) {
+      X::log("[STEP $loopCount] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath, 'searchTimings');
       $this->fs->delete($this->filePath);
     }
 
@@ -289,7 +290,6 @@ class Manager
    */
   protected function readCondition(): ?array
   {
-    clearstatcache();
     if ($this->fs->isFile($this->filePath)) {
       return $this->fs->decodeContents($this->filePath, 'json', true);
     }
@@ -336,7 +336,7 @@ class Manager
       $idx = X::search($this->workers, ['uid' => $uid]);
       if (isset($this->workers[$idx])) {
         $w = array_splice($this->workers, $idx, 1)[0];
-        //X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'], 'searchTimings');
+        X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'] . ' AND ' . $w['data'], 'searchTimings');
         $status = proc_get_status($w['proc']);
         if ($status['running']) {
           proc_terminate($w['proc']);
@@ -378,7 +378,7 @@ class Manager
 
     // Create and clear the log file
     $logFile = $this->logFileBase . '-' . $workerUid . '.log';
-    //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
+    X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
     $this->fs->putContents($logFile, '');
 
     // Attach the log file as stderr

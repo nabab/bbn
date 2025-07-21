@@ -1,0 +1,1236 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\User\\Folder",
+    "namespace": true,
+    "realName": "Folder",
+    "realNamespace": "bbn\\User",
+    "traits": [
+        "bbn\\Models\\Tts\\Optional"
+    ],
+    "interfaces": [],
+    "fileName": "\/User\/Folder.php",
+    "startLine": 11,
+    "endLine": 100,
+    "numMethods": 21,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "optional_is_init": false,
+        "option_root_id": null,
+        "id_pref": null,
+        "options": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\User",
+    "shortName": "Folder",
+    "contentConstructor": {
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __construct(\n    protected Preferences $prefs\n  )\n  {\n    self::optionalInit(['folders', 'note', 'appui']);\n    if ($pref = $this->prefs->getByOption(self::$option_root_id, false)) {\n      $this->id_pref = $pref['id'];\n    }\n    else {\n      $this->id_pref = $this->prefs->add(self::$option_root_id, []);\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 17,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "prefs",
+                    "position": 0,
+                    "type": "bbn\\User\\Preferences",
+                    "type_arr": [
+                        "bbn\\User\\Preferences"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "promoted": "protected"
+                }
+            ]
+        },
+        "create": {
+            "name": "create",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function create(string $name, ?string $parent = null, ?string $icon = null): ?string \n  {\n    if (empty($name)) {\n      throw new Exception(X::_(\"The name can't be empty\"));\n    }\n\n    if ($this->exists($name, $parent)) {\n      throw new Exception(X::_(\"The name already exists\"));\n    }\n\n    $data = [\n      'text' => $name,\n      'id_parent' => $parent,\n      'cfg' => [\n        'creation' => date('Y-m-d H:i:s'),\n      ]\n    ];\n\n    if ($parent) {\n      $data['parent'] = $parent;\n    }\n\n    if ($icon) {\n      $data['icon'] = $icon;\n    }\n\n    return $this->prefs->addBit($this->id_pref, $data);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 31,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "create",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "parent",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "icon",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function exists(string $name, ?string $parent = null)\n  {\n    if (empty($name)) {\n      return false;\n    }\n\n    $all = $this->prefs->getBits($this->id_pref, $parent, false);\n    return $all ? !!X::getRow($all, ['text' => $name]) : false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 60,
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "exists",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "parent",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "move": {
+            "name": "move",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function move(string $id, ?string $parent = null): bool\n  {\n    if ($this->prefs->moveBit($id, $parent)) {\n      return true;\n    }\n\n    throw new Exception(X::_(\"Impossible to move the folder\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 70,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "move",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "parent",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function delete(string $id): bool\n  {\n    if ($this->prefs->deleteBit($id)) {\n      return true;\n    }\n\n    throw new Exception(X::_(\"Impossible to move the folder\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 79,
+            "endLine": 86,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "delete",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "list": {
+            "name": "list",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Folder.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function list(?string $parent = null): array\n  {\n    return array_map(\n      fn ($a): array => [\n        'id' => $a['id'],\n        'text' => $a['text'],\n        'numChildren' => $a['numChildren'],\n        'creation' => $a['cfg']['creation']\n      ],\n      $this->prefs->getBits($this->id_pref, $parent, true, true)\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 88,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "list",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "parent",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array|null $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      $cls = false;\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      if (!$path) {\n        $tmp = explode('\\\\', __CLASS__);\n        $cls = strtolower(end($tmp));\n        $path = [$cls, 'appui', 'plugins'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      \/\/X::ddump($path, self::$option_root_id);\n      if (!self::$option_root_id) {\n        if (empty($cls)) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array|null $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!$path) {\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 78,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array|null $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 104,
+            "endLine": 112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
+        },
+        "getOptionRoot": {
+            "name": "getOptionRoot",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 115,
+            "endLine": 119,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
+            "returns": [],
+            "arguments": []
+        },
+        "getOptionsObject": {
+            "name": "getOptionsObject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 122,
+            "endLine": 130,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
+            "returns": [
+                "bbn\\Appui\\Option"
+            ],
+            "arguments": []
+        },
+        "getOptionId": {
+            "name": "getOptionId",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionId(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fromCode(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 139,
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
+        },
+        "getOptionsIds": {
+            "name": "getOptionsIds",
+            "summary": "Undocumented function",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsIds(...$codes): array\n  {\n    $codes[] = self::getOptionRoot();\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...$codes),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 152,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
+        },
+        "getOptionsTree": {
+            "name": "getOptionsTree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTree(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return ($tree = self::getOptionsObject()->fullTree(...$codes)) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 166,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTreeRef": {
+            "name": "getOptionsTreeRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTreeRef(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return ($tree = self::getOptionsObject()->fullTreeRef(...$codes)) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 173,
+            "endLine": 177,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptions": {
+            "name": "getOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptions(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fullOptions(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 184,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSimpleOptions": {
+            "name": "getSimpleOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getSimpleOptions(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->options(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 187,
+            "endLine": 191,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSimpleOptions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsRef": {
+            "name": "getOptionsRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsRef(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->fullOptionsRef(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 194,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOption": {
+            "name": "getOption",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOption(...$codes)\n  {\n    $codes[] = self::getOptionRoot();\n    return self::getOptionsObject()->option(...$codes);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 201,
+            "endLine": 205,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTextValue": {
+            "name": "getOptionsTextValue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTextValue(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array\n  {\n    if (is_string($id) && !Str::isUid($id)) {\n      $id = [$id];\n    }\n\n    if (is_array($id)) {\n      $id[] = self::getOptionRoot();\n    }\n\n    return $id ? self::getOptionsObject()->textValueOptions($id, $text, $value, ...$additionalFields) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 208,
+            "endLine": 219,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getOptionsTextValue",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": ""
+                },
+                {
+                    "name": "additionalFields",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionsTextValueRef": {
+            "name": "getOptionsTextValueRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Folder",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTextValueRef(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array\n  {\n    if (is_string($id) && !Str::isUid($id)) {\n      $id = self::getOptionId($id);\n    }\n\n    return $id ? self::getOptionsObject()->textValueOptionsRef($id, $text, $value, ...$additionalFields) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 222,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getOptionsTextValueRef",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": ""
+                },
+                {
+                    "name": "additionalFields",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "id_pref": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Folder"
+            },
+            "declaring_trait": "bbn\\User\\Folder",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "prefs": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\User\\Preferences",
+            "declaring": {
+                "name": "bbn\\User\\Folder"
+            },
+            "declaring_trait": "bbn\\User\\Folder",
+            "promoted": true,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Folder"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Folder"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Folder"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": {
+        "optional_is_init": false,
+        "option_root_id": null
+    },
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Models\\Tts\\Optional": "Optional"
+    },
+    "dummyComments": [
+        "\/**\n * @package user\n *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

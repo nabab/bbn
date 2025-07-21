@@ -1,0 +1,713 @@
+{
+    "doc": {
+        "description": "Class Manager\nEncapsulates the logic for handling parallel search processes.",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Search\\Manager",
+    "namespace": true,
+    "realName": "Manager",
+    "realNamespace": "bbn\\Appui\\Search",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Search\/Manager.php",
+    "startLine": 17,
+    "endLine": 416,
+    "numMethods": 7,
+    "numProperties": 12,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "ctrl": null,
+        "uid": null,
+        "conditions": null,
+        "filePath": null,
+        "logFileBase": null,
+        "result": {
+            "success": false,
+            "errors": []
+        },
+        "workers": [],
+        "maxResults": 10000,
+        "maxWorkers": 5,
+        "commandTpl": "php -f router.php %s \"%s\""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Search",
+    "shortName": "Manager",
+    "contentConstructor": {
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __construct(Controller $ctrl, string $uid, array $conditions)\n  {\n    $this->ctrl        = $ctrl;\n    $this->conditions  = $conditions;\n    $this->fs          = new System();\n    $this->uid         = $uid;\n    $this->logFileBase = $this->ctrl->pluginTmpPath('appui-search') . \"config\/{$this->uid}\";\n    $this->filePath    = \"{$this->logFileBase}.json\";\n    $this->fs->createPath(dirname($this->logFileBase));\n    \/\/ Write the first condition into the JSON file\n    $this->search = new Search($this->ctrl, []);\n    $this->setCondition($this->conditions[0]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 64,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "ctrl",
+                    "position": 0,
+                    "type": "bbn\\Mvc\\Controller",
+                    "type_arr": [
+                        "bbn\\Mvc\\Controller"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The BBN MVC controller"
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Unique ID (usually from POST)"
+                },
+                {
+                    "name": "conditions",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Array of conditions (usually from POST)"
+                }
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Controller",
+                        "name": "$ctrl",
+                        "description": "The BBN MVC controller"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid",
+                        "description": "Unique ID (usually from POST)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$conditions",
+                        "description": "Array of conditions (usually from POST)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * @param Controller $ctrl       The BBN MVC controller\n   * @param string     $uid        Unique ID (usually from POST)\n   * @param array      $conditions Array of conditions (usually from POST)\n   *\/"
+        },
+        "run": {
+            "name": "run",
+            "summary": "Runs the entire search process.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function run()\n  {\n    \/\/ We need at least one condition to proceed\n    if (empty($this->conditions)) {\n      return null;\n    }\n\n\n    \/\/ Mark process as successful by default\n    $this->result['success'] = true;\n\n    \/\/ Prepare iteration counters\n    $loopCount = 0;\n    $totalResults = 0;\n    $currentValue = null;\n    \/\/ Create a timer (if needed for logging\/debugging)\n    $timer = new Timer();\n\n    \/\/ Read the (latest) condition\n    $condition = $this->readCondition();\n\n    \/\/ Main loop: runs while the condition file still exists and matches our search value\n    while ($this->isOk($condition)) {\n      if (!empty($condition['value'])) {\n        \/\/ When value changes, reset some things\n        if ($currentValue !== $condition['value']) {\n          $currentValue = $condition['value'];\n          $this->removeWorker();\n          $totalResults = 0;\n          $step = 0;\n          $prev = $this->search->retrievePreviousResults($condition['value']);\n          if (!empty($prev['data'])) {\n            $prev['is_previous'] = true;\n            $prev['value'] = $condition['value'];\n            yield $prev;\n          }\n        }\n\n        \/\/ If we haven't reached our global max\n        if ($totalResults < $this->maxResults) {\n          \/\/ Launch new workers while conditions allow\n          while (!is_null($step) && (count($this->workers) < $this->maxWorkers)) {\n            if (!$this->isOk($condition)) {\n              break;\n            }\n            if ($result = $this->search->stream($condition['value'], $step)) {\n              if (!$this->isOk($condition)) {\n                break;\n              }\n\n              $this->addWorker($result, $step);\n              $timer->start(\"step-$step\");\n              \/\/X::log(\"[STEP $step] \" . microtime(true) . \" ADDING SEARCH WORKER POUR $currentValue $step \" . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');\n              \/\/ If the condition file is removed externally, stop everything\n              if (!$this->fs->exists($this->filePath)) {\n                $this->removeWorker();\n                $step = null;\n                break;\n              }\n              \/\/ If there's a next step, move forward\n              elseif (!empty($result['next_step'])) {\n                $step = $result['next_step'];\n              }\n              else {\n                \/\/ No next step, end the worker-adding loop\n                $step = null;\n              }\n            }\n\n            break;\n          }\n\n          for ($j = 0; $j < count($this->workers); $j++) {\n            \/\/ Re-check the condition each time in case it changed\n            if ($this->isOk($condition)) {\n              $worker = $this->workers[$j];\n              $status = proc_get_status($worker['proc']);\n              \/\/X::log(\"[STEP $worker[step]] \" . microtime(true) . ' ' . $status['running'], 'searchTimings');\n\n              \/\/ If the process has finished\n              if (!$status['running']) {\n                \/\/X::log(\"[STEP $worker[step]] \" . microtime(true) . ' NOT RUNNING', 'searchTimings');\n                \/\/ Read data from stdout\n                $jsonOutput = stream_get_contents($worker['pipes'][1]);\n\n                if ($jsonOutput) {\n                  \/\/X::log(\"[STEP $worker[step]] \" . microtime(true) . ' JSON OK', 'searchTimings');\n                  $ret  = json_decode($jsonOutput, true);\n\n                  \/\/ If results are found, stream them\n                  if (!empty($ret['num'])) {\n                    \/\/X::log(\"[STEP $worker[step]] \" . microtime(true) . ' RESULTS OK', 'searchTimings');\n                    $data = $this->fs->decodeContents($worker['data'], 'json', true);\n                    \/\/ If we exceed the max, trim them\n                    \/*\n                    if ($totalResults > $this->maxResults) {\n                      $excess = $totalResults - $this->maxResults;\n                      array_splice($ret['data']['results'], $newCount - $excess);\n                    }*\/\n\n\n                    \/\/ Stream partial results\n                    yield [\n                      'value' => $condition['value'],\n                      'data' => $data['results'],\n                      'step' => $worker['step'],\n                      'item' => $ret['item'],\n                      'id'   => $worker['id']\n                    ];\n\n                  }\n                  else {\n                    \/\/X::log(\"[STEP $worker[step]] \" . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');\n                  }\n                }\n                else {\n                  X::log($jsonOutput, 'searchError');\n                  X::log($status, 'searchError');\n                }\n\n                \/\/ Check worker-specific log file for errors\n                if ($err = $this->fs->getContents($worker['log'])) {\n                  $this->result['errors'][] = $err;\n                  yield ['error' => $err, 'command' => $worker['cmd']];\n                }\n\n                \/\/ Remove this single worker from the array\n                $j--;\n                \/\/ Clean up the process and its log\n                $this->removeWorker($worker['uid']);\n              }\n              \/*\n              else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {\n                X::log(\"[STEP $worker[step]] \" . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');\n                $this->removeWorker($worker['uid']);\n              }*\/\n              \/\/ If max reached, kill all workers\n              if ($totalResults > $this->maxResults) {\n                $this->removeWorker();\n                break;\n              }\n            }\n            else {\n              \/\/ The condition changed or file missing: re-read and stop\n              $condition = $this->readCondition();\n              $this->removeWorker();\n              break;\n            }\n          }\n\n          if (!count($this->workers) && is_null($step)) {\n            break;\n          }\n        }\n        else {\n          $this->removeWorker();\n          $step = null;\n        }\n      }\n      else {\n        $this->removeWorker();\n        $step = null;\n      }\n\n      if (!count($this->workers) && is_null($step)) {\n        break;\n      }\n\n      \/\/ Avoid burning CPU in the loop\n      if (isset($step) && (count($this->workers) >= $this->maxWorkers)) {\n        usleep(50000);\n      }\n\n      $loopCount++;\n      $condition = $this->readCondition();\n    }\n\n    \/\/ End of main loop; clean up any remaining workers\n    $this->removeWorker();\n\n    \/\/ Delete the condition file if it still exists\n    if ($this->fs->exists($this->filePath)) {\n      $this->fs->delete($this->filePath);\n    }\n\n    \/\/ Record the loop iteration count or any other helpful info\n    $this->result['progress'] = $loopCount;\n\n    \/\/ Stream the final result back\n    return;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 271,
+            "isDeprecated": false,
+            "isGenerator": true,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "run",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Runs the entire search process.",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Runs the entire search process.\n   *\/"
+        },
+        "setCondition": {
+            "name": "setCondition",
+            "summary": "Initializes the condition file with the given data.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setCondition(array $condition): bool\n  {\n    $this->conditions = [$condition];\n    return $this->fs->encodeContents($condition, $this->filePath, 'json');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 279,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setCondition",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "condition",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The condition data to store"
+                }
+            ],
+            "doc": {
+                "description": "Initializes the condition file with the given data.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$condition",
+                        "description": "The condition data to store"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the condition file with the given data.\n   *\n   * @param array $condition The condition data to store\n   * @return bool\n   *\/"
+        },
+        "readCondition": {
+            "name": "readCondition",
+            "summary": "Reads the current condition from the JSON file.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function readCondition(): ?array\n  {\n    clearstatcache();\n    if ($this->fs->isFile($this->filePath)) {\n      return $this->fs->decodeContents($this->filePath, 'json', true);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 290,
+            "endLine": 298,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "readCondition",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Reads the current condition from the JSON file.\n",
+                "params": [],
+                "return": "The condition data or null if file doesn't exist"
+            },
+            "comments": "  \/**\n   * Reads the current condition from the JSON file.\n   *\n   * @return array|null The condition data or null if file doesn't exist\n   *\/"
+        },
+        "isOk": {
+            "name": "isOk",
+            "summary": "Checks if the condition file still exists and matches the passed condition.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function isOk(?array $condition): bool\n  {\n    $inFile = $this->readCondition();\n    if (!$condition || empty($inFile) || connection_aborted()) {\n      return false;\n    }\n\n    if (!isset($inFile['value']) || $inFile['value'] !== $condition['value']) {\n      return false;\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 306,
+            "endLine": 318,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isOk",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "condition",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The reference condition"
+                }
+            ],
+            "doc": {
+                "description": "Checks if the condition file still exists and matches the passed condition.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$condition",
+                        "description": "The reference condition"
+                    }
+                ],
+                "return": "Returns false if file doesn't exist, 0 if changed, or 1 if OK"
+            },
+            "comments": "  \/**\n   * Checks if the condition file still exists and matches the passed condition.\n   *\n   * @param array|null $condition The reference condition\n   * @return bool Returns false if file doesn't exist, 0 if changed, or 1 if OK\n   *\/"
+        },
+        "removeWorker": {
+            "name": "removeWorker",
+            "summary": "Kills and removes all given workers, or all tracked workers if none specified.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function removeWorker(?string $worker = null): void\n  {\n    if (!$worker) {\n      $workers = array_map(fn($a) => $a['uid'], $this->workers);\n    }\n    else {\n      $workers = [$worker];\n    }\n\n    foreach ($workers as $uid) {\n      $idx = X::search($this->workers, ['uid' => $uid]);\n      if (isset($this->workers[$idx])) {\n        $w = array_splice($this->workers, $idx, 1)[0];\n        \/\/X::log(\"[STEP $w[step]] \" . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'], 'searchTimings');\n        $status = proc_get_status($w['proc']);\n        if ($status['running']) {\n          proc_terminate($w['proc']);\n        }\n        proc_close($w['proc']);\n        $this->fs->delete($w['log']);\n        $this->fs->delete($w['data']);\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 326,
+            "endLine": 349,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "removeWorker",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "worker",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Optional list of workers to terminate"
+                }
+            ],
+            "doc": {
+                "description": "Kills and removes all given workers, or all tracked workers if none specified.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$workers",
+                        "description": "Optional list of workers to terminate"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Kills and removes all given workers, or all tracked workers if none specified.\n   *\n   * @param array|null $workers Optional list of workers to terminate\n   * @return void\n   *\/"
+        },
+        "addWorker": {
+            "name": "addWorker",
+            "summary": "Spawns a new worker process to perform a chunk of work.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Search\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search\/Manager.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function addWorker(array $result, int $step): void\n  {\n    \/\/ Prepare descriptor array: [stdin, stdout, stderr]\n    \/\/ stderr is set dynamically to a unique log file\n\n    \/\/ Generate unique ID for this worker\n    $workerUid = Str::genpwd();\n\n    \/\/ Build final command by substituting the URL and encoded arguments\n    $url = $this->ctrl->pluginUrl('appui-search') . '\/results';\n    $dataFile = $this->logFileBase . '-' . $workerUid . '.json';\n    $cmd = sprintf(\n      $this->commandTpl,\n      $url,\n      Str::escapeDquotes(json_encode([\n        'item' => $result['item'] ?? null,\n        'step' => $step,\n        'file' => $dataFile\n      ]))\n    );\n\n    \/\/ Create and clear the log file\n    $logFile = $this->logFileBase . '-' . $workerUid . '.log';\n    \/\/X::log(\"[STEP $step] \" . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');\n    $this->fs->putContents($logFile, '');\n\n    \/\/ Attach the log file as stderr\n    $descriptors = [\n      [\"pipe\", \"r\"],\n      [\"pipe\", \"w\"],\n      [\"file\", $logFile, \"a\"]\n    ];\n\n    \/\/ Open the process\n    $proc = proc_open(\n      $cmd,\n      $descriptors,\n      $pipes,\n      $this->ctrl->appPath()\n    );\n\n    \/\/ Non-blocking read from the stdout pipe\n    stream_set_blocking($pipes[0], 0);\n    stream_set_blocking($pipes[1], 0);\n\n    \/\/ Track the worker\n    $this->workers[] = [\n      'proc'    => $proc,\n      'id'      => $result['id'],\n      'timeout' => $result['timeout'] ?? 10,\n      'cmd'     => $cmd,\n      'uid'     => $workerUid,\n      'pipes'   => $pipes,\n      'log'     => $logFile,\n      'data'    => $dataFile,\n      'step'    => $step\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 358,
+            "endLine": 415,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "addWorker",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "result",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The data describing what this worker should process"
+                },
+                {
+                    "name": "step",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The current step"
+                }
+            ],
+            "doc": {
+                "description": "Spawns a new worker process to perform a chunk of work.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$result",
+                        "description": "The data describing what this worker should process"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$step",
+                        "description": "The current step"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Spawns a new worker process to perform a chunk of work.\n   *\n   * @param array $result The data describing what this worker should process\n   * @param int   $step   The current step\n   * @return void\n   *\/"
+        }
+    },
+    "properties": {
+        "ctrl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var Controller",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "uid": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string Unique identifier from POST",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "conditions": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array Array of search conditions from POST",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "filePath": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string Full path to the JSON conditions file",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "fs": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\File\\System",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var System File system object",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "logFileBase": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string Base path for log files",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "search": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Appui\\Search",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "result": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array Results array to eventually return\/stream",
+                "tags": []
+            },
+            "parent": false,
+            "value": {
+                "success": false,
+                "errors": []
+            }
+        },
+        "workers": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array Current child worker processes",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "maxResults": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int Maximum number of results to collect",
+                "tags": []
+            },
+            "parent": false,
+            "value": 10000
+        },
+        "maxWorkers": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int Maximum number of parallel worker processes",
+                "tags": []
+            },
+            "parent": false,
+            "value": 5
+        },
+        "commandTpl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Search\\Manager"
+            },
+            "declaring_trait": "bbn\\Appui\\Search\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string Command template for launching a worker",
+                "tags": []
+            },
+            "parent": false,
+            "value": "php -f router.php %s \"%s\""
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Appui\\Search": "Search",
+        "bbn\\File\\System": "System",
+        "bbn\\Util\\Timer": "Timer",
+        "bbn\\Mvc\\Controller": "Controller",
+        "Generator": "Generator"
+    },
+    "dummyComments": [
+        "\/**\n * Class Manager\n * Encapsulates the logic for handling parallel search processes.\n *\/"
+    ],
+    "summary": "Class Manager",
+    "description": "Encapsulates the logic for handling parallel search processes.",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "Encapsulates the logic for handling parallel search processes."
+        }
+    ]
+}

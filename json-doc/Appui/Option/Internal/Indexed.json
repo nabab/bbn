@@ -3,15 +3,15 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Indexed",
+    "name": "bbn\\Appui\\Option\\Internal\\Indexed",
     "namespace": true,
     "realName": "Indexed",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Indexed.php",
+    "fileName": "\/Appui\/Option\/Internal\/Indexed.php",
     "startLine": 6,
-    "endLine": 204,
+    "endLine": 218,
     "numMethods": 6,
     "numProperties": 0,
     "numConstants": 0,
@@ -28,7 +28,7 @@
     "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Indexed",
     "contentConstructor": null,
     "methods": {
@@ -37,12 +37,12 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function codeOptions(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Retrieve the list of items for the given ID.\n      $list = $this->items($id);\n      \n      \/\/ If the list is an array, process it to create the result array.\n      if (\\is_array($list)) {\n        $res = [];\n        $cfg = $this->getCfg($id) ?: [];\n        \n        \/\/ Iterate over each item in the list and add its details to the result array.\n        foreach ($list as $i){\n          $o = $this->option($i);\n          $res[$o[$this->fields['code']]] = [\n            $this->fields['id'] => $o[$this->fields['id']],\n            $this->fields['code'] => $o[$this->fields['code']],\n            $this->fields['text'] => $o[$this->fields['text']]\n          ];\n\n          \/\/ If the configuration has a schema, add its fields to the result array.\n          if ( !empty($cfg['schema']) ){\n            if ( \\is_string($cfg['schema']) ){\n              $cfg['schema'] = json_decode($cfg['schema'], true);\n            }\n  \n            foreach ( $cfg['schema'] as $s ){\n              if (!empty($s['field']) && !in_array($s['field'], [$this->fields['id'], $this->fields['code'], $this->fields['text']])) {\n                $res[$o[$this->fields['code']]][$s['field']] = $o[$s['field']] ?? null;\n              }\n            }\n          }\n\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function codeOptions(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Retrieve the list of items for the given ID.\n      $list = $this->items($id);\n      \n      \/\/ If the list is an array, process it to create the result array.\n      if (\\is_array($list)) {\n        $res = [];\n        $cfg = $this->getCfg($id) ?: [];\n        \n        \/\/ Iterate over each item in the list and add its details to the result array.\n        foreach ($list as $i){\n          $o = $this->option($i);\n          $res[$o[$this->fields['code']]] = [\n            $this->fields['id'] => $o[$this->fields['id']],\n            $this->fields['code'] => $o[$this->fields['code']],\n            $this->fields['text'] => $o[$this->fields['text']] ?: $o['alias'][$this->fields['text']]\n          ];\n\n          \/\/ If the configuration has a schema, add its fields to the result array.\n          if ( !empty($cfg['schema']) ){\n            if ( \\is_string($cfg['schema']) ){\n              $cfg['schema'] = json_decode($cfg['schema'], true);\n            }\n  \n            foreach ( $cfg['schema'] as $s ){\n              if (!empty($s['field']) && !in_array($s['field'], [$this->fields['id'], $this->fields['code'], $this->fields['text']])) {\n                $res[$o[$this->fields['code']]][$s['field']] = $o[$s['field']] ?? null;\n              }\n            }\n          }\n\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 9,
@@ -80,8 +80,8 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -123,8 +123,8 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -166,8 +166,8 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -209,12 +209,12 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function optionsByCode(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Check if the result is cached.\n      if ($r = $this->getCache($id, __FUNCTION__)) {\n        return $r;\n      }\n\n      \/\/ Retrieve the native options for the given ID.\n      $opts = $this->nativeOptions($id);\n      \n      \/\/ If there are options, create the result array.\n      if ($opts) {\n        $res = [];\n        \n        \/\/ Iterate over each option and add its code and text to the result array.\n        foreach ($opts as $o) {\n          $res[$o[$this->fields['code']]] = $o[$this->fields['text']];\n        }\n        \n        \/\/ Sort the result array by value.\n        \\asort($res);\n        $opts = $res;\n      }\n\n      \/\/ Cache the result and return it.\n      $this->setCache($id, __FUNCTION__, $opts);\n      return $opts;\n    }\n\n    return null;\n  }",
+            "code": "  public function optionsByCode(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Check if the result is cached.\n      if ($r = $this->getCache($id, __FUNCTION__)) {\n        return $r;\n      }\n\n      \/\/ Retrieve the native options for the given ID.\n      $opts = $this->fullOptions($id);\n      \n      \/\/ If there are options, create the result array.\n      if ($opts) {\n        $res = [];\n        \n        \/\/ Iterate over each option and add its code and text to the result array.\n        foreach ($opts as $o) {\n          $res[$o[$this->fields['code']]] = $o[$this->fields['text']] ?: $o['alias'][$this->fields['text']];\n        }\n        \n        \/\/ Sort the result array by value.\n        \\asort($res);\n        $opts = $res;\n      }\n\n      \/\/ Cache the result and return it.\n      $this->setCache($id, __FUNCTION__, $opts);\n      return $opts;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 121,
@@ -252,16 +252,16 @@
             "summary": "Returns an option's children array of id and text in a user-defined indexed array.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Indexed",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Indexed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function textValueOptions(string $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array\n  {\n    \/\/ Initialize the result array.\n    $res = [];\n    \n    \/\/ Get the full options for the provided codes.\n    if ($opts = $this->fullOptions($id)) {\n      \/\/ Get the configuration for the given code.\n      $cfg = $this->getCfg($id) ?: [];\n      \n      \/\/ Initialize a counter.\n      $i   = 0;\n      \n      \/\/ Iterate over each option and add it to the result array.\n      foreach ($opts as $k => $o) {\n        if (!isset($is_array)) {\n          $is_array = \\is_array($o);\n        }\n        \n        $res[$i] = [\n          $text => $is_array ? $o[$this->fields['text']] : $o,\n          $value => $is_array ? $o[$this->fields['id']] : $k\n        ];\n        if (!empty($cfg['show_code'])) {\n          $res[$i][$this->fields['code']] = $o[$this->fields['code']];\n        }\n        foreach ($additionalFields as $f) {\n          if (!array_key_exists($f, $res[$i])) {\n            $res[$i][$f] = $o[$f] ?? null;\n          }\n        }\n        \n        $i++;\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function textValueOptions(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array\n  {\n    \/\/ Initialize the result array.\n    $res = [];\n    \n    if (is_string($id) && !Str::isUid($id)) {\n      $id = [$id];\n    }\n\n    \/\/ Get the full options for the provided codes.\n    if (!is_array($id)) {\n      $id = [$id];\n    }\n\n    if ($id = $this->fromCode(...$id)) {\n      $opts = $this->fullOptions($id);\n      \/\/ Get the configuration for the given code.\n      $cfg = $this->getCfg($id) ?: [];\n      \n      \/\/ Initialize a counter.\n      $i   = 0;\n      \n      \/\/ Iterate over each option and add it to the result array.\n      foreach ($opts as $k => $o) {\n        if (!isset($is_array)) {\n          $is_array = \\is_array($o);\n        }\n        \n        $res[$i] = [\n          $text => $is_array ? ($o[$this->fields['text']] ?: $o['alias'][$this->fields['text']]) : $o,\n          $value => $is_array ? $o[$this->fields['id']] : $k\n        ];\n        if (!empty($cfg['show_code'])) {\n          $res[$i][$this->fields['code']] = $o[$this->fields['code']];\n        }\n\n        if (!isset($o['alias'])) {\n          $o['alias'] = [];\n        }\n\n        foreach ($additionalFields as $f) {\n          if (!array_key_exists($f, $res[$i])) {\n            $res[$i][$f] = empty($o[$f]) ? ($o['alias'][$f] ?? null) : $o[$f];\n          }\n        }\n        \n        $i++;\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 166,
-            "endLine": 203,
+            "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -279,9 +279,10 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "string",
+                    "type": "array|string",
                     "type_arr": [
-                        "string"
+                        {},
+                        {}
                     ],
                     "variadic": false,
                     "reference": false,
@@ -289,7 +290,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option's ID or its code if it is children of {@link default}"
+                    "description": "The option's ID or an array of codes"
                 },
                 {
                     "name": "text",
@@ -340,9 +341,9 @@
                 "params": [
                     {
                         "tag": "param",
-                        "type": "int|string",
+                        "type": "array|string",
                         "name": "$id",
-                        "description": "The option's ID or its code if it is children of {@link default}"
+                        "description": "The option's ID or an array of codes"
                     },
                     {
                         "tag": "param",
@@ -365,7 +366,7 @@
                 ],
                 "return": "Options' list in a text\/value indexed array or null if not found"
             },
-            "comments": "  \/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param int|string      $id    The option's ID or its code if it is children of {@link default}\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
+            "comments": "  \/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param array|string    $id    The option's ID or an array of codes\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
         }
     },
     "properties": null,
@@ -375,7 +376,7 @@
         "bbn\\Str": "Str"
     },
     "dummyComments": [
-        "\/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param int|string      $id    The option's ID or its code if it is children of {@link default}\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
+        "\/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param array|string    $id    The option's ID or an array of codes\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
     ],
     "summary": "",
     "description": "",

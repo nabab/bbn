@@ -1,0 +1,1177 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+    "namespace": true,
+    "realName": "Formatters",
+    "realNamespace": "bbn\\Db\\Languages\\Models\\Sql",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Languages\/Models\/Sql\/Formatters.php",
+    "startLine": 6,
+    "endLine": 303,
+    "numMethods": 14,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Languages\\Models\\Sql",
+    "shortName": "Formatters",
+    "contentConstructor": null,
+    "methods": {
+        "getCreateDatabase": {
+            "name": "getCreateDatabase",
+            "summary": "Returns the SQL statement to create a database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCreateDatabase(string $database, ?string $enc = null, ?string $collation = null): string\n  {\n    if (Str::checkName($database)\n      && (empty($enc) || Str::checkName($enc))\n      && (empty($collation) || Str::checkName($collation))\n    ) {\n      return \"CREATE DATABASE IF NOT EXISTS \".$this->escape($database).\";\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 16,
+            "endLine": 26,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getCreateDatabase",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the database to create."
+                },
+                {
+                    "name": "enc",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The character set to use, if any."
+                },
+                {
+                    "name": "collation",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The collation to use, if any."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to create a database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database",
+                        "description": "The name of the database to create."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$enc",
+                        "description": "The character set to use, if any."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$collation",
+                        "description": "The collation to use, if any."
+                    }
+                ],
+                "return": "The SQL statement to create the database, or an empty string if the parameters are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to create a database.\n   * @param string $database The name of the database to create.\n   * @param string|null $enc The character set to use, if any.\n   * @param string|null $collation The collation to use, if any.\n   * @return string The SQL statement to create the database, or an empty string if the parameters are invalid.\n   *\/"
+        },
+        "getDropDatabase": {
+            "name": "getDropDatabase",
+            "summary": "Returns the SQL statement to drop a database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropDatabase(string $database): string\n  {\n    if (Str::checkName($database)) {\n      return \"DROP DATABASE IF EXISTS \".$this->escape($database).\";\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 34,
+            "endLine": 41,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getDropDatabase",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the database to drop."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to drop a database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database",
+                        "description": "The name of the database to drop."
+                    }
+                ],
+                "return": "The SQL statement to drop the database, or an empty string if the name is invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to drop a database.\n   * @param string $database The name of the database to drop.\n   * @return string The SQL statement to drop the database, or an empty string if the name is invalid.\n   *\/"
+        },
+        "getDuplicateDatabase": {
+            "name": "getDuplicateDatabase",
+            "summary": "Returns the SQL statement to duplicate a database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDuplicateDatabase(string $source, string $target): string\n  {\n    if (Str::checkName($source) && Str::checkName($target)) {\n      $sql = $this->getCreateDatabase($target).PHP_EOL;\n      if ($tables = $this->getTables($source)) {\n        foreach ($tables as $table) {\n          $sql .= $this->getDuplicateTable(\"$source.$table\", \"$target.$table\", false).PHP_EOL;\n        }\n\n        foreach ($tables as $i => $table) {\n          $sql .= ($i ? PHP_EOL : '') . \"INSERT INTO \" . $this->escape(\"$target.$table\") . \" SELECT * FROM \" . $this->escape(\"$source.$table\") . \";\";\n        }\n      }\n\n      return $sql;\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 50,
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDuplicateDatabase",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "source",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The name of the database to duplicate."
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The name of the new database."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to duplicate a database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "ame The name of the database to duplicate."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame The name of the new database."
+                    }
+                ],
+                "return": "The SQL statement to duplicate the database, or an empty string if the names are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to duplicate a database.\n   * @param string $oldName The name of the database to duplicate.\n   * @param string $newName The name of the new database.\n   * @return string The SQL statement to duplicate the database, or an empty string if the names are invalid.\n   *\/"
+        },
+        "getRenameDatabase": {
+            "name": "getRenameDatabase",
+            "summary": "Returns the SQL statement to rename a database.",
+            "description": "This method first duplicates the old database to the new name and then drops the old database.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method first duplicates the old database to the new name and then drops the old database."
+                }
+            ],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRenameDatabase(string $oldName, string $newName): string\n  {\n    if ($sql = $this->getDuplicateDatabase($oldName, $newName)) {\n      $sql .= PHP_EOL.$this->getDropDatabase($oldName);\n      return $sql;\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 78,
+            "endLine": 86,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getRenameDatabase",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "oldName",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The current name of the database."
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The new name for the database."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to rename a database.\nThis method first duplicates the old database to the new name and then drops the old database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "ame The current name of the database."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame The new name for the database."
+                    }
+                ],
+                "return": "The SQL statement to rename the database, or an empty string if the names are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to rename a database.\n   * This method first duplicates the old database to the new name and then drops the old database.\n   * @param string $oldName The current name of the database.\n   * @param string $newName The new name for the database.\n   * @return string The SQL statement to rename the database, or an empty string if the names are invalid.\n   *\/"
+        },
+        "getAnalyzeDatabase": {
+            "name": "getAnalyzeDatabase",
+            "summary": "Returns the SQL statement to analyze the current database.",
+            "description": "This method generates an ANALYZE statement for each table in the database.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method generates an ANALYZE statement for each table in the database."
+                }
+            ],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAnalyzeDatabase(): string\n  {\n    $sql = '';\n    if ($tables = $this->getTables()\n    ) {\n      foreach ($tables as $i => $table) {\n        $sql .= $this->getAnalyzeTable($table);\n        if (!empty($tables[$i + 1])) {\n          $sql .= PHP_EOL;\n        }\n      }\n    }\n\n    return $sql;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 94,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getAnalyzeDatabase",
+            "returns": [
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the SQL statement to analyze the current database.\nThis method generates an ANALYZE statement for each table in the database.\n",
+                "params": [],
+                "return": "The SQL statement to analyze the database, or an empty string if there are no tables."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to analyze the current database.\n   * This method generates an ANALYZE statement for each table in the database.\n   * @return string The SQL statement to analyze the database, or an empty string if there are no tables.\n   *\/"
+        },
+        "getCreateTableRaw": {
+            "name": "getCreateTableRaw",
+            "summary": "Returns the SQL statement to create a table, including keys and constraints if specified.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCreateTableRaw(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true\n    ): string\n  {\n    if ($sql = $this->getCreateTable($table, $cfg)) {\n      if ($createKeys) {\n        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg);\n      }\n\n      if ($createConstraints) {\n        $sql .= PHP_EOL.$this->getCreateConstraints($table, $cfg);\n      }\n\n      return $sql;\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 119,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getCreateTableRaw",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "createKeys",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "eys"
+                },
+                {
+                    "name": "createConstraints",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "onstraints"
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to create a table, including keys and constraints if specified.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$create",
+                        "description": "eys"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$create",
+                        "description": "onstraints"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to create a table, including keys and constraints if specified.\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return string\n   *\/"
+        },
+        "getCreateTable": {
+            "name": "getCreateTable",
+            "summary": "Returns the SQL statement to create a table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCreateTable(string $table, ?array $cfg = null): string\n  {\n    if (!$cfg) {\n      $cfg = $this->modelize($table);\n    }\n\n    $st = 'CREATE TABLE '.$this->escape($table).' ('.PHP_EOL;\n    $done = false;\n    foreach ($cfg['fields'] as $name => $col) {\n      if (!$done) {\n        $done = true;\n      }\n      else {\n        $st .= ',' . PHP_EOL;\n      }\n\n      $st .= $this->getColumnDefinitionStatement($name, $col);\n    }\n\n    $st .= PHP_EOL . ');';\n    return $st;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 148,
+            "endLine": 169,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getCreateTable",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to create a table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to create a table.\n   * @param string $table\n   * @param array|null $cfg\n   * @return string\n   *\/"
+        },
+        "getDropTable": {
+            "name": "getDropTable",
+            "summary": "Returns the SQL statement to drop a table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropTable(string $table, ?string $database = null): string\n  {\n    if (Str::checkName($table)\n      && (empty($database) || Str::checkName($database))\n    ) {\n      $table = $this->tableFullName((!empty($database) ? \"$database.\" : '').$this->tableSimpleName($table), true);\n      return \"DROP TABLE IF EXISTS $table;\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 178,
+            "endLine": 188,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getDropTable",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the table to drop."
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The name of the database, if different from the current one."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to drop a table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The name of the table to drop."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$database",
+                        "description": "The name of the database, if different from the current one."
+                    }
+                ],
+                "return": "The SQL statement to drop the table, or an empty string if the parameters are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to drop a table.\n   * @param string $table The name of the table to drop.\n   * @param string|null $database The name of the database, if different from the current one.\n   * @return string The SQL statement to drop the table, or an empty string if the parameters are invalid.\n   *\/"
+        },
+        "getDuplicateTable": {
+            "name": "getDuplicateTable",
+            "summary": "Returns the SQL statement to duplicate a table.",
+            "description": "This method generates a CREATE TABLE statement for the target table based on the source table.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method generates a CREATE TABLE statement for the target table based on the source table."
+                }
+            ],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDuplicateTable(string $source, string $target, bool $withData = true): string\n  {\n    if (Str::checkName($source) && Str::checkName($target)) {\n      $sql = $this->getCreateTable($source);\n      $sql = str_replace(\n        'CREATE TABLE '.$this->escape($source),\n        'CREATE TABLE ' . $this->escape($target),\n        $sql\n      );\n      if ($withData) {\n        $sql .= PHP_EOL . \"INSERT INTO \" . $this->escape($target) . \" SELECT * FROM \" . $this->escape($source) . \";\";\n      }\ndie(var_dump($sql));\n      return $sql;\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 199,
+            "endLine": 216,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDuplicateTable",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "source",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the source table."
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the target table."
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "ata Whether to include data in the duplication."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to duplicate a table.\nThis method generates a CREATE TABLE statement for the target table based on the source table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$source",
+                        "description": "The name of the source table."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$target",
+                        "description": "The name of the target table."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata Whether to include data in the duplication."
+                    }
+                ],
+                "return": "The SQL statement to duplicate the table, or an empty string if the parameters are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to duplicate a table.\n   * This method generates a CREATE TABLE statement for the target table based on the source table.\n   * @param string $source The name of the source table.\n   * @param string $target The name of the target table.\n   * @param bool $withData Whether to include data in the duplication.\n   * @return string The SQL statement to duplicate the table, or an empty string if the parameters are invalid.\n   *\/"
+        },
+        "getAnalyzeTable": {
+            "name": "getAnalyzeTable",
+            "summary": "Returns the SQL statement to analyze a table.",
+            "description": "This method generates an ANALYZE statement for the specified table.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method generates an ANALYZE statement for the specified table."
+                }
+            ],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAnalyzeTable(string $table): string\n  {\n    if (Str::checkName($table)) {\n      return \"ANALYZE \" . $this->tableSimpleName($table, true) . \";\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 225,
+            "endLine": 232,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getAnalyzeTable",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the table to analyze."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to analyze a table.\nThis method generates an ANALYZE statement for the specified table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The name of the table to analyze."
+                    }
+                ],
+                "return": "The SQL statement to analyze the table, or an empty string if the table name is invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to analyze a table.\n   * This method generates an ANALYZE statement for the specified table.\n   * @param string $table The name of the table to analyze.\n   * @return string The SQL statement to analyze the table, or an empty string if the table name is invalid.\n   *\/"
+        },
+        "getCreateColumn": {
+            "name": "getCreateColumn",
+            "summary": "Returns the SQL statement to create a column.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCreateColumn(string $table, string $column, array $columnCfg): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($column)\n      && ($columnDefinition = $this->getColumnDefinitionStatement($column, $columnCfg))\n    ) {\n      return \"ALTER TABLE $table ADD $columnDefinition;\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 242,
+            "endLine": 252,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "getCreateColumn",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the table."
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the column to create."
+                },
+                {
+                    "name": "columnCfg",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "fg The configuration for the column."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to create a column.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The name of the table."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The name of the column to create."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$column",
+                        "description": "fg The configuration for the column."
+                    }
+                ],
+                "return": "The SQL statement to create the column, or an empty string if the parameters are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to create a column.\n   * @param string $table The name of the table.\n   * @param string $column The name of the column to create.\n   * @param array $columnCfg The configuration for the column.\n   * @return string The SQL statement to create the column, or an empty string if the parameters are invalid.\n   *\/"
+        },
+        "getDropColumn": {
+            "name": "getDropColumn",
+            "summary": "Returns the SQL statement to drop a column.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropColumn(string $table, string $column): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($column)\n    ) {\n      return \"ALTER TABLE $table DROP COLUMN $column;\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 261,
+            "endLine": 270,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDropColumn",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the table."
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the column to drop."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to drop a column.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The name of the table."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The name of the column to drop."
+                    }
+                ],
+                "return": "The SQL statement to drop the column, or an empty string if the parameters are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to drop a column.\n   * @param string $table The name of the table.\n   * @param string $column The name of the column to drop.\n   * @return string The SQL statement to drop the column, or an empty string if the parameters are invalid.\n   *\/"
+        },
+        "getDropKey": {
+            "name": "getDropKey",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropKey(string $table, string $key): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($key)\n    ) {\n      return 'ALTER TABLE '.$this->escape($table).' DROP KEY '.$this->escape($key).';';\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 273,
+            "endLine": 282,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDropKey",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getDropConstraint": {
+            "name": "getDropConstraint",
+            "summary": "Return the SQL statement to drop a constraint.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropConstraint(string $table, string $constraint): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($constraint)\n    ) {\n      return 'ALTER TABLE '.$this->escape($table).PHP_EOL.'  DROP FOREIGN KEY '.$this->escape($constraint).';';\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 291,
+            "endLine": 300,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDropConstraint",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "constraint",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return the SQL statement to drop a constraint.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$constraint"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the SQL statement to drop a constraint.\n   * @param string $table\n   * @param string $constraint\n   * @return string\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns the SQL statement to create a database.\n   * @param string $database The name of the database to create.\n   * @param string|null $enc The character set to use, if any.\n   * @param string|null $collation The collation to use, if any.\n   * @return string The SQL statement to create the database, or an empty string if the parameters are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to drop a database.\n   * @param string $database The name of the database to drop.\n   * @return string The SQL statement to drop the database, or an empty string if the name is invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to duplicate a database.\n   * @param string $oldName The name of the database to duplicate.\n   * @param string $newName The name of the new database.\n   * @return string The SQL statement to duplicate the database, or an empty string if the names are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to rename a database.\n   * This method first duplicates the old database to the new name and then drops the old database.\n   * @param string $oldName The current name of the database.\n   * @param string $newName The new name for the database.\n   * @return string The SQL statement to rename the database, or an empty string if the names are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to analyze the current database.\n   * This method generates an ANALYZE statement for each table in the database.\n   * @return string The SQL statement to analyze the database, or an empty string if there are no tables.\n   *\/",
+        "\/**\n   * Returns the SQL statement to create a table, including keys and constraints if specified.\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return string\n   *\/",
+        "\/**\n   * Returns the SQL statement to create a table.\n   * @param string $table\n   * @param array|null $cfg\n   * @return string\n   *\/",
+        "\/**\n   * Returns the SQL statement to drop a table.\n   * @param string $table The name of the table to drop.\n   * @param string|null $database The name of the database, if different from the current one.\n   * @return string The SQL statement to drop the table, or an empty string if the parameters are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to duplicate a table.\n   * This method generates a CREATE TABLE statement for the target table based on the source table.\n   * @param string $source The name of the source table.\n   * @param string $target The name of the target table.\n   * @param bool $withData Whether to include data in the duplication.\n   * @return string The SQL statement to duplicate the table, or an empty string if the parameters are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to analyze a table.\n   * This method generates an ANALYZE statement for the specified table.\n   * @param string $table The name of the table to analyze.\n   * @return string The SQL statement to analyze the table, or an empty string if the table name is invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to create a column.\n   * @param string $table The name of the table.\n   * @param string $column The name of the column to create.\n   * @param array $columnCfg The configuration for the column.\n   * @return string The SQL statement to create the column, or an empty string if the parameters are invalid.\n   *\/",
+        "\/**\n   * Returns the SQL statement to drop a column.\n   * @param string $table The name of the table.\n   * @param string $column The name of the column to drop.\n   * @return string The SQL statement to drop the column, or an empty string if the parameters are invalid.\n   *\/",
+        "\/**\n   * Return the SQL statement to drop a constraint.\n   * @param string $table\n   * @param string $constraint\n   * @return string\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

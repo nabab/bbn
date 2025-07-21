@@ -18,8 +18,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/User\/Profile.php",
-    "startLine": 22,
-    "endLine": 84,
+    "startLine": 20,
+    "endLine": 82,
     "numMethods": 3,
     "numProperties": 5,
     "numConstants": 0,
@@ -68,8 +68,8 @@
             "code": "  public function __construct(bbn\\Db $db, bbn\\User $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\X::mergeArrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 54,
-            "endLine": 65,
+            "startLine": 52,
+            "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -84,9 +84,9 @@
                 {
                     "name": "db",
                     "position": 0,
-                    "type": "bbn\\Db",
+                    "type": "bbn\\User\\bbn\\Db",
                     "type_arr": [
-                        "bbn\\Db"
+                        "bbn\\User\\bbn\\Db"
                     ],
                     "variadic": false,
                     "reference": false,
@@ -98,9 +98,9 @@
                 {
                     "name": "user",
                     "position": 1,
-                    "type": "bbn\\User",
+                    "type": "bbn\\User\\bbn\\User",
                     "type_arr": [
-                        "bbn\\User"
+                        "bbn\\User\\bbn\\User"
                     ],
                     "variadic": false,
                     "reference": false,
@@ -165,8 +165,8 @@
             "code": "  public function getId()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 70,
-            "endLine": 75,
+            "startLine": 68,
+            "endLine": 73,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -198,8 +198,8 @@
             "code": "  public function check()\n  {\n      return $this->auth;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 80,
-            "endLine": 83,
+            "startLine": 78,
+            "endLine": 81,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -329,9 +329,7 @@
         }
     },
     "constants": null,
-    "uses": {
-        "bbn": "bbn"
-    },
+    "uses": [],
     "dummyComments": [
         "\/**\n * @package user\n *\/",
         "\/**\n * A user authentication Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Authentication\n * @license   http:\/\/opensource.org\/licenses\/MIT MIT\n * @version 0.2r89\n * @todo Groups and hotlinks features\n * @todo Implement Cache for session requests' results?\n *\/"

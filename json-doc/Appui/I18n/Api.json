@@ -1,0 +1,430 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\I18n\\Api",
+    "namespace": true,
+    "realName": "Api",
+    "realNamespace": "bbn\\Appui\\I18n",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/I18n\/Api.php",
+    "startLine": 8,
+    "endLine": 110,
+    "numMethods": 5,
+    "numProperties": 7,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "apis": {
+            "libretranslate": "LibreTranslate"
+        },
+        "api": null,
+        "apiUrl": "https:\/\/localhost",
+        "apiPort": "",
+        "apiSourceLang": "en",
+        "apiTargetLang": "fr",
+        "apiAlternatives": 0
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\I18n",
+    "shortName": "Api",
+    "contentConstructor": null,
+    "methods": {
+        "apiTranslate": {
+            "name": "apiTranslate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Api",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Api.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function apiTranslate(\n    string|array $string,\n    ?string $sourceLang = null,\n    ?string $targetLang = null,\n    ?int $alternatives = null\n  ): ?array\n  {\n    if (empty($this->api)) {\n      throw new Exception(_(\"No API initialized\"));\n    }\n\n    return $this->api->translate($string, $sourceLang, $targetLang, $alternatives);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 27,
+            "endLine": 39,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "apiTranslate",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "string",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "sourceLang",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "targetLang",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "alternatives",
+                    "position": 3,
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "apiSetSourceLang": {
+            "name": "apiSetSourceLang",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Api",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Api.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function apiSetSourceLang(string $lang){\n    $this->apiSourceLang = $lang;\n    if (!empty($this->api)) {\n      $this->api->setSourceLang($lang);\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 42,
+            "endLine": 49,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "apiSetSourceLang",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "lang",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "apiSetTargetLang": {
+            "name": "apiSetTargetLang",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Api",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Api.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function apiSetTargetLang(string $lang){\n    $this->apiTargetLang = $lang;\n    if (!empty($this->api)) {\n      $this->api->setTargetLang($lang);\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 52,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "apiSetTargetLang",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "lang",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "apiSetAlternatives": {
+            "name": "apiSetAlternatives",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Api",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Api.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function apiSetAlternatives(int $num){\n    $this->apiAlternatives = $num;\n    if (!empty($this->api)) {\n      $this->api->setAlternatives($num);\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 62,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "apiSetAlternatives",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "num",
+                    "position": 0,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "initApi": {
+            "name": "initApi",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Api",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Api.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function initApi(array $cfg): self\n  {\n    if (empty($cfg['service'])\n      || empty(static::$apis[$cfg['service']])\n      || !class_exists(\"\\\\bbn\\\\Appui\\\\I18n\\\\\".static::$apis[$cfg['service']])\n    ) {\n      throw new Exception(_(\"API service not found\"));\n    }\n\n    $this->apiUrl = $cfg['url'] ?? $this->apiUrl;\n    $this->apiPort = $cfg['port'] ?? $this->apiPort;\n    $this->apiSourceLang = $cfg['source'] ?? $this->apiSourceLang;\n    $this->apiTargetLang = $cfg['target'] ?? $this->apiTargetLang;\n    $this->apiAlternatives = $cfg['alternatives'] ?? $this->apiAlternatives;\n    $className = \"\\\\bbn\\\\Appui\\\\I18n\\\\\".static::$apis[$cfg['service']];\n\n    if (empty($this->apiUrl)) {\n      throw new \\Exception(_('API URL is not set'));\n    }\n\n    if (empty($this->apiSourceLang)) {\n      throw new \\Exception(_('API source language is not set'));\n    }\n\n    if (empty($this->apiTargetLang)) {\n      throw new \\Exception(_('API target language is not set'));\n    }\n\n    $this->api = new $className(\n      $this->apiUrl,\n      $this->apiPort,\n      $this->apiSourceLang,\n      $this->apiTargetLang,\n      $this->apiAlternatives\n    );\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 72,
+            "endLine": 109,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initApi",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "api": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "apis": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": {
+                "libretranslate": "LibreTranslate"
+            }
+        },
+        "apiUrl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "https:\/\/localhost"
+        },
+        "apiPort": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": ""
+        },
+        "apiSourceLang": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "en"
+        },
+        "apiTargetLang": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "fr"
+        },
+        "apiAlternatives": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Api"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Api",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 0
+        }
+    },
+    "staticProperties": {
+        "apis": {
+            "libretranslate": "LibreTranslate"
+        }
+    },
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

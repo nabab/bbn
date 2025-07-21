@@ -2,6 +2,8 @@
 
 namespace bbn\Appui\Option\Internal;
 
+use bbn\X;
+
 /**
  * Trait Cat provides methods to manage categories of options.
  */
@@ -69,7 +71,7 @@ trait Cat
    * @param string|null $id The ID of the category.
    * @return array An array of characteristics for each option in the category, indexed by their 'id'.
    */
-  public function jsCategories($id = null)
+  public function jsCategories($id = null, $full = false)
   {
     // If no ID is provided, use the default code to determine it.
     if (!$id) {
@@ -81,46 +83,57 @@ trait Cat
       return $tmp;
     }
 
+    $cf = $this->class_cfg['arch']['options'];
     // Initialize a response array to store category information.
     $res = [
       'categories' => []
     ];
+    $cats = $this->fullOptions($id);
+    if ($full) {
+      $others = $this->db->getColumnValues($this->class_cfg['table'], $cf['id'], [
+        ['JSON_UNQUOTE(JSON_EXTRACT(value, "$.tekname"))', 'isnotnull'],
+        ['JSON_UNQUOTE(JSON_EXTRACT(value, "$.tekname"))', '!=', ''],
+        [$cf['id_parent'], '!=', $id]
+      ], [$cf['tekname'] => 'ASC']);
+      array_push($cats, ...array_map(fn($id) => $this->option($id), $others));
+    }
+    X::sortBy($cats, 'tekname', 'ASC');
+
 
     // Retrieve the full options for the given ID (or all categories if no ID is provided).
-    if ($cats = $this->fullOptions($id ?: false)) {
-      foreach ($cats as $cat) {
-        // If a 'tekname' exists, retrieve additional information and create text/value entries.
-        if (!empty($cat['tekname'])
-          || (empty($cat[$this->fields['text']]) && !empty($cat['alias']['tekname']))
-        ) {
-          $additional = [];
-          // Retrieve the schema for the current category's ID.
-          if (($schema = $this->getSchema($cat[$this->fields['id']]))
-            || (empty($cat[$this->fields['text']])
-              && !empty($cat[$this->fields['id_alias']])
-              && ($schema = $this->getSchema($cat[$this->fields['id_alias']])))
-          ) {
-            // Add fields from the schema to the list of additional information.
-            array_push($additional, ...array_map(function ($a) {
-              return $a['field'];
-            }, $schema));
-          }
-
-          // Create text/value entries for the current category and its options.
-          if (empty($cat[$this->fields['text']])
+    foreach ($cats as $cat) {
+      // If a 'tekname' exists, retrieve additional information and create text/value entries.
+      if (!empty($cat['tekname'])
+        || (empty($cat[$this->fields['text']]) && !empty($cat['alias']['tekname']))
+      ) {
+        $additional = [];
+        // Retrieve the schema for the current category's ID.
+        if (($schema = $this->getSchema($cat[$this->fields['id']]))
+          || (empty($cat[$this->fields['text']])
             && !empty($cat[$this->fields['id_alias']])
-            && !empty($cat['alias']['tekname'])
-          ) {
-            $res[$cat['alias']['tekname']] = $this->textValueOptions($cat[$this->fields['id_alias']], 'text', 'value', ...$additional);
-            $res['categories'][$cat[$this->fields['id']]] = $cat['alias']['tekname'];
-          }
-          else {
-            $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']], 'text', 'value', ...$additional);
-            $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
-          }
+            && ($schema = $this->getSchema($cat[$this->fields['id_alias']])))
+        ) {
+          // Add fields from the schema to the list of additional information.
+          array_push($additional, ...array_map(function ($a) {
+            return $a['field'];
+          }, $schema));
+        }
+
+        // Create text/value entries for the current category and its options.
+        if (empty($cat[$this->fields['text']])
+          && !empty($cat[$this->fields['id_alias']])
+          && !empty($cat['alias']['tekname'])
+        ) {
+          $res[$cat['alias']['tekname']] = $this->textValueOptions($cat[$this->fields['id_alias']], 'text', 'value', ...$additional);
+          $res['categories'][$cat[$this->fields['id']]] = $cat['alias']['tekname'];
+        }
+        else {
+          $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']], 'text', 'value', ...$additional);
+          $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
         }
       }
     }
+
 
     // Store the result in the cache and return it.
     $this->setCache($id, __FUNCTION__, $res);

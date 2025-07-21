@@ -260,7 +260,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\tpublic function __construct( array $cfg = null )\n\t{\n\t\tif ( \\is_array($cfg) ){\n      $this->parameters = $cfg;\n      $this->_defaults = bbn\\X::mergeArrays($this->_defaults, $cfg);\n\t\t}\n\t\t$this->reset();\n\t}",
+            "code": "\tpublic function __construct( array|null $cfg = null )\n\t{\n\t\tif ( \\is_array($cfg) ){\n      $this->parameters = $cfg;\n      $this->_defaults = bbn\\X::mergeArrays($this->_defaults, $cfg);\n\t\t}\n\t\t$this->reset();\n\t}",
             "parent": false,
             "trait": false,
             "startLine": 121,

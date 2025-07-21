@@ -32,13 +32,11 @@ class Tag extends DbCls
       'tags' => [
         'id' => 'id',
         'tag' => 'tag',
+        'id_type' => 'id_type',
         'lang' => 'lang',
+        'url' => 'url',
+        'color' => 'color',
         'description' => 'description'
-      ],
-      'relations' => [
-        'id_tag_orig' => 'tag',
-        'id_tag_dest' => 'lang',
-        'relationship' => 'relationship'
       ]
     ]
   ];
@@ -47,24 +45,30 @@ class Tag extends DbCls
 
   protected $lang;
 
+  protected $options;
+
   public function __construct(Db $db, string|null $lang = null)
   {
     $this->lang = $lang ?: 'en';
     parent::__construct($db);
     $this->initClassCfg();
     $this->cacheInit();
+    $this->options = Option::getInstance();
   }
 
 
-  public function getAll(bool $force = false)
+  public function getAll(?string $lang = null, bool $force = false)
   {
     if (!$this->all || $force) {
       $table = $this->class_cfg['table'];
       $cf = $this->class_cfg['arch']['tags'];
+
+      $filter = [$cf['lang'] => $lang ?: $this->lang];
+
       $this->all = $this->db->getColumnValues(
         $table,
         $cf['tag'],
-        [],
+        $filter,
         ['tag' => 'ASC']
       );
     }
@@ -73,11 +77,30 @@ class Tag extends DbCls
   }
 
 
-  public function get(string $tag, string|null $lang = null): ?array
+  public function getByType(string $id_type)
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];
-    return $this->db->rselect($table, [], [$cf['tag'] => $tag, $cf['lang'] => $lang ?: $this->lang]);
+    return $this->db->getColumnValues(
+      $table,
+      $cf['tag'],
+      [$cf['id_type'] => $id_type],
+      ['tag' => 'ASC']
+    );
+  }
+
+  public function retrieveType($code) : ?string
+  {
+    return $this->options->fromCode($code, 'cats', 'tag', 'appui');
+  }
+
+
+  public function get(string $tag, ?string $id_type = null, ?string $lang = null): ?array
+  {
+    $table = $this->class_cfg['table'];
+    $cf = $this->class_cfg['arch']['tags'];
+    $filter = [$cf['lang'] => $lang ?: $this->lang, $cf['id_type'] => $id_type, $cf['tag'] => $tag];
+    return $this->db->rselect($table, [], $filter);
   }
 
 
@@ -100,7 +123,7 @@ class Tag extends DbCls
    * @param string|null $id_parent
    * @return string
    */
-  public function add(string $tag, string|null $lang = null, string $description = ''): ?string
+  public function add(string $tag, ?string $id_type = null, ?string $lang = null, string $description = ''): ?string
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];
@@ -109,6 +132,7 @@ class Tag extends DbCls
       [
         $cf['tag'] => $tag,
         $cf['lang'] => $lang ?: $this->lang,
+        $cf['id_type'] => $id_type,
         $cf['description'] => $description
       ]
     )) {
