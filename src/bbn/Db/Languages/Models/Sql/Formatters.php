@@ -46,19 +46,22 @@ trait Formatters {
    * @param string $oldName The name of the database to duplicate.
    * @param string $newName The name of the new database.
    * @param bool $withData Whether to include data in the duplication.
-   * @return string The SQL statement to duplicate the database, or an empty string if the names are invalid.
+   * @return null|array An array of SQL statements to duplicate the database, or null if the names are invalid.
    */
-  public function getDuplicateDatabase(string $source, string $target, bool $withData = true): string
+  public function getDuplicateDatabase(string $source, string $target, bool $withData = true): ?array
   {
-    if (Str::checkName($source) && Str::checkName($target)) {
-      $sql = $this->getCreateDatabase($target, $this->getDatabaseCharset($source), $this->getDatabaseCollation($source)).PHP_EOL;
+    if (Str::checkName($source)
+      && Str::checkName($target)
+      && ($sql = $this->getCreateDatabase($target, $this->getDatabaseCharset($source), $this->getDatabaseCollation($source)))
+    ) {
+      $sql = [$sql];
       if ($tables = $this->getTables($source)) {
-        foreach ($tables as $i => $table) {
-          $sql .= $this->getDuplicateTable("$source.$table", "$target.$table", false). (!empty($tables[$i + 1]) ? PHP_EOL : '');
+        foreach ($tables as $table) {
+          $sql[] = $this->getDuplicateTable("$source.$table", "$target.$table", false);
         }
 
         if ($withData) {
-          foreach ($tables as $i => $table) {
+          foreach ($tables as $table) {
             $columns = array_map(
               fn($c) => $this->escape($c),
               array_keys(
@@ -69,7 +72,7 @@ trait Formatters {
               )
             );
             if ($columns) {
-              $sql .= "INSERT INTO " . $this->escape("$target.$table") . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape("$source.$table") . ";" . (!empty($tables[$i + 1]) ? PHP_EOL : '');
+              $sql[] = "INSERT INTO " . $this->escape("$target.$table") . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape("$source.$table") . ";";
             }
           }
         }
@@ -78,7 +81,7 @@ trait Formatters {
       return $sql;
     }
 
-    return '';
+    return null;
   }
 
 
@@ -87,38 +90,36 @@ trait Formatters {
    * This method first duplicates the old database to the new name and then drops the old database.
    * @param string $oldName The current name of the database.
    * @param string $newName The new name for the database.
-   * @return string The SQL statement to rename the database, or an empty string if the names are invalid.
+   * @return null|array An array of SQL statements to rename the database, or null if the names are invalid.
    */
-  public function getRenameDatabase(string $oldName, string $newName): string
+  public function getRenameDatabase(string $oldName, string $newName): ?array
   {
     if ($sql = $this->getDuplicateDatabase($oldName, $newName)) {
-      $sql .= PHP_EOL.$this->getDropDatabase($oldName);
+      $sql[] = $this->getDropDatabase($oldName);
       return $sql;
     }
 
-    return '';
+    return null;
   }
 
 
   /**
    * Returns the SQL statement to analyze the current database.
    * This method generates an ANALYZE statement for each table in the database.
-   * @return string The SQL statement to analyze the database, or an empty string if there are no tables.
+   * @return null|strin|array An array of SQL statements to analyze the database, or null if there are no tables.
    */
-  public function getAnalyzeDatabase(): string
+  public function getAnalyzeDatabase(): null|string|array
   {
-    $sql = '';
-    if ($tables = $this->getTables()
-    ) {
-      foreach ($tables as $i => $table) {
-        $sql .= $this->getAnalyzeTable($table);
-        if (!empty($tables[$i + 1])) {
-          $sql .= PHP_EOL;
-        }
+    if ($tables = $this->getTables()) {
+      $sql = [];
+      foreach ($tables as $table) {
+        $sql[] = $this->getAnalyzeTable($table);
       }
+
+      return $sql;
     }
 
-    return $sql;
+    return null;
   }
 
 
@@ -129,7 +130,7 @@ trait Formatters {
    * @param bool $createKeys
    * @param bool $createConstraints
    * @param bool $anonymize
-   * @return string
+   * @return null|array
    */
   public function getCreateTableRaw(
     string $table,
@@ -137,21 +138,22 @@ trait Formatters {
     bool $createKeys = true,
     bool $createConstraints = true,
     bool $anonymize = false
-    ): string
+    ): ?array
   {
     if ($sql = $this->getCreateTable($table, $cfg)) {
+      $sql = [$sql];
       if ($createKeys) {
-        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg, $anonymize);
+        $sql[] = $this->getCreateKeys($table, $cfg, $anonymize);
       }
 
       if ($createConstraints) {
-        $sql .= PHP_EOL.$this->getCreateConstraints($table, $cfg, $anonymize);
+        $sql[] = $this->getCreateConstraints($table, $cfg, $anonymize);
       }
 
       return $sql;
     }
 
-    return '';
+    return null;
   }
 
 
@@ -205,12 +207,33 @@ trait Formatters {
 
 
   /**
+   * Returns the SQL statement to rename a table.
+   * This method generates an ALTER TABLE statement to rename the specified table.
+   * @param string $table The current name of the table.
+   * @param string $newName The new name for the table.
+   * @return string The SQL statement to rename the table, or an empty string if the names are invalid.
+   */
+  public function getRenameTable(string $table, string $newName): string
+  {
+    if (Str::checkName($table)
+      && Str::checkName($newName)
+    ) {
+      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+      return "ALTER TABLE $t1 RENAME TO $t2;";
+    }
+
+    return '';
+  }
+
+
+  /**
    * Returns the SQL statement to duplicate a table.
    * This method generates a CREATE TABLE statement for the target table based on the source table.
    * @param string $source The name of the source table.
    * @param string $target The name of the target table.
    * @param bool $withData Whether to include data in the duplication.
-   * @return array The SQL statements to duplicate the table, or null if the source table does not exist.
+   * @return null|array The SQL statements to duplicate the table, or null if the source table does not exist.
    */
   public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
   {
@@ -227,7 +250,7 @@ trait Formatters {
           'ALTER TABLE ' . $this->escape($target),
           $sql
         );
-        $ret[] = PHP_EOL . $sql;
+        $ret[] = $sql;
       }
 
       if ($withData) {
@@ -241,7 +264,7 @@ trait Formatters {
           )
         );
         if ($columns) {
-          $sql[] = PHP_EOL."INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
+          $ret[] = "INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
         }
       }
 
@@ -324,7 +347,7 @@ trait Formatters {
    * @param string $constraint
    * @return string
    */
-  public function getDropConstraint(string $table, string $constraint): string
+  public function getDropConstraint(string $table, string $constraint): string|null|array
   {
     if (($table = $this->tableFullName($table, true))
       && Str::checkName($constraint)

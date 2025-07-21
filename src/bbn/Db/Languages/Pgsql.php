@@ -514,26 +514,6 @@ PSQL
     return null;
   }
 
-  /**
-   * Renames the given table to the new given name.
-   *
-   * @param string $table   The current table's name
-   * @param string $newName The new name.
-   * @return bool  True if it succeeded
-   */
-  public function renameTable(string $table, string $newName): bool
-  {
-    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
-      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
-      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-
-      $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
-      return (bool)$res;
-    }
-
-    return false;
-  }
-
 
   /**
    * Returns the SQL statement to get the charset of a table.
@@ -1252,7 +1232,7 @@ PGSQL
   public function getDropConstraint(string $table, string $constraint): string
   {
     return 'ALTER TABLE ' . $this->escape($table) . PHP_EOL .
-      '  DROP CONSTRAINT ' . $this->escape($constraint) . ';' . PHP_EOL;
+      '  DROP CONSTRAINT ' . $this->escape($constraint) . ';';
   }
 
 

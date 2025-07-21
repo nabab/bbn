@@ -1926,6 +1926,51 @@ class Database extends bbn\Models\Cls\Cache
   }
 
 
+  /**
+   * Renames a table
+   *
+   * @param string $id The table ID
+   * @param string $name The new table name
+   * @return bool True on success, false on failure
+   */
+  public function renameTable(string $id, string $name): bool
+  {
+    if (!bbn\Str::isUid($id)) {
+      throw new \Exception(_("Invalid table ID"));
+    }
+    else if (!$this->o->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the table with ID \"%s\"", $id));
+    }
+
+    if (empty($name)) {
+      throw new \Exception(_("The table name cannot be empty"));
+    }
+
+    $r1 = $this->o->setText($id, $name);
+    $r2 = $this->o->setCode($id, $name);
+    return $r1 && $r2;
+  }
+
+
+  /**
+   * Removes a table
+   *
+   * @param string $id The table ID
+   * @return int The number of affected rows
+   */
+  public function removeTable(string $id): int
+  {
+    if (!bbn\Str::isUid($id)) {
+      throw new \Exception(_("Invalid table ID"));
+    }
+    else if (!$this->o->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the table with ID \"%s\"", $id));
+    }
+
+    return $this->o->removeFull($id);
+  }
+
+
   public function infoDb(string $dbName, string $hostId, string $engine): ?array
   {
     if (!Str::isUid($hostId)) {

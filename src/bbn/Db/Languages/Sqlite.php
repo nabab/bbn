@@ -695,17 +695,16 @@ class Sqlite extends Sql
    * @param string $source The name of the source table.
    * @param string $target The name of the target table.
    * @param bool $withData Whether to include data in the duplication.
-   * @return array The SQL statements to duplicate the table, or null if the source table does not exist.
+   * @return array|null An array of SQL statements to duplicate the table, or null if the source table does not exist.
    */
   public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
   {
     if ($sql = $this->getCreateTableRaw($source, null, true, true, true)) {
-      $sql = str_replace(
+      $sql[0] = str_replace(
         'CREATE TABLE '.$this->escape($source),
         'CREATE TABLE ' . $this->escape($target),
-        $sql
+        $sql[0]
       );
-      $ret = [$sql];
       if ($withData) {
         $columns = array_map(
           fn($c) => $this->escape($c),
@@ -717,11 +716,11 @@ class Sqlite extends Sql
           )
         );
         if ($columns) {
-          $ret[] = PHP_EOL."INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
+          $sql[] = "INSERT INTO " . $this->escape($target) . " (" . implode(", ", $columns) . ") SELECT " . implode(", ", $columns) . " FROM " . $this->escape($source) . ";";
         }
       }
 
-      return $ret;
+      return $sql;
     }
 
     return null;
@@ -748,12 +747,11 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $cfg
    * @param bool $anonymize
-   * @return string
+   * @return null|array
    * @throws Exception
    */
-  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): ?array
   {
-    $st = '';
     if (!$cfg) {
       $cfg = $this->modelize($table);
     }
@@ -765,13 +763,13 @@ class Sqlite extends Sql
         fn($k) => !empty($k['columns']) && empty($k['ref_table']) && empty($k['ref_column'])
       ))
     ) {
-      ;
+      $sql = [];
       foreach ($keys as $name => $key) {
         if ($name === 'PRIMARY') {
           continue;
         }
 
-        $st .= 'CREATE ';
+        $st = 'CREATE ';
         if (!empty($key['unique'])) {
           $st .= 'UNIQUE ';
         }
@@ -785,11 +783,14 @@ class Sqlite extends Sql
           ),
           ', '
         ).')';
-        $st .= ';' . PHP_EOL;
+        $st .= ';';
+        $sql[] = $st;
       }
+
+      return $sql;
     }
 
-    return $st;
+    return null;
   }
 
 
@@ -801,7 +802,7 @@ class Sqlite extends Sql
    * @param bool $createKeys
    * @param bool $createConstraints
    * @param bool $anonymize
-   * @return string
+   * @return null|array
    */
   public function getCreateTableRaw(
     string $table,
@@ -809,7 +810,7 @@ class Sqlite extends Sql
     bool $createKeys = true,
     bool $createConstraints = true,
     bool $anonymize = false
-  ): string
+  ): ?array
   {
     if (empty($cfg)) {
       $cfg = $this->modelize($table);
@@ -837,16 +838,17 @@ class Sqlite extends Sql
     }
 
     if ($sql = $this->getCreateTable($table, $cfg, $anonymize)) {
+      $sql = [$sql];
       if ($createKeys
         && ($s = $this->getCreateKeys($table, $cfg, $anonymize))
       ) {
-        $sql .= PHP_EOL . $s;
+        $sql[] = $s;
       }
 
       return $sql;
     }
 
-    return '';
+    return null;
   }
 
 
@@ -1195,25 +1197,6 @@ class Sqlite extends Sql
     return [];
   }
 
-  /**
-   * Renames the given table to the new given name.
-   *
-   * @param string $table   The current table's name
-   * @param string $newName The new name.
-   * @return bool  True if it succeeded
-   */
-  public function renameTable(string $table, string $newName): bool
-  {
-    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
-      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
-      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-
-      $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
-      return (bool)$res;
-    }
-
-    return false;
-  }
 
   public function getTableComment(string $table): string
   {
@@ -1321,11 +1304,10 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $cfg
    * @param bool $anonymize
-   * @return string
+   * @return null|array
    */
-  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): ?array
   {
-    $st = '';
     if (!$cfg) {
       $cfg = $this->modelize($table);
     }
@@ -1342,15 +1324,15 @@ class Sqlite extends Sql
       );
       if (!empty($keys)) {
         $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
-        $st .= $this->getCreateTable($tmpTable, $cfg, $anonymize);
-        $st .= $this->getCreateKeys($tmpTable, $cfg, $anonymize);
-        $st .= 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';'.PHP_EOL;
-        $st .= 'DROP TABLE '.$this->escape($table).';'.PHP_EOL;
-        $st .= 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';'.PHP_EOL;
+        $sql = [$this->getCreateTable($tmpTable, $cfg, $anonymize)];
+        $sql[] = $this->getCreateKeys($tmpTable, $cfg, $anonymize);
+        $sql[] = 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';';
+        $sql[] = 'DROP TABLE '.$this->escape($table).';';
+        $sql[] = 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';';
       }
     }
 
-    return $st;
+    return null;
   }
 
 
@@ -1359,11 +1341,10 @@ class Sqlite extends Sql
    *
    * @param string $table
    * @param string $constraint
-   * @return string
+   * @return null|array
    */
-  public function getDropConstraint(string $table, string $constraint): string
+  public function getDropConstraint(string $table, string $constraint): ?array
   {
-    $st = '';
     if ($cfg = $this->modelize($table)) {
       $cfg['keys'] = array_filter(
         $cfg['keys'],
@@ -1371,13 +1352,14 @@ class Sqlite extends Sql
           && (strtolower($a['constraint']) !== strtolower($constraint))
       );
       $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
-      $st = $this->getCreateTable($tmpTable, $cfg);
-      $st .= 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';'.PHP_EOL;
-      $st .= 'DROP TABLE '.$this->escape($table).';'.PHP_EOL;
-      $st .= 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';'.PHP_EOL;
+      $sql = [$this->getCreateTable($tmpTable, $cfg)];
+      $sql[] = 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';';
+      $sql[] = 'DROP TABLE '.$this->escape($table).';';
+      $sql[] = 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';';
+      return $sql;
     }
 
-    return $st;
+    return null;
   }
 
 

@@ -289,6 +289,22 @@ trait Commands {
   }
 
 
+  public function renameTable(string $table, string $newName): bool
+  {
+    if ($this->check()) {
+      if (!Str::checkName($table) || !Str::checkName($newName)) {
+        throw new Exception(X::_("Wrong table name '%s' or '%s'", $table, $newName));
+      }
+
+      if ($sql = $this->getRenameTable($table, $newName)) {
+        return (bool)$this->emulatePreparesAndQuery($sql);
+      }
+    }
+
+    return false;
+  }
+
+
   /**
    * Drops a table
    *
@@ -309,7 +325,7 @@ trait Commands {
     }
 
     if ($sql = $this->getDropTable($table, $database)) {
-      $this->rawQuery($sql);
+      $this->emulatePreparesAndQuery($sql);
     }
 
     return !$this->tableExists($table, $database);

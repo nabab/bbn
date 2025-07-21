@@ -327,25 +327,27 @@ MYSQL
     return null;
   }
 
+
   /**
-   * Renames the given table to the new given name.
-   *
-   * @param string $table The current table's name
-   * @param string $newName The new name.
-   * @return bool  True if it succeeded
+   * Returns the SQL statement to rename a table.
+   * This method generates an ALTER TABLE statement to rename the specified table.
+   * @param string $table The current name of the table.
+   * @param string $newName The new name for the table.
+   * @return string The SQL statement to rename the table, or an empty string if the names are invalid.
    */
-  public function renameTable(string $table, string $newName): bool
+  public function getRenameTable(string $table, string $newName): string
   {
-    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
+    if (Str::checkName($table)
+      && Str::checkName($newName)
+    ) {
       $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-
-      $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
-      return (bool)$res;
+      return "RENAME TABLE $t1 TO $t2;";
     }
 
-    return false;
+    return '';
   }
+
 
   /**
    * Changes the charset to the given database

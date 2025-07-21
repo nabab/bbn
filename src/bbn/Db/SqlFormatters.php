@@ -109,9 +109,9 @@ interface SqlFormatters
    * @param bool $createKeys
    * @param bool $createConstraints
    * @param bool $anonymize
-   * @return string
+   * @return null|string|array
    */
-  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true, bool $anonymize = false): string;
+  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true, bool $anonymize = false): null|string|array;
 
   /**
    * @param string $table
@@ -124,9 +124,9 @@ interface SqlFormatters
    * @param string $table
    * @param array|null $cfg
    * @param bool $anonymize
-   * @return string
+   * @return null|array|string
    */
-  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): string;
+  public function getCreateKeys(string $table, ?array $cfg = null, bool $anonymize = false): null|array|string;
 
   /**
    * @param string $table
@@ -134,14 +134,14 @@ interface SqlFormatters
    * @param bool $anonymize
    * @return string
    */
-  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): string;
+  public function getCreateConstraints(string $table, ?array $cfg = null, bool $anonymize = false): null|string|array;
 
   /**
    * @param string $table
    * @param string $constraint
-   * @return string
+   * @return string|null|array
    */
-  public function getDropConstraint(string $table, string $constraint): string;
+  public function getDropConstraint(string $table, string $constraint): null|array|string;
 
 
   /**

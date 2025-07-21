@@ -3002,6 +3002,7 @@ class Db implements Db\Actions
    */
   public function renameTable(string $table, string $newName): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
     return $this->language->renameTable($table, $newName);
   }
 
