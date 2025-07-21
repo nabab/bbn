@@ -709,9 +709,18 @@ class Db implements Db\Actions
    * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
    * @return null|array
    */
-  public function modelize($table = null, bool $force = false): ?array
+  public function modelize($table = null, bool $force = false, ?string $interoperability = null): ?array
   {
-    return $this->language->modelize($table, $force);
+    if (!empty($interoperability)) {
+      $interoperability = strtolower($interoperability);
+      if (!\in_array($interoperability, array_keys(self::$engines), true)
+        || ($this->engine === $interoperability)
+      ) {
+        $interoperability = null;
+      }
+    }
+
+    return $this->language->modelize($table, $force, $interoperability);
   }
 
   /**
@@ -3423,6 +3432,13 @@ class Db implements Db\Actions
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
     return $this->language->duplicateTable($source, $target, $withData);
+  }
+
+
+  public function copyTableTo(string $table, self $target): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->copyTableTo($table, $target);
   }
 
 

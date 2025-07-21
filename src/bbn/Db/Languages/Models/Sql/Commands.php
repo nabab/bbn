@@ -3,6 +3,7 @@
 namespace bbn\Db\Languages\Models\Sql;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 use Exception;
 use PDO;
 use bbn\Db\Languages\Models\Sql\Formatters;
@@ -363,6 +364,13 @@ trait Commands {
     }
 
     return $this->check();
+  }
+
+
+  public function copyTableTo(string $table, Db $target): bool
+  {
+    $m = $this->modelize($table, true, $target->getEngine());
+    return $target->createTable($table, $m, true, true);
   }
 
 

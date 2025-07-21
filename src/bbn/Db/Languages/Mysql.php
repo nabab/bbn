@@ -24,11 +24,129 @@ use bbn\X;
 class Mysql extends Sql
 {
 
+  /** @var string The quote character */
+  public $qte = '`';
+
   protected static $defaultCharset = 'utf8mb4';
 
   protected static $defaultCollation = 'utf8mb4_general_ci';
 
   protected static $defaultEngine = 'InnoDB';
+
+  /** @var array Allowed operators */
+  public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
+
+  /** @var array Numeric column types */
+  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+
+  /** @var array Time and date column types */
+  public static $date_types = ['date', 'time', 'datetime'];
+
+  public static $types = [
+    'tinyint',
+    'smallint',
+    'mediumint',
+    'int',
+    'bigint',
+    'decimal',
+    'float',
+    'double',
+    'bit',
+    'char',
+    'varchar',
+    'binary',
+    'varbinary',
+    'tinyblob',
+    'blob',
+    'mediumblob',
+    'longblob',
+    'tinytext',
+    'text',
+    'mediumtext',
+    'longtext',
+    'enum',
+    'set',
+    'date',
+    'time',
+    'datetime',
+    'timestamp',
+    'year',
+    'geometry',
+    'point',
+    'linestring',
+    'polygon',
+    'geometrycollection',
+    'multilinestring',
+    'multipoint',
+    'multipolygon',
+    'json',
+  ];
+
+  /* public static $interoperability = [
+    'integer' => 'int',
+    'real' => 'decimal',
+    'text' => 'text',
+    'blob' => 'blob'
+  ]; */
+
+  public static $interoperability = [
+    'tinyint'            => ['sqlite' => 'integer',   'pgsql' => 'smallint'],
+    'smallint'           => ['sqlite' => 'integer',   'pgsql' => 'smallint'],
+    'mediumint'          => ['sqlite' => 'integer',   'pgsql' => 'integer'],
+    'int'                => ['sqlite' => 'integer',   'pgsql' => 'integer'],
+    'bigint'             => ['sqlite' => 'integer',   'pgsql' => 'bigint'],
+    'decimal'            => ['sqlite' => 'numeric',   'pgsql' => 'numeric'],
+    'float'              => ['sqlite' => 'real',      'pgsql' => 'real'],
+    'double'             => ['sqlite' => 'real',      'pgsql' => 'double precision'],
+    'bit'                => ['sqlite' => 'numeric',   'pgsql' => 'bit'],
+    'char'               => ['sqlite' => 'text',      'pgsql' => 'char'],
+    'varchar'            => ['sqlite' => 'text',      'pgsql' => 'varchar'],
+    'binary'             => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'varbinary'          => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'tinyblob'           => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'blob'               => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'mediumblob'         => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'longblob'           => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'tinytext'           => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'text'               => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'mediumtext'         => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'longtext'           => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'enum'               => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'set'                => ['sqlite' => 'text',      'pgsql' => 'text'],
+    'date'               => ['sqlite' => 'text',      'pgsql' => 'date'],
+    'time'               => ['sqlite' => 'text',      'pgsql' => 'time'],
+    'datetime'           => ['sqlite' => 'text',      'pgsql' => 'timestamp'],
+    'timestamp'          => ['sqlite' => 'text',      'pgsql' => 'timestamp'],
+    'year'               => ['sqlite' => 'integer',   'pgsql' => 'integer'],
+    'geometry'           => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'point'              => ['sqlite' => 'blob',      'pgsql' => 'point'],
+    'linestring'         => ['sqlite' => 'blob',      'pgsql' => 'line'],
+    'polygon'            => ['sqlite' => 'blob',      'pgsql' => 'polygon'],
+    'geometrycollection' => ['sqlite' => 'blob',      'pgsql' => 'bytea'],
+    'multilinestring'    => ['sqlite' => 'blob',      'pgsql' => 'line'],
+    'multipoint'         => ['sqlite' => 'blob',      'pgsql' => 'point'],
+    'multipolygon'       => ['sqlite' => 'blob',      'pgsql' => 'polygon'],
+    'json'               => ['sqlite' => 'text',      'pgsql' => 'json'],
+  ];
+
+  public static $aggr_functions = [
+    'AVG',
+    'BIT_AND',
+    'BIT_OR',
+    'COUNT',
+    'GROUP_CONCAT',
+    'MAX',
+    'MIN',
+    'STD',
+    'STDDEV_POP',
+    'STDDEV_SAMP',
+    'STDDEV',
+    'SUM',
+    'VAR_POP',
+    'VAR_SAMP',
+    'VARIANCE',
+  ];
+
 
   /**
    * Constructor
@@ -1509,12 +1627,12 @@ MYSQL
     }
 
     if (!in_array($cfg['type'], self::$types)) {
-      if (isset(self::$interoperability[$cfg['type']])) {
+      /* if (isset(self::$interoperability[$cfg['type']])) {
         $st .= self::$interoperability[$cfg['type']];
       }
-      else {
+      else { */
         throw new Exception(X::_("Impossible to recognize the column type")." $cfg[type]");
-      }
+      //}
     }
     else {
       $st .= $cfg['type'];
