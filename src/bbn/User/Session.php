@@ -89,6 +89,16 @@ class Session
     }
   }
 
+  public function regenerate(): ?string
+  {
+    if (!$this->isCli) {
+      session_regenerate_id(true);
+      return session_id();
+    }
+
+    return null;
+  }
+
   public static function destroyInstance()
   {
     if (self::singletonExists()) {
