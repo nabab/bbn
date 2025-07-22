@@ -1745,13 +1745,18 @@ use bbn\Models\Tts\DbUauth;
         $fs->delete($this->getTmpPath(), false);
       }
       if (!X::isCli()) {
+        $currentSession = $this->getIdSession();
+        session_regenerate_id(true);
+        $newId = session_id();
+        $this->_set_session('id_session', $newId);
         $this->db->update(
           $this->class_cfg['tables']['sessions'],
           [
-            $this->class_cfg['arch']['sessions']['id_user'] => $id
+            $this->class_cfg['arch']['sessions']['id_user'] => $id,
+            $this->class_cfg['arch']['sessions']['id'] => $newId
           ],
           [
-            $this->class_cfg['arch']['sessions']['id'] => $this->getIdSession()
+            $this->class_cfg['arch']['sessions']['id'] => $currentSession
           ]
         );
       }
