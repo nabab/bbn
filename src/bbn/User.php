@@ -956,7 +956,7 @@ use bbn\Models\Tts\DbUauth;
             $p['opened'] => 1,
             $p['last_activity'] => date('Y-m-d H:i:s'),
             $p['creation'] => date('Y-m-d H:i:s'),
-            $p['cfg'] => json_encode($this->sess_cfg)
+            $p['cfg'] => null
           ]
         );
         
