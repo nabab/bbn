@@ -45,6 +45,38 @@ class Sqlite extends Sql
     'blob'
   ];
 
+  /* public static $interoperability = [
+    'tinyint' => 'integer',
+    'smallint' => 'integer',
+    'mediumint' => 'integer',
+    'int' => 'integer',
+    'bigint' => 'integer',
+    'decimal' => 'real',
+    'float' => 'real',
+    'double' => 'real',
+    'bit' => '',
+    'char' => '',
+    'varchar' => 'text',
+    'binary' => 'blob',
+    'varbinary' => 'blob',
+    'tinyblob' => 'blob',
+    'blob' => 'blob',
+    'mediumblob' => 'blob',
+    'longblob' => 'blob',
+    'tinytext' => 'text',
+    'text' => 'text',
+    'mediumtext' => 'text',
+    'longtext' => 'text',
+    'enum' => 'text',
+    'set' => 'text',
+    'date' => 'text',
+    'time' => 'text',
+    'datetime' => 'text',
+    'timestamp' => 'integer',
+    'year' => 'integer',
+    'json' => 'text'
+  ]; */
+
   public static $interoperability = [
     'integer' => ['mysql' => 'int',   'pgsql' => 'integer'],
     'real'    => ['mysql' => 'float', 'pgsql' => 'real'],

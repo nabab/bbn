@@ -95,7 +95,7 @@ class Mysql extends Sql
     'mediumint'          => ['sqlite' => 'integer', 'pgsql' => 'integer'],
     'int'                => ['sqlite' => 'integer', 'pgsql' => 'integer'],
     'bigint'             => ['sqlite' => 'integer', 'pgsql' => 'bigint'],
-    'decimal'            => ['sqlite' => 'numeric', 'pgsql' => 'numeric'],
+    'decimal'            => ['sqlite' => 'real',    'pgsql' => 'decimal'],
     'float'              => ['sqlite' => 'real',    'pgsql' => 'real'],
     'double'             => ['sqlite' => 'real',    'pgsql' => 'double precision'],
     'bit'                => ['sqlite' => 'numeric', 'pgsql' => 'bit'],
