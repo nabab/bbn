@@ -946,6 +946,7 @@ use bbn\Models\Tts\DbUauth;
           $this->session->set([], $this->userIndex);
         }
 
+        $this->session->regenerate();
       }
 
       $this->auth     = false;
@@ -1743,10 +1744,6 @@ use bbn\Models\Tts\DbUauth;
     if ($this->check() && $id) {
       $this->id   = $id;
       $this->auth = true;
-      if ($this->getLastActivity() < date('Y-m-d H:i:s', strtotime('-' . constant('BBN_SESS_LIFETIME') . ' seconds'))) {
-        $fs = new System();
-        $fs->delete($this->getTmpPath(), false);
-      }
       if (!X::isCli()) {
         $update = [
           $this->class_cfg['arch']['sessions']['id_user'] => $id
@@ -1754,6 +1751,10 @@ use bbn\Models\Tts\DbUauth;
         if ($this->isJustLogin()) {
           $newId = $this->session->regenerate();
           $update[$this->class_cfg['arch']['sessions']['sess_id']] = $newId;
+          if ($this->getLastActivity() < date('Y-m-d H:i:s', strtotime('-' . constant('BBN_SESS_LIFETIME') . ' seconds'))) {
+            $fs = new System();
+            $fs->delete($this->getTmpPath(), false);
+          }
         }
         $this->db->update(
           $this->class_cfg['tables']['sessions'],
