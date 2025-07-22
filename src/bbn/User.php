@@ -945,11 +945,12 @@ use bbn\Models\Tts\DbUauth;
         } else {
           $this->session->set([], $this->userIndex);
         }
+
       }
+
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
-      session_regenerate_id(true);
     }
 
     return $this;
@@ -1747,13 +1748,16 @@ use bbn\Models\Tts\DbUauth;
         $fs->delete($this->getTmpPath(), false);
       }
       if (!X::isCli()) {
-        $newId = $this->session->regenerate();
+        $update = [
+          $this->class_cfg['arch']['sessions']['id_user'] => $id
+        ];
+        if ($this->isJustLogin()) {
+          $newId = $this->session->regenerate();
+          $update[$this->class_cfg['arch']['sessions']['sess_id']] = $newId;
+        }
         $this->db->update(
           $this->class_cfg['tables']['sessions'],
-          [
-            $this->class_cfg['arch']['sessions']['id_user'] => $id,
-            $this->class_cfg['arch']['sessions']['sess_id'] => $newId
-          ], [
+          $update, [
             $this->class_cfg['arch']['sessions']['id'] => $this->getIdSession()
           ]
         );
