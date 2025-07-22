@@ -921,7 +921,7 @@ use bbn\Models\Tts\DbUauth;
    */
   public function closeSession($with_session = false): self
   {
-    if ($this->id) {
+    if ($this->id && !X::isCli()) {
       if ($this->session) {
         $p = &$this->class_cfg['arch']['sessions'];
         if (!X::isCli()) {
@@ -949,7 +949,9 @@ use bbn\Models\Tts\DbUauth;
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
+      session_regenerate_id(true);
     }
+
     return $this;
   }
 
