@@ -946,19 +946,6 @@ use bbn\Models\Tts\DbUauth;
           $this->session->set([], $this->userIndex);
         }
 
-        $newId = $this->session->regenerate();
-        $this->db->insert(
-          $this->class_cfg['tables']['sessions'],
-          [
-            $p['sess_id'] => $newId,
-            $p['ip_address'] => $this->ip_address,
-            $p['user_agent'] => $this->user_agent,
-            $p['opened'] => 1,
-            $p['last_activity'] => date('Y-m-d H:i:s'),
-            $p['creation'] => date('Y-m-d H:i:s'),
-            $p['cfg'] => null
-          ]
-        );
         
       }
 

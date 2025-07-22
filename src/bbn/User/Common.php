@@ -243,6 +243,21 @@ trait Common
     $this->auth = false;
     $this->cfg  = [];
     $this->closeSession();
+    $newId = $this->session->regenerate();
+    $p = $this->class_cfg['arch']['sessions'];
+    $this->db->insert(
+      $this->class_cfg['tables']['sessions'],
+      [
+        $p['sess_id'] => $newId,
+        $p['ip_address'] => $this->ip_address,
+        $p['user_agent'] => $this->user_agent,
+        $p['opened'] => 1,
+        $p['last_activity'] => date('Y-m-d H:i:s'),
+        $p['creation'] => date('Y-m-d H:i:s'),
+        $p['cfg'] => null
+      ]
+    );
+
   }
 
 
