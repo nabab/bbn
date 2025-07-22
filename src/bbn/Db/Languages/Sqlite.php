@@ -700,6 +700,10 @@ class Sqlite extends Sql
   public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
   {
     if ($sql = $this->getCreateTableRaw($source, null, true, true, true)) {
+      if (is_string($sql)) {
+        $sql = [$sql];
+      }
+
       $sql[0] = str_replace(
         'CREATE TABLE '.$this->escape($source),
         'CREATE TABLE ' . $this->escape($target),
@@ -842,7 +846,11 @@ class Sqlite extends Sql
       if ($createKeys
         && ($s = $this->getCreateKeys($table, $cfg, $anonymize))
       ) {
-        $sql[] = $s;
+        if (is_string($s)) {
+          $s = [$s];
+        }
+
+        array_push($sql, ...$s);
       }
 
       return $sql;
@@ -1324,8 +1332,19 @@ class Sqlite extends Sql
       );
       if (!empty($keys)) {
         $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
-        $sql = [$this->getCreateTable($tmpTable, $cfg, $anonymize)];
-        $sql[] = $this->getCreateKeys($tmpTable, $cfg, $anonymize);
+        $sql = $this->getCreateTable($tmpTable, $cfg, $anonymize);
+        if (is_string($sql)) {
+          $sql = [$sql];
+        }
+
+        if ($ctSql = $this->getCreateKeys($tmpTable, $cfg, $anonymize)) {
+          if (is_string($ctSql)) {
+            $ctSql = [$ctSql];
+          }
+
+          array_push($sql, ...$ctSql);
+        }
+
         $sql[] = 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';';
         $sql[] = 'DROP TABLE '.$this->escape($table).';';
         $sql[] = 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';';
@@ -1352,7 +1371,11 @@ class Sqlite extends Sql
           && (strtolower($a['constraint']) !== strtolower($constraint))
       );
       $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
-      $sql = [$this->getCreateTable($tmpTable, $cfg)];
+      $sql = $this->getCreateTable($tmpTable, $cfg);
+      if (is_string($sql)) {
+        $sql = [$sql];
+      }
+
       $sql[] = 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';';
       $sql[] = 'DROP TABLE '.$this->escape($table).';';
       $sql[] = 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';';

@@ -3435,10 +3435,10 @@ class Db implements Db\Actions
   }
 
 
-  public function copyTableTo(string $table, self $target): bool
+  public function copyTableTo(string $table, self $target, bool $withData = true): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
-    return $this->language->copyTableTo($table, $target);
+    return $this->language->copyTableTo($table, $target, $withData);
   }
 
 

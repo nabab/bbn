@@ -367,10 +367,35 @@ trait Commands {
   }
 
 
-  public function copyTableTo(string $table, Db $target): bool
+  public function copyTableTo(string $table, Db $target, bool $withData): bool
   {
     $m = $this->modelize($table, true, $target->getEngine());
-    return $target->createTable($table, $m, true, true);
+    if ($target->createTable($table, $m, true, true)) {
+      if ($withData) {
+        $columns = array_map(
+          fn($c) => $this->escape($c),
+          array_keys(
+            array_filter(
+              $this->getColumns($table),
+              fn($c) => empty($c['virtual'])
+            )
+          )
+        );
+        if ($columns) {
+          $q = $this->query("SELECT " . implode(", ", $columns) . " FROM " . $this->escape($table));
+          $target->disableKeys();
+          while ($row = $q->getRows()) {
+            $target->insert($table, $row);
+          }
+
+          $target->enableKeys();
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
 
