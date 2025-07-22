@@ -1417,11 +1417,11 @@ PGSQL
     }
 
     if (!in_array($col_type, self::$types)) {
-      if (isset(self::$interoperability[$col_type])) {
+      /* if (isset(self::$interoperability[$col_type])) {
         $st      .= self::$interoperability[$col_type];
         $col_type = self::$interoperability[$col_type];
       }
-      else if ($col_type === 'USER-DEFINED') {
+      else  */if ($col_type === 'USER-DEFINED') {
         $st .= $cfg['type'];
       }
       else {

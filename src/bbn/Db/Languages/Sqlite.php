@@ -46,35 +46,10 @@ class Sqlite extends Sql
   ];
 
   public static $interoperability = [
-    'tinyint' => 'integer',
-    'smallint' => 'integer',
-    'mediumint' => 'integer',
-    'int' => 'integer',
-    'bigint' => 'integer',
-    'decimal' => 'real',
-    'float' => 'real',
-    'double' => 'real',
-    'bit' => '',
-    'char' => '',
-    'varchar' => 'text',
-    'binary' => 'blob',
-    'varbinary' => 'blob',
-    'tinyblob' => 'blob',
-    'blob' => 'blob',
-    'mediumblob' => 'blob',
-    'longblob' => 'blob',
-    'tinytext' => 'text',
-    'text' => 'text',
-    'mediumtext' => 'text',
-    'longtext' => 'text',
-    'enum' => 'text',
-    'set' => 'text',
-    'date' => 'text',
-    'time' => 'text',
-    'datetime' => 'text',
-    'timestamp' => 'integer',
-    'year' => 'integer',
-    'json' => 'text'
+    'integer' => ['mysql' => 'int',   'pgsql' => 'integer'],
+    'real'    => ['mysql' => 'float', 'pgsql' => 'real'],
+    'text'    => ['mysql' => 'text',  'pgsql' => 'text'],
+    'blob'    => ['mysql' => 'blob',  'pgsql' => 'bytea']
   ];
 
   public static $aggr_functions = [
@@ -1561,9 +1536,9 @@ class Sqlite extends Sql
 
     if (!empty($cfg['type'])) {
       if (!in_array(strtolower($cfg['type']), self::$types)) {
-        if (isset(self::$interoperability[strtolower($cfg['type'])])) {
+        /* if (isset(self::$interoperability[strtolower($cfg['type'])])) {
           $st .= self::$interoperability[strtolower($cfg['type'])];
-        }
+        } */
         // No error: no type is fine
       }
       else {
