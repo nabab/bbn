@@ -10,7 +10,6 @@ use AllowDynamicProperties;
 use Exception;
 use bbn\X;
 use bbn\Str;
-use bbn\File\System;
 use bbn\Models\Tts\Retriever;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Basic;
@@ -282,9 +281,8 @@ use bbn\User\Session;
 
   const MAX_EMPTY_ATTEMPTS = 5;
 
+
   /**
-   * @var bool
-   */  /**
    * User constructor.
    *
    * @param db    $db
@@ -488,7 +486,7 @@ use bbn\User\Session;
       $this->_init_session();
 
       // CLI user
-      if (X::isCli() && isset($params['id'])) {
+      if (x::isCli() && isset($params['id'])) {
         $this->id = $params['id'];
         $this->auth = true;
       }
@@ -603,30 +601,6 @@ use bbn\User\Session;
   public function checkSalt(string $salt): bool
   {
     return $this->getSalt() === $salt;
-  }
-
-
-  public function getLastActivity(?string $id_session = null): ?string
-  {
-    if ($this->checkSession() && $id_session) {
-      $filter = [
-        $this->class_cfg['arch']['sessions']['id_user'] => $this->getId()
-      ];
-      if ($id_session) {
-        $filter[$this->class_cfg['arch']['sessions']['sess_id']] = $id_session;
-      }
-
-      $last = $this->db->selectOne(
-        $this->class_cfg['tables']['sessions'],
-        'MAX(' . $this->class_cfg['arch']['sessions']['last_activity'] . ')',
-        $filter
-      );
-
-      return $last ?: null;
-    }
-
-    return null;
-
   }
 
 
@@ -885,21 +859,19 @@ use bbn\User\Session;
         $time = time();
         if ($force || empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2)) {
           $this->sess_cfg['last_renew'] = $time;
-          if (!X::isCli()) {
-            $this->db->update(
-              $this->class_cfg['tables']['sessions'],
-              [
-                $p['id_user'] => $this->id,
-                $p['sess_id'] => $this->session->getId(),
-                $p['ip_address'] => $this->ip_address,
-                $p['user_agent'] => $this->user_agent,
-                $p['opened'] => 1,
-                $p['last_activity'] => date('Y-m-d H:i:s', $time),
-                $p['cfg'] => json_encode($this->sess_cfg)
-              ],
-              [$p['id'] => $id_session]
-            );
-          }
+          $this->db->update(
+            $this->class_cfg['tables']['sessions'],
+            [
+              $p['id_user'] => $this->id,
+              $p['sess_id'] => $this->session->getId(),
+              $p['ip_address'] => $this->ip_address,
+              $p['user_agent'] => $this->user_agent,
+              $p['opened'] => 1,
+              $p['last_activity'] => date('Y-m-d H:i:s', $time),
+              $p['cfg'] => json_encode($this->sess_cfg)
+            ],
+            [$p['id'] => $id_session]
+          );
         }
       } else {
         $this->setError(13);
@@ -921,22 +893,20 @@ use bbn\User\Session;
     if ($this->id && !X::isCli()) {
       if ($this->session) {
         $p = &$this->class_cfg['arch']['sessions'];
-        if (!X::isCli()) {
-          $this->db->update(
-            $this->class_cfg['tables']['sessions'],
-            [
-              $p['ip_address'] => $this->ip_address,
-              $p['user_agent'] => $this->user_agent,
-              $p['opened'] => 0,
-              $p['last_activity'] => date('Y-m-d H:i:s'),
-              $p['cfg'] => json_encode($this->sess_cfg)
-            ],
-            [
-              $p['id_user'] => $this->id,
-              $p['sess_id'] => $this->session->getId()
-            ]
-          );
-        }
+        $this->db->update(
+          $this->class_cfg['tables']['sessions'],
+          [
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 0,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ],
+          [
+            $p['id_user'] => $this->id,
+            $p['sess_id'] => $this->session->getId()
+          ]
+        );
         if ($with_session) {
           $this->session->set([]);
         }
@@ -1382,26 +1352,22 @@ use bbn\User\Session;
       $id_session = $this->session->getId();
 
       // Inserting the session in the database
-      if ($id_session) {
-        if (!X::isCli()) {
-          $this->db->insert(
-            $this->class_cfg['tables']['sessions'],
-            [
-              $p['sess_id'] => $id_session,
-              $p['ip_address'] => $this->ip_address,
-              $p['user_agent'] => $this->user_agent,
-              $p['opened'] => 1,
-              $p['last_activity'] => date('Y-m-d H:i:s'),
-              $p['creation'] => date('Y-m-d H:i:s'),
-              $p['cfg'] => json_encode($this->sess_cfg)
-            ]
-          );
-          $id = $this->db->lastId();
-        }
-        else {
-          $id = Str::genpwd(32, 16);
-        }
+      if (
+        $id_session && $this->db->insert(
+          $this->class_cfg['tables']['sessions'],
+          [
+            $p['sess_id'] => $id_session,
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 1,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['creation'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ]
+        )
+      ) {
         // Setting the session with its ID
+        $id = $this->db->lastId();
         if (!$id) {
           throw new Exception(X::_("No session ID, check if your tables have the indexes defined"));
         }

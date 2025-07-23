@@ -6,7 +6,6 @@ namespace bbn\User;
 
 use Exception;
 use bbn\X;
-use bbn\Str;
 use bbn\Models\Tts\Singleton;
 
 
@@ -43,22 +42,17 @@ class Session
 
   protected $id;
 
-  protected $isCli;
 
   public function __construct(array|null $defaults = null)
   {
-    $this->isCli = X::isCli();
     if (self::singletonExists()) {
       throw new Exception("Impossible to create a new session, one already exists");
     }
     self::singletonInit($this);
 
-    if ($this->isCli || ($id = session_id())) {
+    if ($id = session_id()) {
       $this->was_opened = true;
       $this->once_opened = true;
-      if (!$id) {
-        $id = Str::genpwd(16, 32);
-      }
     }
     else {
       $this->open();
@@ -79,14 +73,12 @@ class Session
     }
 
     $this->id = $id;
-    if (!$this->isCli) {
-      if (!isset($_SESSION[self::$name])) {
-        $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
-      }
-
-      $this->data = $_SESSION[self::$name];
-      $this->close();
+    if (!isset($_SESSION[self::$name])) {
+      $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
     }
+
+    $this->data = $_SESSION[self::$name];
+    $this->close();
   }
 
   public function regenerate(): ?string
@@ -131,7 +123,7 @@ class Session
 
   public function isOpened(): bool
   {
-    return $this->isCli || (session_status() !== PHP_SESSION_NONE);
+    return session_status() !== PHP_SESSION_NONE;
   }
 
 
@@ -146,13 +138,11 @@ class Session
   public function fetch($arg=null)
   {
     if ($this->id) {
-      if (!$this->isCli) {
-        $this->open();
-        $this->data = $_SESSION[self::$name];
-        $this->close();
-        if (\is_null($arg)) {
-          return $this->data;
-        }
+      $this->open();
+      $this->data = $_SESSION[self::$name];
+      $this->close();
+      if (\is_null($arg)) {
+        return $this->data;
       }
 
       return $this->_get_value(\func_get_args());
@@ -170,11 +160,9 @@ class Session
   {
     if ($this->id) {
       $this->_set_value(\func_get_args());
-      if (!$this->isCli) {
-        $this->open();
-        $_SESSION[self::$name] = $this->data;
-        $this->close();
-      }
+      $this->open();
+      $_SESSION[self::$name] = $this->data;
+      $this->close();
     }
 
     return $this;
@@ -187,11 +175,9 @@ class Session
       $args = \func_get_args();
       array_unshift($args, null);
       $this->_set_value($args);
-      if (!$this->isCli) {
-        $this->open();
-        $_SESSION[self::$name] = $this->data;
-        $this->close();
-      }
+      $this->open();
+      $_SESSION[self::$name] = $this->data;
+      $this->close();
     }
 
     return $this;
@@ -206,11 +192,9 @@ class Session
       $transformed = \call_user_func($fn, $this->_get_value($args));
       array_unshift($args, $transformed);
       $this->_set_value($args);
-      if (!$this->isCli) {
-        $this->open();
-        $_SESSION[self::$name] = $this->data;
-        $this->close();
-      }
+      $this->open();
+      $_SESSION[self::$name] = $this->data;
+      $this->close();
     }
 
     return $this;
@@ -246,7 +230,7 @@ class Session
 
   public function destroy()
   {
-    if ($this->id && !X::isCli()) {
+    if ($this->id) {
       $this->open();
       $args = \func_get_args();
       $var  =& $_SESSION[self::$name];
@@ -274,9 +258,8 @@ class Session
       $var        = null;
       $this->data = isset($_SESSION[self::$name]) ? $_SESSION[self::$name] : [];
       $this->close();
+      return $this;
     }
-
-    return $this;
   }
 
 
@@ -329,7 +312,7 @@ class Session
 
   protected function open()
   {
-    if (!$this->isCli && !$this->was_opened && !$this->isOpened()) {
+    if (!$this->was_opened && !$this->isOpened()) {
       if (!$this->once_opened) {
         $this->once_opened = true;
 
@@ -347,7 +330,7 @@ class Session
 
   protected function close()
   {
-    if (!$this->isCli && !$this->was_opened && session_id()) {
+    if (!$this->was_opened && session_id()) {
       session_write_close();
     }
 
@@ -393,8 +376,8 @@ class Session
         if (empty($value)) {
           $this->data = [];
 
-        } elseif (X::isAssoc($value)) {
-          $this->data = X::mergeArrays($this->data, $value);
+        } elseif (bbn\X::isAssoc($value)) {
+          $this->data = bbn\X::mergeArrays($this->data, $value);
         }
       }
       else{

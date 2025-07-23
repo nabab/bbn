@@ -57,7 +57,13 @@ trait Formatters {
       $sql = [$sql];
       if ($tables = $this->getTables($source)) {
         foreach ($tables as $table) {
-          $sql[] = $this->getDuplicateTable("$source.$table", "$target.$table", false);
+          if ($dtSql = $this->getDuplicateTable("$source.$table", "$target.$table", false)) {
+            if (is_string($dtSql)) {
+              $dtSql = [$dtSql];
+            }
+
+            array_push($sql, ...$dtSql);
+          }
         }
 
         if ($withData) {
@@ -95,7 +101,18 @@ trait Formatters {
   public function getRenameDatabase(string $oldName, string $newName): ?array
   {
     if ($sql = $this->getDuplicateDatabase($oldName, $newName)) {
-      $sql[] = $this->getDropDatabase($oldName);
+      if (is_string($sql)) {
+        $sql = [$sql];
+      }
+
+      if ($ddSql = $this->getDropDatabase($oldName)) {
+        if (is_string($ddSql)) {
+          $ddSql = [$ddSql];
+        }
+
+        array_push($sql, ...$ddSql);
+      }
+
       return $sql;
     }
 
@@ -113,7 +130,13 @@ trait Formatters {
     if ($tables = $this->getTables()) {
       $sql = [];
       foreach ($tables as $table) {
-        $sql[] = $this->getAnalyzeTable($table);
+        if ($aSql = $this->getAnalyzeTable($table)) {
+          if (is_string($aSql)) {
+            $aSql = [$aSql];
+          }
+
+          array_push($sql, ...$aSql);
+        }
       }
 
       return $sql;
@@ -142,12 +165,24 @@ trait Formatters {
   {
     if ($sql = $this->getCreateTable($table, $cfg)) {
       $sql = [$sql];
-      if ($createKeys) {
-        $sql[] = $this->getCreateKeys($table, $cfg, $anonymize);
+      if ($createKeys
+        && ($createKeysSql = $this->getCreateKeys($table, $cfg, $anonymize))
+      ) {
+        if (is_string($createKeysSql)) {
+          $createKeysSql = [$createKeysSql];
+        }
+
+        array_push($sql, ...$createKeysSql);
       }
 
-      if ($createConstraints) {
-        $sql[] = $this->getCreateConstraints($table, $cfg, $anonymize);
+      if ($createConstraints
+        && ($createConstraintsSql = $this->getCreateConstraints($table, $cfg, $anonymize))
+      ) {
+        if (is_string($createConstraintsSql)) {
+          $createConstraintsSql = [$createConstraintsSql];
+        }
+
+        array_push($sql, ...$createConstraintsSql);
       }
 
       return $sql;
@@ -245,12 +280,16 @@ trait Formatters {
       );
       $ret = [$sql];
       if ($sql = $this->getCreateConstraints($source, null, true)) {
-        $sql = str_replace(
+        if (is_string($sql)) {
+          $sql = [$sql];
+        }
+
+        $sql[0] = str_replace(
           'ALTER TABLE '.$this->escape($source),
           'ALTER TABLE ' . $this->escape($target),
-          $sql
+          $sql[0]
         );
-        $ret[] = $sql;
+        array_push($ret, ...$sql);
       }
 
       if ($withData) {

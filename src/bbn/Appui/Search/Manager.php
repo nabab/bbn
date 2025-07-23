@@ -130,7 +130,7 @@ class Manager
 
               $this->addWorker($result, $step);
               $timer->start("step-$step");
-              //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+              X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
               // If the condition file is removed externally, stop everything
               if (!$this->fs->exists($this->filePath)) {
                 $this->removeWorker();
@@ -159,17 +159,17 @@ class Manager
 
               // If the process has finished
               if (!$status['running']) {
-                //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
+                X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
                 // Read data from stdout
                 $jsonOutput = stream_get_contents($worker['pipes'][1]);
 
                 if ($jsonOutput) {
-                  //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
+                  X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
                   $ret  = json_decode($jsonOutput, true);
 
                   // If results are found, stream them
                   if (!empty($ret['num'])) {
-                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
+                    X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
                     $data = $this->fs->decodeContents($worker['data'], 'json', true);
                     // If we exceed the max, trim them
                     /*
@@ -260,7 +260,7 @@ class Manager
 
     // Delete the condition file if it still exists
     if ($this->fs->exists($this->filePath)) {
-      X::log("[STEP $loopCount] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath, 'searchTimings');
+      X::log("[STEP $step] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath . ' / LOOPCOUNT: ' . $loopCount, 'searchTimings');
       $this->fs->delete($this->filePath);
     }
 
