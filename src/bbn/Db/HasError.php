@@ -235,6 +235,10 @@ trait HasError
       throw new \Exception('Property current does not exist');
     }
 
+    if (empty($this->pdo)) {
+      return false;
+    }
+
     // if $on_error is set to E_CONTINUE returns true
     if (in_array($this->on_error, [Errors::E_EXCEPTION, Errors::E_CONTINUE])) {
       return true;

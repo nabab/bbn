@@ -370,7 +370,10 @@ trait Commands {
   public function copyTableTo(string $table, Db $target, bool $withData): bool
   {
     $m = $this->modelize($table, true, $target->getEngine());
-    if ($target->createTable($table, $m, true, true)) {
+    if ($target->check()
+      && !$target->tableExists($table)
+      && $target->createTable($table, $m, true, true)
+    ) {
       if ($withData) {
         $columns = array_map(
           fn($c) => $this->escape($c),

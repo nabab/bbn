@@ -137,7 +137,9 @@ class Database extends bbn\Models\Cls\Cache
         throw new \Exception(X::_("Unknown engine")." ".$parent['code']);
       }
 
-      if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
+      if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])
+        || !$this->connections[$parent['code']][$cfg['code'] . $db]->check()
+      ) {
         switch ($parent['code']) {
           case 'mysql':
           case 'pgsql':
@@ -2007,6 +2009,9 @@ class Database extends bbn\Models\Cls\Cache
           'last_check' => date('Y-m-d H:i:s')
         ]
       );
+      if ($conn) {
+        $conn->close();
+      }
 
       return $r;
     }
@@ -2057,6 +2062,10 @@ class Database extends bbn\Models\Cls\Cache
           'last_check' => date('Y-m-d H:i:s')
         ]
       );
+      if ($conn) {
+        $conn->close();
+      }
+
       return $r;
     }
 
