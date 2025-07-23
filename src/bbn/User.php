@@ -306,11 +306,12 @@ use bbn\User\Session;
         // Verify that the received token is associated with the device uid
         if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {
           $this->setError(20);
-          return $this->api_request_output =  [
+          $this->api_request_output =  [
             'success' => false,
             'error'   => X::_('Invalid token'),
             'errorCode' => 20
           ];
+          return;
         }
 
         // Check if the phone number is already registered
@@ -341,11 +342,12 @@ use bbn\User\Session;
           $phone = \Brick\PhoneNumber\PhoneNumber::parse($params[$f['phone_number']]);
         } catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
           $this->setError(21);
-          return $this->api_request_output = [
+          $this->api_request_output = [
             'success' => false,
             'error' => X::_('Invalid phone number'),
             'errorCode' => 21
           ];
+          return;
         }
 
         if (
@@ -353,37 +355,31 @@ use bbn\User\Session;
           && !$phone->isValidNumber()
         ) {
           $this->setError(21);
-          return $this->api_request_output = [
+          $this->api_request_output = [
             'success' => false,
             'error' => X::_('Invalid phone number'),
             'errorCode' => 21
           ];
+          return;
         }
 
         // Save it
         if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {
           // Send the sms with code here
-          return $this->api_request_output = [
+          $this->api_request_output = [
             'success' => true,
             'phone_verification_code' => $code
           ];
+          return;
         } else {
           $this->setError(22);
-          return [
-            'success' => false,
-            'error' => X::_('Impossible to update the phone number or the verification code'),
-            'errorCode' => 22
-          ];
+          return;
         }
       } elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
           $this->setError(20);
-          return $this->api_request_output =  [
-            'success' => false,
-            'error'   => X::_('Invalid token'),
-            'errorCode' => 20
-          ];
+          return;
         }
 
         // find the user using phone_number in db
@@ -391,11 +387,7 @@ use bbn\User\Session;
 
         if (!$user) {
           $this->setError(23);
-          return $this->api_request_output =  [
-            'success' => false,
-            'error'   => X::_('Unknown phone number'),
-            'errorCode' => 23
-          ];
+          return;
         }
 
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
@@ -411,11 +403,7 @@ use bbn\User\Session;
             || ((string)$user_cgf['phone_verification_code'] !== (string)$params[$f['phone_verification_code']])
           ) {
             $this->setError(24);
-            return $this->api_request_output =  [
-              'success' => false,
-              'error'   => X::_('Invalid verification code'),
-              'errorCode' => 24
-            ];
+            return;
           }
         }
 
@@ -439,19 +427,21 @@ use bbn\User\Session;
         );
 
         // Send the new token here
-        return $this->api_request_output =  [
+        $this->api_request_output =  [
           'token'   => $new_token,
           'success' => true
         ];
+        return;
       } elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (!$user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           $this->setError(20);
-          return $this->api_request_output =  [
+          $this->api_request_output =  [
             'success' => false,
             'error'   => X::_('Invalid token'),
             'errorCode' => 20
           ];
+          return;
         }
 
         // Update device_lang and last
@@ -471,10 +461,11 @@ use bbn\User\Session;
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
         $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];
 
-        return $this->api_request_output = [
+        $this->api_request_output = [
           'token'   => $params[$f['token']],
           'success' => true
         ];
+        return;
       }
     }
     else {
@@ -601,6 +592,30 @@ use bbn\User\Session;
   public function checkSalt(string $salt): bool
   {
     return $this->getSalt() === $salt;
+  }
+
+
+  public function getLastActivity(?string $id_session = null): ?string
+  {
+    if ($this->checkSession() && $id_session) {
+      $filter = [
+        $this->class_cfg['arch']['sessions']['id_user'] => $this->getId()
+      ];
+      if ($id_session) {
+        $filter[$this->class_cfg['arch']['sessions']['sess_id']] = $id_session;
+      }
+
+      $last = $this->db->selectOne(
+        $this->class_cfg['tables']['sessions'],
+        'MAX(' . $this->class_cfg['arch']['sessions']['last_activity'] . ')',
+        $filter
+      );
+
+      return $last ?: null;
+    }
+
+    return null;
+
   }
 
 

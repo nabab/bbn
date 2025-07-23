@@ -83,7 +83,7 @@ class Session
 
   public function regenerate(): ?string
   {
-    if (!$this->isCli) {
+    if (!X::isCli()) {
       $this->open();
       // Create new session without destroying the old one
       if (session_regenerate_id(false)) {
