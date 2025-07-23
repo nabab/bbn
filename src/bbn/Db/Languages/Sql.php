@@ -2430,7 +2430,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return null|array
    * @throws Exception
    */
-  public function modelize($table = null, bool $force = false, ?string $interoperability = null): ?array
+  public function modelize($table = null, bool $force = false): ?array
   {
     $r      = [];
     $tables = false;
@@ -2450,17 +2450,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       foreach ($tables as $t) {
         if ($full = $this->tableFullName($t)) {
           $r[$full] = $this->_get_cache($full, 'columns', $force);
-          if (!empty($interoperability)
-            && ($this->getEngine() !== $interoperability)
-          ) {
-            foreach ($r[$full]['fields'] as $k => $v) {
-              if (isset($v['type'])
-                && isset(static::$interoperability[$v['type']][$interoperability])
-              ) {
-                $r[$full]['fields'][$k]['type'] = static::$interoperability[$v['type']][$interoperability];
-              }
-            }
-          }
         }
       }
 
@@ -2473,6 +2462,32 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     return null;
   }
+
+
+  /**
+   * Converts the given configuration (modelize) to the given engine.
+   * @param array $cfg The configuration to convert
+   * @param string $engine The engine to convert to
+   * @return array
+   */
+  public function convert(array $cfg, string $engine): array
+  {
+    if (!empty($cfg['fields'])
+      && !empty($engine)
+      && !empty(static::$interoperability)
+    ) {
+      foreach ($cfg['fields'] as $k => $v) {
+        if (isset($v['type'])
+          && isset(static::$interoperability[$v['type']][$engine])
+        ) {
+          $cfg['fields'][$k]['type'] = static::$interoperability[$v['type']][$engine];
+        }
+      }
+    }
+
+    return $cfg;
+  }
+
 
   /****************************************************************
    *                                                              *
@@ -2722,7 +2737,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\Db\Query */
-
+          if ($this->cfg['db'] !== 'apst_app') {
+            //die(var_dump($cfg['sql'], $this->getQueryValues($cfg)));
+          }
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
 

@@ -709,19 +709,23 @@ class Db implements Db\Actions
    * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
    * @return null|array
    */
-  public function modelize($table = null, bool $force = false, ?string $interoperability = null): ?array
+  public function modelize($table = null, bool $force = false): ?array
   {
-    if (!empty($interoperability)) {
-      $interoperability = strtolower($interoperability);
-      if (!\in_array($interoperability, array_keys(self::$engines), true)
-        || ($this->engine === $interoperability)
-      ) {
-        $interoperability = null;
-      }
-    }
-
-    return $this->language->modelize($table, $force, $interoperability);
+    return $this->language->modelize($table, $force);
   }
+
+
+  /**
+   * Converts the given configuration (modelize) to the given engine.
+   * @param array $cfg The configuration to convert
+   * @param string $engine The engine to convert to
+   * @return array
+   */
+  public function convert(array $cfg, string $engine): array
+  {
+    return $this->language->convert($cfg, $engine);
+  }
+
 
   /**
    * 

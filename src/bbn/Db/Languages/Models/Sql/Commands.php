@@ -369,8 +369,10 @@ trait Commands {
 
   public function copyTableTo(string $table, Db $target, bool $withData): bool
   {
-    $m = $this->modelize($table, true, $target->getEngine());
+    ;
     if ($target->check()
+      && ($m = $this->modelize($table, true))
+      && ($m = $this->convert($m, $target->getEngine()))
       && !$target->tableExists($table)
       && $target->createTable($table, $m, true, true)
     ) {
@@ -387,7 +389,7 @@ trait Commands {
         if ($columns) {
           $q = $this->query("SELECT " . implode(", ", $columns) . " FROM " . $this->escape($table));
           $target->disableKeys();
-          while ($row = $q->getRows()) {
+          while ($row = $q->getRow()) {
             $target->insert($table, $row);
           }
 
