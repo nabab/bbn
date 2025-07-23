@@ -2737,9 +2737,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\Db\Query */
-          if ($this->cfg['db'] !== 'apst_app') {
-            //die(var_dump($cfg['sql'], $this->getQueryValues($cfg)));
-          }
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
 
