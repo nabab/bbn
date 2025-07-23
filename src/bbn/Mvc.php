@@ -447,16 +447,39 @@ class Mvc implements Mvc\Api
     return empty($_COOKIE[BBN_APP_NAME]) ? false : json_decode($_COOKIE[BBN_APP_NAME], true)['value'];
   }
 
+  public function getStaticRoutes(): array
+  {
+    return $this->static_routes;
+  }
+
+
 
   /**
    * Adds a route to static routes list if not already exists.
    *
    * @return int
    */
-  public function addStaticRoute(): int
+  public function addStaticRoute(...$routes): int
   {
     $res = 0;
-    foreach (\func_get_args() as $a) {
+    $aliases = array_flip($this->getRoutes('alias'));
+    $todo = [];
+    foreach ($routes as $a) {
+      $todo[] = $a;
+      if (isset($aliases[$a])) {
+        $todo[] = $aliases[$a];
+      }
+      else {
+        foreach ($aliases as $alias => $real) {
+          if (strpos($a, $alias . '/') === 0) {
+            $todo[] = $real . substr($a, strlen($alias));
+            break;
+          }
+        }
+      }
+    }
+
+    foreach ($todo as $a) {
       if (!in_array($a, $this->static_routes, true)) {
         $this->static_routes[] = $a;
         $res++;
@@ -480,6 +503,7 @@ class Mvc implements Mvc\Api
     }
 
     $auth_applicable = '';
+
     foreach ($this->static_routes as $ar) {
       if (
         (substr($ar, -1) === '*')

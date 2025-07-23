@@ -18,6 +18,7 @@ use bbn\User\Common;
 use bbn\User\Implementor;
 use bbn\User\Manager;
 use bbn\Models\Tts\DbUauth;
+use bbn\User\Session;
 
 /**
  * A user authentication Class
@@ -480,13 +481,9 @@ use bbn\Models\Tts\DbUauth;
     }
     else {
       // The client environment variables
-      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-      $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
-      if (empty($this->user_agent)) {
-        X::log([X::isCli(), $_SERVER], 'user_sess');
-      }
-
+      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? (isset($_SERVER['argv'][1]) ? 'CLI' : 'Unknown');
+      $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : (isset($_SERVER['shell']) ? '127.0.0.1' : '');
+      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ($_SERVER['LANG'] ?? '');
       // Creating the session's variables if they don't exist yet
       $this->_init_session();
 
@@ -857,7 +854,7 @@ use bbn\Models\Tts\DbUauth;
       return $this;
     }
  
-    if (($id_session = $this->getIdSession()) && $this->check()) {
+    if (($id_session = $this->getSessionDbId()) && $this->check()) {
       $p = &$this->class_cfg['arch']['sessions'];
       $this->db->update(
         $this->class_cfg['tables']['sessions'],
@@ -880,7 +877,7 @@ use bbn\Models\Tts\DbUauth;
    */
   public function saveSession(bool $force = false): self
   {
-    $id_session = $this->getIdSession();
+    $id_session = $this->getSessionDbId();
     if ($this->check()) {
       if ($id_session) {
         $p = &$this->class_cfg['arch']['sessions'];
@@ -942,16 +939,16 @@ use bbn\Models\Tts\DbUauth;
         }
         if ($with_session) {
           $this->session->set([]);
-        } else {
-          $this->session->set([], $this->userIndex);
         }
-
         
+        $this->session->set([], $this->userIndex);
       }
 
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
+      $this->session  = null;
+      Session::destroyInstance();
     }
 
     return $this;
@@ -1186,7 +1183,7 @@ use bbn\Models\Tts\DbUauth;
       if ($this->db->insert(
         $this->class_cfg['tables']['tokens'],
         [
-          $f['id_session'] => $this->getIdSession(),
+          $f['id_session'] => $this->getSessionDbId(),
           $f['content'] => $token,
           $f['creation'] => X::microtime(),
           $f['last'] => X::microtime()
@@ -1293,7 +1290,7 @@ use bbn\Models\Tts\DbUauth;
    *
    * @return null|string
    */
-  protected function getIdSession(): ?string
+  protected function getSessionDbId(): ?string
   {
     return $this->_get_session('id_session');
   }
@@ -1361,7 +1358,7 @@ use bbn\Models\Tts\DbUauth;
 
     /** @var int $id_session The ID of the session row in the DB */
     if (
-      !($id_session = $this->getIdSession())
+      !($id_session = $this->getSessionDbId())
       || !($tmp = $this->db->selectOne(
         $this->class_cfg['tables']['sessions'],
         $this->class_cfg['arch']['sessions']['cfg'],
@@ -1621,7 +1618,7 @@ use bbn\Models\Tts\DbUauth;
   private function _sess_info(string|null $id_session = null): self
   {
     if (!Str::isUid($id_session)) {
-      $id_session = $this->getIdSession();
+      $id_session = $this->getSessionDbId();
     } else {
       $cfg = $this->_get_session('cfg');
     }
@@ -1648,7 +1645,7 @@ use bbn\Models\Tts\DbUauth;
     } else {
       if (isset($id_session, $id)) {
         $this->_init_session();
-        $new_id_session = $this->getIdSession();
+        $new_id_session = $this->getSessionDbId();
         if ($id_session !== $new_id_session) {
           return $this->_sess_info($new_id_session);
         }
@@ -1685,7 +1682,7 @@ use bbn\Models\Tts\DbUauth;
     // $id mustn't be already defined
     if (!$this->id || $force) {
       // The user ID must be in the session
-      $id_session = $this->getIdSession();
+      $id_session = $this->getSessionDbId();
       $id         = $this->getSession('id');
       if ($id_session && $id) {
         $this->_sess_info($id_session);
@@ -1759,7 +1756,7 @@ use bbn\Models\Tts\DbUauth;
         $this->db->update(
           $this->class_cfg['tables']['sessions'],
           $update, [
-            $this->class_cfg['arch']['sessions']['id'] => $this->getIdSession()
+            $this->class_cfg['arch']['sessions']['id'] => $this->getSessionDbId()
           ]
         );
       }
