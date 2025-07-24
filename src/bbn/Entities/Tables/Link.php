@@ -170,7 +170,7 @@ class Link extends EntityTable
     }
 
     if ($res) {
-      if ($this->cfg['tags']) {
+      if (!empty($this->cfg['tags'])) {
         $res['tags'] = $this->getTags($res[$this->fields['id']]);
       }
 
