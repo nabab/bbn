@@ -85,17 +85,20 @@ class Session
   {
     if (!X::isCli()) {
       $this->open();
+      $oldSession = session_id();
       // Create new session without destroying the old one
       if (session_regenerate_id(false)) {
         // Grab current session ID and close both sessions to allow other scripts to use them
         $newSession = session_id();
+        if (!$newSession || ($newSession === $oldSession)) {
+          throw new Exception(X::_("Impossible to regenerate the session ID"));
+        }
+
         session_write_close();
 
         // Set session ID to the new one, and start it back up again
         session_id($newSession);
-        ini_set('session.use_strict_mode', 0);
         session_start();
-        ini_set('session.use_strict_mode', 1);
 
         // Don't want this one to expire
         if (session_id() !== $newSession) {
