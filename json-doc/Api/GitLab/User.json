@@ -79,7 +79,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getUser(int $id = null): array\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
+            "code": "  public function getUser(?int $id = null): array\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
             "parent": false,
             "trait": false,
             "startLine": 25,

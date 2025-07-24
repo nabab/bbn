@@ -14,7 +14,7 @@
     "fileName": "\/Appui\/Cms.php",
     "startLine": 21,
     "endLine": 1349,
-    "numMethods": 62,
+    "numMethods": 61,
     "numProperties": 17,
     "numConstants": 0,
     "numStaticProperties": 1,
@@ -847,7 +847,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string $type = null, bool $published = false): array\n  {\n    $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);\n    $type_cond = [];\n    foreach ($this->getTypes() as $t) {\n      if (!$type || ($type === $t['value'])) {\n        $type_cond[] = [\n          'field' => 'bbn_notes.id_type',\n          'value' => $t['value']\n        ];\n      }\n    }\n    if (empty($type_cond)) {\n      if (!($opt = Note::getOptionsObject()->option($type))) {\n        throw new \\Exception(X::_(\"Impossible to find a type %s\", $type));\n      }\n\n      $type_cond[] = [\n        'field' => 'bbn_notes.id_type',\n        'value' => $type\n      ];\n    }\n\n    $cfg['where']['conditions'][] = [\n      'logic' => 'OR',\n      'conditions' => $type_cond\n    ];\n\n    $cfg['limit'] = $limit;\n    $cfg['start'] = $start >= 0 ? $start : 0;\n\n    if (!empty($order)) {\n      $cfg['order'] = $order;\n    }\n\n    $db    =& $this->db;\n    $idx   = md5(json_encode($filter));\n    $total = $this->cacheGetSet(function() use (&$db, $cfg) {\n      return $db->count($cfg);\n    }, $idx, 'total', 20);\n    $data  = $this->db->rselectAll($cfg);\n    foreach ($data as &$d) {\n      $d['front_img'] = $d['id_media'] ? $this->media->getMedia($d['id_media'], true) : null;\n    }\n\n    return [\n      'query' => $this->db->last(),\n      'data' => $data,\n      'total' => $total\n    ];\n  }",
+            "code": "  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array\n  {\n    $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);\n    $type_cond = [];\n    foreach ($this->getTypes() as $t) {\n      if (!$type || ($type === $t['value'])) {\n        $type_cond[] = [\n          'field' => 'bbn_notes.id_type',\n          'value' => $t['value']\n        ];\n      }\n    }\n    if (empty($type_cond)) {\n      if (!($opt = Note::getOptionsObject()->option($type))) {\n        throw new Exception(X::_(\"Impossible to find a type %s\", $type));\n      }\n\n      $type_cond[] = [\n        'field' => 'bbn_notes.id_type',\n        'value' => $type\n      ];\n    }\n\n    $cfg['where']['conditions'][] = [\n      'logic' => 'OR',\n      'conditions' => $type_cond\n    ];\n\n    $cfg['limit'] = $limit;\n    $cfg['start'] = $start >= 0 ? $start : 0;\n\n    if (!empty($order)) {\n      $cfg['order'] = $order;\n    }\n\n    $db    =& $this->db;\n    $idx   = md5(json_encode($filter));\n    $total = $this->cacheGetSet(function() use (&$db, $cfg) {\n      return $db->count($cfg);\n    }, $idx, 'total', 20);\n    $data  = $this->db->rselectAll($cfg);\n    foreach ($data as &$d) {\n      $d['front_img'] = $d['id_media'] ? $this->media->getMedia($d['id_media'], true) : null;\n    }\n\n    return [\n      'query' => $this->db->last(),\n      'data' => $data,\n      'total' => $total\n    ];\n  }",
             "parent": false,
             "trait": false,
             "startLine": 511,
@@ -2064,7 +2064,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function set(\n    $url,\n    string $title = '',\n    string $content = '',\n    string $excerpt = '',\n    string $start = null,\n    string $end = null,\n    array $tags = null,\n    string $id_type = null,\n    string $id_media = null,\n    string $id_option = null\n  ): bool\n  {\n    if (is_array($url)) {\n      $tmp = $url;\n      foreach ($tmp as $k => $v) {\n        $$k = $v;\n      }\n    }\n\n    if (!is_string($url) || empty($url)) {\n      throw new Exception(X::_(\"The CMS article MUST have a URL\"));\n    }\n\n    if ($note = $this->getByUrl($url, true)){\n      $id_note = $note['id'];\n    }\n\n    if (!empty($id_note)) {\n      $cfg = $this->get($id_note);\n    }\n    elseif (!($cfg = $this->getByUrl($url, true))) {\n      throw new Exception(X::_(\"Impossible to find the article with URL\") . ' ' . $url);\n    }\n\n    $change = 0;\n    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content) || ($cfg['excerpt'] !== $excerpt)) {\n      $change += (int)$this->setContent($cfg['id_note'], $title, $content, $excerpt);\n    }\n\n    if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {\n      $change += (int)$this->setEvent($cfg['id_note'], [\n        'start' => $start,\n        'end' => $end\n      ]);\n    }\n\n    if (is_array($tags)) {\n      $change += (int)$this->note->setTags($cfg['id_note'], $tags);\n    }\n\n    if ($id_type && ($cfg['id_type'] !== $id_type)) {\n      $change += (int)$this->setType($cfg['id_note'], $id_type);\n    }\n\n    if ($id_option && ($cfg['id_option'] !== $id_option)) {\n      $change += (int)$this->setOption($cfg['id_note'], $id_option);\n    }\n\n    if ($id_media !== $cfg['id_media']) {\n      if ($id_media) {\n        $change += (int)$this->setDefaultMedia($id_note, $id_media);\n      }\n      else {\n        $change += (int)$this->unsetDefaultMedia($id_note);\n      }\n    }\n\n    if ($change) {\n      $this->cacheDelete($cfg['id_note']);\n    }\n\n    return $change ? true : false;\n  }",
+            "code": "  public function set(\n    $url,\n    string $title = '',\n    string $content = '',\n    string $excerpt = '',\n    string|null $start = null,\n    string|null $end = null,\n    array|null $tags = null,\n    string|null $id_type = null,\n    string|null $id_media = null,\n    string|null $id_option = null\n  ): bool\n  {\n    if (is_array($url)) {\n      $tmp = $url;\n      foreach ($tmp as $k => $v) {\n        $$k = $v;\n      }\n    }\n\n    if (!is_string($url) || empty($url)) {\n      throw new Exception(X::_(\"The CMS article MUST have a URL\"));\n    }\n\n    if ($note = $this->getByUrl($url, true)){\n      $id_note = $note['id'];\n    }\n\n    if (!empty($id_note)) {\n      $cfg = $this->get($id_note);\n    }\n    elseif (!($cfg = $this->getByUrl($url, true))) {\n      throw new Exception(X::_(\"Impossible to find the article with URL\") . ' ' . $url);\n    }\n\n    $change = 0;\n    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content) || ($cfg['excerpt'] !== $excerpt)) {\n      $change += (int)$this->setContent($cfg['id_note'], $title, $content, $excerpt);\n    }\n\n    if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {\n      $change += (int)$this->setEvent($cfg['id_note'], [\n        'start' => $start,\n        'end' => $end\n      ]);\n    }\n\n    if (is_array($tags)) {\n      $change += (int)$this->note->setTags($cfg['id_note'], $tags);\n    }\n\n    if ($id_type && ($cfg['id_type'] !== $id_type)) {\n      $change += (int)$this->setType($cfg['id_note'], $id_type);\n    }\n\n    if ($id_option && ($cfg['id_option'] !== $id_option)) {\n      $change += (int)$this->setOption($cfg['id_note'], $id_option);\n    }\n\n    if ($id_media !== $cfg['id_media']) {\n      if ($id_media) {\n        $change += (int)$this->setDefaultMedia($id_note, $id_media);\n      }\n      else {\n        $change += (int)$this->unsetDefaultMedia($id_note);\n      }\n    }\n\n    if ($change) {\n      $this->cacheDelete($cfg['id_note']);\n    }\n\n    return $change ? true : false;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 954,
@@ -4626,60 +4626,6 @@
                 "return": ""
             },
             "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
-        },
-        "serializeFunction": {
-            "name": "serializeFunction",
-            "summary": "Transforms a function in a cacheable string",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Appui\\Cms",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
-            "static": false,
-            "visibility": "protected",
-            "final": false,
-            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
-            "parent": false,
-            "trait": "bbn\\Models\\Tts\\Cache",
-            "startLine": 241,
-            "endLine": 245,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "serializeFunction",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "function",
-                    "position": 0,
-                    "type": "callable",
-                    "type_arr": [
-                        "callable"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ],
-            "doc": {
-                "description": "Transforms a function in a cacheable string\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "callable",
-                        "name": "$function"
-                    }
-                ],
-                "return": ""
-            },
-            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
         }
     },
     "properties": {

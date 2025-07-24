@@ -1,0 +1,469 @@
+{
+    "doc": {
+        "description": "The Code trait provides methods for working with options' codes.",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Internal\\Code",
+    "namespace": true,
+    "realName": "Code",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Internal\/Code.php",
+    "startLine": 11,
+    "endLine": 334,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
+    "shortName": "Code",
+    "contentConstructor": null,
+    "methods": {
+        "_fromCode": {
+            "name": "_fromCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _fromCode(array $codes, bool $real = false, $depth = 0): ?string\n  {\n    if ($this->check()) {\n      \/\/ Get the number of arguments provided.\n      $num = \\count($codes);\n\n      \/\/ If no arguments are provided, return null.\n      if (!$num) {\n        return null;\n      }\n\n      if ($codes[0] === false) {\n        return $this->getRoot();\n      }\n\n      \/\/ If the first argument is a valid UID, check if it's an existing option ID or proceed with further checks.\n      if (Str::isUid($codes[0])) {\n        if ($num > 1) {\n          \/\/ Perform an extra check to ensure the provided ID corresponds to its parent.\n          $parentFromCodes = $this->_fromCode(\\array_slice($codes, 1), $real, $depth + 1);\n          $parentId = $this->getIdParent($codes[0]);\n          if ($parentId !== $parentFromCodes) {\n            if ($parentFromCodes !== $this->getIdAlias($parentId)) {\n              $parentId = $this->getIdParent($parentId);\n              if ($parentId !== $parentFromCodes) {\n                return null;\n              }\n            }\n          }\n        }\n\n        return $codes[0];\n      }\n\n      \/\/ Check if the first argument is a valid alphanumeric code.\n      if (empty($codes) || (!\\is_string($codes[0]) && !is_numeric($codes[0]))) {\n        return null;\n      }\n\n      \/\/ Handle special cases for certain codes, such as 'appui' or 'plugins'.\n      \n      $lastCode = end($codes);\n      \/\/ Ensure that the last argument is a valid UID; otherwise, append the default value.\n      if (!$depth) {\n        if (!Str::isUid($lastCode)) {\n          if ($lastCode === 'appui') {\n            $codes[] = 'plugins';\n            $lastCode = 'plugins';\n            $num++;\n          }\n          if ($lastCode === false) {\n            array_pop($codes);\n            $codes[] = $this->getRoot();\n          }\n          else {\n            if ($lastCode === null) {\n              array_pop($codes);\n              $num--;\n            }\n\n            if (!in_array($lastCode, ['options', 'plugins', 'permissions'])) {\n              $codes[] = 'options';\n              $num++;\n            }\n\n            $codes[] = $this->getDefault();\n            $num++;\n          }\n\n        }\n\n      }\n\n      \/\/X::log($codes, 'codes');\n      \/\/ At this stage, we need at least one code and one ID to proceed with the query.\n      if ($num < 2) {\n        return null;\n      }\n\n      \/\/ Extract the parent ID and true code from the arguments.\n      $id_parent = array_pop($codes);\n      $true_code = array_pop($codes);\n      $enc_code  = $true_code ? base64_encode($true_code . ($real ? '1' : '2')) : 'null';\n      \/\/ Define the cache name based on the encoded code.\n      $cache_name = 'get_code_' . $enc_code;\n      \/\/ Check if a cached result is available for the given parent ID and cache name.\n      if (($tmp = $this->getCache($id_parent, $cache_name))) {\n        \/\/ If no more arguments are provided, return the cached result directly.\n        if (!count($codes)) {\n          return $tmp;\n        }\n\n        \/\/ Otherwise, append the cached result to the remaining arguments and proceed recursively.\n        $codes[] = $tmp;\n        return $this->_fromCode($codes, $real, $depth + 1);\n      }\n\n      \/\/ Perform a database query to find an option matching the provided code and parent ID.\n      $c = &$this->class_cfg;\n      $f = &$this->fields;\n      $rightValue = null;\n\n      \/** @var int|false $tmp *\/\n      if ($tmp = $this->db->selectOne(\n        $c['table'],\n        $f['id'],\n        [\n          $f['id_parent'] =>  $id_parent,\n          $f['code'] => $true_code\n        ]\n      )) {\n        $rightValue = $tmp;\n      }\n      elseif (!$real) {\n        $opt = $this->nativeOption($id_parent);\n        if ($opt['id_alias']) {\n          if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()], true)) {\n            if (!in_array($true_code, ['options', 'plugins', 'permissions', 'templates']) && ($id_option = $this->fromRealCode('options', $id_parent))) {\n              $rightValue = $this->db->selectOne(\n                $c['table'],\n                $f['id'],\n                [\n                  $f['id_parent'] => $id_option,\n                  $f['code'] => $true_code\n                ]\n              );\n            }\n          }\n          elseif (!$opt['text']) {\n            $alias = $this->nativeOption($opt['id_alias']);\n            if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()], true)) {\n              if (!in_array($true_code, ['options', 'plugins', 'permissions', 'templates']) && ($id_option = $this->fromRealCode('options', $alias['id']))) {\n                $rightValue = $this->db->selectOne(\n                  $c['table'],\n                  $f['id'],\n                  [\n                    $f['id_parent'] => $id_option,\n                    $f['code'] => $true_code\n                  ]\n                );\n              }\n              else {\n                $rightValue = $this->db->selectOne(\n                  $c['table'],\n                  $f['id'],\n                  [\n                    $f['id_parent'] => $alias['id'],\n                    $f['code'] => $true_code\n                  ]\n                );\n              }\n            }\n            else {\n              $rightValue = $this->db->selectOne(\n                $c['table'],\n                $f['id'],\n                [\n                  $f['id_parent'] => $opt['id_alias'],\n                  $f['code'] => $true_code\n                ]\n              );\n            }\n          }\n        }\n      }\n\n      \/\/ If a match is found, return the cached result or proceed recursively with the remaining arguments.\n      if ($rightValue) {\n        if (\\count($codes)) {\n          $codes[] = $rightValue;\n          return $this->_fromCode($codes, $real, $depth + 1);\n        }\n\n        return $rightValue;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 13,
+            "endLine": 191,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_fromCode",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "real",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "depth",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "fromCode": {
+            "name": "fromCode",
+            "summary": "Retrieves an option's ID from its \"codes path\"",
+            "description": "This method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fromCode(...$codes): ?string\n  {\n    \/\/ Check if the class is initialized and the database connection is valid.\n    \/\/ If the input is an array, extract its elements as separate arguments.\n    while (isset($codes[0]) && \\is_array($codes[0])) {\n      $codes = $codes[0];\n    }\n    \n    \/\/ Check if we have an option array as a parameter and return its ID directly.\n    if (isset($codes[$this->fields['id']])) {\n      return $codes[$this->fields['id']];\n    }\n\n    return $this->_fromCode($codes);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 203,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fromCode",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's code(s)"
+                }
+            ],
+            "doc": {
+                "description": "Retrieves an option's ID from its \"codes path\"\n\nThis method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$codes",
+                        "description": "The option's code(s)"
+                    }
+                ],
+                "return": "The ID of the option, null if not found, or false if the row cannot be found"
+            },
+            "comments": "  \/**\n   * Retrieves an option's ID from its \"codes path\"\n   *\n   * This method can handle diverse combinations of elements, such as:\n   * - A code or a series of codes from the most specific to a child of the root\n   * - A code or a series of codes and an id_parent where to find the last code\n   * - A code alone having $this->default as parent\n   *\n   * @param string ...$codes The option's code(s)\n   * @return string|null The ID of the option, null if not found, or false if the row cannot be found\n   *\/"
+        },
+        "fromRealCode": {
+            "name": "fromRealCode",
+            "summary": "Retrieves an option's ID from its \"codes path\"",
+            "description": "This method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fromRealCode(...$codes): ?string\n  {\n    \/\/ Check if the class is initialized and the database connection is valid.\n    \/\/ If the input is an array, extract its elements as separate arguments.\n    while (isset($codes[0]) && \\is_array($codes[0])) {\n      $codes = $codes[0];\n    }\n    \n    \/\/ Check if we have an option array as a parameter and return its ID directly.\n    if (isset($codes[$this->fields['id']])) {\n      return $codes[$this->fields['id']];\n    }\n\n    return $this->_fromCode($codes, true);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 230,
+            "endLine": 244,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fromRealCode",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's code(s)"
+                }
+            ],
+            "doc": {
+                "description": "Retrieves an option's ID from its \"codes path\"\n\nThis method can handle diverse combinations of elements, such as:\n- A code or a series of codes from the most specific to a child of the root\n- A code or a series of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$codes",
+                        "description": "The option's code(s)"
+                    }
+                ],
+                "return": "The ID of the option, null if not found, or false if the row cannot be found"
+            },
+            "comments": "  \/**\n   * Retrieves an option's ID from its \"codes path\"\n   *\n   * This method can handle diverse combinations of elements, such as:\n   * - A code or a series of codes from the most specific to a child of the root\n   * - A code or a series of codes and an id_parent where to find the last code\n   * - A code alone having $this->default as parent\n   *\n   * @param string ...$codes The option's code(s)\n   * @return string|null The ID of the option, null if not found, or false if the row cannot be found\n   *\/"
+        },
+        "fromRootCode": {
+            "name": "fromRootCode",
+            "summary": "Retrieves an option's ID from its code path, starting from the root.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fromRootCode(...$codes): ?string\n  {\n    \/\/ Save the default value and set it to the root for this query.\n    if ($this->check()) {\n      $def = $this->default;\n      \/\/ Proceed with the query using the updated default value.\n\n      $codes[] = false;\n      $res = $this->fromCode(...$codes);\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 252,
+            "endLine": 265,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fromRootCode",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves an option's ID from its code path, starting from the root.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves an option's ID from its code path, starting from the root.\n   *\n   * @return string|null\n   *\/"
+        },
+        "getCodes": {
+            "name": "getCodes",
+            "summary": "Returns an array of options in the form id => code.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCodes(...$codes): array\n  {\n    \/\/ Check if a valid ID is provided or can be resolved from the given codes.\n    if (Str::isUid($id = $this->fromCode(...$codes))) {\n      $c   = &$this->fields;\n      \/\/ Retrieve all options with their IDs and codes, sorted by either the 'num' or 'code' field depending on whether the parent option is sortable.\n      $opt = $this->db->rselectAll($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->isSortable($id) ? $c['num'] : $c['code']) => 'ASC']);\n      $res = [];\n      \/\/ Iterate over the retrieved options and populate the result array with their IDs and codes.\n      foreach ($opt as $r) {\n        if (!empty($r[$c['code']]) && Str::isInteger($r[$c['code']])) {\n          $r[$c['code']] = (int)$r[$c['code']];\n        }\n        $res[$r[$c['id']]] = $r[$c['code']];\n      }\n\n      return $res;\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 274,
+            "endLine": 294,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getCodes",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of options in the form id => code.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Options' array"
+            },
+            "comments": "  \/**\n   * Returns an array of options in the form id => code.\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array Options' array\n   *\/"
+        },
+        "code": {
+            "name": "code",
+            "summary": "Returns an option's code.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function code(string $id, $followAlias = true): ?string\n  {\n    \/\/ Check if a valid ID is provided and the instance is properly initialized.\n    if ($this->check() && Str::isUid($id)) {\n      $o = $this->nativeOption($id);\n      if (!$o['code'] && $followAlias && $o['id_alias']) {\n        $o = $this->nativeOption($o['id_alias']);\n      }\n      \/\/ Retrieve the code for the given ID from the database.\n      $code = $o['code'] ?? null;\n\n      \/\/ If the retrieved code is an integer, cast it to an integer for consistency.\n      if (!empty($code) && Str::isInteger($code)) {\n        $code = (int)$code;\n      }\n\n      return $code;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 303,
+            "endLine": 323,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "code",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The options' ID"
+                },
+                {
+                    "name": "followAlias",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's code.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The options' ID"
+                    }
+                ],
+                "return": "The code value, null is none, false if option not found"
+            },
+            "comments": "  \/**\n   * Returns an option's code.\n   *\n   * @param string $id The options' ID\n   * @return string|null The code value, null is none, false if option not found\n   *\/"
+        },
+        "toCodeArray": {
+            "name": "toCodeArray",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Code",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Code.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function toCodeArray($id): ?array\n  {\n    $path = $this->toPath($id, '\/');\n    if (!$path) {\n      return null;\n    }\n\n    return array_reverse(X::split($path, '\/'));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 325,
+            "endLine": 333,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "toCodeArray",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * The Code trait provides methods for working with options' codes.\n *\/",
+        "\/** @var int|false $tmp *\/",
+        "\/**\n   * Retrieves an option's ID from its \"codes path\"\n   *\n   * This method can handle diverse combinations of elements, such as:\n   * - A code or a series of codes from the most specific to a child of the root\n   * - A code or a series of codes and an id_parent where to find the last code\n   * - A code alone having $this->default as parent\n   *\n   * @param string ...$codes The option's code(s)\n   * @return string|null The ID of the option, null if not found, or false if the row cannot be found\n   *\/",
+        "\/**\n   * Retrieves an option's ID from its \"codes path\"\n   *\n   * This method can handle diverse combinations of elements, such as:\n   * - A code or a series of codes from the most specific to a child of the root\n   * - A code or a series of codes and an id_parent where to find the last code\n   * - A code alone having $this->default as parent\n   *\n   * @param string ...$codes The option's code(s)\n   * @return string|null The ID of the option, null if not found, or false if the row cannot be found\n   *\/",
+        "\/**\n   * Retrieves an option's ID from its code path, starting from the root.\n   *\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns an array of options in the form id => code.\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array Options' array\n   *\/",
+        "\/**\n   * Returns an option's code.\n   *\n   * @param string $id The options' ID\n   * @return string|null The code value, null is none, false if option not found\n   *\/"
+    ],
+    "summary": "The Code trait provides methods for working with options' codes.",
+    "description": "",
+    "description_parts": []
+}

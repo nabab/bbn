@@ -327,7 +327,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function setFrom(string $email, string $name = null): self\n  {\n    if (!PHPMailer::validateAddress($email)) {\n      die(\"The From eMail address is not valid\");\n    }\n    if (!$name) {\n      $name = $email;\n    }\n    $this->mailer->setFrom($email, $name);\n    return $this;\n  }",
+            "code": "  public function setFrom(string $email, string|null $name = null): self\n  {\n    if (!PHPMailer::validateAddress($email)) {\n      die(\"The From eMail address is not valid\");\n    }\n    if (!$name) {\n      $name = $email;\n    }\n    $this->mailer->setFrom($email, $name);\n    return $this;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 328,

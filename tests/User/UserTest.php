@@ -2379,9 +2379,9 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getIdSession_method_returns_the_database_id_for_the_session_row_if_exists()
+  public function getSessionDbId_method_returns_the_database_id_for_the_session_row_if_exists()
   {
-    $get_id_session_method = $this->getNonPublicMethod('getIdSession');
+    $get_id_session_method = $this->getNonPublicMethod('getSessionDbId');
 
     $session_data = $this->getNonPublicProperty('data', $this->getSession());
 
@@ -2395,9 +2395,9 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getIdSession_method_returns_null_if_session_row_does_not_exists()
+  public function getSessionDbId_method_returns_null_if_session_row_does_not_exists()
   {
-    $get_id_session_method = $this->getNonPublicMethod('getIdSession');
+    $get_id_session_method = $this->getNonPublicMethod('getSessionDbId');
 
     $session_data = $this->getNonPublicProperty('data', $this->getSession());
 

@@ -1,0 +1,520 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\I18n\\Service",
+    "namespace": true,
+    "realName": "Service",
+    "realNamespace": "bbn\\Appui\\I18n",
+    "traits": [],
+    "interfaces": {
+        "bbn\\Appui\\I18n\\ServiceInterface": {
+            "name": "bbn\\Appui\\I18n\\ServiceInterface"
+        }
+    },
+    "fileName": "\/Appui\/I18n\/Service.php",
+    "startLine": 10,
+    "endLine": 115,
+    "numMethods": 6,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "bbn\\Appui\\I18n\\ServiceInterface"
+    ],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "url": null,
+        "port": null,
+        "sourceLang": null,
+        "targetLang": null,
+        "alternatives": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\I18n",
+    "shortName": "Service",
+    "contentConstructor": {
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __construct(\n    string $url,\n    string $port,\n    string $sourceLang,\n    string $targetLang,\n    int $alternatives\n  )\n  {\n    $this->url = $url;\n    $this->port = $port;\n    $this->sourceLang = $sourceLang;\n    $this->targetLang = $targetLang;\n    $this->alternatives = $alternatives;\n    if (empty($this->url)) {\n      throw new \\Exception('URL is not set');\n    }\n\n    if (empty($this->sourceLang)) {\n      throw new \\Exception('Source language is not set');\n    }\n\n    if (empty($this->targetLang)) {\n      throw new \\Exception('Target language is not set');\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 19,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "port",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "sourceLang",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "targetLang",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "alternatives",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "translate": {
+            "name": "translate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function translate(\n    string|array $string,\n    ?string $sourceLang = null,\n    ?string $targetLang = null,\n    ?int $alternatives = null\n  ): ?array\n  {\n    $multi = is_array($string);\n    $data = [\n      'string' => $multi ? json_encode($string) : $string,\n      'source' => $sourceLang ?: $this->sourceLang,\n      'target' => $targetLang ?: $this->targetLang,\n      'alternatives' => $alternatives ?? $this->alternatives,\n    ];\n    if ($req = $this->request('translate', $data)) {\n      $translated = $req['translated'] ?: '';\n      if ($multi) {\n        $translated = !empty($translated) ? urldecode($translated) : [];\n      }\n\n      if ($err = X::lastCurlError()) {\n        throw new Exception($err);\n      }\n\n      return [\n        'original' => $string,\n        'translated' => $translated,\n        'source' => $data['source'],\n        'target' => $data['target'],\n        'alternatives' => !empty($data['alternatives']) && !empty($req['alternatives']) ? $req['alternatives'] : []\n      ];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 45,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "translate",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "string",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "sourceLang",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "targetLang",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "alternatives",
+                    "position": 3,
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "setSourceLang": {
+            "name": "setSourceLang",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setSourceLang(string $lang): self\n  {\n    $this->sourceLang = $lang;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 86,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setSourceLang",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "lang",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setTargetLang": {
+            "name": "setTargetLang",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setTargetLang(string $lang): self\n  {\n    $this->targetLang = $lang;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 88,
+            "endLine": 93,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setTargetLang",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "lang",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setAlternatives": {
+            "name": "setAlternatives",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setAlternatives(int $num): self\n  {\n    $this->alternatives = $num;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 95,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setAlternatives",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "num",
+                    "position": 0,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "request": {
+            "name": "request",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\I18n\\Service",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/I18n\/Service.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function request(string $endpoint, ?array $data = null): ?array\n  {\n    $url = str_ends_with($this->url, '\/') ? substr($this->url, 0, -1) : $this->url;\n    $response = X::curl(\n      $url.(!empty($this->port) ? ':'.$this->port : '').'\/'.$endpoint,\n      $data\n    );\n    if (!empty($response) && Str::isJson($response)) {\n      return json_decode($response, true);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 102,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "request",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "endpoint",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "url": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Service"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Service",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "port": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Service"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Service",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "sourceLang": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Service"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Service",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "targetLang": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Service"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Service",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "alternatives": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\I18n\\Service"
+            },
+            "declaring_trait": "bbn\\Appui\\I18n\\Service",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Appui\\I18n\\ServiceInterface": "ServiceInterface"
+    },
+    "dummyComments": [],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

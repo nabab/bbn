@@ -532,7 +532,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getDiff($project, string $id, string $filePath = ''): array\n  {\n    $diff = $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id . '\/diff');\n    if (!empty($filePath)) {\n      if (!\\is_null($i = \\bbn\\X::find($diff, function($d) use($filePath){\n        return ($d->old_path === $filePath) || ($d->new_path === $filePath);\n      }))) {\n        return \\bbn\\X::toArray($diff[$i]);\n      }\n      return [];\n    }\n    return $diff;\n  }",
+            "code": "  public function getDiff($project, string $id, string $filePath = ''): array\n  {\n    $diff = $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id . '\/diff');\n    if (!empty($filePath)) {\n      if (!\\is_null($i = \\bbn\\X::search($diff, function($d) use($filePath){\n        return ($d->old_path === $filePath) || ($d->new_path === $filePath);\n      }))) {\n        return \\bbn\\X::toArray($diff[$i]);\n      }\n      return [];\n    }\n    return $diff;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 128,

@@ -1,0 +1,1354 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Internal\\Template",
+    "namespace": true,
+    "realName": "Template",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Internal\/Template.php",
+    "startLine": 8,
+    "endLine": 592,
+    "numMethods": 27,
+    "numProperties": 11,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "templateIds": [],
+        "magicTemplateId": null,
+        "optionsTemplateId": null,
+        "permissionsTemplateId": null,
+        "pluginTemplateId": null,
+        "subpluginTemplateId": null,
+        "subOptionsTemplateId": null,
+        "subPermissionsTemplateId": null,
+        "templateTemplateId": null,
+        "appuiTemplateId": null,
+        "pluginsTemplateId": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
+    "shortName": "Template",
+    "contentConstructor": null,
+    "methods": {
+        "getTemplateId": {
+            "name": "getTemplateId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTemplateId(...$codes): ?string\n  {\n    if ($this->check() && count($codes)) {\n      $code = array_pop($codes);\n      if (!isset($this->templateIds[$code])) {\n        $this->templateIds[$code] = $this->fromCode($code, $this->getMagicTemplateId()) ?: null;\n      }\n\n      if (!isset($this->templateIds[$code])) {\n        foreach ($this->getAliasItems($this->getTemplatesTemplateId()) as $it) {\n          if ($tmp = $this->fromCode($code, $it)) {\n            $this->templateIds[$code] = $tmp;\n            break;\n          }\n        }\n      }\n\n      if (isset($this->templateIds[$code])) {\n        if (count($codes)) {\n          $codes[] = $this->templateIds[$code];\n          return $this->fromCode(...$codes);\n        }\n\n        return $this->templateIds[$code];\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 33,
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "templateList": {
+            "name": "templateList",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function templateList() {\n    return [\n      ...$this->fullOptionsRef($this->getMagicTemplateId()),\n      ...$this->fullOptionsRef($this->getTemplatesTemplateId())\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 64,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "templateList",
+            "returns": [],
+            "arguments": []
+        },
+        "textValueTemplates": {
+            "name": "textValueTemplates",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function textValueTemplates(): array\n  {\n    return array_map(function($a) {\n      return [\n        'text' => $a['text'],\n        'value' => $a['id']\n      ];\n    }, $this->templateList());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "textValueTemplates",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "getMagicTemplateId": {
+            "name": "getMagicTemplateId",
+            "summary": "Returns the ID of the root templates",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getMagicTemplateId(): ?string\n  {\n    if (!$this->magicTemplateId && $this->check() && ($root = $this->getRoot())) {\n      $cfg = $this->getClassCfg();\n      $this->magicTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [\n        $cfg['arch']['options']['id_parent'] => $root,\n        $cfg['arch']['options']['code'] => 'templates',\n      ]);\n    }\n\n    return $this->magicTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 86,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getMagicTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the root templates\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the root templates\n   * @return string\n   *\/"
+        },
+        "getPermissionsTemplateId": {
+            "name": "getPermissionsTemplateId",
+            "summary": "Returns the ID of the 'plugin > permissions' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPermissionsTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->permissionsTemplateId && $this->check()) {\n      $this->permissionsTemplateId = $this->fromCode('permissions', $this->getPluginTemplateId());\n    }\n\n    return $this->permissionsTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 104,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPermissionsTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'plugin > permissions' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'plugin > permissions' template\n   * @return string\n   *\/"
+        },
+        "getOptionsTemplateId": {
+            "name": "getOptionsTemplateId",
+            "summary": "Returns the ID of the 'plugin > options' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getOptionsTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->optionsTemplateId && $this->check()) {\n      $cfg = $this->getClassCfg();\n      $this->optionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [\n        $cfg['arch']['options']['id_parent'] => $this->getPluginTemplateId(),\n        $cfg['arch']['options']['code'] => 'options',\n      ]);\n    }\n\n    return $this->optionsTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 118,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'plugin > options' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'plugin > options' template\n   * @return string\n   *\/"
+        },
+        "getPluginTemplateId": {
+            "name": "getPluginTemplateId",
+            "summary": "Returns the ID of the 'plugin' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPluginTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->pluginTemplateId && $this->check()) {\n      $cfg = $this->getClassCfg();\n      $this->pluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [\n        $cfg['arch']['options']['id_parent'] => $this->getMagicTemplateId(),\n        $cfg['arch']['options']['code'] => 'plugin',\n      ]);\n    }\n\n    return $this->pluginTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 136,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPluginTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'plugin' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'plugin' template\n   * @return string\n   *\/"
+        },
+        "getSubpluginTemplateId": {
+            "name": "getSubpluginTemplateId",
+            "summary": "Returns the ID of the 'subplugin' template i.e. plugins in plugin",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSubpluginTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {\n      $cfg = $this->getClassCfg();\n      $this->subpluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [\n        $cfg['arch']['options']['id_parent'] => $this->getMagicTemplateId(),\n        $cfg['arch']['options']['code'] => 'subplugin',\n      ]);\n    }\n\n    return $this->subpluginTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 154,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSubpluginTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'subplugin' template i.e. plugins in plugin\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'subplugin' template i.e. plugins in plugin\n   * @return string\n   *\/"
+        },
+        "getSubOptionsTemplateId": {
+            "name": "getSubOptionsTemplateId",
+            "summary": "Returns the ID of the options template in the 'subplugin' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSubOptionsTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {\n      $cfg = $this->getClassCfg();\n      $this->subOptionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [\n        $cfg['arch']['options']['id_parent'] => $this->getSubpluginTemplateId(),\n        $cfg['arch']['options']['code'] => 'options',\n      ]);\n    }\n\n    return $this->subOptionsTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 172,
+            "endLine": 183,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSubOptionsTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the options template in the 'subplugin' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the options template in the 'subplugin' template\n   * @return string\n   *\/"
+        },
+        "getSubPermissionsTemplateId": {
+            "name": "getSubPermissionsTemplateId",
+            "summary": "Returns the ID of the options template in the 'subplugin' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSubPermissionsTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {\n      $this->subpluginTemplateId = $this->fromCode('permissions', $this->getSubpluginTemplateId());\n    }\n\n    return $this->subPermissionsTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 190,
+            "endLine": 197,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSubPermissionsTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the options template in the 'subplugin' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the options template in the 'subplugin' template\n   * @return string\n   *\/"
+        },
+        "getTemplatesTemplateId": {
+            "name": "getTemplatesTemplateId",
+            "summary": "Returns the ID of the 'plugin > template' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTemplatesTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->templateTemplateId && $this->check()) {\n      $this->templateTemplateId = $this->fromCode('templates', $this->getPluginTemplateId());\n    }\n\n    return $this->templateTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 204,
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getTemplatesTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'plugin > template' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'plugin > template' template\n   * @return string\n   *\/"
+        },
+        "getPluginsTemplateId": {
+            "name": "getPluginsTemplateId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPluginsTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->pluginsTemplateId && $this->check()) {\n      $this->pluginsTemplateId = $this->fromCode('plugins', $this->getPluginTemplateId());\n    }\n\n    return $this->pluginsTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 214,
+            "endLine": 221,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPluginsTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": []
+        },
+        "getAppuiTemplateId": {
+            "name": "getAppuiTemplateId",
+            "summary": "Returns the ID of the 'plugin > plugins > appui' template",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAppuiTemplateId(): ?string\n  {\n    if ($this->getMagicTemplateId() && !$this->appuiTemplateId && $this->check()) {\n      $this->appuiTemplateId = $this->fromCode('appui', $this->getPluginsTemplateId());\n    }\n\n    return $this->appuiTemplateId;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 228,
+            "endLine": 235,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getAppuiTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the 'plugin > plugins > appui' template\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the 'plugin > plugins > appui' template\n   * @return string\n   *\/"
+        },
+        "applyAllTemplates": {
+            "name": "applyAllTemplates",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function applyAllTemplates(): ?int\n  {\n    $tot = 0;\n    $tids = $this->items($this->getMagicTemplateId());\n    foreach ($tids as $tid) {\n      foreach ($this->getAliasItems($tid) as $id) {\n        $tot += $this->applyTemplate($id);\n      }\n    }\n\n    $tids = $this->getAliasItems($this->getTemplatesTemplateId());\n    foreach ($tids as $tid) {\n      foreach ($this->getAliasItems($tid) as $id) {\n        $tot += $this->applyTemplate($id);\n      }\n    }\n\n    return $tot;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 238,
+            "endLine": 256,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "applyAllTemplates",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": []
+        },
+        "updateTemplate": {
+            "name": "updateTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updateTemplate(string|null $id = null): ?int\n  {\n    if ($this->getMagicTemplateId() && $this->exists($id)) {\n      $res = 0;\n      \/\/ All the options referring to this template\n      $all = $this->getAliases($id);\n      if (\n        !empty($all)\n        && ($export = $this->export($id, 'sfull'))\n        && !empty($export['items'])\n      ) {\n        foreach ($all as $a) {\n          foreach ($this->import($export['items'], $a[$this->fields['id']]) as $num) {\n            $res += $num;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 263,
+            "endLine": 285,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "updateTemplate",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $id\n   * @return int|null\n   *\/"
+        },
+        "updateAllTemplates": {
+            "name": "updateAllTemplates",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updateAllTemplates(): ?int\n  {\n    if ($id = $this->fromCode('list', 'templates')) {\n      $res = 0;\n      foreach ($this->itemsRef($id) ?? [] as $a) {\n        $res += (int)$this->updateTemplate($a);\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 291,
+            "endLine": 303,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "updateAllTemplates",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int|null\n   *\/"
+        },
+        "applySubTemplates": {
+            "name": "applySubTemplates",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function applySubTemplates($id, $target = null): int \n  {\n    $num = 0;\n    if (!$target) {\n      $target = $id;\n    }\n\n    if (($cfg = $this->getCfg($id)) && ($id_tpl = $cfg['id_template'])) {\n      if (($id_tpl === $this->getSubpluginTemplateId()) && (count($this->parents($id)) <= 3)) {\n        $id_tpl = $this->getPluginTemplateId();\n      }\n      $items = $this->nativeOptions($target);\n      if (!empty($items)) {\n        foreach ($items as $it) {\n          $scfg = $this->getCfg($it['id']);\n          if (empty($scfg['container'])) {\n            if ($it['id_alias'] !== $id_tpl) {\n              if ($this->setAlias($it['id'], $id_tpl)) {\n                $this->deleteCache($it['id']);\n                $num++;\n              }\n              else {\n                throw new Exception(X::_(\"Impossible to set the alias for the option\").\" \".$it['id']);\n              }\n            }\n\n            $this->applyTemplate($it['id']);\n          }\n          else {\n            $this->applySubTemplates($id, $it['id']);\n          }\n        }\n      }\n    }\n\n    return $num;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 305,
+            "endLine": 341,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "applySubTemplates",
+            "returns": [
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "applyTemplate": {
+            "name": "applyTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function applyTemplate(string $id, bool $rootAlso = false): ?int\n  {\n    if (!$this->getMagicTemplateId()) {\n      return null;\n    }\n\n    if (!($idAlias = $this->alias($id))) {\n      throw new Exception(X::_(\"Impossible to apply a template, the option must be aliased\"));\n    }\n\n    if (($idAlias === $this->getSubpluginTemplateId()) && (count($this->parents($id)) === 3)) {\n      $idAlias = $this->getPluginTemplateId();\n    }\n\n    $tot = 0;\n    $templateParent = $this->parent($idAlias);\n    if ($templateParent['id'] !== $this->getMagicTemplateId()) {\n      if (!$templateParent['id_alias']) {\n        throw new Exception(X::_(\"Impossible to apply a template, the template's parent must have an alias\"));\n      }\n\n      if ($templateParent['id_alias'] !== $this->getTemplatesTemplateId()) {\n        throw new Exception(X::_(\"Impossible to apply a template, the template's parent must be aliased with the templates' list\"));\n      }\n    }\n\n    \/*\n    if ($rootAlso) {\n      $opt = $this->option($id);\n      $topt = $this->option($idAlias);\n      unset($opt['id_alias'], $opt['alias']);\n      if ((json_encode($opt) !== json_encode($topt)) && $this->set($id, $topt)) {\n        $tot++;\n      }\n    }\n    *\/\n\n    $this->unsetCfg($id);\n\n    foreach ($this->items($idAlias) as $tid) {\n      $tot += $this->applyChildTemplate($tid, $id);\n    }\n\n    return $tot;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 349,
+            "endLine": 393,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "applyTemplate",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "rootAlso",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "lso"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$root",
+                        "description": "lso"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id\n   * @param bool $rootAlso\n   * @return int|null\n   *\/"
+        },
+        "applyChildTemplate": {
+            "name": "applyChildTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function applyChildTemplate($idSubtemplate, $target): int\n  {\n    $tot = 0;\n    if ($idSubtemplate === $target) {\n      throw new Exception(\"The template cannot apply to itself\");\n    }\n\n    $subtpl = $this->rawOption($idSubtemplate);\n    $f =& $this->class_cfg['arch']['options'];\n    $cfg = $subtpl[$f['cfg']] ? json_decode($subtpl[$f['cfg']], true) : [];\n    $foptions = $this->rawOptions($target);\n    $update = true;\n    if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {\n      if ($o = X::getRow($foptions, ['code' => $subtpl[$f['code']]])) {\n        if ($o['id'] === $idSubtemplate) {\n          X::log([\n            $idSubtemplate,\n            $target,\n            $this->option($target),\n            $subtpl,\n            $foptions,\n            $this->items($target),\n            $this->db->rselectAll('bbn_options', [], [$f['id_parent'] => $target])\n          ], 'optionsFail');\n        }\n        \n        if ($this->setAlias($o['id'], $idSubtemplate)) {\n          $tot++;\n        }\n      }\n      elseif ($id = $this->add([\n        $f['id_parent'] => $target,\n        $f['code']      => $subtpl[$f['code']],\n        $f['id_alias']  => $idSubtemplate\n      ])) {\n        $o = $this->rawOption($id);\n        $tot++;\n        $update = false;\n      }\n      else {\n        throw new Exception(X::_(\"Impossible to add the option\"));\n      }\n    }\n\n    if ($update && !empty($o)) {\n      $upd = [];\n      if ($o[$f['code']] !== $subtpl[$f['code']]) {\n        $upd[$f['code']] = $subtpl[$f['code']];\n      }\n      if (!empty($o[$f['text']])) {\n        $upd[$f['text']] = null;\n      }\n      if (!empty($o[$f['value']])) {\n        $upd[$f['value']] = null;\n      }\n      if (!empty($o[$f['cfg']])) {\n        $upd[$f['cfg']] = null;\n      }\n\n      if (!empty($upd)) {\n        if ($this->db->update($this->class_cfg['table'], $upd, [$f['id'] => $o['id']])) {\n          $tot++;\n        }\n      }\n    }\n\n    $this->deleteCache();\n    \n    if (!empty($cfg['id_template'])) {\n      $this->applySubTemplates($o['id']);\n    }\n    else {\n      foreach ($this->items($idSubtemplate) as $tid) {\n        $tot += $this->applyChildTemplate($tid, $o['id']);\n      }\n    }\n\n    $this->deleteCache();\n    return $tot;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 395,
+            "endLine": 474,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "applyChildTemplate",
+            "returns": [
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "idSubtemplate",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getParentTemplateId": {
+            "name": "getParentTemplateId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentTemplateId(string $id): ?string\n  {\n    $templateId1 = $this->getTemplatesTemplateId();\n    $templateId2 = $this->getMagicTemplateId();\n    while ($idParent = $this->getIdParent($id)) {\n      \/\/ root\n      if ($idParent === $id) {\n        return null;\n      }\n\n      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {\n        return $id;\n      }\n\n      $id = $idParent;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 476,
+            "endLine": 494,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getParentTemplateId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "usedTemplate": {
+            "name": "usedTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function usedTemplate(string $id): ?string\n  {\n    if ($this->exists($id) && ($idAlias = $this->getIdAlias($id))) {\n      $templateId1 = $this->getMagicTemplateId();\n      $templateId2 = $this->getTemplatesTemplateId();\n      $id = $idAlias;\n      while ($idParent = $this->getIdParent($id)) {\n        \/\/ root\n        if ($idParent === $id) {\n          return null;\n        }\n\n        if (($idParent === $templateId1) || ($this->getIdAlias($idParent) === $templateId2)) {\n          return $id;\n        }\n\n        $id = $idParent;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 496,
+            "endLine": 517,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "usedTemplate",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasTemplate": {
+            "name": "hasTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasTemplate(string $id): bool\n  {\n    return (bool)$this->usedTemplate($id);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 519,
+            "endLine": 522,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "hasTemplate",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isPartOfTemplates": {
+            "name": "isPartOfTemplates",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isPartOfTemplates($id): bool\n  {\n    $templateId1 = $this->getTemplatesTemplateId();\n    $templateId2 = $this->getMagicTemplateId();\n    if (in_array($this->getIdAlias($id), [$templateId1, $templateId2], true)) {\n      return true;\n    }\n\n    return $this->isInTemplate($id);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 525,
+            "endLine": 534,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isPartOfTemplates",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isTemplate": {
+            "name": "isTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isTemplate(string $id): bool\n  {\n    $templateId1 = $this->getTemplatesTemplateId();\n    $templateId2 = $this->getMagicTemplateId();\n    if ($idParent = $this->getIdParent($id)) {\n      \/\/ root\n      if ($idParent === $id) {\n        return false;\n      }\n\n      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 537,
+            "endLine": 553,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isTemplate",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isInTemplate": {
+            "name": "isInTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isInTemplate(string $id): bool\n  {\n    $templateId1 = $this->getTemplatesTemplateId();\n    $templateId2 = $this->getMagicTemplateId();\n    while ($idParent = $this->getIdParent($id)) {\n      \/\/ root\n      if ($idParent === $id) {\n        return false;\n      }\n\n      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {\n        return true;\n      }\n\n      $id = $idParent;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 556,
+            "endLine": 574,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isInTemplate",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOptionTemplate": {
+            "name": "getOptionTemplate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getOptionTemplate(string $id): ?array\n  {\n    if ($this->isInTemplate($id)) {\n      return $this->option($this->alias($id));\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 577,
+            "endLine": 584,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getOptionTemplate",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isApp": {
+            "name": "isApp",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Internal\\Template",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Template.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isApp(string $id): bool\n  {\n    return $this->isPlugin($id) && ($this->getIdParent($id) === $this->root);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 587,
+            "endLine": 590,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isApp",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "templateIds": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "magicTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "optionsTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "permissionsTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "pluginTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "subpluginTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "subOptionsTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "subPermissionsTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "templateTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "appuiTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "pluginsTemplateId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Template"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Template",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns the ID of the root templates\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'plugin > permissions' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'plugin > options' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'plugin' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'subplugin' template i.e. plugins in plugin\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the options template in the 'subplugin' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the options template in the 'subplugin' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'plugin > template' template\n   * @return string\n   *\/",
+        "\/**\n   * Returns the ID of the 'plugin > plugins > appui' template\n   * @return string\n   *\/",
+        "\/**\n   * @param string|null $id\n   * @return int|null\n   *\/",
+        "\/**\n   * @return int|null\n   *\/",
+        "\/**\n   * @param string $id\n   * @param bool $rootAlso\n   * @return int|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

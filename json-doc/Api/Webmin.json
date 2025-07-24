@@ -20,7 +20,7 @@
     "fileName": "\/Api\/Webmin.php",
     "startLine": 16,
     "endLine": 201,
-    "numMethods": 28,
+    "numMethods": 27,
     "numProperties": 5,
     "numConstants": 1,
     "numStaticProperties": 0,
@@ -1857,60 +1857,6 @@
                 "return": ""
             },
             "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
-        },
-        "serializeFunction": {
-            "name": "serializeFunction",
-            "summary": "Transforms a function in a cacheable string",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Api\\Webmin",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
-            "static": false,
-            "visibility": "protected",
-            "final": false,
-            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
-            "parent": false,
-            "trait": "bbn\\Models\\Tts\\Cache",
-            "startLine": 241,
-            "endLine": 245,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "shortName": "serializeFunction",
-            "returns": [],
-            "arguments": [
-                {
-                    "name": "function",
-                    "position": 0,
-                    "type": "callable",
-                    "type_arr": [
-                        "callable"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ],
-            "doc": {
-                "description": "Transforms a function in a cacheable string\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "callable",
-                        "name": "$function"
-                    }
-                ],
-                "return": ""
-            },
-            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
         }
     },
     "properties": {

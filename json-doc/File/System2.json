@@ -1669,7 +1669,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array\n  {\n    if ( $this->check() && $this->isDir($path) ){\n      \/\/die(var_dump($path));\n      $is_absolute = strpos($path, '\/') === 0;\n      $fs =& $this;\n      clearstatcache();\n      $type = $including_dirs ? 'both' : 'file';\n      return array_map(function($a)use($is_absolute, $fs, $detailed){\n        if ( $detailed ){\n          $a['path'] = $fs->getSystemPath($a['path'], $is_absolute);\n          return $a;\n        }\n        return $fs->getSystemPath($a, $is_absolute);\n      }, $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed));\n    }\n    return null;\n  }",
+            "code": "  public function getFiles(string|null $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array\n  {\n    if ( $this->check() && $this->isDir($path) ){\n      \/\/die(var_dump($path));\n      $is_absolute = strpos($path, '\/') === 0;\n      $fs =& $this;\n      clearstatcache();\n      $type = $including_dirs ? 'both' : 'file';\n      return array_map(function($a)use($is_absolute, $fs, $detailed){\n        if ( $detailed ){\n          $a['path'] = $fs->getSystemPath($a['path'], $is_absolute);\n          return $a;\n        }\n        return $fs->getSystemPath($a, $is_absolute);\n      }, $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed));\n    }\n    return null;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 765,

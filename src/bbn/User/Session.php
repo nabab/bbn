@@ -81,6 +81,41 @@ class Session
     $this->close();
   }
 
+  public function regenerate(): ?string
+  {
+    if (!X::isCli()) {
+      $this->open();
+      $oldSession = session_id();
+      // Create new session without destroying the old one
+      if (session_regenerate_id(false)) {
+        // Grab current session ID and close both sessions to allow other scripts to use them
+        $newSession = session_id();
+        if (!$newSession || ($newSession === $oldSession)) {
+          throw new Exception(X::_("Impossible to regenerate the session ID"));
+        }
+
+        session_write_close();
+
+        // Set session ID to the new one, and start it back up again
+        session_id($newSession);
+        session_start();
+
+        // Don't want this one to expire
+        if (session_id() !== $newSession) {
+          throw new Exception(X::_("The session ID %s could not be regenerated, still using %s", $newSession, session_id()));
+        }
+      }
+      else {
+        throw new Exception(X::_("The session ID %s could not be regenerated", session_id()));
+      }
+      
+      $this->close();
+      return $newSession;
+    }
+
+    return null;
+  }
+
   public static function destroyInstance()
   {
     if (self::singletonExists()) {

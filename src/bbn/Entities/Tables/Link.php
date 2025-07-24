@@ -11,17 +11,19 @@ use bbn\Entities\Entity;
 use bbn\Entities\LinkTrait;
 use bbn\Models\Cls\Nullall;
 use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Tagger;
 
 class Link extends EntityTable
 {
-  use DbActions;
+  use Tagger;
 
   private $type;
   private $cfg;
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_links',
     'tables' => [
-      'links' => 'bbn_entities_links'
+      'links' => 'bbn_entities_links',
+      'tags' => 'bbn_entities_links_tags'
     ],
     'arch' => [
       'links' => [
@@ -33,6 +35,11 @@ class Link extends EntityTable
         'id_option' => 'id_option',
         'cfg' => 'cfg',
       ],
+      'tags' => [
+        'id' => 'id',
+        'id_tag' => 'id_tag',
+        'id_link' => 'id_link'
+      ]
     ],
     'relations' => [
       'identity' => 'id_identity',
@@ -43,6 +50,7 @@ class Link extends EntityTable
 
   protected static array $linkCfg = [
     "single" => false,
+    "tags" => false,
     "required" => false,
     "identity" => false,
     "address" => false,
@@ -55,6 +63,8 @@ class Link extends EntityTable
   private $text;
 
   protected $where = [];
+
+  protected $hasTags = false;
 
   protected static array $codes = [];
 
@@ -70,13 +80,27 @@ class Link extends EntityTable
   )
   {
     parent::__construct($db, $entities, $entity);
-    if (!empty(static::$linkCfg['cfg'])) {
-      $this->class_cfg['cfg'] = static::$linkCfg['cfg'];
-    }
-
     $o = $this->options();
     $codes = self::getCodes($this);
-    $this->cfg =& static::$linkCfg;
+    $this->cfg =& static::$linkCfg ?: self::$linkCfg;
+    if (!empty($this->cfg['cfg'])) {
+      $this->class_cfg['cfg'] = $this->cfg['cfg'];
+    }
+
+    if (!empty($this->cfg['tags'])) {
+      $this->hasTags = true;
+      $this->taggerInit(
+        $this->class_cfg['tables']['tags'],
+        [
+          'id_tag' => $this->class_cfg['arch']['tags']['id_tag'],
+          'id_element' => $this->class_cfg['arch']['tags']['id_link']
+        ]
+      );
+      if (is_string($this->cfg['tags'])) {
+        $this->taggerType = $this->taggerObject->retrieveType($this->cfg['tags']);
+      }
+    }
+
     if (!empty($codes) && ($this->type = $o->fromCode($codes))) {
       $option = $o->option($this->type);
       $this->code = $option['code'];
@@ -139,31 +163,73 @@ class Link extends EntityTable
   public function get($id = null): ?array
   {
     if ($id) {
-      return $this->dbTraitRselect([$this->fields['id'] => $id]);
+      $res = $this->dbTraitRselect([$this->fields['id'] => $id]);
+    }
+    elseif (!empty($this->cfg['single'])) {
+      $res = $this->dbTraitRselectAll([])[0] ?? null;
+    }
+    else {
+      throw new Exception(X::_("This link is not single, you must enter an ID for get"));
     }
 
-    if (!empty($this->cfg['single'])) {
-      $res = $this->dbTraitRselectAll([]);
-      return $res ? $res[0] : null;
+    if ($res) {
+      if ($this->hasTags) {
+        $res['tags'] = $this->getTags($res[$this->fields['id']]);
+      }
+
+      return $res;
     }
 
-    throw new Exception(X::_("This link is not single, you must enter an ID for get"));
+    return null;
+  }
+
+  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  {
+    $res = parent::getAll(
+      $filter,
+      $order,
+      $limit,
+      $start,
+      $fields
+    );
+    if ($this->hasTags) {
+      foreach ($res as &$r) {
+        $r['tags'] = $this->getTags($r[$this->fields['id']]);
+      }
+    }
+    unset($r);
+    return $res;
   }
 
   public function getByIdentity(string $id): ?array
   {
-    return $this->dbTraitRselect([
+    $res = $this->dbTraitRselect([
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id_identity'] => $id
     ]);
+    if ($res) {
+      if ($this->hasTags) {
+        $res['tags'] = $this->getTags($res[$this->fields['id']]);
+      }
+    }
+
+    return $res;
   }
 
   public function getByAddress(string $id): ?array
   {
-    return $this->dbTraitRselect([
+    $res = $this->dbTraitRselect([
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id_address'] => $id
     ]);
+    if ($res) {
+      if ($this->hasTags) {
+        $res['tags'] = $this->getTags($res[$this->fields['id']]);
+      }
+
+    }
+
+    return $res;
   }
 
   public function update(array $data, string|array $where): int

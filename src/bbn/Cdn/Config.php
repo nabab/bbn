@@ -102,7 +102,7 @@ class Config extends bbn\Models\Cls\Basic
    * //         "lib": "jquery",
    * //     },
    * //     "hash": "34b6416f721c044661972951310895a8",
-   * //     "cache_file": "/home/thomas/domains/apstapp.thomas.lan/public_html/cache/34b6416f721c044661972951310895a8.cache",
+   * //     "cache_file": "/home/bbn/public_html/cache/34b6416f721c044661972951310895a8.cache",
    * //     "ext": "",
    * //     "grouped": false,
    * //     "test": false,

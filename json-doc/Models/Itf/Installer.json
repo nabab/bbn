@@ -1,0 +1,131 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Itf\\Installer",
+    "namespace": true,
+    "realName": "Installer",
+    "realNamespace": "bbn\\Models\\Itf",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Models\/Itf\/Installer.php",
+    "startLine": 5,
+    "endLine": 10,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": true,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Itf",
+    "shortName": "Installer",
+    "contentConstructor": null,
+    "methods": {
+        "report": {
+            "name": "report",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Itf\\Installer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Itf\/Installer.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function report(string $msg, bool $isTitle = false): void;",
+            "parent": false,
+            "trait": false,
+            "startLine": 7,
+            "endLine": 7,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "report",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "msg",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "isTitle",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "has_appui": {
+            "name": "has_appui",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Itf\\Installer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Itf\/Installer.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function has_appui(): bool;",
+            "parent": false,
+            "trait": false,
+            "startLine": 9,
+            "endLine": 9,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "has_appui",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

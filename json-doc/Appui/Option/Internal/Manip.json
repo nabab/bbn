@@ -3,17 +3,17 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Manip",
+    "name": "bbn\\Appui\\Option\\Internal\\Manip",
     "namespace": true,
     "realName": "Manip",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Manip.php",
-    "startLine": 9,
-    "endLine": 558,
+    "fileName": "\/Appui\/Option\/Internal\/Manip.php",
+    "startLine": 10,
+    "endLine": 699,
     "numMethods": 9,
-    "numProperties": 0,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
@@ -25,10 +25,12 @@
     "modifiers": 0,
     "parentClass": null,
     "isSubclassOf": false,
-    "defaultProperties": [],
+    "defaultProperties": {
+        "isExporting": false
+    },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Manip",
     "contentConstructor": null,
     "methods": {
@@ -37,16 +39,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function export(string $id, string $mode = 'single'): ?array\n  {\n    $default = $this->getDefault();\n    $this->setDefault($this->root);\n    $o = null;\n    $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];\n    if (!in_array($mode, $modes)) {\n      throw new Exception(X::_(\"The given mode is forbidden\"));\n    }\n\n    $simple = false;\n    switch ($mode) {\n      case 'single':\n        $o = $this->rawOption($id);\n        break;\n      case 'simple':\n        $o = $this->option($id);\n        $simple = true;\n        break;\n      case 'schildren':\n        $o = $this->fullOptions($id);\n        $simple = true;\n        break;\n      case 'children':\n        $o = $this->exportDb($id, false, true);\n        break;\n      case 'full':\n        $o = $this->exportDb($id, true, true);\n        break;\n      case 'sfull':\n        $o = $this->fullTree($id);\n        $simple = true;\n        break;\n    }\n\n    if ($o) {\n      if ($simple) {\n        $opt =& $this;\n        $fn  = function ($o) use (&$opt) {\n\n          $o[$opt->fields['text']] = $opt->rawText($o[$opt->fields['id']]);\n\n          $cfg = $opt->getCfg($o[$this->fields['id']]);\n          if (!is_array($cfg) || !empty($cfg['inherit_from'])) {\n            $cfg = [];\n          }\n          elseif (!empty($cfg['schema']) && is_string($cfg['schema'])) {\n            $cfg['schema'] = json_decode($cfg['schema'], true);\n          }\n\n          \/\/if (isset($cfg['id'])) {\n            \/\/unset($cfg['id']);\n          \/\/}\n\n          if (isset($cfg['scfg'])\n              && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])\n          ) {\n            $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);\n          }\n\n          if (!empty($cfg['id_root_alias'])) {\n            if ($codes = $opt->getCodePath($cfg['id_root_alias'])) {\n              $cfg['id_root_alias'] = $codes;\n            }\n            else {\n              unset($cfg['id_root_alias']);\n            }\n          }\n\n          foreach ($cfg as $n => $v) {\n            if (!$v) {\n              unset($cfg[$n]);\n            }\n          }\n\n          if (!empty($cfg)) {\n            $o[$this->fields['cfg']] = $cfg;\n          }\n\n          unset($o[$this->fields['id']]);\n          unset($o[$this->fields['id_parent']]);\n          if (isset($o['num_children'])) {\n            unset($o['num_children']);\n          }\n\n          if (isset($o['alias'])) {\n            unset($o['alias']);\n          }\n\n          foreach ($o as $n => $v) {\n            if (!$v) {\n              unset($o[$n]);\n            }\n          }\n\n          if (!empty($o[$this->fields['id_alias']])\n              && ($codes = $opt->getCodePath($o[$this->fields['id_alias']]))\n          ) {\n            $o[$this->fields['id_alias']] = $codes;\n          }\n          else {\n            unset($o[$this->fields['id_alias']]);\n          }\n\n          return $o;\n        };\n\n        switch ($mode) {\n          case 'simple':\n            $o = $fn($o);\n            break;\n          case 'schildren':\n            $o = X::map($fn, $o, 'items');\n            break;\n          case 'sfull':\n            $o = $fn($o);\n            $o['items'] = empty($o['items']) ? [] : X::map($fn, $o['items'], 'items');\n            break;\n        }\n      }\n\n    }\n    \n    $this->setDefault($default);\n    return $o;\n  }",
+            "code": "  public function export(string $id, string $mode = 'single'): ?array\n  {\n    $this->isExporting = true;\n    $this->deleteCache();\n    $o = null;\n    $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];\n    if (!in_array($mode, $modes)) {\n      throw new Exception(X::_(\"The given mode is forbidden\"));\n    }\n\n    $simple = false;\n    switch ($mode) {\n      case 'single':\n        $o = $this->rawOption($id);\n        break;\n      case 'simple':\n        $o = $this->option($id);\n        $simple = true;\n        break;\n      case 'schildren':\n        $o = $this->fullOptions($id);\n        $simple = true;\n        break;\n      case 'children':\n        $o = $this->exportDb($id, false, true);\n        break;\n      case 'full':\n        $o = $this->exportDb($id, true, true);\n        break;\n      case 'sfull':\n        $o = $this->fullTree($id);\n        $simple = true;\n        break;\n    }\n\n    if ($o) {\n      if ($simple) {\n        $opt =& $this;\n        $fn  = function ($o) use (&$opt) {\n\n          $o[$opt->fields['text']] = $opt->rawText($o[$opt->fields['id']]);\n\n          $cfg = $opt->getCfg($o[$this->fields['id']]);\n          if (!is_array($cfg) || !empty($cfg['inherit_from'])) {\n            $cfg = [];\n          }\n          elseif (!empty($cfg['schema']) && is_string($cfg['schema'])) {\n            $cfg['schema'] = json_decode($cfg['schema'], true);\n          }\n\n          if (isset($cfg['root_alias'])) {\n            unset($cfg['root_alias']);\n          }\n\n          \/\/if (isset($cfg['id'])) {\n            \/\/unset($cfg['id']);\n          \/\/}\n\n          if (!empty($cfg['scfg'])) {\n            if (!empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])) {\n              $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);\n            }\n\n            if (!empty($cfg['scfg']['id_root_alias'])) {\n              if ($codes = $opt->toCodeArray($cfg['scfg']['id_root_alias'])) {\n                $cfg['scfg']['id_root_alias'] = $codes;\n              }\n              else {\n                unset($cfg['scfg']['id_root_alias']);\n              }\n            }\n\n            if (!empty($cfg['scfg']['id_template'])) {\n              if ($codes = $opt->toCodeArray($cfg['scfg']['id_template'])) {\n                $cfg['scfg']['id_template'] = $codes;\n              }\n              else {\n                unset($cfg['scfg']['id_template']);\n              }\n            }\n          }\n\n          if (!empty($cfg['id_root_alias'])) {\n            if ($codes = $opt->toCodeArray($cfg['id_root_alias'])) {\n              $cfg['id_root_alias'] = $codes;\n            }\n            else {\n              unset($cfg['id_root_alias']);\n            }\n          }\n\n          if (!empty($cfg['id_template'])) {\n            if ($codes = $opt->toCodeArray($cfg['id_template'])) {\n              $cfg['id_template'] = $codes;\n            }\n            else {\n              unset($cfg['id_template']);\n            }\n          }\n\n          foreach ($cfg as $n => $v) {\n            if (!$v) {\n              unset($cfg[$n]);\n            }\n          }\n\n          if (!empty($cfg)) {\n            $o[$this->fields['cfg']] = $cfg;\n          }\n\n          unset($o[$this->fields['id']]);\n          unset($o[$this->fields['id_parent']]);\n          if (isset($o['num_children'])) {\n            unset($o['num_children']);\n          }\n\n          if (isset($o['alias'])) {\n            unset($o['alias']);\n          }\n\n          foreach ($o as $n => $v) {\n            if (!$v) {\n              unset($o[$n]);\n            }\n          }\n\n          if (!empty($o[$this->fields['id_alias']])\n              && ($codes = $opt->toCodeArray($o[$this->fields['id_alias']]))\n          ) {\n            $o[$this->fields['id_alias']] = $codes;\n          }\n          else {\n            unset($o[$this->fields['id_alias']]);\n          }\n\n          return $o;\n        };\n\n        switch ($mode) {\n          case 'simple':\n            $o = $fn($o);\n            break;\n          case 'schildren':\n            $o = X::map($fn, $o, 'items');\n            break;\n          case 'sfull':\n            $o = $fn($o);\n            $o['items'] = empty($o['items']) ? [] : X::map($fn, $o['items'], 'items');\n            break;\n        }\n      }\n\n    }\n    \n    $this->isExporting = false;\n    $this->deleteCache();\n    return $o;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 18,
-            "endLine": 143,
+            "startLine": 21,
+            "endLine": 178,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -126,16 +128,16 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function exportDb($id, bool $deep = false, bool $return = false, bool $aliases = false)\n  {\n    if (($ret = $deep ? $this->rawTree($id) : $this->rawOptions($id))) {\n      $ret  = $this->analyzeOut($ret);\n      $res  = [];\n      $done = [];\n      $max  = 3;\n      foreach ($ret['options'] as $i => $o) {\n        if (!$i || in_array($o[$this->fields['id_parent']], $done, true)) {\n          if (empty($o[$this->fields['id_alias']])) {\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n      }\n\n      while ($max && (count($res) < count($ret['options']))) {\n        foreach ($ret['options'] as $i => $o) {\n          if (!empty($o[$this->fields['id_alias']])\n              && !in_array($o[$this->fields['id']], $done, true)\n              && in_array($o[$this->fields['id_parent']], $done, true)\n              && in_array($o[$this->fields['id_alias']], $done, true)\n          ) {\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n\n        $max--;\n      }\n\n      if (count($res) < count($ret['options'])) {\n        foreach ($ret['options'] as $i => $o) {\n          if (!in_array($o[$this->fields['id_parent']], $done, true)) {\n            $o[$this->fields['id_parent']] = $this->getCodePath($o[$this->fields['id_parent']]);\n          }\n\n          if (!empty($o[$this->fields['id_alias']])\n              && !in_array($o[$this->fields['id']], $done, true)\n          ) {\n            if (!in_array($o[$this->fields['id_alias']], $done, true)) {\n              $code_path     = $this->getCodePath($o[$this->fields['id_alias']]);\n              $o[$this->fields['id_alias']] = $code_path ?: $o[$this->fields['id_alias']];\n            }\n\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n      }\n\n      return $return ? $res : var_export($res, 1);\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 159,
-            "endLine": 214,
+            "startLine": 194,
+            "endLine": 249,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -240,16 +242,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function importAll(array $options, $id_parent = null) {\n    $res = 0;\n    foreach ($this->import($options, $id_parent) as $num) {\n      $res += $num;\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 217,
-            "endLine": 224,
+            "startLine": 252,
+            "endLine": 259,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -299,26 +301,29 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function import(array $options, $id_parent = null, array &$todo = null)\n  {\n    if (is_array($id_parent)) {\n      array_push($id_parent, $this->getRoot());\n      $id_parent = $this->fromCode($id_parent);\n    }\n    elseif (null === $id_parent) {\n      $id_parent = $this->getDefault();\n    }\n\n    if (!empty($options) && $this->check() && $this->exists($id_parent)) {\n      $c       =& $this->fields;\n      $is_root = false;\n      if ($todo === null) {\n        $is_root = true;\n        $todo    = [];\n      }\n\n      if (!isset($options[0])) {\n        $options = [$options];\n      }\n\n      if (X::isAssoc($options)) {\n        $options = [$options];\n      }\n\n      foreach ($options as $o) {\n        $tmp   = [];\n        $items = [];\n        \/** @todo Temp solution *\/\n        if (!is_array($o)) {\n          continue;\n        }\n        if (isset($o[$c['id']])) {\n          if ($this->exists($o[$c['id']])) {\n            unset($o[$c['id']]);\n          }\n        }\n\n        $o[$c['id_parent']] = $id_parent ?: $this->default;\n        if (isset($o['items'])) {\n          $items = $o['items'] ?: null;\n          unset($o['items']);\n        }\n\n\n        $hasNoText = empty($o[$c['text']]);\n        if (isset($o[$c['id_alias']])) {\n          $tmp['id_alias'] = $o[$c['id_alias']];\n          if ($hasNoText) {\n            $o[$c['text']] = 'waiting for alias';\n          }\n          unset($o[$c['id_alias']]);\n        }\n\n        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {\n          $tmp['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];\n          unset($o[$c['cfg']]['id_root_alias']);\n        }\n\n        if ($id = $this->add($o, true)) {\n          yield 1;\n          if (!empty($tmp)) {\n            $todo[$id] = $tmp;\n          }\n\n          if (!empty($items)) {\n            foreach ($this->import($items, $id, $todo) as $success) {\n              yield $success;\n            }\n          }\n        }\n        else {\n          X::log($o);\n          throw new Exception(X::_(\"Error while importing: impossible to add\"));\n        }\n      }\n\n      if ($is_root && !empty($todo)) {\n        foreach ($todo as $id => $td) {\n          if (!empty($td['id_alias'])) {\n            array_push($td['id_alias'], $this->getRoot());\n            if ($id_alias = $this->fromCode(...$td['id_alias'])) {\n              try {\n                $this->setAlias($id, $id_alias);\n                if ($hasNoText) {\n                  $this->setText($id, null);\n                }\n              }\n              catch (Exception $e) {\n                throw new Exception($e->getMessage());\n              }\n            }\n            else {\n              X::log($td['id_alias']);\n              throw new Exception(\n                X::_(\n                  \"Error while importing: impossible to set the alias %s\",\n                  json_encode($td, JSON_PRETTY_PRINT)\n                )\n              );\n            }\n          }\n\n          if (!empty($td['id_root_alias'])\n              && ($id_root_alias = $this->fromCode(...$td['id_root_alias']))\n          ) {\n            $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);\n          }\n        }\n      }\n\n    }\n  }",
+            "code": "  public function import( \n    array $options,\n    null|array|string|int $id_parent = null,\n    $no_alias = false,\n    ?array &$todo = null,\n    bool $returnId = false\n  ): ?iterable\n  {\n    if (is_array($id_parent)) {\n      $id_parent = $this->fromCode(...$id_parent);\n    }\n    elseif (null === $id_parent) {\n      $id_parent = $this->getDefault();\n    }\n\n    if (empty($todo)) {\n      $this->cacheDeleteAll();\n    }\n\n    if (!empty($options) && $this->check() && $this->exists($id_parent)) {\n      $withParent = [];\n      $c       =& $this->fields;\n      $is_root = false;\n      if ($todo === null) {\n        $parent = $this->option($id_parent);\n        if ($parent['id_alias'] && in_array($parent['id_alias'], [$this->getSubpluginTemplateId(), $this->getPluginTemplateId()], true)) {\n          $id_parent = $this->fromCode('options', $id_parent);\n          if (!$id_parent) {\n            throw new Exception(X::_(\"Error while importing: there should be an 'option' option in the target plugin\"));\n          }\n        }\n        $is_root = true;\n        $todo    = [];\n      }\n\n      if (X::isAssoc($options)) {\n        $options = [$options];\n      }\n\n      $this->deleteCache();\n      $realParent = $id_parent ?: $this->default;\n      $currentOptions = $this->fullOptions($realParent);\n      foreach ($options as $o) {\n        $this->deleteCache();\n        $after = [];\n        $items = [];\n        \/** @todo Temp solution *\/\n        if (empty($o) || !is_array($o)) {\n          continue;\n        }\n\n        if (isset($o[$c['id']])) {\n          if ($this->exists($o[$c['id']])) {\n            unset($o[$c['id']]);\n          }\n        }\n\n        if (!empty($o[$c['id_parent']]) && is_array($o[$c['id_parent']])) {\n          $withParent[] = $o;\n          continue;\n        }\n\n        $o[$c['id_parent']] = $realParent;\n        if (isset($o['items'])) {\n          $items = $o['items'] ?: null;\n          unset($o['items']);\n        }\n\n\n        $hasNoText = empty($o[$c['text']]);\n\n        if (isset($o[$c['id_alias']])) {\n          if ($tmp = $this->fromCode(...$o[$c['id_alias']])) {\n            $o[$c['id_alias']] = $tmp;\n            if (empty($o[$c['code']])) {\n              $o[$c['code']] = $this->code($tmp);\n            }\n          }\n          else {\n            $after['id_alias'] = $o[$c['id_alias']];\n            if (empty($o[$c['code']])) {\n              $o[$c['code']] = $this->code($tmp);\n            }\n            \/\/ Add doesn't accept element with neither alias nor text\n            if ($hasNoText) {\n              $after[$c['text']] = null;\n            }\n\n            unset($o[$c['id_alias']]);\n          }\n        }\n\n        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {\n          if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_root_alias'])) {\n            $o[$c['cfg']]['id_root_alias'] = $tmp;\n            $o[$c['cfg']]['relations'] = 'alias';\n          }\n          else {\n            $after['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];\n            unset($o[$c['cfg']]['id_root_alias']);\n          }\n        }\n\n        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_template'])) {\n          if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_template'])) {\n            $o[$c['cfg']]['id_template'] = $tmp;\n            $o[$c['cfg']]['relations'] = 'template';\n            $after['id_template'] = $o[$c['cfg']]['id_template'];\n          }\n          else {\n            $after['id_template'] = $o[$c['cfg']]['id_template'];\n            unset($o[$c['cfg']]['id_template']);\n          }\n        }\n\n        $search = $o;\n        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']], $search[$c['alias']]);\n        $code = $o[$c['code']] ?? (isset($o['alias']) ? $o['alias']['code'] : null);\n\n        if ($code) {\n          $search = [$c['code'] => $code];\n        }\n\n        if ($row = X::getRow($currentOptions, $search)) {\n          $o = X::mergeArrays($row, $o);\n        }\n\n        if ($id = $this->add($o, true)) {\n          yield $returnId ? $id : 1;\n          if (!empty($after)) {\n            $todo[$id] = $after;\n          }\n\n          if (!empty($items)) {\n            foreach ($this->import($items, $id, $no_alias, $todo) as $success) {\n              yield $success;\n            }\n          }\n        }\n        else {\n          X::log($o);\n          throw new Exception(X::_(\"Error while importing: impossible to add\"));\n        }\n      }\n\n      if (!$no_alias && $is_root && !empty($todo)) {\n        foreach ($todo as $id => $td) {\n          if (!empty($td['id_alias'])) {\n            $id_alias = is_array($td['id_alias']) ? $this->fromCode(...$td['id_alias']) : $id['id_alias'];\n            if (Str::isUid($id_alias)) {\n              try {\n                $this->setAlias($id, $id_alias);\n                if (array_key_exists($c['text'], $td) && !$td[$c['text']]) {\n                  $this->setText($id, null);\n                }\n              }\n              catch (Exception $e) {\n                throw new Exception($e->getMessage());\n              }\n            }\n            else {\n              X::log($td['id_alias']);\n              throw new Exception(\n                X::_(\n                  \"Error while importing: impossible to set the alias %s\",\n                  json_encode($td, JSON_PRETTY_PRINT)\n                )\n              );\n            }\n          }\n\n          if (!empty($td['id_root_alias'])) {\n            if ($id_root_alias = $this->fromCode(...$td['id_root_alias'])) {\n              $this->setCfg($id, ['id_root_alias' => $id_root_alias, 'allow_children' => 1, 'relations' => 'alias'], true);\n            }\n            else {\n              throw new Exception(\n                X::_(\n                  \"Error while importing: impossible to set the root alias %s\",\n                  json_encode($td, JSON_PRETTY_PRINT)\n                )\n              );\n            }\n          }\n\n          if (!empty($td['id_template'])) {\n            if ($id_template = is_array($td['id_template']) ? $this->fromCode(...$td['id_template']) : $td['id_template']) {\n              $this->setCfg($id, ['id_template' => $id_template, 'allow_children' => 1, 'relations' => 'template']);\n              $this->applySubTemplates($id);\n            }\n            else {\n              throw new Exception(\n                X::_(\n                  \"Error while importing: impossible to set the template %s\",\n                  json_encode($td, JSON_PRETTY_PRINT)\n                )\n              );\n            }\n          }\n        }\n      }\n\n      $this->deleteCache();\n      foreach ($withParent as $o) {\n        if (!empty($o['items']) &&  ($idParent = $this->fromCode(...$o[$c['id_parent']]))) {\n          $this->import(\n            $o['items'],\n            $idParent,\n            $no_alias\n          );\n        }\n      }\n\n    }\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 239,
-            "endLine": 352,
+            "startLine": 275,
+            "endLine": 489,
             "isDeprecated": false,
             "isGenerator": true,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "shortName": "import",
-            "returns": [],
+            "returns": [
+                null,
+                "iterable"
+            ],
             "arguments": [
                 {
                     "name": "options",
@@ -338,8 +343,13 @@
                 {
                     "name": "id_parent",
                     "position": 1,
-                    "type": "",
-                    "type_arr": [],
+                    "type": "array|string|int|null",
+                    "type_arr": [
+                        {},
+                        {},
+                        {},
+                        {}
+                    ],
                     "variadic": false,
                     "reference": false,
                     "required": false,
@@ -349,8 +359,21 @@
                     "description": "parent The option target, if not specified {@link default}"
                 },
                 {
-                    "name": "todo",
+                    "name": "no_alias",
                     "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "alias If set to true, aliases values won't be set"
+                },
+                {
+                    "name": "todo",
+                    "position": 3,
                     "type": "null|array",
                     "type_arr": [
                         "null",
@@ -361,6 +384,20 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "returnId",
+                    "position": 4,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
                     "default_name": ""
                 }
             ],
@@ -381,6 +418,12 @@
                     },
                     {
                         "tag": "param",
+                        "type": "bool",
+                        "name": "$no",
+                        "description": "alias If set to true, aliases values won't be set"
+                    },
+                    {
+                        "tag": "param",
                         "type": "array|null",
                         "name": "$todo"
                     }
@@ -391,7 +434,7 @@
                     "text": "Usage example"
                 }
             },
-            "comments": "  \/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param array|null $todo\n   * @return iterable|null\n   *\/"
+            "comments": "  \/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param bool $no_alias If set to true, aliases values won't be set\n   * @param array|null $todo\n   * @return iterable|null\n   *\/"
         },
         "duplicate": {
             "name": "duplicate",
@@ -403,16 +446,16 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function duplicate($id, $target, $deep = false, $force = false, $return_num = false)\n  {\n    $res    = null;\n    $target = $this->fromCode($target);\n    if (Str::isUid($target)) {\n      if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {\n        foreach ($this->import($opt, $target) as $num) {\n          $res += $num;\n        }\n        $this->deleteCache($target);\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function duplicate($id, $target, $deep = false, $force = false, $returnId = false)\n  {\n    $res    = null;\n    $target = $this->fromCode($target);\n    if (Str::isUid($target)) {\n      if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {\n        foreach ($this->import($opt, $target, false, null, $returnId) as $num) {\n          if (!$returnId || empty($id)) {\n            $res += $num;\n          }\n        }\n\n        $this->deleteCache($target);\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 368,
-            "endLine": 382,
+            "startLine": 506,
+            "endLine": 523,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -477,7 +520,7 @@
                     "description": "If set to true and option exists it will be merged"
                 },
                 {
-                    "name": "return_num",
+                    "name": "returnId",
                     "position": 4,
                     "type": "",
                     "type_arr": [],
@@ -486,7 +529,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "d If set to true, the ID of the duplicated option will be returned"
                 }
             ],
             "doc": {
@@ -515,6 +559,12 @@
                         "type": "boolean",
                         "name": "$force",
                         "description": "If set to true and option exists it will be merged"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$return",
+                        "description": "d If set to true, the ID of the duplicated option will be returned"
                     }
                 ],
                 "return": "The number of affected rows or null if option not found",
@@ -523,7 +573,7 @@
                     "text": "Usage example"
                 }
             },
-            "comments": "  \/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @return int|null The number of affected rows or null if option not found\n   *\/"
+            "comments": "  \/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @param boolean     $returnId If set to true, the ID of the duplicated option will be returned\n   * @return int|null The number of affected rows or null if option not found\n   *\/"
         },
         "apply": {
             "name": "apply",
@@ -535,16 +585,16 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function apply(callable $f, $id, $deep = false, bool $force = false)\n  {\n    if ($this->check()) {\n      $originals = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n      if (isset($originals['items'])) {\n        $originals = $originals['items'];\n      }\n      $t = $this;\n      $originals = $this->map(function($o) use($t){\n        $o[$t->fields['text']] = $t->rawText($o[$this->fields['id']]);\n        return $o;\n      }, $originals, $deep);\n      $opts = $this->map($f, $originals, $deep);\n      if (\\is_array($opts)) {\n        $changes = 0;\n        foreach ($opts as $i => $o){\n          if ($force || $originals[$i] !== $o) {\n            $changes += (int)$this->set($o[$this->fields['id']], $o);\n          }\n\n          if ($deep && !empty($o['num_children']) && !empty($o['items'])) {\n            $changes += (int)$this->apply($f, $o, 1, true);\n          }\n        }\n\n        return $changes;\n      }\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 398,
-            "endLine": 428,
+            "startLine": 539,
+            "endLine": 569,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -659,16 +709,16 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function map(callable $f, $id, $deep = false)\n  {\n    $opts = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n    $res  = [];\n    if (\\is_array($opts)) {\n      if (isset($opts['items'])) {\n        $opts = $opts['items'];\n      }\n\n      foreach ($opts as $i => $o){\n        $opts[$i] = $f($o);\n        if ($deep && $opts[$i] && !empty($opts[$i]['items'])) {\n          $opts[$i]['items'] = $this->map($f, $opts[$i]['items'], 1);\n        }\n\n        if (\\is_array($opts[$i])) {\n          $res[] = $opts[$i];\n        }\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 443,
-            "endLine": 465,
+            "startLine": 584,
+            "endLine": 606,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -762,16 +812,16 @@
                     "content": ""
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function mapCfg(callable $f, $id, $deep = false)\n  {\n    $opts = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n    if (isset($opts['items'])) {\n      $opts = $opts['items'];\n    }\n\n    $res = [];\n    if (\\is_array($opts)) {\n      foreach ($opts as $i => $o){\n        $o[$this->fields['cfg']] = $this->getCfg($o[$this->fields['id']]);\n        $opts[$i] = $f($o);\n        if ($deep && $opts[$i] && !empty($opts[$i]['items'])) {\n          $opts[$i]['items'] = $this->mapCfg($f, $opts[$i]['items'], 1);\n        }\n\n        if (\\is_array($opts[$i])) {\n          $res[] = $opts[$i];\n        }\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 480,
-            "endLine": 503,
+            "startLine": 621,
+            "endLine": 644,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -860,16 +910,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Manip",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Manip.php",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "  public function analyzeOut(array $options, array &$results = [])\n  {\n    if ($this->check()) {\n\n      if (isset($options[0]) && is_array($options[0])) {\n        foreach ($options as $option) {\n          $this->analyzeOut($option, $results);\n        }\n        return $results;\n      }\n\n      if (empty($results)) {\n        $results['options'] = [];\n        $results['ids']     = [];\n        $results['aliases'] = [];\n      }\n\n      if (!empty($options[$this->fields['id']])) {\n        $results['ids'][$options[$this->fields['id']]] = null;\n      }\n\n      if (!empty($options[$this->fields['id_alias']])) {\n        $results['aliases'][$options[$this->fields['id_alias']]] = [\n          'id' => null,\n          'codes' => $this->getCodePath($options[$this->fields['id_alias']])\n        ];\n      }\n\n      $items = false;\n      if (!empty($options['items'])) {\n        $items = $options['items'];\n        unset($options['items']);\n      }\n\n      $results['options'][] = $options;\n      if ($items) {\n        foreach ($items as $it) {\n          $this->analyzeOut($it, $results);\n        }\n      }\n\n      return $results;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 511,
-            "endLine": 556,
+            "startLine": 652,
+            "endLine": 697,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -929,20 +979,37 @@
             "comments": "  \/**\n   * @param array $options\n   * @param array $results\n   * @return array|null\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "isExporting": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Internal\\Manip"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Manip",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": false
+        }
+    },
     "staticProperties": [],
     "constants": null,
     "uses": {
         "Exception": "Exception",
         "bbn\\X": "X",
-        "bbn\\Str": "Str"
+        "bbn\\Str": "Str",
+        "Generator": "Generator"
     },
     "dummyComments": [
         "\/**\n   * @param string $id\n   * @param string $mode\n   * @return array|null\n   * @throws Exception\n   *\/",
         "\/**\n   * Converts an option or a hierarchy to a multi-level array with JSON values\n   * If $return is false the resulting array will be printed\n   *\n   * ```php\n   * ```\n   *\n   * @todo Example output\n   * @param int     $id     The ID of the option to clone\n   * @param boolean $deep   If set to true children will be included\n   * @param boolean $return If set to true the resulting array will be returned\n   * @return array|string|null\n   *\/",
-        "\/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param array|null $todo\n   * @return iterable|null\n   *\/",
+        "\/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param bool $no_alias If set to true, aliases values won't be set\n   * @param array|null $todo\n   * @return iterable|null\n   *\/",
         "\/** @todo Temp solution *\/",
-        "\/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @return int|null The number of affected rows or null if option not found\n   *\/",
+        "\/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @param boolean     $returnId If set to true, the ID of the duplicated option will be returned\n   * @return int|null The number of affected rows or null if option not found\n   *\/",
         "\/**\n   * Applies a function to children of an option and updates the database\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @param boolean   $force If set to true it will update the row in db without checking with $originals\n   * @return int|null The number of affected rows or null if option not found\n   *\/",
         "\/**\n   * Applies a function to children of an option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean|int   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/",
         "\/**\n   * Applies a function to children of an option, with the cfg array included\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options'ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/",

@@ -1352,6 +1352,7 @@ class Sqlite extends Sql
           array_push($sql, ...$ctSql);
         }
 
+        $sql[] = $this->getCreateKeys($tmpTable, $cfg, $anonymize);
         $sql[] = 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';';
         $sql[] = 'DROP TABLE '.$this->escape($table).';';
         $sql[] = 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';';

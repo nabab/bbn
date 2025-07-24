@@ -62,34 +62,6 @@ trait Common
   protected $api_request_output;
 
 
-  protected function isVerifyPhoneNumberRequest(array $params)
-  {
-    $f = $this->class_cfg['fields'];
-
-    return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action']] === 'verifyCode';
-  }
-
-  protected function isPhoneNumberCodeSendingRequest(array $params)
-  {
-    $f = $this->class_cfg['fields'];
-
-    return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action']] === 'sendSmsCode';
-  }
-
-  protected function isTokenLoginRequest(array $params): bool
-  {
-    $f = $this->class_cfg['fields'];
-    return X::hasProps($params, [$f['token'], $f['device_uid']], true);
-  }
-
-  protected function isToken(): bool
-  {
-    return (bool)$this->class_cfg['tables']['api_tokens'];
-  }
-
-
   /**
    * Retrieves data stored in the data property of the user, only if authenticated.
    *
@@ -242,7 +214,7 @@ trait Common
   {
     $this->auth = false;
     $this->cfg  = [];
-    $this->closeSession();
+    $this->closeSession(true);
   }
 
 
@@ -446,78 +418,6 @@ trait Common
     return null;
   }
 
-  /**
-   * Retrieves the encryption key from database if not defined and saves it.
-   *
-   * @return string|null
-   */
-  private function _get_encryption_key(): ?string
-  {
-    if (is_null($this->_encryption_key)) {
-      if ($this->auth) {
-        $this->_encryption_key = $this->db->selectOne(
-          $this->class_cfg['table'],
-          $this->class_cfg['arch']['users']['enckey'],
-          ['id' => $this->id]
-        );
-        if (!$this->_encryption_key) {
-          $this->_encryption_key = Str::genpwd(32, 16);
-          $this->db->update(
-            $this->class_cfg['table'],
-            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],
-            ['id' => $this->id]
-          );
-        }
-      }
-    }
-
-    return $this->_encryption_key;
-  }
-
-
-   /**
-    * Use the configured hash function to encrypt a password string.
-    *
-    * @param string $st The string to crypt
-    * @return string
-    */
-  private function _hash(string $st): string
-  {
-    if (empty($this->class_cfg['encryption']) || !function_exists($this->class_cfg['encryption'])) {
-      return hash('sha256', $st);
-    }
-
-    return $this->class_cfg['encryption']($st);
-  }
-
-
-
-
-   /**
-    * Defines user's directory and constant BBN_USER_PATH if not done yet.
-    *
-    * @param bool $create If true creates it and remove temp files if any
-    * @return self
-    */
-  private function _init_dir(bool $create = false): self
-  {
-    if (\defined('BBN_DATA_PATH') && $this->getId()) {
-      $this->path     = Mvc::getUserDataPath($this->getId());
-      $this->tmp_path = Mvc::getUserTmpPath($this->getId());
-      if (!\defined('BBN_USER_PATH')) {
-        define('BBN_USER_PATH', $this->path);
-      }
-
-      if ($create && !empty($this->path) && !empty($this->tmp_path)) {
-        Dir::createPath($this->path);
-        Dir::createPath($this->tmp_path);
-        Dir::delete($this->tmp_path, false);
-      }
-    }
-
-    return $this;
-  }
-
 
   /**
    * @param string $access_token
@@ -615,6 +515,85 @@ trait Common
 
     return false;
   }
+
+  public function getApiRequestOutput()
+  {
+    return $this->api_request_output;
+  }
+
+  public function getApiNotificationsToken(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne([
+      'table' => $this->class_cfg['tables']['api_tokens'],
+      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
+      'where' => [ 
+        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id
+      ],
+      'order' => [[
+        'field' => $this->class_cfg['arch']['api_tokens']['last'],
+        'dir' => 'DESC'
+      ]]
+    ]);
+  }
+
+  public function getPhoneNumber(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
+      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
+    ]);
+  }
+
+
+  public function hasSkipVerification(string $id = ''): bool
+  {
+    if ($cfg = $this->db->selectOne(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['cfg'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id
+      ]
+    )) {
+      $cfg = json_decode($cfg);
+      return !empty($cfg->skip_verification);
+    }
+    return false;
+  }
+
+  /**
+   * @return Db db
+   */
+  public function getDbInstance(): Db
+  {
+    return $this->db;
+  }
+
+  protected function isVerifyPhoneNumberRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])
+      && $params[$f['action']] === 'verifyCode';
+  }
+
+  protected function isPhoneNumberCodeSendingRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])
+      && $params[$f['action']] === 'sendSmsCode';
+  }
+
+  protected function isTokenLoginRequest(array $params): bool
+  {
+    $f = $this->class_cfg['fields'];
+    return X::hasProps($params, [$f['token'], $f['device_uid']], true);
+  }
+
+  protected function isToken(): bool
+  {
+    return (bool)$this->class_cfg['tables']['api_tokens'];
+  }
+
 
   /**
    * @param string $phone_number
@@ -743,55 +722,73 @@ trait Common
     return false;
   }
 
-  public function getApiRequestOutput()
-  {
-    return $this->api_request_output;
-  }
-
-  public function getApiNotificationsToken(string $idUser = ''): ?string
-  {
-    return $this->db->selectOne([
-      'table' => $this->class_cfg['tables']['api_tokens'],
-      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
-      'where' => [ 
-        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id
-      ],
-      'order' => [[
-        'field' => $this->class_cfg['arch']['api_tokens']['last'],
-        'dir' => 'DESC'
-      ]]
-    ]);
-  }
-
-  public function getPhoneNumber(string $idUser = ''): ?string
-  {
-    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
-      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
-    ]);
-  }
-
-
-  public function hasSkipVerification(string $id = ''): bool
-  {
-    if ($cfg = $this->db->selectOne(
-      $this->class_cfg['tables']['users'],
-      $this->class_cfg['arch']['users']['cfg'],
-      [
-        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id
-      ]
-    )) {
-      $cfg = json_decode($cfg);
-      return !empty($cfg->skip_verification);
-    }
-    return false;
-  }
-
   /**
-   * @return Db db
+   * Retrieves the encryption key from database if not defined and saves it.
+   *
+   * @return string|null
    */
-  public function getDbInstance(): Db
+  private function _get_encryption_key(): ?string
   {
-    return $this->db;
+    if (is_null($this->_encryption_key)) {
+      if ($this->auth) {
+        $this->_encryption_key = $this->db->selectOne(
+          $this->class_cfg['table'],
+          $this->class_cfg['arch']['users']['enckey'],
+          ['id' => $this->id]
+        );
+        if (!$this->_encryption_key) {
+          $this->_encryption_key = Str::genpwd(32, 16);
+          $this->db->update(
+            $this->class_cfg['table'],
+            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],
+            ['id' => $this->id]
+          );
+        }
+      }
+    }
+
+    return $this->_encryption_key;
   }
 
+
+   /**
+    * Use the configured hash function to encrypt a password string.
+    *
+    * @param string $st The string to crypt
+    * @return string
+    */
+  private function _hash(string $st): string
+  {
+    if (empty($this->class_cfg['encryption']) || !function_exists($this->class_cfg['encryption'])) {
+      return hash('sha256', $st);
+    }
+
+    return $this->class_cfg['encryption']($st);
+  }
+
+
+   /**
+    * Defines user's directory and constant BBN_USER_PATH if not done yet.
+    *
+    * @param bool $create If true creates it and remove temp files if any
+    * @return self
+    */
+  private function _init_dir(bool $create = false): self
+  {
+    if (\defined('BBN_DATA_PATH') && $this->getId()) {
+      $this->path     = Mvc::getUserDataPath($this->getId());
+      $this->tmp_path = Mvc::getUserTmpPath($this->getId());
+      if (!\defined('BBN_USER_PATH')) {
+        define('BBN_USER_PATH', $this->path);
+      }
+
+      if ($create && !empty($this->path) && !empty($this->tmp_path)) {
+        Dir::createPath($this->path);
+        Dir::createPath($this->tmp_path);
+        Dir::delete($this->tmp_path, false);
+      }
+    }
+
+    return $this;
+  }
 }

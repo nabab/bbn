@@ -522,8 +522,8 @@ class Project extends DbCls
       }
 
       if (!$force && $this->cacheHas($this->id, 'project_info')) {
-        //$this->projectInfo = $this->cacheGet($this->id, 'project_info');
-        //return $this->projectInfo;
+        $this->projectInfo = $this->cacheGet($this->id, 'project_info');
+        return $this->projectInfo;
       }
 
       $path = $this->getPaths(true);

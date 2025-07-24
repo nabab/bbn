@@ -251,7 +251,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getConfig(array $cfg = null){\n    if ( \\is_array($cfg) ){\n      return X::mergeArrays($this->cfg, $this->fixCfg($cfg));\n    }\n    return $this->cfg;\n  }",
+            "code": "  public function getConfig(array|null $cfg = null){\n    if ( \\is_array($cfg) ){\n      return X::mergeArrays($this->cfg, $this->fixCfg($cfg));\n    }\n    return $this->cfg;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 118,

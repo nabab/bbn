@@ -58,7 +58,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function __construct($repository, IRunner $runner = NULL)\n\t\t{\n\t\t\tif (basename($repository) === '.git') {\n\t\t\t\t$repository = dirname($repository);\n\t\t\t}\n\n\t\t\t$path = realpath($repository);\n\n\t\t\tif ($path === FALSE) {\n\t\t\t\tthrow new GitException(\"Repository '$repository' not found.\");\n\t\t\t}\n\n\t\t\t$this->repository = $path;\n\t\t\t$this->runner = $runner !== NULL ? $runner : new Runners\\CliRunner;\n\t\t}",
+                "code": "\t\tpublic function __construct($repository, ?IRunner $runner = NULL)\n\t\t{\n\t\t\tif (basename($repository) === '.git') {\n\t\t\t\t$repository = dirname($repository);\n\t\t\t}\n\n\t\t\t$path = realpath($repository);\n\n\t\t\tif ($path === FALSE) {\n\t\t\t\tthrow new GitException(\"Repository '$repository' not found.\");\n\t\t\t}\n\n\t\t\t$this->repository = $path;\n\t\t\t$this->runner = $runner !== NULL ? $runner : new Runners\\CliRunner;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 19,
@@ -3173,7 +3173,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\t\tpublic function pull($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('pull', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+            "code": "\t\tpublic function pull($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('pull', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
             "parent": {
                 "name": "pull",
                 "summary": "Pull changes from a remote",
@@ -3184,7 +3184,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function pull($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('pull', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+                "code": "\t\tpublic function pull($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('pull', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 469,
@@ -3320,7 +3320,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\t\tpublic function push($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('push', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+            "code": "\t\tpublic function push($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('push', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
             "parent": {
                 "name": "push",
                 "summary": "Push changes to a remote",
@@ -3331,7 +3331,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function push($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('push', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+                "code": "\t\tpublic function push($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('push', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 483,
@@ -3467,7 +3467,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\t\tpublic function fetch($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('fetch', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+            "code": "\t\tpublic function fetch($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('fetch', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
             "parent": {
                 "name": "fetch",
                 "summary": "Run fetch command to get latest branches",
@@ -3478,7 +3478,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function fetch($remote = NULL, array $options = NULL)\n\t\t{\n\t\t\t$this->run('fetch', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
+                "code": "\t\tpublic function fetch($remote = NULL, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('fetch', $options, '--end-of-options', $remote);\n\t\t\treturn $this;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 497,
@@ -3614,7 +3614,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\t\tpublic function addRemote($name, $url, array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'add', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
+            "code": "\t\tpublic function addRemote($name, $url, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'add', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
             "parent": {
                 "name": "addRemote",
                 "summary": "Adds new remote repository",
@@ -3625,7 +3625,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function addRemote($name, $url, array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'add', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
+                "code": "\t\tpublic function addRemote($name, $url, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'add', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 512,
@@ -4051,7 +4051,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "\t\tpublic function setRemoteUrl($name, $url, array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'set-url', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
+            "code": "\t\tpublic function setRemoteUrl($name, $url, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'set-url', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
             "parent": {
                 "name": "setRemoteUrl",
                 "summary": "Changes remote repository URL",
@@ -4062,7 +4062,7 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "\t\tpublic function setRemoteUrl($name, $url, array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'set-url', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
+                "code": "\t\tpublic function setRemoteUrl($name, $url, ?array $options = NULL)\n\t\t{\n\t\t\t$this->run('remote', 'set-url', $options, '--end-of-options', $name, $url);\n\t\t\treturn $this;\n\t\t}",
                 "parent": false,
                 "trait": false,
                 "startLine": 554,
@@ -4448,7 +4448,7 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "\t\tprotected function extractFromCommand(array $args, callable $filter = NULL)\n\t\t{\n\t\t\t$result = $this->run(...$args);\n\t\t\t$output = $result->getOutput();\n\n\t\t\tif ($filter !== NULL) {\n\t\t\t\t$newArray = [];\n\n\t\t\t\tforeach ($output as $line) {\n\t\t\t\t\t$value = $filter($line);\n\n\t\t\t\t\tif ($value === FALSE) {\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\t$newArray[] = (string) $value;\n\t\t\t\t}\n\n\t\t\t\t$output = $newArray;\n\t\t\t}\n\n\t\t\tif (empty($output)) {\n\t\t\t\treturn NULL;\n\t\t\t}\n\n\t\t\treturn $output;\n\t\t}",
+            "code": "\t\tprotected function extractFromCommand(array $args, ?callable $filter = NULL)\n\t\t{\n\t\t\t$result = $this->run(...$args);\n\t\t\t$output = $result->getOutput();\n\n\t\t\tif ($filter !== NULL) {\n\t\t\t\t$newArray = [];\n\n\t\t\t\tforeach ($output as $line) {\n\t\t\t\t\t$value = $filter($line);\n\n\t\t\t\t\tif ($value === FALSE) {\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\t$newArray[] = (string) $value;\n\t\t\t\t}\n\n\t\t\t\t$output = $newArray;\n\t\t\t}\n\n\t\t\tif (empty($output)) {\n\t\t\t\treturn NULL;\n\t\t\t}\n\n\t\t\treturn $output;\n\t\t}",
             "parent": {
                 "name": "extractFromCommand",
                 "summary": "",
@@ -4459,11 +4459,11 @@
                 "static": false,
                 "visibility": "protected",
                 "final": false,
-                "code": "\t\tprotected function extractFromCommand(array $args, callable $filter = NULL)\n\t\t{\n\t\t\t$result = $this->run(...$args);\n\t\t\t$output = $result->getOutput();\n\n\t\t\tif ($filter !== NULL) {\n\t\t\t\t$newArray = [];\n\n\t\t\t\tforeach ($output as $line) {\n\t\t\t\t\t$value = $filter($line);\n\n\t\t\t\t\tif ($value === FALSE) {\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\t$newArray[] = (string) $value;\n\t\t\t\t}\n\n\t\t\t\t$output = $newArray;\n\t\t\t}\n\n\t\t\tif (empty($output)) {\n\t\t\t\treturn NULL;\n\t\t\t}\n\n\t\t\treturn $output;\n\t\t}",
+                "code": "\t\tprotected function extractFromCommand(array $args, ?callable $filter = NULL)\n\t\t{\n\t\t\t$result = $this->run(...$args);\n\t\t\t$output = $result->getOutput();\n\n\t\t\tif ($filter !== NULL) {\n\t\t\t\t$newArray = [];\n\n\t\t\t\tforeach ($output as $line) {\n\t\t\t\t\t$value = $filter($line);\n\n\t\t\t\t\tif ($value === FALSE) {\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\t$newArray[] = (string) $value;\n\t\t\t\t}\n\n\t\t\t\t$output = $newArray;\n\t\t\t}\n\n\t\t\tif (empty($output)) {\n\t\t\t\treturn NULL;\n\t\t\t}\n\n\t\t\treturn $output;\n\t\t}",
                 "parent": false,
                 "trait": false,
-                "startLine": 596,
-                "endLine": 622,
+                "startLine": 597,
+                "endLine": 623,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -4502,7 +4502,8 @@
                         "required": false,
                         "has_default": true,
                         "default": null,
-                        "default_name": ""
+                        "default_name": "",
+                        "description": ": (string|FALSE))|NULL $filter"
                     }
                 ],
                 "doc": {
@@ -4511,6 +4512,11 @@
                         {
                             "tag": "param",
                             "name": "$args"
+                        },
+                        {
+                            "tag": "param",
+                            "name": "$value",
+                            "description": ": (string|FALSE))|NULL $filter"
                         }
                     ],
                     "return": "",
@@ -4519,11 +4525,11 @@
                         "type": "GitException"
                     }
                 },
-                "comments": "  \/**\n\t\t * @param  array<mixed> $args\n\t\t * @return string[]|NULL\n\t\t * @throws GitException\n\t\t *\/"
+                "comments": "  \/**\n\t\t * @param  array<mixed> $args\n\t\t * @param  (callable(string $value): (string|FALSE))|NULL $filter\n\t\t * @return string[]|NULL\n\t\t * @throws GitException\n\t\t *\/"
             },
             "trait": false,
-            "startLine": 596,
-            "endLine": 622,
+            "startLine": 597,
+            "endLine": 623,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4562,7 +4568,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": ": (string|FALSE))|NULL $filter"
                 }
             ],
             "doc": {
@@ -4571,6 +4578,11 @@
                     {
                         "tag": "param",
                         "name": "$args"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$value",
+                        "description": ": (string|FALSE))|NULL $filter"
                     }
                 ],
                 "return": "",
@@ -4579,7 +4591,7 @@
                     "type": "GitException"
                 }
             },
-            "comments": "  \/**\n\t\t * @param  array<mixed> $args\n\t\t * @return string[]|NULL\n\t\t * @throws GitException\n\t\t *\/"
+            "comments": "  \/**\n\t\t * @param  array<mixed> $args\n\t\t * @param  (callable(string $value): (string|FALSE))|NULL $filter\n\t\t * @return string[]|NULL\n\t\t * @throws GitException\n\t\t *\/"
         }
     },
     "properties": {

@@ -11,8 +11,8 @@
     "interfaces": [],
     "fileName": "\/Db\/SqlFormatters.php",
     "startLine": 5,
-    "endLine": 163,
-    "numMethods": 19,
+    "endLine": 170,
+    "numMethods": 20,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -332,7 +332,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getJoin(array $cfg, array $join = null): string;",
+            "code": "  public function getJoin(array $cfg, array|null $join = null): string;",
             "parent": false,
             "trait": false,
             "startLine": 56,
@@ -673,8 +673,8 @@
             },
             "comments": "  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/"
         },
-        "getCreate": {
-            "name": "getCreate",
+        "getCreateTableRaw": {
+            "name": "getCreateTableRaw",
             "summary": "Fetches the database and returns an array of objects",
             "description": "",
             "description_parts": [],
@@ -683,7 +683,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreate(string $table, array $model = null): string;",
+            "code": "  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true): string;",
             "parent": false,
             "trait": false,
             "startLine": 111,
@@ -694,9 +694,9 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "shortName": "getCreate",
+            "shortName": "getCreateTableRaw",
             "returns": [
                 "string"
             ],
@@ -717,7 +717,7 @@
                     "description": "The table for which to create the statement"
                 },
                 {
-                    "name": "model",
+                    "name": "cfg",
                     "position": 1,
                     "type": "null|array",
                     "type_arr": [
@@ -729,6 +729,34 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "createKeys",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                },
+                {
+                    "name": "createConstraints",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
                     "default_name": ""
                 }
             ],
@@ -761,7 +789,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreateTable(string $table, array $model = null): string;",
+            "code": "  public function getCreateTable(string $table, ?array $cfg = null): string;",
             "parent": false,
             "trait": false,
             "startLine": 118,
@@ -794,7 +822,7 @@
                     "default_name": ""
                 },
                 {
-                    "name": "model",
+                    "name": "cfg",
                     "position": 1,
                     "type": "null|array",
                     "type_arr": [
@@ -837,7 +865,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreateKeys(string $table, array $model = null): string;",
+            "code": "  public function getCreateKeys(string $table, array|null $model = null): string;",
             "parent": false,
             "trait": false,
             "startLine": 125,
@@ -913,7 +941,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreateConstraints(string $table, array $model = null): string;",
+            "code": "  public function getCreateConstraints(string $table, array|null $model = null): string;",
             "parent": false,
             "trait": false,
             "startLine": 132,
@@ -979,6 +1007,81 @@
             },
             "comments": "  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/"
         },
+        "getDropConstraint": {
+            "name": "getDropConstraint",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\SqlFormatters",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/SqlFormatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDropConstraint(string $table, string $constraint): string;",
+            "parent": false,
+            "trait": false,
+            "startLine": 139,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDropConstraint",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "constraint",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$constraint"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $table\n   * @param string $constraint\n   * @return string\n   *\/"
+        },
         "getAlterTable": {
             "name": "getAlterTable",
             "summary": "",
@@ -992,8 +1095,8 @@
             "code": "  public function getAlterTable(string $table, array $cfg): string;",
             "parent": false,
             "trait": false,
-            "startLine": 140,
-            "endLine": 140,
+            "startLine": 147,
+            "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1067,8 +1170,8 @@
             "code": "  public function getAlterColumn(string $table, array $cfg): string;",
             "parent": false,
             "trait": false,
-            "startLine": 148,
-            "endLine": 148,
+            "startLine": 155,
+            "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1142,8 +1245,8 @@
             "code": "  public function getAlterKey(string $table, array $cfg): string;",
             "parent": false,
             "trait": false,
-            "startLine": 156,
-            "endLine": 156,
+            "startLine": 163,
+            "endLine": 163,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1217,8 +1320,8 @@
             "code": "  public function getQueryValues(array $cfg): array;",
             "parent": false,
             "trait": false,
-            "startLine": 162,
-            "endLine": 162,
+            "startLine": 169,
+            "endLine": 169,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1281,6 +1384,7 @@
         "\/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/",
         "\/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/",
         "\/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/",
+        "\/**\n   * @param string $table\n   * @param string $constraint\n   * @return string\n   *\/",
         "\/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/",
         "\/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/",
         "\/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/",

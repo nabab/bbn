@@ -28,6 +28,11 @@ trait Tagger
   private $taggerTable;
 
   /**
+   * @var null|string The ID of the corresponding type if any.
+   */
+  private $taggerType = null;
+
+  /**
    * @var array The names of the columns where to insert tags relations (must have a id_tag and a id_element indexes).
    */
   private $taggerCols;
@@ -122,15 +127,32 @@ trait Tagger
   }
 
 
+  public function getTagId(string $tag): ?string
+  {
+    if ($tmp = $this->retrieveTag($tag)) {
+      return $tmp['id'];
+    }
+
+    return null;
+  }
+
+
+  public function retrieveTag(string $tag): array
+  {
+    $this->taggerInit();
+    return $this->taggerObject->get($tag, $this->taggerType, $this->taggerGetLang());
+  }
+
+
   public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int
   {
     $this->taggerInit();
     $lang = $this->taggerGetLang($lang);
-    if ($tmp = $this->taggerObject->get($tag, $lang)) {
+    if ($tmp = $this->taggerObject->get($tag, $this->taggerType, $lang)) {
       $id_tag = $tmp['id'];
     }
     else {
-      $id_tag = $this->taggerObject->add($tag, $lang, $description);
+      $id_tag = $this->taggerObject->add($tag, $this->taggerType, $lang, $description);
     }
 
     if (!$id_tag) {
@@ -177,6 +199,7 @@ trait Tagger
       }
 
       if (empty($table) || empty($columns)) {
+        X::ddump(get_class($this), $table, $columns);
         throw new Exception(X::_("Impossible to init the tagger without a table name and 2 columns defined"));
       }
 

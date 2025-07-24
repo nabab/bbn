@@ -3,15 +3,15 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Appui\\Option\\Root",
+    "name": "bbn\\Appui\\Option\\Internal\\Root",
     "namespace": true,
     "realName": "Root",
-    "realNamespace": "bbn\\Appui\\Option",
+    "realNamespace": "bbn\\Appui\\Option\\Internal",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Appui\/Option\/Root.php",
+    "fileName": "\/Appui\/Option\/Internal\/Root.php",
     "startLine": 8,
-    "endLine": 161,
+    "endLine": 162,
     "numMethods": 5,
     "numProperties": 2,
     "numConstants": 0,
@@ -31,7 +31,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\Appui\\Option",
+    "namespaceName": "bbn\\Appui\\Option\\Internal",
     "shortName": "Root",
     "contentConstructor": null,
     "methods": {
@@ -45,8 +45,8 @@
                     "content": "X::dump($opt->getRoot());\n\/\/ (int)0"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Root",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Root.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -86,8 +86,8 @@
                     "content": "X::dump($opt->getDefault());\n\/\/ (int) 0\n$opt->setDefault(5);\nX::dump($opt->getDefault());\n\/\/ (int) 5\n$opt->setDefault();\nX::dump($opt->getDefault());\n\/\/ (int) 0"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Root",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Root.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -131,8 +131,8 @@
                     "content": "X::dump($opt->getDefault());\n\/\/ (int) 0\n\/\/ Default root option\n$new = $opt->fromCode('test');\n\/\/ false\n\/\/ Option not found\n$opt->setDefault($new);\n\/\/ Default is now 5\nX::dump($opt->getDefault());\n\/\/ (int) 5\nX::dump($opt->fromCode('test));\n\/\/ (int) 24\n\/\/ Returns the ID (24) of a child of option 5 with code 'test'\n$opt->setDefault();\n\/\/ Default is back to root\nX::dump($opt->getDefault());\n\/\/ (int) 0"
                 }
             ],
-            "class": "bbn\\Appui\\Option\\Root",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Root.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -189,8 +189,8 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Root",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Root.php",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -218,16 +218,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Appui\\Option\\Root",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "class": "bbn\\Appui\\Option\\Internal\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Internal\/Root.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function init(): bool\n  {\n    if (!$this->is_init) {\n      $this->cacheInit();\n      $t          =& $this;\n      $this->root = $this->cacheGetSet(\n        function () use (&$t) {\n          return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [\n            $t->fields['id_parent'] => null, $t->fields['code'] => 'root']);\n        },\n        'root',\n        'root',\n        60\n      );\n      if (!$this->root) {\n        return false;\n      }\n\n      if (\\defined('BBN_APP_NAME')) {\n        $this->default = $this->cacheGetSet(\n          function () use (&$t) {\n            $res = $t->db->selectOne(\n              $t->class_cfg['table'],\n              $t->fields['id'],\n              [\n                $t->fields['id_parent'] => $this->root,\n                $t->fields['code'] => BBN_APP_NAME\n              ]\n            );\n            if (!$res) {\n              $res = $t->root;\n            }\n\n            return $res;\n          },\n          BBN_APP_NAME,\n          BBN_APP_NAME,\n          60\n        );\n      }\n      else {\n        $this->default = $this->root;\n      }\n\n      $this->is_init = true;\n    }\n\n    return true;\n  }",
+            "code": "  public function init(): bool\n  {\n    if (!$this->is_init) {\n      $this->cacheInit();\n      $t          =& $this;\n      $this->root = $this->cacheGetSet(\n        function () use (&$t) {\n          return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [\n            ['field' => $t->fields['id_parent'], 'exp'  => $t->fields['id']], ['field' => $t->fields['code'], 'value' => 'root']\n          ]);\n        },\n        'root',\n        'root',\n        60\n      );\n      if (!$this->root) {\n        return false;\n      }\n\n      if (\\defined('BBN_APP_NAME')) {\n        $this->default = $this->cacheGetSet(\n          function () use (&$t) {\n            $res = $t->db->selectOne(\n              $t->class_cfg['table'],\n              $t->fields['id'],\n              [\n                $t->fields['id_parent'] => $this->root,\n                $t->fields['code'] => BBN_APP_NAME\n              ]\n            );\n            if (!$res) {\n              $res = $t->root;\n            }\n\n            return $res;\n          },\n          BBN_APP_NAME,\n          BBN_APP_NAME,\n          60\n        );\n      }\n      else {\n        $this->default = $this->root;\n      }\n\n      $this->is_init = true;\n    }\n\n    return true;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 112,
-            "endLine": 160,
+            "endLine": 161,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -250,9 +250,9 @@
             "readonly": false,
             "type": "",
             "declaring": {
-                "name": "bbn\\Appui\\Option\\Root"
+                "name": "bbn\\Appui\\Option\\Internal\\Root"
             },
-            "declaring_trait": "bbn\\Appui\\Option\\Root",
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Root",
             "promoted": false,
             "visibility": "protected",
             "doc": {
@@ -268,9 +268,9 @@
             "readonly": false,
             "type": "",
             "declaring": {
-                "name": "bbn\\Appui\\Option\\Root"
+                "name": "bbn\\Appui\\Option\\Internal\\Root"
             },
-            "declaring_trait": "bbn\\Appui\\Option\\Root",
+            "declaring_trait": "bbn\\Appui\\Option\\Internal\\Root",
             "promoted": false,
             "visibility": "protected",
             "doc": {
