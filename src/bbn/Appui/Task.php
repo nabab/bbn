@@ -45,19 +45,7 @@ class Task extends DbCls
 
 
   protected function email($id_task, $subject, $text){
-    /*
-    $users = array_unique(array_merge($this->get_ccs($id_task), $this->mgr->getUsers(1)));
-    foreach ( $users as $u ){
-      if ( ($u !== $this->id_user) && ($email = $this->mgr->getEmail($u)) ){
-        $this->db->insert('apst_accuses', [
-          'email' => $email,
-          'titre' => $subject,
-          'texte' => $text,
-          'etat' => 'pret'
-        ]);
-      }
-    }
-    */
+    /** @todo Integrate email */
   }
 
   private static function options(){
@@ -1572,14 +1560,7 @@ class Task extends DbCls
         if ($addRole) {
           $this->addRole($id, 'managers');
         }
-        /*
-        $subject = "Nouveau bug posté par {$this->user}";
-        $text = "<p>{$this->user} a posté un nouveau bug</p>".
-          "<p><strong>$title</strong></p>".
-          "<p>".nl2br($text)."</p>".
-          "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
-        $this->email($id, $subject, $text);
-        */
+
         return $id;
       }
     }

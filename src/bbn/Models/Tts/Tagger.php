@@ -127,6 +127,23 @@ trait Tagger
   }
 
 
+  public function getTagId(string $tag): ?string
+  {
+    if ($tmp = $this->retrieveTag($tag)) {
+      return $tmp['id'];
+    }
+
+    return null;
+  }
+
+
+  public function retrieveTag(string $tag): array
+  {
+    $this->taggerInit();
+    return $this->taggerObject->get($tag, $this->taggerType, $this->taggerGetLang());
+  }
+
+
   public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int
   {
     $this->taggerInit();
