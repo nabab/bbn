@@ -26,83 +26,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   use Commands;
   use Formatters;
 
-  /** @var string The quote character */
-  public $qte = '`';
-
-  /** @var array Allowed operators */
-  public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
-
-  /** @var array Numeric column types */
-  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
-
-  /** @var array Time and date column types */
-  public static $date_types = ['date', 'time', 'datetime'];
-
-  public static $types = [
-    'tinyint',
-    'smallint',
-    'mediumint',
-    'int',
-    'bigint',
-    'decimal',
-    'float',
-    'double',
-    'bit',
-    'char',
-    'varchar',
-    'binary',
-    'varbinary',
-    'tinyblob',
-    'blob',
-    'mediumblob',
-    'longblob',
-    'tinytext',
-    'text',
-    'mediumtext',
-    'longtext',
-    'enum',
-    'set',
-    'date',
-    'time',
-    'datetime',
-    'timestamp',
-    'year',
-    'geometry',
-    'point',
-    'linestring',
-    'polygon',
-    'geometrycollection',
-    'multilinestring',
-    'multipoint',
-    'multipolygon',
-    'json',
-  ];
-
-  public static $interoperability = [
-    'integer' => 'int',
-    'real' => 'decimal',
-    'text' => 'text',
-    'blob' => 'blob'
-  ];
-
-  public static $aggr_functions = [
-    'AVG',
-    'BIT_AND',
-    'BIT_OR',
-    'COUNT',
-    'GROUP_CONCAT',
-    'MAX',
-    'MIN',
-    'STD',
-    'STDDEV_POP',
-    'STDDEV_SAMP',
-    'STDDEV',
-    'SUM',
-    'VAR_POP',
-    'VAR_SAMP',
-    'VARIANCE',
-  ];
-
   /**
    * @var array
    */
@@ -287,7 +210,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public static function isAggregateFunction(string $f): bool
   {
-    foreach (self::$aggr_functions as $a) {
+    foreach (static::$aggr_functions as $a) {
       if (preg_match('/' . $a . '\\s*\\(/i', $f)) {
         return true;
       }
@@ -361,7 +284,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getOperators(): array
   {
-    return self::$operators;
+    return static::$operators;
   }
 
 
@@ -372,7 +295,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getTypes(): array
   {
-    return self::$types;
+    return static::$types;
   }
 
 
@@ -383,7 +306,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getNumericTypes(): array
   {
-    return self::$numeric_types;
+    return static::$numeric_types;
   }
 
 
@@ -394,7 +317,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getDateTypes(): array
   {
-    return self::$date_types;
+    return static::$date_types;
   }
 
 
@@ -1059,10 +982,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
                   $is_uid = true;
                 }
               }
-              elseif (\in_array($model['type'], self::$numeric_types, true)) {
+              elseif (\in_array($model['type'], static::$numeric_types, true)) {
                 $is_number = true;
               }
-              elseif (\in_array($model['type'], self::$date_types, true)) {
+              elseif (\in_array($model['type'], static::$date_types, true)) {
                 $is_date = true;
               }
             }
@@ -2540,6 +2463,32 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return null;
   }
 
+
+  /**
+   * Converts the given configuration (modelize) to the given engine.
+   * @param array $cfg The configuration to convert
+   * @param string $engine The engine to convert to
+   * @return array
+   */
+  public function convert(array $cfg, string $engine): array
+  {
+    if (!empty($cfg['fields'])
+      && !empty($engine)
+      && !empty(static::$interoperability)
+    ) {
+      foreach ($cfg['fields'] as $k => $v) {
+        if (isset($v['type'])
+          && isset(static::$interoperability[$v['type']][$engine])
+        ) {
+          $cfg['fields'][$k]['type'] = static::$interoperability[$v['type']][$engine];
+        }
+      }
+    }
+
+    return $cfg;
+  }
+
+
   /****************************************************************
    *                                                              *
    *                                                              *
@@ -2788,7 +2737,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\Db\Query */
-
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
 

@@ -96,7 +96,7 @@ class Pgsql extends Sql
     'boolean'
   ];
 
-  public static $interoperability = [
+  /* public static $interoperability = [
     'text' => 'text',
     'tinytext' => 'text',
     'mediumtext' => 'text',
@@ -111,6 +111,49 @@ class Pgsql extends Sql
     'double' => 'double precision',
     'datetime' => 'timestamp',
     'linestring' => 'line'
+  ]; */
+
+  public static $interoperability = [
+    'smallserial'                 => ['sqlite' => 'integer', 'mysql' => 'smallint'],
+    'serial'                      => ['sqlite' => 'integer', 'mysql' => 'int'],
+    'bigserial'                   => ['sqlite' => 'integer', 'mysql' => 'bigint'],
+    'smallint'                    => ['sqlite' => 'integer', 'mysql' => 'smallint'],
+    'int'                         => ['sqlite' => 'integer', 'mysql' => 'int'],
+    'integer'                     => ['sqlite' => 'integer', 'mysql' => 'int'],
+    'bigint'                      => ['sqlite' => 'integer', 'mysql' => 'bigint'],
+    'decimal'                     => ['sqlite' => 'real',    'mysql' => 'decimal'],
+    'float'                       => ['sqlite' => 'real',    'mysql' => 'float'],
+    'real'                        => ['sqlite' => 'real',    'mysql' => 'real'],
+    'double precision'            => ['sqlite' => 'real',    'mysql' => 'double'],
+    'numeric'                     => ['sqlite' => 'real',    'mysql' => 'decimal'],
+    'money'                       => ['sqlite' => 'real',    'mysql' => 'decimal'],
+    'bit'                         => ['sqlite' => 'bit',     'mysql' => 'bit'],
+    'bit varying'                 => ['sqlite' => 'varbit',  'mysql' => 'bit'],
+    'character'                   => ['sqlite' => 'text',    'mysql' => 'char'],
+    'char'                        => ['sqlite' => 'text',    'mysql' => 'char'],
+    'varchar'                     => ['sqlite' => 'text',    'mysql' => 'varchar'],
+    'character varying'           => ['sqlite' => 'text',    'mysql' => 'varchar'],
+    'bytea'                       => ['sqlite' => 'blob',    'mysql' => 'binary'],
+    'text'                        => ['sqlite' => 'text',    'mysql' => 'text'],
+    'date'                        => ['sqlite' => 'text',    'mysql' => 'date'],
+    'time'                        => ['sqlite' => 'text',    'mysql' => 'time'],
+    'timestamp'                   => ['sqlite' => 'integer', 'mysql' => 'timestamp'],
+    'timestampz'                  => ['sqlite' => 'integer', 'mysql' => 'timestamp'],
+    'timestamp without time zone' => ['sqlite' => 'integer', 'mysql' => 'timestamp'],
+    'timestamp with time zone'    => ['sqlite' => 'integer', 'mysql' => 'timestamp'],
+    'time without time zone'      => ['sqlite' => 'text',    'mysql' => 'time'],
+    'time with time zone'         => ['sqlite' => 'text',    'mysql' => 'time'],
+    'interval'                    => ['sqlite' => 'blob',    'mysql' => 'blob'],
+    'point'                       => ['sqlite' => 'blob',    'mysql' => 'point'],
+    'line'                        => ['sqlite' => 'blob',    'mysql' => 'linestring'],
+    'lseg'                        => ['sqlite' => 'blob',    'mysql' => 'linestring'],
+    'polygon'                     => ['sqlite' => 'blob',    'mysql' => 'polygon'],
+    'box'                         => ['sqlite' => 'blob',    'mysql' => 'geometry'],
+    'path'                        => ['sqlite' => 'blob',    'mysql' => 'geometry'],
+    'circle'                      => ['sqlite' => 'blob',    'mysql' => 'geometry'],
+    'json'                        => ['sqlite' => 'text',    'mysql' => 'json'],
+    'jsonb'                       => ['sqlite' => 'text',    'mysql' => 'json'],
+    'boolean'                     => ['sqlite' => 'integer', 'mysql' => 'tinyint']
   ];
 
   public static $aggr_functions = [
@@ -1417,11 +1460,11 @@ PGSQL
     }
 
     if (!in_array($col_type, self::$types)) {
-      if (isset(self::$interoperability[$col_type])) {
+      /* if (isset(self::$interoperability[$col_type])) {
         $st      .= self::$interoperability[$col_type];
         $col_type = self::$interoperability[$col_type];
       }
-      else if ($col_type === 'USER-DEFINED') {
+      else  */if ($col_type === 'USER-DEFINED') {
         $st .= $cfg['type'];
       }
       else {

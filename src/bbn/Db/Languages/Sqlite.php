@@ -45,7 +45,7 @@ class Sqlite extends Sql
     'blob'
   ];
 
-  public static $interoperability = [
+  /* public static $interoperability = [
     'tinyint' => 'integer',
     'smallint' => 'integer',
     'mediumint' => 'integer',
@@ -75,6 +75,13 @@ class Sqlite extends Sql
     'timestamp' => 'integer',
     'year' => 'integer',
     'json' => 'text'
+  ]; */
+
+  public static $interoperability = [
+    'integer' => ['mysql' => 'int',   'pgsql' => 'integer'],
+    'real'    => ['mysql' => 'float', 'pgsql' => 'real'],
+    'text'    => ['mysql' => 'text',  'pgsql' => 'text'],
+    'blob'    => ['mysql' => 'blob',  'pgsql' => 'bytea']
   ];
 
   public static $aggr_functions = [
@@ -1562,9 +1569,9 @@ class Sqlite extends Sql
 
     if (!empty($cfg['type'])) {
       if (!in_array(strtolower($cfg['type']), self::$types)) {
-        if (isset(self::$interoperability[strtolower($cfg['type'])])) {
+        /* if (isset(self::$interoperability[strtolower($cfg['type'])])) {
           $st .= self::$interoperability[strtolower($cfg['type'])];
-        }
+        } */
         // No error: no type is fine
       }
       else {

@@ -714,6 +714,19 @@ class Db implements Db\Actions
     return $this->language->modelize($table, $force);
   }
 
+
+  /**
+   * Converts the given configuration (modelize) to the given engine.
+   * @param array $cfg The configuration to convert
+   * @param string $engine The engine to convert to
+   * @return array
+   */
+  public function convert(array $cfg, string $engine): array
+  {
+    return $this->language->convert($cfg, $engine);
+  }
+
+
   /**
    * 
    */
@@ -3423,6 +3436,13 @@ class Db implements Db\Actions
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
     return $this->language->duplicateTable($source, $target, $withData);
+  }
+
+
+  public function copyTableTo(string $table, self $target, bool $withData = true): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->copyTableTo($table, $target, $withData);
   }
 
 

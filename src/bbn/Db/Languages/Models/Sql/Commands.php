@@ -3,6 +3,7 @@
 namespace bbn\Db\Languages\Models\Sql;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 use Exception;
 use PDO;
 use bbn\Db\Languages\Models\Sql\Formatters;
@@ -363,6 +364,43 @@ trait Commands {
     }
 
     return $this->check();
+  }
+
+
+  public function copyTableTo(string $table, Db $target, bool $withData): bool
+  {
+    ;
+    if ($target->check()
+      && ($m = $this->modelize($table, true))
+      && ($m = $this->convert($m, $target->getEngine()))
+      && !$target->tableExists($table)
+      && $target->createTable($table, $m, true, true)
+    ) {
+      if ($withData) {
+        $columns = array_map(
+          fn($c) => $this->escape($c),
+          array_keys(
+            array_filter(
+              $this->getColumns($table),
+              fn($c) => empty($c['virtual'])
+            )
+          )
+        );
+        if ($columns) {
+          $q = $this->query("SELECT " . implode(", ", $columns) . " FROM " . $this->escape($table));
+          $target->disableKeys();
+          while ($row = $q->getRow()) {
+            $target->insert($table, $row);
+          }
+
+          $target->enableKeys();
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
 
