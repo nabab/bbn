@@ -64,6 +64,8 @@ class Link extends EntityTable
 
   protected $where = [];
 
+  protected $hasTags = false;
+
   protected static array $codes = [];
 
   /**
@@ -86,6 +88,7 @@ class Link extends EntityTable
     }
 
     if (!empty($this->cfg['tags'])) {
+      $this->hasTags = true;
       $this->taggerInit(
         $this->class_cfg['tables']['tags'],
         [
@@ -170,7 +173,7 @@ class Link extends EntityTable
     }
 
     if ($res) {
-      if (!empty($this->cfg['tags'])) {
+      if ($this->hasTags) {
         $res['tags'] = $this->getTags($res[$this->fields['id']]);
       }
 
@@ -189,7 +192,7 @@ class Link extends EntityTable
       $start,
       $fields
     );
-    if ($this->cfg['tags']) {
+    if ($this->hasTags) {
       foreach ($res as &$r) {
         $r['tags'] = $this->getTags($r[$this->fields['id']]);
       }
@@ -205,7 +208,7 @@ class Link extends EntityTable
       $this->fields['id_identity'] => $id
     ]);
     if ($res) {
-      if ($this->cfg['tags']) {
+      if ($this->hasTags) {
         $res['tags'] = $this->getTags($res[$this->fields['id']]);
       }
     }
@@ -220,7 +223,7 @@ class Link extends EntityTable
       $this->fields['id_address'] => $id
     ]);
     if ($res) {
-      if ($this->cfg['tags']) {
+      if ($this->hasTags) {
         $res['tags'] = $this->getTags($res[$this->fields['id']]);
       }
 
