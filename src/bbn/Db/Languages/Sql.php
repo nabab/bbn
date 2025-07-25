@@ -27,6 +27,24 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   use Commands;
   use Formatters;
 
+
+  public static $operators = [];
+
+  public static $numeric_types = [];
+
+  public static $date_types = [];
+
+  public static $binary_types = [];
+
+  public static $text_types = [];
+
+  public static $types = [];
+
+  public static $interoperability = [];
+
+  public static $aggr_functions = [];
+
+
   /**
    * @var array
    */
@@ -332,6 +350,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return static::$binary_types;
   }
 
+
   /**
    * Returns the list of text types in the current language
    *
@@ -342,25 +361,54 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return static::$text_types;
   }
 
+
+  /**
+   * Returns true if the given field type is a binary type
+   *
+   * @param string $type The type to check
+   * @return bool
+   */
   public function isBinaryType(string $type): bool
   {
     return in_array(strtolower($type), $this->getBinaryTypes());
   }
 
+
+  /**
+   * Returns true if the given field type is a numeric type
+   *
+   * @param string $type The type to check
+   * @return bool
+   */
   public function isNumericType(string $type): bool
   {
     return in_array(strtolower($type), $this->getNumericTypes());
   }
 
+
+  /**
+   * Returns true if the given field type is a date type
+   *
+   * @param string $type The type to check
+   * @return bool
+   */
   public function isDateType(string $type): bool
   {
     return in_array(strtolower($type), $this->getDateTypes());
   }
 
+
+  /**
+   * Returns true if the given field type is a text type
+   *
+   * @param string $type The type to check
+   * @return bool
+   */
   public function isTextType(string $type): bool
   {
     return in_array(strtolower($type), $this->getTextTypes());
   }
+
 
   /**
    * Closes the connection definitely, making the object unusable.
@@ -669,7 +717,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           continue;
         }
         // Transforming the values if needed
-        if (($cfg['values_desc'][$i]['type'] === 'binary')
+        if (!empty($cfg['values_desc'][$i]['type'])
+          && $this->isBinaryType($cfg['values_desc'][$i]['type'])
           && ($cfg['values_desc'][$i]['maxlength'] === 16)
           && Str::isUid($v)
         ) {
@@ -1017,7 +1066,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
             if (!empty($model)) {
               $is_null = (bool)$model['null'];
-              if ($model['type'] === 'binary') {
+              if (!empty($model['type']) && $this->isBinaryType($model['type'])) {
                 $is_number = true;
                 if (($model['maxlength'] === 16) && !empty($model['key'])) {
                   $is_uid = true;
@@ -1292,7 +1341,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             $model = $this->modelize($idx);
             if (($idx !== false) && isset($model['fields'][$csn])) {
               $column = $model['fields'][$csn];
-              if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
+              if (!empty($column['type'])
+                && $this->isBinaryType($column['type'])
+                && ($column['maxlength'] === 16)
+              ) {
                 $is_uid = true;
                 if (!is_string($alias)) {
                   $alias = $csn;
@@ -2734,10 +2786,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
           );
           break;
-        case 'binary':
-          if ($cfg['primary_length'] === 16) {
+        default:
+          if (!empty($cfg['primary_type'])
+            && $this->isBinaryType($cfg['primary_type'])
+            && ($cfg['primary_length'] === 16)
+          ) {
             $val = $this->getUid();
           }
+
           break;
       }
 
