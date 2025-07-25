@@ -367,6 +367,14 @@ trait Commands {
   }
 
 
+  /**
+   * Copies the given table to the target database.
+   *
+   * @param string $table The source table name
+   * @param Db $target The target database connection
+   * @param bool $withData If true, the data will be copied too
+   * @return bool True if it succeeded
+   */
   public function copyTableTo(string $table, Db $target, bool $withData): bool
   {
     ;
@@ -474,7 +482,7 @@ trait Commands {
   public function createColumn(string $table, string $column, array $columnCfg): bool
   {
     if ($sql = $this->getCreateColumn($table, $column, $columnCfg)) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -489,7 +497,7 @@ trait Commands {
   public function dropColumn(string $table, string $column): bool
   {
     if ($sql = $this->getDropColumn($table, $column)) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -519,7 +527,7 @@ trait Commands {
   public function dropKey(string $table, string $key): bool
   {
     if ($sql = $this->getDropKey($table, $key)) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -549,7 +557,7 @@ trait Commands {
   public function dropConstraint(string $table, string $constraint): bool
   {
     if ($sql = $this->getDropConstraint($table, $constraint)) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;

@@ -1380,7 +1380,7 @@ class Sqlite extends Sql
       $cfg['keys'] = array_filter(
         $cfg['keys'],
         fn($a) => empty($a['constraint'])
-          && (strtolower($a['constraint']) !== strtolower($constraint))
+          || (strtolower($a['constraint']) !== strtolower($constraint))
       );
       $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
       $sql = $this->getCreateTable($tmpTable, $cfg);

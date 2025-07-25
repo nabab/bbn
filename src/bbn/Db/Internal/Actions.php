@@ -366,6 +366,14 @@ trait Actions
   }
 
 
+  /**
+   * Copies a table to another database
+   *
+   * @param string $table The source table name
+   * @param self $target The target database connection
+   * @param bool $withData If true, the data will be copied too
+   * @return bool True if it succeeded
+   */
   public function copyTableTo(string $table, self $target, bool $withData = true): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
@@ -394,6 +402,36 @@ trait Actions
   public function getTableCollation(string $table): ?string
   {
     return $this->language->getTableCollation($table);
+  }
+
+
+  /**
+   * Creates the constraints for the given table
+   *
+   * @param string $table The table's name
+   * @param array|null $cfg The configuration
+   * @return bool True if it succeeded
+   * @throws Exception
+   */
+  public function createConstraints(string $table, ?array $cfg = null): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->createConstraints($table, $cfg);
+  }
+
+
+  /**
+   * Drops the given constraint from the table
+   *
+   * @param string $table The table's name
+   * @param string $constraint The constraint's name
+   * @return bool True if it succeeded
+   * @throws Exception
+   */
+  public function dropConstraint(string $table, string $constraint): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->dropConstraint($table, $constraint);
   }
 
 
