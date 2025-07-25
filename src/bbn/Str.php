@@ -605,11 +605,29 @@ class Str
    */
   public static function isJson($st)
   {
-    if (\is_string($st) && !empty($st)
-        && ( (substr($st, 0, 1) === '{') || (substr($st, 0, 1) === '[') )
-    ) {
+    if (!$st || !is_string($st)) {
+      return false;
+    }
+
+    $st = trim($st);
+    $first = substr($st, 0, 1);
+    if (!in_array($first, ['{', '['])) {
+      return false;
+    }
+    $last = substr($st, -1);
+    if (($first === '[') && ($last !== ']')) {
+      return false;
+    }
+    if (($first === '{') && ($last !== '}')) {
+      return false;
+    }
+
+    try {
       json_decode($st);
       return (json_last_error() == JSON_ERROR_NONE);
+    }
+    catch (\Exception $e) {
+      // If an exception is thrown, it is not a valid JSON
     }
 
     return false;

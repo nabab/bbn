@@ -42,6 +42,10 @@ class Mysql extends Sql
   /** @var array Time and date column types */
   public static $date_types = ['date', 'time', 'datetime'];
 
+  public static $binary_types = ['binary', 'varbinary', 'tinyblob', 'blob', 'mediumblob', 'longblob'];
+
+  public static $text_types = ['tinytext', 'text', 'mediumtext', 'longtext', 'varchar', 'char'];
+
   public static $types = [
     'tinyint',
     'smallint',

@@ -53,6 +53,10 @@ class Pgsql extends Sql
   /** @var array Time and date column types */
   public static $date_types = ['date', 'time', 'datetime'];
 
+  public static $binary_types = ['bytea', 'uuid'];
+
+  public static $text_types = ['text', 'varchar', 'character', 'char'];
+
   public static $types = [
     'smallserial',
     'serial',
@@ -74,6 +78,7 @@ class Pgsql extends Sql
     'varchar',
     'character varying',
     'bytea',
+    'uuid',
     'text',
     'date',
     'time',

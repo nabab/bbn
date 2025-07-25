@@ -38,6 +38,11 @@ class Sqlite extends Sql
   /** @var array Time and date column types don't exist in SQLite */
   public static $date_types = [];
 
+  public static $binary_types = ['blob'];
+
+  public static $text_types = ['text'];
+
+
   public static $types = [
     'integer',
     'real',

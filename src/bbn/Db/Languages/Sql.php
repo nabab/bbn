@@ -15,11 +15,12 @@ use bbn\Db\EnginesApi;
 use bbn\Db\Query;
 use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
+use bbn\Db\Types;
 use PHPSQLParser\PHPSQLParser;
 use bbn\Db\Languages\Models\Sql\Commands;
 use bbn\Db\Languages\Models\Sql\Formatters;
 
-abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
+abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Types
 {
   use HasError;
   use Cache;
@@ -320,6 +321,46 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return static::$date_types;
   }
 
+
+  /**
+   * Returns the list of date types in the current language
+   *
+   * @return array
+   */
+  public function getBinaryTypes(): array
+  {
+    return static::$binary_types;
+  }
+
+  /**
+   * Returns the list of text types in the current language
+   *
+   * @return array
+   */
+  public function getTextTypes(): array
+  {
+    return static::$text_types;
+  }
+
+  public function isBinaryType(string $type): bool
+  {
+    return in_array(strtolower($type), $this->getBinaryTypes());
+  }
+
+  public function isNumericType(string $type): bool
+  {
+    return in_array(strtolower($type), $this->getNumericTypes());
+  }
+
+  public function isDateType(string $type): bool
+  {
+    return in_array(strtolower($type), $this->getDateTypes());
+  }
+
+  public function isTextType(string $type): bool
+  {
+    return in_array(strtolower($type), $this->getTextTypes());
+  }
 
   /**
    * Closes the connection definitely, making the object unusable.
