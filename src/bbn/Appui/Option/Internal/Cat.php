@@ -94,7 +94,7 @@ trait Cat
         ['JSON_UNQUOTE(JSON_EXTRACT(value, "$.tekname"))', 'isnotnull'],
         ['JSON_UNQUOTE(JSON_EXTRACT(value, "$.tekname"))', '!=', ''],
         [$cf['id_parent'], '!=', $id]
-      ], [$cf['tekname'] => 'ASC']);
+      ], ['tekname' => 'ASC']);
       array_push($cats, ...array_map(fn($id) => $this->option($id), $others));
     }
     X::sortBy($cats, 'tekname', 'ASC');

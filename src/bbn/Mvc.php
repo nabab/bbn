@@ -462,7 +462,7 @@ class Mvc implements Mvc\Api
   public function addStaticRoute(...$routes): int
   {
     $res = 0;
-    $aliases = array_flip($this->getRoutes('alias'));
+    $aliases = array_flip($this->getRoutes('alias') ?: []);
     $todo = [];
     foreach ($routes as $a) {
       $todo[] = $a;
