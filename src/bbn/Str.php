@@ -591,6 +591,33 @@ class Str
     return false;
   }
 
+  public static function data2Html(object|array $data): ?string
+  {
+    if (is_object($data)) {
+      $data = (array)$data;
+    }
+    $isAssoc = X::isAssoc($data);
+    $st = '<ul>';
+    foreach ($data as $k => $v) {
+      $st .= '<li>';
+      if ($isAssoc) {
+        $st .= '<strong>' . htmlspecialchars((string)$k) . '</strong>: ';
+      }
+
+      if (is_array($v)) {
+        $st .= self::data2Html($v);
+      }
+      else {
+        $st .= htmlspecialchars((string)$v);
+      }
+
+      $st .= '</li>';
+    }
+    $st .= '</ul>';
+
+    return $st;
+  }
+
 
   /**
    * Checks if the string is a json string.

@@ -17,7 +17,8 @@ trait Types
 
   public function getDateTypes(): array
   {
-    return $this->language->getDateTypes();
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'getDateTypes']);
   }
 
 
@@ -28,7 +29,8 @@ trait Types
    */
   public function getBinaryTypes(): array
   {
-    return $this->language->getBinaryTypes();
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'getBinaryTypes']);
   }
 
   /**
@@ -38,26 +40,31 @@ trait Types
    */
   public function getTextTypes(): array
   {
-    return $this->language->getTextTypes();
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'getTextTypes']);
   }
 
   public function isBinaryType(string $type): bool
   {
-    return $this->language->isBinaryType($type);
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'isBinaryType'], $type);
   }
 
   public function isNumericType(string $type): bool
   {
-    return $this->language->isNumericType($type);
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'isNumericType'], $type);
   }
 
   public function isDateType(string $type): bool
   {
-    return $this->language->isDateType($type);
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'isDateType'], $type);
   }
 
   public function isTextType(string $type): bool
   {
-    return $this->language->isTextType($type);
+    $clsName = get_class($this->language);
+    return call_user_func([$clsName, 'isTextType'], $type);
   }
 }

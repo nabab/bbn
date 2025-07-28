@@ -3,20 +3,20 @@ namespace bbn\Db;
 
 interface Types
 {
-  public function isBinaryType(string $type): bool;
+  public static function isBinaryType(string $type): bool;
 
-  public function isNumericType(string $type): bool;
+  public static function isNumericType(string $type): bool;
 
-  public function isDateType(string $type): bool;
+  public static function isDateType(string $type): bool;
 
-  public function isTextType(string $type): bool;
+  public static function isTextType(string $type): bool;
 
-  public function getBinaryTypes(): array;
+  public static function getBinaryTypes(): array;
 
-  public function getNumericTypes(): array;
+  public static function getNumericTypes(): array;
 
-  public function getDateTypes(): array;
+  public static function getDateTypes(): array;
 
-  public function getTextTypes(): array;
+  public static function getTextTypes(): array;
 
 }

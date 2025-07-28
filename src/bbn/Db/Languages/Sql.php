@@ -301,7 +301,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getOperators(): array
+  public static function getOperators(): array
   {
     return static::$operators;
   }
@@ -312,7 +312,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getTypes(): array
+  public static function getTypes(): array
   {
     return static::$types;
   }
@@ -323,7 +323,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getNumericTypes(): array
+  public static function getNumericTypes(): array
   {
     return static::$numeric_types;
   }
@@ -334,7 +334,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getDateTypes(): array
+  public static function getDateTypes(): array
   {
     return static::$date_types;
   }
@@ -345,7 +345,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getBinaryTypes(): array
+  public static function getBinaryTypes(): array
   {
     return static::$binary_types;
   }
@@ -356,7 +356,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return array
    */
-  public function getTextTypes(): array
+  public static function getTextTypes(): array
   {
     return static::$text_types;
   }
@@ -368,9 +368,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $type The type to check
    * @return bool
    */
-  public function isBinaryType(string $type): bool
+  public static function isBinaryType(string $type): bool
   {
-    return in_array(strtolower($type), $this->getBinaryTypes());
+    return in_array(strtolower($type), self::getBinaryTypes());
   }
 
 
@@ -380,9 +380,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $type The type to check
    * @return bool
    */
-  public function isNumericType(string $type): bool
+  public static function isNumericType(string $type): bool
   {
-    return in_array(strtolower($type), $this->getNumericTypes());
+    return in_array(strtolower($type), self::getNumericTypes());
   }
 
 
@@ -392,9 +392,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $type The type to check
    * @return bool
    */
-  public function isDateType(string $type): bool
+  public static function isDateType(string $type): bool
   {
-    return in_array(strtolower($type), $this->getDateTypes());
+    return in_array(strtolower($type), self::getDateTypes());
   }
 
 
@@ -404,9 +404,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $type The type to check
    * @return bool
    */
-  public function isTextType(string $type): bool
+  public static function isTextType(string $type): bool
   {
-    return in_array(strtolower($type), $this->getTextTypes());
+    return in_array(strtolower($type), self::getTextTypes());
   }
 
 

@@ -1098,13 +1098,7 @@ class X
   {
     $keys = array_keys($r);
     $c    = \count($keys);
-    for ($i = 0; $i < $c; $i++) {
-      if ($keys[$i] !== $i) {
-        return 1;
-      }
-    }
-
-    return false;
+    return (bool)($c && ($keys !== range(0, $c - 1)));
   }
 
 

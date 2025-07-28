@@ -13,7 +13,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Db;
 use bbn\Appui\Passwords;
-use ValueError;
+use Exception;
 
 class Database extends bbn\Models\Cls\Cache
 {
@@ -286,7 +286,7 @@ class Database extends bbn\Models\Cls\Cache
     if (!empty($engineCode)) {
       $c = "bbn\\Db\\Languages\\". ucfirst($engineCode);
       if (class_exists($c)) {
-        return $c::$types;
+        return $c::getTypes();
       }
     }
 
@@ -1167,6 +1167,15 @@ class Database extends bbn\Models\Cls\Cache
 
     if (!$conn || !$conn->check()) {
       throw new \Exception(X::_("Impossible to connect"));
+    }
+
+    if (empty($table)) {
+      $res = [];
+      foreach ($conn->getTables() as $t) {
+        $tsn = $conn->tsn($t);
+        $res[$tsn] = $this->modelize($tsn, $db, $host, $engine);
+      }
+      return $res;
     }
 
     $table_id = '';
@@ -2071,4 +2080,222 @@ class Database extends bbn\Models\Cls\Cache
 
     return null;
   }
+
+  public function getDisplayConfig(string $table, int $level = 0): array
+  {
+    $opt =& $this->o;
+    $db =& $this->currentConn;
+    $ocf = $opt->getClassCfg();
+    $res = ['table' => $table];
+    $cfg = $this->modelize($table);
+    if ($level && !empty($cfg['option']) && !empty($cfg['option']['viewer'])) {
+      $res = [
+        'table' => $table,
+        'component' => $cfg['option']['viewer'],
+        'componentOptions' => $cfg['option']['componentOptions'] ?? $cfg['option']['options'] ?? [],
+        'columns' => empty($cfg['option']['dcolumns']) ? array_keys($cfg['fields']) : $cfg['option']['dcolumns'],
+        'labels' => []
+      ];
+      foreach ($res['columns'] as $c) {
+        $res['labels'][$c] = $cfg['fields'][$c]['text'] ?? $c;
+      }
+
+      return $res;
+    }
+
+    foreach ($cfg['fields'] as $name => $f) {
+      if ($level && !empty($cfg['option']['dcolumns']) && !in_array($name, $cfg['option']['dcolumns'])) {
+        continue;
+      }
+      $isDef = false;
+      if (!empty($f['option']) && !empty($f['option']['viewer'])) {
+        $def = [
+          'component' => $f['option']['viewer'],
+          'componentOptions' => $f['option']['componentOptions'] ?? $f['option']['options'] ?? []
+        ];
+        $isDef = true;
+      }
+      elseif ($f['key']) {
+        foreach ($cfg['cols'][$name] as $k) {
+          if ($k === 'PRIMARY') {
+            $def = [
+              'component' => 'appui-database-data-binary',
+              'componentOptions' => [
+                'table' => $table,
+                'column' => $name
+              ]
+            ];
+            $isDef = true;
+            break;
+          }
+
+          if (!empty($cfg['keys'][$k]['ref_column'])) {
+            if ($cfg['keys'][$k]['ref_table'] === $ocf['table']) {
+              $def = ['option' => true];
+            }
+            else if ($level < 3) {
+              $def = $this->getDisplayConfig($cfg['keys'][$k]['ref_table'], $level + 1);
+              $def['column'] = $cfg['keys'][$k]['ref_column'];
+            }
+            else {
+              $def = [
+                'component' => 'appui-database-data-binary',
+                'componentOptions' => [
+                  'table' => $cfg['keys'][$k]['ref_table'],
+                  'column' => $cfg['keys'][$k]['ref_column']
+                ]
+              ];
+              $def['table'] = $cfg['keys'][$k]['ref_table'];
+              $def['column'] = $cfg['keys'][$k]['ref_column'];
+            }
+            $isDef = 1;
+            break;
+          }
+        }
+      }
+
+      if (!$isDef) {
+        if ($db->isNumericType($f['type'])) {
+          $def = ['type' => 'number', 'length' => $f['maxlength'] ?? null, 'signed' => $f['signed'] ?? true];
+        }
+        elseif ($db->isTextType($f['type'])) {
+          $def = ['type' => 'text', 'length' => $f['maxlength'] ?? null];
+        }
+        elseif ($db->isBinaryType($f['type'])) {
+          $def = ['type' => 'binary', 'length' => $f['maxlength'] ?? null];
+        }
+        elseif ($db->isDateType($f['type'])) {
+          $def = ['type' => 'date'];
+        }
+        else {
+          $def = ['type' => 'unknown'];
+        }
+      }
+
+      $def['label'] = $f['text'] ?? $name;
+      $res['fields'][$name] = $def;
+    }
+
+    return $res;
+  }
+
+  public function getDisplayRecord(string $table, array $cfg, array $where, array &$alreadyShown = []): array
+  {
+    $opt =& $this->o;
+    $db =& $this->currentConn;
+    $res = ['table' => $cfg['table']];
+    $dbCfg = [
+      'tables' => [$table],
+      'where' => $where
+    ];
+    $swhere = [];
+    foreach ($where as $k => $v) {
+      if (!is_int($k)) {
+        $swhere[$db->csn($k)] = $v;
+      }
+    }
+    $alreadyShown[] = md5($db->tsn($table) . json_encode($swhere));
+    if (!empty($cfg['columns'])) {
+      $dbCfg['fields'] = [];
+      foreach ($cfg['columns'] as $c) {
+        if (strpos($c, ':')) {
+          [$tmp1, $tmp2] = X::split($c, ':');
+          [$originField, $extPrimary] = X::split($tmp1, '.');
+          [$extTable, $extField] = X::split($tmp2, '.');
+          $aliasTable = $originField . '_' . $extTable;
+          $dbCfg['fields'][] = $aliasTable . '.' . $extField;
+          if (empty($dbCfg['join'])) {
+            $dbCfg['join'] = [];
+          }
+  
+          if (!X::getRow($dbCfg['join'], [
+            'table' => $extTable,
+            'alias' => $aliasTable
+          ])) {
+            $dbCfg['join'][] = [
+              'table' => $extTable,
+              'alias' => $aliasTable,
+              'type' => 'left',
+              'on' => [
+                [
+                  'field' => $cfg['table'] . '.' . $originField,
+                  'exp' => $aliasTable . '.' . $extPrimary
+                ]
+              ]
+            ];
+          }
+        }
+        else {
+          $dbCfg['fields'][] = $cfg['table'] . '.' . $c;
+        }
+      }
+    }
+    elseif (!empty($cfg['fields'])) {
+      $dbCfg['fields'] = array_keys($cfg['fields']);
+    }
+    elseif (!isset($cfg['component'])) {
+      X::ddump($cfg);
+      throw new Exception("No data!");
+    }
+  
+    if (!empty($cfg['record'])) {
+      $data = $cfg['record'];
+    }
+    else {
+      $data = $db->rselect($dbCfg);
+    }
+    
+    if (!empty($cfg['component'])) {
+      $res = $cfg;
+      if (empty($res['componentOptions']['source'])) {
+        $res['componentOptions']['source'] = $data;
+      }
+    }
+    else {
+      $res['fields'] = [];
+      foreach ($cfg['fields'] as $name => $f) {
+        if (!empty($cfg['columns']) && !in_array($name, $cfg['columns'])) {
+          continue;
+        }
+        if (is_null($data[$name])) {
+          $tmp = ['value' => $data[$name]];
+        }
+        elseif (!empty($f['option'])) {
+          $tmp = ['value' => $opt->text($data[$name])];
+        }
+        elseif (!empty($f['table'])) {
+          if (in_array(md5($db->tsn($f['table']) . json_encode([$db->csn($f['column']) => $data[$name]])), $alreadyShown)) {
+            continue;
+          }
+  
+          $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $alreadyShown);
+        }
+        elseif (!empty($f['component'])) {
+          $tmp = array_merge($f, [
+            'value' => $data[$name]
+          ]);
+        }
+        elseif (!empty($f['type'])) {
+          if (($f['type'] === 'text') && Str::isJson($data[$name])) {
+            $f['type'] = 'json';
+          }
+          $tmp = array_merge($f, [
+            'value' => $data[$name]
+          ]);
+        }
+        else {
+          throw new Exception("Unrecognizable field!");
+        }
+  
+        $tmp['name'] = $name;
+        $res['fields'][] = $tmp;
+      }
+  
+      $res['source'] = $data;
+    }
+  
+    return $res;
+
+  }
+
 }
