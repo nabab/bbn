@@ -1418,7 +1418,7 @@ use bbn\User\Session;
    */
   protected function _get_session(string|null $attr = null)
   {
-    if ($this->session->has($this->sessIndex)) {
+    if ($this->session && $this->session->has($this->sessIndex)) {
       return $attr ? $this->session->get($this->sessIndex, $attr) : $this->session->get($this->sessIndex);
     }
 

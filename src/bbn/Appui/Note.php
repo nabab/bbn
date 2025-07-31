@@ -283,7 +283,6 @@ class Note extends DbCls
   ): ?string
   {
     $props = [
-      'title',
       'content',
       'id_type',
       'private',
@@ -301,7 +300,7 @@ class Note extends DbCls
       $cfg = $title;
     }
     else {
-      $cfg = [];
+      $cfg = ['title' => $title];
     }
 
     foreach ($props as $prop) {

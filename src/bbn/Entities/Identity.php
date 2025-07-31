@@ -205,30 +205,6 @@ class Identity extends DbCls
   }
 
   /**
-   * Conducts a full search for identities records.
-   *
-   * @param mixed $p Search parameters or a single UID.
-   * @param int $start Pagination start.
-   * @param int $limit Pagination limit.
-   * @return array The full search results.
-   */
-  /*
-  public function full_search($p, int $start = 0, int $limit = 0)
-  {
-    $arc = &$this->class_cfg['arch']['identities'];
-    $r   = [];
-    $res = Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
-    if ($res) {
-      foreach ($res as $i => $id) {
-        $r[$i] = $this->getInfo($id);
-      }
-    }
-
-    return $r;
-  }
-  */
-
-  /**
    * Adds or updates a person record in the database.
    *
    * @param mixed $fn The person data to add.

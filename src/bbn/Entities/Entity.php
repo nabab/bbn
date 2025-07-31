@@ -31,8 +31,6 @@ class Entity
 
   protected array $info = [];
 
-  protected string $id;
-
   protected ?Link $links;
 
   protected $easyId = null;
@@ -44,7 +42,7 @@ class Entity
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(protected Db $db, string $id, protected Entities $entities)
+  public function __construct(protected Db $db, protected string $id, protected Entities $entities)
   {
     $this->class_cfg = $this->entities->getClassCfg();
     $this->table = $this->class_cfg['table'];
