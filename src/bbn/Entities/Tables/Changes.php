@@ -150,11 +150,16 @@ class Changes extends EntityTable
 
   /**
    * @param string $code
-   * @return string
+   * @return null|string
    */
-  public static function decryptCode(string $code): string
+  public static function decryptCode(string $code): ?string
   {
-    return \bbn\Util\Enc::decrypt(base64_decode(strtr($code, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($code)) % 4)));
+    $val = \bbn\Util\Enc::decrypt(base64_decode(strtr($code, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($code)) % 4)));
+    if (preg_match('/^[a-zA-Z0-9]+$/', $val)) {
+      return $val;
+    }
+
+    return null;
   }
 
 
