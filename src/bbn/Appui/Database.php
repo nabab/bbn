@@ -2096,6 +2096,7 @@ class Database extends bbn\Models\Cls\Cache
         'columns' => empty($cfg['option']['dcolumns']) ? array_keys($cfg['fields']) : $cfg['option']['dcolumns'],
         'labels' => []
       ];
+      
       foreach ($res['columns'] as $c) {
         $res['labels'][$c] = $cfg['fields'][$c]['text'] ?? $c;
       }
@@ -2172,14 +2173,14 @@ class Database extends bbn\Models\Cls\Cache
         }
       }
 
-      $def['label'] = $f['text'] ?? $name;
+      $def['label'] = isset($f['option']) && !empty($f['option']['text']) ? $f['option']['text'] : $name;
       $res['fields'][$name] = $def;
     }
 
     return $res;
   }
 
-  public function getDisplayRecord(string $table, array $cfg, array $where, array &$alreadyShown = []): array
+  public function getDisplayRecord(string $table, array $cfg, array $where, $when = null, array &$alreadyShown = []): array
   {
     $opt =& $this->o;
     $db =& $this->currentConn;
@@ -2268,7 +2269,7 @@ class Database extends bbn\Models\Cls\Cache
             continue;
           }
   
-          $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $alreadyShown);
+          $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $when, $alreadyShown);
         }
         elseif (!empty($f['component'])) {
           $tmp = array_merge($f, [
