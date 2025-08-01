@@ -107,7 +107,7 @@ class Manager
           $currentValue = $condition['value'];
           $this->removeWorker();
           $totalResults = 0;
-          $step = 0;
+          $step = -1;
           $prev = $this->search->retrievePreviousResults($condition['value']);
           if (!empty($prev['data'])) {
             $prev['is_previous'] = true;
@@ -130,15 +130,18 @@ class Manager
 
               $this->addWorker($result, $step);
               $timer->start("step-$step");
-              X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+              //X::log("[STEP $step] " . microtime(true) . " NUM WORKERS: " . count($this->workers) . " MAX WORKERS: " . $this->maxWorkers . " MAX RES: " . $this->maxResults, 'searchTimings');
+              //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+              //X::log($result, 'searchRes');
               // If the condition file is removed externally, stop everything
               if (!$this->fs->exists($this->filePath)) {
+                //X::log("[STEP $step] " . microtime(true) . " FILE REMOVED " . $this->filePath, 'searchTimings');
                 $this->removeWorker();
                 $step = null;
                 break;
               }
               // If there's a next step, move forward
-              elseif (!empty($result['next_step'])) {
+              elseif (array_key_exists('next_step', $result)) {
                 $step = $result['next_step'];
               }
               else {
@@ -159,17 +162,17 @@ class Manager
 
               // If the process has finished
               if (!$status['running']) {
-                X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
+                //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
                 // Read data from stdout
                 $jsonOutput = stream_get_contents($worker['pipes'][1]);
 
                 if ($jsonOutput) {
-                  X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
+                  //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
                   $ret  = json_decode($jsonOutput, true);
 
                   // If results are found, stream them
                   if (!empty($ret['num'])) {
-                    X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
+                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
                     $data = $this->fs->decodeContents($worker['data'], 'json', true);
                     // If we exceed the max, trim them
                     /*
@@ -260,7 +263,7 @@ class Manager
 
     // Delete the condition file if it still exists
     if ($this->fs->exists($this->filePath)) {
-      X::log("[STEP $step] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath . ' / LOOPCOUNT: ' . $loopCount, 'searchTimings');
+      //X::log("[STEP $step] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath . ' / LOOPCOUNT: ' . $loopCount, 'searchTimings');
       $this->fs->delete($this->filePath);
     }
 
@@ -336,7 +339,7 @@ class Manager
       $idx = X::search($this->workers, ['uid' => $uid]);
       if (isset($this->workers[$idx])) {
         $w = array_splice($this->workers, $idx, 1)[0];
-        X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'] . ' AND ' . $w['data'], 'searchTimings');
+        //X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'] . ' AND ' . $w['data'], 'searchTimings');
         $status = proc_get_status($w['proc']);
         if ($status['running']) {
           proc_terminate($w['proc']);
@@ -378,7 +381,7 @@ class Manager
 
     // Create and clear the log file
     $logFile = $this->logFileBase . '-' . $workerUid . '.log';
-    X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
+    //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
     $this->fs->putContents($logFile, '');
 
     // Attach the log file as stderr

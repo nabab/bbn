@@ -453,11 +453,12 @@ class Search extends Basic
       'data' => []
     ];
     $id_search = $this->getSearchId($search_value);
-    if (!$step) {
+    if ($step === -1) {
       if ($id_search) {
         $this->updateSearch($search_value);
         if ($previousResults = $this->retrieveUserResults($id_search, $config_array)) {
           $results['data'] = $previousResults;
+          $results['next_step'] = 0;
         }
       }
       else {
