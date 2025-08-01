@@ -512,23 +512,11 @@ class Cache implements CacheInterface
         */
       case 'files':
         $file = self::_file($key, $this->path);
-        if (!$this->fs->isFile($file)) {
-          $tmp_file = X::dirname($file).'/_'.X::basename($file);
-          if ($this->fs->isFile($tmp_file)) {
-            $num = 0;
-            while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {
-              X::log([$key, $file, $tmp_file, date('Y-m-d H:i:s')], "$num-wait_for_cache");
-              sleep(1);
-              $num++;
-            }
-          }
-        }
-
-        if (($t = $this->fs->getContents($file))
-            && ($t = json_decode($t, true))
+        if ($this->fs->isFile($file)
+          && ($t = $this->fs->getContents($file))
+          && ($t = json_decode($t, true))
         ) {
-          if ($t
-              && (!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
+          if ((!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
               && (!$t['expire'] || ($t['expire'] > time()))
           ) {
             return $t;
