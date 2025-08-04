@@ -272,20 +272,21 @@ trait Formatters {
    */
   public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array
   {
-    if ($sql = $this->getCreateTableRaw($source, null, true, false, true)) {
-      $sql = str_replace(
-        'CREATE TABLE '.$this->escape($source),
-        'CREATE TABLE ' . $this->escape($target),
-        $sql
-      );
-      $ret = [$sql];
+    if ($ret = $this->getCreateTableRaw($source, null, true, false, true)) {
+      foreach ($ret as $i => $r) {
+        $ret[$i] = str_replace(
+          'TABLE ' . $this->escape($source),
+          'TABLE ' . $this->escape($target),
+          $r
+        );
+      }
       if ($sql = $this->getCreateConstraints($source, null, true)) {
         if (is_string($sql)) {
           $sql = [$sql];
         }
 
         $sql[0] = str_replace(
-          'ALTER TABLE '.$this->escape($source),
+          'ALTER TABLE ' . $this->escape($source),
           'ALTER TABLE ' . $this->escape($target),
           $sql[0]
         );
