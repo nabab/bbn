@@ -13,6 +13,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Db;
 use bbn\Appui\Passwords;
+use bbn\Appui\History;
 use Exception;
 
 class Database extends bbn\Models\Cls\Cache
@@ -754,6 +755,10 @@ class Database extends bbn\Models\Cls\Cache
 
       if ($idKeys = $this->o->fromCode('keys', $r['id'])) {
         $r['num_keys'] = $this->o->count($idKeys);
+        $r['num_constraints'] = 0;
+        if ($keys = $this->o->fullOptions($idKeys)) {
+          $r['num_constraints'] = count(array_filter($keys, fn($k) => !empty($k['constraint']) && !empty($k['ref_table']) && !empty($k['ref_column'])));
+        }
       }
 
       return $r;
@@ -2049,6 +2054,14 @@ class Database extends bbn\Models\Cls\Cache
       }
       catch (\Exception $e) {}
 
+      $keys = $isReal ? $conn->getKeys($tableName) : [];
+      $constrainsts = isset($keys['keys']) ?
+        array_filter(
+          $keys['keys'],
+          fn($k) => !empty($k['constraint']) && !empty($k['ref_table']) && !empty($k['ref_column'])
+        ) :
+        [];
+
       $r = X::mergeArrays(
         !empty($tableId) ? ($this->fullTable($tableId, $dbId ?: $dbName, $hostId, $engineId) ?: []) : static::$tableProps,
         [
@@ -2064,11 +2077,13 @@ class Database extends bbn\Models\Cls\Cache
           'is_real' => $isReal,
           'is_virtual' => !empty($tableId),
           'num_real_columns' => $isReal ? count($conn->getColumns($tableName)) : 0,
-          'num_real_keys' => $isReal ? count($conn->getKeys($tableName)) : 0,
+          'num_real_keys' => isset($keys['keys']) ? count($keys['keys']) : 0,
+          'num_real_constraints' =>  count($constrainsts),
           'size' => $isReal ? $conn->tableSize($tableName) : 0,
           'charset' => $isReal ? $conn->getTableCharset($tableName) : '',
           'collation' => $isReal ? $conn->getTableCollation($tableName) : '',
-          'last_check' => date('Y-m-d H:i:s')
+          'last_check' => date('Y-m-d H:i:s'),
+          'keys' => $isReal ? $conn->getKeys($tableName) : [],
         ]
       );
       if ($conn) {
@@ -2080,6 +2095,7 @@ class Database extends bbn\Models\Cls\Cache
 
     return null;
   }
+
 
   public function getDisplayConfig(string $table, int $level = 0): array
   {
@@ -2180,7 +2196,14 @@ class Database extends bbn\Models\Cls\Cache
     return $res;
   }
 
-  public function getDisplayRecord(string $table, array $cfg, array $where, $when = null, array &$alreadyShown = []): array
+
+  public function getDisplayRecord(
+    string $table,
+    array $cfg,
+    array $where,
+    $when = null,
+    array &$alreadyShown = []
+  ): array
   {
     $opt =& $this->o;
     $db =& $this->currentConn;
@@ -2299,4 +2322,39 @@ class Database extends bbn\Models\Cls\Cache
 
   }
 
+
+  public function integrateHistoryIntoTable(
+    string $table,
+    string $db,
+    string $host,
+    ?string $user = null,
+    ?string $date = null
+  ): bool
+  {
+    if (!Str::isUid($host)) {
+      throw new Exception(_("Invalid host ID"));
+    }
+
+    if (($engineId = $this->engineIdFromHost($host))
+      && ($engine = $this->engineCode($engineId))
+      && ($conn = $this->connection($host, $engine, $db))
+      && class_exists('bbn\\Appui\\History')
+      && History::hasHistory($conn)
+      && $conn->tableExists($table)
+      && ($mod = $conn->modelize($table))
+    ) {
+      if (empty($mod['keys'])
+        || empty($mod['keys']['PRIMARY'])
+      ) {
+        throw new Exception(_("The table does not have a primary key, please add one before integrating the history system."));
+      }
+
+      $primary = $mod['keys']['PRIMARY'];
+      if (!empty($primary['constraint'])) {
+        throw new Exception(_("The table has a primary key with a constraint, please remove it before integrating the history system."));
+      }
+    }
+
+    return false;
+  }
 }
