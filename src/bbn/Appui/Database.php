@@ -2328,7 +2328,8 @@ class Database extends bbn\Models\Cls\Cache
     string $db,
     string $host,
     ?string $user = null,
-    ?string $date = null
+    ?string $date = null,
+    ?string $activeColumn = null
   ): bool
   {
     if (!Str::isUid($host)) {
@@ -2343,16 +2344,129 @@ class Database extends bbn\Models\Cls\Cache
       && $conn->tableExists($table)
       && ($mod = $conn->modelize($table))
     ) {
+      // Check if the table has a primary key
       if (empty($mod['keys'])
         || empty($mod['keys']['PRIMARY'])
+        || empty($mod['keys']['PRIMARY']['columns'])
       ) {
         throw new Exception(_("The table does not have a primary key, please add one before integrating the history system."));
       }
 
       $primary = $mod['keys']['PRIMARY'];
+      // Check if the primary key is a single column
+      if (count($primary['columns']) !== 1) {
+        throw new Exception(_("The table has a primary key with multiple columns, please reduce it to a single column before integrating the history system."));
+      }
+
+      // Check if the primary key has a constraint
       if (!empty($primary['constraint'])) {
         throw new Exception(_("The table has a primary key with a constraint, please remove it before integrating the history system."));
       }
+
+      // Check if the primary key has a relation with another table
+      if (array_filter(
+        $mod['keys'],
+        fn($v, $k) => ($k !== 'PRIMARY')
+          && ($primary['columns'] === $v['columns'])
+          && !empty($v['constraint'])
+          && !empty($v['ref_table'])
+          && !empty($v['ref_column']),
+        ARRAY_FILTER_USE_BOTH
+      )) {
+        throw new Exception(_("The table already has a foreign key with the primary key columns, please remove it before integrating the history system."));
+      }
+    }
+
+    if (!($dbId = $this->dbId($db, $host, $engine))) {
+      $dbId = $this->importDb($db, $host);
+    }
+
+    if (empty($dbId)) {
+      throw new Exception(X::_("Impossible to find the database \"%s\" in the options", $db));
+    }
+
+    $tableId = false;
+    $columnId = false;
+    $primaryField = $primary['columns'][0];
+    if ($this->importTable($table, $dbId, $host)) {
+      $tableId = $this->tableId($table, $dbId, $host, $engine);
+      $columnId = $this->columnId($primaryField, $tableId);
+    }
+
+    if (empty($tableId)) {
+      throw new Exception(X::_("Impossible to find the table \"%s\" in the options", $table));
+    }
+
+    if (empty($columnId)) {
+      throw new Exception(X::_("Impossible to find the column \"%s\" in the options", $primaryField));
+    }
+
+    if ($conn->count($table)) {
+      if (empty($user)) {
+        if (defined('BBN_EXTERNAL_USER_ID')) {
+          $user = BBN_EXTERNAL_USER_ID;
+        }
+        else if (class_exists('bbn\\User')
+          && ($uclass = bbn\User::getInstance())
+        ) {
+          $user = $uclass->getId();
+        }
+
+        if (empty($user)) {
+          throw new Exception(_("No user ID provided for the history system integration."));
+        }
+      }
+
+      if (empty($date)) {
+        $date = X::microtime();
+      }
+      else {
+        $t = strtotime($date);
+        $date = date('U', $t) . '.' . substr(date('u', $t), 0, 4);
+      }
+
+      $sql = "SELECT " . $conn->escape($primaryField) . (!empty($activeColumn) ? ", " . $conn->escape($activeColumn) : "") . " FROM " . $conn->escape($table);
+      $q = $conn->query($sql);
+      while ($row = $q->getRow()) {
+        if ($conn->insertIgnore('bbn_history_uids', [
+          'bbn_uid' => $row[$primaryField],
+          'bbn_table' => $tableId,
+          'bbn_active' => !empty($activeColumn) ? (int)!empty($row[$activeColumn]) : 1,
+        ])) {
+          $conn->insertIgnore('bbn_history', [
+            'opr' => 'INSERT',
+            'uid' => $row[$primaryField],
+            'col' => $columnId,
+            'tst' => $date,
+            'usr' => $user
+          ]);
+          if (!empty($activeColumn) && empty($row[$activeColumn])) {
+            $conn->insertIgnore('bbn_history', [
+              'opr' => 'DELETE',
+              'uid' => $row[$primaryField],
+              'col' => $columnId,
+              'tst' => $date,
+              'usr' => $user
+            ]);
+
+          }
+        }
+      }
+    }
+
+    // To add primary key -> history table relation
+    if ($conn->createConstraints($table, [
+      'keys' => [[
+        'constraint' => 'bbn_history_uids_fk',
+        'columns' => $primary['columns'],
+        'ref_table' => $conn->tableSimpleName(History::$table_uids),
+        'ref_column' => 'bbn_uid',
+        'update' => 'CASCADE',
+        'delete' => 'CASCADE'
+      ]]
+    ])) {
+      $conn->clearCache($table, 'tables');
+      return true;
     }
 
     return false;
