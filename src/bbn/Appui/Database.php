@@ -1684,7 +1684,7 @@ class Database extends bbn\Models\Cls\Cache
           'columns' => []
         ],
         'php' => [
-          'tables' => [$table],
+          'table' => $table,
           'fields' => [],
           'join' => [],
           'order' => []
@@ -1722,13 +1722,50 @@ class Database extends bbn\Models\Cls\Cache
               $tIdx++;
               // Getting the model from the foreign table
               $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
+              // Adding the JOIN part to the query
+              $res['php']['join'][] = [
+                'type' => $f['null'] ? 'left' : '',
+                'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],
+                'alias' => $alias.'_t'.$tIdx,
+                'on' => [
+                  [
+                    'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
+                    'exp' => $table.'.'.$col
+                  ]
+                ]
+              ];
               // Looking for displayed columns configured
               if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
                 $dcols = [];
+                $dcIdx = 0;
                 foreach ($tmodel['option']['dcolumns'] as $dcol) {
-                  $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);
+                  if (strpos($dcol, ':')) {
+                    [$tmp1, $tmp2] = X::split($dcol, ':');
+                    [$originField, $extPrimary] = X::split($tmp1, '.');
+                    [$extTable, $extField] = X::split($tmp2, '.');
+                    $dcIdx++;
+                    // Adding the JOIN part to the query
+                    $res['php']['join'][] = [
+                      'type' => 'left',
+                      'table' => $extTable,
+                      'alias' => $alias.'_t'.$tIdx.'_dc'.$dcIdx,
+                      'on' => [
+                        [
+                          'field' => $alias.'_t'.$tIdx.'_dc'.$dcIdx.'.'.$extPrimary,
+                          'exp' => $table.'.'.$originField
+                        ]
+                      ]
+                    ];
+                    $dc = $this->db->cfn($extField, $alias.'_t'.$tIdx.'_dc'.$dcIdx);
+                  }
+                  else {
+                    $dc = $this->db->cfn($dcol, $alias.'_t'.$tIdx);
+                  }
+
+                  $dcols[] = $dc;
                   if (!$displayColumn) {
-                    $displayColumn = $dcol;
+                    //$displayColumn = $dcol;
+                    $displayColumn = $dc;
                   }
                 }
 
@@ -1764,18 +1801,6 @@ class Database extends bbn\Models\Cls\Cache
                 }
               }
 
-              // Adding the JOIN part to the query
-              $res['php']['join'][] = [
-                'type' => $f['null'] ? 'left' : '',
-                'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],
-                'alias' => $alias.'_t'.$tIdx,
-                'on' => [
-                  [
-                    'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
-                    'exp' => $table.'.'.$col
-                  ]
-                ]
-              ];
               break;
             }
           }
@@ -2226,31 +2251,10 @@ class Database extends bbn\Models\Cls\Cache
           [$tmp1, $tmp2] = X::split($c, ':');
           [$originField, $extPrimary] = X::split($tmp1, '.');
           [$extTable, $extField] = X::split($tmp2, '.');
-          $aliasTable = $originField . '_' . $extTable;
-          $dbCfg['fields'][] = $aliasTable . '.' . $extField;
-          if (empty($dbCfg['join'])) {
-            $dbCfg['join'] = [];
-          }
-  
-          if (!X::getRow($dbCfg['join'], [
-            'table' => $extTable,
-            'alias' => $aliasTable
-          ])) {
-            $dbCfg['join'][] = [
-              'table' => $extTable,
-              'alias' => $aliasTable,
-              'type' => 'left',
-              'on' => [
-                [
-                  'field' => $cfg['table'] . '.' . $originField,
-                  'exp' => $aliasTable . '.' . $extPrimary
-                ]
-              ]
-            ];
-          }
+          $dbCfg['fields'][] = $originField;
         }
         else {
-          $dbCfg['fields'][] = $cfg['table'] . '.' . $c;
+          $dbCfg['fields'][] = $c;
         }
       }
     }
@@ -2261,14 +2265,47 @@ class Database extends bbn\Models\Cls\Cache
       X::ddump($cfg);
       throw new Exception("No data!");
     }
-  
+
     if (!empty($cfg['record'])) {
       $data = $cfg['record'];
     }
     else {
-      $data = $db->rselect($dbCfg);
+      if (empty($when)) {
+        $data = $db->rselect($dbCfg);
+      }
+      else {
+        $primaryKey = $db->getPrimary($cfg['table']);
+        $idRow = $db->selectOne($cfg['table'], $primaryKey, $dbCfg['where']);
+        $data = History::getRowBack($cfg['table'], $idRow, $when, $dbCfg['fields']);
+      }
+
+      if (!empty($cfg['columns'])) {
+        $fieldsToUnset = [];
+        foreach ($cfg['columns'] as $c) {
+          if (strpos($c, ':')) {
+            [$tmp1, $tmp2] = X::split($c, ':');
+            [$originField, $extPrimary] = X::split($tmp1, '.');
+            [$extTable, $extField] = X::split($tmp2, '.');
+            if (array_key_exists($originField, $data)
+              && !in_array($originField, $fieldsToUnset)
+            ) {
+              $fieldsToUnset[] = $originField;
+            }
+
+            $data[$extField] = !empty($data[$originField]) ?
+              $db->selectOne($extTable, $extField, [$extPrimary => $data[$originField]]) :
+              null;
+          }
+        }
+
+        if (!empty($fieldsToUnset)) {
+          foreach ($fieldsToUnset as $u) {
+            unset($data[$u]);
+          }
+        }
+      }
     }
-    
+
     if (!empty($cfg['component'])) {
       $res = $cfg;
       if (empty($res['componentOptions']['source'])) {
@@ -2291,7 +2328,7 @@ class Database extends bbn\Models\Cls\Cache
           if (in_array(md5($db->tsn($f['table']) . json_encode([$db->csn($f['column']) => $data[$name]])), $alreadyShown)) {
             continue;
           }
-  
+
           $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $when, $alreadyShown);
         }
         elseif (!empty($f['component'])) {
@@ -2310,11 +2347,11 @@ class Database extends bbn\Models\Cls\Cache
         else {
           throw new Exception("Unrecognizable field!");
         }
-  
+
         $tmp['name'] = $name;
         $res['fields'][] = $tmp;
       }
-  
+
       $res['source'] = $data;
     }
   
