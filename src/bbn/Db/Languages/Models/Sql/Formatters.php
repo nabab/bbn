@@ -214,7 +214,7 @@ trait Formatters {
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= $this->getColumnDefinitionStatement($name, $col);
+      $st .= '  ' . $this->getColumnDefinitionStatement($name, $col);
     }
 
     $st .= PHP_EOL . ');';

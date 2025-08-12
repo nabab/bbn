@@ -2485,7 +2485,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return bool|string
    */
-  private function _db_cache_name(string $item, string $mode)
+  protected function _db_cache_name(string $item, string $mode)
   {
     $r = false;
     if ($this->getEngine() === 'sqlite') {

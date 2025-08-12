@@ -1402,9 +1402,15 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $table The table's name
    * @param bool   $id_db The database to which import the table (its id_parent)
    * @param string $host  The connection's code
+   * @param bool   $full  If true will connect to the database and import its structure
    * @return string|null The ID of the generated table entry
    */
-  public function importTable(string $table, string $id_db, string $host = ''): ?array
+  public function importTable(
+    string $table,
+    string $id_db,
+    string $host = '',
+    bool $full = true
+  ): ?array
   {
     if (empty($host)) {
       $host_id = $this->retrieveHost($id_db);
@@ -1446,7 +1452,8 @@ class Database extends bbn\Models\Cls\Cache
         }
       }
 
-      if ($id_table
+      if (!empty($id_table)
+        && !empty($full)
         && ($id_columns = $this->o->fromCode('columns', $id_table))
         && ($id_keys = $this->o->fromCode('keys', $id_table))
         && ($db = $this->o->code($id_db))
@@ -1467,7 +1474,11 @@ class Database extends bbn\Models\Cls\Cache
           );
         }
         foreach ($m['fields'] as $col => $cfg) {
-          if ($opt_col = $this->o->option($col, $id_columns)) {
+          if ($optColId = $this->importColumn($col, $id_table, $host_id, $cfg)) {
+            $num_cols++;
+            $fields[$col] = $optColId;
+          }
+          /* if ($opt_col = $this->o->option($col, $id_columns)) {
             $num_cols += (int)$this->o->set($opt_col['id'], bbn\X::mergeArrays($opt_col, $cfg, [
               'text' => $opt_col['text'] === $opt_col['code'] ? $col : $opt_col['text'],
               'code' => $col,
@@ -1493,7 +1504,7 @@ class Database extends bbn\Models\Cls\Cache
 
           if ($opt_col) {
             $fields[$col] = $opt_col['id'];
-          }
+          } */
 
           if (isset($ocols[$col])) {
             unset($ocols[$col]);
@@ -1601,6 +1612,87 @@ class Database extends bbn\Models\Cls\Cache
 
     return null;
   }
+
+
+  public function importColumn(string $column, string $tableId, string $hostId, ?array $cfg = null): ?string
+  {
+    if (!bbn\Str::isUid($tableId)) {
+      throw new \Exception(_("Invalid table ID"));
+    }
+    else if (!$this->o->exists($tableId)) {
+      throw new \Exception(X::_("Impossible to find the table with ID \"%s\"", $tableId));
+    }
+
+    if (!($table = $this->o->code($tableId))) {
+      throw new \Exception(_("Invalid code for table ID \"%s\"", $tableId));
+    }
+
+    if (!($dbId = $this->dbIdFromTable($tableId))) {
+      throw new \Exception(X::_("Impossible to find the database from the table with ID \"%s\"", $tableId));
+    }
+
+    if (!($db = $this->o->code($dbId))) {
+      throw new \Exception(X::_("Impossible to get the database's code with ID \"%s\"", $dbId));
+    }
+
+    if (!bbn\Str::isUid($hostId)) {
+      throw new \Exception(_("Invalid host ID"));
+    }
+    else if (!$this->o->exists($hostId)) {
+      throw new \Exception(X::_("Impossible to find the host with ID \"%s\"", $hostId));
+    }
+
+    if (!($engineId = $this->engineIdFromHost($hostId))) {
+      throw new \Exception(X::_("Impossible to find the engine ID for the host \"%s\"", $hostId));
+    }
+
+    if (!($engine = $this->engineCode($engineId))) {
+      throw new \Exception(X::_("Impossible to find the engine code for the engine \"%s\"", $engineId));
+    }
+
+    if (!($columnsId = $this->o->fromCode('columns', $tableId))) {
+      throw new \Exception(X::_("Impossible to find the columns ID for the table \"%s\"", $tableId));
+    }
+
+    if ((empty($cfg) || !is_array($cfg))
+      && ($conn = $this->connection($hostId, $engine, $db))
+      && ($m = $conn->modelize($table))
+      && !empty($m['fields'][$column])
+    ) {
+      $cfg = $m['fields'][$column];
+    }
+
+    if (!empty($cfg)) {
+      if ($opt = $this->o->option($column, $columnsId)) {
+        if ($this->o->set($opt['id'], X::mergeArrays($opt, $cfg, [
+          'text' => $opt['text'] === $opt['code'] ? $column : $opt['text'],
+          'code' => $column,
+          'num' => $cfg['position']
+        ]))) {
+          return $opt['id'];
+        }
+      }
+      elseif ($id = $this->o->add(
+        X::mergeArrays(
+          $cfg,
+          [
+            'id_parent' => $columnsId,
+            'text' => $column,
+            'code' => $column,
+            'num' => $cfg['position']
+          ]
+        )
+      )) {
+        return $id;
+      }
+    }
+
+    return null;
+  }
+
+
+  public function importKey()
+  {}
 
 
   /**

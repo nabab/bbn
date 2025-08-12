@@ -1442,7 +1442,7 @@ PGSQL
   {
     $st = '';
     if ($includeColumnName) {
-      $st .= '  ' . $this->escape($name) . ' ';
+      $st .= $this->escape($name) . ' ';
     }
 
     if (empty($cfg['type'])) {
@@ -1480,13 +1480,11 @@ PGSQL
       $st .= $cfg['type'];
     }
 
-    if (
-      !empty($cfg['maxlength']) && $col_type !== 'bytea' &&
-      (
-        (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
-        ||
-        !in_array($col_type, self::$numeric_types)
-      )
+    if (!empty($cfg['maxlength'])
+      && ($col_type !== 'bytea')
+      && ((in_array($col_type, self::$numeric_types)
+          && in_array($col_type, self::$numeric_with_max_values))
+        || !in_array($col_type, self::$numeric_types))
     ) {
       $st .= '(' . $cfg['maxlength'];
       if (!empty($cfg['decimals'])) {
@@ -1494,6 +1492,10 @@ PGSQL
       }
 
       $st .= ')';
+    }
+
+    if (!empty($cfg['collation'])) {
+      $st .= ' COLLATE ' . Str::encodeFilename($cfg['collation']);
     }
 
     if (empty($cfg['null'])) {
@@ -1507,31 +1509,24 @@ PGSQL
       }
     }
 
+    if (array_key_exists('default', $cfg)) {
+      if (is_null($cfg['default'])
+        || (strtoupper((string)$cfg['default']) === 'NULL')
+      ) {
+        $st .= ' DEFAULT NULL';
+      }
+      else if (!empty($cfg['defaultExpression'])) {
+        $st .= ' DEFAULT ' . (string)$cfg['default'];
+      }
+      else if (isset($cfg['default'])
+        && ($cfg['default'] !== '')
+      ) {
+        $st .= ' DEFAULT ' . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
+      }
+    }
+
     if (!empty($cfg['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
-    }
-    elseif (array_key_exists('default', $cfg)) {
-      if (!empty($cfg['defaultExpression'])) {
-        $st .= ' DEFAULT ';
-        if (is_null($cfg['default'])
-          || (strtoupper((string)$cfg['default']) === 'NULL')
-        ) {
-          $st .= 'NULL';
-        }
-        else {
-          $st .= (string)$cfg['default'];
-        }
-      }
-      else {
-        if (is_null($cfg['default'])
-          || (strtoupper((string)$cfg['default']) === 'NULL')
-        ) {
-          $st .= ' DEFAULT NULL';
-        }
-        else if (isset($cfg['default'])) {
-          $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
-        }
-      }
     }
 
     return rtrim($st, ',' . PHP_EOL);

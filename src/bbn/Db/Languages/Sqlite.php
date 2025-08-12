@@ -674,7 +674,7 @@ class Sqlite extends Sql
     $i = 0;
     foreach ($cfg['fields'] as $name => $col) {
       $i++;
-      $st .= $this->getColumnDefinitionStatement($name, $col);
+      $st .= '  ' . $this->getColumnDefinitionStatement($name, $col);
       if ($i < $numFields) {
         $st .= ',' . PHP_EOL;
       }
@@ -1568,7 +1568,7 @@ class Sqlite extends Sql
   {
     $st = '';
     if ($includeColumnName) {
-      $st .= '  ' . $this->escape($name) . ' ';
+      $st .= $this->escape($name) . ' ';
     }
 
     if (!empty($cfg['type'])) {
@@ -1584,7 +1584,16 @@ class Sqlite extends Sql
     }
 
     if (!empty($cfg['maxlength'])) {
-      $st .= '('.$cfg['maxlength'].')';
+      $st .= '(' . $cfg['maxlength'];
+      if (!empty($cfg['decimals'])) {
+        $st .= ',' . $cfg['decimals'];
+      }
+
+      $st .= ')';
+    }
+
+    if (!empty($cfg['collation'])) {
+      $st .= ' COLLATE ' . Str::encodeFilename($cfg['collation']);
     }
 
     if (empty($cfg['null'])) {
@@ -1592,11 +1601,23 @@ class Sqlite extends Sql
     }
 
     if (array_key_exists('default', $cfg)) {
-      if (!is_null($cfg['default'])
-        && ($cfg['default'] !== 'NULL')
+      if (is_null($cfg['default'])
+        || (strtoupper((string)$cfg['default']) === 'NULL')
       ) {
-        $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default']))."'");
+        $st .= ' DEFAULT NULL';
       }
+      else if (!empty($cfg['defaultExpression'])) {
+        $st .= ' DEFAULT ' . (string)$cfg['default'];
+      }
+      else if (isset($cfg['default'])
+        && ($cfg['default'] !== '')
+      ) {
+        $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
+      }
+    }
+
+    if (!empty($cfg['virtual'])) {
+      $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
     }
 
     return $st;

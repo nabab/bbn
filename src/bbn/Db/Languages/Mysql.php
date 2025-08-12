@@ -1584,31 +1584,6 @@ MYSQL
     return false;
   }
 
-  /**
-   * Creates the given column for the given table.
-   *
-   * @param string $table
-   * @param string $column
-   * @param array $columnCfg
-   * @return bool
-   */
-  public function createColumn(string $table, string $column, array $columnCfg): bool
-  {
-    if (($table = $this->tableFullName($table, true))
-      && Str::checkName($column)
-      && ($columnDefinition = $this->getColumnDefinitionStatement($column, $columnCfg))
-    ) {
-      if (!empty($columnCfg['after'])
-        && is_string($columnCfg['after'])
-      ) {
-        $columnDefinition .= " AFTER " . $this->escape($columnCfg['after']);
-      }
-
-      return (bool)$this->rawQuery("ALTER TABLE $table ADD $columnDefinition");
-    }
-
-    return false;
-  }
 
   /**
    * Returns a statement for column definition.
@@ -1623,7 +1598,7 @@ MYSQL
   {
     $st = '';
     if ($includeColumnName) {
-      $st .= '  ' . $this->escape($name) . ' ';
+      $st .= $this->escape($name) . ' ';
     }
 
     if (empty($cfg['type'])) {
@@ -1674,31 +1649,24 @@ MYSQL
       $st .= ' NOT NULL';
     }
 
+    if (array_key_exists('default', $cfg)) {
+      if (is_null($cfg['default'])
+        || (strtoupper((string)$cfg['default']) === 'NULL')
+      ) {
+        $st .= ' DEFAULT NULL';
+      }
+      else if (!empty($cfg['defaultExpression'])) {
+        $st .= ' DEFAULT ' . (string)$cfg['default'];
+      }
+      else if (isset($cfg['default'])
+        && ($cfg['default'] !== '')
+      ) {
+        $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
+      }
+    }
+
     if (!empty($cfg['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
-    }
-    elseif (array_key_exists('default', $cfg)) {
-      if (!empty($cfg['defaultExpression'])) {
-        $st .= ' DEFAULT ';
-        if (is_null($cfg['default'])
-          || (strtoupper((string)$cfg['default']) === 'NULL')
-        ) {
-          $st .= 'NULL';
-        }
-        else {
-          $st .= (string)$cfg['default'];
-        }
-      }
-      else {
-        if (is_null($cfg['default'])
-          || (strtoupper((string)$cfg['default']) === 'NULL')
-        ) {
-          $st .= ' DEFAULT NULL';
-        }
-        else if (isset($cfg['default'])) {
-          $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
-        }
-      }
     }
 
     return $st;
