@@ -745,13 +745,6 @@ trait Engine
     return $this->language->getAlterTable($table, $cfg);
   }
 
-  public function createColumn(string $table, string $col, array $cfg): string
-  {
-    $this->ensureLanguageMethodExists(__FUNCTION__);
-
-    return $this->language->createColumn($table, $col, $cfg);
-  }
-
 
   /**
    * @param string $table

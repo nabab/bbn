@@ -406,6 +406,47 @@ trait Actions
 
 
   /**
+   * Creates a column in the given table with the given configuration.
+   * @param string $table The table's name
+   * @param string $col The column's name
+   * @param array $cfg The configuration of the column
+   * @return bool
+   */
+  public function createColumn(string $table, string $col, array $cfg): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->createColumn($table, $col, $cfg);
+  }
+
+
+  /**
+   * Drops the given column from the given table.
+   * @param string $table
+   * @param string $column
+   * @return bool
+   */
+  public function dropColumn(string $table, string $col): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->dropColumn($table, $col);
+  }
+
+
+  /**
+   * Alters the given column in the given table with the given configuration.
+   * @param string $table The table's name
+   * @param string $col The column's name
+   * @param array $cfg The configuration of the column
+   * @return bool
+   */
+  public function alterColumn(string $table, string $col, array $cfg): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->alterColumn($table, $col, $cfg);
+  }
+
+
+  /**
    * Creates the constraints for the given table
    *
    * @param string $table The table's name

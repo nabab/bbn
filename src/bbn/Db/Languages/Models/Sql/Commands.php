@@ -560,6 +560,7 @@ trait Commands {
 
 
   /**
+   * Drops the given column from the given table.
    * @param string $table
    * @param string $column
    * @return bool
@@ -567,6 +568,30 @@ trait Commands {
   public function dropColumn(string $table, string $column): bool
   {
     if (($sql = $this->getDropColumn($table, $column))
+      && $this->emulatePreparesAndQuery($sql)
+    ) {
+      if ($cacheName = $this->_db_cache_name($table, 'columns')) {
+        $this->cacheDelete($cacheName);
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+
+   /**
+   * Creates the given column for the given table.
+   *
+   * @param string $table
+   * @param array $columnCfg
+   * @return bool
+   */
+  public function alterColumn(string $table, string $column, array $columnCfg): bool
+  {
+    die(var_dump($this->getAlterColumn($table, $columnCfg)));
+    if (($sql = $this->getAlterColumn($table, $columnCfg))
       && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
