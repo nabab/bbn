@@ -102,6 +102,8 @@ abstract class Entities extends DbCls
     ],
   ];
 
+  protected $defaultCountry;
+
   /**
    * Links cache.
    *
@@ -189,6 +191,11 @@ abstract class Entities extends DbCls
     }
 
     throw new Exception(X::_("The method %s does not exist", $method));
+  }
+
+  public function getDefaultCountry(): ?string
+  {
+    return $this->defaultCountry;
   }
 
   /**

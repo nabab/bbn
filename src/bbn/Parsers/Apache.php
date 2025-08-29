@@ -68,13 +68,13 @@ class Apache
 
   public static function getParseLimit(): int
   {
-    return self::$limit;
+    return self::$parse_limit;
   }
 
 
   public static function setParseLimit(int $limit): void
   {
-    self::$limit = $limit;
+    self::$parse_limit = $limit;
   }
 
 

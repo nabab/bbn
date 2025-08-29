@@ -1,4 +1,5 @@
 <?php
+
 namespace bbn\Entities;
 
 use Exception;
@@ -30,7 +31,6 @@ class Address extends DbCls
         'city' => 'city',
         'id_country' => 'id_country',
         'phone' => 'phone',
-        'email' => 'email',
         'fulladdress' => 'fulladdress',
         'cfg' => 'cfg'
       ],
@@ -46,14 +46,13 @@ class Address extends DbCls
    * @param Db    $db
    */
   public function __construct(
-    Db $db, 
+    Db $db,
     protected ?Entities $entities = null,
     protected Entity|Nullall $entity = new Nullall()
-  )
-  {
+  ) {
     parent::__construct($db);
     $this->initClassCfg();
-	}
+  }
 
 
   public function options(): Option
@@ -61,17 +60,15 @@ class Address extends DbCls
     return $this->entities->options();
   }
 
-	public function getInfo($id, $id_entity = null){
-	  $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
-	  if ( $d ){
-      if ( !empty($d['tel']) ){
+  public function getInfo($id, $id_entity = null)
+  {
+    $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
+    if ($d) {
+      if (!empty($d['tel'])) {
         $d['tel'] = (string)$d['tel'];
       }
-      if ( !empty($d['fax']) ){
-        $d['fax'] = (string)$d['fax'];
-      }
-			$d['fadresse'] = $this->fadresse($d);
-      if ( $id_entity ){
+      $d['fadresse'] = $this->fadresse($d);
+      if ($id_entity) {
         $d['roles'] = $this->db->getColumnValues([
           'tables' => ['bbn_entities_links'],
           'fields' => ['bbn_options.text'],
@@ -109,54 +106,52 @@ class Address extends DbCls
           ]
         ]);
       }
-		}
+    }
     return $d;
-	}
+  }
 
-	public function search($fn, $cp=null){
-		if ( $cp && is_string($fn) ){
-			$fn = ['adresse' => $fn, 'cp' => $cp];
-		}
-		else if ( !is_array($fn) ){
-			$fn = $this->set_adresse($fn);
-		}
+  public function search($fn, $cp = null)
+  {
+    if ($cp && is_string($fn)) {
+      $fn = ['adresse' => $fn, 'cp' => $cp];
+    } else if (!is_array($fn)) {
+      $fn = $this->set_address($fn);
+    }
 
-    if ( !empty($fn['adresse']) && !empty($fn['cp']) ){
-			return $this->db->selectOne('bbn_addresses', 'id', [
-			  'cp' => $fn['cp'],
-			  'adresse' => $fn['adresse']
+    if (!empty($fn['adresse']) && !empty($fn['cp'])) {
+      return $this->db->selectOne('bbn_addresses', 'id', [
+        'cp' => $fn['cp'],
+        'adresse' => $fn['adresse']
       ]);
-		}
-		return false;
-	}
+    }
+    return false;
+  }
 
-	public function seek($p, int $start = 0, int $limit = 100){
-    if ( is_array($p) && ( !empty($p['adresse']) ||
-        !empty($p['email']) ||
+  public function seek($p, int $start = 0, int $limit = 100)
+  {
+    if (
+      is_array($p) && (!empty($p['adresse']) ||
         !empty($p['tel']) ||
-        !empty($p['fax']) )
-    ){
+        !empty($p['cp']))
+    ) {
       $cond = [];
-      
-      if ( !empty($p['email']) && Str::isEmail($p['email']) ){
-        array_push($cond, ['email', 'LIKE', $p['email']]);
+
+      if (!empty($p['adresse']) && strlen($p['adresse']) > 7) {
+        array_push($cond, ['adresse', 'LIKE', '%' . $p['adresse'] . '%']);
       }
-      if ( !empty($p['adresse']) && strlen($p['adresse']) > 7 ){
-        array_push($cond, ['adresse', 'LIKE', '%'.$p['adresse'].'%']);
+      if (!empty($p['tel']) && (strlen($p['tel']) >= 6)) {
+        array_push($cond, ['tel', 'LIKE', $p['tel'] . '%']);
       }
-      if ( !empty($p['tel']) && (strlen($p['tel']) >= 6) ){
-        array_push($cond, ['tel', 'LIKE', $p['tel'].'%']);
-      }
-      if ( !empty($p['ville']) ){
+      if (!empty($p['ville'])) {
         array_push($cond, ['ville', 'LIKE', $p['ville']]);
       }
-      if ( !empty($p['cp']) ){
+      if (!empty($p['cp'])) {
         array_push($cond, ['cp', 'LIKE', $p['cp']]);
       }
       return $this->db->getColumnValues("bbn_addresses", 'id', $cond, ['adresse', 'ville'], $limit, $start);
     }
-		return false;
-	}
+    return false;
+  }
 
   /**
    * Supprime un tier et tous ses liens si précisé
@@ -167,23 +162,25 @@ class Address extends DbCls
    *
    * @return bool Succès ou pas de la suppression
    */
-  public function delete($id, $with_links = false){
-    if ( $this->getInfo($id) ){
+  public function delete($id, $with_links = false)
+  {
+    if ($this->getInfo($id)) {
       $rels = $this->relations($id);
-      if ( $with_links || empty($rels) ){
-        foreach ( $rels as $k => $r ){
+      if ($with_links || empty($rels)) {
+        foreach ($rels as $k => $r) {
           $this->db->delete('amiral_liens', ['id' => $k]);
         }
         return $this->db->delete('bbn_addresses', ['id' => $id]);
       }
     }
-		return false;
+    return false;
   }
 
-  public function fullSearch($p, $start = 0, $limit = 0){
+  public function fullSearch($p, $start = 0, $limit = 0)
+  {
     $r = [];
     $res = Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
-    foreach ( $res as $i => $id ){
+    foreach ($res as $i => $id) {
       $relations = $this->db->getColumnValues([
         'tables' => ['bbn_entities_links'],
         'fields' => ['nom'],
@@ -206,15 +203,16 @@ class Address extends DbCls
           'id_address' => $id
         ]
       ]);
-      
+
       $r[$i] = $this->getInfo($id);
       $r[$i]['relations'] = X::join($relations, ', ');
     }
     return $r;
   }
 
-  public function relations($id){
-    if ( $this->getInfo($id) ){
+  public function relations($id)
+  {
+    if ($this->getInfo($id)) {
       return $this->db->selectAllByKeys([
         'tables' => ['bbn_entities_links'],
         'fields' => ['bbn_addresses.id', 'id_entity'],
@@ -238,57 +236,76 @@ class Address extends DbCls
     return false;
   }
 
-  private function getCityCondition($ville, $percent = false){
-    $cdx = $this->get_cedex($ville);
+  private function getCityCondition($ville, $percent = false)
+  {
+    $cdx = $this->getCedex($ville);
     $percent = $percent ? '%' : '';
-    $ville_cond = "( `apst_cp`.`ville` LIKE '".$percent.Str::escapeSquotes($ville).$percent."' ";
-    if ( strpos($ville, '-') ){
+    $ville_cond = "( `apst_cp`.`ville` LIKE '" . $percent . Str::escapeSquotes($ville) . $percent . "' ";
+    if (strpos($ville, '-')) {
       $ville_comp = Str::escapeSquotes(str_replace('-', ' ', $ville));
-      $ville_cond .= "OR `apst_cp`.`ville` LIKE '".$percent.$ville_comp.$percent."' ";
+      $ville_cond .= "OR `apst_cp`.`ville` LIKE '" . $percent . $ville_comp . $percent . "' ";
     }
-    if ( strpos($ville, ' ') ){
+    if (strpos($ville, ' ')) {
       $ville_comp = Str::escapeSquotes(str_replace(' ', '-', $cdx['ville']));
-      $ville_cond .= "OR `apst_cp`.`ville` LIKE '".$percent.$ville_comp.$percent."' ";
+      $ville_cond .= "OR `apst_cp`.`ville` LIKE '" . $percent . $ville_comp . $percent . "' ";
     }
     $ville_cond .= ") ";
     return $ville_cond;
   }
 
-  public function getCity($cp, $ville='') {
+  public function getCedex($ville)
+  {
+    $r = [
+      'ville' => Str::changeCase($ville),
+      'has_cedex' => false,
+      'num_cedex' => null
+    ];
+    if (!empty($r['ville']) && stripos($r['ville'], 'Cedex')) {
+      $r['has_cedex'] = 1;
+      $tmp = explode("Cedex", $r['ville']);
+      $r['ville'] = trim($tmp[0]);
+      if (isset($tmp[1]) && Str::isNumber(trim($tmp[1]))) {
+        $r['num_cedex'] = trim($tmp[1]);
+      }
+    }
+    return $r;
+  }
+
+
+  public function getCity($cp, $ville = '')
+  {
     $cp = Str::getNumbers($cp);
 
-    if ( strlen($cp) === 2 ){
+    if (strlen($cp) === 2) {
       $cp .= '000';
-    }
-    else if ( strlen($cp) === 4 ){
-      $cp = '0'.$cp;
+    } else if (strlen($cp) === 4) {
+      $cp = '0' . $cp;
     }
 
     $ville = trim($ville);
     $ville = str_replace('/', ' SUR ', $ville);
-    while ( strpos($ville, '  ') ){
+    while (strpos($ville, '  ')) {
       $ville = str_replace('  ', ' ', $ville);
     }
 
-    if ( empty($ville) && empty($cp) ){
+    if (empty($ville) && empty($cp)) {
       return [
         'cp' => '00000',
         'ville' => 'Inconnue'
       ];
-    }
-    else if ( empty($cp) && !empty($ville) ){
+    } else if (empty($cp) && !empty($ville)) {
       $cp = $this->db->getOne("
         SELECT `apst_cp`.`ville`, `apst_cp`.`cp`
         FROM `apst_cp`
           LEFT OUTER JOIN `bbn_addresses`
             ON `bbn_addresses`.`cp` = `apst_cp`.`cp`
-        WHERE ".$this->getCityCondition($ville)."
+        WHERE " . $this->getCityCondition($ville) . "
         GROUP BY `apst_cp`.`cp`
         ORDER BY COUNT(`bbn_addresses`.`id`) DESC
         LIMIT 1");
-    }
-    else if ( empty($ville) ){
-      return $this->db->getRow("
+    } else if (empty($ville)) {
+      return $this->db->getRow(
+        "
           SELECT `apst_cp`.`cp`, `apst_cp`.`ville`
           FROM `apst_cp`
             LEFT OUTER JOIN `bbn_addresses`
@@ -297,62 +314,66 @@ class Address extends DbCls
           GROUP BY `apst_cp`.`ville`
           ORDER BY COUNT(`bbn_addresses`.`id`) DESC
           LIMIT 1",
-          $cp);
+        $cp
+      );
     }
-    $cdx = $this->get_cedex($ville);
+    $cdx = $this->getCedex($ville);
     $ville_cond = $this->getCityCondition($ville);
 
-    if ( $tmp = $this->db->getRow("
+    if ($tmp = $this->db->getRow(
+      "
       SELECT cp, ville
       FROM apst_cp
       WHERE cp LIKE ?
       AND cp > 0
       AND $ville_cond",
-      $cp) ){
+      $cp
+    )) {
       return $tmp;
     }
-    
-    if ( $villes = $this->db->getColArray("
+
+    if ($villes = $this->db->getColArray(
+      "
       SELECT ville
       FROM apst_cp
       WHERE cp = ?
       AND cp > 0",
-      $cp)
-    ){
+      $cp
+    )) {
       $compare = [];
       $tmp = false;
-      foreach ( $villes as $k => $v ){
-        $cdx2 = $this->get_cedex($v);
+      foreach ($villes as $k => $v) {
+        $cdx2 = $this->getCedex($v);
         $compare[$k] = levenshtein($cdx['ville'], $cdx2['ville']);
-        if ( min($compare) === $compare[$k] ){
+        if (min($compare) === $compare[$k]) {
           $tmp = $cdx2;
           $tmp['ville2'] = $v;
         }
       }
-      if ( (min($compare) < 3) &&
-              ($cdx['has_cedex'] === $tmp['has_cedex']) &&
-              ($cdx['num_cedex'] === $tmp['num_cedex']) ){
+      if ((min($compare) < 3) &&
+        ($cdx['has_cedex'] === $tmp['has_cedex']) &&
+        ($cdx['num_cedex'] === $tmp['num_cedex'])
+      ) {
         return [
           'ville' => $tmp['ville2'],
           'cp' => $cp
         ];
-      }
-      else{
+      } else {
         $inf = $this->db->rselect('apst_cp', [], [
           'cp' => $cp,
           'ville' => $tmp['ville2']
         ]);
         $inf['ville'] = $cdx['ville'];
-        if ( $cdx['has_cedex'] ){
+        if ($cdx['has_cedex']) {
           $inf['ville'] .= ' Cedex';
-          if ( $cdx['num_cedex'] ){
-            $inf['ville'] .= ' '.$cdx['num_cedex'];
+          if ($cdx['num_cedex']) {
+            $inf['ville'] .= ' ' . $cdx['num_cedex'];
           }
         }
         if (array_key_exists('id', $inf)) {
           unset($inf['id']);
         }
-        if ( $this->db->insert("apst_cp", $inf) ){
+        if ($this->db->insert("apst_cp", $inf)) {
           return [
             'ville' => $inf['ville'],
             'cp' => $inf['cp']
@@ -362,45 +383,48 @@ class Address extends DbCls
     }
 
     $dpt = substr($cp, 0, 2);
-    if ( $dpt == 97 ){
+    if ($dpt == 97) {
       $dpt = substr($cp, 0, 3);
-    }
-    else if ( $dpt == 20 ){
-      $dpt = $this->db->getOne("
+    } else if ($dpt == 20) {
+      $dpt = $this->db->getOne(
+        "
         SELECT id_dpt
         FROM apst_cp
         WHERE ville LIKE ?
         AND id_dpt LIKE '2A'
         OR id_dpt LIKE '2B'
         LIMIT 1",
-        $ville);
-      if ( !$dpt ){
+        $ville
+      );
+      if (!$dpt) {
         $dpt = '2B';
       }
     }
-    
-    if ( $dpt ){
+
+    if ($dpt) {
       $ville_cond = $this->getCityCondition($ville, 1);
       // Sinon on la rajoute
-      if ( $inf = $this->db->getRow("
+      if ($inf = $this->db->getRow(
+        "
         SELECT *
         FROM apst_cp
         WHERE id_dpt LIKE ?
         AND $ville_cond
         LIMIT 1",
-        $dpt) ){
+        $dpt
+      )) {
 
         $inf['cp'] = $cp;
-        if ( $cdx['has_cedex'] ){
+        if ($cdx['has_cedex']) {
           $inf['ville'] .= ' Cedex';
-          if ( $cdx['num_cedex'] ){
-            $inf['ville'] .= ' '.$cdx['num_cedex'];
+          if ($cdx['num_cedex']) {
+            $inf['ville'] .= ' ' . $cdx['num_cedex'];
           }
         }
         if (array_key_exists('id', $inf)) {
           unset($inf['id']);
         }
-        if ( $this->db->insert("apst_cp", $inf) ){
+        if ($this->db->insert("apst_cp", $inf)) {
           return [
             'ville' => $inf['ville'],
             'cp' => $inf['cp']
@@ -409,143 +433,135 @@ class Address extends DbCls
       }
     }
     return [
-      'cp' => emptY($cp) ? '00000' : $cp,
+      'cp' => empty($cp) ? '00000' : $cp,
       'ville' => empty($ville) ? 'Inconnue' : $ville
     ];
   }
 
-  public function add($fn, $force = false){
+  public function add($fn, $force = false)
+  {
     $id = false;
     $fn = $this->set_address($fn);
     if (!empty($fn['id_country'])) {
-      if (($fn['id_country'] === $this->options()->fromCode('FR', 'countries'))
-        && ($conf_ville = $this->get_ville(empty($fn['cp']) ? '' : $fn['cp'], empty($fn['ville']) ? '' : $fn['ville']))
+      if (($fn['id_country'] === $this->options()->fromCode($this->entities->getDefaultCountry(), 'countries', 'appui', 'core'))
+        && ($conf_ville = $this->getCity(empty($fn['cp']) ? '' : $fn['cp'], empty($fn['ville']) ? '' : $fn['ville']))
       ) {
         $fn['cp'] = $conf_ville['cp'];
         $fn['ville'] = $conf_ville['ville'];
       }
       if ($force || !($id = $this->search($fn))) {
-        if ( $this->db->insert("bbn_addresses", $fn) ){
+        if ($this->db->insert("bbn_addresses", $fn)) {
           $id = $this->db->lastId();
         }
       }
     }
     return $id;
-	}
+  }
 
-	public function update($id, $fn)
-	{
-    
-    if ( $info = $this->getInfo($id) ){
+  public function update($id, $fn)
+  {
+
+    if ($info = $this->getInfo($id)) {
       $fields = array_keys($this->db->getColumns('bbn_addresses'));
-      foreach ( $fn as $k => $v ){
-        if ( !in_array($k, $fields) ){
+      foreach ($fn as $k => $v) {
+        if (!in_array($k, $fields)) {
           unset($fn[$k]);
         }
       }
-      if ( isset($info['fadresse']) ){
-          unset($info['fadresse']);
+      if (isset($info['fadresse'])) {
+        unset($info['fadresse']);
       }
       //$n count the property changed between $info and $fn
       $changed = false;
-      foreach ( $info as $i => $val ){
-        if ( \array_key_exists($i, $fn) && ($val !== $fn[$i]) ){
+      foreach ($info as $i => $val) {
+        if (\array_key_exists($i, $fn) && ($val !== $fn[$i])) {
           $changed = true;
           break;
         }
       }
-      if ( !$changed ){
+      if (!$changed) {
+        return $id;
+      } else if ((count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id])) {
         return $id;
       }
-      else if ( (count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id]) ){
-        return $id;
-      }
-		}
+    }
     return false;
-	}
+  }
 
-	public function set_address($fn){
+  public function set_address($fn)
+  {
     $r = [];
-    
-		if ( is_array($fn) ){
-			if ( !is_array($fn['adresse']) ){
-				$fn['adresse'] = explode("\n", $fn['adresse']);
-			}
-      if ( is_array($fn['adresse']) ){
-        $r['adresse'] = array_filter($fn['adresse'], function($ad){
+
+    if (is_array($fn)) {
+      if (!is_array($fn['adresse'])) {
+        $fn['adresse'] = explode("\n", $fn['adresse']);
+      }
+      if (is_array($fn['adresse'])) {
+        $r['adresse'] = array_filter($fn['adresse'], function ($ad) {
           return !empty($ad) && strlen($ad) > 1;
         });
-        if ( count($r['adresse']) > 0 ){
+        if (count($r['adresse']) > 0) {
           // On enlève la virgule après le numéro de rue si elle y est
           $r['adresse'] = preg_replace("#^(\\d+),#", "\$1", implode("\n", $r['adresse']));
-        }
-        else{
+        } else {
           unset($r['adresse']);
         }
       }
-      if ( isset($fn['cp']) ){
-  			$r['cp'] = (int) Str::getNumbers($fn['cp']);
+      if (isset($fn['cp'])) {
+        $r['cp'] = (int) Str::getNumbers($fn['cp']);
       }
-      if ( isset($fn['id_country']) ){
-  			$r['id_country'] = $fn['id_country'];
+      if (isset($fn['id_country'])) {
+        $r['id_country'] = $fn['id_country'];
       }
       $r['ville'] = empty($fn['ville']) ? '' : Str::changeCase($fn['ville']);
-      if ( isset($fn['tel']) ){
+      if (isset($fn['tel'])) {
         $fn['tel'] = Str::getNumbers($fn['tel']);
-        if ( strlen($fn['tel']) > 10 && strpos($fn['tel'], '33') === 0 ){
+        if (strlen($fn['tel']) > 10 && strpos($fn['tel'], '33') === 0) {
           $fn['tel'] = substr($fn['tel'], 2);
         }
-        if ( strlen($fn['tel']) === 9 && strpos($fn['tel'], '0') !== 0 ){
-          $fn['tel'] = '0'.$fn['tel'];
+        if (strlen($fn['tel']) === 9 && strpos($fn['tel'], '0') !== 0) {
+          $fn['tel'] = '0' . $fn['tel'];
         }
-        if ( strlen($fn['tel']) === 10 ){
+        if (strlen($fn['tel']) === 10) {
           $r['tel'] = $fn['tel'];
         }
       }
-      if ( isset($fn['fax']) ){
-        $fn['fax'] = Str::getNumbers($fn['fax']);
-        if ( strlen($fn['fax']) > 10 && strpos($fn['fax'], '33') === 0 ){
-          $fn['fax'] = substr($fn['fax'], 2);
-        }
-        if ( strlen($fn['fax']) === 9 && strpos($fn['fax'], '0') !== 0 ){
-          $fn['fax'] = '0'.$fn['fax'];
-        }
-        if ( strlen($fn['fax']) === 10 ){
-          $r['fax'] = $fn['fax'];
-        }
-      }
-      if ( isset($fn['email']) && Str::isEmail($fn['email']) ){
-        $r['email'] = $fn['email'];
-      }
-		}
-		return $r;
-	}
+    }
+    return $r;
+  }
 
-  public function fadresse($s, $with_br = 1){
-    if (Str::isUid($s) ){
+  public function fadresse($s, $with_br = 1, array $excludedCountries = []): string
+  {
+    if (Str::isUid($s)) {
       $s = $this->getInfo($s);
     }
-    if ( is_array($s) ){
+    if (is_array($s)) {
       $st = '';
-      if ( !empty($s['adresse']) ){
-        $st .= nl2br($s['adresse'], false).'<br>';
+      if (!empty($s['adresse'])) {
+        $st .= nl2br($s['adresse'], false) . '<br>';
       }
-      if ( !empty($s['cp']) ){
-        $st .= $s['cp'].' ';
+      if (!empty($s['cp'])) {
+        $st .= $s['cp'] . ' ';
       }
-      if ( !empty($s['ville']) ){
+      if (!empty($s['ville'])) {
         $st .= $s['ville'];
       }
-      if ( !$with_br ){
+      if (!$with_br) {
         return str_replace('<br>', ', ', $st);
       }
-      if ( !empty($s['id_country']) && ($s['id_country'] !== $this->options()->fromCode('FR', 'countries')) ){
-        $st .= '<br>(' .$this->options()->text($s['id_country']). ')' ;
+      $excl = [];
+      foreach ($excludedCountries as $c) {
+        if (is_string($c)) {
+          $excl[] = $this->options()->fromCode(strtoupper($c), 'countries', 'core', 'appui');
+        }
       }
-      
+      if (!empty($s['id_country']) && !in_array($s['id_country'], $excl)) {
+        $st .= '<br>' . $this->options()->text($s['id_country']);
+      }
+
       return $st;
     }
-    
+
     return '';
   }
 
@@ -554,16 +570,17 @@ class Address extends DbCls
    *
    * @var mixed $ids Un tableau d'IDs ou une liste d'arguments
    */
-  public function fusion($ids){
+  public function fusion($ids)
+  {
     $args = is_array($ids) ? $ids : func_get_args();
-    if ( count($args) > 1 ){
+    if (count($args) > 1) {
       $id = array_shift($args);
       $creation = [$this->db->selectOne('bbn_history', 'tst', [
         'uid' => $id,
         'opr' => 'INSERT'
       ])];
-      foreach ( $args as $a ){
-        if ( $fn = $this->getInfo($a) ){
+      foreach ($args as $a) {
+        if ($fn = $this->getInfo($a)) {
           $creation[] = $this->db->selectOne('bbn_history', 'tst', [
             'uid' => $a
           ]);
@@ -591,10 +608,11 @@ class Address extends DbCls
               'id_address' => $a
             ]
           ]);
-          foreach ( $links as $link ){
+          foreach ($links as $link) {
             $this->db->update('bbn_entities_links', ['id_address' => $id], ['id' => $link['id']]);
           }
-          $this->db->query("
+          $this->db->query(
+            "
             UPDATE bbn_history
             SET uid = ?
             WHERE uid = ?
@@ -602,19 +620,22 @@ class Address extends DbCls
             hex2bin($id),
             hex2bin($a)
           );
-          $this->db->query("
+          $this->db->query(
+            "
             DELETE FROM bbn_history
             WHERE uid = ?",
             hex2bin($a)
           );
-          $this->db->query("
+          $this->db->query(
+            "
             DELETE FROM bbn_addresses
             WHERE id = ?",
             hex2bin($a)
           );
         }
       }
-      $this->db->query("
+      $this->db->query(
+        "
         UPDATE bbn_history
         SET tst = ?
         WHERE uid = ?
@@ -648,5 +669,4 @@ class Address extends DbCls
 
     return $this->tableRelations;
   }
-
 }

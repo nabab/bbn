@@ -549,8 +549,10 @@ class Note extends DbCls
     return $this->db->selectOne(
       $cf['tables']['versions'],
       $cf['arch']['versions']['title'],
-      [$cf['arch']['versions']['id_note'] => $id],
-      [$cf['arch']['versions']['version'] => 'DESC']
+      [
+        $cf['arch']['versions']['id_note'] => $id,
+        $cf['arch']['versions']['latest'] => 1
+      ]
     );
   }
 
