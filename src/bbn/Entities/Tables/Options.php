@@ -38,7 +38,7 @@ class Options extends EntityTable
   {
     parent::__construct($db, $entities, $entity);
     $this->initClassCfg(self::$default_class_cfg);
-    self::optionalInit(['options', 'entity', 'appui']);
+    self::optionalInit(['types', 'apst_adherent', 'entity', 'appui']);
   }
 
 
