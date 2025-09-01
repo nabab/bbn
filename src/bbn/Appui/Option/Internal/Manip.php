@@ -388,7 +388,11 @@ trait Manip
         }
 
         $search = $o;
-        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']], $search[$c['alias']]);
+        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']]);
+        if (array_key_exists($c['alias'], $search)) {
+          unset($search[$c['alias']]);
+        }
+
         $code = $o[$c['code']] ?? (isset($o['alias']) ? $o['alias']['code'] : null);
 
         if ($code) {
