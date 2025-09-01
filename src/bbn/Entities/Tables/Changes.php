@@ -299,7 +299,7 @@ class Changes extends EntityTable
         && !empty($subdata['data'])
       ) {
         foreach ($subdata['data'] as $i => $v){
-          $subdata['data'][$i] = $this->checkEmailRequired($subdata['table'], $v);
+          $subdata['data'][$i] = $this->checkEmailRequired($subdata['table'], $v, $type);
         }
 
         $tocfg['subdata'] = $subdata;
@@ -319,7 +319,7 @@ class Changes extends EntityTable
           }
         }
         else {
-          $tocfg['data'][] = $this->checkEmailRequired($table, $todata);
+          $tocfg['data'][] = $this->checkEmailRequired($table, $todata, $type);
           if ($id_change = $this->_insert($moment, $tocfg)) {
             return [$id_change];
           }
@@ -328,7 +328,7 @@ class Changes extends EntityTable
       }
       elseif (!empty($is_insert) || !empty($is_delete)) {
         foreach ($todata as $i => $t){
-          $todata[$i] = !empty($is_insert) ? $this->checkEmailRequired($table, $t) : $t;
+          $todata[$i] = !empty($is_insert) ? $this->checkEmailRequired($table, $t, $type) : $t;
         }
 
         $tocfg['data'] = $todata;
@@ -355,7 +355,7 @@ class Changes extends EntityTable
               $ret[] = $id_change;
             }
             else {
-              $tocfg['data'] = [$this->checkEmailRequired($table, $t)];
+              $tocfg['data'] = [$this->checkEmailRequired($table, $t, $type)];
               if ($id_change = $this->_insert($moment, $tocfg)) {
                 $ret[] = $id_change;
               }
@@ -1022,7 +1022,7 @@ class Changes extends EntityTable
       && ($cfg = \json_decode($old[$this->fields['cfg']], true))
     ) {
       if (($idx = X::search($cfg['data'], ['field' => $todata['field']])) !== null) {
-        $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata));
+        $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata, $cfg['type']));
         $cfg['subdata']    = $subdata;
         if ($this->db->update(
           $this->class_table,
@@ -1418,11 +1418,13 @@ class Changes extends EntityTable
    * @param array  $data
    * @return array
    */
-  protected function checkEmailRequired(string $table, array $data): array
+  protected function checkEmailRequired(string $table, array $data, string $type): array
   {
     if (!$this->skipEmailVerfication
       && !empty($data['value'])
       && $this->emailRequired($table, $data['field'])
+      && (($type === 'insert')
+        || (($type === 'update') && array_key_exists('old', $data)))
     ) {
       $data['email'] = Str::genpwd();
       $this->sendEmailVerification($data['value'], $data['email']);
