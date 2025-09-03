@@ -2369,6 +2369,9 @@ class Database extends bbn\Models\Cls\Cache
         $primaryKey = $db->getPrimary($cfg['table']);
         $idRow = $db->selectOne($cfg['table'], $primaryKey, $dbCfg['where']);
         $data = History::getRowBack($cfg['table'], $idRow, $when, $dbCfg['fields']);
+        if (empty($data)) {
+          $data = $db->rselect($dbCfg);
+        }
       }
 
       if (!empty($cfg['columns'])) {
