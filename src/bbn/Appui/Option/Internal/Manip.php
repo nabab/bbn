@@ -389,7 +389,7 @@ trait Manip
 
         $search = $o;
         unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']]);
-        if (array_key_exists($c['alias'], $search)) {
+        if (array_key_exists($c['alias'] ?? [], $search)) {
           unset($search[$c['alias']]);
         }
 
