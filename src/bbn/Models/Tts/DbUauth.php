@@ -130,7 +130,7 @@ trait DbUauth
       throw new Exception(X::_("The typology is not valid"));
     }
 
-    $existing = self::$dbUauth->find($value, $id_type);
+    $existing = self::$dbUauth->find($value, $type);
     $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $id_type);
     if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [
         $arch['id_associate'] => $id,
@@ -218,9 +218,9 @@ trait DbUauth
       throw new Exception(X::_("The typology is not valid"));
     }
 
-    $existing = self::$dbUauth->find($value, $id_type);
+    $existing = self::$dbUauth->find($value, $type);
     $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);
-    
+
     if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [
         $arch['id_associate'] => $id,
         $arch['id_uauth'] => $idUauth
