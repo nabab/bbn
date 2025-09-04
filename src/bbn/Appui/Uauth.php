@@ -110,6 +110,10 @@ class Uauth extends DbCls
       $value = $this->checkPhone($value);
     }
 
+    if (is_null($value) || ($value === '')) {
+      throw new Exception(X::_("The value cannot be empty or null"));
+    }
+
     $idType = $this->getIdTypology($type);
     $arc = &$this->class_cfg['arch']['uauth'];
     $data = [
