@@ -351,7 +351,13 @@ trait Manip
             }
           }
           else {
-            X::ddump($o);
+            throw new Exception(
+              X::_(
+                "Error while importing: impossible to find the alias for %s",
+                json_encode($o, JSON_PRETTY_PRINT)
+              )
+            );
+
             $after['id_alias'] = $o[$c['id_alias']];
             if (empty($o[$c['code']])) {
               $o[$c['code']] = $this->code($tmp);
