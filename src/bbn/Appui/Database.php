@@ -2407,6 +2407,10 @@ class Database extends bbn\Models\Cls\Cache
       $res = $cfg;
       if (empty($res['componentOptions']['source'])) {
         $res['componentOptions']['source'] = $data;
+        if (!empty($changes)) {
+          $res['old_value'] = $cfg;
+          $res['old_value']['componentOptions']['source'] = array_merge($data, $changes);
+        }
       }
     }
     else {
@@ -2415,15 +2419,35 @@ class Database extends bbn\Models\Cls\Cache
         if (!empty($cfg['columns']) && !in_array($name, $cfg['columns'])) {
           continue;
         }
-        $hasChange = $isRoot && array_key_exists($name, $changes);
 
+        $hasChange = $isRoot && array_key_exists($name, $changes);
         if (is_null($data[$name])) {
           $tmp = ['value' => $data[$name]];
+          if ($hasChange && $changes[$name]) {
+            if (!empty($f['option'])) {
+              $tmp['old_value'] = ['value' => $opt->text($changes[$name])];
+            }
+            elseif (!empty($f['table'])) {
+              $tmp['old_value'] = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $changes[$name]], $when - 1, [], $alreadyShown);
+            }
+            elseif (!empty($f['component'])) {
+              $tmp['old_value'] = array_merge($tmp, [
+                'value' => $changes[$name]
+              ]);
+            }
+            elseif (!empty($f['type'])) {
+              if (($f['type'] === 'text') && Str::isJson($changes[$name])) {
+                $tmp['old_value'] = array_merge($tmp, [
+                  'value' => $changes[$name]
+                ]);
+              }
+            }
+          }
         }
         elseif (!empty($f['option'])) {
           $tmp = ['value' => $opt->text($data[$name])];
           if ($hasChange) {
-            $tmp['old_value'] = $opt->text($changes[$name]);
+            $tmp['old_value'] = ['value' => $changes[$name] ? $opt->text($changes[$name]) : null];
           }
         }
         elseif (!empty($f['table'])) {
@@ -2433,7 +2457,7 @@ class Database extends bbn\Models\Cls\Cache
 
           $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $when, [], $alreadyShown);
           if ($hasChange) {
-            $tmp['old_value'] = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $changes[$name]], $when, [], $alreadyShown);
+            $tmp['old_value'] = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $changes[$name]], $when - 1, [], $alreadyShown);
           }
         }
         elseif (!empty($f['component'])) {
