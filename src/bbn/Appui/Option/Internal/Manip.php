@@ -351,6 +351,7 @@ trait Manip
             }
           }
           else {
+            X::ddump($o);
             $after['id_alias'] = $o[$c['id_alias']];
             if (empty($o[$c['code']])) {
               $o[$c['code']] = $this->code($tmp);
