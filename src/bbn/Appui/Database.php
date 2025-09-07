@@ -2319,6 +2319,7 @@ class Database extends bbn\Models\Cls\Cache
     array $cfg,
     array $where,
     $when = null,
+    array $changes = [],
     array &$alreadyShown = []
   ): array
   {
@@ -2335,6 +2336,7 @@ class Database extends bbn\Models\Cls\Cache
         $swhere[$db->csn($k)] = $v;
       }
     }
+    $isRoot = empty($alreadyShown);
     $alreadyShown[] = md5($db->tsn($table) . json_encode($swhere));
     if (!empty($cfg['columns'])) {
       $dbCfg['fields'] = [];
@@ -2413,23 +2415,36 @@ class Database extends bbn\Models\Cls\Cache
         if (!empty($cfg['columns']) && !in_array($name, $cfg['columns'])) {
           continue;
         }
+        $hasChange = $isRoot && array_key_exists($name, $changes);
+
         if (is_null($data[$name])) {
           $tmp = ['value' => $data[$name]];
         }
         elseif (!empty($f['option'])) {
           $tmp = ['value' => $opt->text($data[$name])];
+          if ($hasChange) {
+            $tmp['old_value'] = $opt->text($changes[$name]);
+          }
         }
         elseif (!empty($f['table'])) {
           if (in_array(md5($db->tsn($f['table']) . json_encode([$db->csn($f['column']) => $data[$name]])), $alreadyShown)) {
             continue;
           }
 
-          $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $when, $alreadyShown);
+          $tmp = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $data[$name]], $when, [], $alreadyShown);
+          if ($hasChange) {
+            $tmp['old_value'] = $this->getDisplayRecord($f['table'], $f, [$f['column'] => $changes[$name]], $when, [], $alreadyShown);
+          }
         }
         elseif (!empty($f['component'])) {
           $tmp = array_merge($f, [
             'value' => $data[$name]
           ]);
+          if ($hasChange) {
+            $tmp['old_value'] = array_merge($f, [
+              'value' => $changes[$name]
+            ]);
+          }
         }
         elseif (!empty($f['type'])) {
           if (($f['type'] === 'text') && Str::isJson($data[$name])) {
@@ -2438,6 +2453,11 @@ class Database extends bbn\Models\Cls\Cache
           $tmp = array_merge($f, [
             'value' => $data[$name]
           ]);
+          if ($hasChange) {
+            $tmp['old_value'] = array_merge($f, [
+              'value' => $changes[$name]
+            ]);
+          }
         }
         else {
           throw new Exception("Unrecognizable field!");

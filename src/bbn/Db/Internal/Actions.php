@@ -372,12 +372,13 @@ trait Actions
    * @param string $table The source table name
    * @param self $target The target database connection
    * @param bool $withData If true, the data will be copied too
+   * @param string $newName The new name for the copied table
    * @return bool True if it succeeded
    */
-  public function copyTableTo(string $table, self $target, bool $withData = true): bool
+  public function copyTableTo(string $table, self $target, bool $withData = true, string $newName = ''): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
-    return $this->language->copyTableTo($table, $target, $withData);
+    return $this->language->copyTableTo($table, $target, $withData, $newName);
   }
 
 

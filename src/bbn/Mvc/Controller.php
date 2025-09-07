@@ -2019,8 +2019,11 @@ class Controller implements Api
       $o->process();
       $this->obj = X::mergeObjects($this->obj ?: new stdClass(), $o->obj ?: new stdClass());
     }
+    elseif ($private) {
+      throw new \Error(X::_("Impossible to route the following private request") . ': ' . $path);
+    }
     else {
-      throw new \Error(X::_("Impossible to route the following request") . ': ' . $path);
+      throw new \Error(X::_("Impossible to route the following public request") . ': ' . $path);
     }
 
     return $this;

@@ -1941,7 +1941,7 @@
             "static": false,
             "visibility": "private",
             "final": false,
-            "code": "  private function buildPrompt(string $prompt, string $format = 'textarea', string|null $lang = null, array|null $cfg = null): string | null\n  {\n    $output = $prompt;\n    $output .= \"\\n\\n\";\n    \n    if ($format) {\n      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . \"\\n\\n\";\n    }\n\n    if ($lang) {\n      $option = Option::getInstance();\n      $output .= \"The language of the response must be in \" . $option->text($lang, 'languages', 'i18n', 'appui');\n    }\n    \n    return $output;\n  }",
+            "code": "  private function buildPrompt(string $prompt, string $format = 'textarea', string|null $lang = null, array|null $cfg = null): string | null\n  {\n    $output = $prompt;\n    $output .= \"\\n\\n\";\n    \n    if ($format) {\n      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . \"\\n\\n\";\n    }\n\n    if ($lang) {\n      $option = Option::getInstance();\n      $output .= \"The language of the response must be in \" . $option->text($lang, 'languages', 'core', 'appui');\n    }\n    \n    return $output;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 847,

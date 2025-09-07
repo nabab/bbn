@@ -39,10 +39,10 @@ class Cache implements CacheInterface
 
 
   /**
-   * @param null $engine
+   * @param ?string $engine
    * @return int
    */
-  private static function _init(string|null $engine = null): int
+  private static function _init(?string $engine = null): int
   {
     if (!self::$is_init) {
       self::$engine  = new Cache($engine);
@@ -223,7 +223,7 @@ class Cache implements CacheInterface
       );
     }
 
-    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {
+    if ((!$engine || ($engine === 'apc')) && function_exists('apcu_clear_cache')) {
       self::_set_type('apc');
     }
     elseif ((!$engine || ($engine === 'memcache')) && class_exists("Memcache")) {
@@ -251,7 +251,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return (bool)apc_exists($key);
+          return (bool)apcu_exists($key);
         case 'memcache':
           return $this->obj->get($key) !== $key;
         case 'files':
@@ -286,7 +286,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_delete($key);
+          return apcu_delete($key);
         case 'memcache':
           return $this->obj->delete($key);
         case 'files':
@@ -338,7 +338,7 @@ class Cache implements CacheInterface
         if (!$st || strpos($item, $st) === 0) {
           switch (self::$type){
             case 'apc':
-              $res += (int)apc_delete($item);
+              $res += (int)apcu_delete($item);
               break;
             case 'memcache':
               $res += (int)$this->obj->delete($item);
@@ -433,7 +433,12 @@ class Cache implements CacheInterface
       $hash = self::makeHash($val);
       switch (self::$type){
         case 'apc':
-          return \apc_store(
+          if (!function_exists('\\apcu_store')) {
+            throw new Exception(X::_("The APC extension doesn't seem to be installed"));
+          }
+
+          return \apcu_store(
+
             $key, [
             'timestamp' => microtime(1),
             'hash' => $hash,
@@ -496,20 +501,20 @@ class Cache implements CacheInterface
   {
     switch (self::$type) {
       case 'apc':
-        /*
-        if (\apc_exists($key)) {
-          return \apc_fetch($key);
+        if (!function_exists('\\apcu_exists')) {
+          throw new Exception(X::_("The APC extension doesn't seem to be installed"));
+        }
+
+        if (\apcu_exists($key)) {
+          return \apcu_fetch($key);
         }
         break;
-        */
       case 'memcache':
-        /*
         $tmp = $this->obj->get($key);
         if ($tmp !== $key) {
           return $tmp;
         }
         break;
-        */
       case 'files':
         $file = self::_file($key, $this->path);
         if ($this->fs->isFile($file)
@@ -620,7 +625,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_cache_info();
+          return apcu_cache_info();
         case 'memcache':
           return $this->obj->getStats('slabs');
         case 'files':
@@ -638,7 +643,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_cache_info();
+          return apcu_cache_info();
         case 'memcache':
           return $this->obj->getStats();
         case 'files':
@@ -657,7 +662,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          $all  = apc_cache_info();
+          $all  = apcu_cache_info();
           $list = [];
           foreach ($all['cache_list'] as $a){
             array_push($list, $a['info']);

@@ -417,7 +417,7 @@ class I18n extends cacheCls
    */
   public function getPrimariesLangs(bool $onlyCodes = false): array
   {
-    if ($languages = $this->options->fullOptions('languages', 'i18n', 'appui')) {
+    if ($languages = $this->options->fullOptions('languages', 'core', 'appui')) {
       $res = array_values(
         array_filter(
           $languages, function ($v) {

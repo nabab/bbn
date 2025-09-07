@@ -439,14 +439,14 @@ trait Commands {
    * @param bool $withData If true, the data will be copied too
    * @return bool True if it succeeded
    */
-  public function copyTableTo(string $table, Db $target, bool $withData): bool
+  public function copyTableTo(string $table, Db $target, bool $withData, string $newName = ''): bool
   {
     ;
     if ($target->check()
       && ($m = $this->modelize($table, true))
       && ($m = $this->convert($m, $target->getEngine()))
-      && !$target->tableExists($table)
-      && $target->createTable($table, $m, true, true)
+      && !$target->tableExists($newName ?: $table)
+      && $target->createTable($newName ?: $table, $m, true, true)
     ) {
       if ($withData) {
         $columns = array_map(
@@ -462,7 +462,7 @@ trait Commands {
           $q = $this->query("SELECT " . implode(", ", $columns) . " FROM " . $this->escape($table));
           $target->disableKeys();
           while ($row = $q->getRow()) {
-            $target->insert($table, $row);
+            $target->insert($newName ?: $table, $row);
           }
 
           $target->enableKeys();

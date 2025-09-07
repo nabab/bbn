@@ -1881,7 +1881,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getPrimariesLangs()\n  {\n    $uid_languages = $this->options->fromCode('languages', 'i18n', 'appui');\n    $languages     = $this->options->fullTree($uid_languages);\n    $primaries     = array_values(\n      array_filter(\n        $languages['items'],\n        function ($v) {\n          return !empty($v['primary']);\n        }\n      )\n    );\n    return $primaries ?: [];\n  }",
+            "code": "  public function getPrimariesLangs()\n  {\n    $uid_languages = $this->options->fromCode('languages', 'core', 'appui');\n    $languages     = $this->options->fullTree($uid_languages);\n    $primaries     = array_values(\n      array_filter(\n        $languages['items'],\n        function ($v) {\n          return !empty($v['primary']);\n        }\n      )\n    );\n    return $primaries ?: [];\n  }",
             "parent": false,
             "trait": false,
             "startLine": 1169,

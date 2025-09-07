@@ -489,15 +489,7 @@ class Ai extends DbCls
         'responded'    => $responseTime,
         'id' => $result['id'],
         'tags' => $this->getTags($fullText),
-        'model' => $cfg['model'],
-        'language' => $cfg['language'],
-        'aiFormat' => $cfg['aiFormat'],
-        'cfg' => [
-          'temperature' => $cfg['temperature'] ?? 0.7,
-          'top_p' => $cfg['top_p'] ?? 0.9,
-          'presence_penalty' => $cfg['presence'] ?? 0.7,
-          'frequency_penalty' => $cfg['frequency'] ?? 0.3,
-        ]
+        'cfg' => $cfg
       ];
 
       $conversation['conversation'][] = $lastMessage;
@@ -855,7 +847,7 @@ class Ai extends DbCls
 
     if ($lang) {
       $option = Option::getInstance();
-      $output .= "The language of the response must be in " . $option->text($lang, 'languages', 'i18n', 'appui');
+      $output .= "The language of the response must be in " . $option->text($lang, 'languages', 'core', 'appui');
     }
     
     return $output;

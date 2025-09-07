@@ -705,7 +705,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getPrimariesLangs(bool $onlyCodes = false): array\n  {\n    if ($languages = $this->options->fullOptions('languages', 'i18n', 'appui')) {\n      $res = array_values(\n        array_filter(\n          $languages, function ($v) {\n            return !empty($v['primary']);\n          }\n        )\n      );\n      return $onlyCodes ? \\array_map(fn($l) => $l['code'], $res) : $res;\n    }\n    return [];\n  }",
+            "code": "  public function getPrimariesLangs(bool $onlyCodes = false): array\n  {\n    if ($languages = $this->options->fullOptions('languages', 'core', 'appui')) {\n      $res = array_values(\n        array_filter(\n          $languages, function ($v) {\n            return !empty($v['primary']);\n          }\n        )\n      );\n      return $onlyCodes ? \\array_map(fn($l) => $l['code'], $res) : $res;\n    }\n    return [];\n  }",
             "parent": false,
             "trait": false,
             "startLine": 418,

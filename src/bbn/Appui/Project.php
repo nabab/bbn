@@ -1168,7 +1168,7 @@ class Project extends DbCls
    */
   public function getPrimariesLangs()
   {
-    $uid_languages = $this->options->fromCode('languages', 'i18n', 'appui');
+    $uid_languages = $this->options->fromCode('languages', 'core', 'appui');
     $languages     = $this->options->fullTree($uid_languages);
     $primaries     = array_values(
       array_filter(
