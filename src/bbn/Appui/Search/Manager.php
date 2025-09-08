@@ -61,18 +61,20 @@ class Manager
    * @param string     $uid        Unique ID (usually from POST)
    * @param array      $conditions Array of conditions (usually from POST)
    */
-  public function __construct(Controller $ctrl, string $uid, array $conditions)
+  public function __construct(Controller $ctrl, string $uid, array $conditions = [])
   {
     $this->ctrl        = $ctrl;
     $this->conditions  = $conditions;
     $this->fs          = new System();
     $this->uid         = $uid;
-    $this->logFileBase = $this->ctrl->inc->user->getTmpPath('appui-search') . "config/{$this->uid}";
-    $this->filePath    = "{$this->logFileBase}.json";
-    $this->fs->createPath(dirname($this->logFileBase));
-    // Write the first condition into the JSON file
-    $this->search = new Search($this->ctrl, []);
-    $this->setCondition($this->conditions[0]);
+    $this->logFileBase = $this->ctrl->inc->user->getTmpPath('appui-search') . "config/{$this->uid}/";
+    $this->filePath    = "{$this->logFileBase}{$this->uid}.json";
+    if (!empty($this->conditions)) {
+      $this->search = new Search($this->ctrl, []);
+      $this->fs->createPath($this->logFileBase);
+      // Write the first condition into the JSON file
+      $this->setCondition($this->conditions[0]);
+    }
   }
 
   /**
@@ -115,129 +117,133 @@ class Manager
             yield $prev;
           }
         }
-
+        else {
         // If we haven't reached our global max
-        if ($totalResults < $this->maxResults) {
-          // Launch new workers while conditions allow
-          while (!is_null($step) && (count($this->workers) < $this->maxWorkers)) {
-            if (!$this->isOk($condition)) {
-              break;
-            }
-            if ($result = $this->search->stream($condition['value'], $step)) {
+          if ($totalResults < $this->maxResults) {
+            // Launch new workers while conditions allow
+            while (!is_null($step)
+              && (count($this->workers) < $this->maxWorkers)
+            ) {
               if (!$this->isOk($condition)) {
                 break;
               }
 
-              $this->addWorker($result, $step);
-              $timer->start("step-$step");
-              //X::log("[STEP $step] " . microtime(true) . " NUM WORKERS: " . count($this->workers) . " MAX WORKERS: " . $this->maxWorkers . " MAX RES: " . $this->maxResults, 'searchTimings');
-              //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
-              //X::log($result, 'searchRes');
-              // If the condition file is removed externally, stop everything
-              if (!$this->fs->exists($this->filePath)) {
-                //X::log("[STEP $step] " . microtime(true) . " FILE REMOVED " . $this->filePath, 'searchTimings');
-                $this->removeWorker();
-                $step = null;
-                break;
-              }
-              // If there's a next step, move forward
-              elseif (array_key_exists('next_step', $result)) {
-                $step = $result['next_step'];
-              }
-              else {
-                // No next step, end the worker-adding loop
-                $step = null;
-              }
-            }
+              if ($result = $this->search->stream($condition['value'], $step)) {
+                if (!$this->isOk($condition)) {
+                  break;
+                }
 
-            break;
-          }
-
-          for ($j = 0; $j < count($this->workers); $j++) {
-            // Re-check the condition each time in case it changed
-            if ($this->isOk($condition)) {
-              $worker = $this->workers[$j];
-              $status = proc_get_status($worker['proc']);
-              //X::log("[STEP $worker[step]] " . microtime(true) . ' ' . $status['running'], 'searchTimings');
-
-              // If the process has finished
-              if (!$status['running']) {
-                //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
-                // Read data from stdout
-                $jsonOutput = stream_get_contents($worker['pipes'][1]);
-
-                if ($jsonOutput) {
-                  //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
-                  $ret  = json_decode($jsonOutput, true);
-
-                  // If results are found, stream them
-                  if (!empty($ret['num'])) {
-                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
-                    $data = $this->fs->decodeContents($worker['data'], 'json', true);
-                    // If we exceed the max, trim them
-                    /*
-                    if ($totalResults > $this->maxResults) {
-                      $excess = $totalResults - $this->maxResults;
-                      array_splice($ret['data']['results'], $newCount - $excess);
-                    }*/
-
-
-                    // Stream partial results
-                    yield [
-                      'value' => $condition['value'],
-                      'data' => $data['results'],
-                      'step' => $worker['step'],
-                      'item' => $ret['item'],
-                      'id'   => $worker['id']
-                    ];
-
-                  }
-                  else {
-                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
-                  }
+                $this->addWorker($result, $step);
+                $timer->start("step-$step");
+                //X::log("[STEP $step] " . microtime(true) . " NUM WORKERS: " . count($this->workers) . " MAX WORKERS: " . $this->maxWorkers . " MAX RES: " . $this->maxResults, 'searchTimings');
+                //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+                //X::log($result, 'searchRes');
+                // If the condition file is removed externally, stop everything
+                if (!$this->fs->exists($this->filePath)) {
+                  //X::log("[STEP $step] " . microtime(true) . " FILE REMOVED " . $this->filePath, 'searchTimings');
+                  $this->removeWorker();
+                  $step = null;
+                  break;
+                }
+                // If there's a next step, move forward
+                elseif (array_key_exists('next_step', $result)) {
+                  $step = $result['next_step'];
                 }
                 else {
-                  X::log($jsonOutput, 'searchError');
-                  X::log($status, 'searchError');
+                  // No next step, end the worker-adding loop
+                  $step = null;
                 }
-
-                // Check worker-specific log file for errors
-                if ($err = $this->fs->getContents($worker['log'])) {
-                  $this->result['errors'][] = $err;
-                  yield ['error' => $err, 'command' => $worker['cmd']];
-                }
-
-                // Remove this single worker from the array
-                $j--;
-                // Clean up the process and its log
-                $this->removeWorker($worker['uid']);
               }
-              /*
-              else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
-                X::log("[STEP $worker[step]] " . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
-                $this->removeWorker($worker['uid']);
-              }*/
-              // If max reached, kill all workers
-              if ($totalResults > $this->maxResults) {
+
+              break;
+            }
+
+            for ($j = 0; $j < count($this->workers); $j++) {
+              // Re-check the condition each time in case it changed
+              if ($this->isOk($condition)) {
+                $worker = $this->workers[$j];
+                $status = proc_get_status($worker['proc']);
+                //X::log("[STEP $worker[step]] " . microtime(true) . ' ' . $status['running'], 'searchTimings');
+
+                // If the process has finished
+                if (!$status['running']) {
+                  //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
+                  // Read data from stdout
+                  $jsonOutput = stream_get_contents($worker['pipes'][1]);
+
+                  if ($jsonOutput) {
+                    //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
+                    $ret  = json_decode($jsonOutput, true);
+
+                    // If results are found, stream them
+                    if (!empty($ret['num'])) {
+                      //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
+                      $data = $this->fs->decodeContents($worker['data'], 'json', true);
+                      // If we exceed the max, trim them
+                      /*
+                      if ($totalResults > $this->maxResults) {
+                        $excess = $totalResults - $this->maxResults;
+                        array_splice($ret['data']['results'], $newCount - $excess);
+                      }*/
+
+
+                      // Stream partial results
+                      yield [
+                        'value' => $condition['value'],
+                        'data' => $data['results'],
+                        'step' => $worker['step'],
+                        'item' => $ret['item'],
+                        'id'   => $worker['id']
+                      ];
+
+                    }
+                    else {
+                      //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
+                    }
+                  }
+                  else {
+                    X::log($jsonOutput, 'searchError');
+                    X::log($status, 'searchError');
+                  }
+
+                  // Check worker-specific log file for errors
+                  if ($err = $this->fs->getContents($worker['log'])) {
+                    $this->result['errors'][] = $err;
+                    yield ['error' => $err, 'command' => $worker['cmd']];
+                  }
+
+                  // Remove this single worker from the array
+                  $j--;
+                  // Clean up the process and its log
+                  $this->removeWorker($worker['uid']);
+                }
+                /*
+                else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
+                  X::log("[STEP $worker[step]] " . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
+                  $this->removeWorker($worker['uid']);
+                }*/
+                // If max reached, kill all workers
+                if ($totalResults > $this->maxResults) {
+                  $this->removeWorker();
+                  break;
+                }
+              }
+              else {
+                // The condition changed or file missing: re-read and stop
+                $condition = $this->readCondition();
                 $this->removeWorker();
                 break;
               }
             }
-            else {
-              // The condition changed or file missing: re-read and stop
-              $condition = $this->readCondition();
-              $this->removeWorker();
+
+            if (!count($this->workers) && is_null($step)) {
               break;
             }
           }
-
-          if (!count($this->workers) && is_null($step)) {
-            break;
+          else {
+            $this->removeWorker();
+            $step = null;
           }
-        }
-        else {
-          $this->removeWorker();
-          $step = null;
         }
       }
       else {
@@ -259,19 +265,19 @@ class Manager
     }
 
     // End of main loop; clean up any remaining workers
-    $this->removeWorker();
-
-    // Delete the condition file if it still exists
-    if ($this->fs->exists($this->filePath)) {
-      //X::log("[STEP $step] " . microtime(true) . ' DELETING CONDITION FILE ' . $this->filePath . ' / LOOPCOUNT: ' . $loopCount, 'searchTimings');
-      $this->fs->delete($this->filePath);
-    }
+    $this->stop();
 
     // Record the loop iteration count or any other helpful info
     $this->result['progress'] = $loopCount;
 
     // Stream the final result back
     return;
+  }
+
+  public function stop()
+  {
+    $this->removeWorker();
+    return $this->fs->delete($this->logFileBase, true);
   }
 
   /**
@@ -309,11 +315,12 @@ class Manager
   protected function isOk(?array $condition): bool
   {
     $inFile = $this->readCondition();
-    if (!$condition || empty($inFile) || connection_aborted()) {
-      return false;
-    }
-
-    if (!isset($inFile['value']) || $inFile['value'] !== $condition['value']) {
+    if (!$condition
+      || connection_aborted()
+      || empty($inFile)
+      || !isset($inFile['value'])
+      || ($inFile['value'] !== $condition['value'])
+    ) {
       return false;
     }
 
@@ -368,7 +375,7 @@ class Manager
 
     // Build final command by substituting the URL and encoded arguments
     $url = $this->ctrl->pluginUrl('appui-search') . '/results';
-    $dataFile = $this->logFileBase . '-' . $workerUid . '.json';
+    $dataFile = $this->logFileBase . $workerUid . '.json';
     $cmd = sprintf(
       $this->commandTpl,
       $url,
@@ -380,7 +387,7 @@ class Manager
     );
 
     // Create and clear the log file
-    $logFile = $this->logFileBase . '-' . $workerUid . '.log';
+    $logFile = $this->logFileBase . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
     $this->fs->putContents($logFile, '');
 
