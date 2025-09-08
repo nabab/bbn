@@ -38,6 +38,9 @@ trait Common
   /** @var int */
   protected $id_group;
 
+  /** @var null */
+  protected $group = null;
+
   /** @var mixed */
   protected $alert;
 
@@ -121,6 +124,29 @@ trait Common
   {
     if ($this->check()) {
       return $this->id;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the user's group's ID if there is no error.
+   *
+   * @return null|string
+   */
+  public function getFullGroup(): ?array
+  {
+    if ($this->check()) {
+      if (!$this->group) {
+        $this->group = $this->db->rselect(
+          $this->class_cfg['tables']['groups'],
+          $this->class_cfg['arch']['groups'],
+          [$this->class_cfg['arch']['groups']['id'] => $this->id_group]
+        );
+      }
+
+      return $this->group;
     }
 
     return null;
