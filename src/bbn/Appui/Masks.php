@@ -10,6 +10,7 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\X;
+use bbn\Appui\Option;
 
 class Masks extends bbn\Models\Cls\Db
 {
@@ -58,8 +59,30 @@ class Masks extends bbn\Models\Cls\Db
    */
   public function get(string $id, bool $simple = false): ?array
   {
-    if (($mask = $this->db->rselect('bbn_notes_masks', [], ['id_note' => $id]))
-        && ($data = $this->notes->get($mask['id_note'], null, $simple))
+    $optCfg = Option::getInstance()->getClassCfg();
+    $noteCfg = $this->notes->getClassCfg();
+    if (($mask = $this->db->rselect([
+        'table' => 'bbn_notes_masks',
+        'fields' => $this->db->getFieldsList('bbn_notes_masks'),
+        'join' => [[
+          'table' => $optCfg['table'],
+          'on' => [[
+            'field' => $this->db->cfn($optCfg['arch']['options']['id'], $optCfg['table']),
+            'exp' => 'bbn_notes_masks.id_type'
+          ]]
+        ], [
+          'table' => $noteCfg['table'],
+          'on' => [[
+            'field' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),
+            'exp' => 'bbn_notes_masks.id_note'
+          ], [
+            'field' => $this->db->cfn($noteCfg['arch']['notes']['active'], $noteCfg['table']),
+            'value' => 1
+          ]]
+        ]],
+        'where' => ['bbn_notes_masks.id_note' => $id]
+      ]))
+      && ($data = $this->notes->get($mask['id_note'], null, $simple))
     ) {
       $data['default'] = $mask['def'];
       $data['id_type'] = $mask['id_type'];
