@@ -604,10 +604,16 @@ class Cache implements CacheInterface
           }
           // Otherwise another process is certainly creating the cache, so wait for it
           else {
+            $timeout = time() + self::$max_wait;
+            while (time() < $timeout) {
+              if (($r = $this->get($key)) !== false) {
+                return $r['value'];
+              }
+              usleep(500);
+            }
+
             return $this->get($key);
           }
-
-          // Creating the cache
         }
         else {
           $data = $tmp['value'];
