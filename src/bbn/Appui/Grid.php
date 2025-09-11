@@ -450,6 +450,10 @@ class Grid extends bbn\Models\Cls\Cache
             || ($c['type'] === 'isodate'))
       )
     );
+    if (is_null($data)) {
+      $data = $this->getData();
+    }
+    /*
     $data = array_map(function ($row) use ($dates, $options) {
       foreach ($row as $i => &$r) {
         if ($options && isset($options[$i])) {
@@ -469,6 +473,7 @@ class Grid extends bbn\Models\Cls\Cache
       unset($r);
       return $row;
     }, $data ?: ($this->getData() ?: []));
+    */
     if (X::toExcel($data, $path, true, $cfg)) {
       return ['file' => $path];
     }
