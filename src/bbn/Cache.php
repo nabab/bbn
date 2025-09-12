@@ -607,8 +607,9 @@ class Cache implements CacheInterface
             $timeout = time() + self::$max_wait;
             while (time() < $timeout) {
               if (($r = $this->get($key)) !== false) {
-                return $r['value'];
+                return $r;
               }
+
               usleep(500);
             }
 
