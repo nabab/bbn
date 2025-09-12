@@ -526,9 +526,9 @@ class System extends Basic
     if ($this->check() && $this->isDir($path)) {
       $real = $this->getRealPath($path) . '/';
       if ($append && $this->exists($file)) {
-        return (bool)file_put_contents($real . X::basename($file), $content, FILE_APPEND);
+        return is_dir($real) ? (bool)file_put_contents($real . X::basename($file), $content, FILE_APPEND) : false;
       } else {
-        return (bool)file_put_contents($real . X::basename($file), $content);
+        return is_dir($real) ? (bool)file_put_contents($real . X::basename($file), $content) : false;
       }
     }
 
@@ -547,7 +547,7 @@ class System extends Basic
         return $this->obj->getContents($file);
       } else {
         $real = $this->getRealPath($file);
-        return file_get_contents($real);
+        return is_file($real) ? file_get_contents($real) : null;
       }
     }
 
