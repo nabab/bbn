@@ -11,6 +11,7 @@ use Exception;
  */
 trait Cfg
 {
+
   /**
    * Returns a formatted content of the cfg column as an array.
    * Checks if the parent option has inheritance and sets array accordingly.
@@ -43,16 +44,13 @@ trait Cfg
 
     $id_alias = $this->db->selectOne($c['table'], $f['id_alias'], [$f['id'] => $id]);
     if ($id_alias && $this->hasTemplate($id)) {
-      $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id_alias]);
+      $cfg = $this->getRawCfg($id_alias);
       $id = $id_alias;
     }
     else {
       // Retrieve the cfg value from the database.
-      $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
+      $cfg = $this->getRawCfg($id);
     }
-
-    // Decode the JSON string to an array if possible, otherwise initialize as empty array.
-    $cfg = Str::isJson($cfg) ? json_decode($cfg, true) : [];
 
     // Check for permissions and store them in the config array.
     $perm = $cfg['permissions'] ?? false;
@@ -70,10 +68,7 @@ trait Cfg
         continue;
       }
       // Retrieve the config of the parent option.
-      $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $p]);
-
-      // Decode the JSON string to an array if possible, otherwise initialize as empty array.
-      $parent_cfg = Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];
+      $parent_cfg = $this->getRawCfg($p);
 
       // Check for inheritance in the parent's config or scfg.
       if (!empty($parent_cfg['scfg']) && ($p === $last)) {
@@ -184,7 +179,7 @@ trait Cfg
    * @param mixed ...$codes Any option(s) accepted by fromCode()
    * @return string|null The raw cfg value or null if the option cannot be found
    */
-  public function getRawCfg(...$codes): ?string
+  public function getRawCfg(...$codes): array
   {
     // Get the ID of the option from its code.
     $id = $this->fromCode($codes);
@@ -193,10 +188,48 @@ trait Cfg
     if (Str::isUid($id)) {
       $c = &$this->class_cfg;
       $f = &$this->fields;
-      return $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
+      if ($json = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id])) {
+        $res = json_decode($json, true);
+        $change = false;
+        if (!empty($res['schema'])) {
+          if (is_string($res['schema'])) {
+            $res['schema'] = json_decode($res['schema'], true);
+            $change = true;
+          }
+          foreach ($res['schema'] as &$v) {
+            if (!empty($v['title']) && empty($v['label'])) {
+              $v['label'] = $v['title'];
+              unset($v['title']);
+              $change = true;
+            }
+          }
+          unset($v);
+        }
+        if (!empty($res['scfg']) && !empty($res['scfg']['schema'])) {
+          if (is_string($res['scfg']['schema'])) {
+            $res['scfg']['schema'] = json_decode($res['scfg']['schema'], true);
+            $change = true;
+          }
+          foreach ($res['scfg']['schema'] as &$v) {
+            if (!empty($v['title']) && empty($v['label'])) {
+              $v['label'] = $v['title'];
+              unset($v['title']);
+              $change = true;
+            }
+          }
+          unset($v);
+        }
+
+        if ($change) {
+          X::log($id, 'correct-options-schema');
+          $this->setCfg($id, $res);
+        }
+
+        return $res;
+      }
     }
 
-    return null;
+    return [];
   }
 
   /**

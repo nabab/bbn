@@ -264,8 +264,7 @@ trait Write
       }
 
       if ($cfg) {
-        $ocfg        = $this->getRawCfg($id);
-        $data[$c['cfg']] = json_encode(array_merge($ocfg ? json_decode($ocfg, true) : [], $cfg));
+        $data[$c['cfg']] = array_merge($this->getRawCfg($id) ?: [], $cfg);
       }
 
       // id_parent cannot be edited this way
