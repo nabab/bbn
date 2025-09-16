@@ -300,7 +300,7 @@ class Manager
   protected function readCondition(): ?array
   {
     if ($this->fs->isFile($this->filePath)) {
-      return $this->fs->decodeContents($this->filePath, 'json', true);
+      return @$this->fs->decodeContents($this->filePath, 'json', true);
     }
 
     return null;
