@@ -178,7 +178,7 @@ class Manager
                     // If results are found, stream them
                     if (!empty($ret['num'])) {
                       //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
-                      $data = $this->fs->decodeContents($worker['data'], 'json', true);
+                      $data = @$this->fs->decodeContents($worker['data'], 'json', true);
                       // If we exceed the max, trim them
                       /*
                       if ($totalResults > $this->maxResults) {
@@ -207,7 +207,7 @@ class Manager
                   }
 
                   // Check worker-specific log file for errors
-                  if ($err = $this->fs->getContents($worker['log'])) {
+                  if ($err = @$this->fs->getContents($worker['log'])) {
                     $this->result['errors'][] = $err;
                     yield ['error' => $err, 'command' => $worker['cmd']];
                   }
@@ -289,7 +289,7 @@ class Manager
   public function setCondition(array $condition): bool
   {
     $this->conditions = [$condition];
-    return $this->fs->encodeContents($condition, $this->filePath, 'json');
+    return @$this->fs->encodeContents($condition, $this->filePath, 'json');
   }
 
   /**
@@ -389,7 +389,7 @@ class Manager
     // Create and clear the log file
     $logFile = $this->logFileBase . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
-    $this->fs->putContents($logFile, '');
+    @$this->fs->putContents($logFile, '');
 
     // Attach the log file as stderr
     $descriptors = [
