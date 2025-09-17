@@ -927,16 +927,21 @@ MYSQL;
               }
             }
       
-            foreach ($model['keys'] as $key) {
-              if (!empty($key['unique'])) {
+            foreach ($model['keys'] as $name => $key) {
+              if (!empty($key['unique']) && ((count($key['columns']) > 1) || ($key['columns'][0] !== $primary))) {
+                $toPush = [
+                  'name' => $name,
+                  'columns' => []
+                ];
+
                 foreach ($key['columns'] as $col) {
-                  if (($col !== $primary)
-                    && !in_array($col, self::$structures[$table]['unique'], true)
-                    && !empty($model['fields'][$col]['null'])
-                  ) {
-                    array_push(self::$structures[$table]['unique'], $col);
-                  }
+                  $toPush['columns'][] = [
+                    'name' => $col,
+                    'nullable' => empty($model['fields'][$col]['virtual']) ? !!$model['fields'][$col]['null'] : false
+                  ];
                 }
+
+                array_push(self::$structures[$table]['unique'], $toPush);
               }
             }
 
@@ -1262,7 +1267,6 @@ MYSQL;
     ) {
       // This happens before the query is executed
       if ($cfg['moment'] === 'before') {
-
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
@@ -1283,63 +1287,58 @@ MYSQL;
             // (if it exists in active state, DB will return its standard error but it's not this class' problem)
             if (!$primary_defined) {
               // Checks if there is a unique value (non based on UID)
-              $modelize = $db->modelize($table);
-              $keys = $modelize['keys'];
-              unset($keys['PRIMARY']);
-              foreach ($keys as $key) {
-                if (!empty($key['unique']) && !empty($key['columns'])) {
-                  $fields = [];
-                  $exit = false;
-                  foreach ($key['columns'] as $col) {
-                    $col_idx = array_search($col, $cfg['fields'], true);
-                    if (($col_idx === false) || \is_null($cfg['values'][$col_idx])) {
-                      $exit = true;
-                      break;
-                    } else {
-                      $fields[] = [
-                        'field' => $col,
-                        'operator' => 'eq',
-                        'value' => $cfg['values'][$col_idx]
-                      ];
-                    }
-                  }
-                  if ($exit) {
-                    continue;
-                  }
-
-                  $isDisabled = !self::$enabled;
-                  if (!$isDisabled) {
-                    self::disable();
-                  }
-
-                  if ($tmp = $db->selectOne([
-                    'tables' => [$table],
-                    'fields' => [$s['primary']],
-                    'join' => [[
-                      'table' => self::$table_uids,
-                      'on' => [[
-                        'field' => $db->cfn('bbn_uid', self::$table_uids),
-                        'operator' => 'eq',
-                        'exp' => $db->cfn($s['primary'], $table, true)
-                      ]]
-                    ]],
-                    'where' => [
-                      'conditions' => $fields,
-                      'logic' => 'AND'
-                    ]
-                  ])) {
-                    $primary_value = $tmp;
-                    $primary_defined = true;
-                    if (!$isDisabled) {
-                      self::enable();
-                    }
-
+              foreach ($s['unique'] as $key) {
+                $fields = [];
+                $exit = false;
+                foreach ($key['columns'] as $col) {
+                  $col_idx = array_search($col, $cfg['fields'], true);
+                  if (($col_idx === false) || \is_null($cfg['values'][$col_idx])) {
+                    $exit = true;
                     break;
+                  } else {
+                    $fields[] = [
+                      'field' => $col['name'],
+                      'operator' => 'eq',
+                      'value' => $cfg['values'][$col_idx]
+                    ];
                   }
+                }
+                if ($exit) {
+                  continue;
+                }
 
+                $isDisabled = !self::$enabled;
+                if (!$isDisabled) {
+                  self::disable();
+                }
+
+                if ($tmp = $db->selectOne([
+                  'tables' => [$table],
+                  'fields' => [$s['primary']],
+                  'join' => [[
+                    'table' => self::$table_uids,
+                    'on' => [[
+                      'field' => $db->cfn('bbn_uid', self::$table_uids),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn($s['primary'], $table, true)
+                    ]]
+                  ]],
+                  'where' => [
+                    'conditions' => $fields,
+                    'logic' => 'AND'
+                  ]
+                ])) {
+                  $primary_value = $tmp;
+                  $primary_defined = true;
                   if (!$isDisabled) {
                     self::enable();
                   }
+
+                  break;
+                }
+
+                if (!$isDisabled) {
+                  self::enable();
                 }
               }
             }
@@ -1464,10 +1463,59 @@ MYSQL;
                 }
               }
             }*/
-            if (
-              $primary_where &&
-              ($row = self::$db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
-            ) {
+            $tmp = [];
+            foreach ($cfg['fields'] as $i => $f) {
+              $tmp[$f] = $cfg['values'][$i];
+            }
+            if ($primary_where) {
+              $fields = $cfg['fields'];
+              $isDefined = false;
+              foreach ($s['unique'] as $unique) {
+                $isDefined = count(X::filter($unique['columns'], fn($a) => in_array($a['name'], $cfg['fields'], true))) ? $unique : false;
+                if ($isDefined) {
+                  foreach ($unique['columns'] as $a) {
+                    if (!in_array($a['name'], $fields, true)) {
+                      $fields[] = $a['name'];
+                    }
+                  }
+                  break;
+                }
+              }
+
+              $isDisabled = !self::$enabled;
+              if (!$isDisabled) {
+                self::disable();
+              }
+              $row = self::$db->rselect($table, $fields, [$s['primary'] => $primary_where]);
+              if ($isDefined) {
+                $search = [];
+                foreach ($isDefined['columns'] as $col) {
+                  $search[$col['name']] = in_array($col['name'], $cfg['fields']) ? $tmp[$col['name']] : $row[$col['name']];
+                  if (is_null($search[$col['name']])) {
+                    $search = [];
+                    break;
+                  }
+                }
+                if (!empty($search)) {
+                  $search[] = [$s['primary'], '!=', $primary_where];
+                  if ($checkRow = self::$db->selectOne($table, $s['primary'], $search)) {
+                    // ONLY IF DELETED OTHERWISE REGULAR DB ERROR
+                    $deleted = !self::$db->selectOne(self::$table_uids, self::$column, ['bbn_uid' => $checkRow]);
+                    if ($deleted) {
+                      if (!X::getRow($isDefined['columns'], ['nullable' => true])) {
+                        throw new Exception(X::_("Impossible to update the record with primary %s from %s because a unique constraint already exists in record %s, you should make one of the unique keys columns nullable", $primary_where, $table, $checkRow));
+                      }
+                      else {
+                        // Should have been done on the delete action
+                      }
+                    }
+                  }
+                }
+              }
+              if (!$isDisabled) {
+                self::enable();
+              }
+
               foreach ($cfg['fields'] as $i => $idx) {
                 $csn = self::$db->csn($idx);
                 if (
@@ -1490,11 +1538,6 @@ MYSQL;
               // Real query's execution will be prevented
               $cfg['run'] = false;
               $cfg['value'] = 0;
-
-              $tmp = [];
-              foreach ($cfg['fields'] as $i => $f) {
-                $tmp[$f] = $cfg['values'][$i];
-              }
               foreach ($ids as $id) {
                 $cfg['value'] += self::$db->update($table, $tmp, [$s['primary'] => $id]);
               }
@@ -1524,21 +1567,6 @@ MYSQL;
                 self::disable();
               }
 
-              foreach ($s['unique'] as $un) {
-                $old = self::$db->selectOne($table, $un, [$s['primary'] => $primary_where]);
-                self::$db->update($table, [$un => null], [$s['primary'] => $primary_where]);
-                if (!isset($s['fields'][$un])) {
-                  X::log([$un, $s], '_toDoHistoryStructureError');
-                  continue;
-                }
-                $cfg['history'][] = [
-                  'operation' => 'UPDATE',
-                  'column' => $s['fields'][$un]['id_option'],
-                  'line' => $primary_where,
-                  'old' => $old
-                ];
-              }
-
               self::enable();
               foreach ($s['refs'] as $ref) {
                 if (!empty($ref['constraint']) && $db->count($ref['table'], [$ref['col'] => $primary_where])) {
@@ -1564,6 +1592,27 @@ MYSQL;
                 }
               }
               self::disable();
+
+              foreach ($s['unique'] as $unique) {
+                foreach ($unique['columns'] as $col) {
+                  if (!$col['nullable']) {
+                    continue;
+                  }
+
+                  $old = self::$db->selectOne($table, $col['name'], [$s['primary'] => $primary_where]);
+                  self::$db->update($table, [$col['name'] => null], [$s['primary'] => $primary_where]);
+                  if (!isset($s['fields'][$col['name']])) {
+                    X::log([$col['name'], $s], '_toDoHistoryStructureError');
+                    continue;
+                  }
+                  $cfg['history'][] = [
+                    'operation' => 'UPDATE',
+                    'column' => $s['fields'][$col['name']]['id_option'],
+                    'line' => $primary_where,
+                    'old' => $old
+                  ];
+                }
+              }
 
               $cfg['value'] = self::$db->update(self::$table_uids, [
                 'bbn_active' => 0
