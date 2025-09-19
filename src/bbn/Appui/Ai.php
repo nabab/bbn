@@ -649,14 +649,13 @@ class Ai extends DbCls
    */
   public function getPromptById(string $id)
   {
-    
     $prompt = $this->dbTraitRselect($id);
-    
     if (!empty($prompt)) {
       $note = $this->note->get($prompt['id_note']);
       $prompt['title'] = $note['title'];
       $prompt['content'] = $note['content'];
       $prompt['lang'] = $note['lang'];
+      $prompt['items'] = [];
     }
     
     return $prompt;
