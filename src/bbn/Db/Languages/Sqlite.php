@@ -1442,6 +1442,7 @@ class Sqlite extends Sql
   public static function getHostDatabases(string $host): array
   {
     $databases = [];
+    $host = self::getHostPath($host);
     if (is_dir($host)) {
       $fs = Dir::getFiles($host, false, false, ['sqlite', 'db']);
       foreach ($fs as $f) {
@@ -1453,6 +1454,14 @@ class Sqlite extends Sql
 
     sort($databases);
     return $databases;
+  }
+
+  public static function hasHostDatabase(string $host, string $database): bool
+  {
+    return in_array(
+      self::normalizeFilename($database),
+      self::getHostDatabases($host)
+    );
   }
 
 

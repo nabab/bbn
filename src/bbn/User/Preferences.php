@@ -76,6 +76,32 @@ class Preferences extends DbCls
         'text' => 'text',
         'cfg' => 'cfg'
       ]
+    ],
+    'locale' => [
+      'table' => 'bbn_users_options',
+      'tables' => [
+        'user_options' => 'bbn_users_options',
+        'user_options_bits' => 'bbn_users_options_bits'
+      ],
+      'arch' => [
+        'user_options' => [
+          'id' => 'id',
+          'id_option' => 'id_option',
+          'num' => 'num',
+          'id_link' => 'id_link',
+          'text' => 'text',
+          'cfg' => 'cfg'
+        ],
+        'user_options_bits' => [
+          'id' => 'id',
+          'id_user_option' => 'id_user_option',
+          'id_parent' => 'id_parent',
+          'id_option' => 'id_option',
+          'num' => 'num',
+          'text' => 'text',
+          'cfg' => 'cfg'
+        ]
+      ]
     ]
   ];
 
@@ -90,6 +116,9 @@ class Preferences extends DbCls
 
   /** @var int */
   protected $id_group;
+
+  /** @var Db */
+  protected $localeDb;
 
 
   /**
@@ -1321,8 +1350,22 @@ class Preferences extends DbCls
         && !$this->retrieveUserIds($id_option)
         && $this->_insert($id_option, $cfg)
     ) {
+      return $this->localeDb->lastId();
+    }
+    return null;
+  }
+
+
+  public function addToLocale(string $id_option, array $cfg): ?string
+  {
+    if (
+        ($id_option = $this->_getIdOption($id_option))
+        && !$this->retrieveUserIds($id_option)
+        && $this->_insert($id_option, $cfg, true)
+    ) {
       return $this->db->lastId();
     }
+
     return null;
   }
 
@@ -2523,21 +2566,34 @@ class Preferences extends DbCls
    * @param array  $cfg
    * @return int
    */
-  private function _insert(string $id_option, array $cfg): int
+  private function _insert(string $id_option, array $cfg, bool $toLocale = false): int
   {
     $json = ($tmp = $this->getCfg(false, $cfg)) ? json_encode($tmp) : null;
-    return $this->db->insert(
-        $this->class_cfg['table'],
-        [
-        $this->fields['id_option'] => $id_option,
-        $this->fields['num'] => $cfg[$this->fields['num']] ?? null,
-        $this->fields['text'] => $cfg[$this->fields['text']] ?? null,
-        $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? null,
-        $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? null,
-        $this->fields['id_user'] => $this->id_user,
-        $this->fields['cfg'] => $json
-        ]
-    );
+    $db = $this->db;
+    $table = $this->class_cfg['table'];
+    $fields = $this->fields;
+    if (!empty($toLocale)) {
+      $this->setLocaleDb();
+      $db = $this->localeDb;
+      $table = $this->class_cfg['locale']['table'];
+      $fields = $this->class_cfg['locale']['arch']['user_options'];
+    }
+
+    $data = [
+      $fields['id_option'] => $id_option,
+      $fields['num'] => $cfg[$fields['num']] ?? null,
+      $fields['text'] => $cfg[$fields['text']] ?? null,
+      $fields['id_link'] => $cfg[$fields['id_link']] ?? null,
+      $fields['id_alias'] => $cfg[$fields['id_alias']] ?? null,
+      $fields['id_user'] => $this->id_user,
+      $fields['cfg'] => $json
+    ];
+
+    if (!empty($toLocale)) {
+      unset($data[$fields['id_user']]);
+    }
+
+    return $db->insert($table, $data);
   }
 
 
@@ -2663,4 +2719,24 @@ class Preferences extends DbCls
 
     return null;
   }
+
+  private function setLocaleDb(): void
+  {
+    if (!$this->localeDb) {
+      $this->localeDb = $this->user->getLocaleDatabase();
+    }
+
+    if (!$this->localeDb) {
+      throw new Exception(X::_("Impossible to get the locale user's database"));
+    }
+
+    foreach ($this->class_cfg['locale']['tables'] as $ti => $tn) {
+      if (!$this->localeDb->tableExists($tn)) {
+        if (!$this->db->copyTableTo($this->class_cfg['tables'][$ti], $this->localeDb, false)) {
+          throw new Exception(X::_("Impossible to copy the table %s to the locale database", $this->class_cfg['tables'][$ti]));
+        }
+      }
+    }
+  }
+
 }

@@ -19,6 +19,10 @@ use bbn\User\Implementor;
 use bbn\User\Manager;
 use bbn\Models\Tts\DbUauth;
 use bbn\User\Session;
+use bbn\Appui\Option;
+use bbn\Db;
+use bbn\Appui\Database;
+use bbn\Db\Languages\Sqlite;
 
 /**
  * A user authentication Class
@@ -286,7 +290,7 @@ use bbn\User\Session;
   /**
    * User constructor.
    *
-   * @param db    $db
+   * @param Db    $db
    * @param array $cfg
    * @param array $params
    */
@@ -1231,6 +1235,34 @@ use bbn\User\Session;
     }
 
     return null;
+  }
+
+
+  public function getLocaleDatabase(): ?Db
+  {
+    /** @var Option $options */
+    $options = Option::getInstance();
+    if (empty($options)) {
+      throw new Exception(X::_('Impossible to get the options class instance'));
+    }
+
+    $idHost = $options->fromCode('BBN_USER_PATH', 'connections', 'sqlite', 'engines', 'database', 'appui');
+    if (empty($idHost)) {
+      throw new Exception(X::_('Impossible to find the SQLite host for user\'s database'));
+    }
+
+    $dbName = 'locale_' . $this->id . '.sqlite';
+    if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+      Sqlite::createDatabaseOnHost($dbName, $idHost);
+    }
+
+    if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+      throw new Exception(X::_('Impossible to find the user\'s database'));
+    }
+
+    $d = new Database($this->db);
+    return $d->connection($idHost, 'sqlite', $dbName);
+
   }
 
 
