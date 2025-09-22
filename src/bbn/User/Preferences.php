@@ -18,6 +18,7 @@ use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\Current;
 use bbn\Models\Cls\Db as DbCls;
+use bbn\Mvc;
 
 /**
  * A user's preference system linked to options and user classes
@@ -1340,30 +1341,19 @@ class Preferences extends DbCls
    * ```
    * @param string $id_option
    * @param array $cfg
+   * @param bool $toLocale
    * @return null|string
    * @throws Exception
    */
-  public function add(string $id_option, array $cfg): ?string
+  public function add(string $id_option, array $cfg, bool $toLocale = false): ?string
   {
-    if (
-        ($id_option = $this->_getIdOption($id_option))
-        && !$this->retrieveUserIds($id_option)
-        && $this->_insert($id_option, $cfg)
+    if (($id_option = $this->_getIdOption($id_option))
+      && !$this->retrieveUserIds($id_option)
+      && $this->_insert($id_option, $cfg, $toLocale)
     ) {
-      return $this->localeDb->lastId();
-    }
-    return null;
-  }
-
-
-  public function addToLocale(string $id_option, array $cfg): ?string
-  {
-    if (
-        ($id_option = $this->_getIdOption($id_option))
-        && !$this->retrieveUserIds($id_option)
-        && $this->_insert($id_option, $cfg, true)
-    ) {
-      return $this->db->lastId();
+      return $toLocale ?
+        $this->localeDb->lastId() :
+        $this->db->lastId();
     }
 
     return null;
@@ -2571,26 +2561,20 @@ class Preferences extends DbCls
     $json = ($tmp = $this->getCfg(false, $cfg)) ? json_encode($tmp) : null;
     $db = $this->db;
     $table = $this->class_cfg['table'];
-    $fields = $this->fields;
+    $data = [
+      $this->fields['id_option'] => $id_option,
+      $this->fields['num'] => $cfg[$this->fields['num']] ?? null,
+      $this->fields['text'] => $cfg[$this->fields['text']] ?? null,
+      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? null,
+      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? null,
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['cfg'] => $json
+    ];
     if (!empty($toLocale)) {
       $this->setLocaleDb();
       $db = $this->localeDb;
+      $data = $this->normalizeToLocale($data, $table);
       $table = $this->class_cfg['locale']['table'];
-      $fields = $this->class_cfg['locale']['arch']['user_options'];
-    }
-
-    $data = [
-      $fields['id_option'] => $id_option,
-      $fields['num'] => $cfg[$fields['num']] ?? null,
-      $fields['text'] => $cfg[$fields['text']] ?? null,
-      $fields['id_link'] => $cfg[$fields['id_link']] ?? null,
-      $fields['id_alias'] => $cfg[$fields['id_alias']] ?? null,
-      $fields['id_user'] => $this->id_user,
-      $fields['cfg'] => $json
-    ];
-
-    if (!empty($toLocale)) {
-      unset($data[$fields['id_user']]);
     }
 
     return $db->insert($table, $data);
@@ -2608,12 +2592,17 @@ class Preferences extends DbCls
    */
   private function _retrieveIds(string $id_option, string|null $id_user = null, string|null $id_group = null): ?array
   {
-    if (!$id_user && !$id_group && isset($this->id_user, $this->id_group)) {
+    if (!$id_user
+      && !$id_group
+      && isset($this->id_user, $this->id_group)
+    ) {
       $id_user  = $this->id_user;
       $id_group = $this->id_group;
     }
 
-    if (($id_user || $id_group) && ($id_option = $this->_getIdOption($id_option))) {
+    if (($id_user || $id_group)
+      && ($id_option = $this->_getIdOption($id_option))
+    ) {
       $cond = [
         'logic' => 'OR',
         'conditions' => []
@@ -2651,17 +2640,32 @@ class Preferences extends DbCls
         $where['conditions'][] = $cond;
       }
 
-      return $this->db->getColumnValues(
-          [
-          'table' => $this->class_cfg['table'],
-          'fields' => [$this->fields['id']],
-          'where' => $where,
-          'order' => [
-          ['field' => $this->fields['num'], 'dir' => 'ASC'],
-          ['field' => $this->fields['text'], 'dir' => 'ASC']
-          ]
-          ]
-      );
+      $rows = $this->db->getColumnValues([
+        'table' => $this->class_cfg['table'],
+        'fields' => [$this->fields['id']],
+        'where' => $where,
+        'order' => [[
+          'field' => $this->fields['num'],
+          'dir' => 'ASC'
+        ], [
+          'field' => $this->fields['text'],
+          'dir' => 'ASC'
+        ]]
+      ]);
+
+      if ($localeRows = $this->retrieveIdsFromLocale($id_option)) {
+        if (!is_array($rows)) {
+          $rows = [];
+        }
+
+        array_push($rows, ...$localeRows);
+        X::sortBy($rows, [
+          $this->fields['num'] => 'ASC',
+          $this->fields['text'] => 'ASC'
+        ]);
+      }
+
+      return $rows;
     }
 
     return null;
@@ -2720,23 +2724,86 @@ class Preferences extends DbCls
     return null;
   }
 
-  private function setLocaleDb(): void
+
+  private function setLocaleDb(): bool
   {
+    $structure = true;
     if (!$this->localeDb) {
       $this->localeDb = $this->user->getLocaleDatabase();
+      $structure = false;
     }
 
     if (!$this->localeDb) {
       throw new Exception(X::_("Impossible to get the locale user's database"));
     }
 
-    foreach ($this->class_cfg['locale']['tables'] as $ti => $tn) {
-      if (!$this->localeDb->tableExists($tn)) {
-        if (!$this->db->copyTableTo($this->class_cfg['tables'][$ti], $this->localeDb, false)) {
-          throw new Exception(X::_("Impossible to copy the table %s to the locale database", $this->class_cfg['tables'][$ti]));
+    if (!$structure) {
+      $cfgFile = Mvc::getPluginPath('appui-usergroup') . 'cfg/databaselocale.json';
+      if (is_file($cfgFile)
+        && ($cfg = json_decode(file_get_contents($cfgFile), true))
+      ) {
+        foreach ($cfg as $table => $tableCfg) {
+          if (!$this->localeDb->tableExists($table)
+            && !$this->localeDb->createTable($table, $tableCfg)
+          ) {
+            throw new Exception(X::_("Impossible to create the locale table %s", $table));
+          }
+        }
+
+        $structure = true;
+      }
+    }
+
+    return $structure;
+  }
+
+
+  private function normalizeToLocale(array $data, $table): array
+  {
+    $res = [];
+    if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
+      $table = $this->class_cfg['locale']['tables'][$tableIdx];
+      $fields = $this->class_cfg['locale']['arch'][$tableIdx];
+      foreach ($data as $field => $value) {
+        if ($fieldIdx = array_search($field, $fields)) {
+          if ($fieldIdx === 'id_option') {
+            $value = $this->opt->toPath($value);
+          }
+
+          $res[$fields[$fieldIdx]] = $value;
         }
       }
     }
+
+    return $res;
+  }
+
+
+  private function retrieveIdsFromLocale(string $idOption)
+  {
+    if ($this->setLocaleDb()
+      && ($optPath = $this->opt->toPath($idOption))
+      && ($table = $this->class_cfg['locale']['table'])
+      && ($fields = $this->class_cfg['locale']['arch']['user_options'])
+      && ($ids = $this->localeDb->getColumnValues([
+        'table' => $table,
+        'fields' => [$fields['id']],
+        'where' => [
+          $fields['id_option'] => $optPath
+        ],
+        'order' => [[
+          'field' => $this->fields['num'],
+          'dir' => 'ASC'
+        ], [
+          'field' => $this->fields['text'],
+          'dir' => 'ASC'
+        ]]
+      ]))
+    ) {
+      return $ids;
+  }
+
+    return null;
   }
 
 }
