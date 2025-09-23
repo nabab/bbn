@@ -13,6 +13,7 @@ use bbn\Appui\Passwords;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\LocaleDatabase;
 use Generator;
 use stdClass;
 
@@ -20,6 +21,7 @@ class Email extends Basic
 {
   use DbActions;
   use Optional;
+  use LocaleDatabase;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -75,7 +77,63 @@ class Email extends Basic
         'num_sent' => 'num_sent',
         'last_sent' => 'last_sent'
       ]
-    ]
+    ],
+    'locale' => [
+      'table' => 'bbn_users_emails',
+      'tables' => [
+        'users_emails' => 'bbn_users_emails',
+        'users_emails_aliases' => 'bbn_users_emails_aliases',
+        'users_emails_recipients' => 'bbn_users_emails_recipients',
+        'users_contacts' => 'bbn_users_contacts',
+        'users_contacts_links' => 'bbn_users_contacts_links'
+      ],
+      'arch' => [
+        'users_emails' => [
+          'id' => 'id',
+          'id_user' => 'id_user',
+          'id_folder' => 'id_folder',
+          'msg_uid' => 'msg_uid',
+          'msg_unique_id' => 'msg_unique_id',
+          'date' => 'date',
+          'id_sender' => 'id_sender',
+          'subject' => 'subject',
+          'excerpt' => 'excerpt',
+          'size' => 'size',
+          'attachments' => 'attachments',
+          'flags' => 'flags',
+          'is_read' => 'is_read',
+          'id_parent' => 'id_parent',
+          'id_thread' => 'id_thread',
+          'external_uids' => 'external_uids'
+        ],
+        'users_emails_aliases' => [
+          'id_account' => 'id_account',
+          'id_link' => 'id_link',
+          'main' => 'main'
+        ],
+        'users_emails_recipients' => [
+          'id_email' => 'id_email',
+          'id_contact_link' => 'id_contact_link',
+          'type' => 'type'
+        ],
+        'users_contacts' => [
+          'id' => 'id',
+          'id_user' => 'id_user',
+          'name' => 'name',
+          'blacklist' => 'blacklist',
+          'cfg' => 'cfg'
+        ],
+        'users_contacts_links' => [
+          'id' => 'id',
+          'id_contact' => 'id_contact',
+          'type' => 'type',
+          'value' => 'value',
+          'num_sent' => 'num_sent',
+          'last_sent' => 'last_sent'
+        ]
+      ]
+    ],
+    'ref_plugin' => 'appui-email'
   ];
 
 
@@ -286,7 +344,8 @@ class Email extends Basic
         'host' => $cfg['host'] ?? null,
         'port' => $cfg['port'] ?? null,
         'ssl' => $cfg['ssl'] ?? true
-      ]
+      ],
+      !empty($cfg['locale'])
     ))
     ) {
       throw new \Exception("Impossible to add the preference");
