@@ -1506,7 +1506,7 @@ class System extends Basic
         string $errstr,
         string|null $errfile = null,
         ?int $errline = null
-      ) {
+      ): void {
       },
       E_WARNING
     );

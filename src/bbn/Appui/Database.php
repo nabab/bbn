@@ -1186,21 +1186,21 @@ class Database extends bbn\Models\Cls\Cache
     $table_id = '';
     $table    = $conn->tsn($table);
     $ftable   = $conn->tfn($db.'.'.$table);
-    $keys     = function (&$a) use (&$table_id, $table, &$conn) {
+    $keys     = function (&$a) use (&$table_id, $table, &$conn): void {
       if (\is_array($a['keys'])) {
         array_walk(
           $a['keys'],
-          function (&$w, $k) use ($table_id, $table) {
+          function (&$w, $k) use ($table_id, $table): void {
             $w['id_option'] = $this->keyId($k, $table_id);
           }
         );
       }
     };
-    $fields   = function (&$a) use (&$table_id, $table, &$conn) {
+    $fields   = function (&$a) use (&$table_id, $table, &$conn): void {
       if (\is_array($a['fields'])) {
         array_walk(
           $a['fields'],
-          function (&$w, $k) use ($table_id, $table) {
+          function (&$w, $k) use ($table_id, $table): void {
             if (!$table_id) {
               throw new \Exception(X::_("Table undefined")." $table");
             }
@@ -1224,7 +1224,7 @@ class Database extends bbn\Models\Cls\Cache
       elseif (empty($table)) {
         array_walk(
           $model,
-          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine, $db) {
+          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine, $db): void {
             $table = $this->db->tsn($k);
             if ($table_id = $this->tableId($table, $db, $host, $engine)) {
               $w['id_option'] = $table_id;
@@ -1512,7 +1512,7 @@ class Database extends bbn\Models\Cls\Cache
         }
 
         if (!empty($ocols)) {
-          foreach ($ocols as $col => $id) {
+          foreach ($ocols as $id) {
             if (bbn\Str::isUid($id)) {
               $num_cols_rem += (int)$this->o->remove($id);
             }

@@ -43,7 +43,7 @@ class Cloudmin
         function ($a) {
           array_walk(
               $a['values'],
-              function (&$b) {
+              function (&$b): void {
                 if (\is_array($b) && array_key_exists(0, $b) && (count($b) === 1)) {
                   $b = $b[0];
                 }
@@ -53,7 +53,7 @@ class Cloudmin
           if ($a['values']['filesystem']) {
             array_walk(
                 $a['values']['filesystem'],
-                function (&$b) {
+                function (&$b): void {
                   $tmp = explode(' ', $b);
                   $b   = [
                     'name' => $tmp[0],

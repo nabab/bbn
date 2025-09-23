@@ -1176,7 +1176,7 @@ class Preferences extends DbCls
       }
       // Changing the given option's NUM
       $res[$o_index][$this->fields['num']] = $index + 1;
-      foreach ($res as $i => $r) {
+      foreach ($res as $r) {
         if ($upd) {
           $this->updateByOption($r[$this->fields['id']], $r);
         }

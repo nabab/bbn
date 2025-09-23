@@ -2182,7 +2182,7 @@ class Ide
 
       $all = $this->fs->getFiles($path, true);
       if (is_array($all) && count($all)) {
-        foreach ($all as $i => $v) {
+        foreach ($all as $v) {
           if (X::basename($v) !== "cfg") {
             //if folder
             if ($this->fs->isDir($v)) {
@@ -2201,7 +2201,7 @@ class Ide
 
               $content = $this->fs->scan($content);
               if (is_array($content) && count($content)) {
-                foreach ($content as $j => $val) {
+                foreach ($content as $val) {
                   $list = [];
                   // case file into folder
                   if ($this->fs->isFile($val)) {
@@ -2267,7 +2267,7 @@ class Ide
                           $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
                           $file_name   = X::basename($path_file);
                           $path        = X::dirname($base . '/' . substr($path_file, strlen($base_rep)));
-                          $occourences = $occourences + substr_count($lineCurrent, $info['search']);
+                          $occourences += substr_count($lineCurrent, $info['search']);
                           // info for code
                           $list[] = [
                             'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
@@ -2289,7 +2289,7 @@ class Ide
 
                   //if we find rows then we will create the tree structure with all the information
                   if (count($list) > 0) {
-                    $totLines = $totLines + count($list);
+                    $totLines += count($list);
                     if (!empty($info['mvc'])) {
                       if (explode("/", $path_file)[1] === "public") {
                         $tab = 'php';
@@ -2362,7 +2362,7 @@ class Ide
                     $position    = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                     $text        = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
                     $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
-                    $occourences = $occourences + substr_count($lineCurrent, $info['search']);
+                    $occourences += substr_count($lineCurrent, $info['search']);
                     //see
                     $path = str_replace($base, (strpos($path_file, $this->getAppPath()) === 0 ? 'app/' : 'lib/'), $path);
 
@@ -2418,8 +2418,8 @@ class Ide
 
       if (!empty($result)) {
         $totFiles = 0;
-        foreach ($result as $key => $value) {
-          $totFiles = $totFiles + $value['items'][0]['numChildren'];
+        foreach ($result as $value) {
+          $totFiles += $value['items'][0]['numChildren'];
         }
 
         return [
@@ -2471,7 +2471,7 @@ class Ide
                     $text     .= str_replace($seek, "<strong><span class='underlineSeach'>" . $seek . "</span></strong>", $lineCurrent);
                     $file_name = X::basename($path_file);
 
-                    $occourences = $occourences + substr_count($lineCurrent, $seek);
+                    $occourences += substr_count($lineCurrent, $seek);
                     if (in_array($rep['name'], $foundRepos) === false) {
                       $foundRepos[] = $rep['name'];
                       $numRepositories++;
@@ -2496,7 +2496,7 @@ class Ide
 
                 //if we find rows then we will create the tree structure with all the information
                 if (count($list) > 0) {
-                  $totLines = $totLines + count($list);
+                  $totLines += count($list);
                   if (explode("/", $path_file)[1] === "public") {
                     $tab = 'php';
                   } else {
@@ -2831,7 +2831,7 @@ class Ide
       }
 
       // Each file associated with the structure (MVC case)
-      foreach ($rep['tabs'] as $i => $tab) {
+      foreach ($rep['tabs'] as $tab) {
         // The path of each file
         $tmp = $path;
         if (!empty($tab['path'])) {

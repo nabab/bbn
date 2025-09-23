@@ -334,8 +334,8 @@ class Cdn extends Models\Cls\Basic
       clearstatcache();
       // Real research for last mods and generation timestamps
       if ($c['is_component']) {
-        foreach ($c['content'] as $name => $cp) {
-          foreach ($cp as $type => $files) {
+        foreach ($c['content'] as $cp) {
+          foreach ($cp as $files) {
             foreach ($files as $f) {
               if (is_file($this->fpath . $f)) {
                 $last_modified = filemtime($this->fpath . $f);

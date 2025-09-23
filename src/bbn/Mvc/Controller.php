@@ -553,7 +553,7 @@ class Controller implements Api
   public function registerPluginClasses($plugin_path): self
   {
     spl_autoload_register(
-        function ($class_name) use ($plugin_path) {
+        function ($class_name) use ($plugin_path): void {
           if (
               (strpos($class_name, '/') === false)
               && (strpos($class_name, '.') === false)
@@ -852,7 +852,7 @@ class Controller implements Api
   {
     $args     = \func_get_args();
     $has_path = false;
-    foreach ($args as $i => $a) {
+    foreach ($args as $a) {
       if ($new_data = $this->retrieveVar($a)) {
         $this->jsData($new_data);
       }

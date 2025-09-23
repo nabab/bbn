@@ -208,7 +208,7 @@ trait Manip
       }
 
       while ($max && (count($res) < count($ret['options']))) {
-        foreach ($ret['options'] as $i => $o) {
+        foreach ($ret['options'] as $o) {
           if (!empty($o[$this->fields['id_alias']])
               && !in_array($o[$this->fields['id']], $done, true)
               && in_array($o[$this->fields['id_parent']], $done, true)
@@ -223,7 +223,7 @@ trait Manip
       }
 
       if (count($res) < count($ret['options'])) {
-        foreach ($ret['options'] as $i => $o) {
+        foreach ($ret['options'] as $o) {
           if (!in_array($o[$this->fields['id_parent']], $done, true)) {
             $o[$this->fields['id_parent']] = $this->getCodePath($o[$this->fields['id_parent']]);
           }

@@ -1566,7 +1566,7 @@ PGSQL
       'fields' => [],
     ];
     $i             = 0;
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $f) {
       if (isset($cfg['available_fields'][$f])) {
         $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
@@ -1611,7 +1611,7 @@ PGSQL
       'values' => [],
       'fields' => [],
     ];
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $f) {
       if (isset($cfg['available_fields'][$f])) {
         $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);

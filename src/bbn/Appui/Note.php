@@ -1800,7 +1800,7 @@ class Note extends DbCls
       }
       $this->log($this->db->last(), $this->db->getLastValues());
       $this->log($res);
-      
+
       $res = $this->db->update($table, [$cols['num'] => $num], [$cols['id'] => $id]);
       /*
       if ($res) {

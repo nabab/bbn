@@ -154,7 +154,7 @@ class Php extends bbn\Models\Cls\Basic
     ];
     $tokens = token_get_all($code, TOKEN_PARSE);
 
-    foreach ($tokens as $i => $token) {
+    foreach ($tokens as $token) {
       if (is_array($token)) {
         $t = token_name($token[0]);
         if ($t === 'T_CLASS') {
@@ -181,7 +181,7 @@ class Php extends bbn\Models\Cls\Basic
   // }
   // die();
   
-    foreach ($tokens as $i => $token) {
+    foreach ($tokens as $token) {
       if (is_array($token)) {
         $t = token_name($token[0]);
         if ($t === 'T_CLASS') {

@@ -960,7 +960,7 @@ class Appui
     if (!$this->_dbFilesContent) {
       $routes   = $this->getRoutes();
       $tables   = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -997,7 +997,7 @@ class Appui
     if (!$this->_structureFilesContent) {
       $routes   = $this->getRoutes();
       $tables   = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1035,7 +1035,7 @@ class Appui
     if (!$this->_optionFilesContent) {
       $routes   = $this->getRoutes();
       $options  = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1079,7 +1079,7 @@ class Appui
     if (!$this->_permissionFilesContent) {
       $routes   = $this->getRoutes();
       $perms    = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1170,7 +1170,7 @@ class Appui
     if (!$this->_dashboardFilesContent) {
       $routes     = $this->getRoutes();
       $dashboards = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1716,7 +1716,7 @@ class Appui
         $appui_options = [];
         $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
-        foreach (array_values($routes) as $i => $r) {
+        foreach (array_values($routes) as $r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';

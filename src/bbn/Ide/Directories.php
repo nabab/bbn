@@ -635,7 +635,7 @@ class Directories {
         !empty($tab)
       ){
         $cfg = $cfg['tabs'][$tab];
-        $root = $root . $cfg['path'];
+        $root .= $cfg['path'];
       }
       // New file
       if ( $type === 'file' ){
@@ -1079,7 +1079,7 @@ class Directories {
           self::createPermByReal($perms);
         }
         else {
-          $dir_perms = function($fd) use(&$dir_perms){
+          $dir_perms = function($fd) use(&$dir_perms): void{
             foreach ( $fd as $f ){
               if ( is_file($f) &&
                 (X::basename($f) !== '_super.php')

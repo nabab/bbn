@@ -1216,7 +1216,7 @@ class X
 
     $backtrace = debug_backtrace();
     $st = '';
-    foreach ($backtrace as $i => $b) {
+    foreach ($backtrace as $b) {
       if (isset($b['class']) && $b['file'] !== __FILE__) {
         $st = $b['file'] . ';' . $b['line'] . PHP_EOL;
         break;
@@ -3222,7 +3222,7 @@ class X
         )
       );
 
-      array_walk($data, function (&$item) use ($cfg, $dates) {
+      array_walk($data, function (&$item) use ($cfg, $dates): void {
         foreach ($cfg['fields'] as $field) {
           if (!empty($field['hidden'])) {
             unset($item[$field['field']]);

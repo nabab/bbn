@@ -458,7 +458,7 @@ class I18n extends cacheCls
           'text' => $paths[$p]['text'],
           'id_parent' => $parent
         ];
-        foreach ($items as $idx => $item){
+        foreach ($items as $item){
           if (($id = $this->getId($item['text'], $paths[$p]['language']))
             && $this->hasTranslation($id, $lang)
           ) {

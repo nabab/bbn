@@ -688,7 +688,7 @@ class Mvc implements Mvc\Api
     $randoms = [];
     $_random = fn($i) => $randoms[$i] ?? ($randoms[$i] = md5(Str::genpwd()));
     ob_start();
-    (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
+    (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random): void {
       if ($bbn_inc_content) {
         if (\count($bbn_inc_data)) {
           foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {

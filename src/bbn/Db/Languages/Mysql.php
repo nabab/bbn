@@ -950,7 +950,7 @@ MYSQL;
       $indexes = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
       $keys = [];
       $cols = [];
-      foreach ($indexes as $i => $index) {
+      foreach ($indexes as $index) {
         $a = $this->getRow(
           <<<MYSQL
 SELECT `CONSTRAINT_NAME` AS `name`,

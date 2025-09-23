@@ -678,10 +678,10 @@ class Cache implements CacheInterface
         case 'memcache':
           $list     = [];
           $allSlabs = $this->obj->getExtendedStats('slabs');
-          foreach ($allSlabs as $server => $slabs){
+          foreach ($allSlabs as $slabs){
             foreach ($slabs as $slabId => $slabMeta){
               $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);
-              foreach ($cdump AS $keys => $arrVal){
+              foreach ($cdump AS $arrVal){
                 foreach ($arrVal AS $k => $v){
                   if ($k !== 'CLIENT_ERROR') {
                     echo array_push($list, $k);

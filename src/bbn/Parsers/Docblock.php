@@ -186,7 +186,7 @@ class Docblock {
     $res = [];
     // The matches without the comments
     if (!empty($matches[1])) {
-      foreach ($matches[1] as $idx => $it) {
+      foreach ($matches[1] as $it) {
         /** @var array Representation of each comment block found in the source  */
         $tmp = [
           'summary' => '',
@@ -330,7 +330,7 @@ class Docblock {
     //die(var_dump($res));
     $result = array_shift($res);
     $result['methods'] = [];
-    foreach ($res as $i => $r) {
+    foreach ($res as $r) {
       if (!empty($r['type']) && ($r['type'] === 'method')) {
         $result['methods'][$r['name']] = $r;
       }

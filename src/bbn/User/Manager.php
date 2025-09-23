@@ -62,7 +62,7 @@ You can click the following link to access directly your account:<br>
 
   protected $db;
 
-  protected $class_cfg = false;
+  protected $class_cfg;
 
 
   public function getListFields()
@@ -81,7 +81,7 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function findSessions(string $id_user=null, int $minutes = 5): array
+  public function findSessions(?string $id_user=null, int $minutes = 5): array
   {
     $cfg = [
       'table' => $this->class_cfg['tables']['sessions'],

@@ -116,7 +116,7 @@ trait HasError
       $dbt = array_reverse($btr);
       array_walk(
         $dbt,
-        function ($a, $i) use (&$msg) {
+        function ($a, $i) use (&$msg): void {
           if (isset($a['dfile'])) {
             $msg[] = str_repeat($a['good'] ? '!' : ' ', $i).
             ($i ? '->' : '').$a['msg'];

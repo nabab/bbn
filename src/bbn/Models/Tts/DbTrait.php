@@ -63,7 +63,7 @@ trait DbTrait
       }
       elseif (isset($ccfg['cfg'])) {
         $cfg = [];
-        foreach ($ccfg['cfg'] as $k => $v) {
+        foreach ($ccfg['cfg'] as $v) {
           if (array_key_exists($v['field'], $data)) {
             $cfg[$v['field']] = $data[$v['field']];
             unset($data[$v['field']]);
@@ -117,7 +117,7 @@ trait DbTrait
       if (array_key_exists($f['cfg'], $data)) {
         $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
         if (!empty($ccfg['cfg'])) {
-          foreach ($ccfg['cfg'] as $k => $v) {
+          foreach ($ccfg['cfg'] as $v) {
             if (isset($v['field']) 
                 && array_key_exists($v['field'], $data[$f['cfg']])
                 && !array_key_exists($v['field'], $data)) {

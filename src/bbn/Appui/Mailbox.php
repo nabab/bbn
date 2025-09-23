@@ -1489,7 +1489,7 @@ class Mailbox extends Basic
     if ($folders = $this->_get_folders($dir)) {
       $i   = 0;
       $ret = [];
-      foreach($folders as $key => $val) {
+      foreach($folders as $val) {
         $name      = imap_utf7_decode($val->name);
         $name_arr  = explode('}', $name);
         $j         = \count($name_arr) - 1;
