@@ -562,47 +562,42 @@ class Preferences extends DbCls
       $id_user  = $this->db->csn($this->fields['id_user'], true);
       $id_group = $this->db->csn($this->fields['id_group'], true);
       $public   = $this->db->csn($this->fields['public'], true);
-      if (
-          $row = $this->db->rselect(
-              [
-              'table' => $table,
-              'fields' => $this->fields,
-              'where' => [
-              'conditions' => [[
-              'field' => $uid,
-              'value' => $id
-              ], [
-              'logic' => 'OR',
-              'conditions' => [[
+      $row = $this->db->rselect([
+        'table' => $table,
+        'fields' => $this->fields,
+        'where' => [
+          'conditions' => [[
+            'field' => $uid,
+            'value' => $id
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
               'field' => $id_user,
               'value' => $this->id_user
-              ], [
+            ], [
               'field' => $id_group,
               'value' => $this->id_group
-              ], [
+            ], [
               'field' => $public,
               'value' => 1
-              ]]
-              ]]
-              ]
-              ]
-          )
-      ) {
+            ]]
+          ]]
+        ]
+      ]);
+      if ($row) {
         if ($with_config) {
           if (empty($row['cfg']) && !empty($row['id_alias'])) {
             //if it's the case of a shared list takes the $cfg and the text from the alias
-            $alias       = $this->db->rselect(
-                [
-                'table' => $table,
-                'fields' => ['cfg', 'text'],
-                'where' => [
+            $alias = $this->db->rselect([
+              'table' => $table,
+              'fields' => ['cfg', 'text'],
+              'where' => [
                 'conditions' => [[
                   'field' => 'id',
                   'value' => $row['id_alias']
                 ]]
-                ]
-                ]
-            );
+              ]
+            ]);
             $row['cfg']  = $alias['cfg'];
             $row['text'] = $alias['text'];
           }
@@ -2653,7 +2648,9 @@ class Preferences extends DbCls
         ]]
       ]);
 
-      if ($localeRows = $this->retrieveIdsFromLocale($id_option)) {
+      if (!empty($id_user)
+        && ($localeRows = $this->retrieveIdsFromLocale($id_option))
+      ) {
         if (!is_array($rows)) {
           $rows = [];
         }
