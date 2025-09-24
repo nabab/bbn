@@ -5,15 +5,26 @@ namespace bbn\Models\Tts;
 use Exception;
 use bbn\X;
 use bbn\Mvc;
+use bbn\User;
 
 trait LocaleDatabase
 {
 
-  private function setLocaleDb(): bool
+  /** @var Db The locale database instance */
+  protected $localeDb;
+
+  /**
+   * Sets the locale database and its structure if needed
+   *
+   * @return bool
+   * @throws Exception
+   */
+  private function setLocaleDb(?User $user = null): bool
   {
     $structure = true;
+    $user = $user ?: User::getInstance();
     if (!$this->localeDb) {
-      $this->localeDb = $this->user->getLocaleDatabase();
+      $this->localeDb = $user->getLocaleDatabase();
       $structure = false;
     }
 
@@ -22,32 +33,40 @@ trait LocaleDatabase
     }
 
     if (!$structure) {
-      $cfgFile = Mvc::getPluginPath($this->class_cfg['ref_plugin']) . 'cfg/databaselocale.json';
-      if (is_file($cfgFile)
-        && ($cfg = json_decode(file_get_contents($cfgFile), true))
-      ) {
-        foreach ($cfg as $table => $tableCfg) {
-          if (!$this->localeDb->tableExists($table)
-            && !$this->localeDb->createTable($table, $tableCfg)
-          ) {
+      foreach ($this->class_cfg['tables'] as $table) {
+        if (!$this->localeDb->tableExists($table)){
+          $modelize = $this->db->modelize($table);
+          $modelize['keys'] = array_filter(
+            $modelize['keys'],
+            fn($k) => !in_array($k['ref_table'], ['bbn_options', 'bbn_users', 'bbn_users_groups'])
+          );
+          unset($modelize['charset'], $modelize['collation']);
+          $modelize = $this->db->convert($modelize, $this->localeDb->getEngine());
+          if (!$this->localeDb->createTable($table, $modelize)) {
             throw new Exception(X::_("Impossible to create the locale table %s", $table));
           }
         }
-
-        $structure = true;
       }
+
+      $structure = true;
     }
 
     return $structure;
   }
 
-
+  /**
+   * Normalizes data to be inserted in the locale database
+   *
+   * @param array $data
+   * @param string $table
+   * @return array
+   */
   private function normalizeToLocale(array $data, $table): array
   {
     $res = [];
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
-      $table = $this->class_cfg['locale']['tables'][$tableIdx];
-      $fields = $this->class_cfg['locale']['arch'][$tableIdx];
+      $table = $this->class_cfg['tables'][$tableIdx];
+      $fields = $this->class_cfg['arch'][$tableIdx];
       foreach ($data as $field => $value) {
         if ($fieldIdx = array_search($field, $fields)) {
           if ($fieldIdx === 'id_option') {
@@ -62,11 +81,17 @@ trait LocaleDatabase
     return $res;
   }
 
-
+  /**
+   * Normalizes data fetched from the locale database
+   *
+   * @param array $data
+   * @param string $table
+   * @return array
+   */
   private function normalizeFromLocale(array $data, $table): array
   {
     $res = [];
-    if ($tableIdx = array_search($table, $this->class_cfg['locale']['tables'])) {
+    if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
       $fields = $this->class_cfg['arch'][$tableIdx];
       foreach ($data as $field => $value) {

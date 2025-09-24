@@ -2575,6 +2575,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         ) {
           $cfg['fields'][$k]['type'] = static::$interoperability[$v['type']][$engine];
         }
+
+        if (isset($v['collation'])) {
+          $cfg['fields'][$k]['collation'] = null;
+        }
+
+        if (isset($v['charset'])) {
+          $cfg['fields'][$k]['charset'] = null;
+        }
       }
     }
 

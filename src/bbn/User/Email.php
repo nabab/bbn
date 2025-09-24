@@ -77,73 +77,17 @@ class Email extends Basic
         'num_sent' => 'num_sent',
         'last_sent' => 'last_sent'
       ]
-    ],
-    'locale' => [
-      'table' => 'bbn_users_emails',
-      'tables' => [
-        'users_emails' => 'bbn_users_emails',
-        'users_emails_aliases' => 'bbn_users_emails_aliases',
-        'users_emails_recipients' => 'bbn_users_emails_recipients',
-        'users_contacts' => 'bbn_users_contacts',
-        'users_contacts_links' => 'bbn_users_contacts_links'
-      ],
-      'arch' => [
-        'users_emails' => [
-          'id' => 'id',
-          'id_user' => 'id_user',
-          'id_folder' => 'id_folder',
-          'msg_uid' => 'msg_uid',
-          'msg_unique_id' => 'msg_unique_id',
-          'date' => 'date',
-          'id_sender' => 'id_sender',
-          'subject' => 'subject',
-          'excerpt' => 'excerpt',
-          'size' => 'size',
-          'attachments' => 'attachments',
-          'flags' => 'flags',
-          'is_read' => 'is_read',
-          'id_parent' => 'id_parent',
-          'id_thread' => 'id_thread',
-          'external_uids' => 'external_uids'
-        ],
-        'users_emails_aliases' => [
-          'id_account' => 'id_account',
-          'id_link' => 'id_link',
-          'main' => 'main'
-        ],
-        'users_emails_recipients' => [
-          'id_email' => 'id_email',
-          'id_contact_link' => 'id_contact_link',
-          'type' => 'type'
-        ],
-        'users_contacts' => [
-          'id' => 'id',
-          'id_user' => 'id_user',
-          'name' => 'name',
-          'blacklist' => 'blacklist',
-          'cfg' => 'cfg'
-        ],
-        'users_contacts_links' => [
-          'id' => 'id',
-          'id_contact' => 'id_contact',
-          'type' => 'type',
-          'value' => 'value',
-          'num_sent' => 'num_sent',
-          'last_sent' => 'last_sent'
-        ]
-      ]
-    ],
-    'ref_plugin' => 'appui-email'
+    ]
   ];
 
 
   /** @var array An array of connection objects */
   protected $mboxes = [];
 
-  /** @var bbn\Appui\Option The options object */
+  /** @var Option The options object */
   protected $opt;
 
-  /** @var bbn\Appui\Passwords The passwords object */
+  /** @var Passwords The passwords object */
   protected $pw;
 
 
@@ -272,7 +216,8 @@ class Email extends Basic
           'folders' => null,
           'last_uid' => $a['last_uid'] ?? null,
           'last_check' => $a['last_check'] ?? null,
-          'id_account' => $id_account
+          'id_account' => $id_account,
+          'locale' => !empty($a['locale'])
         ];
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
         if (!isset($a['stage'])) {
@@ -324,7 +269,7 @@ class Email extends Basic
   }
 
 
-  public function addAccount(array $cfg): string
+  public function addAccount(array $cfg, bool $isLocale = false): string
   {
     if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
       throw new \Exception("Missing arguments");
@@ -345,9 +290,8 @@ class Email extends Basic
         'port' => $cfg['port'] ?? null,
         'ssl' => $cfg['ssl'] ?? true
       ],
-      !empty($cfg['locale'])
-    ))
-    ) {
+      $isLocale
+    ))) {
       throw new \Exception("Impossible to add the preference");
     }
 

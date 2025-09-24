@@ -2,16 +2,26 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\Db;
+use bbn\Models\Cls\Db as DbModel;
 use bbn\X;
+use bbn\User;
+use bbn\Appui\Option;
+use bbn\Util\Enc;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\LocaleDatabase;
+use bbn\User\Preferences;
+use Exception;
 
 /**
  * Passwords management in appui
  */
-class Passwords extends bbn\Models\Cls\Db
+class Passwords extends DbModel
 {
-  use bbn\Models\Tts\DbActions;
+  use DbActions;
+  use LocaleDatabase;
 
-  /** @var bbn\Appui\Option An options object */
+  /** @var Option An options object */
   private $_o;
 
   /** @var array Database architecture schema */
@@ -34,9 +44,9 @@ class Passwords extends bbn\Models\Cls\Db
   /**
    * Contructor.
    *
-   * @param \bbn\Db $db Database connection
+   * @param Db $db Database connection
    */
-  public function __construct(\bbn\Db $db) 
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     $this->initClassCfg();
@@ -56,7 +66,7 @@ class Passwords extends bbn\Models\Cls\Db
   {
     if ($password && defined('BBN_ENCRYPTION_KEY')) {
       $arch     = &$this->class_cfg['arch']['passwords'];
-      $to_store = \bbn\Util\Enc::crypt64($password, BBN_ENCRYPTION_KEY);
+      $to_store = Enc::crypt64($password, BBN_ENCRYPTION_KEY);
       //var_dump(base64_encode($to_store));
       if ($this->db->insertUpdate(
         $this->class_cfg['table'],
@@ -72,7 +82,7 @@ class Passwords extends bbn\Models\Cls\Db
       return false;
     }
 
-    throw new \Exception(X::_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
+    throw new Exception(X::_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
   }
 
 
@@ -81,27 +91,32 @@ class Passwords extends bbn\Models\Cls\Db
    *
    * @param string   $password The password to store
    * @param string   $id_pref  The ID in user_options
-   * @param bbn\User $user     A user object
+   * @param User $user     A user object
    *
    * @return bool
    */
-  public function userStore(string $password, string $id_pref, bbn\User $user): bool
+  public function userStore(string $password, string $id_pref, User $user): bool
   {
     if (!$password) {
-      throw new \Exception("No password given");
+      throw new Exception("No password given");
     }
 
     if (!($to_store = $user->crypt($password))) {
-      throw new \Exception("Impossible to crypt the password");
+      throw new Exception("Impossible to crypt the password");
     }
 
-    $arch =& $this->class_cfg['arch']['passwords'];
+    $db = $this->db;
+    $pref = Preferences::getInstance();
+    if ($pref->isLocale($id_pref)) {
+      $this->setLocaleDb();
+      $db = $this->localeDb;
+    }
 
-    return (bool)$this->db->insertUpdate(
+    return (bool)$db->insertUpdate(
       $this->class_cfg['table'],
       [
-        $arch['id_user_option'] => $id_pref,
-        $arch['password'] => base64_encode($to_store)
+        $this->fields['id_user_option'] => $id_pref,
+        $this->fields['password'] => base64_encode($to_store)
       ]
     );
 
@@ -125,7 +140,7 @@ class Passwords extends bbn\Models\Cls\Db
         [$arch['id_option'] => $id_option]
       )
       ) {
-        return \bbn\Util\Enc::decrypt64($password, BBN_ENCRYPTION_KEY);
+        return Enc::decrypt64($password, BBN_ENCRYPTION_KEY);
       }
     }
     return null;
@@ -136,20 +151,25 @@ class Passwords extends bbn\Models\Cls\Db
    * Returns a password for the given user's option.
    *
    * @param string   $id_pref The ID in user_options
-   * @param bbn\User $user    A user object
+   * @param User $user    A user object
    *
    * @return string|null
    */
-  public function userGet(string $id_pref, bbn\User $user): ?string
+  public function userGet(string $id_pref, User $user): ?string
   {
     if ($user->isAuth()) {
-      $arch =& $this->class_cfg['arch']['passwords'];
-      if ($password = $this->db->selectOne(
+      $db = $this->db;
+      $pref = Preferences::getInstance();
+      if ($pref->isLocale($id_pref)) {
+        $this->setLocaleDb();
+        $db = $this->localeDb;
+      }
+
+      if ($password = $db->selectOne(
         $this->class_cfg['table'],
-        $arch['password'],
-        [$arch['id_user_option'] => $id_pref]
-      )
-      ) {
+        $this->fields['password'],
+        [$this->fields['id_user_option'] => $id_pref]
+      )) {
         return $user->decrypt(base64_decode($password));
       }
     }
@@ -173,15 +193,20 @@ class Passwords extends bbn\Models\Cls\Db
     );
   }
 
-  public function userDelete(string $id_pref, bbn\User $user)
+  public function userDelete(string $id_pref, User $user)
   {
     if ($user->isAuth()) {
-      $pref = \bbn\User\Preferences::getInstance();
+      $pref = Preferences::getInstance();
       if ($pref->isAuthorized($id_pref)) {
-        $arch =& $this->class_cfg['arch']['passwords'];
-        return $this->db->delete(
-          $this->class_cfg['table'], 
-          [$arch['id_user_option'] => $id_pref]
+        $db = $this->db;
+        if ($pref->isLocale($id_pref)) {
+          $this->setLocaleDb();
+          $db = $this->localeDb;
+        }
+
+        return $db->delete(
+          $this->class_cfg['table'],
+          [$this->fields['id_user_option'] => $id_pref]
         );
       }
     }

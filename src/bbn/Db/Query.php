@@ -54,6 +54,11 @@ class Query extends PDOStatement implements Actions
    */
   protected $union;
 
+  /**
+   * @var string
+   */
+  protected $engine;
+
 
   /**
    * @param SqlEngines $db
@@ -67,6 +72,7 @@ class Query extends PDOStatement implements Actions
       $this->values    = $last['values'] ?? [];
       $this->write     = $last['write'] ?? false;
       $this->structure = $last['structure'] ?? [];
+      $className       = get_class($this->db);
     }
   }
 
@@ -174,7 +180,9 @@ class Query extends PDOStatement implements Actions
   public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));
+    $r = $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -197,6 +205,7 @@ class Query extends PDOStatement implements Actions
       $res = parent::fetchAll($fetch_style);
     }
 
+    $this->_closeCursor();
     return $this->db->correctTypes($res);
   }
 
@@ -208,7 +217,9 @@ class Query extends PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetchColumn($column_number));
+    $r = $this->db->correctTypes(parent::fetchColumn($column_number));
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -220,7 +231,9 @@ class Query extends PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $r = $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -230,7 +243,9 @@ class Query extends PDOStatement implements Actions
   public function rowCount(): int
   {
     $this->execute();
-    return parent::rowCount();
+    $r = parent::rowCount();
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -241,7 +256,9 @@ class Query extends PDOStatement implements Actions
   public function getColumnMeta($column=0): array
   {
     $this->execute();
-    return parent::getColumnMeta($column);
+    $r = parent::getColumnMeta($column);
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -251,7 +268,9 @@ class Query extends PDOStatement implements Actions
   public function nextRowset(): bool
   {
     $this->execute();
-    return parent::nextRowset();
+    $r = parent::nextRowset();
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -365,6 +384,18 @@ class Query extends PDOStatement implements Actions
     }
 
     return null;
+  }
+
+  /**
+   * Closes the cursor if the engine is SQLite to avoid "database is locked" errors
+   */
+  private function _closeCursor()
+  {
+    if (($this->db->getEngine() === 'sqlite')
+      //&& $this->isWrite()
+    ) {
+      $this->closeCursor();
+    }
   }
 
 
