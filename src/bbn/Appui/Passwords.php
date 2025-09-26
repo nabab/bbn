@@ -107,9 +107,8 @@ class Passwords extends DbModel
 
     $db = $this->db;
     $pref = Preferences::getInstance();
-    if ($pref->isLocale($id_pref)) {
-      $this->setLocaleDb();
-      $db = $this->localeDb;
+    if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+      $db = $this->getLocaleDb();
     }
 
     return (bool)$db->insertUpdate(
@@ -160,9 +159,8 @@ class Passwords extends DbModel
     if ($user->isAuth()) {
       $db = $this->db;
       $pref = Preferences::getInstance();
-      if ($pref->isLocale($id_pref)) {
-        $this->setLocaleDb();
-        $db = $this->localeDb;
+      if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+        $db = $this->getLocaleDb();
       }
 
       if ($password = $db->selectOne(
@@ -199,9 +197,8 @@ class Passwords extends DbModel
       $pref = Preferences::getInstance();
       if ($pref->isAuthorized($id_pref)) {
         $db = $this->db;
-        if ($pref->isLocale($id_pref)) {
-          $this->setLocaleDb();
-          $db = $this->localeDb;
+        if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+          $db = $this->getLocaleDb();
         }
 
         return $db->delete(

@@ -4,8 +4,10 @@ namespace bbn\Models\Tts;
 
 use Exception;
 use bbn\X;
-use bbn\Mvc;
+use bbn\Str;
 use bbn\User;
+use bbn\Db;
+use bbn\Appui\Option;
 
 trait LocaleDatabase
 {
@@ -13,18 +15,69 @@ trait LocaleDatabase
   /** @var Db The locale database instance */
   protected $localeDb;
 
+
+  /**
+   * Returns the database instance depending on whether the record is in the main or locale database
+   * @param string $id
+   * @param string $table
+   * @return Db|null
+   */
+  public function getRightDb(string $id, string $table): ?Db
+  {
+    return $this->isLocale($id, $table) ?
+      $this->getLocaleDb() :
+      $this->db;
+  }
+
+
+  /**
+   * Returns the locale database instance
+   *
+   * @return Db|null
+   * @throws Exception
+   */
+  public function getLocaleDb(): ?Db
+  {
+    if (!$this->localeDb) {
+      $this->setLocaleDb();
+    }
+
+    return $this->localeDb ?: null;
+  }
+
+
+  public function isLocale(string $id, string $table): bool
+  {
+    if (array_search($table, $this->class_cfg['tables'])
+      && ($db = $this->getLocaleDb())
+      && ($primary = $db->getPrimary($table))
+    ) {
+      return (bool)$db->count($table, [$primary[0] => $id]);
+    }
+
+    return false;
+  }
+
+
   /**
    * Sets the locale database and its structure if needed
    *
+   * @param User|string|null $user
    * @return bool
    * @throws Exception
    */
-  private function setLocaleDb(?User $user = null): bool
+  protected function setLocaleDb(User|string|null $user = null): bool
   {
     $structure = true;
-    $user = $user ?: User::getInstance();
+    $currentUserCls = User::getInstance();
+    $userCls = $user instanceof User ? $user : $currentUserCls;
+    $userId = is_string($user) ? $user : $userCls->getId();
+    if ($userId === $currentUserCls->getId()) {
+      $userId = null;
+    }
+
     if (!$this->localeDb) {
-      $this->localeDb = $user->getLocaleDatabase();
+      $this->localeDb = $userCls->getLocaleDatabase(true, $userId);
       $structure = false;
     }
 
@@ -33,15 +86,47 @@ trait LocaleDatabase
     }
 
     if (!$structure) {
+      $optCfg = Option::getInstance()->getClassCfg();
+      $usrCfg = $userCls->getClassCfg();
+      $tables = [
+        $optCfg['table'],
+        $usrCfg['table'],
+        $usrCfg['tables']['groups']
+      ];
       foreach ($this->class_cfg['tables'] as $table) {
         if (!$this->localeDb->tableExists($table)){
           $modelize = $this->db->modelize($table);
-          $modelize['keys'] = array_filter(
-            $modelize['keys'],
-            fn($k) => !in_array($k['ref_table'], ['bbn_options', 'bbn_users', 'bbn_users_groups'])
-          );
-          unset($modelize['charset'], $modelize['collation']);
+          $optionsFields = [];
+          foreach ($modelize['keys'] as $k => $v) {
+            if (($v['ref_table'] === $optCfg['table'])
+              && !in_array($v['columns'][0], $optionsFields)
+            ) {
+              $optionsFields[] = $v['columns'][0];
+            }
+
+            if (in_array($v['ref_table'], $tables)) {
+              unset($modelize['keys'][$k]);
+            }
+          }
+
+          if (isset($modelize['charset'])) {
+            unset($modelize['charset']);
+          }
+
+          if (isset($modelize['collation'])) {
+            unset($modelize['collation']);
+          }
+
           $modelize = $this->db->convert($modelize, $this->localeDb->getEngine());
+          if (!empty($optionsFields)) {
+            foreach ($modelize['fields'] as $f => &$v) {
+              if (in_array($f, $optionsFields)) {
+                $v['type'] = 'text';
+                unset($v['maxlength']);
+              }
+            }
+          }
+
           if (!$this->localeDb->createTable($table, $modelize)) {
             throw new Exception(X::_("Impossible to create the locale table %s", $table));
           }
@@ -54,6 +139,7 @@ trait LocaleDatabase
     return $structure;
   }
 
+
   /**
    * Normalizes data to be inserted in the locale database
    *
@@ -61,16 +147,44 @@ trait LocaleDatabase
    * @param string $table
    * @return array
    */
-  private function normalizeToLocale(array $data, $table): array
+  protected function normalizeToLocale(array $data, $table): array
   {
     $res = [];
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
       $fields = $this->class_cfg['arch'][$tableIdx];
+      $optCfg = Option::getInstance()->getClassCfg();
+      $usrCfg = User::getInstance()->getClassCfg();
+      $modelize = $this->db->modelize($table);
+      $options = array_values(
+        array_map(
+          fn($k) => $k['columns'][0],
+          array_filter(
+            $modelize['keys'],
+            fn($k) => !empty($k['columns'])
+              && ($k['ref_table'] === $optCfg['table'])
+          )
+        )
+      );
+      $toNull = array_values(
+        array_map(
+          fn($k) => $k['columns'][0],
+          array_filter(
+            $modelize['keys'],
+            fn($k) => !empty($k['columns'])
+              && (($k['ref_table'] === $usrCfg['table'])
+                || ($k['ref_table'] === $usrCfg['tables']['group']))
+          )
+        )
+      );
       foreach ($data as $field => $value) {
         if ($fieldIdx = array_search($field, $fields)) {
-          if ($fieldIdx === 'id_option') {
+          if (in_array($field, $options) && Str::isUid($value)) {
             $value = $this->opt->toPath($value);
+          }
+
+          if (in_array($field, $toNull) && Str::isUid($value)) {
+            $value = null;
           }
 
           $res[$fields[$fieldIdx]] = $value;
@@ -81,6 +195,7 @@ trait LocaleDatabase
     return $res;
   }
 
+
   /**
    * Normalizes data fetched from the locale database
    *
@@ -88,25 +203,50 @@ trait LocaleDatabase
    * @param string $table
    * @return array
    */
-  private function normalizeFromLocale(array $data, $table): array
+  protected function normalizeFromLocale(array $data, $table): array
   {
-    $res = [];
+    $res = ['locale' => true];
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
       $fields = $this->class_cfg['arch'][$tableIdx];
+      $optCfg = Option::getInstance()->getClassCfg();
+      $usrCls = User::getInstance();
+      $usrCfg = $usrCls->getClassCfg();
+      $modelize = $this->db->modelize($table);
+      $options = array_values(
+        array_map(
+          fn($k) => $k['columns'][0],
+          array_filter(
+            $modelize['keys'],
+            fn($k) => !empty($k['columns'])
+              && ($k['ref_table'] === $optCfg['table'])
+          )
+        )
+      );
+      $usr = array_values(
+        array_map(
+          fn($k) => $k['columns'][0],
+          array_filter(
+            $modelize['keys'],
+            fn($k) => !empty($k['columns'])
+              && ($k['ref_table'] === $usrCfg['table'])
+          )
+        )
+      );
       foreach ($data as $field => $value) {
         if ($fieldIdx = array_search($field, $fields)) {
-          if ($fieldIdx === 'id_option') {
+          if (in_array($field, $options)
+            && !empty($value)
+            && !Str::isUid($value)
+          ) {
             $value = $this->opt->fromPath($value);
           }
 
-          $res[$fields[$fieldIdx]] = $value;
-        }
-      }
+          if (in_array($field, $usr) && !Str::isUid($value)) {
+            $value = $usrCls->getId();
+          }
 
-      foreach ($fields as $i => $f) {
-        if (!array_key_exists($f, $res)) {
-          $res[$f] = $i === 'public' ? 0 : null;
+          $res[$fields[$fieldIdx]] = $value;
         }
       }
     }

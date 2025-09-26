@@ -1238,7 +1238,7 @@ use bbn\Db\Languages\Sqlite;
   }
 
 
-  public function getLocaleDatabase(): ?Db
+  public function getLocaleDatabase(bool $createIfNotExists = true, ?string $idUser = null): ?Db
   {
     /** @var Option $options */
     $options = Option::getInstance();
@@ -1252,7 +1252,16 @@ use bbn\Db\Languages\Sqlite;
     }
 
     $dbName = 'locale_' . $this->id . '.sqlite';
+    if (!empty($idUser) && Str::isUid($idUser)) {
+      $dbName = 'locale_' . $idUser . '.sqlite';
+      $idHost = str_replace($this->id, $idUser, Sqlite::getHostPath($idHost));
+    }
+
     if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+      if (!$createIfNotExists) {
+        return null;
+      }
+
       Sqlite::createDatabaseOnHost($dbName, $idHost);
     }
 

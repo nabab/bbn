@@ -1537,7 +1537,8 @@ class Sqlite extends Sql
     return null;
   }
 
-  private static function getHostPath(string $host): string
+
+  public static function getHostPath(string $host): string
   {
     $path = $host;
     if (Str::isUid($host)) {

@@ -10,6 +10,7 @@ use bbn\User;
 use bbn\User\Preferences;
 use bbn\Appui\Mailbox;
 use bbn\Appui\Passwords;
+use bbn\Appui\Grid;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
@@ -202,6 +203,7 @@ class Email extends Basic
     return false;
   }
 
+
   public function getAccount(string $id_account, bool $force = false): ?array
   {
     if ($force || !isset($this->mboxes[$id_account])) {
@@ -288,9 +290,9 @@ class Email extends Basic
         'type' => $cfg['type'],
         'host' => $cfg['host'] ?? null,
         'port' => $cfg['port'] ?? null,
-        'ssl' => $cfg['ssl'] ?? true
-      ],
-      $isLocale
+        'ssl' => $cfg['ssl'] ?? true,
+        'locale' => $isLocale
+      ]
     ))) {
       throw new \Exception("Impossible to add the preference");
     }
@@ -449,6 +451,7 @@ class Email extends Basic
 
   }
 
+
   public function getInfoFolder($id)
   {
     $folder = $this->getFolder($id);
@@ -491,6 +494,7 @@ class Email extends Basic
     return null;
   }
 
+
   public function flattenFolders($folders): array
   {
     $res = [];
@@ -502,6 +506,7 @@ class Email extends Basic
     }
     return $res;
   }
+
 
   public function getHashes(): ?array
   {
@@ -526,6 +531,7 @@ class Email extends Basic
     return $res;
   }
 
+
   public function getFolder(string $id, bool $force = false): ?array
   {
     if ($f = $this->pref->getBit($id)) {
@@ -535,12 +541,14 @@ class Email extends Basic
     return null;
   }
 
+
   public function getNextUid(array $folder, int $uid): ?int
   {
     $mb = $this->getMailbox($folder['id_account']);
     $mb->selectFolder($folder['uid']);
     return $mb->getNextUid($uid);
   }
+
 
   public function syncEmails(string|array $folder, int $limit = 0, bool $generator = false): int|null|Generator
   {
@@ -558,6 +566,9 @@ class Email extends Basic
       }
 
       if ($check) {
+        $db = $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+          $this->getLocaleDb() :
+          $this->db;
         $added = 0;
         $mb = $this->getMailbox($folder['id_account']);
         $info = $mb->getInfoFolder($folder['uid']);
@@ -689,7 +700,7 @@ class Email extends Basic
           $num = $added + $folder['num_msg'];
           $s2 = 0;
           while ($info->Nmsgs < $num) {
-            $msg = $this->db->rselect(
+            $msg = $db->rselect(
               $emailsTable,
               [$emailsFields['id'], $emailsFields['msg_uid']],
               [$emailsFields['id_folder'] => $folder['id']],
@@ -697,7 +708,7 @@ class Email extends Basic
               $s2
             );
             if (!$mb->getMsgNo($msg['msg_uid'])
-              && ($this->db->delete($emailsTable, [$emailsFields['id'] => $msg['id']]))
+              && ($db->delete($emailsTable, [$emailsFields['id'] => $msg['id']]))
             ) {
               $num--;
               $s2--;
@@ -783,75 +794,78 @@ class Email extends Basic
       $prefOptFields = $prefCgf['arch']['user_options'];
       $prefOptBitsTable = $prefCgf['tables']['user_options_bits'];
       $prefOptBitsFields = $prefCgf['arch']['user_options_bits'];
-      $grid = new \bbn\Appui\Grid($this->db, $post, [
+      $db = $this->pref->isLocale($ids[0], $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+        $this->getLocaleDb() :
+        $this->db;
+      $grid = new Grid($db, $post, [
         'table' => $this->class_table,
         'fields' => X::mergeArrays(
           array_map(
-            fn($f) => $this->db->cfn($f, $this->class_table), $this->fields
+            fn($f) => $db->cfn($f, $this->class_table), $this->fields
           ),
           [
-            'from' => 'CONCAT('.$this->db->cfn($contactsFields['name'], 'fromname').', " <", '.$this->db->cfn($linksFields['value'], 'fromlink').', ">")',
-            'from_email' => $this->db->cfn($linksFields['value'], 'fromlink'),
-            'from_name' => $this->db->cfn($contactsFields['name'], 'fromname'),
-            'to' => 'IFNULL(CONCAT('.$this->db->cfn($contactsFields['name'], 'toname').', " <", '.$this->db->cfn($linksFields['value'], 'tolink').', ">"), '.$this->db->cfn($linksFields['value'], 'tolink').')',
-            'to_email' => $this->db->cfn($linksFields['value'], 'tolink'),
-            'to_name' => $this->db->cfn($contactsFields['name'], 'toname'),
-            'id_account' => $this->db->cfn($prefOptFields['id'], $prefOptTable),
+            'from' => 'CONCAT('.$db->cfn($contactsFields['name'], 'fromname').', " <", '.$db->cfn($linksFields['value'], 'fromlink').', ">")',
+            'from_email' => $db->cfn($linksFields['value'], 'fromlink'),
+            'from_name' => $db->cfn($contactsFields['name'], 'fromname'),
+            'to' => 'IFNULL(CONCAT('.$db->cfn($contactsFields['name'], 'toname').', " <", '.$db->cfn($linksFields['value'], 'tolink').', ">"), '.$db->cfn($linksFields['value'], 'tolink').')',
+            'to_email' => $db->cfn($linksFields['value'], 'tolink'),
+            'to_name' => $db->cfn($contactsFields['name'], 'toname'),
+            'id_account' => $db->cfn($prefOptFields['id'], $prefOptTable),
           ]
         ),
         'join' => [[
           'table' => $linksTable,
           'alias' => 'fromlink',
           'on' => [[
-            'field' => $this->db->cfn($linksFields['id'], 'fromlink'),
-            'exp' => $this->db->cfn($this->fields['id_sender'], $this->class_table)
+            'field' => $db->cfn($linksFields['id'], 'fromlink'),
+            'exp' => $db->cfn($this->fields['id_sender'], $this->class_table)
           ]]
         ], [
           'table' => $contactsTable,
           'alias' => 'fromname',
           'on' => [[
-            'field' => $this->db->cfn($contactsFields['id'], 'fromname'),
-            'exp' => $this->db->cfn($linksFields['id_contact'], 'fromlink')
+            'field' => $db->cfn($contactsFields['id'], 'fromname'),
+            'exp' => $db->cfn($linksFields['id_contact'], 'fromlink')
           ]]
         ], [
           'table' => $recTable,
           'alias' => 'rec',
           'on' => [[
-            'field' => $this->db->cfn($recFields['id_email'], 'rec'),
-            'exp' => $this->db->cfn($this->fields['id'], $this->class_table)
+            'field' => $db->cfn($recFields['id_email'], 'rec'),
+            'exp' => $db->cfn($this->fields['id'], $this->class_table)
           ], [
-            'field' => $this->db->cfn($recFields['type'], 'rec'),
+            'field' => $db->cfn($recFields['type'], 'rec'),
             'value' => 'to'
           ]]
         ], [
           'table' => $linksTable,
           'alias' => 'tolink',
           'on' => [[
-            'field' => $this->db->cfn($linksFields['id'], 'tolink'),
-            'exp' => $this->db->cfn($recFields['id_contact_link'], 'rec')
+            'field' => $db->cfn($linksFields['id'], 'tolink'),
+            'exp' => $db->cfn($recFields['id_contact_link'], 'rec')
           ]]
         ], [
           'table' => $contactsTable,
           'alias' => 'toname',
           'on' => [[
-            'field' => $this->db->cfn($contactsFields['id'], 'toname'),
-            'exp' => $this->db->cfn($linksFields['id_contact'], 'tolink')
+            'field' => $db->cfn($contactsFields['id'], 'toname'),
+            'exp' => $db->cfn($linksFields['id_contact'], 'tolink')
           ]]
         ], [
           'table' => $prefOptBitsTable,
           'on' => [[
-            'field' => $this->db->cfn($prefOptBitsFields['id'], $prefOptBitsTable),
-            'exp' => $this->db->cfn($this->fields['id_folder'], $this->class_table)
+            'field' => $db->cfn($prefOptBitsFields['id'], $prefOptBitsTable),
+            'exp' => $db->cfn($this->fields['id_folder'], $this->class_table)
           ]]
         ], [
           'table' => $prefOptTable,
           'on' => [[
-            'field' => $this->db->cfn($prefOptBitsFields['id_user_option'], $prefOptBitsTable),
-            'exp' => $this->db->cfn($prefOptFields['id'], $prefOptTable)
+            'field' => $db->cfn($prefOptBitsFields['id_user_option'], $prefOptBitsTable),
+            'exp' => $db->cfn($prefOptFields['id'], $prefOptTable)
           ]]
         ]],
         'filters' => $filters,
-        'group_by' => [$this->db->cfn($this->fields['id'], $this->class_table)],
+        'group_by' => [$db->cfn($this->fields['id'], $this->class_table)],
       ]);
 
 
@@ -875,7 +889,8 @@ class Email extends Basic
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
-    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);
+    $db = $this->getRightDb($id, $table);
+    $em = $db->rselect($table, $cfg, [$cfg['id'] => $id]);
     if ($em) {
       $folder = $this->getFolder($em['id_folder']);
       if ($folder
@@ -886,16 +901,18 @@ class Email extends Basic
     return null;
   }
 
+
   public function getEmail($id): ?array
   {
-    if (($em = $this->db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
+    $db = $this->getRightDb($id, $this->class_table);
+    if (($em = $db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
       && ($folder = $this->getFolder($em['id_folder']))
       && ($mb = $this->getMailbox($folder['id_account']))
       && $mb->selectFolder($folder['uid'])
       && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
     ) {
       if ($number === 0) {
-        $this->db->delete($this->class_table, [$this->fields['id'] => $id]);
+        $db->delete($this->class_table, [$this->fields['id'] => $id]);
         return null;
       }
 
@@ -908,32 +925,47 @@ class Email extends Basic
     return null;
   }
 
+
   public function getEmailByUID($post): ?array
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
-
-    $grid = new \bbn\Appui\Grid($this->db, $post, [
+    $grid = new Grid($this->db, $post, [
       'table' => $table,
       'fields' => $cfg
     ]);
 
     if ($grid->check()) {
-      return $grid->getDatatable();
+      $res = $grid->getDatatable();
+      $grid = new Grid($this->getLocaleDb(), $post, [
+        'table' => $table,
+        'fields' => $cfg
+      ]);
+      if ($grid->check()) {
+        $res2 = $grid->getDatatable();
+        if (!empty($res2['data'])) {
+          $res['data'] = array_merge($res['data'], $res2['data']);
+          $res['total'] += $res2['total'];
+        }
+      }
+      return $res;
     }
+
 
     return null;
   }
+
 
   public function getThreadId(?string $id): ?string
   {
     if ($id === null) {
       return null;
     }
+
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
-
-    $email = $this->db->rselect([
+    $db = $this->getRightDb($id, $table);
+    $email = $db->rselect([
       'table' => $table,
       'fields' => $cfg,
       'where' => [
@@ -944,7 +976,7 @@ class Email extends Basic
     ]);
 
     while ($email['id_parent']) {
-      $email = $this->db->rselect([
+      $email = $db->rselect([
         'table' => $table,
         'fields' => $cfg,
         'where' => [
@@ -959,18 +991,22 @@ class Email extends Basic
 
   }
 
+
   public function updateRead($id)
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
-    $this->db->update($table, [$cfg['is_read'] => 1], [$cfg['id'] => $id]);
+    $db = $this->getRightDb($id, $table);
+    $db->update($table, [$cfg['is_read'] => 1], [$cfg['id'] => $id]);
   }
 
-  public function syncThreads(int $limit): int
+
+  public function syncThreads(int $limit = 0, bool $onlyLocale = false): int
   {
     $did = 0;
+    $db = $onlyLocale ? $this->getLocaleDb() : $this->db;
     // select all emails of the user where id_thread is null and external_id is not null
-    if ($emails = $this->db->rselectAll([
+    if ($emails = $db->rselectAll([
       'table' => $this->class_table,
       'fields' => $this->fields,
       'where' => [[
@@ -985,23 +1021,27 @@ class Email extends Basic
       ]],
       'order' => [
         $this->fields['date'] => 'DESC'
-      ]
+      ],
+      'limit' => $limit
     ])) {
       foreach ($emails as $email) {
         $external_uids = json_decode($email[$this->fields['external_uids']], true);
         $toUpd = [];
         if (!empty($external_uids['in_reply_to'])
-          && ($parentId = $this->db->selectOne($this->class_table, $this->fields['id'], [$this->fields['msg_unique_id'] => $external_uids['in_reply_to']]))
+          && ($parentId = $db->selectOne($this->class_table, $this->fields['id'], [$this->fields['msg_unique_id'] => $external_uids['in_reply_to']]))
         ) {
           $toUpd[$this->fields['id_parent']] = $parentId;
         }
 
         if (!empty($toUpd)) {
-          $did += $this->db->update($this->class_table, $toUpd, [$this->fields['id'] => $email['id']]);
+          $did += $db->update($this->class_table, $toUpd, [$this->fields['id'] => $email['id']]);
         }
       }
     }
 
+    if (!$onlyLocale) {
+      $did += $this->syncThreads($limit, true);
+    }
     return $did;
   }
 
@@ -1010,9 +1050,11 @@ class Email extends Basic
   {
     $id = false;
     if (X::hasProps($email, ['from', 'uid'])) {
+      $isLocale = $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']);
+      $db = $isLocale ? $this->getLocaleDb() : $this->db;
       $cfg = $this->class_cfg['arch']['users_emails'];
       $table = $this->class_cfg['tables']['users_emails'];
-      $existing = $this->db->selectOne(
+      $existing = $db->selectOne(
         $table,
         $cfg['id'],
         [
@@ -1025,12 +1067,12 @@ class Email extends Basic
       foreach (Mailbox::getDestFields() as $df) {
         if (!empty($email[$df])) {
           foreach ($email[$df] as &$dest) {
-            if ($id = $this->retrieveEmail($dest['email'])) {
+            if ($id = $this->retrieveEmail($dest['email'], $isLocale)) {
               $sent_opt = X::getField(self::getFolderTypes(), ['code' => 'sent'], 'id');
               if ($sent_opt === $folder['id_option']) {
                 $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));
               }
-            } elseif (!($id = $this->addContactFromMail($dest))) {
+            } elseif (!($id = $this->addContactFromMail($dest, false, $isLocale))) {
               X::log("Impossible to add contact from mail" . $dest['email'], 'poller_email_error');
             }
 
@@ -1107,8 +1149,8 @@ class Email extends Basic
         if ($existing) {
           $id = $existing;
         }
-        else if ($this->db->insert($table, $ar)) {
-          $id = $this->db->lastId();
+        else if ($db->insert($table, $ar)) {
+          $id = $db->lastId();
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
           $number = $mb->getMsgNo($email['uid']);
@@ -1123,7 +1165,7 @@ class Email extends Basic
 
           // update excerpt column where id is same
           try {
-            $this->db->update($table, [$cfg['excerpt'] => trim(normalizer_normalize($text))], [$cfg['id'] => $id]);
+            $db->update($table, [$cfg['excerpt'] => trim(normalizer_normalize($text))], [$cfg['id'] => $id]);
           }
           catch (\Exception $e) {
             X::log([
@@ -1155,7 +1197,7 @@ class Email extends Basic
   }
 
 
-  public function addContactFromMail(array $dest, bool $blacklist = false): ?string
+  public function addContactFromMail(array $dest, bool $blacklist = false, bool $isLocale = false): ?string
   {
     if (X::hasProp($dest, 'email', true)) {
       if (!Str::isEmail($dest['email'])) {
@@ -1163,21 +1205,21 @@ class Email extends Basic
       }
 
       $cfg_contacts = $this->class_cfg['arch']['users_contacts'];
-      $cfg_links = $this->class_cfg['arch']['users_contacts_links'];
       $table_contacts = $this->class_cfg['tables']['users_contacts'];
       $table_links = $this->class_cfg['tables']['users_contacts_links'];
-      if ($this->db->insert($table_contacts, [
+      $db = $isLocale ? $this->getLocaleDb() : $this->db;
+      if ($db->insert($table_contacts, [
         $cfg_contacts['id_user'] => $this->user->getId(),
         $cfg_contacts['name'] => empty($dest['name']) ? null : mb_substr($dest['name'], 0, 100),
         $cfg_contacts['blacklist'] => $blacklist ? 1 : 0
       ])) {
-        $id_contact = $this->db->lastId();
-        if ($this->db->insert($table_links, [
+        $id_contact = $db->lastId();
+        if ($db->insert($table_links, [
           'id_contact' => $id_contact,
           'type' => 'email',
           'value' => $dest['email']
         ])) {
-          return $this->db->lastId();
+          return $db->lastId();
         }
       }
     }
@@ -1190,8 +1232,8 @@ class Email extends Basic
   {
     $cfg = $this->class_cfg['arch']['users_contacts_links'];
     $table = $this->class_cfg['tables']['users_contacts_links'];
-    $data = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);
-    return $data ?: null;
+    $db = $this->getRightDb($id, $table);
+    return $db->rselect($table, $cfg, [$cfg['id'] => $id]) ?: null;
   }
 
 
@@ -1199,7 +1241,8 @@ class Email extends Basic
   {
     $cfg = $this->class_cfg['arch']['users_emails_recipients'];
     $table = $this->class_cfg['tables']['users_emails_recipients'];
-    return (bool)$this->db->insertIgnore(
+    $db = $this->getRightDb($id_email, $this->class_cfg['tables']['users_emails']);
+    return (bool)$db->insertIgnore(
       $table,
       [
         $cfg['id_email'] => $id_email,
@@ -1216,6 +1259,7 @@ class Email extends Basic
     if ($link = $this->getLink($id_link)) {
       $cfg = $this->class_cfg['arch']['users_contacts_links'];
       $table = $this->class_cfg['tables']['users_contacts_links'];
+      $db = $this->getRightDb($id_link, $table);
       if (!$date) {
         $date = date('Y-m-d H:i:s');
       }
@@ -1223,7 +1267,7 @@ class Email extends Basic
         $date = $link['last_sent'];
       }
 
-      return (bool)$this->db->update(
+      return (bool)$db->update(
         $table,
         [
           $cfg['num_sent'] => $link[$cfg['num_sent']] + 1,
@@ -1238,21 +1282,22 @@ class Email extends Basic
   }
 
 
-  public function retrieveEmail(string $email): ?string
+  public function retrieveEmail(string $email, bool $isLocale = false): ?string
   {
     if (Str::isEmail($email)) {
       $contacts = $this->class_cfg['tables']['users_contacts'];
       $contactsFields = $this->class_cfg['arch']['users_contacts'];
       $links = $this->class_cfg['tables']['users_contacts_links'];
       $linksFields = $this->class_cfg['arch']['users_contacts_links'];
-      return $this->db->selectOne([
+      $db = $isLocale ? $this->getLocaleDb() : $this->db;
+      return $db->selectOne([
         'table' => $links,
-        'fields' => [$this->db->cfn($linksFields['id'], $links)],
+        'fields' => [$db->cfn($linksFields['id'], $links)],
         'join' => [[
           'table' => $contacts,
           'on' => [[
             'field' => $linksFields['id_contact'],
-            'exp' => $this->db->cfn($contactsFields['id'], $contacts)
+            'exp' => $db->cfn($contactsFields['id'], $contacts)
           ]]
         ]],
         'where' => [
@@ -1273,25 +1318,26 @@ class Email extends Basic
   }
 
 
-  public function getContacts(): array
+  public function getContacts(bool $onlyLocale = false): array
   {
     $contacts = $this->class_cfg['tables']['users_contacts'];
     $cfg_c = $this->class_cfg['arch']['users_contacts'];
     $links = $this->class_cfg['tables']['users_contacts_links'];
     $cfg_l = $this->class_cfg['arch']['users_contacts_links'];
-    $rows = $this->db->rselectAll(
+    $db = $onlyLocale ? $this->getLocaleDb() : $this->db;
+    $rows = $db->rselectAll(
       [
         'tables' => [$links],
         'fields' => [
-          $this->db->cfn($cfg_l['id'], $links),
-          $this->db->cfn($cfg_l['value'], $links),
-          $this->db->cfn($cfg_l['id_contact'], $links),
-          $this->db->cfn($cfg_l['num_sent'], $links),
-          $this->db->cfn($cfg_l['last_sent'], $links),
-          $this->db->cfn($cfg_c['name'], $contacts),
-          $this->db->cfn($cfg_c['cfg'], $contacts),
-          $this->db->cfn($cfg_c['blacklist'], $contacts),
-          'sortIndex' => 'IFNULL(' . $this->db->cfn($cfg_c['name'], $contacts, true) . ',' . $this->db->cfn($cfg_l['value'], $links) . ')'
+          $db->cfn($cfg_l['id'], $links),
+          $db->cfn($cfg_l['value'], $links),
+          $db->cfn($cfg_l['id_contact'], $links),
+          $db->cfn($cfg_l['num_sent'], $links),
+          $db->cfn($cfg_l['last_sent'], $links),
+          $db->cfn($cfg_c['name'], $contacts),
+          $db->cfn($cfg_c['cfg'], $contacts),
+          $db->cfn($cfg_c['blacklist'], $contacts),
+          'sortIndex' => 'IFNULL(' . $db->cfn($cfg_c['name'], $contacts, true) . ',' . $db->cfn($cfg_l['value'], $links) . ')'
         ],
         'join' => [
           [
@@ -1299,7 +1345,7 @@ class Email extends Basic
             'on' => [
               [
                 'field' => $cfg_l['id_contact'],
-                'exp' => $this->db->cfn($cfg_c['id'], $contacts)
+                'exp' => $db->cfn($cfg_c['id'], $contacts)
               ]
             ]
 
@@ -1327,6 +1373,11 @@ class Email extends Basic
           'blacklist' => $r['blacklist']
         ];
       }
+    }
+
+    if (!$onlyLocale) {
+      $res = array_merge($res, $this->getContacts(true));
+      X::sortBy($res, 'sortIndex', 'asc');
     }
 
     return $res;
@@ -1526,7 +1577,8 @@ class Email extends Basic
 
   public function getAttachments(string $id, ?string $filename = null): ?array
   {
-    if (($em = $this->db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
+    $db = $this->getRightDb($id, $this->class_table);
+    if (($em = $db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
       && ($folder = $this->getFolder($em['id_folder']))
       && ($mb = $this->getMailbox($folder['id_account']))
       && $mb->selectFolder($folder['uid'])
@@ -1602,10 +1654,11 @@ class Email extends Basic
         $account['sync']['folders'] = [];
       }
 
+      $db = empty($account['locale']) ? $this->db : $this->getLocaleDb();
       $account['sync']['folders'][$idFolder] = [
         'id' => $idFolder,
         'name' => $folderName,
-        'db_msg' => $this->db->count($this->class_table, [$this->fields['id_folder'] => $idFolder]),
+        'db_msg' => $db->count($this->class_table, [$this->fields['id_folder'] => $idFolder]),
         'msg' => $numMsg,
       ];
       return (bool)$this->pref->set($idAccount, $account);
@@ -1633,7 +1686,8 @@ class Email extends Basic
       'last_uid' => $folder['last_uid'] ?? null,
       'last_check' => $folder['last_check'] ?? null,
       'hash' => $folder['hash'] ?? null,
-      'subscribed' => $folder['subscribed'] ?? false
+      'subscribed' => $folder['subscribed'] ?? false,
+      'locale' => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
     ];
   }
 
@@ -1650,9 +1704,12 @@ class Email extends Basic
 
   private function getDbUidMax(string $idFolder): ?int
   {
-    return $this->db->selectOne(
+    $db = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+      $this->getLocaleDb() :
+      $this->db;
+    return $db->selectOne(
       $this->class_table,
-      'MAX(' . $this->db->csn($this->fields['msg_uid'], true) . ')',
+      'MAX(' . $db->csn($this->fields['msg_uid'], true) . ')',
       [
         $this->fields['id_folder'] => $idFolder,
         $this->fields['id_user'] => $this->user->getId()
@@ -1663,9 +1720,12 @@ class Email extends Basic
 
   private function getDbUidMin(string $idFolder): ?int
   {
-    return $this->db->selectOne(
+    $db = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+      $this->getLocaleDb() :
+      $this->db;
+    return $db->selectOne(
       $this->class_table,
-      'MIN(' . $this->db->csn($this->fields['msg_uid'], true) . ')',
+      'MIN(' . $db->csn($this->fields['msg_uid'], true) . ')',
       [
         $this->fields['id_folder'] => $idFolder,
         $this->fields['id_user'] => $this->user->getId()
@@ -1676,7 +1736,10 @@ class Email extends Basic
 
   private function getNumMsg(string $idFolder): int
   {
-    return $this->db->count(
+    $db = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+      $this->getLocaleDb() :
+      $this->db;
+    return $db->count(
       $this->class_table,
       [
         $this->fields['id_folder'] => $idFolder,
