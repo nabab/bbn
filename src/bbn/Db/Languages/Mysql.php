@@ -1645,7 +1645,7 @@ MYSQL
       }
     }
 
-    if (empty($cfg['null'])) {
+    if (empty($cfg['null']) && empty($cfg['virtual'])) {
       $st .= ' NOT NULL';
     }
 

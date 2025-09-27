@@ -51,6 +51,16 @@ class History
   private static $cache;
   private static $cache_prefix;
 
+  public static function getTable()
+  {
+    return self::$table;
+  }
+
+  public static function getTableUids()
+  {
+    return self::$table_uids;
+  }
+
   /**
    * Returns the column's corresponding option's ID
    * @param $column string
@@ -927,6 +937,7 @@ MYSQL;
               }
             }
       
+            self::$structures[$table]['constraints'] = [];
             foreach ($model['keys'] as $name => $key) {
               if (!empty($key['unique']) && ((count($key['columns']) > 1) || ($key['columns'][0] !== $primary))) {
                 $toPush = [
@@ -942,6 +953,14 @@ MYSQL;
                 }
 
                 array_push(self::$structures[$table]['unique'], $toPush);
+              }
+
+              if (!empty($key['ref_column']) && (count($key['columns']) === 1) && ($key['columns'][0] !== $primary)) {
+                self::$structures[$table]['constraints'][$name] = [
+                  'column' => $key['columns'][0],
+                  'ref_table' => $key['ref_table'],
+                  'ref_column' => $key['ref_column']
+                ];
               }
             }
 
