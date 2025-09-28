@@ -1717,7 +1717,8 @@ class Appui
         $appui_options = [];
         $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
-        foreach (array_values($routes) as $r) {
+        $plugins = array_values($routes);
+        foreach ($plugins as &$r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           if ($this->_currentFs->exists($idFile)) {
@@ -1738,8 +1739,46 @@ class Appui
               throw new Exception(X::_("Impossible to add the plugin %s", $tmp['code']));
             }
 
-            X::log($tmp, 'options_plugins');
+            $r['id'] = $id_plugin;
             $num += $opt->applyTemplate($id_plugin);
+          }
+        }
+
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
+            if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
+              $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
+              }
+              if (X::isAssoc($tmp)) {
+                $tmp = [$tmp];
+              }
+  
+              $id_templates = $opt->fromCode('templates', $id_plugin);
+              if (!$id_templates) {
+                throw new Exception(X::_("Impossible to find the templates plugin %s options", $r['name']));
+              }
+              $todo[] = [$tmp, $id_templates];
+              foreach($opt->import($tmp, $id_templates, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+          }
+
+          if ($num >= $next) {
+            $next += $step;
+            yield $num;
+          }
+        }
+
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
@@ -1764,10 +1803,10 @@ class Appui
           }
         }
 
-        foreach (array_values($routes) as $r) {
-          $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
-          $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
-          if ($id_plugin = $opt->fromRealCode(substr($r['name'], 6), $id_appui)) {
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
+            $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
             if ($this->_currentFs->exists($pluginsFile)) {
               $tmp = $this->_currentFs->decodeContents($pluginsFile, 'json', true);
               if (!$tmp) {
@@ -1802,34 +1841,6 @@ class Appui
                 }
               }
             }
-
-            if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
-              $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
-              if (!$tmp) {
-                throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
-              }
-              if (X::isAssoc($tmp)) {
-                $tmp = [$tmp];
-              }
-  
-              $id_templates = $opt->fromCode('templates', $id_plugin);
-              if (!$id_templates) {
-                throw new Exception(X::_("Impossible to find the templates plugin %s options", $r['name']));
-              }
-              $todo[] = [$tmp, $id_templates];
-              foreach($opt->import($tmp, $id_templates, true) as $res) {
-                $num += $res;
-                if ($num >= $next) {
-                  $next += $step;
-                  yield $num;
-                }
-              }
-            }
-          }
-
-          if ($num >= $next) {
-            $next += $step;
-            yield $num;
           }
         }
 

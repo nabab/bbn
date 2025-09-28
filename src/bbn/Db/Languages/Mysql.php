@@ -1234,6 +1234,7 @@ MYSQL
         $st .= '  ADD ';
         if (!empty($key['unique'])
           && isset($cfg['fields'][$key['columns'][0]])
+          && isset($cfg['fields'][$key['columns'][0]]['key'])
           && ($cfg['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
           $st .= 'PRIMARY KEY';
