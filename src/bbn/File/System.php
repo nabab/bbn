@@ -1334,10 +1334,11 @@ class System extends Basic
         }
       } elseif (is_dir($path)) {
         try {
-          $fs = scandir($path, SCANDIR_SORT_ASCENDING);
+          $fs = scandir($path, SCANDIR_SORT_ASCENDING) ?: [];
         } catch (Exception $e) {
           $fs = [];
         }
+
         foreach ($fs as $f) {
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
             $file = $path . '/' . $f;
