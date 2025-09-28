@@ -1717,7 +1717,7 @@ class Appui
         $appui_options = [];
         $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
-        $plugins = array_values($routes);
+        $plugins = array_values(array_reverse($routes));
         foreach ($plugins as &$r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           if ($this->_currentFs->exists($idFile)) {
