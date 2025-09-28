@@ -1720,8 +1720,6 @@ class Appui
         foreach (array_values($routes) as $r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
-          $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
-          $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1763,7 +1761,13 @@ class Appui
                 }
               }
             }
+          }
+        }
 
+        foreach (array_values($routes) as $r) {
+          $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
+          $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
+          if ($id_plugin = $opt->fromRealCode(substr($r['name'], 6), $id_appui)) {
             if ($this->_currentFs->exists($pluginsFile)) {
               $tmp = $this->_currentFs->decodeContents($pluginsFile, 'json', true);
               if (!$tmp) {
