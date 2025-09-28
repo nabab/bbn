@@ -1746,7 +1746,7 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
-            $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
+            $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
             if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
               $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
               if (!$tmp) {
