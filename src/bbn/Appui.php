@@ -1717,7 +1717,7 @@ class Appui
         $appui_options = [];
         $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
-        $plugins = array_values(array_reverse($routes));
+        $plugins = array_values($routes);
         foreach ($plugins as &$r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           if ($this->_currentFs->exists($idFile)) {
@@ -1760,7 +1760,7 @@ class Appui
               }
               $todo[] = [$tmp, $id_options];
               //X::dump("Importing ".X::join($opt->getCodePath($id_options), '/'));
-              foreach($opt->import($tmp, $id_options, true) as $res) {
+              foreach($opt->import($tmp, $id_options, true, null, false, true) as $res) {
                 $num += $res;
                 if ($num >= $next) {
                   $next += $step;
@@ -1828,7 +1828,7 @@ class Appui
                 if (!empty($toImport['items'])) {
                   $tmpElements = $toImport['items'];
                   unset($toImport['items']);
-                  foreach ($opt->import($toImport, $id_plugins, true) as $tmpId) {
+                  foreach ($opt->import($toImport, $id_plugins, true, null, false, true) as $tmpId) {
                     $num++;
                     $opt->deleteCache();
                     $par = $opt->fromCode('options', $tmpId);
@@ -1847,7 +1847,7 @@ class Appui
         }
 
         foreach ($todo as $td) {
-          foreach($opt->import($td[0], $td[1]) as $res) {
+          foreach($opt->import($td[0], $td[1], true, null, false, true) as $res) {
             $num += $res;
             if ($num >= $next) {
               $next += $step;
@@ -1855,6 +1855,8 @@ class Appui
             }
           }
         }
+
+        $opt->applyAllTemplates();
 
         /*
         foreach ($opt->import($appui_options, $root) as $success) {
