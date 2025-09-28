@@ -1721,7 +1721,7 @@ class Appui
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
-          $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
+          $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1740,6 +1740,7 @@ class Appui
               throw new Exception(X::_("Impossible to add the plugin %s", $tmp['code']));
             }
 
+            X::log($tmp, 'options_plugins');
             $num += $opt->applyTemplate($id_plugin);
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
