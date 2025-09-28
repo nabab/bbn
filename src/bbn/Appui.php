@@ -1746,6 +1746,7 @@ class Appui
 
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
             $templatesFile = $this->libPath() . $r['path'] . '/s rc/cfg/templates.json';
             if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
               $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
@@ -1779,6 +1780,7 @@ class Appui
 
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
