@@ -458,8 +458,9 @@ trait Template
       }
     }
 
-    $this->deleteCache();
+    $this->deleteCache(null, true, true);
     
+    X::log([$idSubtemplate, $subtpl, $cfg, $this->items($idSubtemplate)], 'import_options');
     if (!empty($cfg['id_template'])) {
       $this->applySubTemplates($o['id']);
     }
