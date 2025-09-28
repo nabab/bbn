@@ -277,8 +277,7 @@ trait Manip
     null|array|string|int $id_parent = null,
     $no_alias = false,
     ?array &$todo = null,
-    bool $returnId = false,
-    bool $withTemplates = true
+    bool $returnId = false
   ): ?iterable
   {
     if (is_array($id_parent)) {
@@ -462,7 +461,7 @@ trait Manip
             }
           }
 
-          if (!empty($td['id_template']) && $withTemplates) {
+          if (!empty($td['id_template'])) {
             if ($id_template = is_array($td['id_template']) ? $this->fromCode(...$td['id_template']) : $td['id_template']) {
               $this->setCfg($id, ['id_template' => $id_template, 'allow_children' => 1, 'relations' => 'template']);
               $this->applySubTemplates($id);
