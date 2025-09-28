@@ -1746,6 +1746,34 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
+            $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
+            $opt->deleteCache(null);
+            if ($this->_currentFs->exists($optionsFile)) {
+              $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $optionsFile));
+              }
+
+              $id_options = $opt->fromCode('options', $id_plugin);
+              if (!$id_options) {
+                throw new Exception(X::_("Impossible to find the options parent"));
+              }
+              $todo[] = [$tmp, $id_options];
+              //X::dump("Importing ".X::join($opt->getCodePath($id_options), '/'));
+              foreach($opt->import($tmp, $id_options, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+          }
+        }
+
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
             $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
             if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
               $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
@@ -1774,34 +1802,6 @@ class Appui
           if ($num >= $next) {
             $next += $step;
             yield $num;
-          }
-        }
-
-        foreach ($plugins as $r) {
-          if (!empty($r['id'])) {
-            $id_plugin = $r['id'];
-            $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
-            $opt->deleteCache(null);
-            if ($this->_currentFs->exists($optionsFile)) {
-              $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
-              if (!$tmp) {
-                throw new Exception(X::_("Illegal JSON in %s", $optionsFile));
-              }
-
-              $id_options = $opt->fromCode('options', $id_plugin);
-              if (!$id_options) {
-                throw new Exception(X::_("Impossible to find the options parent"));
-              }
-              $todo[] = [$tmp, $id_options];
-              //X::dump("Importing ".X::join($opt->getCodePath($id_options), '/'));
-              foreach($opt->import($tmp, $id_options, true) as $res) {
-                $num += $res;
-                if ($num >= $next) {
-                  $next += $step;
-                  yield $num;
-                }
-              }
-            }
           }
         }
 
