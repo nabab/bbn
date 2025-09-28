@@ -1691,7 +1691,7 @@ class Appui
       $num = 0;
 
       if ($routes[$idx]) {
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
         $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
         $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
         foreach ($opt->import($tmp, $root) as $res) {
@@ -1707,9 +1707,9 @@ class Appui
           ], true);
         }
 
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
         $num += $opt->applyTemplate($idApp);
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
         $opt->setDefault($idApp);
 
         $id_appui = $opt->fromCode('appui');
@@ -1849,7 +1849,7 @@ class Appui
         }
           */
 
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
       }
     }
   }
