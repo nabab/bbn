@@ -1720,7 +1720,6 @@ class Appui
         $plugins = array_values($routes);
         foreach ($plugins as &$r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
-          $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1781,6 +1780,7 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
+            $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
