@@ -1710,6 +1710,7 @@ class Appui
         $opt->deleteCache(null, true);
         $num += $opt->applyTemplate($idApp);
         $opt->deleteCache(null, true);
+        X::ddump($num, $opt->fullTree($idApp));
         $opt->setDefault($idApp);
 
         $id_appui = $opt->fromCode('appui');
