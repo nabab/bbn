@@ -204,6 +204,17 @@ class Note extends DbCls
 
 
   /**
+   * Checks if a note exists
+   * @param string $id
+   * @return bool
+   */
+  public function exists(string $id): bool
+  {
+    return $this->dbTraitExists($id);
+  }
+
+
+  /**
    * @param $title
    * @param $content
    * @return string

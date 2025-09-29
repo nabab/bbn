@@ -42,6 +42,16 @@ class Url extends DbCls
   }
 
 
+  /**
+   * Deletes a row from the table
+   * @param string $id The ID of the row to delete
+   * @return bool True if the row was deleted, false otherwise
+   */
+  public function delete(string $id) {
+    return $this->dbTraitDelete($id);
+  }
+
+
   public static function sanitize(string $url, string $prefix = ''): string
   {
     $url    = trim($url, '/ ');
