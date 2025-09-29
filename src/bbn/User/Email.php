@@ -219,7 +219,7 @@ class Email extends Basic
           'last_uid' => $a['last_uid'] ?? null,
           'last_check' => $a['last_check'] ?? null,
           'id_account' => $id_account,
-          'locale' => !empty($a['locale'])
+          $this->localeField => !empty($a[$this->localeField])
         ];
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
         if (!isset($a['stage'])) {
@@ -291,7 +291,7 @@ class Email extends Basic
         'host' => $cfg['host'] ?? null,
         'port' => $cfg['port'] ?? null,
         'ssl' => $cfg['ssl'] ?? true,
-        'locale' => $isLocale
+        $this->localeField => $isLocale
       ]
     ))) {
       throw new \Exception("Impossible to add the preference");
@@ -1654,7 +1654,7 @@ class Email extends Basic
         $account['sync']['folders'] = [];
       }
 
-      $db = empty($account['locale']) ? $this->db : $this->getLocaleDb();
+      $db = empty($account[$this->localeField]) ? $this->db : $this->getLocaleDb();
       $account['sync']['folders'][$idFolder] = [
         'id' => $idFolder,
         'name' => $folderName,
@@ -1687,7 +1687,7 @@ class Email extends Basic
       'last_check' => $folder['last_check'] ?? null,
       'hash' => $folder['hash'] ?? null,
       'subscribed' => $folder['subscribed'] ?? false,
-      'locale' => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
+      $this->localeField => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
     ];
   }
 

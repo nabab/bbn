@@ -15,6 +15,9 @@ trait LocaleDatabase
   /** @var Db The locale database instance */
   protected $localeDb;
 
+  /** @var string The field in the data that indicates if the record is in the locale database */
+  protected $localeField = 'locale';
+
 
   /**
    * Returns the database instance depending on whether the record is in the main or locale database
@@ -149,10 +152,8 @@ trait LocaleDatabase
    */
   protected function normalizeToLocale(array $data, $table): array
   {
-    $res = [];
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
-      $fields = $this->class_cfg['arch'][$tableIdx];
       $optCfg = Option::getInstance()->getClassCfg();
       $usrCfg = User::getInstance()->getClassCfg();
       $modelize = $this->db->modelize($table);
@@ -178,21 +179,23 @@ trait LocaleDatabase
         )
       );
       foreach ($data as $field => $value) {
-        if ($fieldIdx = array_search($field, $fields)) {
-          if (in_array($field, $options) && Str::isUid($value)) {
-            $value = $this->opt->toPath($value);
-          }
-
-          if (in_array($field, $toNull) && Str::isUid($value)) {
-            $value = null;
-          }
-
-          $res[$fields[$fieldIdx]] = $value;
+        if (in_array($field, $options) && Str::isUid($value)) {
+          $value = $this->opt->toPath($value);
         }
+
+        if (in_array($field, $toNull) && !is_null($value)) {
+          $value = null;
+        }
+
+        $data[$field] = $value;
+      }
+
+      if (isset($data[$this->localeField])) {
+        unset($data[$this->localeField]);
       }
     }
 
-    return $res;
+    return $data;
   }
 
 
@@ -205,10 +208,8 @@ trait LocaleDatabase
    */
   protected function normalizeFromLocale(array $data, $table): array
   {
-    $res = ['locale' => true];
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
-      $fields = $this->class_cfg['arch'][$tableIdx];
       $optCfg = Option::getInstance()->getClassCfg();
       $usrCls = User::getInstance();
       $usrCfg = $usrCls->getClassCfg();
@@ -234,24 +235,26 @@ trait LocaleDatabase
         )
       );
       foreach ($data as $field => $value) {
-        if ($fieldIdx = array_search($field, $fields)) {
-          if (in_array($field, $options)
-            && !empty($value)
-            && !Str::isUid($value)
-          ) {
-            $value = $this->opt->fromPath($value);
-          }
-
-          if (in_array($field, $usr) && !Str::isUid($value)) {
-            $value = $usrCls->getId();
-          }
-
-          $res[$fields[$fieldIdx]] = $value;
+        if (in_array($field, $options)
+          && !empty($value)
+          && !Str::isUid($value)
+        ) {
+          $value = $this->opt->fromPath($value);
         }
+
+        if (in_array($field, $usr)
+          && !Str::isUid($value)
+        ) {
+          $value = $usrCls->getId();
+        }
+
+        $data[$field] = $value;
       }
+
+      $data[$this->localeField] = true;
     }
 
-    return $res;
+    return $data;
   }
 
 }
