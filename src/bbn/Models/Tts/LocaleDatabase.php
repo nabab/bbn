@@ -74,13 +74,13 @@ trait LocaleDatabase
     $structure = true;
     $currentUserCls = User::getInstance();
     $userCls = $user instanceof User ? $user : $currentUserCls;
-    $userId = is_string($user) ? $user : $userCls->getId();
+    $userId = is_string($user) && Str::isUid($user) ? $user : $userCls->getId();
     if ($userId === $currentUserCls->getId()) {
       $userId = null;
     }
 
-    if (!$this->localeDb) {
-      $this->localeDb = $userCls->getLocaleDatabase(true, $userId);
+    if (!$this->localeDb || !empty($user)) {
+      $this->localeDb = $userCls->getLocaleDatabase($userId);
       $structure = false;
     }
 
@@ -170,14 +170,14 @@ trait LocaleDatabase
       $toNull = array_values(
         array_map(
           fn($k) => $k['columns'][0],
-          array_filter(
+          array_values(array_filter(
             $modelize['keys'],
             fn($k) => !empty($k['columns'])
               && (($k['ref_table'] === $usrCfg['table'])
-                || ($k['ref_table'] === $usrCfg['tables']['group']))
+                || ($k['ref_table'] === $usrCfg['tables']['groups']))
           )
         )
-      );
+      ));
       foreach ($data as $field => $value) {
         if (in_array($field, $options) && Str::isUid($value)) {
           $value = $this->opt->toPath($value);

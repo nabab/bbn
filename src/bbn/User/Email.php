@@ -271,7 +271,7 @@ class Email extends Basic
   }
 
 
-  public function addAccount(array $cfg, bool $isLocale = false): string
+  public function addAccount(array $cfg): string
   {
     if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
       throw new \Exception("Missing arguments");
@@ -291,7 +291,7 @@ class Email extends Basic
         'host' => $cfg['host'] ?? null,
         'port' => $cfg['port'] ?? null,
         'ssl' => $cfg['ssl'] ?? true,
-        $this->localeField => $isLocale
+        $this->localeField => !empty($cfg[$this->localeField])
       ]
     ))) {
       throw new \Exception("Impossible to add the preference");
@@ -405,6 +405,7 @@ class Email extends Basic
   {
     $mb = $this->getMailbox($id_account);
     $folder = $this->getFolder($id);
+    die(var_dump($mb->listAllFolders(), $folder));
     if ($folder && $mb->deleteMbox($folder['uid'])) {
       if ($this->deleteFolderDb($id)) {
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);

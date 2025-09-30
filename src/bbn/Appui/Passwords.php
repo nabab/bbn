@@ -107,8 +107,21 @@ class Passwords extends DbModel
 
     $db = $this->db;
     $pref = Preferences::getInstance();
+    $currentPrefUser = $pref->getUserInstance();
+    $currentPrefUserId = $currentPrefUser->getId();
+    $userId = $user->getId();
+    $userChanged = $userId !== $currentPrefUserId;
+    if ($userChanged) {
+      $pref->setUser($user);
+    }
+
     if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+      $this->setLocaleDb($userId);
       $db = $this->getLocaleDb();
+    }
+
+    if ($userChanged) {
+      $pref->setUser($currentPrefUser);
     }
 
     return (bool)$db->insertUpdate(
@@ -159,8 +172,21 @@ class Passwords extends DbModel
     if ($user->isAuth()) {
       $db = $this->db;
       $pref = Preferences::getInstance();
+      $currentPrefUser = $pref->getUserInstance();
+      $currentPrefUserId = $currentPrefUser->getId();
+      $userId = $user->getId();
+      $userChanged = $userId !== $currentPrefUserId;
+      if ($userChanged) {
+        $pref->setUser($user);
+      }
+
       if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+        $this->setLocaleDb($userId);
         $db = $this->getLocaleDb();
+      }
+
+      if ($userChanged) {
+        $pref->setUser($currentPrefUser);
       }
 
       if ($password = $db->selectOne(
@@ -193,19 +219,36 @@ class Passwords extends DbModel
 
   public function userDelete(string $id_pref, User $user)
   {
+    $res = 0;
     if ($user->isAuth()) {
+      $db = $this->db;
       $pref = Preferences::getInstance();
+      $currentPrefUser = $pref->getUserInstance();
+      $currentPrefUserId = $currentPrefUser->getId();
+      $userId = $user->getId();
+      $userChanged = $userId !== $currentPrefUserId;
+      if ($userChanged) {
+        $pref->setUser($user);
+      }
+
       if ($pref->isAuthorized($id_pref)) {
-        $db = $this->db;
         if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+          $this->setLocaleDb($userId);
           $db = $this->getLocaleDb();
         }
 
-        return $db->delete(
+        $res =  $db->delete(
           $this->class_cfg['table'],
           [$this->fields['id_user_option'] => $id_pref]
         );
       }
+
+      if ($userChanged) {
+        $pref->setUser($currentPrefUser);
+      }
+
     }
+
+    return $res;
   }
 }

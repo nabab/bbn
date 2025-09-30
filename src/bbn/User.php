@@ -1238,7 +1238,7 @@ use bbn\Db\Languages\Sqlite;
   }
 
 
-  public function getLocaleDatabase(bool $createIfNotExists = true, ?string $idUser = null): ?Db
+  public function getLocaleDatabase(?string $idUser = null, bool $createIfNotExists = true): ?Db
   {
     /** @var Option $options */
     $options = Option::getInstance();
