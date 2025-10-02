@@ -116,8 +116,7 @@ class Passwords extends DbModel
     }
 
     if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
-      $this->setLocaleDb($userId);
-      $db = $this->getLocaleDb();
+      $db = $this->getLocaleDb($userId);
     }
 
     if ($userChanged) {

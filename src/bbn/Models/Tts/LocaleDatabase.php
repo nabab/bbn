@@ -36,13 +36,14 @@ trait LocaleDatabase
   /**
    * Returns the locale database instance
    *
+   * @param User|string|null $user
    * @return Db|null
    * @throws Exception
    */
-  public function getLocaleDb(): ?Db
+  public function getLocaleDb(User|string|null $user = null): ?Db
   {
-    if (!$this->localeDb) {
-      $this->setLocaleDb();
+    if (!$this->localeDb || !empty($user)) {
+      $this->setLocaleDb($user);
     }
 
     return $this->localeDb ?: null;

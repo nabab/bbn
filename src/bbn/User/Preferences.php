@@ -2824,10 +2824,13 @@ class Preferences extends DbCls
           }
 
           array_push($rows, ...$localeRows);
-          X::sortBy($rows, [
-            $this->fields['num'] => 'ASC',
-            $this->fields['text'] => 'ASC'
-          ]);
+          X::sortBy($rows, [[
+            'key' => $this->fields['num'],
+            'dir' => 'asc'
+          ], [
+            'key' => $this->fields['text'],
+            'dir' => 'asc'
+          ]]);
         }
 
         if ($changedLocaleDb) {

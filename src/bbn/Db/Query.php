@@ -217,9 +217,9 @@ class Query extends PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    $r = $this->db->correctTypes(parent::fetchColumn($column_number));
+    $res = $this->db->correctTypes(parent::fetchColumn($column_number));
     $this->_closeCursor();
-    return $r;
+    return $res;
   }
 
 
@@ -231,9 +231,9 @@ class Query extends PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    $r = $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $res = $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
     $this->_closeCursor();
-    return $r;
+    return $res;
   }
 
 
@@ -243,9 +243,7 @@ class Query extends PDOStatement implements Actions
   public function rowCount(): int
   {
     $this->execute();
-    $r = parent::rowCount();
-    $this->_closeCursor();
-    return $r;
+    return parent::rowCount();
   }
 
 
@@ -256,9 +254,7 @@ class Query extends PDOStatement implements Actions
   public function getColumnMeta($column=0): array
   {
     $this->execute();
-    $r = parent::getColumnMeta($column);
-    $this->_closeCursor();
-    return $r;
+    return parent::getColumnMeta($column);
   }
 
 
@@ -268,9 +264,7 @@ class Query extends PDOStatement implements Actions
   public function nextRowset(): bool
   {
     $this->execute();
-    $r = parent::nextRowset();
-    $this->_closeCursor();
-    return $r;
+    return parent::nextRowset();
   }
 
 
@@ -386,14 +380,24 @@ class Query extends PDOStatement implements Actions
     return null;
   }
 
-  /**
-   * Closes the cursor if the engine is SQLite to avoid "database is locked" errors
-   */
-  private function _closeCursor()
+
+  protected function _closeCursor()
   {
+    $last = $this->db->getRealLastParams();
+    $sql = $last['statement'] ?? null;
+    $kind = $last['kind'] ?? null;
     if (($this->db->getEngine() === 'sqlite')
-      //&& $this->isWrite()
+      && ($this->isWrite()
+        || (!empty($sql) && str_starts_with(strtolower($sql), 'pragma'))
+        || (!empty($sql) && str_contains(strtolower($sql), 'count('))
+        || (!empty($sql) && str_contains(strtolower($sql), 'sqlite_master'))
+        || ($kind === 'pragma')
+      )
     ) {
+      $this->closeCursor();
+    }
+    else if ($this->db->getEngine() === 'sqlite'){
+      //\bbn\X::log($last, 'mirkosqlite');
       $this->closeCursor();
     }
   }
