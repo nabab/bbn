@@ -2057,10 +2057,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       return $this->pdo->query(...$args);
     }
 
-    if ($this->getEngine() === 'sqlite'){
-      \bbn\X::log([\bbn\X::microtime(true), $args], 'mirkosqlite');
-    }
-
     // The function can be called directly with func_get_args()
     while ((\count($args) === 1) && is_array($args[0])){
       $args = $args[0];

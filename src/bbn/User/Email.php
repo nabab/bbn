@@ -361,42 +361,97 @@ class Email extends Basic
   }
 
 
-  public function renameFolder(string $id, string $name, string $id_account, string|null $id_parent = null): bool
+  public function renameFolder(string $id, string $name, ?string $idParent = null): bool
   {
-    $mb = $this->getMailbox($id_account);
-    $uid_parent = "";
-    if ($id_parent) {
-      $uid_parent = $this->getFolder($id_parent)['uid'];
-    }
-    $mboxName = $id_parent ? $uid_parent . '.' . $name : $name;
-    if ($mb && $mb->renameMbox($this->getFolder($id)['uid'], $mboxName)) {
-      if ($this->renameFolderDb($id, $name, $id_account, $id_parent)) {
-        return true;
+    if (($folder = $this->getFolder($id))
+      && !empty($folder['uid'])
+      && !empty($folder['id_account'])
+      && ($mb = $this->getMailbox($folder['id_account']))
+    ) {
+      if (!empty($idParent)) {
+        if (!($parentFolder = $this->getFolder($idParent))) {
+          return false;
+        }
+
+        if ($folder['id_account'] !== $parentFolder['id_account']) {
+          return false;
+        }
+
+        $newUid = explode('.', $parentFolder['uid']);
+      }
+      else {
+        $newUid = explode('.', $folder['uid']);
+        array_pop($newUid);
+      }
+
+      $newUid[] = $name;
+      $newUid = implode('.', $newUid);
+      if ($mb->renameMbox($folder['uid'], $newUid)) {
+        return $this->renameFolderDb($id, $name, $idParent);
       }
     }
+
     return false;
   }
 
 
-  public function renameFolderDb(string $id, string $name, string $id_account, string|null $id_parent = null): bool
+  public function renameFolderDb(string $id, string $name, ?string $idParent = null): bool
   {
-    $a = [
-      'text' => $name,
-      'uid' => $name,
-    ];
+    if (($folder = $this->getFolder($id))
+      && !empty($folder['uid'])
+      && !empty($folder['id_account'])
+    ) {
+      $prefCfg = $this->pref->getClassCfg();
+      $bitsFields  = $prefCfg['arch']['user_options_bits'];
+      $idAccount = $folder['id_account'];
+      $a = [
+        $bitsFields['text'] => $name
+      ];
+      if (!empty($idParent)
+        && ($idParent !== $folder['id_parent'])
+      ) {
+        if (!($parentFolder = $this->getFolder($idParent))) {
+          return false;
+        }
 
-    if ($id_parent) {
-      $uid_parent = $this->getFolder($id_parent)['uid'];
-      $a['uid'] = $uid_parent . '.' . $name;
-      $a['id_parent'] = $id_parent;
-    }
-    if ($this->pref->updateBit($id, $a)) {
-      if (!$id_parent) {
-        $this->pref->moveBit($id, null);
+        if ($idAccount !== $parentFolder['id_account']) {
+          return false;
+        }
+
+        $a[$bitsFields['id_parent']] = $idParent;
+        $newUid = explode('.', $parentFolder['uid']);
       }
-      $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
-      return true;
-    };
+      else {
+        $newUid = explode('.', $folder['uid']);
+        array_pop($newUid);
+      }
+
+      $newUid[] = $name;
+      $newUid = implode('.', $newUid);
+      $a['uid'] = $newUid;
+      if ($this->pref->updateBit($id, $a)) {
+        function updateChildren($idp, $ouid, $nuid, $pref, $idAccount) {
+          if ($items = $pref->getBits($idAccount, $idp, true, true)) {
+            foreach ($items as $it) {
+              if (!empty($it['uid'])) {
+                $uid = $it['uid'];
+                if (str_starts_with($uid, $ouid.'.')) {
+                  $newUid = $nuid . substr($uid, strlen($ouid));
+                  $pref->updateBit($it['id'], ['uid' => $newUid]);
+                  if (!empty($it['numChildren'])) {
+                    updateChildren($it['id'], $uid, $newUid, $pref, $idAccount);
+                  }
+                }
+              }
+            }
+          }
+        };
+        updateChildren($id, $folder['uid'], $newUid, $this->pref, $idAccount);
+        $this->mboxes[$idAccount]['folders'] = $this->getFolders($this->mboxes[$idAccount]);
+        return true;
+      };
+    }
+
     return false;
   }
 
@@ -405,7 +460,6 @@ class Email extends Basic
   {
     $mb = $this->getMailbox($id_account);
     $folder = $this->getFolder($id);
-    die(var_dump($mb->listAllFolders(), $folder));
     if ($folder && $mb->deleteMbox($folder['uid'])) {
       if ($this->deleteFolderDb($id)) {
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);

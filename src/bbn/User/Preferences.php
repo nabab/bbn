@@ -2089,7 +2089,7 @@ class Preferences extends DbCls
         }
 
         if ($isLocale) {
-          $bits = $this->normalizeFromLocale($bits, $table);
+          $bits = array_map(fn($b) => $this->normalizeFromLocale($b, $table), $bits);
         }
 
         if (!empty($with_config)) {

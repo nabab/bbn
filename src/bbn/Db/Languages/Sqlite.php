@@ -115,7 +115,6 @@ class Sqlite extends Sql
 
     parent::__construct($cfg);
     $this->rawQuery("PRAGMA journal_mode=wal")->closeCursor();
-    $this->rawQuery("PRAGMA busy_timeout=5000")->closeCursor();
   }
 
   /**
@@ -631,6 +630,32 @@ class Sqlite extends Sql
 
     return $res;
   }
+
+
+  /**
+   * Return SQL code for row(s) DELETE.
+   *
+   * ```php
+   * X::dump($db->getDelete(['tables' => 'users']);
+   * // (string) DELETE FROM `db_example`.`table_users`
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   *
+   */
+  public function getDelete(array $cfg): string
+  {
+    $res = '';
+    if (count($cfg['tables']) === 1) {
+      $res = 'DELETE ' .
+        (count($cfg['join'] ?? []) ? current($cfg['tables']) . ' ' : '') .
+        'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
+    }
+
+    return $res;
+  }
+
 
   /**
    * @param null|string $table The table for which to create the statement

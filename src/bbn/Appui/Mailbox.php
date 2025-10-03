@@ -425,8 +425,10 @@ class Mailbox extends Basic
       if (imap_deletemailbox($this->stream, $this->mbParam . $mbox)) {
         return true;
       }
+
       X::ddump($this->getError());
     }
+
     return false;
   }
 
