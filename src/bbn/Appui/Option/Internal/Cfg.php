@@ -285,6 +285,7 @@ trait Cfg
       $perm = isset($itemCfg['permissions']) && ($itemCfg['permissions'] === 'single') ? true : ($cfg['permissions'] ?? false);
       // Look for parent options with inheritance.
       $parents = array_reverse($this->parents($id_parent));
+      $lastIdx = count($parents) - 1;
       $last    = end($parents);
       $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $last]);
       // Decode the JSON string to an array if possible, otherwise initialize as empty array.
@@ -307,7 +308,7 @@ trait Cfg
           if (!empty($parent_cfg['inheritance']) || !empty($parent_cfg['scfg']['inheritance'])) {
             // Check if the parent is a direct parent and its inheritance value is 'children' or 'cascade'.
             if (
-              (($i === ($last-1))
+              (($i === ($lastIdx-1))
                 && (
                   (($parent_cfg['inheritance'] ?? null) === 'children')
                   || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'children'))
