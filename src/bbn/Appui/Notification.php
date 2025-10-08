@@ -326,7 +326,7 @@ class Notification extends DbCls
   }
 
 
-  public function get(string $id): array
+  public function get(string $id): ?array
   {
     if (Str::isUid($id) && ($ucfg = $this->user->getClassCfg())) {
       return $this->db->rselect(

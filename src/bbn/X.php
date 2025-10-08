@@ -270,10 +270,10 @@ class X
       }
 
       self::sortBy($r, 'last_date', 'DESC');
-      file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));
+      file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
     }
     else {
-      die(X::_("Impossible to write the error log file"));
+      die(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath().'logs'));
     }
   }
 

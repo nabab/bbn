@@ -170,10 +170,12 @@ class Ide
       $project_name   = constant('BBN_APP_NAME');
     }
 
-    $this->project = $project_name;
-    if ($project_name && !empty($this->projects)) {
-      $this->init();
-      $this->_ide_path();
+    if ($this->project !== $project_name) {
+      $this->project = $project_name;
+      if ($project_name && !empty($this->projects)) {
+        $this->init();
+        $this->_ide_path();
+      }
     }
 
     return $project_name;
