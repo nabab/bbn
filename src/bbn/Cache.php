@@ -108,7 +108,7 @@ class Cache implements CacheInterface
    * @param string $path
    * @return string
    */
-  private static function _file(string $key, string $path): string
+  public static function _file(string $key, string $path): string
   {
     return self::_dir($key, $path).'/'.self::_sanitize(X::basename($key)).'.bbn.cache';
   }

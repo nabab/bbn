@@ -15,6 +15,7 @@ use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\LocaleDatabase;
+use bbn\File\System;
 use Generator;
 use stdClass;
 
@@ -773,6 +774,10 @@ class Email extends Basic
           }
         }
 
+        if ($added) {
+          $this->syncThreads();
+        }
+
         return $added;
       }
     }
@@ -940,6 +945,38 @@ class Email extends Basic
   }
 
 
+  public function getListAsThreads(string|array $id_folder, array $post): ?array
+  {
+    $res = $this->getList($id_folder, $post);
+    if ($res && !empty($res['data'])) {
+      $grouped = [];
+      foreach ($res['data'] as $d) {
+        $threadId = $d['id_thread'] ?: $d['id'];
+        if (!isset($grouped[$threadId])) {
+          $grouped[$threadId] = [];
+        }
+
+        $grouped[$threadId][] = $d;
+      }
+
+      $numData = count($res['data']);
+      $res['data'] = array_values(array_map(function($d){
+        if (count($d) > 1) {
+          X::sortBy($d, 'date', 'desc');
+          $all = $d;
+          $d[0]['thread'] = $all;
+          return $d[0];
+        }
+
+        return $d[0];
+      }, $grouped));
+      $res['total'] -= $numData - count($res['data']);
+    }
+
+    return $res;
+  }
+
+
   public function getLoginByEmailId($id)
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
@@ -957,25 +994,43 @@ class Email extends Basic
   }
 
 
-  public function getEmail($id): ?array
+  public function getEmail(string $id, bool $force = false): ?array
   {
     $db = $this->getRightDb($id, $this->class_table);
-    if (($em = $db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
-      && ($folder = $this->getFolder($em['id_folder']))
-      && ($mb = $this->getMailbox($folder['id_account']))
-      && $mb->selectFolder($folder['uid'])
-      && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
-    ) {
-      if ($number === 0) {
-        $db->delete($this->class_table, [$this->fields['id'] => $id]);
-        return null;
+    if ($em = $db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]) ){
+      $cachePrefix = 'emails/';
+      if ($force
+        || (!($arr = $this->user->getCache($cachePrefix . $id)))
+      ) {
+        if (($folder = $this->getFolder($em['id_folder']))
+          && ($mb = $this->getMailbox($folder['id_account']))
+          && $mb->selectFolder($folder['uid'])
+          && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
+        ) {
+          if ($number === 0) {
+            $db->delete($this->class_table, [$this->fields['id'] => $id]);
+            return null;
+          }
+
+          $arr = $mb->getMsg($number);
+          $arr['id_account'] = $folder['id_account'];
+          $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
+          $this->user->setCache($cachePrefix . $id, $arr, 86400);
+          $fs = new System();
+          if ($fs->getNumFiles($this->user->getCachePath() . $cachePrefix) > 50) {
+            $files = $fs->getFiles($this->user->getCachePath() . $cachePrefix, false, false, null, 'm');
+            X::sortBy($files, 'mtime', 'desc');
+            array_splice($files, 0, 50);
+            foreach ($files as $f) {
+              $fs->delete($f['name']);
+            }
+          }
+        }
       }
 
-      $arr = $mb->getMsg($number);
-      $arr['id_account'] = $folder['id_account'];
-      $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
       return $arr;
     }
+
 
     return null;
   }
@@ -1011,39 +1066,19 @@ class Email extends Basic
   }
 
 
-  public function getThreadId(?string $id): ?string
+  public function getThreadId(string $id): ?string
   {
-    if ($id === null) {
-      return null;
+    $db = $this->getRightDb($id, $this->class_table);
+    $email = $db->rselect($this->class_table, [], [$this->fields['id'] => $id]);
+    $threadId = null;
+    while (!empty($email[$this->fields['id_parent']])) {
+      $email = $db->rselect($this->class_table, [], [$this->fields['id'] => $email[$this->fields['id_parent']]]);
+      if (!empty($email) && ($email[$this->fields['id']] !== $id)) {
+        $threadId = $email[$this->fields['id']];
+      }
     }
 
-    $cfg = $this->class_cfg['arch']['users_emails'];
-    $table = $this->class_cfg['tables']['users_emails'];
-    $db = $this->getRightDb($id, $table);
-    $email = $db->rselect([
-      'table' => $table,
-      'fields' => $cfg,
-      'where' => [
-        'conditions' => [
-          $cfg['id'] => $id
-        ]
-      ]
-    ]);
-
-    while ($email['id_parent']) {
-      $email = $db->rselect([
-        'table' => $table,
-        'fields' => $cfg,
-        'where' => [
-          'conditions' => [
-            $cfg['id'] => $email['id_parent']
-          ]
-        ]
-      ]);
-    }
-
-    return $email['thread_id'];
-
+    return $threadId;
   }
 
 
@@ -1080,8 +1115,8 @@ class Email extends Basic
       'limit' => $limit
     ])) {
       foreach ($emails as $email) {
-        $external_uids = json_decode($email[$this->fields['external_uids']], true);
         $toUpd = [];
+        $external_uids = json_decode($email[$this->fields['external_uids']], true);
         if (!empty($external_uids['in_reply_to'])
           && ($parentId = $db->selectOne($this->class_table, $this->fields['id'], [$this->fields['msg_unique_id'] => $external_uids['in_reply_to']]))
         ) {
@@ -1090,6 +1125,16 @@ class Email extends Basic
 
         if (!empty($toUpd)) {
           $did += $db->update($this->class_table, $toUpd, [$this->fields['id'] => $email['id']]);
+        }
+      }
+
+      foreach ($emails as $email) {
+        if ($threadId = $this->getThreadId($email[$this->fields['id']])) {
+          $db->update(
+            $this->class_table,
+            [$this->fields['id_thread'] => $threadId],
+            [$this->fields['id'] => $email['id']]
+          );
         }
       }
     }
