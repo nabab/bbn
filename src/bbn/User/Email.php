@@ -945,35 +945,55 @@ class Email extends Basic
   }
 
 
-  public function getListAsThreads(string|array $id_folder, array $post): ?array
+  public function getListAsThreads(string|array $id_folder, array $cfg): ?array
   {
-    $res = $this->getList($id_folder, $post);
-    if ($res && !empty($res['data'])) {
-      $grouped = [];
-      foreach ($res['data'] as $d) {
-        $threadId = $d['id_thread'] ?: $d['id'];
-        if (!isset($grouped[$threadId])) {
-          $grouped[$threadId] = [];
+    if (($folder = $this->getFolder($id_folder))
+      && !empty($folder['id_account'])
+      && ($folders = $this->getFolders($folder['id_account']))
+    ) {
+      $res = $this->getList($id_folder, $cfg);
+      if ($res && !empty($res['data'])) {
+        $grouped = [];
+        foreach ($res['data'] as $d) {
+          $threadId = $d['id_thread'] ?: $d['id'];
+          if (!isset($grouped[$threadId])) {
+            $grouped[$threadId] = [];
+          }
+
+          $grouped[$threadId][] = $d;
         }
 
-        $grouped[$threadId][] = $d;
+        $numData = count($res['data']);
+        $t = $this;
+        function extractIds($folders, $types) {
+          $res = [];
+          foreach ($folders as $f) {
+            if (in_array($f['type'], $types)) {
+              $res[] = $f['id'];
+            }
+
+            if (!empty($f['items'])) {
+              $res = array_merge($res, extractIds($f['items'], $types));
+            }
+          }
+
+          return $res;
+        }
+
+        $foldersIds = extractIds($folders, ['inbox', 'sent', 'folders']);
+        $res['data'] = array_values(array_map(function($d) use($t, $foldersIds) {
+          X::sortBy($d, 'date', 'desc');
+          $threadId = $d[0]['id_thread'] ?: $d[0]['id'];
+          $d[0]['thread'] = $t->getThread($threadId, $foldersIds);
+          return $d[0];
+        }, $grouped));
+        $res['total'] -= $numData - count($res['data']);
       }
 
-      $numData = count($res['data']);
-      $res['data'] = array_values(array_map(function($d){
-        if (count($d) > 1) {
-          X::sortBy($d, 'date', 'desc');
-          $all = $d;
-          $d[0]['thread'] = $all;
-          return $d[0];
-        }
-
-        return $d[0];
-      }, $grouped));
-      $res['total'] -= $numData - count($res['data']);
+      return $res;
     }
 
-    return $res;
+    return null;
   }
 
 
@@ -1079,6 +1099,26 @@ class Email extends Basic
     }
 
     return $threadId;
+  }
+
+
+  public function getThread(string $idThread, array $foldersIds): array
+  {
+    return $this->getList($foldersIds, [
+      'filters' => [
+        'logic' => 'OR',
+        'conditions' => [[
+          'field' => $this->fields['id'],
+          'value' => $idThread
+        ], [
+          'field' => $this->fields['id_thread'],
+          'value' => $idThread
+        ]]
+      ],
+      'order' => [
+        $this->fields['date'] => 'DESC'
+      ]
+    ])['data'] ?? [];
   }
 
 

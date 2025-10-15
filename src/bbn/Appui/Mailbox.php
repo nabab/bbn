@@ -771,23 +771,27 @@ class Mailbox extends Basic
           else {
             foreach ($structure->parts as $part) {
               if ($part->ifdisposition
-                && (strtolower($part->disposition) === 'attachment')
+                && ((strtolower($part->disposition) === 'attachment')
+                  || (strtolower($part->disposition) === 'inline'))
                 && $part->ifparameters
                 && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
               ) {
                 $tmp['attachments'][] = [
+                  'id' => substr($part->id, 1, -1),
                   'name' => $name_row->value,
                   'size' => $part->bytes,
                   'type' => Str::fileExt($name_row->value) || strtolower($part->subtype)
                 ];
-              } elseif (!empty($part->parts)) {
+              }
+              elseif (!empty($part->parts)) {
                 foreach ($part->parts as $p) {
                   if ($p->subtype === 'HTML') {
                     $tmp['is_html'] = true;
                     break;
                   }
                 }
-              } elseif ($part->subtype === 'HTML') {
+              }
+              elseif ($part->subtype === 'HTML') {
                 $tmp['is_html'] = true;
               }
             }
@@ -854,7 +858,6 @@ class Mailbox extends Basic
       }
     }
 
-
     $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0);  // pass 0 as part-number
@@ -865,6 +868,7 @@ class Mailbox extends Basic
         $this->_get_msg_part($msgno, $p, $partno0 + 1);
       }
     }
+
     if ($res['html'] = $this->_htmlmsg) {
       // replace cid links by name
       $res['html'] = preg_replace_callback(
@@ -1388,9 +1392,9 @@ class Mailbox extends Basic
             }
 
             $a = [
+              'type' => Str::fileExt($nameParam->value) || strtolower($part->subtype),
               'name' => $nameParam->value,
               'size' => $part->bytes,
-              'type' => Str::fileExt($nameParam->value) || strtolower($part->subtype),
               'data' => $data
             ];
             if ($filename) {
@@ -1520,26 +1524,22 @@ class Mailbox extends Basic
    */
   private function _get_decode_value($message, $coding)
   {
-    if ($coding === 0) {
-      $message = imap_8bit($message);
+    switch ($coding) {
+      case 0:
+        return $message;
+      case 1:
+        return imap_8bit($message);
+      case 2:
+        return imap_binary($message);
+      case 3:
+        return imap_base64($message);
+      case 4:
+        return imap_qprint($message);
+      case 5:
+        return imap_base64($message);
+      default:
+        return $message;
     }
-    elseif ($coding === 1) {
-      $message = imap_8bit($message);
-    }
-    elseif ($coding === 2) {
-      $message = imap_binary($message);
-    }
-    elseif ($coding === 3) {
-      $message = imap_base64($message);
-    }
-    elseif ($coding === 4) {
-      $message = imap_qprint($message);
-    }
-    elseif ($coding === 5) {
-      $message = imap_base64($message);
-    }
-
-    return $message;
   }
 
 
@@ -1552,10 +1552,7 @@ class Mailbox extends Basic
    */
   private function _get_msg_part($msgno, $structure, $partno)
   {
-    // DECODE DATA
-    $data = $this->getMsgBody($msgno, $partno);
-    // Any part may be encoded, even plain text messages, so check everything.
-    $data = $this->_get_decode_value($data, $structure->encoding);
+    X::log($structure, 'mirko');
     // PARAMETERS
     // get all parameters, like charset, Filenames of attachments, etc.
     $params = [];
@@ -1576,24 +1573,30 @@ class Mailbox extends Basic
     // so an attached text file (type 0) is not mistaken as the message.
     if (!empty($params['filename']) || !empty($params['name'])) {
       // filename may be given as 'Filename' or 'Name' or both
-      if ($filename = empty($params['filename']) ? $params['name'] : $params['filename']) {
-        if (isset($structure->ifdisposition)
-          && isset($structure->disposition)
-          && (strtolower($structure->disposition) === 'inline')
-        ) {
-          //X::ddump($structure);
-          $this->_inline_files[] = [
-            'id' => substr($structure->id, 1, -1),
-            'type' => strtolower($structure->subtype),
-            'name' => $filename,
-            'size' => $params['size'] ?? 0,
-            'data' => $data
-          ];
+      if (($filename = empty($params['filename']) ? $params['name'] : $params['filename'])
+        && isset($structure->ifdisposition)
+        && isset($structure->disposition)
+      ) {
+        $a = [
+          'id' => substr($structure->id, 1, -1),
+          'type' => Str::fileExt($filename) ?: strtolower($structure->subtype),
+          'name' => $filename,
+          'size' => $params['size'] ?? $structure->bytes ?? 0
+        ];
+        if (strtolower($structure->disposition) === 'inline') {
+          $this->_inline_files[] = $a;
+          $this->_htmlmsg .= '<a href="" cid="'. $filename . '">'. $filename . '</a>';
         }
-        else {
-          $this->_attachments[] = $filename;
+        else if (strtolower($structure->disposition) === 'attachment') {
+          $this->_attachments[] = $a;
         }
       }
+    }
+    else {
+      // DECODE DATA
+      $data = $this->getMsgBody($msgno, $partno);
+      // Any part may be encoded, even plain text messages, so check everything.
+      $data = $this->_get_decode_value($data, $structure->encoding);
     }
 
     // TEXT
@@ -1605,13 +1608,13 @@ class Mailbox extends Basic
         $this->_plainmsg .= trim(Str::toUtf8($data)).PHP_EOL;
       }
       else {
-        $this->_htmlmsg .= trim(Str::toUtf8($data)).'<br><br>';
+        $htmlmsg = trim(Str::toUtf8($data));
 
-        if (!empty($this->_htmlmsg)) {
+        if (!empty($htmlmsg)) {
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
-          preg_match($body_pattern, $this->_htmlmsg, $body);
+          preg_match($body_pattern, $htmlmsg, $body);
           if (!empty($body[2])) {
-            $this->_htmlmsg = $body[2];
+            $this->_htmlmsg .= $body[2];
           }
 
           $img_pattern          = "/<img([^>]+)>/smi";
