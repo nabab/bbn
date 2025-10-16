@@ -675,10 +675,42 @@ class Mailbox extends Basic
       && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
+      function analyzeParts($parts, &$t) {
+        foreach ($parts as $part) {
+          if ($part->ifdisposition
+            && ((strtolower($part->disposition) === 'attachment')
+              || (strtolower($part->disposition) === 'inline'))
+            && $part->ifparameters
+            && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+          ) {
+            $a = [
+              'id' => substr($part->id, 1, -1),
+              'name' => $name_row->value,
+              'size' => $part->bytes,
+              'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
+            ];
+            $t['attachments'][] = $a;
+            if ((strtolower($part->disposition) === 'inline')) {
+              $t['inline'][] = $a;
+            }
+          }
+          elseif (!empty($part->parts)) {
+            analyzeParts($part->parts, $t);
+          }
+          elseif ($part->subtype === 'HTML') {
+            $t['is_html'] = true;
+          }
+        }
+      }
       while ($start >= $end) {
         try {
-          $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
+          $msgHeaderInfo = $this->getMsgHeaderinfo($start);
+          if (empty($msgHeaderInfo)) {
+            $start--;
+            continue;
+          }
 
+          $tmp = (array)$this->decode_encoded_words_deep($msgHeaderInfo);
           // imap decode the subject
           if (!empty($tmp['subject'])
             && is_string($tmp['subject'])
@@ -701,6 +733,7 @@ class Mailbox extends Basic
 
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
+            $start--;
             continue;
           }
 
@@ -764,42 +797,18 @@ class Mailbox extends Basic
 
           $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
           $tmp['attachments'] = [];
+          $tmp['inline'] = [];
           $tmp['is_html'] = false;
           if (empty($structure->parts)) {
             $tmp['is_html'] = $structure->subtype === 'HTML';
           }
           else {
-            foreach ($structure->parts as $part) {
-              if ($part->ifdisposition
-                && ((strtolower($part->disposition) === 'attachment')
-                  || (strtolower($part->disposition) === 'inline'))
-                && $part->ifparameters
-                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
-              ) {
-                $tmp['attachments'][] = [
-                  'id' => substr($part->id, 1, -1),
-                  'name' => $name_row->value,
-                  'size' => $part->bytes,
-                  'type' => Str::fileExt($name_row->value) || strtolower($part->subtype)
-                ];
-              }
-              elseif (!empty($part->parts)) {
-                foreach ($part->parts as $p) {
-                  if ($p->subtype === 'HTML') {
-                    $tmp['is_html'] = true;
-                    break;
-                  }
-                }
-              }
-              elseif ($part->subtype === 'HTML') {
-                $tmp['is_html'] = true;
-              }
-            }
+            analyzeParts($structure->parts, $tmp);
           }
 
           $res[] = $tmp;
           $start--;
-          if ($generator) {
+          if (!empty($generator)) {
             yield $tmp;
           }
         } catch (\Exception $e) {
@@ -1379,29 +1388,42 @@ class Mailbox extends Basic
   {
     if ($structure = $this->getMsgStructure($msgNum)) {
       $attachments = [];
-      if (!empty($structure->parts)) {
-        foreach ($structure->parts as $np => $part) {
-          if ($part->ifdisposition
-            && (strtolower($part->disposition) === 'attachment')
-            && $part->ifparameters
-            && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-            && (!$filename || ($filename === $nameParam->value))
-          ) {
-            if ($data = $this->getMsgBody($msgNum, $np + 1)) {
-              $data = $this->_get_decode_value($data, $structure->encoding);
-            }
-
-            $a = [
-              'type' => Str::fileExt($nameParam->value) || strtolower($part->subtype),
+      function analyzeParts($part, &$att, $mn, $np, $f, $t){
+        if (!empty($part->ifdisposition)
+          && !empty($part->disposition)
+          && !empty($part->ifparameters)
+          && ((strtolower($part->disposition) === 'attachment')
+            || (strtolower($part->disposition) === 'inline'))
+          && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+          && (empty($f) || ($f === $nameParam->value))
+        ) {
+          if ($data = $t->getMsgBody($mn, $np)) {
+            $att[] = [
+              'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
               'name' => $nameParam->value,
               'size' => $part->bytes,
-              'data' => $data
+              'data' => $t->_get_decode_value($data, $part->encoding)
             ];
-            if ($filename) {
-              return $a;
-            }
+          }
+        }
 
-            $attachments[] = $a;
+        if (!empty($part->parts)
+          && (empty($filename) || !count($att))
+        ) {
+          foreach ($part->parts as $np2 => $p) {
+            analyzeParts($p, $att, $mn, $np . '.' . ($np2 + 1), $f, $t);
+            if (!empty($f) && count($att)) {
+              break;
+            }
+          }
+        }
+      }
+
+      if (!empty($structure->parts)) {
+        foreach ($structure->parts as $np => $part) {
+          analyzeParts($part, $attachments, $msgNum, $np + 1, $filename, $this);
+          if (!empty($filename) && count($attachments)) {
+            return $attachments[0];
           }
         }
       }
@@ -1522,7 +1544,7 @@ class Mailbox extends Basic
    * @param int    $coding  Type of encoding
    * @return string
    */
-  private function _get_decode_value($message, $coding)
+  public function _get_decode_value($message, $coding)
   {
     switch ($coding) {
       case 0:
@@ -1552,7 +1574,6 @@ class Mailbox extends Basic
    */
   private function _get_msg_part($msgno, $structure, $partno)
   {
-    X::log($structure, 'mirko');
     // PARAMETERS
     // get all parameters, like charset, Filenames of attachments, etc.
     $params = [];
@@ -1585,6 +1606,7 @@ class Mailbox extends Basic
         ];
         if (strtolower($structure->disposition) === 'inline') {
           $this->_inline_files[] = $a;
+          $this->_attachments[] = $a;
           $this->_htmlmsg .= '<a href="" cid="'. $filename . '">'. $filename . '</a>';
         }
         else if (strtolower($structure->disposition) === 'attachment') {

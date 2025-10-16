@@ -1086,6 +1086,11 @@ class Email extends Basic
   }
 
 
+  public function getEmailFolderId(string $id){
+    return $this->getRightDb($id, $this->class_table)->selectOne($this->class_table, $this->fields['id_folder'], [$this->fields['id'] => $id]);
+  }
+
+
   public function getThreadId(string $id): ?string
   {
     $db = $this->getRightDb($id, $this->class_table);
