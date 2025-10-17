@@ -882,11 +882,13 @@ class Mailbox extends Basic
       // replace cid links by name
       $res['html'] = preg_replace_callback(
         '/src="cid:(.*?)"/',
-        function ($m) {
+        function ($m) use($msgno) {
           $res = $m[0];
           $cid = $m[1];
           // get the name of the file with the cid in inline array
-          if ($att = X::getRow($this->_inline_files, ['id' => $cid])) {
+          if (($att = X::getRow($this->_inline_files, ['id' => $cid]))
+            && ($att = $this->getAttachments($msgno, $att['name']))
+          ) {
             $ext = Str::fileExt($att['name']);
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])
               || in_array($att['type'], ['jpeg', 'png', 'gif'])
@@ -1388,40 +1390,9 @@ class Mailbox extends Basic
   {
     if ($structure = $this->getMsgStructure($msgNum)) {
       $attachments = [];
-      function analyzeParts($part, &$att, $mn, $np, $f, $t){
-        if (!empty($part->ifdisposition)
-          && !empty($part->disposition)
-          && !empty($part->ifparameters)
-          && ((strtolower($part->disposition) === 'attachment')
-            || (strtolower($part->disposition) === 'inline'))
-          && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-          && (empty($f) || ($f === $nameParam->value))
-        ) {
-          if ($data = $t->getMsgBody($mn, $np)) {
-            $att[] = [
-              'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
-              'name' => $nameParam->value,
-              'size' => $part->bytes,
-              'data' => $t->_get_decode_value($data, $part->encoding)
-            ];
-          }
-        }
-
-        if (!empty($part->parts)
-          && (empty($filename) || !count($att))
-        ) {
-          foreach ($part->parts as $np2 => $p) {
-            analyzeParts($p, $att, $mn, $np . '.' . ($np2 + 1), $f, $t);
-            if (!empty($f) && count($att)) {
-              break;
-            }
-          }
-        }
-      }
-
       if (!empty($structure->parts)) {
         foreach ($structure->parts as $np => $part) {
-          analyzeParts($part, $attachments, $msgNum, $np + 1, $filename, $this);
+          $this->analyzeAttachmentPart($part, $attachments, $msgNum, $np + 1, $filename);
           if (!empty($filename) && count($attachments)) {
             return $attachments[0];
           }
@@ -1432,6 +1403,37 @@ class Mailbox extends Basic
     }
 
     return null;
+  }
+
+  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
+    if (!empty($part->ifdisposition)
+      && !empty($part->disposition)
+      && !empty($part->ifparameters)
+      && ((strtolower($part->disposition) === 'attachment')
+        || (strtolower($part->disposition) === 'inline'))
+      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+      && (empty($filename) || ($filename === $nameParam->value))
+    ) {
+      if ($data = $this->getMsgBody($msgNum, $partNum)) {
+        $attachments[] = [
+          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
+          'name' => $nameParam->value,
+          'size' => $part->bytes,
+          'data' => $this->_get_decode_value($data, $part->encoding)
+        ];
+      }
+    }
+
+    if (!empty($part->parts)
+      && (empty($filename) || !count($attachments))
+    ) {
+      foreach ($part->parts as $np2 => $p) {
+        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
+        if (!empty($filename) && count($attachments)) {
+          break;
+        }
+      }
+    }
   }
 
 

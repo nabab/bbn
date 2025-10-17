@@ -867,9 +867,9 @@ class Email extends Basic
             'from' => 'CONCAT('.$db->cfn($contactsFields['name'], 'fromname').', " <", '.$db->cfn($linksFields['value'], 'fromlink').', ">")',
             'from_email' => $db->cfn($linksFields['value'], 'fromlink'),
             'from_name' => $db->cfn($contactsFields['name'], 'fromname'),
-            'to' => 'IFNULL(CONCAT('.$db->cfn($contactsFields['name'], 'toname').', " <", '.$db->cfn($linksFields['value'], 'tolink').', ">"), '.$db->cfn($linksFields['value'], 'tolink').')',
-            'to_email' => $db->cfn($linksFields['value'], 'tolink'),
-            'to_name' => $db->cfn($contactsFields['name'], 'toname'),
+            'to' => 'GROUP_CONCAT(IFNULL(CONCAT('.$db->cfn($contactsFields['name'], 'toname').', " <", '.$db->cfn($linksFields['value'], 'tolink').', ">"), '.$db->cfn($linksFields['value'], 'tolink').'), ", ")',
+            'to_email' => 'GROUP_CONCAT(' . $db->cfn($linksFields['value'], 'tolink') . ", ', ')",
+            'to_name' => 'GROUP_CONCAT(' . $db->cfn($contactsFields['name'], 'toname') . ", ', ')",
             'id_account' => $db->cfn($prefOptFields['id'], $prefOptTable),
           ]
         ),
