@@ -4,9 +4,15 @@
  */
 namespace bbn\User;
 
-use bbn;
 use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
+use bbn\Db;
+use bbn\Mail;
+use bbn\User;
+use bbn\User\Preferences;
 use stdClass;
+use Exception;
 
 /**
  * A class for managing users
@@ -56,10 +62,13 @@ You can click the following link to access directly your account:<br>
 
   protected $list_fields;
 
+  /** @var User User object */
   protected $usrcls;
 
-  protected $mailer = false;
+  /** @var Mail */
+  protected $mailer;
 
+  /** @var Db */
   protected $db;
 
   protected $class_cfg;
@@ -71,7 +80,7 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function getMailer()
+  public function getMailer(): Mail
   {
     if (!$this->mailer) {
       $this->mailer = $this->usrcls->getMailer();
@@ -118,10 +127,10 @@ You can click the following link to access directly your account:<br>
 
 
   /**
-   * @param bbn\User $obj A user's connection object (\connection or subclass)
+   * @param User $obj A user's connection object (\connection or subclass)
    *
    */
-  public function __construct(bbn\User $obj)
+  public function __construct(User $obj)
   {
     if (\is_object($obj) && method_exists($obj, 'getClassCfg')) {
       $this->usrcls    = $obj;
@@ -162,8 +171,9 @@ You can click the following link to access directly your account:<br>
    */
   public function groups(): array
   {
-    $a             =& $this->class_cfg['arch'];
-    $t             =& $this->class_cfg['tables'];
+    $cfg = $this->getClassCfg();
+    $a             =& $cfg['arch'];
+    $t             =& $cfg['tables'];
     $id            = $this->db->cfn($a['groups']['id'], $t['groups']);
     $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);
     $db            =& $this->db;
@@ -206,9 +216,9 @@ You can click the following link to access directly your account:<br>
 
   public function getEmail(string $id): ?string
   {
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       $email = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);
-      if ($email && bbn\Str::isEmail($email)) {
+      if ($email && Str::isEmail($email)) {
         return $email;
       }
     }
@@ -273,7 +283,7 @@ You can click the following link to access directly your account:<br>
   public function getUser(string $id): ?array
   {
     $u = $this->class_cfg['arch']['users'];
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       $where = [$u['id'] => $id];
     }
     else{
@@ -314,11 +324,10 @@ You can click the following link to access directly your account:<br>
   {
     $g = $this->class_cfg['arch']['groups'];
     if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'], [], [
-      $g['id'] => $id
-      ]
-    )
-    ) {
+      $this->class_cfg['tables']['groups'],
+      $this->class_cfg['arch']['groups'],
+      [$g['id'] => $id]
+    )) {
       $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
       return $group;
     }
@@ -331,11 +340,10 @@ You can click the following link to access directly your account:<br>
   {
     $g = $this->class_cfg['arch']['groups'];
     if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'], [], [
-      $g['code'] => $code
-      ]
-    )
-    ) {
+      $this->class_cfg['tables']['groups'],
+      $this->class_cfg['arch']['groups'],
+      [$g['code'] => $code]
+    )) {
       $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
       return $group;
     }
@@ -484,7 +492,7 @@ You can click the following link to access directly your account:<br>
       $group = $this->getGroupType($cfg[$u['id_group']]);
       switch ($group) {
         case 'real':
-          if (bbn\Str::isEmail($cfg[$u['email']])
+          if (Str::isEmail($cfg[$u['email']])
               && $this->db->insert($this->class_cfg['tables']['users'], $cfg)
           ) {
             $cfg[$u['id']] = $this->db->lastId();
@@ -553,7 +561,7 @@ You can click the following link to access directly your account:<br>
     }
 
     if ($id_user && (        !isset($cfg[$this->class_cfg['arch']['users']['email']])
-        || bbn\Str::isEmail($cfg[$this->class_cfg['arch']['users']['email']])        )
+        || Str::isEmail($cfg[$this->class_cfg['arch']['users']['email']])        )
     ) {
       if ($this->db->update(
         $this->class_cfg['tables']['users'], $cfg, [
@@ -578,7 +586,7 @@ You can click the following link to access directly your account:<br>
       case 'user':
         if ($src = $this->getUser($id)) {
           $data = X::mergeArrays($src, $data);
-          unset($data[$this->class_cfg['arch']['users']['id']]);
+          unset($data[$cfg['arch']['users']['id']]);
           $col    = $cfg['arch']['user_options']['id_user'];
           $id_new = $this->add($data);
         }
@@ -586,7 +594,7 @@ You can click the following link to access directly your account:<br>
       case 'group':
         if ($src = $this->getGroup($id)) {
           $data = X::mergeArrays($src, $data);
-          unset($data[$this->class_cfg['arch']['groups']['id']]);
+          unset($data[$cfg['arch']['groups']['id']]);
           $col    = $cfg['arch']['user_options']['id_group'];
           $id_new = $this->groupInsert($data);
         }
@@ -681,12 +689,12 @@ You can click the following link to access directly your account:<br>
   public function sendMail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
     if (($usr = $this->getUser($id_user)) && $usr['email']) {
-      if (!$this->getMailer()) {
-        //return mail($usr['email'], $subject, $text);
-        throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
+      if (!($mailer = $this->getMailer())) {
+        return mail($usr['email'], $subject, $text);
+        //throw new Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
       }
 
-      return $this->mailer->send(
+      return $mailer->send(
         [
         'to' => $usr['email'],
         'subject' => $subject,
@@ -711,6 +719,56 @@ You can click the following link to access directly your account:<br>
   }
 
 
+  public function expireHotlinks($id_user): int
+  {
+    $hl =& $this->class_cfg['arch']['hotlinks'];
+    // Expire existing valid hotlinks
+    return $hl ? $this->db->update(
+      $this->class_cfg['tables']['hotlinks'], [
+        $hl['expire'] => date('Y-m-d H:i:s')
+      ], [
+        [$hl['id_user'], '=', $id_user],
+        [$hl['expire'], '>', date('Y-m-d H:i:s')]
+      ]
+    ) : 0;
+  }
+
+  public function createHotlink($id_user, int $exp = 0): ?string
+  {
+    $hl =& $this->class_cfg['arch']['hotlinks'];
+    if ($hl && ($usr = $this->getUser($id_user))) {
+      // Expiration date
+      if (!\is_int($exp) || ($exp < 1)) {
+        $exp = time() + $this->hotlink_length;
+      }
+
+      $magic = $this->usrcls->makeMagicString();
+      // Create hotlink
+      $this->db->insert(
+        $this->class_cfg['tables']['hotlinks'], [
+          $hl['magic'] => $magic['hash'],
+          $hl['id_user'] => $id_user,
+          $hl['expire'] => date('Y-m-d H:i:s', $exp)
+        ]
+      );
+      $id_link = $this->db->lastId();
+      $group = $this->getGroup($usr['id_group']);
+      $url = constant('BBN_URL');
+      if (substr($url, -1) === '/') {
+        $url = substr($url, 0, -1);
+      }
+
+      $url .= constant("BBN_CUR_PATH");
+
+      if ($group['home']) {
+        $url .= $group['home'];
+      }
+
+      return "$url?id=$id_link&key=$magic[key]";
+    }
+
+    return null;
+  }
 
   /**
    *
@@ -725,54 +783,30 @@ You can click the following link to access directly your account:<br>
       switch ($message)
       {
         case 'hotlink':
-          if ($path = bbn\Mvc::getPluginUrl('appui-usergroup')) {
+          if ($path = Mvc::getPluginUrl('appui-usergroup')) {
             $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/main/profile';
           }
           break;
         case 'creation':
-          if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
+          if ($path = Mvc::getPluginUrl('appui-core')) {
             $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/login/%s';
           }
           break;
         case 'password':
-          if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
+          if ($path = Mvc::getPluginUrl('appui-core')) {
             $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/login/%s';
           }
           break;
       }
 
       if (empty($this->messages[$message]['link'])) {
-        throw new \Exception(X::_("Impossible to make hotlinks without a link configured"));
+        throw new Exception(X::_("Impossible to make hotlinks without a link configured"));
       }
     }
 
-    if ($usr = $this->getUser($id_user)) {
-      // Expiration date
-      if (!\is_int($exp) || ($exp < 1)) {
-        $exp = time() + $this->hotlink_length;
-      }
-
-      $hl =& $this->class_cfg['arch']['hotlinks'];
-      // Expire existing valid hotlinks
-      $this->db->update(
-        $this->class_cfg['tables']['hotlinks'], [
-        $hl['expire'] => date('Y-m-d H:i:s')
-        ],[
-        [$hl['id_user'], '=', $id_user],
-        [$hl['expire'], '>', date('Y-m-d H:i:s')]
-        ]
-      );
-      $magic = $this->usrcls->makeMagicString();
-      // Create hotlink
-      $this->db->insert(
-        $this->class_cfg['tables']['hotlinks'], [
-        $hl['magic'] => $magic['hash'],
-        $hl['id_user'] => $id_user,
-        $hl['expire'] => date('Y-m-d H:i:s', $exp)
-        ]
-      );
-      $id_link = $this->db->lastId();
-      $link    = "?id=$id_link&key=".$magic['key'];
+    if ($this->getUser($id_user)) {
+      $this->expireHotlinks($id_user);
+      $link = $this->createHotlink($id_user);
       $this->sendMail(
         $id_user,
         $this->messages[$message]['subject'],
@@ -781,7 +815,7 @@ You can click the following link to access directly your account:<br>
     }
     else{
       X::log("User $id_user not found");
-      throw new \Exception(X::_('User not found'));
+      throw new Exception(X::_('User not found'));
     }
 
     return $this;
@@ -1030,7 +1064,7 @@ You can click the following link to access directly your account:<br>
     $g = $this->class_cfg['arch']['groups'];
     if ($this->groupNumUsers($id)) {
       /** @todo Error management */
-      throw new \Exception(X::_("Impossible to delete this group as it has users"));
+      throw new Exception(X::_("Impossible to delete this group as it has users"));
     }
 
     return (bool)$this->db->delete(
@@ -1091,15 +1125,15 @@ You can click the following link to access directly your account:<br>
   public function addPermission(string $id_perm, string|null $id_user = null, string|null $id_group = null, int $public = 0): bool
   {
     if (!$id_group && !$id_user && !$public) {
-      throw new \Exception("No paraneters!");
+      throw new Exception("No paraneters!");
     }
 
-    if (!($pref = \bbn\User\Preferences::getInstance())) {
-      throw new \Exception("No User\Preferences instance!");
+    if (!($pref = Preferences::getInstance())) {
+      throw new Exception("No User\Preferences instance!");
     }
 
     if (!($prefCfg = $pref->getClassCfg())) {
-      throw new \Exception("No User\Preferences cfg!");
+      throw new Exception("No User\Preferences cfg!");
     }
 
 
@@ -1118,15 +1152,15 @@ You can click the following link to access directly your account:<br>
   public function removePermission(string $id_perm, string|null $id_user = null, string|null $id_group = null, int $public = 0): bool
   {
     if (!$id_group && !$id_user && !$public) {
-      throw new \Exception("No paraneters!");
+      throw new Exception("No paraneters!");
     }
 
-    if (!($pref = \bbn\User\Preferences::getInstance())) {
-      throw new \Exception("No User\Preferences instance!");
+    if (!($pref = Preferences::getInstance())) {
+      throw new Exception("No User\Preferences instance!");
     }
 
     if (!($prefCfg = $pref->getClassCfg())) {
-      throw new \Exception("No User\Preferences cfg!");
+      throw new Exception("No User\Preferences cfg!");
     }
 
     return (bool)$this->db->deleteIgnore(

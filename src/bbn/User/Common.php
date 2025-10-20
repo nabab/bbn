@@ -7,6 +7,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
+use bbn\Mail;
 use bbn\File\Dir;
 use bbn\File\System;
 use bbn\User\Manager;
@@ -17,7 +18,7 @@ use Brick\PhoneNumber\PhoneNumberFormat;
 
 trait Common
 {
-  /** @var string */
+  /** @var Mail */
   private $_mailer;
 
   /** @var bool */
@@ -135,14 +136,14 @@ trait Common
    *
    * @return null|string
    */
-  public function getFullGroup(): ?array
+  public function getFullGroup(?string $idGroup = null): ?array
   {
     if ($this->check()) {
       if (!$this->group) {
         $this->group = $this->db->rselect(
           $this->class_cfg['tables']['groups'],
           $this->class_cfg['arch']['groups'],
-          [$this->class_cfg['arch']['groups']['id'] => $this->id_group]
+          [$this->class_cfg['arch']['groups']['id'] => $idGroup ?: $this->id_group]
         );
       }
 
@@ -158,10 +159,20 @@ trait Common
    *
    * @return null|string
    */
-  public function getGroup(): ?string
+  public function getIdGroup(): ?string
   {
     if ($this->check()) {
       return $this->id_group;
+    }
+
+    return null;
+  }
+
+
+  public function getGroup(): ?array
+  {
+    if ($this->check()) {
+      return $this->group;
     }
 
     return null;
@@ -250,7 +261,7 @@ trait Common
    * @return Mail
    * @throws Exception
    */
-  public function getMailer()
+  public function getMailer(): Mail
   {
     if (!$this->_mailer) {
       if (class_exists($this->class_cfg['mailer'])) {
@@ -634,13 +645,14 @@ trait Common
       return false;
     }
     $phone_number = $phone->format(PhoneNumberFormat::E164);
-    $user = $this->db->rselect(
+    $id_user = $this->db->selectOne(
       $this->class_cfg['tables']['users'],
-      $this->class_cfg['arch']['users'],
+      $this->class_cfg['arch']['users']['id'],
       [
         $this->class_cfg['arch']['users']['login'] => $phone_number
       ]
     );
+    $user = $id_user ? $this->getInfo($id_user) : null;
     return !empty($user) && !$this->hasSkipVerification($user[$this->class_cfg['arch']['users']['id']]) && !$phone->isValidNumber() ? false : $user;
   }
 
@@ -652,17 +664,26 @@ trait Common
   protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
   {
     if ($user_id = $this->getUserByTokenAndDeviceUid($token, $device_uid)) {
-
-      return $this->db->rselect(
-        $this->class_cfg['tables']['users'],
-        $this->class_cfg['arch']['users'],
-        [
-          $this->class_cfg['arch']['users']['id'] => $user_id
-        ]
-      );
+      return $this->getInfo($user_id);
     }
 
     return null;
+  }
+
+  protected function getInfo(string $idUser): ?array
+  {
+    $info = $this->db->rselect(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $idUser
+      ]
+    ) ?: null;
+    if ($info) {
+      $info['group'] = $this->getFullGroup($info['id_group']);
+    }
+
+    return $info;
   }
 
   /**

@@ -163,7 +163,8 @@ class Ai extends DbCls
   }
 
 
-  public function getModels() {
+  public function getModels()
+  {
     $res = $this->ai->listModels();
     if ($res && is_string($res)) {
       $res = json_decode($res, true);
@@ -457,10 +458,15 @@ class Ai extends DbCls
       }
       else {
         $subpath = substr(X::makeStoragePath('conversations', 'Y', 100, $this->fs), strlen($path) + 1);
+        $result['file'] = $subpath . $result['id'] . '.json';
         $row = [
           'title' => $result['title'],
           'id'    => $result['id'],
-          'file'  => $subpath . $result['id'] . '.json'
+          'file'  => $result['file'],
+          'num' => 0,
+          'tags' => [],
+          'creation' => $startTime,
+          'last' => $responseTime,
         ];
 
         $conversation = [
@@ -476,6 +482,8 @@ class Ai extends DbCls
 
       $conversation['num']++;
       $conversation['last'] = $responseTime;
+      $row['num']++;
+      $row['last'] = $responseTime;
       $lastMessage = [
         'messages' => [
           ...$query['messages'], 
@@ -505,7 +513,7 @@ class Ai extends DbCls
         $this->fs->encodeContents($summary, $summaryFile, 'json');
       }
     }
-    elseif (empty($resutl['error'])) {
+    elseif (empty($result['error'])) {
       $result['error'] = X::_("Unknown error");
     }
 

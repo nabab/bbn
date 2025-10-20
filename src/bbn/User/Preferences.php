@@ -122,6 +122,11 @@ class Preferences extends DbCls
     }
   }
 
+  public function getIdUser(): ?string
+  {
+    return $this->user ? $this->user->getId() : null;
+  }
+
 
   /**
    * Returns an array describing the structures of the tables for the class.
@@ -333,7 +338,7 @@ class Preferences extends DbCls
    * Checks if a group has the given preference.
    *
    * ```
-   * $pref->groupHas('042b29722c2f11eca47652540000cfbe', $pref->getGroup());
+   * $pref->groupHas('042b29722c2f11eca47652540000cfbe', $pref->getIdGroup());
    *
    * // (bool) = false;
    * ```
@@ -369,14 +374,14 @@ class Preferences extends DbCls
    * Returns the Id of the current group.
    *
    * ```
-   * $pref->getGroup();
+   * $pref->getIdGroup();
    *
    * //(string) = "980dd074514ef11eca56895680000cers";
    * ```
    *
    * @return null|string
    */
-  public function getGroup(): ?string
+  public function getIdGroup(): ?string
   {
     return $this->id_group;
   }
@@ -2486,7 +2491,7 @@ class Preferences extends DbCls
   {
     $this->user     = $user;
     $this->id_user  = $this->user->getId();
-    $this->id_group = $this->user->getGroup();
+    $this->id_group = $this->user->getIdGroup();
     return $this;
   }
 

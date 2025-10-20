@@ -158,7 +158,7 @@ class Environment
         $this->getPost();
       }
 
-      if ($this->_has_post || \count($_FILES)) {
+      if (($_SERVER['REQUEST_METHOD'] === 'POST') || \count($_FILES)) {
         /** @todo Remove the json parameter from the bbn.js functions */
         $this->setMode(BBN_DEFAULT_MODE);
       }

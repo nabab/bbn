@@ -75,7 +75,16 @@ trait DbConfig
       throw new Exception(X::_("The class %s is not configured properly to work with trait DbActions", get_class($this)));
     }
 
-    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];
+    if (count($arr) === 1) {
+      $cfg = $arr[0];
+    }
+    else {
+      $cfg = array_merge(...$arr);
+    }
+
+    if ($cfg['table'] === 'bbn_users') {
+      //X::hddump($cfg, $arr);
+    } 
 
     $table_index = array_flip($cfg['tables'])[$cfg['table']];
     if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {

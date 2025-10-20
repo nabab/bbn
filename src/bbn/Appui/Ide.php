@@ -462,6 +462,9 @@ class Ide
   {
     //return $this->projects::decipherPath($st);
     $st = Str::parsePath($st);
+    if (!isset($this->repositories)) {
+      throw new \Exception("BOBOB");
+    }
     //get root absolute of the file
     foreach ($this->repositories as $i => $rep) {
       if (strpos($st, $rep['name']) === 0) {
@@ -1081,7 +1084,7 @@ class Ide
    *
    * @param string $file The real file/dir's path
    * @param string $type The path type (file or dir)
-   * @return bool|int
+   * @return bool|string
    */
   public function realToPerm(string $file, $type = 'file')
   {
@@ -1146,7 +1149,7 @@ class Ide
           array_push($bits, $this->_permissions());
         }
 
-        return $this->options->fromCode($bits);
+        return $this->options->fromCode(...$bits);
       }
     }
 
@@ -1162,7 +1165,7 @@ class Ide
   /**
    * Gets file's preferences
    *
-   * @param string $cfg info for get file json
+   * @param array $cfg info for get file json
    * @return array|null
    */
   public function getFilePreferences(array $cfg = []): ?array
@@ -1883,7 +1886,6 @@ class Ide
                     [
                       'text' => $time,
                       'code' => $this->fs->getContents($file),
-                      'folder' => false,
                       'mode' => X::basename($ctrl_path),
                       'folder' => false
                     ]
@@ -1929,11 +1931,11 @@ class Ide
                       $i = \count($backups) - 1;
                     }
 
-                    if (($idx = X::search($backups[$i]['items'], ['title' => $d])) === null) {
+                    if (($idx = X::search($backups[$i]['items'], ['title' => $dir])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
-                          'text' => $d,
+                          'text' => $dir,
                           'folder' => true,
                           'items' => [],
                           'icon' => 'folder-icon'
@@ -2380,11 +2382,11 @@ class Ide
 
                     // info for file
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $lineNumber . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       'code' => true,
-                      'uid' => $path . '/' . $file_name,
+                      'uid' => $path . '/' . $v,
                       'icon' => 'nf nf-fa-code',
                       'linkPosition' => explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0],
                       'tab' => !empty($tab) ? $tab : false
@@ -2403,7 +2405,7 @@ class Ide
                     'num' => count($list),
                     'numChildren' => count($list),
                     'repository' => $info['repository']['bbn_path'] . '/',
-                    'uid' => $path . '/' . $file_name,
+                    'uid' => $path . '/' . $v,
                     'file' => X::basename($path_file),
                     'link' => !empty($link) ? $link : false,
                     'tab' => !empty($tab) ? $tab : false,
@@ -2466,7 +2468,6 @@ class Ide
                   //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
                   if (!empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\n') === false)) {
                     $lineNumber = $file->key() + 1;
-                    $name_path  = $rep['path'] . substr(X::dirname($val), strlen($base_rep));
                     $line       = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
 
                     $text      = $line;
@@ -2670,7 +2671,7 @@ class Ide
       && !empty($pref_arch = $this->pref->getClassCfg())
     ) {
       if (is_null($id_user)) {
-        $id_user = $this->pref->id_user;
+        $id_user = $this->pref->getIdUser();
       }
 
       return $this->db->rselect(
@@ -3592,7 +3593,7 @@ class Ide
           && !empty($cfg['active_file'])
         ) {
           if (empty($this->fs->delete($path . $cfg['path']))) {
-            $this->error("Error during the file|folder delete: $t[old]");
+            $this->error(X::_("Error during the file|folder delete: %s", $path . $cfg['path']));
             return false;
           }
 

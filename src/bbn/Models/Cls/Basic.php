@@ -113,13 +113,12 @@ abstract class Basic
   }
 
 
-  public function log()
+  public function log(...$args)
   {
     if ($this->isDebug()) {
-        $ar = func_get_args();
-        $cn = Str::encodeFilename(str_replace('\\', '_', get_class($this)));
-      foreach ($ar as $a){
-            X::log($a, $cn);
+      $cn = Str::encodeFilename(str_replace('\\', '_', get_class($this)));
+      foreach ($args as $a){
+        X::log($a, $cn);
       }
     }
   }

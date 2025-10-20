@@ -771,7 +771,7 @@ class Notification extends DbCls
         && ($email = $usr[$ucfg['arch']['users']['email']])
         && Str::isEmail($email)
     ) {
-      $templ['title'] = str_replace('{{app_name}}', defined('BBN_SITE_TITLE') ? BBN_SITE_TITLE : BBN_CLIENT_NAME, $templ['title']);
+      $templ['title'] = str_replace('{{app_name}}', defined('BBN_SITE_TITLE') ? constant('BBN_SITE_TITLE') : constant('BBN_CLIENT_NAME'), $templ['title']);
       $this->lastDbId = $this->db->lastId();
       $ret = (bool)$this->db->insert(
         'bbn_emails', [

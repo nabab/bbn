@@ -64,11 +64,10 @@ trait Common
   /**
    * Log to a specific log with debug info
    */
-  public function log()
+  public function log(...$args)
   {
     if (Mvc::getDebug()) {
-      $ar = \func_get_args();
-      X::log(\count($ar) > 1 ? $ar : $ar[0], 'mvc');
+      X::log(\count($args) > 1 ? $args : $args[0], 'mvc');
     }
   }
 

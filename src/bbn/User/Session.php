@@ -320,7 +320,7 @@ class Session
         $this->once_opened = true;
 
         if (defined('BBN_SESS_LIFETIME')) {
-          ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
+          ini_set('session.gc_maxlifetime', constant('BBN_SESS_LIFETIME'));
         }
       }
 

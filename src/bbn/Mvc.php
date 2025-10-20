@@ -896,6 +896,10 @@ class Mvc implements Mvc\Api
     return $this->info ? true : false;
   }
 
+  public function getInfo() {
+    return $this->info;
+  }
+
 
   public function getPlugins()
   {

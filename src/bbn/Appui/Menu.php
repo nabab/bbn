@@ -780,7 +780,7 @@ class Menu extends bbn\Models\Cls\Basic
           return true;
         }
 
-        if (isset($a['id_permission']) && $pref->has($a['id_permission'], $pref->getUser(), $pref->getGroup())) {
+        if (isset($a['id_permission']) && $pref->has($a['id_permission'], $pref->getUser(), $pref->getIdGroup())) {
           return true;
         }
 

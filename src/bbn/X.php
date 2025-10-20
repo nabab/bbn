@@ -2125,7 +2125,7 @@ class X
         $compare = self::compareConditions($data, $a);
       }
       else {
-        $compare = self::compare($data[$a['field']] ?? null, $a['value'], $a['operator']);
+        $compare = self::compare($data[$a['field']] ?? null, $a['value'] ?? null, $a['operator']);
       }
 
       if ($compare) {
@@ -3224,6 +3224,10 @@ class X
 
       array_walk($data, function (&$item) use ($cfg, $dates): void {
         foreach ($cfg['fields'] as $field) {
+          if (!isset($item[$field['field']])) {
+            continue;
+          }
+
           if (!empty($field['hidden'])) {
             unset($item[$field['field']]);
           }

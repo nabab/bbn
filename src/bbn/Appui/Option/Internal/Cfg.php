@@ -177,7 +177,7 @@ trait Cfg
    * Returns the raw content of the cfg column for the given option.
    *
    * @param mixed ...$codes Any option(s) accepted by fromCode()
-   * @return string|null The raw cfg value or null if the option cannot be found
+   * @return array The raw cfg value or null if the option cannot be found
    */
   public function getRawCfg(...$codes): array
   {

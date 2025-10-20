@@ -1636,7 +1636,7 @@ class UserTest extends TestCase
     $this->assertInstanceOf(User::class, $result);
     $this->assertSame(['foo' => 'bar'], $this->getConfig());
     $this->assertSame($data, $this->getSessionData()[$this->user_index]);
-    $this->assertSame(4, (int)$this->user->getGroup());
+    $this->assertSame(4, (int)$this->user->getIdGroup());
   }
 
 
@@ -1701,11 +1701,11 @@ class UserTest extends TestCase
   /** @test */
   public function getGroup_method_returns_the_group_id_if_there_is_no_error_and_null_otherwise()
   {
-    $this->assertNull($this->user->getGroup());
+    $this->assertNull($this->user->getIdGroup());
 
     $this->loginWithSessionData();
 
-    $this->assertSame(1, (int)$this->user->getGroup());
+    $this->assertSame(1, (int)$this->user->getIdGroup());
   }
 
 
@@ -2500,7 +2500,7 @@ class UserTest extends TestCase
 
     $this->assertTrue(isset($this->getNonPublicProperty('fields')['enckey']));
     $this->assertSame('enckey', $this->getNonPublicProperty('fields')['enckey']);
-    $this->assertNull($this->user->getGroup());
+    $this->assertNull($this->user->getIdGroup());
     $this->assertFalse(isset($this->getSessionData()[$this->user_index]));
 
     $this->db_mock->shouldReceive('rselect')->once()->andReturn(
@@ -2514,7 +2514,7 @@ class UserTest extends TestCase
     $result           = $user_info_method->invoke($this->user);
 
     $this->assertTrue(!isset($this->getNonPublicProperty('fields')['enckey']));
-    $this->assertSame(1, (int)$this->user->getGroup());
+    $this->assertSame(1, (int)$this->user->getIdGroup());
     $this->assertInstanceOf(User::class, $result);
     $this->assertTrue(isset($this->getSessionData()[$this->user_index]));
     $this->assertSame(1, $this->getSessionData()[$this->user_index]['id_group']);
@@ -2547,7 +2547,7 @@ class UserTest extends TestCase
     $result           = $user_info_method->invoke($this->user);
 
     $this->assertSame(['foo' => 'bar'], $this->getConfig());
-    $this->assertSame(3, (int)$this->user->getGroup());
+    $this->assertSame(3, (int)$this->user->getIdGroup());
     $this->assertInstanceOf(User::class, $result);
   }
 
@@ -2762,7 +2762,7 @@ class UserTest extends TestCase
     $this->assertTrue($this->user->isAuth());
     $this->assertTrue($this->user->check());
     $this->assertSame($this->user_id, $this->user->getId());
-    $this->assertSame(66, (int)$this->user->getGroup());
+    $this->assertSame(66, (int)$this->user->getIdGroup());
     $this->assertSame(
       json_decode($cfg, true)['fingerprint'],
       $this->getSessionConfig()['fingerprint']
@@ -3042,7 +3042,7 @@ class UserTest extends TestCase
     $this->assertTrue($result);
     $this->assertTrue($this->user->isAuth());
     $this->assertSame(['foo' => 'bar'], $this->getConfig());
-    $this->assertSame(33, (int)$this->user->getGroup());
+    $this->assertSame(33, (int)$this->user->getIdGroup());
     $this->assertSame(
       ['cfg' => ['foo' => 'bar'], 'id_group' => 33],
       $this->getSessionData()[$this->user_index]
