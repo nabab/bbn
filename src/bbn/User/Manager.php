@@ -752,7 +752,6 @@ You can click the following link to access directly your account:<br>
         ]
       );
       $id_link = $this->db->lastId();
-      $group = $this->getGroup($usr['id_group']);
       $url = constant('BBN_URL');
       if (substr($url, -1) === '/') {
         $url = substr($url, 0, -1);
@@ -760,7 +759,10 @@ You can click the following link to access directly your account:<br>
 
       $url .= constant("BBN_CUR_PATH");
 
-      if ($group['home']) {
+      if (!empty($usr['id_group'])
+        && ($group = $this->getGroup($usr['id_group']))
+        && !empty($group['home'])
+      ) {
         $url .= $group['home'];
       }
 

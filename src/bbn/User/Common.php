@@ -560,7 +560,7 @@ trait Common
 
   public function getApiNotificationsToken(string $idUser = ''): ?string
   {
-    return $this->db->selectOne([
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->selectOne([
       'table' => $this->class_cfg['tables']['api_tokens'],
       'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
       'where' => [ 
@@ -570,7 +570,7 @@ trait Common
         'field' => $this->class_cfg['arch']['api_tokens']['last'],
         'dir' => 'DESC'
       ]]
-    ]);
+    ]) : null;
   }
 
   public function getPhoneNumber(string $idUser = ''): ?string
@@ -628,7 +628,7 @@ trait Common
 
   protected function isToken(): bool
   {
-    return (bool)$this->class_cfg['tables']['api_tokens'];
+    return !empty($this->class_cfg['tables']['api_tokens']);
   }
 
 
@@ -730,30 +730,34 @@ trait Common
 
   protected function verifyTokenAndDeviceUid($device_uid, $token)
   {
-    return $this->db->count(
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->count(
       $this->class_cfg['tables']['api_tokens'],
       [
         $this->class_cfg['arch']['api_tokens']['token']      => $token,
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
       ]
-    );
+    ) : null;
   }
 
   protected function getUserByTokenAndDeviceUid($token, $device_uid)
   {
-    return $this->db->selectOne(
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->selectOne(
       $this->class_cfg['tables']['api_tokens'],
       $this->class_cfg['arch']['api_tokens']['id_user'],
       [
         $this->class_cfg['arch']['api_tokens']['token']      => $token,
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
       ]
-    );
+    ) : null;
   }
 
   protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool
   {
-    if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {
+    if (!empty($this->class_cfg['tables']['api_tokens'])
+      && !empty($token)
+      && !empty($deviceUid)
+      && !empty($idUser)
+    ) {
       return (bool)$this->db->update(
         $this->class_cfg['tables']['api_tokens'],
         [
