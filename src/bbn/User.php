@@ -701,6 +701,7 @@ use bbn\User\Session;
           && ($key !== 'admin')
           && ($key !== 'dev')
           && ($key !== 'pass')
+          && ($key !== 'res')
         ) {
           $update[$key] = $val;
         }

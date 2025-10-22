@@ -32,11 +32,12 @@ class Ai extends DbCls
   protected static $default_class_cfg = [
     'table' => 'bbn_ai_prompt',
     'tables' => [
-      'ai_prompt' => 'bbn_ai_prompt',
-      'ai_prompt_items' => 'bbn_ai_prompt_items',
+      'prompt' => 'bbn_ai_prompt',
+      'prompt_items' => 'bbn_ai_prompt_items',
+      'prompt_settings' => 'bbn_ai_prompt_settings',
     ],
     'arch' => [
-      'ai_prompt' => [
+      'prompt' => [
         'id' => 'id',
         'id_note' => 'id_note',
         'input' => 'input',
@@ -45,7 +46,7 @@ class Ai extends DbCls
         'usage_count' => 'usage_count',
         'shortcode' => 'shortcode'
       ],
-      'ai_prompt_items' => [
+      'prompt_items' => [
         'id' => 'id',
         'id_prompt' => 'id_prompt',
         'text' => 'text',
@@ -54,12 +55,13 @@ class Ai extends DbCls
         'mime' => 'mime',
         'ai' => 'ai',
       ],
-      'ai_prompt_settings' => [
+      'prompt_settings' => [
         'id' => 'id',
         'id_prompt' => 'id_prompt',
-        'id_model' => 'id_model',
+        'model' => 'model',
         'def' => 'def',
         'last_use' => 'last_use',
+        'hash' => 'hash',
         'cfg' => 'cfg',
       ],
     ]
@@ -578,8 +580,9 @@ class Ai extends DbCls
       return false;
     }
     
-    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
-      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
+    $ccfg = $this->getClassCfg();
+    $this->db->delete($ccfg['tables']['prompt_items'], [
+      $ccfg['arch']['prompt_items']['id_prompt'] => $id
     ]);
     
     return true;
@@ -605,11 +608,12 @@ class Ai extends DbCls
       ];
     }*/
     
+    $ccfg = $this->getClassCfg();
     $prompts = $this->db->rselectAll([
-      'tables' => [$this->class_cfg['tables']['ai_prompt']],
+      'tables' => [$ccfg['tables']['prompt']],
       'where' => $where,
       'order' => [[
-        'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],
+        'field' => $ccfg['arch']['prompt']['creation_date'],
         'dir' => 'DESC'
       ]],
     ]);
@@ -632,10 +636,11 @@ class Ai extends DbCls
    */
   public function getPromptByShortcode(string $shortcode)
   {
+    $ccfg = $this->getClassCfg();
     $prompt = $this->dbTraitRselect([
-      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
+      'tables' => [$ccfg['tables']['prompt']],
       'where' => [
-        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
+        $ccfg['arch']['prompt']['shortcode'] => $shortcode
 ]
     ]);
     
@@ -680,23 +685,34 @@ class Ai extends DbCls
    * @param string|null $shortcode The shortcode of the prompt (optional).
    * @return mixed The ID of the inserted prompt if successful, otherwise null.
    */
-  public function insertPrompt(array $data)
+  public function insertPrompt(array $data): ?string
   {
     $option = Option::getInstance();
-    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {
+    if (!X::hasProps($data, ['title', 'content', 'input', 'output', 'model'])) {
       throw new Exception("Missing required data");
     }
 
     $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');
     $id_note = $this->note->insert($data['title'], $data['content'], $id_option, true, false, NULL, NULL, 'text/plain', $data['lang']);
+    $ccfg = $this->getClassCfg();
 
-    return $this->dbTraitInsert([
-      $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,
-      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],
-      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],
-      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'] ?: null,
-      $this->class_cfg['arch']['ai_prompt']['cfg'] => $cfg ? json_encode($cfg) : null
-    ]);
+    if ($this->dbTraitInsert([
+      $ccfg['arch']['prompt']['id_note'] => $id_note,
+      $ccfg['arch']['prompt']['input'] => $data['input'],
+      $ccfg['arch']['prompt']['output'] => $data['output'],
+      $ccfg['arch']['prompt']['shortcode'] => $data['shortcode'] ?: null
+    ])) {
+      $idPrompt = $this->db->lastId();
+      $cfg = $data['cfg'];
+      ksort($cfg);
+      if ($cfg) {
+        $this->insertSettings($idPrompt, $data['model'], $cfg);
+      }
+
+      return $idPrompt;
+    }
+
+    return null;
   }
   
   /**
@@ -708,7 +724,7 @@ class Ai extends DbCls
    */
   public function updatePrompt(string $id, array $data): bool
   {
-    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {
+    if (!X::hasProps($data, ['title', 'content', 'input', 'output', 'model', 'cfg'])) {
       throw new Exception("Missing required data");
     }
 
@@ -741,14 +757,17 @@ class Ai extends DbCls
       $res1 = $this->note->update($note['id'], $noteUpdate);
     }
 
+    $ccfg = $this->getClassCfg();
     // Update the prompt with the provided ID, input, and output values
     $res2 = $this->dbTraitUpdate($id, [
-      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],
-      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],
-      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'],
+      $ccfg['arch']['prompt']['input'] => $data['input'],
+      $ccfg['arch']['prompt']['output'] => $data['output'],
+      $ccfg['arch']['prompt']['shortcode'] => $data['shortcode'],
     ]);
+
+    $res3 = $this->insertSettings($id, $data['model'], $data['cfg']);
     
-    return (bool)($res1 || $res2);
+    return (bool)($res1 || $res2 || $res3);
   }
   
   public function deletePrompt(string $id) {
@@ -765,9 +784,10 @@ class Ai extends DbCls
       // If the associated note does not exist, return false to indicate the failure
       return false;
     }
-    
-    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
-      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
+
+    $ccfg = $this->getClassCfg();
+    $this->db->delete($ccfg['tables']['prompt_items'], [
+      $ccfg['arch']['prompt_items']['id_prompt'] => $id
     ]);
   
     $this->dbTraitDelete($id);
@@ -776,17 +796,46 @@ class Ai extends DbCls
   }
 
 
-  public function insertSettings(string $id_prompt, string $id_model, ?array $cfg = null): ?string
+  public function insertSettings(string $id_prompt, string $model, ?array $cfg = null): ?string
   {
-    if (empty($id_prompt) || empty($id_model)) {
+    if (empty($id_prompt) || empty($model)) {
       return false;
     }
-    
-    if ($this->db->insert($this->class_cfg['tables']['ai_prompt_settings'], [
-      $this->class_cfg['arch']['ai_prompt_settings']['id_prompt'] => $id_prompt,
-      $this->class_cfg['arch']['ai_prompt_settings']['id_model'] => $id_model,
-      $this->class_cfg['arch']['ai_prompt_settings']['cfg'] => json_encode($cfg),
-    ])) {
+
+    ksort($cfg);
+    $json = json_encode($cfg);
+    $hash = md5($model .'|' . $json);
+    $ccfg = $this->getClassCfg();
+    $id = $this->db->selectOne(
+      $ccfg['tables']['prompt_settings'],
+      $ccfg['arch']['prompt_settings']['id'],
+      [
+        $ccfg['arch']['prompt_settings']['id_prompt'] => $id_prompt,
+        $ccfg['arch']['prompt_settings']['hash'] => $hash,
+      ]
+    );
+    if ($id) {
+      return $id;
+    }
+
+    $data = [
+      $ccfg['arch']['prompt_settings']['id_prompt'] => $id_prompt,
+      $ccfg['arch']['prompt_settings']['model'] => $model,
+      $ccfg['arch']['prompt_settings']['hash'] => $hash,
+      $ccfg['arch']['prompt_settings']['cfg'] => $json,
+    ];
+    if (!$this->db->selectOne(
+      $ccfg['tables']['prompt_settings'],
+      $ccfg['arch']['prompt_settings']['id'],
+      [
+        $ccfg['arch']['prompt_settings']['id_prompt'] => $id_prompt,
+        $ccfg['arch']['prompt_settings']['def'] => 1
+      ]
+    )) {
+      $data[$ccfg['arch']['prompt_settings']['def']] = 1;
+    }
+
+    if ($this->db->insert($ccfg['tables']['prompt_settings'], $data)) {
       return $this->db->lastId();
     }
 
@@ -804,9 +853,10 @@ class Ai extends DbCls
    */
   private function insertItem(string $id_prompt, string $text, string $ai)
   {
-    $tf = $this->class_cfg['arch']['ai_prompt_items'];
+    $ccfg = $this->getClassCfg();
+    $tf = $ccfg['arch']['prompt_items'];
     $user = User::getInstance();
-    $this->db->insert($this->class_cfg['tables']['ai_prompt_items'], [
+    $this->db->insert($ccfg['tables']['prompt_items'], [
       $tf['id_prompt'] => $id_prompt,
       $tf['text'] => $text,
       $tf['author'] => $user->getId(),
@@ -826,12 +876,17 @@ class Ai extends DbCls
    */
   private function buildPromptFromRow(array $prompt): string | null
   {
-    $note = $this->note->get($prompt['id_note']);
-    if (empty($note) || empty($note['content'])) {
-      return null;
+    $content = $prompt['content'] ?? '';
+    if (empty($content) && !empty($prompt['id_note'])) {
+      $note = $this->note->get($prompt['id_note']);
+      if (empty($note) || empty($note['content'])) {
+        return null;
+      }
+
+      $content = $note['content'];
     }
 
-    return $this->buildPrompt($note['content'], $prompt['output'], $note['lang']);
+    return $this->buildPrompt($content, $prompt['output'], $note['lang']);
   }
   
   
@@ -849,7 +904,7 @@ class Ai extends DbCls
     $output .= "\n\n";
     
     if ($format) {
-      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . "\n\n";
+      $output .= X::getField(self::$responseFormats, ['value' => $format], 'prompt') . "\n\n";
     }
 
     if ($lang) {
