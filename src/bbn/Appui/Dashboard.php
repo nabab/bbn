@@ -824,7 +824,7 @@ class Dashboard extends Basic
                 'value' => $this->user->getId()
               ], [
                 'field' => $this->archPref['id_group'],
-                'value' => $this->user->getGroup()
+                'value' => $this->user->getIdGroup()
               ], [
                 'field' => $this->archPref['public'],
                 'value' => 1

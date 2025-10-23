@@ -38,7 +38,7 @@ class Generator {
       $export = preg_replace("/^([ ]*)(.*)/m", '$1$1$2', $export);
       $array = preg_split("/\r\n|\n|\r/", $export);
       $array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [NULL, ']$1', ' => ['], $array);
-      $export = str_replace('['.PHP_EOL.']','[]', join(PHP_EOL, array_filter(["["] + $array)));
+      $export = str_replace('['.PHP_EOL.']','[]', implode(PHP_EOL, array_filter(["["] + $array)));
     }
     return $export;
   
@@ -99,7 +99,7 @@ class Generator {
         return str_contains($a, "bbn");
      });
       if (!empty($implements)) {
-        $res .= " implements " . join(", ", array_map(function($elem) {
+        $res .= " implements " . implode(", ", array_map(function($elem) {
           if ( !empty($this->cfg['realNamespace'])) {
             return str_replace(($this->cfg['realNamespace'] . "\\"), "", $elem);
           }

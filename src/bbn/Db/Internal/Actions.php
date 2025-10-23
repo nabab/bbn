@@ -595,7 +595,7 @@ trait Actions
         unset($m['ref_table'], $m['ref_column'], $m['delete'], $m['update']);
       }
     }
-    foreach ($structure['fields'] as $k => &$f) {
+    foreach ($structure['fields'] as &$f) {
       unset($f['position']);
       if (!in_array($f['type'], ['decimal', 'float', 'double'])) {
         unset($f['decimals']);

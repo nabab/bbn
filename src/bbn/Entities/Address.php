@@ -57,7 +57,7 @@ class Address extends DbCls
 
   public function options(): Option
   {
-    return $this->entities->options();
+    return $this->entities ? $this->entities->options() : Option::getInstance();
   }
 
   public function getInfo($id, $id_entity = null)
@@ -112,16 +112,17 @@ class Address extends DbCls
 
   public function search($fn, $cp = null)
   {
+    $f = $this->getClassCfg()['arch']['addresses'];
     if ($cp && is_string($fn)) {
-      $fn = ['adresse' => $fn, 'cp' => $cp];
+      $fn = [$f['address'] => $fn, 'cp' => $cp];
     } else if (!is_array($fn)) {
       $fn = $this->set_address($fn);
     }
 
-    if (!empty($fn['adresse']) && !empty($fn['cp'])) {
-      return $this->db->selectOne('bbn_addresses', 'id', [
-        'cp' => $fn['cp'],
-        'adresse' => $fn['adresse']
+    if (!empty($fn[$f['address']]) && !empty($fn[$f['postcode']])) {
+      return $this->db->selectOne('bbn_addresses', $f['id'], [
+        $f['postcode'] => $fn[$f['postcode']],
+        $f['address'] => $fn[$f['address']]
       ]);
     }
     return false;
@@ -129,26 +130,27 @@ class Address extends DbCls
 
   public function seek($p, int $start = 0, int $limit = 100)
   {
+    $f = $this->getClassCfg()['arch']['addresses'];
     if (
-      is_array($p) && (!empty($p['adresse']) ||
-        !empty($p['tel']) ||
-        !empty($p['cp']))
+      is_array($p) && (!empty($p[$f['address']]) ||
+        !empty($p[$f['phone']]) ||
+        !empty($p[$f['postcode']]))
     ) {
       $cond = [];
 
-      if (!empty($p['adresse']) && strlen($p['adresse']) > 7) {
-        array_push($cond, ['adresse', 'LIKE', '%' . $p['adresse'] . '%']);
+      if (!empty($p[$f['address']]) && strlen($p[$f['address']]) > 7) {
+        array_push($cond, [$f['address'], 'LIKE', '%' . $p[$f['address']] . '%']);
       }
-      if (!empty($p['tel']) && (strlen($p['tel']) >= 6)) {
-        array_push($cond, ['tel', 'LIKE', $p['tel'] . '%']);
+      if (!empty($p[$f['phone']]) && (strlen($p[$f['phone']]) >= 6)) {
+        array_push($cond, [$f['phone'], 'LIKE', $p[$f['phone']] . '%']);
       }
-      if (!empty($p['ville'])) {
-        array_push($cond, ['ville', 'LIKE', $p['ville']]);
+      if (!empty($p[$f['city']])) {
+        array_push($cond, [$f['city'], 'LIKE', $p[$f['city']]]);
       }
-      if (!empty($p['cp'])) {
-        array_push($cond, ['cp', 'LIKE', $p['cp']]);
+      if (!empty($p[$f['postcode']])) {
+        array_push($cond, [$f['postcode'], 'LIKE', $p[$f['postcode']]]);
       }
-      return $this->db->getColumnValues("bbn_addresses", 'id', $cond, ['adresse', 'ville'], $limit, $start);
+      return $this->db->getColumnValues("bbn_addresses", $f['id'], $cond, [$f['address'], $f['city']], $limit, $start);
     }
     return false;
   }
@@ -168,7 +170,7 @@ class Address extends DbCls
       $rels = $this->relations($id);
       if ($with_links || empty($rels)) {
         foreach ($rels as $k => $r) {
-          $this->db->delete('amiral_liens', ['id' => $k]);
+          //$this->db->delete('amiral_liens', ['id' => $k]);
         }
         return $this->db->delete('bbn_addresses', ['id' => $id]);
       }
@@ -255,15 +257,16 @@ class Address extends DbCls
 
   public function getCedex($ville)
   {
+    $f = $this->getClassCfg()['arch']['addresses'];
     $r = [
-      'ville' => Str::changeCase($ville),
+      $f['city'] => Str::changeCase($ville),
       'has_cedex' => false,
       'num_cedex' => null
     ];
-    if (!empty($r['ville']) && stripos($r['ville'], 'Cedex')) {
+    if (!empty($r[$f['city']]) && stripos($r[$f['city']], 'Cedex')) {
       $r['has_cedex'] = 1;
-      $tmp = explode("Cedex", $r['ville']);
-      $r['ville'] = trim($tmp[0]);
+      $tmp = explode("Cedex", $r[$f['city']]);
+      $r[$f['city']] = trim($tmp[0]);
       if (isset($tmp[1]) && Str::isNumber(trim($tmp[1]))) {
         $r['num_cedex'] = trim($tmp[1]);
       }
@@ -441,13 +444,14 @@ class Address extends DbCls
   public function add($fn, $force = false)
   {
     $id = false;
+    $f = $this->getClassCfg()['arch']['addresses'];
     $fn = $this->set_address($fn);
     if (!empty($fn['id_country'])) {
-      if (($fn['id_country'] === $this->options()->fromCode($this->entities->getDefaultCountry(), 'countries', 'appui', 'core'))
-        && ($conf_ville = $this->getCity(empty($fn['cp']) ? '' : $fn['cp'], empty($fn['ville']) ? '' : $fn['ville']))
+      if ($this->entities && ($fn['id_country'] === $this->options()->fromCode($this->entities->getDefaultCountry(), 'countries', 'appui', 'core'))
+        && ($conf_ville = $this->getCity(empty($fn[$f['postcode']]) ? '' : $fn[$f['postcode']], empty($fn[$f['city']]) ? '' : $fn[$f['city']]))
       ) {
-        $fn['cp'] = $conf_ville['cp'];
-        $fn['ville'] = $conf_ville['ville'];
+        $fn[$f['postcode']] = $conf_ville['cp'];
+        $fn[$f['city']] = $conf_ville['ville'];
       }
       if ($force || !($id = $this->search($fn))) {
         if ($this->db->insert("bbn_addresses", $fn)) {
@@ -490,40 +494,41 @@ class Address extends DbCls
 
   public function set_address($fn)
   {
+    $f = $this->getClassCfg()['arch']['addresses'];
     $r = [];
 
     if (is_array($fn)) {
-      if (!is_array($fn['adresse'])) {
-        $fn['adresse'] = explode("\n", $fn['adresse']);
+      if (!is_array($fn[$f['address']])) {
+        $fn[$f['address']] = explode("\n", $fn[$f['address']]);
       }
-      if (is_array($fn['adresse'])) {
-        $r['adresse'] = array_filter($fn['adresse'], function ($ad) {
+      if (is_array($fn[$f['address']])) {
+        $r[$f['address']] = array_filter($fn[$f['address']], function ($ad) {
           return !empty($ad) && strlen($ad) > 1;
         });
-        if (count($r['adresse']) > 0) {
+        if (count($r[$f['address']]) > 0) {
           // On enlève la virgule après le numéro de rue si elle y est
-          $r['adresse'] = preg_replace("#^(\\d+),#", "\$1", implode("\n", $r['adresse']));
+          $r[$f['address']] = preg_replace("#^(\\d+),#", "\$1", implode("\n", $r[$f['address']]));
         } else {
-          unset($r['adresse']);
+          unset($r[$f['address']]);
         }
       }
-      if (isset($fn['cp'])) {
-        $r['cp'] = (int) Str::getNumbers($fn['cp']);
+      if (isset($fn[$f['postcode']])) {
+        $r[$f['postcode']] = (int) Str::getNumbers($fn[$f['postcode']]);
       }
       if (isset($fn['id_country'])) {
         $r['id_country'] = $fn['id_country'];
       }
-      $r['ville'] = empty($fn['ville']) ? '' : Str::changeCase($fn['ville']);
-      if (isset($fn['tel'])) {
-        $fn['tel'] = Str::getNumbers($fn['tel']);
-        if (strlen($fn['tel']) > 10 && strpos($fn['tel'], '33') === 0) {
-          $fn['tel'] = substr($fn['tel'], 2);
+      $r[$f['city']] = empty($fn[$f['city']]) ? '' : Str::changeCase($fn[$f['city']]);
+      if (isset($fn[$f['phone']])) {
+        $fn[$f['phone']] = Str::getNumbers($fn[$f['phone']]);
+        if (strlen($fn[$f['phone']]) > 10 && strpos($fn[$f['phone']], '33') === 0) {
+          $fn[$f['phone']] = substr($fn[$f['phone']], 2);
         }
-        if (strlen($fn['tel']) === 9 && strpos($fn['tel'], '0') !== 0) {
-          $fn['tel'] = '0' . $fn['tel'];
+        if (strlen($fn[$f['phone']]) === 9 && strpos($fn[$f['phone']], '0') !== 0) {
+          $fn[$f['phone']] = '0' . $fn[$f['phone']];
         }
-        if (strlen($fn['tel']) === 10) {
-          $r['tel'] = $fn['tel'];
+        if (strlen($fn[$f['phone']]) === 10) {
+          $r[$f['phone']] = $fn[$f['phone']];
         }
       }
     }
@@ -536,15 +541,16 @@ class Address extends DbCls
       $s = $this->getInfo($s);
     }
     if (is_array($s)) {
+      $f = $this->getClassCfg()['arch']['addresses'];
       $st = '';
-      if (!empty($s['adresse'])) {
-        $st .= nl2br($s['adresse'], false) . '<br>';
+      if (!empty($s[$f['address']])) {
+        $st .= nl2br($s[$f['address']], false) . '<br>';
       }
-      if (!empty($s['cp'])) {
-        $st .= $s['cp'] . ' ';
+      if (!empty($s[$f['postcode']])) {
+        $st .= $s[$f['postcode']] . ' ';
       }
-      if (!empty($s['ville'])) {
-        $st .= $s['ville'];
+      if (!empty($s[$f['city']])) {
+        $st .= $s[$f['city']];
       }
       if (!$with_br) {
         return str_replace('<br>', ', ', $st);

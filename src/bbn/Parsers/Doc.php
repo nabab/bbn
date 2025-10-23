@@ -335,7 +335,7 @@ class Doc
   {
     $res = [];
     if (!empty($tags)) {
-      foreach ($tags as $i => $tag) {
+      foreach ($tags as $tag) {
         // Skip the 'memberof' tag
         if ($tag['tag'] === 'memberof') {
           continue;

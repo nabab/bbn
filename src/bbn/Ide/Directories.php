@@ -1,12 +1,14 @@
 <?php
 
 namespace bbn\Ide;
-use bbn;
+
 use bbn\X;
+use bbn\File\Dir;
+use bbn\Models\Tts\Optional;
 
 class Directories {
 
-  use bbn\Models\Tts\Optional;
+  use Optional;
 
   const IDE_PATH = 'ide',
         DEV_PATH = 'paths',
@@ -635,7 +637,7 @@ class Directories {
         !empty($tab)
       ){
         $cfg = $cfg['tabs'][$tab];
-        $root = $root . $cfg['path'];
+        $root .= $cfg['path'];
       }
       // New file
       if ( $type === 'file' ){
@@ -1079,7 +1081,7 @@ class Directories {
           self::createPermByReal($perms);
         }
         else {
-          $dir_perms = function($fd) use(&$dir_perms){
+          $dir_perms = function($fd) use(&$dir_perms): void{
             foreach ( $fd as $f ){
               if ( is_file($f) &&
                 (X::basename($f) !== '_super.php')
@@ -1588,18 +1590,19 @@ class Directories {
    * @return array
    */
   public function changeExt($ext, $file){
-    if ( !empty($ext) &&
-      !empty($file) &&
-      file_exists($file)
-    ){
+    if (!empty($ext)
+      && !empty($file)
+      && file_exists($file)
+    ) {
       $pi = X::pathinfo($file);
       $new = $pi['dirname'].'/'.$pi['filename'].'.'.$ext;
-      bbn\File\Dir::move($file, $new, true);
+      Dir::move($file, $new, true);
       return [
         'file' => $new,
         'file_url' => $this->realToUrl($new)
       ];
     }
+
     $this->error("Error.");
   }
 
@@ -1608,9 +1611,10 @@ class Directories {
    *
    * @param string $file The real file/dir's path
    * @param string $type The type (file/dir)
-   * @return bool|int
+   * @return ?string
    */
-  public function realToPerm($file, $type='file'){
+  public function realToPerm($file, $type='file'): ?string
+  {
     if ( !empty($file) &&
       is_dir(\bbn\Mvc::getAppPath()) &&
       // It must be a controller
@@ -1648,7 +1652,8 @@ class Directories {
         return $this->options->fromCode($code, $id_parent);
       }
     }
-    return false;
+
+    return null;
   }
 
   /**

@@ -829,7 +829,7 @@ class Project extends DbCls
             }
 
             //check if the files of the component + those that have a different name or have hidden folders is the same as all the content, leaving only the possibility in case of folders not hidden
-            $num = $num - ($num_check + $element_exluded);
+            $num -= $num_check + $element_exluded;
           }
         }
 

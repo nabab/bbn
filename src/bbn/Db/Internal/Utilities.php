@@ -161,7 +161,7 @@ trait Utilities
   {
     $val = null;
     if (($tab = $this->modelize($table)) && isset($tab['fields'][$col])) {
-      foreach ($tab['keys'] as $key => $cfg){
+      foreach ($tab['keys'] as $cfg){
         if ($cfg['unique']
             && !empty($cfg['ref_column'])
             && (\count($cfg['columns']) === 1)

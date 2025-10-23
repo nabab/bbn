@@ -95,7 +95,7 @@ class Hash
 			)
 			{
 				if ( is_numeric($v) )
-					$v = $v + 0;
+					$v += 0;
 				$i = array_search($k,$this->keys);
 				if ( $i === false )
 				{

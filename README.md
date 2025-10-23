@@ -7,7 +7,9 @@ bbn
 
 ## The PHP library used by [app-UI](https://app-ui.com)
 
-### You can install the library through Composer
+## 📦 Installation
+
+You can install the library via **Composer**:
 
 ```json
 {
@@ -17,132 +19,378 @@ bbn
 }
 ```
 
-### A library targeted at Single Page Applications that includes:
+---
 
-* [An MVC framework](#mvc)
-* [A powerful ORM supporting database structure analysis and lots of return methods](#orm)
-* [An options' class on which most app-UI features are based](#option)
-* API classes for integrating external services (Virtualmin, Cloudmin, Github, Gitlab, Payments...)
-* A History class allowing to store each change done in the database and revert them
-* Files, Images, and PDF files manipulation classes
-* Filesystems explorator
-* An automated task management system
-* A universal caching system
-* HTML generation classes
-* Users and groups management classes
-* Parsers for PHP, Javascript and VueJS components
-* Specific classes for app-UI features such as:
-  * Notes
-  * Medias
-  * Chat
-  * Clipboard
-  * Content Management System
-  * Dashboard
-  * Databases management system
-  * Databases synchronization system
-  * I.D.E.
-  * Automated mailings
-  * Internationalization
-  * Masking system for letters and texts
-  * A notification system
-  * Data's observers
-  * Passwords management
-  * Planning and events management
-  * Project management system
-  * A statistics system
-  * A general project and workflow management system
-  * Static methods for manipulating all kind of data and other useful functions
-* And many other features!
+## 🚀 Overview
 
-The bbn framework works with a [router](https://github.com/nabab/bbn-router) and some configuration files. An [installer](https://www.youtube.com/watch?v=dQw4w9WgXcQ) will be released in 2022.
+**bbn** is a PHP library designed for **Single Page Applications (SPA)**.  
+It provides a comprehensive set of tools, including:
 
-There is still a huge amount of work on code review, translation and documentation ahead.
+- ⚙️ **MVC framework**
+- 🧠 **Powerful ORM**
+  - Supports database structure analysis
+  - Provides numerous data retrieval methods
+- 🗂️ **Options class** – the foundation for many app-UI features
+- 🌐 **API integrations** for:
+  - Virtualmin, Cloudmin, GitHub, GitLab, payment gateways, and more
+- 🕒 **History class** – track and revert database changes
+- 🖼️ **File manipulation utilities** for:
+  - Files, images, and PDFs
+- 🧭 **Filesystem explorer**
+- ⏱️ **Automated task management system**
+- ⚡ **Universal caching system**
+- 🧱 **HTML generation classes**
+- 👥 **User and group management**
+- 🧩 **Parsers** for PHP, JavaScript, and VueJS components
 
-Any help is welcome!
+### 🧰 app-UI Specific Features
 
-### Typical installation structure:
+- Notes  
+- Media manager  
+- Chat  
+- Clipboard  
+- CMS  
+- Dashboard  
+- Database management and synchronization  
+- I.D.E.  
+- Automated mailings  
+- Internationalization (i18n)  
+- Masking system for text  
+- Notification system  
+- Data observers  
+- Password management  
+- Planning and event management  
+- Project and workflow management  
+- Statistics system  
+- Static helper methods for all kinds of data
 
-- app-ui/
-	- data/
-	- src/
-		- cfg/
-			- environments.yml
-			- settings.yml
-			- custom2.php
-		- cli/
-		- components/
-		- lib/
-		- locale/
-		- mvc/
-			- css/
-			- html/
-			- js/
-			- model/
-			- private/
-			- public/
-		- plugins/
-	- router.php
-- public_html/
-	- .htaccess
-	- index.php
+...and **many other features!**
 
-**By default the BBN framework returns a HTML document if there is no POST, and a JSON object otherwise.**  
+---
 
-The [bbn-js](https://github.com/nabab/bbn-js) and [bbn-vue](https://github.com/nabab/bbn-vue) libraries are intimately related with this framework, and deal with its I/O.
+## ⚙️ Framework Architecture
 
-They catch each local link clicked, send them as a POST request, then deal with the response.
+The **bbn** framework works with a **router** and a few configuration files.  
+An **installer** will be released in the future.
 
-### The JSON object returned by clicking a link typically holds the following properties:
+> 🧑‍💻 There is still a lot of ongoing work regarding code review, translations, and documentation.  
+> Contributions are welcome!
 
-|Name|Description|
-|---|---|
-|`content`|a HTML string, which will be injected into a container|
-|`title`|will be the new page's title, that will be prepended to the website's general title|
-|`css`|a CSS string which will be put as a `<style/>` tag in the same container|
-|`script`|a javascript function which will either return:<br>- A function that will receive the container as argument and will be executed after the content injection<br>- An object that will be treated as a VueJS anonymous component inside the [router component](https://github.com/nabab/bbn-vue/blob/master/src/components/router/router.js)|
-|`data`|An object of data, [accessible by the javascript](#accessing-the-data-through-javascript)|
+---
 
-### Life cycle of a typical request
+## 📁 Typical Directory Structure
 
-#### The redirection
+```
+app-ui/
+├── data/
+├── src/
+│   ├── cfg/
+│   │   ├── environments.yml
+│   │   ├── settings.yml
+│   │   └── custom2.php
+│   ├── cli/
+│   ├── components/
+│   ├── lib/
+│   ├── locale/
+│   ├── mvc/
+│   │   ├── css/
+│   │   ├── html/
+│   │   ├── js/
+│   │   ├── model/
+│   │   ├── private/
+│   │   └── public/
+│   ├── plugins/
+│   ├── router.php
+│
+├── public_html/
+│   ├── .htaccess
+│   └── index.php
+```
 
-:arrow_right: Call to https://myapp.com/just/testing (which does not exist)  
-:arrow_right: An .htaccess file rewrites all the not found files to an index.php file  
-:arrow_right: The index file `chdir` in the app folder `src/` which should be outside of the public root  
-:arrow_right: It then includes the [router](https://github.com/nabab/bbn-router/blob/master/src/router.php) which should be in the src/ directory (as a symlink towards vendor)  
+---
 
-#### The routing
+## 🔄 Request Lifecycle
 
-:arrow_right: It recognizes the predefined configuration in which it stands through the `hostname` and `app_path` definitions from `src/cfg/environment.yml`  
-:arrow_right: It defines constants and initializes autoload  
-:arrow_right: It instantiates different classes depending on the configuration  
-:arrow_right: It creates the MVC class, which will look for the right controller:  
+### 1️⃣ Redirection
 
-- It looks into `src/mvc/public/` for a controller corresponding to the path `just/testing`:
-	- If it is a landing page (no POST) the file should be:
-	`src/mvc/public/just/testing/index.php`
-	- Otherwise the file should be:
-	`src/mvc/public/just/testing.php`
-- while it doesn't find the file it goes backward in the directories: 
-	- If it is a landing page (no POST) it looks for:
-	`src/mvc/public/just/index.php` and finally `src/mvc/public/index.php`
-	- Otherwise it looks for:
-	`src/mvc/public/just.php` then returns a `404` if it doesn't find it
+1. Request:  
+   → `https://myapp.com/just/testing` (which does not exist)
 
-#### The execution
+2. `.htaccess` rewrites all missing files to `index.php`.
 
-:arrow_right: An optional file `src/custom1.php` is included with an object `$bbn` available with property `mvc`  
-:arrow_right: If we are not in CLI mode a session is started  
-:arrow_right: Still not in CLI mode an optional file `src/custom2.php` is included with an object `$bbn` available with property `mvc`, `user` and `session` depending on the configuration  
-:arrow_right: The MVC includes the controller  
+3. `index.php` changes directory to `src/` (outside the public root).
 
-#### The output  
+4. The **router** (in `src/`) is loaded — usually symlinked from `vendor`.
 
-:arrow_right: The output buffer becomes the `content` property of the response object  
-:arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
-:arrow_right:  If it is a landing page (no POST) the property `content` will be returned with HTML headers  
-:arrow_right:  Otherwise the object `mvc->obj` will be returned encoded with JSON headers  
-:arrow_right:  If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers  
+---
+
+### 2️⃣ Routing
+
+1. The framework identifies its environment from:
+   - `hostname`
+   - `app_path` in `src/cfg/environment.yml`
+
+2. Constants are defined and **autoload** is initialized.
+
+3. Classes are instantiated based on configuration.
+
+4. The **MVC** class looks for the appropriate controller in:
+   - `src/mvc/public/just/testing/`
+
+   Depending on the request type:
+
+   - **Landing page (GET):**
+     ```
+     src/mvc/public/just/testing/index.php
+     ```
+   - **POST request:**
+     ```
+     src/mvc/public/just/testing.php
+     ```
+
+   If not found, it moves up the hierarchy:
+   ```
+   src/mvc/public/just/index.php
+   src/mvc/public/index.php
+   ```
+   or for POST:
+   ```
+   src/mvc/public/just.php
+   ```
+
+   If none found → **404**.
+
+---
+
+### 3️⃣ Execution
+
+1. Optional `src/custom1.php` is included with `$bbn->mvc`.
+2. If not in CLI mode:
+   - A session is started.
+   - Optional `src/custom2.php` is included (`$bbn` may have `mvc`, `user`, `session`).
+3. The MVC includes the controller.
+
+---
+
+### 4️⃣ Output
+
+1. Output buffer becomes the `content` property of the response.
+2. Optional `src/custom3.php` is included (with `$bbn->obj`).
+3. Depending on request type:
+   - **Landing page (GET):** returns `content` with HTML headers.
+   - **POST request:** returns JSON-encoded `mvc->obj`.
+4. If `obj` contains a file or image, response headers are set accordingly.
+
+---
+
+## 🧠 Response Format
+
+When clicking a link (handled by `bbn-js` and `bbn-vue`), the framework returns a **JSON object** with the following properties:
+
+| Name | Description |
+|------|--------------|
+| `content` | HTML string injected into a container |
+| `title` | Page title (prepended to site title) |
+| `css` | CSS string inserted as a `<style>` tag |
+| `script` | JavaScript function or VueJS anonymous component |
+| `data` | Data object accessible by JavaScript |
+
+> The frontend libraries `bbn-js` and `bbn-vue` handle all I/O:  
+> They intercept local links, send POST requests, and process the JSON responses.
+
+---
+
+## ⚡ Quick Start Example
+
+Below is a minimal example showing how to set up and run a simple **bbn** application.
+
+### 🏗️ Project Structure
+
+```
+my-app/
+├── composer.json
+├── src/
+│   ├── cfg/
+│   │   ├── environments.yml
+│   │   └── settings.yml
+│   ├── mvc/
+│   │   └── public/
+│   │       └── hello/
+│   │           └── index.php
+│   └── router.php
+└── public_html/
+    ├── .htaccess
+    └── index.php
+```
+
+### ⚙️ Configuration
+
+#### `composer.json`
+```json
+{
+  "require": {
+    "bbn/bbn": "dev/master"
+  }
+}
+```
+
+#### `src/cfg/environments.yml`
+```yaml
+environments:
+  dev:
+    host: localhost
+    app_path: /path/to/my-app/src
+    db:
+      engine: mysql
+      host: 127.0.0.1
+      user: root
+      pass: root
+      dbname: myapp
+```
+
+#### `src/cfg/settings.yml`
+```yaml
+mode: dev
+timezone: UTC
+locale: en
+```
+
+### 🧩 Router
+
+#### `src/router.php`
+```php
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+$router = new \bbn\Mvc\Router();
+$router->run();
+```
+
+### 🌐 Entry Point
+
+#### `public_html/.htaccess`
+```apache
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+```
+
+#### `public_html/index.php`
+```php
+<?php
+chdir(__DIR__ . '/../src/');
+require 'router.php';
+```
+
+### 🧱 Controller
+
+#### `src/mvc/public/hello/index.php`
+```php
+<?php
+/** @var bbn\Mvc\Model $model */
+return [
+  'title' => 'Hello World',
+  'content' => '<h1>Welcome to bbn!</h1>'
+];
+```
+
+### ▶️ Running the App
+
+1. Install dependencies:
+   ```bash
+   composer install
+   ```
+2. Start a local PHP server:
+   ```bash
+   php -S localhost:8080 -t public_html
+   ```
+3. Visit [http://localhost:8080/hello](http://localhost:8080/hello)
+
+You should see:
+
+> **Hello World — Welcome to bbn!**
+
+### 🧩 Next Steps
+
+- Explore the MVC structure under `src/mvc/`
+- Connect your database and start using the ORM
+- Integrate with `bbn-vue` or `bbn-js` for dynamic SPA behavior
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions of all kinds — code, documentation, tests, translations, or ideas.  
+Your help is greatly appreciated in making **bbn** better for everyone.
+
+### 🧭 How to Contribute
+
+1. **Fork** the repository  
+2. **Create a new branch** for your feature or fix:  
+   ```bash
+   git checkout -b feature/my-new-feature
+   ```
+3. **Make your changes** and ensure that everything is working  
+4. **Commit** your changes with a meaningful message:  
+   ```bash
+   git commit -m "Add support for XYZ feature"
+   ```
+5. **Push** your branch to your fork:  
+   ```bash
+   git push origin feature/my-new-feature
+   ```
+6. **Open a Pull Request** to the `master` branch  
+
+### 🧹 Code Guidelines
+
+- Follow **PSR-12** coding standards  
+- Use clear and consistent **naming conventions**  
+- Add **type hints** and **PHPDoc** comments where appropriate  
+- Keep functions **small and focused**  
+- Write **unit tests** for new features whenever possible  
+
+### 🧪 Testing
+
+Run the test suite using:
+
+```bash
+composer test
+```
+
+> Please ensure that all tests pass before submitting a pull request.
+
+### 🌍 Translations
+
+We’re progressively translating the framework and documentation.  
+If you’d like to contribute translations, you can:
+- Add new language files under `src/locale/`
+- Improve existing translations
+
+### 🧾 Documentation
+
+Help us improve the documentation by:
+- Fixing typos or outdated examples  
+- Expanding missing sections  
+- Adding code samples or tutorials  
+
+All documentation files are located in the `/docs` folder (coming soon).
+
+### 🗓️ Roadmap & Issues
+
+Check out the **Issues** section for:
+- Ongoing bug reports  
+- Feature requests  
+- Upcoming milestones  
+
+You can also start a new discussion or suggest improvements.
+
+### 💡 Need Help?
+
+If you encounter problems or have questions:
+- Open a **GitHub Issue**
+- Or reach out via our community channels (coming soon)
+
+
 
 ## A few examples
 

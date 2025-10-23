@@ -1529,6 +1529,17 @@ PGSQL
       $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
     }
 
+    if (!empty($cfg['position'])) {
+      if (strpos($cfg['position'], 'after:') === 0) {
+        $after = trim(substr($cfg['position'], 6));
+        if (Str::checkName($after)) {
+          $st .= ' AFTER ' . $this->escape($after);
+        }
+      } elseif (strtolower($cfg['position']) === 'first') {
+        $st .= ' FIRST';
+      }
+    }
+
     return rtrim($st, ',' . PHP_EOL);
   }
 
@@ -1566,7 +1577,7 @@ PGSQL
       'fields' => [],
     ];
     $i             = 0;
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $f) {
       if (isset($cfg['available_fields'][$f])) {
         $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
@@ -1611,7 +1622,7 @@ PGSQL
       'values' => [],
       'fields' => [],
     ];
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $f) {
       if (isset($cfg['available_fields'][$f])) {
         $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);

@@ -218,7 +218,7 @@ class History
       $col      = $this->db->escape($this->getHistoryTableColumnName('col'));
       $where_ar = [];
       if (isset($model['fields']) && is_array($model['fields'])) {
-        foreach ($model['fields'] as $k => $f){
+        foreach ($model['fields'] as $f){
           if (!empty($f['id_option'])) {
             $where_ar[] = $col.' = UNHEX("'.$this->db->escapeValue($f['id_option']).'")';
           }
@@ -1097,7 +1097,7 @@ MYSQL;
       if (!isset($cfg['history'])) {
         $cfg['history'] = [];
         $new_join       = [];
-        foreach ($cfg['join'] as $i => $t){
+        foreach ($cfg['join'] as $t){
           $post_join = false;
           $model     = $this->db->modelize($t['table']);
           if (isset($model['keys']['PRIMARY'])

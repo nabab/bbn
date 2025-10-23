@@ -98,7 +98,7 @@ class Virtualmin
               foreach ($info[$d['name']] as $istr => $str) {
                 if ($str = explode("\n", \trim($str))) {
                   $tmp = [];
-                  foreach ($str as $is => $s) {
+                  foreach ($str as $s) {
                     if ($s = explode(':', $s)) {
                       $tmp[\trim($s[0])] = \trim($s[1]);
                     }
@@ -148,7 +148,7 @@ class Virtualmin
                     return $val !== '';
                   }
                 );
-                foreach ($fields as $y => $field) {
+                foreach ($fields as $field) {
                   if (($pos = strpos($field, ':')) !== false) {
                     $idx   = str_replace(' ', '', substr($field, 0, $pos));
                     $value = substr($field, $pos, strlen($field) - $pos);

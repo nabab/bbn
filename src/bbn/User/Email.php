@@ -1538,7 +1538,7 @@ class Email extends Basic
       // get the option 'folders'
       $types = self::getFolderTypes();
 
-      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed, $mb) {
+      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed, $mb): void {
         // set the first value of $a in $ele and remove it in the array
         $ele = array_shift($a);
         // search if res contain an array with 'text' => $ele and return the index or null instead
@@ -1619,7 +1619,7 @@ class Email extends Basic
 
       $pref = $this->pref;
 
-      $import = function (array $to_add, $id_parent = null) use ($id_account, &$pref, &$import, &$types) {
+      $import = function (array $to_add, $id_parent = null) use ($id_account, &$pref, &$import, &$types): void {
         foreach ($to_add as $a) {
           if ($id_parent) {
             $a['id_parent'] = $id_parent;
@@ -1648,13 +1648,13 @@ class Email extends Basic
         }
       };
 
-      $update = function(array $toUpdate) use ($pref) {
+      $update = function(array $toUpdate) use ($pref): void {
         foreach ($toUpdate as $u) {
           $pref->updateBit($u['id'], $u);
         }
       };
 
-      $remove = function(array $toRemove) use ($pref) {
+      $remove = function(array $toRemove) use ($pref): void {
         foreach ($toRemove as $r) {
           $pref->deleteBit($r['id']);
         }

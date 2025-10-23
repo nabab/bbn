@@ -22,6 +22,7 @@ use bbn\Appui\Database;
 use bbn\Appui\Masks;
 use bbn\Appui\Option;
 use bbn\Appui\Uauth;
+use bbn\Appui\History;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbActions;
 

@@ -108,7 +108,7 @@ class Session
       else {
         throw new Exception(X::_("The session ID %s could not be regenerated", session_id()));
       }
-      
+
       $this->close();
       return $newSession;
     }
@@ -320,7 +320,7 @@ class Session
         $this->once_opened = true;
 
         if (defined('BBN_SESS_LIFETIME')) {
-          ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
+          ini_set('session.gc_maxlifetime', constant('BBN_SESS_LIFETIME'));
         }
       }
 
@@ -379,8 +379,8 @@ class Session
         if (empty($value)) {
           $this->data = [];
 
-        } elseif (bbn\X::isAssoc($value)) {
-          $this->data = bbn\X::mergeArrays($this->data, $value);
+        } elseif (X::isAssoc($value)) {
+          $this->data = X::mergeArrays($this->data, $value);
         }
       }
       else{
@@ -414,5 +414,5 @@ $sess->set(10, "myProp");
 $sess->set(10, "myProp2");
 $sess->uset("myProp2");
 $sess->transform(function($a){return $a+1;}, "myProp");
-bbn\X::hdump($sess->get("myProp"), $sess->get("hhhh"));
+X::hdump($sess->get("myProp"), $sess->get("hhhh"));
 */

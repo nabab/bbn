@@ -204,6 +204,17 @@ class Note extends DbCls
 
 
   /**
+   * Checks if a note exists
+   * @param string $id
+   * @return bool
+   */
+  public function exists(string $id): bool
+  {
+    return $this->dbTraitExists($id);
+  }
+
+
+  /**
    * @param $title
    * @param $content
    * @return string
@@ -1800,7 +1811,7 @@ class Note extends DbCls
       }
       $this->log($this->db->last(), $this->db->getLastValues());
       $this->log($res);
-      
+
       $res = $this->db->update($table, [$cols['num'] => $num], [$cols['id'] => $id]);
       /*
       if ($res) {

@@ -1169,7 +1169,7 @@ class Str
       $bits       = array_reverse(explode('/', $path));
       $path       = '';
       $num_parent = 0;
-      foreach ($bits as $i => $b){
+      foreach ($bits as $b){
         if ($b === '..') {
           $num_parent++;
         }

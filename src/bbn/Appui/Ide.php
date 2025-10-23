@@ -170,10 +170,12 @@ class Ide
       $project_name   = constant('BBN_APP_NAME');
     }
 
-    $this->project = $project_name;
-    if ($project_name && !empty($this->projects)) {
-      $this->init();
-      $this->_ide_path();
+    if ($this->project !== $project_name) {
+      $this->project = $project_name;
+      if ($project_name && !empty($this->projects)) {
+        $this->init();
+        $this->_ide_path();
+      }
     }
 
     return $project_name;
@@ -460,6 +462,9 @@ class Ide
   {
     //return $this->projects::decipherPath($st);
     $st = Str::parsePath($st);
+    if (!isset($this->repositories)) {
+      throw new \Exception("BOBOB");
+    }
     //get root absolute of the file
     foreach ($this->repositories as $i => $rep) {
       if (strpos($st, $rep['name']) === 0) {
@@ -1079,7 +1084,7 @@ class Ide
    *
    * @param string $file The real file/dir's path
    * @param string $type The path type (file or dir)
-   * @return bool|int
+   * @return bool|string
    */
   public function realToPerm(string $file, $type = 'file')
   {
@@ -1144,7 +1149,7 @@ class Ide
           array_push($bits, $this->_permissions());
         }
 
-        return $this->options->fromCode($bits);
+        return $this->options->fromCode(...$bits);
       }
     }
 
@@ -1160,7 +1165,7 @@ class Ide
   /**
    * Gets file's preferences
    *
-   * @param string $cfg info for get file json
+   * @param array $cfg info for get file json
    * @return array|null
    */
   public function getFilePreferences(array $cfg = []): ?array
@@ -1881,7 +1886,6 @@ class Ide
                     [
                       'text' => $time,
                       'code' => $this->fs->getContents($file),
-                      'folder' => false,
                       'mode' => X::basename($ctrl_path),
                       'folder' => false
                     ]
@@ -1927,11 +1931,11 @@ class Ide
                       $i = \count($backups) - 1;
                     }
 
-                    if (($idx = X::search($backups[$i]['items'], ['title' => $d])) === null) {
+                    if (($idx = X::search($backups[$i]['items'], ['title' => $dir])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
-                          'text' => $d,
+                          'text' => $dir,
                           'folder' => true,
                           'items' => [],
                           'icon' => 'folder-icon'
@@ -2182,7 +2186,7 @@ class Ide
 
       $all = $this->fs->getFiles($path, true);
       if (is_array($all) && count($all)) {
-        foreach ($all as $i => $v) {
+        foreach ($all as $v) {
           if (X::basename($v) !== "cfg") {
             //if folder
             if ($this->fs->isDir($v)) {
@@ -2201,7 +2205,7 @@ class Ide
 
               $content = $this->fs->scan($content);
               if (is_array($content) && count($content)) {
-                foreach ($content as $j => $val) {
+                foreach ($content as $val) {
                   $list = [];
                   // case file into folder
                   if ($this->fs->isFile($val)) {
@@ -2267,7 +2271,7 @@ class Ide
                           $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
                           $file_name   = X::basename($path_file);
                           $path        = X::dirname($base . '/' . substr($path_file, strlen($base_rep)));
-                          $occourences = $occourences + substr_count($lineCurrent, $info['search']);
+                          $occourences += substr_count($lineCurrent, $info['search']);
                           // info for code
                           $list[] = [
                             'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
@@ -2289,7 +2293,7 @@ class Ide
 
                   //if we find rows then we will create the tree structure with all the information
                   if (count($list) > 0) {
-                    $totLines = $totLines + count($list);
+                    $totLines += count($list);
                     if (!empty($info['mvc'])) {
                       if (explode("/", $path_file)[1] === "public") {
                         $tab = 'php';
@@ -2362,7 +2366,7 @@ class Ide
                     $position    = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                     $text        = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
                     $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
-                    $occourences = $occourences + substr_count($lineCurrent, $info['search']);
+                    $occourences += substr_count($lineCurrent, $info['search']);
                     //see
                     $path = str_replace($base, (strpos($path_file, $this->getAppPath()) === 0 ? 'app/' : 'lib/'), $path);
 
@@ -2378,11 +2382,11 @@ class Ide
 
                     // info for file
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $lineNumber . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       'code' => true,
-                      'uid' => $path . '/' . $file_name,
+                      'uid' => $path . '/' . $v,
                       'icon' => 'nf nf-fa-code',
                       'linkPosition' => explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0],
                       'tab' => !empty($tab) ? $tab : false
@@ -2401,7 +2405,7 @@ class Ide
                     'num' => count($list),
                     'numChildren' => count($list),
                     'repository' => $info['repository']['bbn_path'] . '/',
-                    'uid' => $path . '/' . $file_name,
+                    'uid' => $path . '/' . $v,
                     'file' => X::basename($path_file),
                     'link' => !empty($link) ? $link : false,
                     'tab' => !empty($tab) ? $tab : false,
@@ -2418,8 +2422,8 @@ class Ide
 
       if (!empty($result)) {
         $totFiles = 0;
-        foreach ($result as $key => $value) {
-          $totFiles = $totFiles + $value['items'][0]['numChildren'];
+        foreach ($result as $value) {
+          $totFiles += $value['items'][0]['numChildren'];
         }
 
         return [
@@ -2464,14 +2468,13 @@ class Ide
                   //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
                   if (!empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\n') === false)) {
                     $lineNumber = $file->key() + 1;
-                    $name_path  = $rep['path'] . substr(X::dirname($val), strlen($base_rep));
                     $line       = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
 
                     $text      = $line;
                     $text     .= str_replace($seek, "<strong><span class='underlineSeach'>" . $seek . "</span></strong>", $lineCurrent);
                     $file_name = X::basename($path_file);
 
-                    $occourences = $occourences + substr_count($lineCurrent, $seek);
+                    $occourences += substr_count($lineCurrent, $seek);
                     if (in_array($rep['name'], $foundRepos) === false) {
                       $foundRepos[] = $rep['name'];
                       $numRepositories++;
@@ -2496,7 +2499,7 @@ class Ide
 
                 //if we find rows then we will create the tree structure with all the information
                 if (count($list) > 0) {
-                  $totLines = $totLines + count($list);
+                  $totLines += count($list);
                   if (explode("/", $path_file)[1] === "public") {
                     $tab = 'php';
                   } else {
@@ -2668,7 +2671,7 @@ class Ide
       && !empty($pref_arch = $this->pref->getClassCfg())
     ) {
       if (is_null($id_user)) {
-        $id_user = $this->pref->id_user;
+        $id_user = $this->pref->getIdUser();
       }
 
       return $this->db->rselect(
@@ -2831,7 +2834,7 @@ class Ide
       }
 
       // Each file associated with the structure (MVC case)
-      foreach ($rep['tabs'] as $i => $tab) {
+      foreach ($rep['tabs'] as $tab) {
         // The path of each file
         $tmp = $path;
         if (!empty($tab['path'])) {
@@ -3590,7 +3593,7 @@ class Ide
           && !empty($cfg['active_file'])
         ) {
           if (empty($this->fs->delete($path . $cfg['path']))) {
-            $this->error("Error during the file|folder delete: $t[old]");
+            $this->error(X::_("Error during the file|folder delete: %s", $path . $cfg['path']));
             return false;
           }
 

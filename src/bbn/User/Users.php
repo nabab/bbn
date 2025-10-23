@@ -60,6 +60,4 @@ FROM bbn_users
     }
     return $res;
   }
-
-
 }

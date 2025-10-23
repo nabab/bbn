@@ -51,6 +51,16 @@ class History
   private static $cache;
   private static $cache_prefix;
 
+  public static function getTable()
+  {
+    return self::$table;
+  }
+
+  public static function getTableUids()
+  {
+    return self::$table_uids;
+  }
+
   /**
    * Returns the column's corresponding option's ID
    * @param $column string
@@ -927,6 +937,7 @@ MYSQL;
               }
             }
       
+            self::$structures[$table]['constraints'] = [];
             foreach ($model['keys'] as $name => $key) {
               if (!empty($key['unique']) && ((count($key['columns']) > 1) || ($key['columns'][0] !== $primary))) {
                 $toPush = [
@@ -942,6 +953,14 @@ MYSQL;
                 }
 
                 array_push(self::$structures[$table]['unique'], $toPush);
+              }
+
+              if (!empty($key['ref_column']) && (count($key['columns']) === 1) && ($key['columns'][0] !== $primary)) {
+                self::$structures[$table]['constraints'][$name] = [
+                  'column' => $key['columns'][0],
+                  'ref_table' => $key['ref_table'],
+                  'ref_column' => $key['ref_column']
+                ];
               }
             }
 
@@ -989,6 +1008,69 @@ MYSQL;
   {
     return self::$links;
   }
+
+  public static function getRelatedIds(
+    string $id,
+    string $table,
+    array $relatedTables = [],
+    int $depth = 2,
+    int $current = 0,
+    array $uids = []
+  ): array
+  {
+    $uids = [$id];
+    $noDirects = $relatedTables;
+    $db = self::_get_db();
+    $primary = $db->getPrimary($table);
+    if (count($primary) !== 1) {
+      return $uids;
+    }
+    foreach ($db->getForeignKeys($primary[0], $table) as $tfn => $col) {
+      $table = $db->tsn($tfn);
+      if (($hcfg = History::getTableCfg($tfn)) && $hcfg['history']) {
+        $allTables[] = $table;
+        $dbModel = $db->modelize($tfn);
+        $tableUids = $db->getColumnValues($tfn, $hcfg['primary'], [$col[0] => $id]);
+        array_push($uids, ...$tableUids);
+        if (!in_array($table, $noDirects)) {
+          continue;
+        }
+        foreach ($dbModel['fields'] as $colName => $colCfg) {
+          if (empty($colCfg['key']) || ($colCfg['key'] === 'primary')) {
+            continue;
+          }
+          if (!empty($dbModel['cols'][$colName])) {
+            foreach ($dbModel['cols'][$colName] as $keyName) {
+              if (!empty($dbModel['keys'][$keyName]['ref_table']) && (count($dbModel['keys'][$keyName]['columns']) === 1)) {
+                $stable = $db->tsn($dbModel['keys'][$keyName]['ref_table']);
+                if (in_array($stable, [$table])) {
+                  continue;
+                }
+
+                if (($shcfg = History::getTableCfg($stable)) && $shcfg['history']) {
+                  $allTables[] = $stable;
+                  if ($stableUids = $db->getColumnValues($table, $colName, [$hcfg['primary'] => $tableUids])) {
+                    array_push($uids, ...$stableUids);
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    $uids = array_unique($uids);
+    $current++;
+    if ($depth > $current) {
+    }
+
+    return $uids;
+  }
+
+
+
 
 
   public static function fusion(array $ids, string $table, Db $db, $main = null): bool
@@ -1757,7 +1839,7 @@ MYSQL;
         'logic' => 'OR',
         'conditions' => []
       ];
-      foreach ($model['fields'] as $k => $f) {
+      foreach ($model['fields'] as $f) {
         if (!empty($f['id_option'])) {
           $where_ar['conditions'][] = [
             'field' => 'col',

@@ -991,7 +991,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     $res = '';
     if (isset($conditions['conditions'], $conditions['logic'])) {
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
-      foreach ($conditions['conditions'] as $key => $f) {
+      foreach ($conditions['conditions'] as $f) {
         if (is_array($f) && isset($f['logic']) && isset($f['conditions'])) {
           if ($tmp = $this->getConditions($f, $cfg, $is_having, $indent + 2)) {
             $res .= (empty($res) ? '(' : PHP_EOL . str_repeat(' ', $indent) . "$logic (") .
@@ -1431,7 +1431,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             $fields = $subcfg['fields'];
           }
 
-          foreach ($fields as $k => $f){
+          foreach ($fields as $f){
             if (!empty($subcfg['available_fields'][$f])) {
               $model = $this->modelize($subcfg['available_fields'][$f]);
               if ($model) {
@@ -2099,7 +2099,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         'last' => microtime(true)
       ];
       $num_values = 0;
-      foreach ($args as $i => $arg){
+      foreach ($args as $arg){
         if (!is_array($arg)) {
           $params['values'][] = $arg;
           $num_values++;
@@ -2743,7 +2743,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $table = $this->tableFullName(is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
       // Specific to a table
       if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
-        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
+        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $f){
           if ($f && \is_callable($f)) {
             if (!($tmp = $f($cfg))) {
               $cfg['run']  = false;
@@ -2984,7 +2984,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
         }
 
-        foreach ($args['join'] as $key => $join){
+        foreach ($args['join'] as $join){
           if (!empty($join['table'])) {
             $tfn = $this->tableFullName($join['table']);
             if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
@@ -3433,7 +3433,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
     if (!empty($res['join'])) {
       $new_join = [];
-      foreach ($res['join'] as $k => $join ){
+      foreach ($res['join'] as $join ){
         $new_item = $join;
         if (!empty($join['join'])) {
           $new_join2 = [];
@@ -5192,7 +5192,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     $res   = [];
     $model = $this->modelize();
     foreach ($model as $tn => $m){
-      foreach ($m['keys'] as $k => $t){
+      foreach ($m['keys'] as $t){
         if (($t['ref_table'] === $table)
           && ($t['ref_column'] === $col)
           && ($t['ref_db'] === $db)

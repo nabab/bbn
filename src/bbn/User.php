@@ -97,6 +97,7 @@ use bbn\Cache;
         'group' => 'group',
         'type' => 'type',
         'code' => 'code',
+        'home' => 'home',
         'cfg' => 'cfg'
       ],
       'hotlinks' => [
@@ -267,6 +268,9 @@ use bbn\Cache;
   /** @var int */
   protected $id_group;
 
+  /** @var array */
+  protected $group;
+
   /** @var mixed */
   protected $alert;
 
@@ -310,6 +314,9 @@ use bbn\Cache;
     self::retrieverInit($this);
 
     if ($this->isToken() && !empty($params[$f['token']])) {
+      if (!isset($this->class_cfg['tables']['api_tokens'])) {
+        throw new Exception(X::_('The class %s is not configured properly to work with API tokens', get_class($this)));
+      }
 
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
@@ -404,12 +411,12 @@ use bbn\Cache;
 
         if (!$this->hasSkipVerification()) {
           // Verify that the code is correct
-          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
+          $user_cfg = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
           if (
-            !$user_cgf
-            || !isset($user_cgf['phone_verification_code'])
-            || ((string)$user_cgf['phone_verification_code'] !== (string)$params[$f['phone_verification_code']])
+            !$user_cfg
+            || !isset($user_cfg['phone_verification_code'])
+            || ((string)$user_cfg['phone_verification_code'] !== (string)$params[$f['phone_verification_code']])
           ) {
             $this->setError(24);
             return;
@@ -440,7 +447,6 @@ use bbn\Cache;
           'token'   => $new_token,
           'success' => true
         ];
-        return;
       } elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (!$user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
@@ -474,7 +480,6 @@ use bbn\Cache;
           'token'   => $params[$f['token']],
           'success' => true
         ];
-        return;
       }
     }
     else {
@@ -704,6 +709,7 @@ use bbn\Cache;
           && ($key !== 'admin')
           && ($key !== 'dev')
           && ($key !== 'pass')
+          && ($key !== 'res')
         ) {
           $update[$key] = $val;
         }
@@ -1729,10 +1735,12 @@ use bbn\Cache;
         unset($this->fields['enckey']);
       }
 
-      if (!empty($this->getSession('cfg') && !$force)) {
+      if (!empty($this->getSession('id_group') && !$force)) {
         $this->cfg      = $this->getSession('cfg');
         $this->id_group = $this->getSession('id_group');
-      } elseif ($d = $this->db->rselect(
+        $this->group = $this->getSession('group');
+      }
+      elseif ($d = $this->db->rselect(
         $this->class_cfg['tables']['users'],
         array_unique(array_values($this->fields)),
         X::mergeArrays(
@@ -1750,6 +1758,8 @@ use bbn\Cache;
         $this->cfg = $r['cfg'] ?? [];
         // Group
         $this->id_group = $r['id_group'];
+        $this->group = $this->getFullGroup();
+        $r['group'] = $this->group;
         $this->session->set($r, $this->userIndex);
         $this->saveSession();
       }

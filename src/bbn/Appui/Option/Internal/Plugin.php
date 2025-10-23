@@ -84,7 +84,7 @@ trait Plugin
     if ($subpluginAlias && $pluginAlias) {
       $ids = $this->parents($id);
       $num = count($ids);
-      foreach ($ids as $i => $id) {
+      foreach ($ids as $id) {
         if ($this->getIdAlias($id) === $subpluginAlias) {
           if (!$type || ($type === 'subplugin')) {
             return ['type' => 'subplugin', 'id' => $id];

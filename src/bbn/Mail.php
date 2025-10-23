@@ -42,9 +42,11 @@ namespace bbn;
 
 use Exception;
 use bbn\X;
+use bbn\Mvc;
+use bbn\Models\Cls\Basic;
 use PHPMailer\PHPMailer\PHPMailer;
 
-class Mail extends Models\Cls\Basic
+class Mail extends Basic
 {
   /**
    * The destination fields.
@@ -171,7 +173,7 @@ TEMPLATE;
   private static function getDefaultTemplate(){
     if (!self::$_template_checked) {
       self::$_template_checked = true;
-      if (($dir = \bbn\Mvc::getContentPath()) && file_exists($dir.'mails/template.html')) {
+      if (($dir = Mvc::getContentPath()) && file_exists($dir.'mails/template.html')) {
         self::$_default_template = file_get_contents($dir.'mails/template.html');
       }
     }
@@ -189,12 +191,23 @@ TEMPLATE;
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
 
-    if ( !isset($cfg['from']) && isset($cfg['user']) ){
+    $indexes = [
+      'from',
+      'user',
+      'pass',
+      'host',
+      'ssl',
+      'debug',
+    ];
+
+    if (empty($cfg['from']) && !empty($cfg['user'])) {
       $cfg['from'] = $cfg['user'];
     }
 
-    if (!isset($cfg['from'])) {
-      $cfg['from'] = BBN_ADMIN_EMAIL;
+    foreach ($indexes as $i) {
+      if (!array_key_exists($i, $cfg) && defined('BBN_EMAIL_'.strtoupper($i))) {
+        $cfg[$i] = constant('BBN_EMAIL_'.strtoupper($i));
+      }
     }
 
     if (!PHPMailer::validateAddress($cfg['from'])) {
@@ -218,10 +231,12 @@ TEMPLATE;
           }
           else{
             $this->mailer->SMTPOptions = [
-              'verify_peer' => false,
-              'verify_peer_name' => false,
-              'verify_host' => false,
-              'allow_self_signed' => false
+              'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'verify_host' => false,
+                'allow_self_signed' => false
+              ]
             ];
           }
         }
@@ -242,14 +257,14 @@ TEMPLATE;
         }
       }
 
-      $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
+      $this->mailer->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
       if ($cfg['reply-to'] ?? false) {
-        $this->setReplyTo($cfg['reply-to']);
+        $this->mailer->addReplyTo($cfg['reply-to']);
       }
 
       $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $this->log($this->mailer->ErrorInfo);
       $this->log($e->getMessage());
       $this->mailer = false;
@@ -499,7 +514,7 @@ TEMPLATE;
       try {
         $r = $this->mailer->send();
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         $this->log($e->getMessage());
         $this->log(\imap_last_error());
       }

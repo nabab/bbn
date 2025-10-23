@@ -1284,7 +1284,7 @@ class Permissions extends Basic
   public static function fTreat(array $tree, $parent = false)
   {
     $res = [];
-    foreach ($tree as $i => $t){
+    foreach ($tree as $t){
       $code      = $t['type'] === 'dir' ? X::basename($t['name']).'/' : X::basename($t['name'], '.php');
       $text      = $t['type'] === 'dir' ? X::basename($t['name']) : X::basename($t['name'], '.php');
       $o         = [

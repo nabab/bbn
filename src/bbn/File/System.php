@@ -1333,7 +1333,12 @@ class System extends Basic
           X::log(error_get_last(), 'filesystem');
         }
       } elseif (is_dir($path)) {
-        $fs = scandir($path, SCANDIR_SORT_ASCENDING);
+        try {
+          $fs = scandir($path, SCANDIR_SORT_ASCENDING) ?: [];
+        } catch (Exception $e) {
+          $fs = [];
+        }
+
         foreach ($fs as $f) {
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
             $file = $path . '/' . $f;
@@ -1506,7 +1511,7 @@ class System extends Basic
         string $errstr,
         string|null $errfile = null,
         ?int $errline = null
-      ) {
+      ): void {
       },
       E_WARNING
     );

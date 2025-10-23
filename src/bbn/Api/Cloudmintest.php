@@ -335,7 +335,7 @@ class Cloudmintest {
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->getHeaderUrl() . $url_part;
-      
+
     //Calling shell_exec and returning the result array
     return $this->callShellExec($url_part);
   }

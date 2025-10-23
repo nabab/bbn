@@ -80,7 +80,7 @@ class Git extends GitRepoCz
       if (is_array($output) && !empty($output)) {
         $arr = [];
 
-        foreach ($output as $i => $val) {
+        foreach ($output as $val) {
 
           $sigle = substr($val, 0, 2);
 

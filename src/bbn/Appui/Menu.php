@@ -476,7 +476,7 @@ class Menu extends bbn\Models\Cls\Basic
       $idPermTplId = $this->options->getPermissionsTemplateId();
       $idAccessTplId = $this->options->fromCode('access', $idPermTplId);
       $root = $this->options->getRoot();
-      foreach ($res as $k => &$d) {
+      foreach ($res as &$d) {
         $d['numChildren'] = count($this->pref->getBits($id_menu, $d['id']));
         $path = $tmp = [];
         if (!is_null($d['id_option'])) {
@@ -755,7 +755,7 @@ class Menu extends bbn\Models\Cls\Basic
     }
 
     $res = [];
-    foreach ($tmp as $i => $it){
+    foreach ($tmp as $it){
       if (!empty($it['items']) || !empty($it['id_permission'])) {
         $res[] = $it;
       }
@@ -780,7 +780,7 @@ class Menu extends bbn\Models\Cls\Basic
           return true;
         }
 
-        if (isset($a['id_permission']) && $pref->has($a['id_permission'], $pref->getUser(), $pref->getGroup())) {
+        if (isset($a['id_permission']) && $pref->has($a['id_permission'], $pref->getUser(), $pref->getIdGroup())) {
           return true;
         }
 

@@ -215,7 +215,7 @@ class Router
 
     $this->_prepath = $path;
     if (substr($this->_prepath, -1) !== '/') {
-      $this->_prepath = $this->_prepath . '/';
+      $this->_prepath .= '/';
     }
 
     if ($this->_mode) {

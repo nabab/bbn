@@ -253,7 +253,7 @@ class Config extends bbn\Models\Cls\Basic
           $res[$cp] = $this->getDir($this->cfg['url'].$cp);
           if ($res[$cp]) {
             $dir = false;
-            foreach ($res[$cp] as $type => $files) {
+            foreach ($res[$cp] as $files) {
               if (!$dir && count($files)) {
                 $dir = $this->fpath.X::dirname($files[0]);
               }

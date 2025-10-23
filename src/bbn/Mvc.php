@@ -688,7 +688,7 @@ class Mvc implements Mvc\Api
     $randoms = [];
     $_random = fn($i) => $randoms[$i] ?? ($randoms[$i] = md5(Str::genpwd()));
     ob_start();
-    (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
+    (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random): void {
       if ($bbn_inc_content) {
         if (\count($bbn_inc_data)) {
           foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {
@@ -894,6 +894,10 @@ class Mvc implements Mvc\Api
   public function check()
   {
     return $this->info ? true : false;
+  }
+
+  public function getInfo() {
+    return $this->info;
   }
 
 
@@ -1277,7 +1281,7 @@ class Mvc implements Mvc\Api
    *
    * @return array|null
    */
-  public function customPluginModel(string $path, array $data, Controller $ctrl, string $plugin, int $ttl = null): ?array
+  public function customPluginModel(string $path, array $data, Controller $ctrl, string $plugin, ?int $ttl = null): ?array
   {
     if (
       $plugin
@@ -1375,7 +1379,7 @@ class Mvc implements Mvc\Api
    *
    * @return array|null
    */
-  public function subpluginModel(string $path, array $data, Controller $ctrl, string $plugin, string $subplugin, int $ttl = null): ?array
+  public function subpluginModel(string $path, array $data, Controller $ctrl, string $plugin, string $subplugin, ?int $ttl = null): ?array
   {
     if (
       $plugin
@@ -1531,7 +1535,7 @@ class Mvc implements Mvc\Api
    * @param int|null       $ttl
    * @return array|null
    */
-  public function getPluginModel(string $path, array $data, Controller $ctrl, string $plugin, int $ttl = null)
+  public function getPluginModel(string $path, array $data, Controller $ctrl, string $plugin, ?int $ttl = null)
   {
     return $this->customPluginModel(router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
   }
@@ -1548,7 +1552,7 @@ class Mvc implements Mvc\Api
    * @param int|null       $ttl
    * @return array|null
    */
-  public function getSubpluginModel(string $path, array $data, Controller $ctrl, string $plugin, string $subplugin, int $ttl = null)
+  public function getSubpluginModel(string $path, array $data, Controller $ctrl, string $plugin, string $subplugin, ?int $ttl = null)
   {
     return $this->subpluginModel($path, $data, $ctrl, $plugin, $subplugin, $ttl);
   }
@@ -1583,7 +1587,7 @@ class Mvc implements Mvc\Api
    * @param array data to send to the model
    * @return void
    */
-  public function setCachedModel($path, array $data, Controller $ctrl, $ttl = 10)
+  public function setCachedModel($path, array $data, Controller $ctrl, int $ttl = 10)
   {
     if (\is_null($data)) {
       $data = $this->data;

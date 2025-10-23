@@ -458,15 +458,14 @@ trait Template
       }
     }
 
-    $this->deleteCache();
+    $this->deleteCache(null, true, true);
     
+    X::log([$idSubtemplate, $subtpl, $cfg, $this->items($idSubtemplate)], 'import_options');
+    foreach ($this->items($idSubtemplate) as $tid) {
+      $tot += $this->applyChildTemplate($tid, $o['id']);
+    }
     if (!empty($cfg['id_template'])) {
       $this->applySubTemplates($o['id']);
-    }
-    else {
-      foreach ($this->items($idSubtemplate) as $tid) {
-        $tot += $this->applyChildTemplate($tid, $o['id']);
-      }
     }
 
     $this->deleteCache();

@@ -276,7 +276,7 @@ class Task extends DbCls
             break;
           case 'price':
           case 'approved':
-            foreach ( $log['value'] as $i => $v ){
+            foreach ( $log['value'] as $v ){
               $values[] = number_format((float)$v, 2, ',', '.');
             }
             break;

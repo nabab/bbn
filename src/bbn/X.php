@@ -270,10 +270,10 @@ class X
       }
 
       self::sortBy($r, 'last_date', 'DESC');
-      file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));
+      file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
     }
     else {
-      die(X::_("Impossible to write the error log file"));
+      die(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath().'logs'));
     }
   }
 
@@ -1216,7 +1216,7 @@ class X
 
     $backtrace = debug_backtrace();
     $st = '';
-    foreach ($backtrace as $i => $b) {
+    foreach ($backtrace as $b) {
       if (isset($b['class']) && $b['file'] !== __FILE__) {
         $st = $b['file'] . ';' . $b['line'] . PHP_EOL;
         break;
@@ -2125,7 +2125,7 @@ class X
         $compare = self::compareConditions($data, $a);
       }
       else {
-        $compare = self::compare($data[$a['field']] ?? null, $a['value'], $a['operator']);
+        $compare = self::compare($data[$a['field']] ?? null, $a['value'] ?? null, $a['operator']);
       }
 
       if ($compare) {
@@ -3222,8 +3222,12 @@ class X
         )
       );
 
-      array_walk($data, function (&$item) use ($cfg, $dates) {
+      array_walk($data, function (&$item) use ($cfg, $dates): void {
         foreach ($cfg['fields'] as $field) {
+          if (!isset($item[$field['field']])) {
+            continue;
+          }
+
           if (!empty($field['hidden'])) {
             unset($item[$field['field']]);
           }

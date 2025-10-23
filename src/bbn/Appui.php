@@ -960,7 +960,7 @@ class Appui
     if (!$this->_dbFilesContent) {
       $routes   = $this->getRoutes();
       $tables   = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -997,7 +997,7 @@ class Appui
     if (!$this->_structureFilesContent) {
       $routes   = $this->getRoutes();
       $tables   = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1035,7 +1035,7 @@ class Appui
     if (!$this->_optionFilesContent) {
       $routes   = $this->getRoutes();
       $options  = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1079,7 +1079,7 @@ class Appui
     if (!$this->_permissionFilesContent) {
       $routes   = $this->getRoutes();
       $perms    = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1170,7 +1170,7 @@ class Appui
     if (!$this->_dashboardFilesContent) {
       $routes     = $this->getRoutes();
       $dashboards = [];
-      foreach ($routes['root'] as $url => $plugin) {
+      foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
@@ -1691,7 +1691,7 @@ class Appui
       $num = 0;
 
       if ($routes[$idx]) {
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
         $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
         $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
         foreach ($opt->import($tmp, $root) as $res) {
@@ -1707,20 +1707,19 @@ class Appui
           ], true);
         }
 
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
         $num += $opt->applyTemplate($idApp);
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
+        //X::ddump($num, $opt->fullTree($idApp), $opt->fullTree($opt->getPluginTemplateId()));
         $opt->setDefault($idApp);
 
         $id_appui = $opt->fromCode('appui');
         $appui_options = [];
         $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
-        foreach (array_values($routes) as $i => $r) {
+        $plugins = array_values($routes);
+        foreach ($plugins as &$r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
-          $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
-          $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
-          $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1739,7 +1738,15 @@ class Appui
               throw new Exception(X::_("Impossible to add the plugin %s", $tmp['code']));
             }
 
+            $r['id'] = $id_plugin;
             $num += $opt->applyTemplate($id_plugin);
+          }
+        }
+
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
+            $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
@@ -1761,7 +1768,47 @@ class Appui
                 }
               }
             }
+          }
+        }
 
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
+            $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
+            if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
+              $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
+              }
+              if (X::isAssoc($tmp)) {
+                $tmp = [$tmp];
+              }
+  
+              $id_templates = $opt->fromCode('templates', $id_plugin);
+              if (!$id_templates) {
+                throw new Exception(X::_("Impossible to find the templates plugin %s options", $r['name']));
+              }
+              $todo[] = [$tmp, $id_templates];
+              foreach($opt->import($tmp, $id_templates, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+          }
+
+          if ($num >= $next) {
+            $next += $step;
+            yield $num;
+          }
+        }
+
+        foreach ($plugins as $r) {
+          if (!empty($r['id'])) {
+            $id_plugin = $r['id'];
+            $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
             if ($this->_currentFs->exists($pluginsFile)) {
               $tmp = $this->_currentFs->decodeContents($pluginsFile, 'json', true);
               if (!$tmp) {
@@ -1796,34 +1843,6 @@ class Appui
                 }
               }
             }
-
-            if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
-              $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
-              if (!$tmp) {
-                throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
-              }
-              if (X::isAssoc($tmp)) {
-                $tmp = [$tmp];
-              }
-  
-              $id_templates = $opt->fromCode('templates', $id_plugin);
-              if (!$id_templates) {
-                throw new Exception(X::_("Impossible to find the templates plugin %s options", $r['name']));
-              }
-              $todo[] = [$tmp, $id_templates];
-              foreach($opt->import($tmp, $id_templates, true) as $res) {
-                $num += $res;
-                if ($num >= $next) {
-                  $next += $step;
-                  yield $num;
-                }
-              }
-            }
-          }
-
-          if ($num >= $next) {
-            $next += $step;
-            yield $num;
           }
         }
 
@@ -1849,7 +1868,7 @@ class Appui
         }
           */
 
-        $opt->deleteCache(null);
+        $opt->deleteCache(null, true);
       }
     }
   }

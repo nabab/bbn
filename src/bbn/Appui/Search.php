@@ -384,7 +384,7 @@ class Search extends Basic
     //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
     if (!$start && !$step) {
-      array_walk($config_array, function (&$a) {
+      array_walk($config_array, function (&$a): void {
         $a['cfg']['start'] = 0;
       });
     }
@@ -475,7 +475,7 @@ class Search extends Basic
     $num_cfg = count($config_array);
     //X::log($config_array, 'search');
     if (!$start && !$step) {
-      array_walk($config_array, function (&$a) {
+      array_walk($config_array, function (&$a): void {
         $a['cfg']['start'] = 0;
       });
     }
@@ -512,7 +512,7 @@ class Search extends Basic
   public static function seekResult(Db $db, array $item): array
   {
     if ($search_results = $db->rselectAll($item['cfg'])) {
-      array_walk($search_results, function (&$a) use ($item) {
+      array_walk($search_results, function (&$a) use ($item): void {
         $b = array_slice($a, 0);
         unset($b['match']);
         ksort($b);

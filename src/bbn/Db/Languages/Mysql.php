@@ -950,7 +950,7 @@ MYSQL;
       $indexes = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
       $keys = [];
       $cols = [];
-      foreach ($indexes as $i => $index) {
+      foreach ($indexes as $index) {
         $a = $this->getRow(
           <<<MYSQL
 SELECT `CONSTRAINT_NAME` AS `name`,
@@ -1234,6 +1234,7 @@ MYSQL
         $st .= '  ADD ';
         if (!empty($key['unique'])
           && isset($cfg['fields'][$key['columns'][0]])
+          && isset($cfg['fields'][$key['columns'][0]]['key'])
           && ($cfg['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
           $st .= 'PRIMARY KEY';
@@ -1645,7 +1646,7 @@ MYSQL
       }
     }
 
-    if (empty($cfg['null'])) {
+    if (empty($cfg['null']) && empty($cfg['virtual'])) {
       $st .= ' NOT NULL';
     }
 
@@ -1667,6 +1668,17 @@ MYSQL
 
     if (!empty($cfg['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
+    }
+
+    if (!empty($cfg['position'])) {
+      if (strpos($cfg['position'], 'after:') === 0) {
+        $after = trim(substr($cfg['position'], 6));
+        if (Str::checkName($after)) {
+          $st .= ' AFTER ' . $this->escape($after);
+        }
+      } elseif (strtolower($cfg['position']) === 'first') {
+        $st .= ' FIRST';
+      }
     }
 
     return $st;
