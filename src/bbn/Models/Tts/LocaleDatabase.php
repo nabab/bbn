@@ -50,9 +50,35 @@ trait LocaleDatabase
   }
 
 
+  /**
+   * Checks if the user has a locale database
+   *
+   * @param User|string|null $user
+   * @return bool
+   */
+  public function hasLocaleDb(User|string|null $user = null): bool
+  {
+    $currentUserCls = User::getInstance();
+    $userCls = $user instanceof User ? $user : $currentUserCls;
+    $userId = is_string($user) && Str::isUid($user) ? $user : $userCls->getId();
+    if ($userId === $currentUserCls->getId()) {
+      $userId = null;
+    }
+
+    return (bool)$userCls->getLocaleDatabase($userId, false);
+  }
+
+
+  /**
+   * Checks if a record is in the locale database
+   * @param string $id
+   * @param string $table
+   * @return bool
+   */
   public function isLocale(string $id, string $table): bool
   {
     if (array_search($table, $this->class_cfg['tables'])
+      && $this->hasLocaleDb()
       && ($db = $this->getLocaleDb())
       && ($primary = $db->getPrimary($table))
     ) {

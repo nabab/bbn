@@ -1067,17 +1067,20 @@ class Email extends Basic
 
     if ($grid->check()) {
       $res = $grid->getDatatable();
-      $grid = new Grid($this->getLocaleDb(), $post, [
-        'table' => $table,
-        'fields' => $cfg
-      ]);
-      if ($grid->check()) {
-        $res2 = $grid->getDatatable();
-        if (!empty($res2['data'])) {
-          $res['data'] = array_merge($res['data'], $res2['data']);
-          $res['total'] += $res2['total'];
+      if ($this->hasLocaleDb()) {
+        $grid = new Grid($this->getLocaleDb(), $post, [
+          'table' => $table,
+          'fields' => $cfg
+        ]);
+        if ($grid->check()) {
+          $res2 = $grid->getDatatable();
+          if (!empty($res2['data'])) {
+            $res['data'] = array_merge($res['data'], $res2['data']);
+            $res['total'] += $res2['total'];
+          }
         }
       }
+
       return $res;
     }
 
@@ -1139,6 +1142,10 @@ class Email extends Basic
   public function syncThreads(int $limit = 0, bool $onlyLocale = false): int
   {
     $did = 0;
+    if ($onlyLocale && !$this->hasLocaleDb()) {
+      return $did;
+    }
+
     $db = $onlyLocale ? $this->getLocaleDb() : $this->db;
     // select all emails of the user where id_thread is null and external_id is not null
     if ($emails = $db->rselectAll([
@@ -1465,6 +1472,10 @@ class Email extends Basic
 
   public function getContacts(bool $onlyLocale = false): array
   {
+    if ($onlyLocale && !$this->hasLocaleDb()) {
+      return [];
+    }
+
     $contacts = $this->class_cfg['tables']['users_contacts'];
     $cfg_c = $this->class_cfg['arch']['users_contacts'];
     $links = $this->class_cfg['tables']['users_contacts_links'];

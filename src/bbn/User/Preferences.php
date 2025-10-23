@@ -502,18 +502,24 @@ class Preferences extends DbCls
   {
     $changedLocaleDb = false;
     $cfg = null;
-    if (!empty($id_user) && ($id_user !== $this->id_user)) {
+    $hasLocaleDb = $this->hasLocaleDb($id_user ?: $this->id_user);
+    if (!empty($id_user)
+      && ($id_user !== $this->id_user)
+      && $hasLocaleDb
+    ) {
       $this->setLocaleDb($id_user);
       $changedLocaleDb = true;
     }
 
-    if (!($cfg = $this->getLocaleDb()->selectOne(
-      $this->class_cfg['table'],
-      $this->fields['cfg'],
-      [
-        $this->fields['id_option'] => $this->opt->toPath($id_option)
-      ]
-    ))) {
+    if (!$hasLocaleDb
+      || !($cfg = $this->getLocaleDb()->selectOne(
+        $this->class_cfg['table'],
+        $this->fields['cfg'],
+        [
+          $this->fields['id_option'] => $this->opt->toPath($id_option)
+        ]
+      ))
+    ) {
       $cfg = $this->db->selectOne(
         $this->class_cfg['table'],
         $this->fields['cfg'],
@@ -525,7 +531,12 @@ class Preferences extends DbCls
     }
 
     if ($changedLocaleDb) {
-      $this->setLocaleDb($this->user);
+      if ($this->hasLocaleDb($this->id_user)) {
+        $this->setLocaleDb($this->id_user);
+      }
+      else {
+        $this->localeDb = null;
+      }
     }
 
     if (!empty($cfg)) {
@@ -700,7 +711,9 @@ class Preferences extends DbCls
           ]]
         ]
       ]) ?: [];
-      if ($optPath = $this->opt->toPath($id_option)) {
+      if ($this->hasLocaleDb()
+        && ($optPath = $this->opt->toPath($id_option))
+      ) {
         array_push(
           $rows,
           ...array_map(
@@ -1461,6 +1474,7 @@ class Preferences extends DbCls
         ]]
       ];
     }
+
     return $db->delete([
       'table' => $this->class_cfg['table'],
       'where' => [
@@ -1488,20 +1502,25 @@ class Preferences extends DbCls
           $this->fields['id_user'] => $id_user ?: $this->id_user
         ]
       );
-      $changedLocaleDb = false;
-      if (!empty($id_user) && ($id_user !== $this->id_user)) {
-        $this->setLocaleDb($id_user);
-        $changedLocaleDb = true;
-      }
+      $d2 = 0;
+      if ($this->hasLocaleDb($id_user ?: $this->id_user)) {
+        $changedLocaleDb = false;
+        if (!empty($id_user)
+          && ($id_user !== $this->id_user)
+        ) {
+          $this->setLocaleDb($id_user);
+          $changedLocaleDb = true;
+        }
 
-      $d2 = $this->getLocaleDb()->delete(
-        $this->class_cfg['table'],
-        [
-          $this->fields['id_option'] => $this->opt->toPath($id_option)
-        ]
-      );
-      if ($changedLocaleDb) {
-        $this->setLocaleDb($this->user);
+        $d2 = $this->getLocaleDb()->delete(
+          $this->class_cfg['table'],
+          [
+            $this->fields['id_option'] => $this->opt->toPath($id_option)
+          ]
+        );
+        if ($changedLocaleDb) {
+          $this->setLocaleDb($this->user);
+        }
       }
 
       return $d1 + $d2;
@@ -1618,13 +1637,16 @@ class Preferences extends DbCls
   public function addLink(string $id_option, string $id_link): ?string
   {
     $isLocale = false;
-    if ($id = $this->getLocaleDb()->selectOne(
-      $this->class_cfg['table'],
-      $this->fields['id'],
-      [
-        $this->fields['id_option'] => $this->opt->toPath($id_option)
-      ]
-    )) {
+    $hasLocaleDb = $this->hasLocaleDb();
+    if ($hasLocaleDb
+      && ($id = $this->getLocaleDb()->selectOne(
+        $this->class_cfg['table'],
+        $this->fields['id'],
+        [
+          $this->fields['id_option'] => $this->opt->toPath($id_option)
+        ]
+      ))
+    ) {
       $isLocale = true;
     }
     else {
@@ -2604,14 +2626,21 @@ class Preferences extends DbCls
     if (Str::isUid($id_option)) {
       $res = [];
       if ($ids = $this->_retrieveIds($id_option, $id_user, $id_group)) {
+        $hasLocaleDb = $this->hasLocaleDb();
         $changedLocaleDb = false;
-        if (!empty($id_user) && ($id_user !== $this->id_user)) {
-          $this->setLocaleDb($id_user);
+        if (!empty($id_user)
+          && ($id_user !== $this->id_user)
+        ) {
+          if ($hasLocaleDb = $this->hasLocaleDb($id_user)) {
+            $this->setLocaleDb($id_user);
+          }
+
           $changedLocaleDb = true;
         }
 
         foreach ($ids as $id) {
-          $res[] = $this->getRightDb($id, $this->class_table)->rselect(
+          $db = $hasLocaleDb ? $this->getRightDb($id, $this->class_table) : $this->db;
+          $res[] = $db->rselect(
             $this->class_cfg['table'],
             [
               'value' => $this->fields['id'],
@@ -2622,7 +2651,12 @@ class Preferences extends DbCls
         }
 
         if ($changedLocaleDb) {
-          $this->setLocaleDb($this->user);
+          if ($this->hasLocaleDb($this->user)) {
+            $this->setLocaleDb($this->user);
+          }
+          else {
+            $this->localeDb = null;
+          }
         }
       }
 
@@ -2656,7 +2690,7 @@ class Preferences extends DbCls
       && ($this->id_user !== $this->user->getId())
       && !empty($this->localeDb)
     ) {
-      $this->setLocaleDb($this->user);
+      $this->localeDb = null;
     }
 
     $this->id_user  = $this->user->getId();
@@ -2794,14 +2828,13 @@ class Preferences extends DbCls
         ]]
       ]);
 
-      if (!empty($id_user)) {
+      if (!empty($id_user)
+        && $this->hasLocaleDb($id_user)
+      ) {
         $changedLocaleDb = false;
         if ($id_user !== $this->id_user) {
           $this->setLocaleDb($id_user);
           $changedLocaleDb = true;
-        }
-        else {
-          $this->setLocaleDb();
         }
 
         if (($optPath = $this->opt->toPath($id_option))
@@ -2839,7 +2872,12 @@ class Preferences extends DbCls
         }
 
         if ($changedLocaleDb) {
-          $this->setLocaleDb($this->id_user);
+          if ($this->hasLocaleDb($this->id_user)) {
+            $this->setLocaleDb($this->id_user);
+          }
+          else {
+            $this->localeDb = null;
+          }
         }
       }
 
@@ -2896,21 +2934,23 @@ class Preferences extends DbCls
         'where' => $where,
         'order' => [$this->fields['text']]
       ]);
-      if ($rows2 = $this->getLocaleDb()->rselectAll([
-        'table' => $this->class_cfg['table'],
-        'fields' => [
-          $this->fields['id'],
-          $this->fields['id_option'],
-          $this->fields['text']
-        ],
-        'where' => [
-          'conditions' => [[
-            'field' => $this->fields['id_link'],
-            'value' => $this->opt->toPath($id_link)
-          ]],
-        ],
-        'order' => [$this->fields['text']]
-      ])) {
+      if ($this->hasLocaleDb()
+        && ($rows2 = $this->getLocaleDb()->rselectAll([
+          'table' => $this->class_cfg['table'],
+          'fields' => [
+            $this->fields['id'],
+            $this->fields['id_option'],
+            $this->fields['text']
+          ],
+          'where' => [
+            'conditions' => [[
+              'field' => $this->fields['id_link'],
+              'value' => $this->opt->toPath($id_link)
+            ]],
+          ],
+          'order' => [$this->fields['text']]
+        ]))
+      ) {
         if (!is_array($rows)) {
           $rows = [];
         }
