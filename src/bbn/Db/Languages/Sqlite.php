@@ -167,6 +167,7 @@ class Sqlite extends Sql
     $cfg['originalDb'] = $cfg['db'];
     $cfg['originalHost'] = $cfg['host'];
     $cfg['db']   = 'main';
+    $cfg['code_host'] = $cfg['host'];
 
     return $cfg;
   }

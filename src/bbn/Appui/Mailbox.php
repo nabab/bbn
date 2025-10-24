@@ -684,7 +684,7 @@ class Mailbox extends Basic
             && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
           ) {
             $a = [
-              'id' => substr($part->id, 1, -1),
+              'id' => !empty(substr($part->id, 1, -1)) ? substr($part->id, 1, -1) : null,
               'name' => $name_row->value,
               'size' => $part->bytes,
               'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
@@ -1601,7 +1601,7 @@ class Mailbox extends Basic
         && isset($structure->disposition)
       ) {
         $a = [
-          'id' => substr($structure->id, 1, -1),
+          'id' => !empty($structure->id) ? substr($structure->id, 1, -1) : null,
           'type' => Str::fileExt($filename) ?: strtolower($structure->subtype),
           'name' => $filename,
           'size' => $params['size'] ?? $structure->bytes ?? 0
