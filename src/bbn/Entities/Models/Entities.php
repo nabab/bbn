@@ -161,8 +161,8 @@ abstract class Entities extends DbCls
     // Setting up the class configuration
     $this->initClassCfg($cfg);
     $cls = $this->class_cfg['classes'];
-    if ($cls['link']) {
-      $this->linkCls = $cls['mail'];
+    if (!empty($cls['link'])) {
+      $this->linkCls = $cls['link'];
     }
   }
 
