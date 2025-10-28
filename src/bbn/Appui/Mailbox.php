@@ -13,6 +13,7 @@ use HTMLPurifier;
 use HTMLPurifier_HTML5Config;
 use IMAP\Connection;
 use bbn\Models\Cls\Basic;
+use Generator;
 
 /*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
 
@@ -123,6 +124,13 @@ class Mailbox extends Basic
 
   protected $mailer;
 
+  protected $ssl = false;
+
+  protected $idle_stream;
+
+  protected $idle_last;
+
+  protected $idle_tag;
 
   public static function setDefaultPingInterval(int $val): void
   {
@@ -154,6 +162,7 @@ class Mailbox extends Basic
       $this->pass           = $cfg['pass'];
       $this->folder         = $cfg['dir'] ?? 'INBOX';
       $this->_ping_interval = self::$_default_ping_interval;
+      $this->ssl            = !empty($cfg['ssl']);
 
       switch ($this->type){
         case 'hotmail':
@@ -171,13 +180,13 @@ class Mailbox extends Basic
           break;
         */
         case 'imap':
-          if (empty($cfg['ssl'])) {
-            $this->port    = 143;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
-          }
-          else {
+          if ($this->ssl) {
             $this->port    = 993;
             $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/ssl/novalidate-cert}';
+          }
+          else {
+            $this->port    = 143;
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
           }
           break;
         case 'local':
@@ -188,21 +197,7 @@ class Mailbox extends Basic
           break;
       }
 
-      if (isset($this->mbParam)) {
-        $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
-
-        if ($this->stream) {
-          $this->folders[$this->folder] = [
-            'last_uid' => null,
-            'num_msg'  => null,
-            'last_check' => null
-          ];
-          $this->status                 = 'ok';
-        }
-        else {
-          $this->status = imap_last_error();
-        }
-      }
+      $this->connect();
     }
   }
 
@@ -684,7 +679,7 @@ class Mailbox extends Basic
             && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
           ) {
             $a = [
-              'id' => !empty(substr($part->id, 1, -1)) ? substr($part->id, 1, -1) : null,
+              'id' => !empty($part->id) ? substr($part->id, 1, -1) : null,
               'name' => $name_row->value,
               'size' => $part->bytes,
               'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
@@ -1404,6 +1399,169 @@ class Mailbox extends Basic
 
     return null;
   }
+
+
+  public function idle(callable $callback, int $timeout = 300): bool
+  {
+    $context = [];
+    if ($this->ssl) {
+      $context['ssl'] = [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ];
+    }
+
+    // Establish the connection
+    $this->idle_stream = stream_socket_client(
+      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      $errno,
+      $errstr,
+      30, // Timeout in seconds
+      STREAM_CLIENT_CONNECT,
+      stream_context_create($context)
+    );
+    if (!$this->idle_stream) {
+      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+    }
+
+    $this->idle_tag = 0;
+
+    try {
+      $callback([
+        'success' => true,
+        'message' => $this->sendCommand("LOGIN {$this->login} {$this->pass}")
+      ]);
+      $callback([
+        'success' => true,
+        'message' => $this->sendCommand("SELECT {$this->folder}")
+      ]);
+      $callback([
+        'success' => true,
+        'message' => $this->sendCommand("IDLE")
+      ]);
+      $isRun = true;
+      while ($isRun) {
+        try {
+          $response = $this->getCommandResponse();
+        }
+        catch (\Exception $e) {
+          $errCode = $e->getCode();
+          if (($errCode === 1) && $this->isIdleConnected()) {
+          //if (($errCode === 1)) {
+            continue;
+          }
+
+          if (!str_contains($e->getMessage(), "connection closed")) {
+            throw $e;
+          }
+        }
+
+        if (($pos = strpos($response, "EXISTS")) !== false) {
+          $msgn = (int)substr($response, 2, $pos - 2);
+
+          // Check if the stream is still alive or should be considered stale
+          if (!$this->_is_connected() || ($this->idle_last < time())) {
+            fclose($this->idle_stream);
+            // Establish a new connection
+            imap_close($this->stream);
+            $this->connect();
+            $isRun = false;
+            return $this->idle($callback, $timeout);
+          }
+
+          $this->idle_last = time() + $timeout;
+
+          // Always reopen the folder - otherwise the new message number isn't known to the current remote session
+          $this->selectFolder($this->folder);
+          $callback([
+            'success' => true,
+            'message' => $this->getMsg($msgn)
+          ]);
+        }
+      }
+    }
+    catch (\Exception $e) {
+      throw $e;
+    }
+
+    return true;
+  }
+
+
+  public function getIdleStream()
+  {
+    return $this->idle_stream;
+  }
+
+
+  private function sendCommand(string $command): string
+  {
+    $this->idle_tag++;
+    fwrite($this->idle_stream, 'BBN_' . $this->idle_tag . ' ' . $command . "\r\n");
+    $this->idle_last = time();
+    return $this->getCommandResponse($command);
+  }
+
+
+  protected function getCommandResponse(string $command = ''): string
+  {
+    $response = '';
+    while ((($nChar = fread($this->idle_stream, 1)) !== false)
+      && !in_array($nChar, ['', "\n"])
+    ) {
+      $response .= $nChar;
+    }
+
+    if (($response === '')
+      && (($nChar === false)
+        || ($nChar === ''))
+    ) {
+      throw new \Exception(X::_('Empty response (command: %s)', $command), 1);
+    }
+
+    $response .= "\n";
+    return $response;
+  }
+
+
+  protected function isIdleConnected(): bool
+  {
+    if (!empty($this->idle_stream)) {
+      try {
+        $this->sendCommand("NOOP");
+        return true;
+      }
+      catch (\Exception $e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+
+  protected function connect(): bool
+  {
+    if (isset($this->mbParam)) {
+      $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
+      if ($this->stream) {
+        $this->folders[$this->folder] = [
+          'last_uid' => null,
+          'num_msg'  => null,
+          'last_check' => null
+        ];
+        $this->status = 'ok';
+        return true;
+      }
+      else {
+        $this->status = imap_last_error();
+        return false;
+      }
+    }
+
+    return false;
+  }
+
 
   private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
     if (!empty($part->ifdisposition)

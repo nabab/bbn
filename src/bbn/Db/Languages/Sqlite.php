@@ -1503,10 +1503,10 @@ class Sqlite extends Sql
 
   public static function hasHostDatabase(string $host, string $database): bool
   {
-    return in_array(
-      self::normalizeFilename($database),
-      self::getHostDatabases($host)
-    );
+    $path = self::getHostPath($host);
+    return !empty($path)
+      && is_dir($path)
+      && is_file($path . self::normalizeFilename($database));
   }
 
 

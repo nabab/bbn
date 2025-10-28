@@ -1298,6 +1298,11 @@ class Email extends Basic
           $cfg['excerpt'] => ""
         ];
 
+        X::log([
+          'table' => $table,
+          'ar' => $ar,
+          'engine' => $db->getEngine()
+        ], 'mirko');
         if ($existing) {
           $id = $existing;
         }

@@ -1262,7 +1262,10 @@ use bbn\Cache;
     }
 
     $dbName = 'locale_' . $this->id . '.sqlite';
-    if (!empty($idUser) && Str::isUid($idUser)) {
+    if (!empty($idUser)
+      && Str::isUid($idUser)
+      && ($idUser !== $this->id)
+    ) {
       $dbName = 'locale_' . $idUser . '.sqlite';
       $idHost = str_replace($this->id, $idUser, Sqlite::getHostPath($idHost));
     }
