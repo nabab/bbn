@@ -126,11 +126,17 @@ class Mailbox extends Basic
 
   protected $ssl = false;
 
-  protected $idle_stream;
+  protected $idleStream;
 
-  protected $idle_last;
+  protected $idleLastTime;
 
-  protected $idle_tag;
+  protected $idleLastCommand;
+
+  protected $idleTag;
+
+  protected $idleTagPrefix = 'BBN_';
+
+  protected $idleRunning = false;
 
   public static function setDefaultPingInterval(int $val): void
   {
@@ -1403,6 +1409,8 @@ class Mailbox extends Basic
 
   public function idle(callable $callback, int $timeout = 300): bool
   {
+    $this->idleRunning = false;
+    $this->idleTag = 0;
     $context = [];
     if ($this->ssl) {
       $context['ssl'] = [
@@ -1412,42 +1420,34 @@ class Mailbox extends Basic
     }
 
     // Establish the connection
-    $this->idle_stream = stream_socket_client(
+    $this->idleStream = stream_socket_client(
       ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
       $errno,
       $errstr,
-      30, // Timeout in seconds
+      $timeout,
       STREAM_CLIENT_CONNECT,
       stream_context_create($context)
     );
-    if (!$this->idle_stream) {
+    if (!$this->idleStream) {
       throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
     }
 
-    $this->idle_tag = 0;
-
     try {
-      $callback([
-        'success' => true,
-        'message' => $this->sendCommand("LOGIN {$this->login} {$this->pass}")
-      ]);
-      $callback([
-        'success' => true,
-        'message' => $this->sendCommand("SELECT {$this->folder}")
-      ]);
-      $callback([
-        'success' => true,
-        'message' => $this->sendCommand("IDLE")
-      ]);
-      $isRun = true;
-      while ($isRun) {
+      $login = $this->sendCommand("LOGIN {$this->login} {$this->pass}");
+      $callback([$login, 'login']);
+      $folder = $this->sendCommand("SELECT {$this->folder}");
+      $callback([$folder, 'folder']);
+      $idle = $this->sendCommand("IDLE", false);
+      $callback([$this->readCommandResponseLine(), 'idle']);
+      $this->idleRunning = true;
+      while ($this->idleRunning) {
         try {
-          $response = $this->getCommandResponse();
+          //$response = $this->readCommandResponse();
+          $response = $this->readCommandResponseLine();
         }
         catch (\Exception $e) {
           $errCode = $e->getCode();
           if (($errCode === 1) && $this->isIdleConnected()) {
-          //if (($errCode === 1)) {
             continue;
           }
 
@@ -1460,27 +1460,22 @@ class Mailbox extends Basic
           $msgn = (int)substr($response, 2, $pos - 2);
 
           // Check if the stream is still alive or should be considered stale
-          if (!$this->_is_connected() || ($this->idle_last < time())) {
-            fclose($this->idle_stream);
+          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
+            $this->stopIdle();
             // Establish a new connection
             imap_close($this->stream);
             $this->connect();
-            $isRun = false;
             return $this->idle($callback, $timeout);
           }
 
-          $this->idle_last = time() + $timeout;
-
-          // Always reopen the folder - otherwise the new message number isn't known to the current remote session
+          $this->idleLastTime = time() + $timeout;
           $this->selectFolder($this->folder);
-          $callback([
-            'success' => true,
-            'message' => $this->getMsg($msgn)
-          ]);
+          $callback($this->getMsg($msgn));
         }
       }
     }
     catch (\Exception $e) {
+      $this->stopIdle();
       throw $e;
     }
 
@@ -1488,45 +1483,81 @@ class Mailbox extends Basic
   }
 
 
+  public function stopIdle()
+  {
+    $this->idleRunning = false;
+    if (!empty($this->idleStream)) {
+      fwrite($this->idleStream, "DONE\r\n");
+      fclose($this->idleStream);
+      $this->idleStream = null;
+    }
+  }
+
+
   public function getIdleStream()
   {
-    return $this->idle_stream;
+    return $this->idleStream;
   }
 
 
-  private function sendCommand(string $command): string
+  protected function sendCommand(string $command, bool $response = true): string
   {
-    $this->idle_tag++;
-    fwrite($this->idle_stream, 'BBN_' . $this->idle_tag . ' ' . $command . "\r\n");
-    $this->idle_last = time();
-    return $this->getCommandResponse($command);
+    $this->idleTag++;
+    $this->idleLastCommand = $this->idleTagPrefix . $this->idleTag . ' ' . $command;
+    fwrite($this->idleStream, $this->idleLastCommand . "\r\n");
+    $this->idleLastTime = time();
+    return !empty($response) ? $this->readCommandResponse() : '';
   }
 
 
-  protected function getCommandResponse(string $command = ''): string
+  protected function readCommandResponse(bool $asArray = false): string|array
   {
-    $response = '';
-    while ((($nChar = fread($this->idle_stream, 1)) !== false)
-      && !in_array($nChar, ['', "\n"])
-    ) {
-      $response .= $nChar;
+    $response = [];
+    while ($line = trim($this->readCommandResponseLine())) {
+      $response[] = $line;
+      $prefix = $this->idleTagPrefix . $this->idleTag . ' ';
+      if (str_starts_with($line, $prefix)) {
+        if (str_starts_with($line, $prefix . 'BAD ')
+          || str_starts_with($line, $prefix . 'NO ')
+        ) {
+          throw new \Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
+        }
+
+        return !empty($asArray) ? [$line] : $line;
+      }
     }
 
-    if (($response === '')
-      && (($nChar === false)
-        || ($nChar === ''))
+    return !empty($asArray) ? $response : (!empty($response) ? $response[count($response) - 1] : '');
+  }
+
+
+  protected function readCommandResponseLine(): string
+  {
+    $line = '';
+    while (substr($line, -1) !== "\n") {
+      $line .= fgets($this->idleStream, 1024);
+    }
+    /* while ((($c = fread($this->idleStream, 1)) !== false)
+      && !in_array($c, ['', "\n"])
     ) {
-      throw new \Exception(X::_('Empty response (command: %s)', $command), 1);
+      $line .= $c;
+    } */
+
+    if ($this->idleRunning
+      && ($line === '')
+      //&& (($c === false)
+      //  || ($c === ''))
+    ) {
+      throw new \Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
     }
 
-    $response .= "\n";
-    return $response;
+    return $line;
   }
 
 
   protected function isIdleConnected(): bool
   {
-    if (!empty($this->idle_stream)) {
+    if (!empty($this->idleStream)) {
       try {
         $this->sendCommand("NOOP");
         return true;
