@@ -259,6 +259,18 @@ trait Common
   }
 
 
+  public function publicPath(): string
+  {
+    return Mvc::getPublicPath();
+  }
+
+
+  public function curPath(): string
+  {
+    return Mvc::getCurPath();
+  }
+
+
   public function userTmpPath(string|null $id_user = null, string|null $plugin = null):? string
   {
     return Mvc::getUserTmpPath($id_user, $plugin);
