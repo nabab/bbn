@@ -1703,25 +1703,25 @@ class Email extends Basic
   public function send(string $id_account, array $cfg): int
   {
     if ($mb = $this->getMailbox($id_account)) {
-      $fields = ['to', 'cc', 'bcc'];
-      $num = 0;
-      $dest = [];
-      /*
-                foreach ($fields as $field) {
-                  $dest[$field] = [];
-                  if (!empty($cfg[$field])) {
-                    foreach ($cfg[$field] as $d) {
-                      if (Str::isEmail($d)) {
-                        $dest[$field][] = $d;
-                        $num++;
-                      }
-                    }
-                  }
-                }
-                */
-
-      if (!empty($cfg['title']) || !empty($cfg['text'])) {
-        $mailer = $mb->getMailer();
+      if (!empty($cfg['to'])
+        && (!empty($cfg['title']) || !empty($cfg['text']))
+      ) {
+        $mailer = $mb->getMailer([
+          'from' => $cfg['from'] ?? null,
+          'name' => $cfg['name'] ?? $cfg['from'] ?? null,
+          'template' => <<<HTML
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>{{title}}</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+              </head>
+              <body style="background-color:#FFF; color:#333; font-family:Arial; margin:20px; padding:0; font-size:14px">
+                <div>{{{text}}}</div>
+              </body>
+            </html>
+          HTML
+        ]);
         return $mailer->send($cfg);
       }
     }

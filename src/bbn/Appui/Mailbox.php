@@ -14,6 +14,8 @@ use HTMLPurifier_HTML5Config;
 use IMAP\Connection;
 use bbn\Models\Cls\Basic;
 use Generator;
+use bbn\User;
+use bbn\File\Dir;
 
 /*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
 
@@ -96,6 +98,11 @@ class Mailbox extends Basic
    * @var string The mailbox parameters
    */
   protected $mbParam;
+
+  /**
+   * @var string The unique hash of the mailbox
+   */
+  protected $hash;
 
   /**
    * @var string The status of the connection (should be ok)
@@ -203,6 +210,7 @@ class Mailbox extends Basic
           break;
       }
 
+      $this->hash = md5($this->mbParam . '-' . $this->login);
       $this->connect();
     }
   }
@@ -226,15 +234,15 @@ class Mailbox extends Basic
     return imap_last_error() ?: null;
   }
 
-  public function getMailer(): Mail
+  public function getMailer(array $cfg = []): Mail
   {
     if (!$this->mailer) {
-      $this->mailer = new Mail([
+      $this->mailer = new Mail(X::mergeArrays($cfg, [
         'host'  => $this->host,
-        'login' => $this->login,
+        'user' => $this->login,
         'pass'  => $this->pass,
         'type'  => $this->type
-      ]);
+      ]));
     }
 
     return $this->mailer;
@@ -287,6 +295,12 @@ class Mailbox extends Basic
   public function getParams(): string
   {
     return $this->mbParam;
+  }
+
+
+  public function getHash(): string
+  {
+    return $this->hash;
   }
 
 
@@ -1433,12 +1447,98 @@ class Mailbox extends Basic
     }
 
     try {
-      $login = $this->sendCommand("LOGIN {$this->login} {$this->pass}");
-      $callback([$login, 'login']);
-      $folder = $this->sendCommand("SELECT {$this->folder}");
-      $callback([$folder, 'folder']);
-      $idle = $this->sendCommand("IDLE", false);
-      $callback([$this->readCommandResponseLine(), 'idle']);
+      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
+      $this->sendCommand("SELECT {$this->folder}");
+      //$this->sendCommand("CAPABILITY", false);
+      //$callback([$this->readCommandResponse(true), 'idle']);
+      $this->sendCommand("IDLE", false);
+      $this->idleRunning = true;
+      while ($this->idleRunning) {
+        try {
+          //$response = $this->readCommandResponse();
+          $response = $this->readCommandResponseLine();
+        }
+        catch (\Exception $e) {
+          $errCode = $e->getCode();
+          if (($errCode === 1) && $this->isIdleConnected()) {
+            continue;
+          }
+
+          if (!str_contains($e->getMessage(), "connection closed")) {
+            throw $e;
+          }
+        }
+
+        if (($pos = strpos($response, "EXISTS")) !== false) {
+          $msgn = (int)substr($response, 2, $pos - 2);
+
+          // Check if the stream is still alive or should be considered stale
+          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
+            $this->stopIdle();
+            // Establish a new connection
+            imap_close($this->stream);
+            $this->connect();
+            return $this->idle($callback, $timeout);
+          }
+
+          $this->idleLastTime = time() + $timeout;
+          $this->selectFolder($this->folder);
+          $callback($this->getMsg($msgn));
+        }
+      }
+    }
+    catch (\Exception $e) {
+      $this->stopIdle();
+      throw $e;
+    }
+
+    return true;
+  }
+
+
+  public function idle2(int $timeout = 300): bool
+  {
+    $this->idleRunning = false;
+    $this->idleTag = 0;
+    $context = [];
+    if ($this->ssl) {
+      $context['ssl'] = [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ];
+    }
+
+    // Establish the connection
+    $this->idleStream = stream_socket_client(
+      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      $errno,
+      $errstr,
+      $timeout,
+      STREAM_CLIENT_CONNECT,
+      stream_context_create($context)
+    );
+    if (!$this->idleStream) {
+      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+    }
+
+    try {
+      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
+      $this->sendCommand("SELECT {$this->folder}");
+      $this->sendCommand("CAPABILITY", false);
+      //$this->readCommandResponseLine();
+  
+      $this->sendCommand("IDLE", false);
+      $user = User::getInstance();
+      $path = $user->getTmpPath() . 'mailbox/' . $this->getHash() . '/';
+      if (is_dir($path)) {
+        Dir::delete($path, true);
+      }
+
+      sleep(1);
+      if (Dir::createPath($path)) {
+        
+      }
+
       $this->idleRunning = true;
       while ($this->idleRunning) {
         try {
@@ -1523,7 +1623,9 @@ class Mailbox extends Basic
           throw new \Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
         }
 
-        return !empty($asArray) ? [$line] : $line;
+        if (empty($asArray)) {
+          return $line;
+        }
       }
     }
 
