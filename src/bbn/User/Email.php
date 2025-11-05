@@ -533,7 +533,7 @@ class Email extends Basic
       }
 
       $t =& $this;
-      return X::map(
+      $folders = X::map(
         function ($f) use ($t) {
           $res = $t->normalizeFolder($f);
           if (!empty($f['items'])) {
@@ -545,6 +545,8 @@ class Email extends Basic
         $this->pref->getFullBits($account['id']),
         'items'
       );
+      X::sortBy($folders, 'text');
+      return $folders;
     }
 
     return null;
@@ -1749,6 +1751,46 @@ class Email extends Basic
     }
 
     return null;
+  }
+
+
+  public function moveEmailToFolder(string $idEmail, string $idFolder): bool
+  {
+    $db = $this->getRightDb($idEmail, $this->class_table);
+    $email = $db->rselect(
+      $this->class_table,
+      [
+        $this->fields['id_folder'],
+        $this->fields['msg_uid']
+      ],
+      [
+        $this->fields['id'] => $idEmail
+      ]
+    );
+    if (!empty($email)
+      && !empty($email[$this->fields['id_folder']])
+      && Str::isInteger($email[$this->fields['msg_uid']])
+      && ($email[$this->fields['id_folder']] !== $idFolder)
+      && ($folderSrc = $this->getFolder($email[$this->fields['id_folder']]))
+      && ($folderDest = $this->getFolder($idFolder))
+      && ($folderSrc['id_account'] === $folderDest['id_account'])
+      && ($mb = $this->getMailbox($folderDest['id_account']))
+      && $mb->selectFolder($folderSrc['uid'])
+      && Str::isInteger($msgNo = $mb->getMsgNo($email[$this->fields['msg_uid']]))
+      && $mb->moveMsg($msgNo, $folderDest['uid'])
+    ) {
+      return (bool)$db->update(
+        $this->class_table,
+        [
+          $this->fields['id_folder'] => $idFolder
+        ],
+        [
+          $this->fields['id'] => $idEmail
+        ]
+      );
+    }
+
+    return false;
   }
 
 

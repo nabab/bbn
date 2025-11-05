@@ -254,7 +254,7 @@ class Mailbox extends Basic
 
       if ($this->type === 'imap') {
         $c['imap'] = true;
-        $c['imap_sent'] = '.Sent';
+        $c['imap_sent'] = 'Sent';
         if ($this->ssl) {
           $c['imap_ssl'] = 'ssl';
         }
