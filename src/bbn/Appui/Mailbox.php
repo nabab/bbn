@@ -237,12 +237,30 @@ class Mailbox extends Basic
   public function getMailer(array $cfg = []): Mail
   {
     if (!$this->mailer) {
-      $this->mailer = new Mail(X::mergeArrays($cfg, [
+      $c = [
         'host'  => $this->host,
         'user' => $this->login,
         'pass'  => $this->pass,
         'type'  => $this->type
-      ]));
+      ];
+      if ($this->ssl) {
+        $c['ssl'] = [
+          'verify_peer' => false,
+          'verify_peer_name' => false,
+          'verify_host' => false,
+          'allow_self_signed' => true
+        ];
+      }
+
+      if ($this->type === 'imap') {
+        $c['imap'] = true;
+        $c['imap_sent'] = '.Sent';
+        if ($this->ssl) {
+          $c['imap_ssl'] = 'ssl';
+        }
+      }
+
+      $this->mailer = new Mail(X::mergeArrays($c, $cfg));
     }
 
     return $this->mailer;
