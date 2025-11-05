@@ -68,6 +68,11 @@ class Mvc implements Mvc\Api
   private static $_cur_path;
 
   /**
+   * @var string The absolute path to the public folder
+   */
+  private static $_public_path;
+
+  /**
    * @var string The libraries path (vendor)
    */
   private static $_lib_path;
@@ -179,6 +184,7 @@ class Mvc implements Mvc\Api
       self::$_app_path = defined('BBN_APP_PATH') ? constant('BBN_APP_PATH') : '';
       self::$_app_prefix = defined('BBN_APP_PREFIX') ? constant('BBN_APP_PREFIX') : '';
       self::$_cur_path = defined('BBN_CUR_PATH') ? constant('BBN_CUR_PATH') : '';
+      self::$_public_path = defined('BBN_PUBLIC') ? constant('BBN_PUBLIC') : '';
       self::$_lib_path = defined('BBN_LIB_PATH') ? constant('BBN_LIB_PATH') : '';
       self::$_data_path = defined('BBN_DATA_PATH') ? constant('BBN_DATA_PATH') : '';
       self::$_tmp_path = defined('BBN_TMP_PATH') ? constant('BBN_TMP_PATH') : '';
@@ -225,7 +231,7 @@ class Mvc implements Mvc\Api
 
 
   /**
-   * Returns the web public path of the app.
+   * Returns the relative web public path of the site root
    *
    * @return string
    */
@@ -233,6 +239,18 @@ class Mvc implements Mvc\Api
   {
     self::initPath();
     return self::$_cur_path;
+  }
+
+
+  /**
+   * Returns the relative web public path of the site root
+   *
+   * @return string
+   */
+  public static function getPublicPath(): string
+  {
+    self::initPath();
+    return self::$_public_path;
   }
 
 

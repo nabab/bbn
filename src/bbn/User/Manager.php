@@ -766,7 +766,7 @@ You can click the following link to access directly your account:<br>
         $url .= $group['home'];
       }
 
-      return "$url?id=$id_link&key=$magic[key]";
+      return "?id=$id_link&key=$magic[key]";
     }
 
     return null;
