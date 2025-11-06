@@ -247,22 +247,24 @@ class Email extends Basic
 
   public function updateAccount(string $id_account, array $cfg): bool
   {
-    if (X::hasProps($cfg, ['login', 'pass', 'type'], true)
-      && $this->getAccount($id_account)
-    ) {
-      $d = X::mergeArrays($this->pref->getCfg($id_account) ?: [], [
-        'host' => $cfg['host'] ?? null,
-        'login' => $cfg['login'],
-        'type' => $cfg['type'],
-        'port' => $cfg['port'] ?? null,
-        'ssl' => $cfg['ssl'] ?? true,
-        'last_uid' => $cfg['last_uid'] ?? null,
-        'last_check' => $cfg['last_check'] ?? null
-      ]);
-      return (bool)$this->pref->setCfg($id_account, $d);
+    if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
+      throw new \Exception("Missing arguments");
     }
 
-    return false;
+    if (!$this->getAccount($id_account)) {
+      throw new \Exception("The account doesn't exist");
+    }
+
+    $d = X::mergeArrays($this->pref->getCfg($id_account) ?: [], [
+      'host' => $cfg['host'] ?? null,
+      'login' => $cfg['login'],
+      'type' => $cfg['type'],
+      'port' => $cfg['port'] ?? null,
+      'ssl' => $cfg['ssl'] ?? true,
+      'last_uid' => $cfg['last_uid'] ?? null,
+      'last_check' => $cfg['last_check'] ?? null
+    ]);
+    return (bool)$this->pref->setCfg($id_account, $d);
   }
 
 
@@ -619,7 +621,7 @@ class Email extends Basic
         $check = $this->checkFolder($folder);
       }
       catch (\Exception $e) {
-        X::log($e->getMessage(), "poller_email_error");
+        X::log($e->getMessage(), "user_email_error");
         $check = false;
       }
 
@@ -737,19 +739,20 @@ class Email extends Basic
             }
             else {
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
-              $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
+              $this->log(X::_("Impossible to insert the email with ID %s", $a['message_id']));
             }
           }
         }
         else {
-          X::log(X::_("Impossible to get the emails for folder") . ' ' . $folder['uid'] . ' ' . X::_("from") . ' ' . $start . ' ' . X::_("to") . ' ' . $end . ' (' . $real_end . ')');
-          throw new \Exception(
-            X::_("Impossible to get the emails for folder")
-            . ' ' . $folder['uid']
-            . ' ' . X::_("from") . ' ' . $start
-            . ' ' . X::_("to") . ' ' . $end
-            . ' (' . $real_end . ')'
+          $err = X::_(
+            "Impossible to get the emails for folder %s from %s to %s (%s)",
+            $folder['uid'],
+            $start,
+            $end,
+            $real_end
           );
+          X::log($err, "user_email_error");
+          throw new \Exception($err);
         }
 
         if ($info->Nmsgs > ($added + $folder['num_msg'])) {
@@ -1227,7 +1230,7 @@ class Email extends Basic
                 $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));
               }
             } elseif (!($id = $this->addContactFromMail($dest, false, $isLocale))) {
-              X::log("Impossible to add contact from mail" . $dest['email'], 'poller_email_error');
+              X::log(X::_("Impossible to add contact from mail %s", $dest['email']), 'user_email_error');
             }
 
             $dest['id'] = $id;
@@ -1300,11 +1303,6 @@ class Email extends Basic
           $cfg['excerpt'] => ""
         ];
 
-        X::log([
-          'table' => $table,
-          'ar' => $ar,
-          'engine' => $db->getEngine()
-        ], 'mirko');
         if ($existing) {
           $id = $existing;
         }
@@ -1333,7 +1331,7 @@ class Email extends Basic
               'cfg' => $ar,
               'text' => trim($text),
               'error' => $e->getMessage()
-            ], 'poller_email_error');
+            ], 'user_email_error');
             throw new \Exception($e->getMessage());
           }
 
@@ -1757,40 +1755,71 @@ class Email extends Basic
   public function moveEmailToFolder(string $idEmail, string $idFolder): bool
   {
     $db = $this->getRightDb($idEmail, $this->class_table);
-    $email = $db->rselect(
-      $this->class_table,
-      [
-        $this->fields['id_folder'],
-        $this->fields['msg_uid']
-      ],
-      [
-        $this->fields['id'] => $idEmail
-      ]
-    );
-    if (!empty($email)
-      && !empty($email[$this->fields['id_folder']])
-      && Str::isInteger($email[$this->fields['msg_uid']])
-      && ($email[$this->fields['id_folder']] !== $idFolder)
-      && ($folderSrc = $this->getFolder($email[$this->fields['id_folder']]))
-      && ($folderDest = $this->getFolder($idFolder))
-      && ($folderSrc['id_account'] === $folderDest['id_account'])
-      && ($mb = $this->getMailbox($folderDest['id_account']))
-      && $mb->selectFolder($folderSrc['uid'])
-      && Str::isInteger($msgNo = $mb->getMsgNo($email[$this->fields['msg_uid']]))
-      && $mb->moveMsg($msgNo, $folderDest['uid'])
+    $email = $db->rselect($this->class_table, [
+      $this->fields['id_folder'],
+      $this->fields['msg_uid']
+    ], [
+      $this->fields['id'] => $idEmail
+    ]);
+    if (empty($email)
+      || empty($email[$this->fields['id_folder']])
+      || !isset($email[$this->fields['msg_uid']])
+      || !Str::isInteger($email[$this->fields['msg_uid']])
     ) {
-      return (bool)$db->update(
-        $this->class_table,
-        [
-          $this->fields['id_folder'] => $idFolder
-        ],
-        [
-          $this->fields['id'] => $idEmail
-        ]
-      );
+      throw new \Exception(X::_("Impossible to find the email or the folder ID or the message UID for the email ID: %s", $idEmail));
     }
 
-    return false;
+    if ($email[$this->fields['id_folder']] === $idFolder) {
+      throw new \Exception(X::_("The email is already in the selected folder."));
+    }
+
+    if (!$folderSrc = $this->getFolder($email[$this->fields['id_folder']])) {
+      throw new \Exception(X::_("Impossible to find the source folder for the email ID: %s", $idEmail));
+    }
+
+    if (!$folderDest = $this->getFolder($idFolder)) {
+      throw new \Exception(X::_("Impossible to find the destination folder ID: %s", $idFolder));
+    }
+
+    if (($folderSrc['id_account'] !== $folderDest['id_account'])) {
+      throw new \Exception(X::_("The source and destination folders must belong to the same account."));
+    }
+
+    if (!$mb = $this->getMailbox($folderSrc['id_account'])) {
+      throw new \Exception(X::_("Impossible to find the mailbox for the account ID: %s", $folderSrc['id_account']));
+    }
+
+    if (!$mbParams = $mb->getParams()) {
+      throw new \Exception(X::_("Impossible to get the mailbox connection parameters for the account ID: %s", $folderSrc['id_account']));
+    }
+
+    if (!$mb->selectFolder($folderSrc['uid'])) {
+      throw new \Exception(X::_("Impossible to select the source folder '%s' in the mailbox.", $folderSrc['text']));
+    }
+
+    if (!$mb->moveMsg($email[$this->fields['msg_uid']], $folderDest['uid'])) {
+      throw new \Exception(X::_("Impossible to move the email ID: %s to the folder '%s'.", $idEmail, $folderDest['text']));
+    }
+
+    if (!$mb->expunge()) {
+      throw new \Exception(X::_("Impossible to expunge the mailbox after moving the email ID: %s to the folder '%s'.", $idEmail, $folderDest['text']));
+    }
+
+    if (!$db->update($this->class_table, [
+      $this->fields['id_folder'] => $idFolder
+    ], [
+      $this->fields['id'] => $idEmail
+    ])) {
+      throw new \Exception(X::_("Impossible to update the database after moving the email ID: %s to the folder '%s'.", $idEmail, $folderDest['text']));
+    }
+
+    return (bool)$this->syncFolders(
+      $folderSrc['id_account'],
+      array_map(
+        fn($f) => substr($f, strlen($mbParams) - 1),
+        $mb->listAllSubscribed()
+      )
+    );
   }
 
 

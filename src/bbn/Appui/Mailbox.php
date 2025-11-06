@@ -1015,80 +1015,6 @@ class Mailbox extends Basic
     return false;
   }
 
-  /**
-   * Returns an array containing the full names of the all mailboxes.  (Test: ok)
-   *
-   * @todo Remove
-   * @return bool|array
-   */
-  public function listAllMboxes()
-  {
-    return $this->_list_mboxes('*');
-  }
-
-
-  /**
-   * Returns an array containing the full names of the current level mailboxes.  (Test: ok)
-   *
-   * @todo Remove
-   * @param string $dir Current mailbox folder
-   * @return bool|array
-   */
-  public function listCurlevMboxes($dir='')
-  {
-    return $this->_list_mboxes($dir . '%');
-  }
-
-
-  /**
-   * Returns an array of objects for all mailboxes containing detailed mailbox information. (Test: ok)
-   *
-   * @todo Remove
-   * @return array|bool
-   */
-  public function getAllMboxes()
-  {
-    return $this->_get_mboxes('*');
-  }
-
-
-  /**
-   * Returns an array of objects for each current level mailboxes containing detailed mailbox information. (Test: ok)
-   *
-   * @todo Remove
-   * @param string $dir Mailbox folder
-   * @return array|bool
-   */
-  public function getCurlevMboxes($dir='')
-  {
-    return $this->_get_mboxes($dir . '%');
-  }
-
-
-  /**
-   * Returns a sorted array containing the simple names of the all mailboxes. (Test: ok)
-   *
-   * @todo Remove
-   * @return array
-   */
-  public function getAllNamesMboxes()
-  {
-    return $this->_get_names_mboxes('*');
-  }
-
-
-  /**
-   * Returns a sorted array containing the simple names of the current level mailboxes. (Test: ok)
-   *
-   * @todo Remove
-   * @param string $dir Current mailbox folder
-   * @return array
-   */
-  public function getCurlevNamesMboxes($dir='')
-  {
-    return $this->_get_names_mboxes($dir . '%');
-  }
-
 
   /**
    * Reopens the desired mailbox (you can give it the simple name or the full name). (Test: ok)
@@ -1514,7 +1440,7 @@ class Mailbox extends Basic
   }
 
 
-  public function idle2(int $timeout = 300): bool
+  /* public function idle2(int $timeout = 300): bool
   {
     $this->idleRunning = false;
     $this->idleTag = 0;
@@ -1598,7 +1524,7 @@ class Mailbox extends Basic
     }
 
     return true;
-  }
+  } */
 
 
   public function stopIdle()
