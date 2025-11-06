@@ -19,6 +19,8 @@ use bbn\User\Implementor;
 use bbn\User\Manager;
 use bbn\Models\Tts\DbUauth;
 use bbn\User\Session;
+use bbn\Db;
+use bbn\Cache;
 
 /**
  * A user authentication Class
@@ -284,13 +286,16 @@ use bbn\User\Session;
   /** @var array $class_cfg */
   protected $class_cfg;
 
+  /** @var string */
+  protected $cache_path;
+
   const MAX_EMPTY_ATTEMPTS = 5;
 
 
   /**
    * User constructor.
    *
-   * @param db    $db
+   * @param Db    $db
    * @param array $cfg
    * @param array $params
    */
@@ -1238,6 +1243,109 @@ use bbn\User\Session;
 
     return null;
   }
+  /**
+   * Gets the cache path for the user.
+   *
+   * @return string|null
+   */
+  public function getCachePath()
+  {
+    if (empty($this->cache_path)) {
+      $this->cacheInit();
+    }
+
+    return $this->cache_path;
+  }
+
+
+  /**
+   * Checks if a cache file exists for the user.
+   *
+   * @param string $path The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+  public function hasCache(string $path): bool
+  {
+    return $this->cacheInit() && (bool)$this->getCache($path, true);
+  }
+
+
+  /**
+   * Gets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return mixed
+   */
+  public function getCache(string $key, bool $raw = false): mixed
+  {
+    if ($this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+    ) {
+      $fs = new System();
+      if ($fs->isFile($file)
+        && ($t = $fs->getContents($file))
+        && ($t = json_decode($t, true))
+      ) {
+        if (empty($t['ttl'])
+          || empty($t['expire'])
+          || ($t['expire'] > time())
+        ) {
+          return $raw ? $t : $t['value'];
+        }
+        else {
+          $this->deleteCache($key);
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Sets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @param mixed  $val The value to store
+   * @param int    $ttl Time to live in seconds (0 for infinite)
+   * @return bool
+   */
+  public function setCache(string $key, $val, $ttl = null): bool
+  {
+    $fs = new System();
+    if ($this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+      && $fs->createPath(X::dirname($file))
+    ) {
+      $ttl = Cache::ttl($ttl);
+      $value = [
+        'timestamp' => microtime(1),
+        'hash' => Cache::makeHash($val),
+        'expire' => $ttl ? time() + $ttl : 0,
+        'ttl' => $ttl,
+        'value' => $val
+      ];
+      return (bool)$fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT));
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Deletes a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+  public function deleteCache(string $key): bool
+  {
+    return $this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+      && ($fs = new System())
+      && $fs->delete($file);
+  }
+
 
 
   /**
@@ -1534,6 +1642,26 @@ use bbn\User\Session;
     }
 
     return $this->auth;
+  }
+
+
+  /**
+   * Initializes the cache path for the user.
+   * @return self
+   */
+  protected function cacheInit(): bool
+  {
+    if (!empty($this->id)) {
+      $this->cache_path = Mvc::getUserTmpPath($this->id) . 'cache/';
+      $fs = new System();
+      if (!$fs->isDir($this->cache_path)) {
+        $fs->mkdir($this->cache_path);
+      }
+
+      return $fs->isDir($this->cache_path);
+    }
+
+    return false;
   }
 
 
