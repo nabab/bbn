@@ -13,6 +13,9 @@ use HTMLPurifier;
 use HTMLPurifier_HTML5Config;
 use IMAP\Connection;
 use bbn\Models\Cls\Basic;
+use Generator;
+use bbn\User;
+use bbn\File\Dir;
 
 /*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
 
@@ -97,6 +100,11 @@ class Mailbox extends Basic
   protected $mbParam;
 
   /**
+   * @var string The unique hash of the mailbox
+   */
+  protected $hash;
+
+  /**
    * @var string The status of the connection (should be ok)
    */
   protected $status = '';
@@ -123,6 +131,19 @@ class Mailbox extends Basic
 
   protected $mailer;
 
+  protected $ssl = false;
+
+  protected $idleStream;
+
+  protected $idleLastTime;
+
+  protected $idleLastCommand;
+
+  protected $idleTag;
+
+  protected $idleTagPrefix = 'BBN_';
+
+  protected $idleRunning = false;
 
   public static function setDefaultPingInterval(int $val): void
   {
@@ -154,6 +175,7 @@ class Mailbox extends Basic
       $this->pass           = $cfg['pass'];
       $this->folder         = $cfg['dir'] ?? 'INBOX';
       $this->_ping_interval = self::$_default_ping_interval;
+      $this->ssl            = !empty($cfg['ssl']);
 
       switch ($this->type){
         case 'hotmail':
@@ -171,13 +193,13 @@ class Mailbox extends Basic
           break;
         */
         case 'imap':
-          if (empty($cfg['ssl'])) {
-            $this->port    = 143;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
-          }
-          else {
+          if ($this->ssl) {
             $this->port    = 993;
             $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/ssl/novalidate-cert}';
+          }
+          else {
+            $this->port    = 143;
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
           }
           break;
         case 'local':
@@ -188,21 +210,8 @@ class Mailbox extends Basic
           break;
       }
 
-      if (isset($this->mbParam)) {
-        $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
-
-        if ($this->stream) {
-          $this->folders[$this->folder] = [
-            'last_uid' => null,
-            'num_msg'  => null,
-            'last_check' => null
-          ];
-          $this->status                 = 'ok';
-        }
-        else {
-          $this->status = imap_last_error();
-        }
-      }
+      $this->hash = md5($this->mbParam . '-' . $this->login);
+      $this->connect();
     }
   }
 
@@ -225,15 +234,33 @@ class Mailbox extends Basic
     return imap_last_error() ?: null;
   }
 
-  public function getMailer(): Mail
+  public function getMailer(array $cfg = []): Mail
   {
     if (!$this->mailer) {
-      $this->mailer = new Mail([
+      $c = [
         'host'  => $this->host,
-        'login' => $this->login,
+        'user' => $this->login,
         'pass'  => $this->pass,
         'type'  => $this->type
-      ]);
+      ];
+      if ($this->ssl) {
+        $c['ssl'] = [
+          'verify_peer' => false,
+          'verify_peer_name' => false,
+          'verify_host' => false,
+          'allow_self_signed' => true
+        ];
+      }
+
+      if ($this->type === 'imap') {
+        $c['imap'] = true;
+        $c['imap_sent'] = 'Sent';
+        if ($this->ssl) {
+          $c['imap_ssl'] = 'ssl';
+        }
+      }
+
+      $this->mailer = new Mail(X::mergeArrays($c, $cfg));
     }
 
     return $this->mailer;
@@ -286,6 +313,12 @@ class Mailbox extends Basic
   public function getParams(): string
   {
     return $this->mbParam;
+  }
+
+
+  public function getHash(): string
+  {
+    return $this->hash;
   }
 
 
@@ -425,8 +458,10 @@ class Mailbox extends Basic
       if (imap_deletemailbox($this->stream, $this->mbParam . $mbox)) {
         return true;
       }
+
       X::ddump($this->getError());
     }
+
     return false;
   }
 
@@ -673,10 +708,42 @@ class Mailbox extends Basic
       && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
+      function analyzeParts($parts, &$t) {
+        foreach ($parts as $part) {
+          if ($part->ifdisposition
+            && ((strtolower($part->disposition) === 'attachment')
+              || (strtolower($part->disposition) === 'inline'))
+            && $part->ifparameters
+            && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+          ) {
+            $a = [
+              'id' => !empty($part->id) ? substr($part->id, 1, -1) : null,
+              'name' => $name_row->value,
+              'size' => $part->bytes,
+              'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
+            ];
+            $t['attachments'][] = $a;
+            if ((strtolower($part->disposition) === 'inline')) {
+              $t['inline'][] = $a;
+            }
+          }
+          elseif (!empty($part->parts)) {
+            analyzeParts($part->parts, $t);
+          }
+          elseif ($part->subtype === 'HTML') {
+            $t['is_html'] = true;
+          }
+        }
+      }
       while ($start >= $end) {
         try {
-          $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
+          $msgHeaderInfo = $this->getMsgHeaderinfo($start);
+          if (empty($msgHeaderInfo)) {
+            $start--;
+            continue;
+          }
 
+          $tmp = (array)$this->decode_encoded_words_deep($msgHeaderInfo);
           // imap decode the subject
           if (!empty($tmp['subject'])
             && is_string($tmp['subject'])
@@ -699,6 +766,7 @@ class Mailbox extends Basic
 
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
+            $start--;
             continue;
           }
 
@@ -762,38 +830,18 @@ class Mailbox extends Basic
 
           $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
           $tmp['attachments'] = [];
+          $tmp['inline'] = [];
           $tmp['is_html'] = false;
           if (empty($structure->parts)) {
             $tmp['is_html'] = $structure->subtype === 'HTML';
           }
           else {
-            foreach ($structure->parts as $part) {
-              if ($part->ifdisposition
-                && (strtolower($part->disposition) === 'attachment')
-                && $part->ifparameters
-                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
-              ) {
-                $tmp['attachments'][] = [
-                  'name' => $name_row->value,
-                  'size' => $part->bytes,
-                  'type' => Str::fileExt($name_row->value) || strtolower($part->subtype)
-                ];
-              } elseif (!empty($part->parts)) {
-                foreach ($part->parts as $p) {
-                  if ($p->subtype === 'HTML') {
-                    $tmp['is_html'] = true;
-                    break;
-                  }
-                }
-              } elseif ($part->subtype === 'HTML') {
-                $tmp['is_html'] = true;
-              }
-            }
+            analyzeParts($structure->parts, $tmp);
           }
 
           $res[] = $tmp;
           $start--;
-          if ($generator) {
+          if (!empty($generator)) {
             yield $tmp;
           }
         } catch (\Exception $e) {
@@ -852,7 +900,6 @@ class Mailbox extends Basic
       }
     }
 
-
     $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0);  // pass 0 as part-number
@@ -863,15 +910,18 @@ class Mailbox extends Basic
         $this->_get_msg_part($msgno, $p, $partno0 + 1);
       }
     }
+
     if ($res['html'] = $this->_htmlmsg) {
       // replace cid links by name
       $res['html'] = preg_replace_callback(
         '/src="cid:(.*?)"/',
-        function ($m) {
+        function ($m) use($msgno) {
           $res = $m[0];
           $cid = $m[1];
           // get the name of the file with the cid in inline array
-          if ($att = X::getRow($this->_inline_files, ['id' => $cid])) {
+          if (($att = X::getRow($this->_inline_files, ['id' => $cid]))
+            && ($att = $this->getAttachments($msgno, $att['name']))
+          ) {
             $ext = Str::fileExt($att['name']);
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])
               || in_array($att['type'], ['jpeg', 'png', 'gif'])
@@ -1375,27 +1425,9 @@ class Mailbox extends Basic
       $attachments = [];
       if (!empty($structure->parts)) {
         foreach ($structure->parts as $np => $part) {
-          if ($part->ifdisposition
-            && (strtolower($part->disposition) === 'attachment')
-            && $part->ifparameters
-            && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-            && (!$filename || ($filename === $nameParam->value))
-          ) {
-            if ($data = $this->getMsgBody($msgNum, $np + 1)) {
-              $data = $this->_get_decode_value($data, $structure->encoding);
-            }
-
-            $a = [
-              'name' => $nameParam->value,
-              'size' => $part->bytes,
-              'type' => Str::fileExt($nameParam->value) || strtolower($part->subtype),
-              'data' => $data
-            ];
-            if ($filename) {
-              return $a;
-            }
-
-            $attachments[] = $a;
+          $this->analyzeAttachmentPart($part, $attachments, $msgNum, $np + 1, $filename);
+          if (!empty($filename) && count($attachments)) {
+            return $attachments[0];
           }
         }
       }
@@ -1404,6 +1436,313 @@ class Mailbox extends Basic
     }
 
     return null;
+  }
+
+
+  public function idle(callable $callback, int $timeout = 300): bool
+  {
+    $this->idleRunning = false;
+    $this->idleTag = 0;
+    $context = [];
+    if ($this->ssl) {
+      $context['ssl'] = [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ];
+    }
+
+    // Establish the connection
+    $this->idleStream = stream_socket_client(
+      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      $errno,
+      $errstr,
+      $timeout,
+      STREAM_CLIENT_CONNECT,
+      stream_context_create($context)
+    );
+    if (!$this->idleStream) {
+      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+    }
+
+    try {
+      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
+      $this->sendCommand("SELECT {$this->folder}");
+      //$this->sendCommand("CAPABILITY", false);
+      //$callback([$this->readCommandResponse(true), 'idle']);
+      $this->sendCommand("IDLE", false);
+      $this->idleRunning = true;
+      while ($this->idleRunning) {
+        try {
+          //$response = $this->readCommandResponse();
+          $response = $this->readCommandResponseLine();
+        }
+        catch (\Exception $e) {
+          $errCode = $e->getCode();
+          if (($errCode === 1) && $this->isIdleConnected()) {
+            continue;
+          }
+
+          if (!str_contains($e->getMessage(), "connection closed")) {
+            throw $e;
+          }
+        }
+
+        if (($pos = strpos($response, "EXISTS")) !== false) {
+          $msgn = (int)substr($response, 2, $pos - 2);
+
+          // Check if the stream is still alive or should be considered stale
+          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
+            $this->stopIdle();
+            // Establish a new connection
+            imap_close($this->stream);
+            $this->connect();
+            return $this->idle($callback, $timeout);
+          }
+
+          $this->idleLastTime = time() + $timeout;
+          $this->selectFolder($this->folder);
+          $callback($this->getMsg($msgn));
+        }
+      }
+    }
+    catch (\Exception $e) {
+      $this->stopIdle();
+      throw $e;
+    }
+
+    return true;
+  }
+
+
+  public function idle2(int $timeout = 300): bool
+  {
+    $this->idleRunning = false;
+    $this->idleTag = 0;
+    $context = [];
+    if ($this->ssl) {
+      $context['ssl'] = [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ];
+    }
+
+    // Establish the connection
+    $this->idleStream = stream_socket_client(
+      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      $errno,
+      $errstr,
+      $timeout,
+      STREAM_CLIENT_CONNECT,
+      stream_context_create($context)
+    );
+    if (!$this->idleStream) {
+      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+    }
+
+    try {
+      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
+      $this->sendCommand("SELECT {$this->folder}");
+      $this->sendCommand("CAPABILITY", false);
+      //$this->readCommandResponseLine();
+  
+      $this->sendCommand("IDLE", false);
+      $user = User::getInstance();
+      $path = $user->getTmpPath() . 'mailbox/' . $this->getHash() . '/';
+      if (is_dir($path)) {
+        Dir::delete($path, true);
+      }
+
+      sleep(1);
+      if (Dir::createPath($path)) {
+        
+      }
+
+      $this->idleRunning = true;
+      while ($this->idleRunning) {
+        try {
+          //$response = $this->readCommandResponse();
+          $response = $this->readCommandResponseLine();
+        }
+        catch (\Exception $e) {
+          $errCode = $e->getCode();
+          if (($errCode === 1) && $this->isIdleConnected()) {
+            continue;
+          }
+
+          if (!str_contains($e->getMessage(), "connection closed")) {
+            throw $e;
+          }
+        }
+
+        if (($pos = strpos($response, "EXISTS")) !== false) {
+          $msgn = (int)substr($response, 2, $pos - 2);
+
+          // Check if the stream is still alive or should be considered stale
+          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
+            $this->stopIdle();
+            // Establish a new connection
+            imap_close($this->stream);
+            $this->connect();
+            return $this->idle($callback, $timeout);
+          }
+
+          $this->idleLastTime = time() + $timeout;
+          $this->selectFolder($this->folder);
+          $callback($this->getMsg($msgn));
+        }
+      }
+    }
+    catch (\Exception $e) {
+      $this->stopIdle();
+      throw $e;
+    }
+
+    return true;
+  }
+
+
+  public function stopIdle()
+  {
+    $this->idleRunning = false;
+    if (!empty($this->idleStream)) {
+      fwrite($this->idleStream, "DONE\r\n");
+      fclose($this->idleStream);
+      $this->idleStream = null;
+    }
+  }
+
+
+  public function getIdleStream()
+  {
+    return $this->idleStream;
+  }
+
+
+  protected function sendCommand(string $command, bool $response = true): string
+  {
+    $this->idleTag++;
+    $this->idleLastCommand = $this->idleTagPrefix . $this->idleTag . ' ' . $command;
+    fwrite($this->idleStream, $this->idleLastCommand . "\r\n");
+    $this->idleLastTime = time();
+    return !empty($response) ? $this->readCommandResponse() : '';
+  }
+
+
+  protected function readCommandResponse(bool $asArray = false): string|array
+  {
+    $response = [];
+    while ($line = trim($this->readCommandResponseLine())) {
+      $response[] = $line;
+      $prefix = $this->idleTagPrefix . $this->idleTag . ' ';
+      if (str_starts_with($line, $prefix)) {
+        if (str_starts_with($line, $prefix . 'BAD ')
+          || str_starts_with($line, $prefix . 'NO ')
+        ) {
+          throw new \Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
+        }
+
+        if (empty($asArray)) {
+          return $line;
+        }
+      }
+    }
+
+    return !empty($asArray) ? $response : (!empty($response) ? $response[count($response) - 1] : '');
+  }
+
+
+  protected function readCommandResponseLine(): string
+  {
+    $line = '';
+    while (substr($line, -1) !== "\n") {
+      $line .= fgets($this->idleStream, 1024);
+    }
+    /* while ((($c = fread($this->idleStream, 1)) !== false)
+      && !in_array($c, ['', "\n"])
+    ) {
+      $line .= $c;
+    } */
+
+    if ($this->idleRunning
+      && ($line === '')
+      //&& (($c === false)
+      //  || ($c === ''))
+    ) {
+      throw new \Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
+    }
+
+    return $line;
+  }
+
+
+  protected function isIdleConnected(): bool
+  {
+    if (!empty($this->idleStream)) {
+      try {
+        $this->sendCommand("NOOP");
+        return true;
+      }
+      catch (\Exception $e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+
+  protected function connect(): bool
+  {
+    if (isset($this->mbParam)) {
+      $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
+      if ($this->stream) {
+        $this->folders[$this->folder] = [
+          'last_uid' => null,
+          'num_msg'  => null,
+          'last_check' => null
+        ];
+        $this->status = 'ok';
+        return true;
+      }
+      else {
+        $this->status = imap_last_error();
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+
+  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
+    if (!empty($part->ifdisposition)
+      && !empty($part->disposition)
+      && !empty($part->ifparameters)
+      && ((strtolower($part->disposition) === 'attachment')
+        || (strtolower($part->disposition) === 'inline'))
+      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+      && (empty($filename) || ($filename === $nameParam->value))
+    ) {
+      if ($data = $this->getMsgBody($msgNum, $partNum)) {
+        $attachments[] = [
+          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
+          'name' => $nameParam->value,
+          'size' => $part->bytes,
+          'data' => $this->_get_decode_value($data, $part->encoding)
+        ];
+      }
+    }
+
+    if (!empty($part->parts)
+      && (empty($filename) || !count($attachments))
+    ) {
+      foreach ($part->parts as $np2 => $p) {
+        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
+        if (!empty($filename) && count($attachments)) {
+          break;
+        }
+      }
+    }
   }
 
 
@@ -1516,28 +1855,24 @@ class Mailbox extends Basic
    * @param int    $coding  Type of encoding
    * @return string
    */
-  private function _get_decode_value($message, $coding)
+  public function _get_decode_value($message, $coding)
   {
-    if ($coding === 0) {
-      $message = imap_8bit($message);
+    switch ($coding) {
+      case 0:
+        return $message;
+      case 1:
+        return imap_8bit($message);
+      case 2:
+        return imap_binary($message);
+      case 3:
+        return imap_base64($message);
+      case 4:
+        return imap_qprint($message);
+      case 5:
+        return imap_base64($message);
+      default:
+        return $message;
     }
-    elseif ($coding === 1) {
-      $message = imap_8bit($message);
-    }
-    elseif ($coding === 2) {
-      $message = imap_binary($message);
-    }
-    elseif ($coding === 3) {
-      $message = imap_base64($message);
-    }
-    elseif ($coding === 4) {
-      $message = imap_qprint($message);
-    }
-    elseif ($coding === 5) {
-      $message = imap_base64($message);
-    }
-
-    return $message;
   }
 
 
@@ -1550,10 +1885,6 @@ class Mailbox extends Basic
    */
   private function _get_msg_part($msgno, $structure, $partno)
   {
-    // DECODE DATA
-    $data = $this->getMsgBody($msgno, $partno);
-    // Any part may be encoded, even plain text messages, so check everything.
-    $data = $this->_get_decode_value($data, $structure->encoding);
     // PARAMETERS
     // get all parameters, like charset, Filenames of attachments, etc.
     $params = [];
@@ -1574,24 +1905,31 @@ class Mailbox extends Basic
     // so an attached text file (type 0) is not mistaken as the message.
     if (!empty($params['filename']) || !empty($params['name'])) {
       // filename may be given as 'Filename' or 'Name' or both
-      if ($filename = empty($params['filename']) ? $params['name'] : $params['filename']) {
-        if (isset($structure->ifdisposition)
-          && isset($structure->disposition)
-          && (strtolower($structure->disposition) === 'inline')
-        ) {
-          //X::ddump($structure);
-          $this->_inline_files[] = [
-            'id' => substr($structure->id, 1, -1),
-            'type' => strtolower($structure->subtype),
-            'name' => $filename,
-            'size' => $params['size'] ?? 0,
-            'data' => $data
-          ];
+      if (($filename = empty($params['filename']) ? $params['name'] : $params['filename'])
+        && isset($structure->ifdisposition)
+        && isset($structure->disposition)
+      ) {
+        $a = [
+          'id' => !empty($structure->id) ? substr($structure->id, 1, -1) : null,
+          'type' => Str::fileExt($filename) ?: strtolower($structure->subtype),
+          'name' => $filename,
+          'size' => $params['size'] ?? $structure->bytes ?? 0
+        ];
+        if (strtolower($structure->disposition) === 'inline') {
+          $this->_inline_files[] = $a;
+          $this->_attachments[] = $a;
+          $this->_htmlmsg .= '<a href="" cid="'. $filename . '">'. $filename . '</a>';
         }
-        else {
-          $this->_attachments[] = $filename;
+        else if (strtolower($structure->disposition) === 'attachment') {
+          $this->_attachments[] = $a;
         }
       }
+    }
+    else {
+      // DECODE DATA
+      $data = $this->getMsgBody($msgno, $partno);
+      // Any part may be encoded, even plain text messages, so check everything.
+      $data = $this->_get_decode_value($data, $structure->encoding);
     }
 
     // TEXT
@@ -1603,13 +1941,13 @@ class Mailbox extends Basic
         $this->_plainmsg .= trim(Str::toUtf8($data)).PHP_EOL;
       }
       else {
-        $this->_htmlmsg .= trim(Str::toUtf8($data)).'<br><br>';
+        $htmlmsg = trim(Str::toUtf8($data));
 
-        if (!empty($this->_htmlmsg)) {
+        if (!empty($htmlmsg)) {
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
-          preg_match($body_pattern, $this->_htmlmsg, $body);
+          preg_match($body_pattern, $htmlmsg, $body);
           if (!empty($body[2])) {
-            $this->_htmlmsg = $body[2];
+            $this->_htmlmsg .= $body[2];
           }
 
           $img_pattern          = "/<img([^>]+)>/smi";

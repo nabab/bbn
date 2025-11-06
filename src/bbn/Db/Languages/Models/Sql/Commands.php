@@ -33,14 +33,24 @@ trait Commands {
 
     $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     if (is_string($sql)) {
-      $res = $this->rawQuery($sql);
+      if ($r = $this->rawQuery($sql)) {
+        if ($this->getEngine() === 'sqlite') {
+          $r->closeCursor();
+        }
+
+        $res = true;
+      }
     }
     else {
       $res = true;
       foreach ($sql as $s) {
-        if (!$this->rawQuery($s)) {
+        if (!($r = $this->rawQuery($s))) {
           $res = false;
           break;
+        }
+
+        if ($this->getEngine() === 'sqlite') {
+          $r->closeCursor();
         }
       }
     }
@@ -83,10 +93,10 @@ trait Commands {
    */
   public function collations(): ?array
   {
-    if (($sql = $this->getCollations())
-      && ($list = $this->getRows($sql))
-    ) {
-      $list = array_map(fn($a) => $a['collation'], $list);
+    if ($sql = $this->getCollations()) {
+      $q = $this->rawQuery($sql);
+      $list = array_map(fn($a) => $a['collation'], $q->fetchAll(PDO::FETCH_ASSOC) ?: []);
+      $q->closeCursor();
       sort($list);
       return $list;
     }
@@ -267,8 +277,10 @@ trait Commands {
   {
     if ($this->check()
       && ($sql = $this->getCharsetDatabase($database))
-      && ($r = $this->getRow($sql))
     ) {
+      $q = $this->rawQuery($sql);
+      $r = $q->fetch(PDO::FETCH_ASSOC) ?: [];
+      $q->closeCursor();
       return $r['charset'] ?? $r['encoding'] ?? null;
     }
 

@@ -54,6 +54,11 @@ class Query extends PDOStatement implements Actions
    */
   protected $union;
 
+  /**
+   * @var string
+   */
+  protected $engine;
+
 
   /**
    * @param SqlEngines $db
@@ -67,6 +72,7 @@ class Query extends PDOStatement implements Actions
       $this->values    = $last['values'] ?? [];
       $this->write     = $last['write'] ?? false;
       $this->structure = $last['structure'] ?? [];
+      $className       = get_class($this->db);
     }
   }
 
@@ -174,7 +180,9 @@ class Query extends PDOStatement implements Actions
   public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));
+    $r = $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));
+    $this->_closeCursor();
+    return $r;
   }
 
 
@@ -197,6 +205,7 @@ class Query extends PDOStatement implements Actions
       $res = parent::fetchAll($fetch_style);
     }
 
+    $this->_closeCursor();
     return $this->db->correctTypes($res);
   }
 
@@ -208,7 +217,9 @@ class Query extends PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetchColumn($column_number));
+    $res = $this->db->correctTypes(parent::fetchColumn($column_number));
+    $this->_closeCursor();
+    return $res;
   }
 
 
@@ -220,7 +231,9 @@ class Query extends PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    return $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $res = $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $this->_closeCursor();
+    return $res;
   }
 
 
@@ -365,6 +378,28 @@ class Query extends PDOStatement implements Actions
     }
 
     return null;
+  }
+
+
+  protected function _closeCursor()
+  {
+    $last = $this->db->getRealLastParams();
+    $sql = $last['statement'] ?? null;
+    $kind = $last['kind'] ?? null;
+    if (($this->db->getEngine() === 'sqlite')
+      && ($this->isWrite()
+        || (!empty($sql) && str_starts_with(strtolower($sql), 'pragma'))
+        || (!empty($sql) && str_contains(strtolower($sql), 'count('))
+        || (!empty($sql) && str_contains(strtolower($sql), 'sqlite_master'))
+        || ($kind === 'pragma')
+      )
+    ) {
+      $this->closeCursor();
+    }
+    else if ($this->db->getEngine() === 'sqlite'){
+      //\bbn\X::log($last, 'mirkosqlite');
+      $this->closeCursor();
+    }
   }
 
 

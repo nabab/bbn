@@ -19,7 +19,10 @@ use bbn\User\Implementor;
 use bbn\User\Manager;
 use bbn\Models\Tts\DbUauth;
 use bbn\User\Session;
+use bbn\Appui\Option;
 use bbn\Db;
+use bbn\Appui\Database;
+use bbn\Db\Languages\Sqlite;
 use bbn\Cache;
 
 /**
@@ -1346,6 +1349,150 @@ use bbn\Cache;
       && $fs->delete($file);
   }
 
+
+
+  public function getLocaleDatabase(?string $idUser = null, bool $createIfNotExists = true): ?Db
+  {
+    /** @var Option $options */
+    $options = Option::getInstance();
+    if (empty($options)) {
+      throw new Exception(X::_('Impossible to get the options class instance'));
+    }
+
+    $idHost = $options->fromCode('BBN_USER_PATH', 'connections', 'sqlite', 'engines', 'database', 'appui');
+    if (empty($idHost)) {
+      throw new Exception(X::_('Impossible to find the SQLite host for user\'s database'));
+    }
+
+    $dbName = 'locale_' . $this->id . '.sqlite';
+    if (!empty($idUser)
+      && Str::isUid($idUser)
+      && ($idUser !== $this->id)
+    ) {
+      $dbName = 'locale_' . $idUser . '.sqlite';
+      $idHost = str_replace($this->id, $idUser, Sqlite::getHostPath($idHost));
+    }
+
+    if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+      if (!$createIfNotExists) {
+        return null;
+      }
+
+      Sqlite::createDatabaseOnHost($dbName, $idHost);
+    }
+
+    if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+      throw new Exception(X::_('Impossible to find the user\'s database'));
+    }
+
+    $d = new Database($this->db);
+    return $d->connection($idHost, 'sqlite', $dbName);
+
+  }
+
+
+  /**
+   * Gets the cache path for the user.
+   *
+   * @return string|null
+   */
+  public function getCachePath()
+  {
+    if (empty($this->cache_path)) {
+      $this->cacheInit();
+    }
+
+    return $this->cache_path;
+  }
+
+
+  /**
+   * Checks if a cache file exists for the user.
+   *
+   * @param string $path The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+  public function hasCache(string $path): bool
+  {
+    return $this->cacheInit() && (bool)$this->getCache($path, true);
+  }
+
+
+  /**
+   * Gets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return mixed
+   */
+  public function getCache(string $key, bool $raw = false): mixed
+  {
+    if ($this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+    ) {
+      $fs = new System();
+      if ($fs->isFile($file)
+        && ($t = $fs->getContents($file))
+        && ($t = json_decode($t, true))
+      ) {
+        if (empty($t['ttl'])
+          || empty($t['expire'])
+          || ($t['expire'] > time())
+        ) {
+          return $raw ? $t : $t['value'];
+        }
+        else {
+          $this->deleteCache($key);
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Sets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @param mixed  $val The value to store
+   * @param int    $ttl Time to live in seconds (0 for infinite)
+   * @return bool
+   */
+  public function setCache(string $key, $val, $ttl = null): bool
+  {
+    $fs = new System();
+    if ($this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+      && $fs->createPath(X::dirname($file))
+    ) {
+      $ttl = Cache::ttl($ttl);
+      $value = [
+        'timestamp' => microtime(1),
+        'hash' => Cache::makeHash($val),
+        'expire' => $ttl ? time() + $ttl : 0,
+        'ttl' => $ttl,
+        'value' => $val
+      ];
+      return (bool)$fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT));
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Deletes a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+  public function deleteCache(string $key): bool
+  {
+    return $this->cacheInit()
+      && ($file = Cache::_file($key, $this->getCachePath()))
+      && ($fs = new System())
+      && $fs->delete($file);
+  }
 
 
   /**

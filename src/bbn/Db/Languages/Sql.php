@@ -2126,8 +2126,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $params['union']     = isset($sequences['UNION']);
           $params['write']     = !\in_array($params['kind'], self::$read_kinds, true);
           $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
+          if (($this->getEngine() === 'sqlite')
+            && str_starts_with(strtolower($statement), 'pragma')
+          ) {
+            $params['kind'] = 'PRAGMA';
+          }
         }
-        elseif (($this->getEngine() === 'sqlite') && str_starts_with($statement, 'PRAGMA')) {
+        elseif (($this->getEngine() === 'sqlite')
+          && str_starts_with(strtolower($statement), 'pragma')
+        ) {
           $params['kind'] = 'PRAGMA';
         }
         else {
@@ -2248,6 +2255,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         // If it is a write statement returns the number of affected rows
         if ($q['prepared'] && $q['write']) {
           $r = $q['prepared']->rowCount();
+          if ($this->getEngine() === 'sqlite') {
+            $q['prepared']->closeCursor();
+          }
         }
 
         // If it is an insert statement we (try to) set the last inserted ID
@@ -2574,6 +2584,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           && isset(static::$interoperability[$v['type']][$engine])
         ) {
           $cfg['fields'][$k]['type'] = static::$interoperability[$v['type']][$engine];
+        }
+
+        if (isset($v['collation'])) {
+          $cfg['fields'][$k]['collation'] = null;
+        }
+
+        if (isset($v['charset'])) {
+          $cfg['fields'][$k]['charset'] = null;
         }
       }
     }

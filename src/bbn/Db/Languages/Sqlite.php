@@ -114,6 +114,7 @@ class Sqlite extends Sql
     }
 
     parent::__construct($cfg);
+    $this->rawQuery("PRAGMA journal_mode=wal")->closeCursor();
   }
 
   /**
@@ -166,6 +167,7 @@ class Sqlite extends Sql
     $cfg['originalDb'] = $cfg['db'];
     $cfg['originalHost'] = $cfg['host'];
     $cfg['db']   = 'main';
+    $cfg['code_host'] = $cfg['host'];
 
     return $cfg;
   }
@@ -224,7 +226,10 @@ class Sqlite extends Sql
    */
   public function tableExists(string $table, string $database = ''): bool
   {
-    return (bool)$this->getRow("SELECT name FROM sqlite_master WHERE type='table' AND name='$table'");
+    $q = $this->rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$table'");
+    $r = $q->fetch(PDO::FETCH_ASSOC);
+    $q->closeCursor();
+    return (bool)$r;
   }
 
 
@@ -289,7 +294,7 @@ class Sqlite extends Sql
    */
   public function disableKeys(): self
   {
-    $this->rawQuery('PRAGMA foreign_keys = OFF;');
+    $this->rawQuery('PRAGMA foreign_keys = OFF;')->closeCursor();
 
     return $this;
   }
@@ -302,7 +307,7 @@ class Sqlite extends Sql
    */
   public function enableKeys(): self
   {
-    $this->rawQuery('PRAGMA foreign_keys = ON;');
+    $this->rawQuery('PRAGMA foreign_keys = ON;')->closeCursor();
 
     return $this;
   }
@@ -355,17 +360,14 @@ class Sqlite extends Sql
     }
 
     $t2 = [];
-    if (($r = $this->rawQuery(
-      '
-      SELECT "tbl_name"
-      FROM '.$database.'"sqlite_master"
-        WHERE type = \'table\''
-    ) )
-        && $t1 = $this->fetchAllResults($r, PDO::FETCH_NUM)
-    ) {
-      foreach ($t1 as $t){
-        if (strpos($t[0], 'sqlite') !== 0) {
-          array_push($t2, $t[0]);
+    if ($r = $this->rawQuery("SELECT tbl_name FROM $database.sqlite_master WHERE type = 'table'")) {
+      $t1 = $this->fetchAllResults($r, PDO::FETCH_NUM);
+      $r->closeCursor();
+      if ($t1) {
+        foreach ($t1 as $t){
+          if (strpos($t[0], 'sqlite') !== 0) {
+            array_push($t2, $t[0]);
+          }
         }
       }
     }
@@ -390,7 +392,10 @@ class Sqlite extends Sql
     $r = [];
     if ($table = $this->tableFullName($table)) {
       $p = 1;
-      if ($rows = $this->getRows("PRAGMA table_info($table)")) {
+      $q = $this->rawQuery("PRAGMA table_info($table)");
+      $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+      $q->closeCursor();
+      if ($rows) {
         foreach ($rows as $row){
           $f     = $row['name'];
           $r[$f] = [
@@ -475,9 +480,15 @@ class Sqlite extends Sql
       $keys     = [];
       $cols     = [];
       $database = $this->getCurrent() === 'main' ? '' : '"'.$this->getCurrent().'".';
-      if ($indexes = $this->getRows('PRAGMA index_list('.$table.')')) {
+      $q = $this->rawQuery('PRAGMA index_list('.$table.')');
+      $indexes = $q->fetchAll(PDO::FETCH_ASSOC);
+      $q->closeCursor();
+      if ($indexes) {
         foreach ($indexes as $d){
-          if ($fields = $this->getRows('PRAGMA index_info('.$database.'"'.$d['name'].'")')) {
+          $q = $this->rawQuery('PRAGMA index_info('.$database.'"'.$d['name'].'")');
+          $fields = $q->fetchAll(PDO::FETCH_ASSOC);
+          $q->closeCursor();
+          if ($fields) {
             foreach ($fields as $d2){
               $key_name = strtolower($d['origin']) === 'pk' ? 'PRIMARY' : $d['name'];
               if (!isset($keys[$key_name])) {
@@ -540,7 +551,10 @@ class Sqlite extends Sql
         }
       }
 
-      if ($constraints = $this->getRows("PRAGMA foreign_key_list($database\"$table\")")) {
+      $q = $this->rawQuery("PRAGMA foreign_key_list($database\"$table\")");
+      $constraints = $q->fetchAll(PDO::FETCH_ASSOC);
+      $q->closeCursor();
+      if ($constraints) {
         foreach ($constraints as $constraint) {
           $constraint_name = "{$constraint['table']}_{$constraint['from']}";
           if (empty($cols[$constraint['from']])) {
@@ -618,6 +632,32 @@ class Sqlite extends Sql
     return $res;
   }
 
+
+  /**
+   * Return SQL code for row(s) DELETE.
+   *
+   * ```php
+   * X::dump($db->getDelete(['tables' => 'users']);
+   * // (string) DELETE FROM `db_example`.`table_users`
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   *
+   */
+  public function getDelete(array $cfg): string
+  {
+    $res = '';
+    if (count($cfg['tables']) === 1) {
+      $res = 'DELETE ' .
+        (count($cfg['join'] ?? []) ? current($cfg['tables']) . ' ' : '') .
+        'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
+    }
+
+    return $res;
+  }
+
+
   /**
    * @param null|string $table The table for which to create the statement
    * @return string
@@ -627,7 +667,9 @@ class Sqlite extends Sql
     if (($table = $this->tableFullName($table, true))
         && ($r = $this->rawQuery("SELECT sql FROM sqlite_master WHERE name = $table"))
     ) {
-      return $r->fetch(PDO::FETCH_ASSOC)['sql'] ?? '';
+      $res = $r->fetch(PDO::FETCH_ASSOC)['sql'] ?? '';
+      $r->closeCursor();
+      return $res;
     }
 
     return '';
@@ -1058,8 +1100,11 @@ class Sqlite extends Sql
         $query .= ' );';
       }
 
-      X::log(['index', $query],'vito');
-      return (bool)$this->rawQuery($query);
+      if ($res = $this->rawQuery($query)) {
+        $res->closeCursor();
+      }
+
+      return (bool)$res;
     }
 
     return false;
@@ -1442,6 +1487,7 @@ class Sqlite extends Sql
   public static function getHostDatabases(string $host): array
   {
     $databases = [];
+    $host = self::getHostPath($host);
     if (is_dir($host)) {
       $fs = Dir::getFiles($host, false, false, ['sqlite', 'db']);
       foreach ($fs as $f) {
@@ -1453,6 +1499,14 @@ class Sqlite extends Sql
 
     sort($databases);
     return $databases;
+  }
+
+  public static function hasHostDatabase(string $host, string $database): bool
+  {
+    $path = self::getHostPath($host);
+    return !empty($path)
+      && is_dir($path)
+      && is_file($path . self::normalizeFilename($database));
   }
 
 
@@ -1528,7 +1582,8 @@ class Sqlite extends Sql
     return null;
   }
 
-  private static function getHostPath(string $host): string
+
+  public static function getHostPath(string $host): string
   {
     $path = $host;
     if (Str::isUid($host)) {
