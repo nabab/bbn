@@ -306,7 +306,7 @@ class Email extends Basic
 
     $this->getAccount($id_pref, true);
     if (!empty($cfg['folders'])) {
-      $this->syncFolders($id_pref, $cfg['folders']);
+      $this->syncFolders($id_pref, $cfg['folders'], $cfg['rules'] ?? []);
     }
 
     return $id_pref;
@@ -1545,7 +1545,7 @@ class Email extends Basic
   }
 
 
-  public function syncFolders(string $id_account, array $subscribed = [])
+  public function syncFolders(string $id_account, array $subscribed = [], array $rules = [])
   {
     // get Mailbox account
     if ($mb = $this->getMailbox($id_account)) {
@@ -1635,18 +1635,42 @@ class Email extends Basic
 
       $pref = $this->pref;
 
-      $import = function (array $to_add, $id_parent = null) use ($id_account, &$pref, &$import, &$types): void {
+      $import = function (
+        array $to_add,
+        $id_parent = null
+      ) use (
+        $id_account,
+        &$pref,
+        &$import,
+        &$types,
+        $rules
+      ): void
+      {
         foreach ($to_add as $a) {
           if ($id_parent) {
             $a['id_parent'] = $id_parent;
             $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
           }
           else {
-            foreach ($types as $type) {
-              if (!empty($type['names'])) {
-                if (in_array($a['text'], $type['names'], true)) {
-                  $a['id_option'] = $type['id'];
-                  break;
+            if (!empty($rules)
+              && ($rule = array_search($a['uid'], $rules))
+            ) {
+              $a['id_option'] = X::getField($types, ['code' => $rule], 'id');
+            }
+            else {
+              foreach ($types as $type) {
+                if (!empty($type['names'])) {
+                  if (in_array(
+                    strtolower($a['text']),
+                    array_map(fn($n) => strtolower($n), $type['names']),
+                    true
+                  )) {
+                    if (empty($rules) || empty($rules[$type['code']])) {
+                      $a['id_option'] = $type['id'];
+                    }
+
+                    break;
+                  }
                 }
               }
             }
