@@ -1,0 +1,800 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Internal",
+    "namespace": true,
+    "realName": "Internal",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Internal.php",
+    "startLine": 6,
+    "endLine": 235,
+    "numMethods": 13,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Internal",
+    "contentConstructor": null,
+    "methods": {
+        "getHash": {
+            "name": "getHash",
+            "summary": "Gets the created hash.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getHash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getHash(): string\n  {\n    return $this->language->getHash();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 25,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getHash",
+            "returns": [
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Gets the created hash.\n\n```php\nX::dump($db->getHash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the created hash.\n   *\n   * ```php\n   * X::dump($db->getHash());\n   * \/\/ (string) 3819056v431b210daf45f9b5dc2\n   * ```\n   * @return string\n   *\/"
+        },
+        "replaceTableInConditions": {
+            "name": "replaceTableInConditions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function replaceTableInConditions(array $conditions, $old_name, $new_name): array\n  {\n    return X::map(\n      function ($a) use ($old_name, $new_name) {\n        if (!empty($a['field'])) {\n          $a['field'] = preg_replace(\"\/(\\\\W|^)$old_name([\\\\`\\\\']*\\\\s*)\\\\.\/\", '$1'.$new_name.'$2.', $a['field']);\n        }\n\n        if (!empty($a['exp'])) {\n          $a['exp'] = preg_replace(\"\/(\\\\W|^)$old_name([\\\\`\\\\']*\\\\s*)\\\\.\/\", '$1'.$new_name.'$2.', $a['exp']);\n        }\n\n        return $a;\n      }, $conditions, 'conditions'\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 37,
+            "endLine": 52,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "replaceTableInConditions",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "conditions",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "old_name",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "new_name",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$conditions"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$old_name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$new_name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $conditions\n   * @param $old_name\n   * @param $new_name\n   * @return array\n   *\/"
+        },
+        "treatConditions": {
+            "name": "treatConditions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function treatConditions(array $where, bool $full = true)\n  {\n    return $this->language->treatConditions($where, $full);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 60,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "treatConditions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "where",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "full",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$full"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $where\n   * @param bool  $full\n   * @return array|bool\n   *\/"
+        },
+        "reprocessCfg": {
+            "name": "reprocessCfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function reprocessCfg(array $cfg): ?array\n  {\n    return $this->language->reprocessCfg($cfg);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 70,
+            "endLine": 73,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "reprocessCfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @return array|null\n   *\/"
+        },
+        "processCfg": {
+            "name": "processCfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function processCfg(array $args, bool $force = false): ?array\n  {\n    return $this->language->processCfg($args, $force);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 84,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "processCfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$args"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   *\n   * @param array $args\n   * @param bool $force\n   * @return array|null\n   *\/"
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks if the database is ready to process a query.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->check());\n\/\/ (bool)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function check(): bool\n  {\n    return $this->language->check();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 96,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "check",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the database is ready to process a query.\n\n```php\nX::dump($db->check());\n\/\/ (bool)\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the database is ready to process a query.\n   *\n   * ```php\n   * X::dump($db->check());\n   * \/\/ (bool)\n   * ```\n   * \n   * @return bool\n   *\/"
+        },
+        "log": {
+            "name": "log",
+            "summary": "Writes in data\/logs\/db.log.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$db->$db->log('test');"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log($st): self\n  {\n    $args = \\func_get_args();\n    foreach ($args as $a){\n      X::log($a, 'db');\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 111,
+            "endLine": 119,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "log",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Writes in data\/logs\/db.log.\n\n```php\n$db->$db->log('test');\n```\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Writes in data\/logs\/db.log.\n   *\n   * ```php\n   * $db->$db->log('test');\n   * ```\n   * \n   * @param mixed $st\n   * @return self\n   *\/"
+        },
+        "setErrorMode": {
+            "name": "setErrorMode",
+            "summary": "Sets the error mode.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setErrorMode(string $mode): self\n  {\n    $this->language->setErrorMode($mode);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 133,
+            "endLine": 137,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setErrorMode",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The error mode: \"continue\", \"die\", \"stop\", \"stop_all\"."
+                }
+            ],
+            "doc": {
+                "description": "Sets the error mode.\n\n```php\n$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The error mode: \"continue\", \"die\", \"stop\", \"stop_all\"."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the error mode.\n   *\n   * ```php\n   * $db->setErrorMode('continue'|'die'|'stop_all|'stop');\n   * \/\/ (self)\n   * ```\n   *\n   * @param string $mode The error mode: \"continue\", \"die\", \"stop\", \"stop_all\".\n   * @return self\n   *\/"
+        },
+        "getErrorMode": {
+            "name": "getErrorMode",
+            "summary": "Gets the error mode.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getErrorMode());\n\/\/ (string) stop_all"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorMode(): string\n  {\n    return $this->language->getErrorMode();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 150,
+            "endLine": 153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorMode",
+            "returns": [
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Gets the error mode.\n\n```php\nX::dump($db->getErrorMode());\n\/\/ (string) stop_all\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the error mode.\n   *\n   * ```php\n   * X::dump($db->getErrorMode());\n   * \/\/ (string) stop_all\n   * ```\n   * \n   * @return string\n   *\/"
+        },
+        "clearCache": {
+            "name": "clearCache",
+            "summary": "Deletes a specific item from the cache.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->clearCache('db_example','tables'));\n\/\/ (db)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function clearCache(string $item, string $mode): self\n  {\n    if ($this->cacheHas($item, $mode)) {\n      $this->cacheDelete($item, $mode);\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 168,
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "clearCache",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "item",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "'db_name' or 'table_name'"
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "'columns','tables' or 'databases'"
+                }
+            ],
+            "doc": {
+                "description": "Deletes a specific item from the cache.\n\n```php\nX::dump($db->clearCache('db_example','tables'));\n\/\/ (db)\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$item",
+                        "description": "'db_name' or 'table_name'"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "'columns','tables' or 'databases'"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes a specific item from the cache.\n   *\n   * ```php\n   * X::dump($db->clearCache('db_example','tables'));\n   * \/\/ (db)\n   * ```\n   *\n   * @param string $item 'db_name' or 'table_name'\n   * @param string $mode 'columns','tables' or 'databases'\n   * @return self\n   *\/"
+        },
+        "clearAllCache": {
+            "name": "clearAllCache",
+            "summary": "Clears the cache.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->clearAllCache());\n\/\/ (db)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function clearAllCache(): self\n  {\n    $this->cacheDeleteAll();\n    $this->language->initCache();\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 188,
+            "endLine": 193,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "clearAllCache",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Clears the cache.\n\n```php\nX::dump($db->clearAllCache());\n\/\/ (db)\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Clears the cache.\n   *\n   * ```php\n   * X::dump($db->clearAllCache());\n   * \/\/ (db)\n   * ```\n   *\n   * @return self\n   *\/"
+        },
+        "stopFancyStuff": {
+            "name": "stopFancyStuff",
+            "summary": "Stops fancy stuff.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$db->stopFancyStuff();\n\/\/ (self)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function stopFancyStuff(): self\n  {\n    if ($this->language) {\n      $this->language->stopFancyStuff();\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 206,
+            "endLine": 213,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "stopFancyStuff",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Stops fancy stuff.\n\n```php\n $db->stopFancyStuff();\n\/\/ (self)\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Stops fancy stuff.\n   *\n   * ```php\n   *  $db->stopFancyStuff();\n   * \/\/ (self)\n   * ```\n   *\n   * @return self\n   *\/"
+        },
+        "startFancyStuff": {
+            "name": "startFancyStuff",
+            "summary": "Starts fancy stuff.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$db->startFancyStuff();\n\/\/ (self)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Internal",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Internal.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function startFancyStuff(): self\n  {\n    if ($this->language) {\n      $this->language->startFancyStuff();\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 226,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "startFancyStuff",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Starts fancy stuff.\n\n```php\n$db->startFancyStuff();\n\/\/ (self)\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Starts fancy stuff.\n   *\n   * ```php\n   * $db->startFancyStuff();\n   * \/\/ (self)\n   * ```\n   * \n   * @return self\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * Gets the created hash.\n   *\n   * ```php\n   * X::dump($db->getHash());\n   * \/\/ (string) 3819056v431b210daf45f9b5dc2\n   * ```\n   * @return string\n   *\/",
+        "\/**\n   * @param array $conditions\n   * @param $old_name\n   * @param $new_name\n   * @return array\n   *\/",
+        "\/**\n   * @param array $where\n   * @param bool  $full\n   * @return array|bool\n   *\/",
+        "\/**\n   * @param array $cfg\n   * @return array|null\n   *\/",
+        "\/**\n   *\n   * @param array $args\n   * @param bool $force\n   * @return array|null\n   *\/",
+        "\/**\n   * Checks if the database is ready to process a query.\n   *\n   * ```php\n   * X::dump($db->check());\n   * \/\/ (bool)\n   * ```\n   * \n   * @return bool\n   *\/",
+        "\/**\n   * Writes in data\/logs\/db.log.\n   *\n   * ```php\n   * $db->$db->log('test');\n   * ```\n   * \n   * @param mixed $st\n   * @return self\n   *\/",
+        "\/**\n   * Sets the error mode.\n   *\n   * ```php\n   * $db->setErrorMode('continue'|'die'|'stop_all|'stop');\n   * \/\/ (self)\n   * ```\n   *\n   * @param string $mode The error mode: \"continue\", \"die\", \"stop\", \"stop_all\".\n   * @return self\n   *\/",
+        "\/**\n   * Gets the error mode.\n   *\n   * ```php\n   * X::dump($db->getErrorMode());\n   * \/\/ (string) stop_all\n   * ```\n   * \n   * @return string\n   *\/",
+        "\/**\n   * Deletes a specific item from the cache.\n   *\n   * ```php\n   * X::dump($db->clearCache('db_example','tables'));\n   * \/\/ (db)\n   * ```\n   *\n   * @param string $item 'db_name' or 'table_name'\n   * @param string $mode 'columns','tables' or 'databases'\n   * @return self\n   *\/",
+        "\/**\n   * Clears the cache.\n   *\n   * ```php\n   * X::dump($db->clearAllCache());\n   * \/\/ (db)\n   * ```\n   *\n   * @return self\n   *\/",
+        "\/**\n   * Stops fancy stuff.\n   *\n   * ```php\n   *  $db->stopFancyStuff();\n   * \/\/ (self)\n   * ```\n   *\n   * @return self\n   *\/",
+        "\/**\n   * Starts fancy stuff.\n   *\n   * ```php\n   * $db->startFancyStuff();\n   * \/\/ (self)\n   * ```\n   * \n   * @return self\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

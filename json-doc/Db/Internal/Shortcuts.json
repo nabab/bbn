@@ -1,0 +1,427 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Shortcuts",
+    "namespace": true,
+    "realName": "Shortcuts",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Shortcuts.php",
+    "startLine": 5,
+    "endLine": 100,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Shortcuts",
+    "contentConstructor": null,
+    "methods": {
+        "tfn": {
+            "name": "tfn",
+            "summary": "Return table's full name.",
+            "description": "(similar to {@link table_full_name()})",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "(similar to {@link table_full_name()})"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->tfn(\"table_users\"));\n\/\/ (string) work_db.table_users\nX::dump($db->tfn(\"table_users\", true));\n\/\/ (string) `work_db`.`table_users`"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Shortcuts",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Shortcuts.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function tfn(string $table, bool $escaped = false): ?string\n  {\n    return $this->tableFullName($table, $escaped);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 31,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tfn",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped."
+                }
+            ],
+            "doc": {
+                "description": "Return table's full name.\n(similar to {@link table_full_name()})\n\n```php\nX::dump($db->tfn(\"table_users\"));\n\/\/ (string) work_db.table_users\nX::dump($db->tfn(\"table_users\", true));\n\/\/ (string) `work_db`.`table_users`\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$escaped",
+                        "description": "If set to true the returned string will be escaped."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return table's full name.\n   * (similar to {@link table_full_name()})\n   *\n   * ```php\n   * X::dump($db->tfn(\"table_users\"));\n   * \/\/ (string) work_db.table_users\n   * X::dump($db->tfn(\"table_users\", true));\n   * \/\/ (string) `work_db`.`table_users`\n   * ```\n   *\n   * @param string $table   The table's name\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/"
+        },
+        "tsn": {
+            "name": "tsn",
+            "summary": "Return table's simple name.",
+            "description": "(similar to {@link table_simple_name()})",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "(similar to {@link table_simple_name()})"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\nX::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Shortcuts",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Shortcuts.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function tsn(string $table, bool $escaped = false): ?string\n  {\n    return $this->tableSimpleName($table, $escaped);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 52,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tsn",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped."
+                }
+            ],
+            "doc": {
+                "description": "Return table's simple name.\n(similar to {@link table_simple_name()})\n\n```php\nX::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\nX::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$escaped",
+                        "description": "If set to true the returned string will be escaped."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return table's simple name.\n   * (similar to {@link table_simple_name()})\n   *\n   * ```php\n   * X::dump($db->tsn(\"work_db.table_users\"));\n   * \/\/ (string) table_users\n   * X::dump($db->tsn(\"work_db.table_users\", true));\n   * \/\/ (string) `table_users`\n   * ```\n   *\n   * @param string $table   The table's name\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/"
+        },
+        "cfn": {
+            "name": "cfn",
+            "summary": "Return column's full name.",
+            "description": "(similar to {@link col_full_name()})",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "(similar to {@link col_full_name()})"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\nX::dump($db->cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Shortcuts",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Shortcuts.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function cfn(string $col, ?string $table = null, bool $escaped = false): ?string\n  {\n    return $this->colFullName($col, $table, $escaped);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 74,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cfn",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name (escaped or not)."
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The table's name (escaped or not)."
+                },
+                {
+                    "name": "escaped",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped."
+                }
+            ],
+            "doc": {
+                "description": "Return column's full name.\n(similar to {@link col_full_name()})\n\n```php\nX::dump($db->cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\nX::dump($db->cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$col",
+                        "description": "The column's name (escaped or not)."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$table",
+                        "description": "The table's name (escaped or not)."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$escaped",
+                        "description": "If set to true the returned string will be escaped."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return column's full name.\n   * (similar to {@link col_full_name()})\n   *\n   * ```php\n   * X::dump($db->cfn(\"name\", \"table_users\"));\n   * \/\/ (string)  table_users.name\n   * X::dump($db->cfn(\"name\", \"table_users\", true));\n   * \/\/ (string) \\`table_users\\`.\\`name\\`\n   * ```\n   *\n   * @param string $col     The column's name (escaped or not).\n   * @param string|null $table   The table's name (escaped or not).\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/"
+        },
+        "csn": {
+            "name": "csn",
+            "summary": "Return the column's simple name.",
+            "description": "(similar to {@link col_simple_name()})",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "(similar to {@link col_simple_name()})"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->csn(\"table_users.name\"));\n\/\/ (string) name\nX::dump($db->csn(\"table_users.name\", true));\n\/\/ (string) `name`"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Shortcuts",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Shortcuts.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function csn(string $col, bool $escaped = false): ?string\n  {\n    return $this->colSimpleName($col, $escaped);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 95,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "csn",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's complete name (escaped or not)"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped."
+                }
+            ],
+            "doc": {
+                "description": "Return the column's simple name.\n(similar to {@link col_simple_name()})\n\n```php\nX::dump($db->csn(\"table_users.name\"));\n\/\/ (string) name\nX::dump($db->csn(\"table_users.name\", true));\n\/\/ (string) `name`\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$col",
+                        "description": "The column's complete name (escaped or not)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$escaped",
+                        "description": "If set to true the returned string will be escaped."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the column's simple name.\n   * (similar to {@link col_simple_name()})\n   *\n   * ```php\n   * X::dump($db->csn(\"table_users.name\"));\n   * \/\/ (string) name\n   * X::dump($db->csn(\"table_users.name\", true));\n   * \/\/ (string) `name`\n   * ```\n   *\n   * @param string $col     The column's complete name (escaped or not)\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Return table's full name.\n   * (similar to {@link table_full_name()})\n   *\n   * ```php\n   * X::dump($db->tfn(\"table_users\"));\n   * \/\/ (string) work_db.table_users\n   * X::dump($db->tfn(\"table_users\", true));\n   * \/\/ (string) `work_db`.`table_users`\n   * ```\n   *\n   * @param string $table   The table's name\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/",
+        "\/**\n   * Return table's simple name.\n   * (similar to {@link table_simple_name()})\n   *\n   * ```php\n   * X::dump($db->tsn(\"work_db.table_users\"));\n   * \/\/ (string) table_users\n   * X::dump($db->tsn(\"work_db.table_users\", true));\n   * \/\/ (string) `table_users`\n   * ```\n   *\n   * @param string $table   The table's name\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/",
+        "\/**\n   * Return column's full name.\n   * (similar to {@link col_full_name()})\n   *\n   * ```php\n   * X::dump($db->cfn(\"name\", \"table_users\"));\n   * \/\/ (string)  table_users.name\n   * X::dump($db->cfn(\"name\", \"table_users\", true));\n   * \/\/ (string) \\`table_users\\`.\\`name\\`\n   * ```\n   *\n   * @param string $col     The column's name (escaped or not).\n   * @param string|null $table   The table's name (escaped or not).\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/",
+        "\/**\n   * Return the column's simple name.\n   * (similar to {@link col_simple_name()})\n   *\n   * ```php\n   * X::dump($db->csn(\"table_users.name\"));\n   * \/\/ (string) name\n   * X::dump($db->csn(\"table_users.name\", true));\n   * \/\/ (string) `name`\n   * ```\n   *\n   * @param string $col     The column's complete name (escaped or not)\n   * @param bool   $escaped If set to true the returned string will be escaped.\n   * @return null|string\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -1,0 +1,508 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Utilities",
+    "namespace": true,
+    "realName": "Utilities",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Utilities.php",
+    "startLine": 7,
+    "endLine": 246,
+    "numMethods": 8,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Utilities",
+    "contentConstructor": null,
+    "methods": {
+        "escapeValue": {
+            "name": "escapeValue",
+            "summary": "Return a string with quotes and percent escaped.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->escapeValue(\"My father's job is interesting\");\n\/\/ (string) My  father\\'s  job  is  interesting"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function escapeValue(string $value, $esc = \"'\"): string\n  {\n    return str_replace(\n      '%', '\\\\%', $esc === '\"' ? Str::escapeDquotes($value) : Str::escapeSquotes($value)\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 31,
+            "endLine": 36,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "escapeValue",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "value",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The string to escape."
+                },
+                {
+                    "name": "esc",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "'",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return a string with quotes and percent escaped.\n\n```php\nX::dump($db->escapeValue(\"My father's job is interesting\");\n\/\/ (string) My  father\\'s  job  is  interesting\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$value",
+                        "description": "The string to escape."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$esc"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return a string with quotes and percent escaped.\n   *\n   * ```php\n   * X::dump($db->escapeValue(\"My father's job is interesting\");\n   * \/\/ (string) My  father\\'s  job  is  interesting\n   * ```\n   *\n   * @param string $value The string to escape.\n   * @param string $esc\n   * @return string\n   *\n   *\/"
+        },
+        "setLastInsertId": {
+            "name": "setLastInsertId",
+            "summary": "Changes the value of last_insert_id (used by history).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setLastInsertId($id = ''): self\n  {\n    $this->language->setLastInsertId($id);\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 50,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "setLastInsertId",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The last inserted id"
+                }
+            ],
+            "doc": {
+                "description": "Changes the value of last_insert_id (used by history).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$id",
+                        "description": "The last inserted id"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "this function should be private\n\n```php\nX::dump($db->setLastInsertId());\n\/\/ (db)\n```"
+                }
+            },
+            "comments": "  \/**\n   * Changes the value of last_insert_id (used by history).\n   * @todo this function should be private\n   *\n   * ```php\n   * X::dump($db->setLastInsertId());\n   * \/\/ (db)\n   * ```\n   * @param mixed $id The last inserted id\n   * @return self\n   *\/"
+        },
+        "last": {
+            "name": "last",
+            "summary": "Return the last query for this connection.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function last(): ?string\n  {\n    return $this->language->last();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 67,
+            "endLine": 70,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "last",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return the last query for this connection.\n\n```php\nX::dump($db->last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the last query for this connection.\n   *\n   * ```php\n   * X::dump($db->last());\n   * \/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n   * ```\n   *\n   * @return string\n   *\/"
+        },
+        "lastId": {
+            "name": "lastId",
+            "summary": "Return the last inserted ID.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->lastId());\n\/\/ (int) 26"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function lastId()\n  {\n    return $this->language->lastId();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 82,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "lastId",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Return the last inserted ID.\n\n```php\nX::dump($db->lastId());\n\/\/ (int) 26\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the last inserted ID.\n   *\n   * ```php\n   * X::dump($db->lastId());\n   * \/\/ (int) 26\n   * ```\n   *\n   * @return mixed\n   *\/"
+        },
+        "flush": {
+            "name": "flush",
+            "summary": "Deletes all the queries recorded and returns their (ex) number.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::hdump($ctrl->db->flush()); \/\/ 9"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function flush(): int\n  {\n    return $this->language->flush();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 96,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "flush",
+            "returns": [
+                "int"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the queries recorded and returns their (ex) number.\n\n```php\nX::hdump($ctrl->db->flush()); \/\/ 9\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the queries recorded and returns their (ex) number.\n   *\n   * ```php\n   * X::hdump($ctrl->db->flush()); \/\/ 9\n   * ```\n   * @return int\n   *\/"
+        },
+        "newId": {
+            "name": "newId",
+            "summary": "Generate a new casual id based on the max number of characters of id's column structure in the given table",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->newId('table_users', 18));\n\/\/ (int) 69991701"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function newId($table, int $min = 1)\n  {\n    $tab = $this->modelize($table);\n    if (\\count($tab['keys']['PRIMARY']['columns']) !== 1) {\n      die(\"Error! Unique numeric primary key doesn't exist\");\n    }\n\n    if (($id_field = $tab['keys']['PRIMARY']['columns'][0])\n        && ($maxlength = $tab['fields'][$id_field]['maxlength'] )\n        && ($maxlength > 1)\n    ) {\n      $max = (10 ** $maxlength) - 1;\n      if ($max >= mt_getrandmax()) {\n        $max = mt_getrandmax();\n      }\n\n      if (($max > $min) && ($table = $this->tfn($table, true))) {\n        $i = 0;\n        do {\n          $id = random_int($min, $max);\n          \/** @todo *\/\n          \/*\n          if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){\n            $id = substr(md5('bbn'.$id), 0, random_int(1, 10 ** $maxlength));\n          }\n          *\/\n          $i++;\n        }\n        while (($i < 100) && $this->select($table, [$id_field], [$id_field => $id]));\n        return $id;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 115,
+            "endLine": 149,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "newId",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name."
+                },
+                {
+                    "name": "min",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generate a new casual id based on the max number of characters of id's column structure in the given table\n\n```php\nX::dump($db->newId('table_users', 18));\n\/\/ (int) 69991701\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$table",
+                        "description": "The table's name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$min"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Either get rid of th efunction or include the UID types\nTODO-testing is this needed?"
+                }
+            },
+            "comments": "  \/**\n   * Generate a new casual id based on the max number of characters of id's column structure in the given table\n   *\n   * ```php\n   * X::dump($db->newId('table_users', 18));\n   * \/\/ (int) 69991701\n   * ```\n   *\n   * @todo Either get rid of th efunction or include the UID types\n   * TODO-testing is this needed?\n   * @param null|string $table The table's name.\n   * @param int         $min\n   * @return mixed\n   *\/"
+        },
+        "randomValue": {
+            "name": "randomValue",
+            "summary": "Returns a random value fitting the requested column's type",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function randomValue($col, $table)\n  {\n    $val = null;\n    if (($tab = $this->modelize($table)) && isset($tab['fields'][$col])) {\n      foreach ($tab['keys'] as $cfg){\n        if ($cfg['unique']\n            && !empty($cfg['ref_column'])\n            && (\\count($cfg['columns']) === 1)\n            && ($col === $cfg['columns'][0])\n        ) {\n          return ($num = $this->count($cfg['ref_column'])) ? $this->selectOne(\n            [\n            'tables' [$cfg['ref_table']],\n            'fields' => [$cfg['ref_column']],\n            'start' => random_int(0, $num - 1)\n            ]\n          ) : null;\n        }\n      }\n\n      switch ($tab['fields'][$col]['type']){\n        case 'int':\n          if (($tab['fields'][$col]['maxlength'] === 1) && !$tab['fields'][$col]['signed']) {\n            $val = microtime(true) % 2 === 0 ? 1 : 0;\n          }\n          else {\n            $max = 10 ** $tab['fields'][$col]['maxlength'] - 1;\n            if ($max > mt_getrandmax()) {\n              $max = mt_getrandmax();\n            }\n\n            if ($tab['fields'][$col]['signed']) {\n              $max \/= 2;\n            }\n\n            $min = $tab['fields'][$col]['signed'] ? -$max : 0;\n            $val = random_int($min, $max);\n          }\n          break;\n        case 'float':\n        case 'double':\n        case 'decimal':\n          break;\n        case 'varchar':\n          break;\n        case 'text':\n          break;\n        case 'date':\n          break;\n        case 'datetime':\n          break;\n        case 'timestamp':\n          break;\n        case 'time':\n          break;\n        case 'year':\n          break;\n        case 'blob':\n          break;\n        case 'binary':\n          break;\n        case 'varbinary':\n          break;\n        case 'enum':\n          break;\n      }\n    }\n\n    return $val;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 160,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "randomValue",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns a random value fitting the requested column's type\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$col"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$table"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "This great function has to be done properly\nTODO is this used?"
+                }
+            },
+            "comments": "  \/**\n   * Returns a random value fitting the requested column's type\n   *\n   * @todo This great function has to be done properly\n   * TODO is this used?\n   * @param $col\n   * @param $table\n   * @return mixed\n   *\/"
+        },
+        "countQueries": {
+            "name": "countQueries",
+            "summary": "Returns the number of queries",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::hdump($ctrl->db->countQueries()); \/\/ 10"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Utilities",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Utilities.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function countQueries(): int\n  {\n    return $this->language->countQueries();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 240,
+            "endLine": 243,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "countQueries",
+            "returns": [
+                "int"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the number of queries\n\n```php\nX::hdump($ctrl->db->countQueries()); \/\/ 10\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/** Returns the number of queries \n   * \n   * ```php\n   * X::hdump($ctrl->db->countQueries()); \/\/ 10\n   * ```\n   * \n   * @return int\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Return a string with quotes and percent escaped.\n   *\n   * ```php\n   * X::dump($db->escapeValue(\"My father's job is interesting\");\n   * \/\/ (string) My  father\\'s  job  is  interesting\n   * ```\n   *\n   * @param string $value The string to escape.\n   * @param string $esc\n   * @return string\n   *\n   *\/",
+        "\/**\n   * Changes the value of last_insert_id (used by history).\n   * @todo this function should be private\n   *\n   * ```php\n   * X::dump($db->setLastInsertId());\n   * \/\/ (db)\n   * ```\n   * @param mixed $id The last inserted id\n   * @return self\n   *\/",
+        "\/**\n   * Return the last query for this connection.\n   *\n   * ```php\n   * X::dump($db->last());\n   * \/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n   * ```\n   *\n   * @return string\n   *\/",
+        "\/**\n   * Return the last inserted ID.\n   *\n   * ```php\n   * X::dump($db->lastId());\n   * \/\/ (int) 26\n   * ```\n   *\n   * @return mixed\n   *\/",
+        "\/**\n   * Deletes all the queries recorded and returns their (ex) number.\n   *\n   * ```php\n   * X::hdump($ctrl->db->flush()); \/\/ 9\n   * ```\n   * @return int\n   *\/",
+        "\/**\n   * Generate a new casual id based on the max number of characters of id's column structure in the given table\n   *\n   * ```php\n   * X::dump($db->newId('table_users', 18));\n   * \/\/ (int) 69991701\n   * ```\n   *\n   * @todo Either get rid of th efunction or include the UID types\n   * TODO-testing is this needed?\n   * @param null|string $table The table's name.\n   * @param int         $min\n   * @return mixed\n   *\/",
+        "\/** @todo *\/",
+        "\/**\n   * Returns a random value fitting the requested column's type\n   *\n   * @todo This great function has to be done properly\n   * TODO is this used?\n   * @param $col\n   * @param $table\n   * @return mixed\n   *\/",
+        "\/** Returns the number of queries \n   * \n   * ```php\n   * X::hdump($ctrl->db->countQueries()); \/\/ 10\n   * ```\n   * \n   * @return int\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

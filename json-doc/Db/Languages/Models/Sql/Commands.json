@@ -12,9 +12,9 @@
     ],
     "interfaces": [],
     "fileName": "\/Db\/Languages\/Models\/Sql\/Commands.php",
-    "startLine": 10,
-    "endLine": 479,
-    "numMethods": 36,
+    "startLine": 11,
+    "endLine": 692,
+    "numMethods": 40,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -44,11 +44,11 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function emulatePreparesAndQuery(string $sql)\n  {\n    $att = true;\n    try {\n      $att = $this->pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES);\n    }\n    catch (Exception $e) {}\n\n    if (empty($att)) {\n      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);\n    }\n\n    $res = (bool)$this->rawQuery($sql);\n    if (empty($att)) {\n      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n    }\n\n    return $res;\n  }",
+            "code": "  protected function emulatePreparesAndQuery(string|array $sql)\n  {\n    $att = true;\n    $emode = null;\n    $res = false;\n    try {\n      $att = $this->pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES);\n    }\n    catch (Exception $e) {}\n\n    try {\n      $emode = $this->pdo->getAttribute(PDO::ATTR_ERRMODE);\n    }\n    catch (Exception $e) {}\n\n    if (empty($att)) {\n      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);\n    }\n\n    $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);\n    if (is_string($sql)) {\n      $res = $this->rawQuery($sql);\n    }\n    else {\n      $res = true;\n      foreach ($sql as $s) {\n        if (!$this->rawQuery($s)) {\n          $res = false;\n          break;\n        }\n      }\n    }\n\n    if (empty($att)) {\n      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);\n    }\n\n    if (!is_null($emode)) {\n      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, $emode);\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 14,
-            "endLine": 32,
+            "startLine": 15,
+            "endLine": 57,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -63,9 +63,10 @@
                 {
                     "name": "sql",
                     "position": 0,
-                    "type": "string",
+                    "type": "array|string",
                     "type_arr": [
-                        "string"
+                        {},
+                        {}
                     ],
                     "variadic": false,
                     "reference": false,
@@ -89,8 +90,8 @@
             "code": "  public function charsets(): ?array\n  {\n    if (($sql = $this->getCharsets())\n      && ($list = $this->getRows($sql))\n    ) {\n      $list = array_map(fn($a) => $a['charset'], $list);\n      sort($list);\n      return $list;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 40,
-            "endLine": 51,
+            "startLine": 65,
+            "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -125,8 +126,8 @@
             "code": "  public function collations(): ?array\n  {\n    if (($sql = $this->getCollations())\n      && ($list = $this->getRows($sql))\n    ) {\n      $list = array_map(fn($a) => $a['collation'], $list);\n      sort($list);\n      return $list;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 59,
-            "endLine": 70,
+            "startLine": 84,
+            "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -158,11 +159,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createDatabase(string $database, ?string $enc = null, ?string $collation = null): bool\n  {\n    if ($sql = $this->getCreateDatabase($database, $enc, $collation)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function createDatabase(string $database, ?string $enc = null, ?string $collation = null): bool\n  {\n    if ($sql = $this->getCreateDatabase($database, $enc, $collation)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    if ($cacheName = $this->_db_cache_name($database, 'tables')) {\n      $this->cacheDelete($cacheName);\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 81,
-            "endLine": 88,
+            "startLine": 106,
+            "endLine": 117,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -254,11 +255,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function dropDatabase(string $database): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($database)) {\n        throw new Exception(X::_(\"Wrong database name '%s'\", $database));\n      }\n\n      if ($database === $this->getCurrent()) {\n        throw new Exception(X::_('Cannot drop the currently open database!'));\n      }\n\n      if ($sql = $this->getDropDatabase($database)) {\n        try {\n          return (bool)$this->emulatePreparesAndQuery($sql);\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
+            "code": "  public function dropDatabase(string $database): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($database)) {\n        throw new Exception(X::_(\"Wrong database name '%s'\", $database));\n      }\n\n      if ($database === $this->getCurrent()) {\n        throw new Exception(X::_('Cannot drop the currently open database!'));\n      }\n\n      if ($sql = $this->getDropDatabase($database)) {\n        try {\n          if ($this->emulatePreparesAndQuery($sql)) {\n            if ($cacheName = $this->_db_cache_name($database, 'tables')) {\n              $this->cacheDelete($cacheName);\n            }\n            return true;\n          }\n\n          return false;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 98,
-            "endLine": 120,
+            "startLine": 127,
+            "endLine": 156,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -314,11 +315,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function renameDatabase(string $oldName, string $newName): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($oldName) || !Str::checkName($newName)) {\n        throw new Exception(X::_(\"Wrong database name '%s' or '%s'\", $oldName, $newName));\n      }\n\n      if ($oldName === $this->getCurrent()) {\n        throw new Exception(X::_('Cannot rename the currently open database!'));\n      }\n\n      if ($sql = $this->getRenameDatabase($oldName, $newName)) {\n        try {\n          return (bool)$this->emulatePreparesAndQuery($sql);\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
+            "code": "  public function renameDatabase(string $oldName, string $newName): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($oldName) || !Str::checkName($newName)) {\n        throw new Exception(X::_(\"Wrong database name '%s' or '%s'\", $oldName, $newName));\n      }\n\n      if ($oldName === $this->getCurrent()) {\n        throw new Exception(X::_('Cannot rename the currently open database!'));\n      }\n\n      if ($sql = $this->getRenameDatabase($oldName, $newName)) {\n        try {\n          if ($this->emulatePreparesAndQuery($sql)) {\n            if ($cacheName = $this->_db_cache_name($oldName, 'tables')) {\n              $this->cacheDelete($cacheName);\n            }\n\n            if ($cacheName = $this->_db_cache_name($newName, 'tables')) {\n              $this->cacheDelete($cacheName);\n            }\n\n            return true;\n          }\n\n          return false;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 131,
-            "endLine": 153,
+            "startLine": 167,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -397,19 +398,19 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function duplicateDatabase(string $source, string $target): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($source) || !Str::checkName($target)) {\n        throw new Exception(X::_(\"Wrong database name '%s' or '%s'\", $source, $target));\n      }\n\n      if ($sql = $this->getDuplicateDatabase($source, $target)) {\n        try {\n          $this->disableKeys();\n          $res = (bool)$this->emulatePreparesAndQuery($sql);\n          $this->enableKeys();\n          return $res;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
+            "code": "  public function duplicateDatabase(string $source, string $target, bool $withData): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($source) || !Str::checkName($target)) {\n        throw new Exception(X::_(\"Wrong database name '%s' or '%s'\", $source, $target));\n      }\n\n      if ($sql = $this->getDuplicateDatabase($source, $target, $withData)) {\n        try {\n          $this->disableKeys();\n          if ($res = (bool)$this->emulatePreparesAndQuery($sql)) {\n            if ($cacheName = $this->_db_cache_name($target, 'tables')) {\n              $this->cacheDelete($cacheName);\n            }\n          }\n\n          $this->enableKeys();\n          return $res;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 164,
-            "endLine": 185,
+            "startLine": 213,
+            "endLine": 239,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
             "shortName": "duplicateDatabase",
             "returns": [
                 "bool"
@@ -442,6 +443,21 @@
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ata"
                 }
             ],
             "doc": {
@@ -456,6 +472,12 @@
                         "tag": "param",
                         "type": "string",
                         "name": "$target"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata"
                     }
                 ],
                 "return": "",
@@ -464,7 +486,7 @@
                     "type": "Exception"
                 }
             },
-            "comments": "  \/**\n   * Duplicates the given database\n   *\n   * @param string $source\n   * @param string $target\n   * @return bool\n   * @throws Exception\n   *\/"
+            "comments": "  \/**\n   * Duplicates the given database\n   *\n   * @param string $source\n   * @param string $target\n   * @param bool $withData\n   * @return bool\n   * @throws Exception\n   *\/"
         },
         "analyzeDatabase": {
             "name": "analyzeDatabase",
@@ -479,8 +501,8 @@
             "code": "  public function analyzeDatabase(string $database): bool\n  {\n    if ($this->check()\n      && ($sql = $this->getAnalyzeDatabase($database))\n    ) {\n      return (bool)$this->emulatePreparesAndQuery($sql);\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 194,
-            "endLine": 203,
+            "startLine": 248,
+            "endLine": 257,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -535,8 +557,8 @@
             "code": "  public function getDatabaseCharset(string $database): ?string\n  {\n    if ($this->check()\n      && ($sql = $this->getCharsetDatabase($database))\n      && ($r = $this->getRow($sql))\n    ) {\n      return $r['charset'] ?? $r['encoding'] ?? null;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 212,
-            "endLine": 222,
+            "startLine": 266,
+            "endLine": 276,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -592,8 +614,8 @@
             "code": "  public function getDatabaseCollation(string $database): ?string\n  {\n    if ($this->check()\n      && method_exists($this, 'getCollationDatabase')\n      && ($sql = $this->getCollationDatabase($database))\n      && ($r = $this->getRow($sql))\n    ) {\n      return $r['collation'] ?? null;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 231,
-            "endLine": 242,
+            "startLine": 285,
+            "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -646,11 +668,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createTable(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true\n  ): bool\n  {\n    if ($sql = $this->getCreateTableRaw($table, $cfg, $createKeys, $createConstraints)) {\n      return (bool)$this->emulatePreparesAndQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function createTable(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true\n  ): bool\n  {\n    if ($sql = $this->getCreateTableRaw($table, $cfg, $createKeys, $createConstraints)) {\n      if ($this->emulatePreparesAndQuery($sql)) {\n        if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n          $this->cacheDelete($cacheName);\n        }\n\n        return true;\n      }\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 252,
-            "endLine": 264,
+            "startLine": 306,
+            "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -754,6 +776,64 @@
             },
             "comments": "  \/**\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return string\n   *\/"
         },
+        "renameTable": {
+            "name": "renameTable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Commands",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Commands.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function renameTable(string $table, string $newName): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($table) || !Str::checkName($newName)) {\n        throw new Exception(X::_(\"Wrong table name '%s' or '%s'\", $table, $newName));\n      }\n\n      if (($sql = $this->getRenameTable($table, $newName))\n        && $this->emulatePreparesAndQuery($sql)\n      ) {\n        if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n          $this->cacheDelete($cacheName);\n        }\n\n        if ($cacheName = $this->_db_cache_name($newName, 'columns')) {\n          $this->cacheDelete($cacheName);\n        }\n\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 327,
+            "endLine": 350,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "renameTable",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "dropTable": {
             "name": "dropTable",
             "summary": "Drops a table",
@@ -764,11 +844,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function dropTable(string $table, ?string $database = null): bool\n  {\n    $tn = (!empty($database) ? $database . '.' : '').$table;\n    $tfn = $this->tableFullName($tn, true);\n    if (!$tfn) {\n      throw new Exception(X::_(\"Invalid table name to drop '%s'\", $tn));\n    }\n\n    if (!$this->tableExists($table, $database)) {\n      throw new Exception(X::_(\"The table %s does not exist\", $tfn));\n    }\n\n    if ($sql = $this->getDropTable($table, $database)) {\n      $this->rawQuery($sql);\n    }\n\n    return !$this->tableExists($table, $database);\n\n  }",
+            "code": "  public function dropTable(string $table, ?string $database = null): bool\n  {\n    $tn = (!empty($database) ? $database . '.' : '').$table;\n    $tfn = $this->tableFullName($tn, true);\n    if (!$tfn) {\n      throw new Exception(X::_(\"Invalid table name to drop '%s'\", $tn));\n    }\n\n    if (!$this->tableExists($table, $database)) {\n      throw new Exception(X::_(\"The table %s does not exist\", $tfn));\n    }\n\n    if (($sql = $this->getDropTable($table, $database))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      if (!empty($database)\n        && ($cacheName = $this->_db_cache_name($database, 'tables'))\n      ) {\n        $this->cacheDelete($cacheName);\n      }\n    }\n\n\n    return !$this->tableExists($table, $database);\n\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 274,
-            "endLine": 292,
+            "startLine": 360,
+            "endLine": 389,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -840,11 +920,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function duplicateTable(string $source, string $target, bool $withData): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($source) || !Str::checkName($target)) {\n        throw new Exception(X::_(\"Wrong table name '%s' or '%s'\", $source, $target));\n      }\n\n      if ($sql = $this->getDuplicateTable($source, $target, $withData)) {\n        try {\n          $this->disableKeys();\n          $res = (bool)$this->emulatePreparesAndQuery($sql);\n          $this->enableKeys();\n          return $res;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
+            "code": "  public function duplicateTable(string $source, string $target, bool $withData): bool\n  {\n    if ($this->check()) {\n      if (!Str::checkName($source) || !Str::checkName($target)) {\n        throw new Exception(X::_(\"Wrong table name '%s' or '%s'\", $source, $target));\n      }\n\n      if ($cacheName = $this->_db_cache_name($target, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      if ($sql = $this->getDuplicateTable($source, $target, $withData)) {\n        try {\n          $this->disableKeys();\n          if ($res = (bool)$this->emulatePreparesAndQuery($sql)) {\n            if ($cacheName = $this->_db_cache_name($target, 'columns')) {\n              $this->cacheDelete($cacheName);\n            }\n          }\n\n          $this->enableKeys();\n          return $res;\n        }\n        catch (Exception $e) {\n          return false;\n        }\n      }\n    }\n\n    return $this->check();\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 304,
-            "endLine": 325,
+            "startLine": 401,
+            "endLine": 431,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -930,6 +1010,120 @@
             },
             "comments": "  \/**\n   * Duplicates the given table\n   *\n   * @param string $source\n   * @param string $target\n   * @param bool $withData\n   * @return bool\n   * @throws Exception\n   *\/"
         },
+        "copyTableTo": {
+            "name": "copyTableTo",
+            "summary": "Copies the given table to the target database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Commands",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Commands.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function copyTableTo(string $table, Db $target, bool $withData, string $newName = ''): bool\n  {\n    ;\n    if ($target->check()\n      && ($m = $this->modelize($table, true))\n      && ($m = $this->convert($m, $target->getEngine()))\n      && !$target->tableExists($newName ?: $table)\n      && $target->createTable($newName ?: $table, $m, true, true)\n    ) {\n      if ($withData) {\n        $columns = array_map(\n          fn($c) => $this->escape($c),\n          array_keys(\n            array_filter(\n              $this->getColumns($table),\n              fn($c) => empty($c['virtual'])\n            )\n          )\n        );\n        if ($columns) {\n          $q = $this->query(\"SELECT \" . implode(\", \", $columns) . \" FROM \" . $this->escape($table));\n          $target->disableKeys();\n          while ($row = $q->getRow()) {\n            $target->insert($newName ?: $table, $row);\n          }\n\n          $target->enableKeys();\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 442,
+            "endLine": 476,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "copyTableTo",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source table name"
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The target database connection"
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ata If true, the data will be copied too"
+                },
+                {
+                    "name": "newName",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Copies the given table to the target database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The source table name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "Db",
+                        "name": "$target",
+                        "description": "The target database connection"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata If true, the data will be copied too"
+                    }
+                ],
+                "return": "True if it succeeded"
+            },
+            "comments": "  \/**\n   * Copies the given table to the target database.\n   *\n   * @param string $table The source table name\n   * @param Db $target The target database connection\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/"
+        },
         "analyzeTable": {
             "name": "analyzeTable",
             "summary": "Analyzes the given table.",
@@ -943,8 +1137,8 @@
             "code": "  public function analyzeTable(string $table, ?string $database = null): bool\n  {\n    if ($this->check()\n      && ($sql = $this->getAnalyzeTable($table, $database))\n    ) {\n      return (bool)$this->emulatePreparesAndQuery($sql);\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 335,
-            "endLine": 344,
+            "startLine": 486,
+            "endLine": 495,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1016,11 +1210,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getTableCharset(string $table): ?string\n  {\n    if ($this->check()\n      && ($sql = $this->getCharsetTable($table))\n      && ($r = $this->getRow($sql))\n    ) {\n      return $r['charset'] ?? $r['encoding'] ?? null;\n    }\n\n    return null;\n  }",
+            "code": "  public function getTableCharset(string $table): ?string\n  {\n    if ($this->check()\n      && method_exists($this, 'getCharsetTable')\n      && ($sql = $this->getCharsetTable($table))\n      && ($r = $this->getRow($sql))\n    ) {\n      return $r['charset'] ?? $r['encoding'] ?? null;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 353,
-            "endLine": 363,
+            "startLine": 504,
+            "endLine": 515,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1076,8 +1270,8 @@
             "code": "  public function getTableCollation(string $table): ?string\n  {\n    if ($this->check()\n      && method_exists($this, 'getCollationTable')\n      && ($sql = $this->getCollationTable($table))\n      && ($r = $this->getRow($sql))\n    ) {\n      return $r['collation'] ?? null;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 372,
-            "endLine": 383,
+            "startLine": 524,
+            "endLine": 535,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1130,11 +1324,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createColumn(string $table, string $column, array $columnCfg): bool\n  {\n    if ($sql = $this->getCreateColumn($table, $column, $columnCfg)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function createColumn(string $table, string $column, array $columnCfg): bool\n  {\n    if (($sql = $this->getCreateColumn($table, $column, $columnCfg))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 394,
-            "endLine": 401,
+            "startLine": 546,
+            "endLine": 559,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1218,7 +1412,7 @@
         },
         "dropColumn": {
             "name": "dropColumn",
-            "summary": "",
+            "summary": "Drops the given column from the given table.",
             "description": "",
             "description_parts": [],
             "class": "bbn\\Db\\Languages\\Models\\Sql\\Commands",
@@ -1226,11 +1420,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function dropColumn(string $table, string $column): bool\n  {\n    if ($sql = $this->getDropColumn($table, $column)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function dropColumn(string $table, string $column): bool\n  {\n    if (($sql = $this->getDropColumn($table, $column))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 409,
-            "endLine": 416,
+            "startLine": 568,
+            "endLine": 581,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1274,7 +1468,7 @@
                 }
             ],
             "doc": {
-                "description": "",
+                "description": "Drops the given column from the given table.\n",
                 "params": [
                     {
                         "tag": "param",
@@ -1289,7 +1483,98 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/"
+            "comments": "  \/**\n   * Drops the given column from the given table.\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/"
+        },
+        "alterColumn": {
+            "name": "alterColumn",
+            "summary": "Creates the given column for the given table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Commands",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Commands.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function alterColumn(string $table, string $column, array $columnCfg): bool\n  {\n    die(var_dump($this->getAlterColumn($table, $columnCfg)));\n    if (($sql = $this->getAlterColumn($table, $columnCfg))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 591,
+            "endLine": 605,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "alterColumn",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "fg"
+                },
+                {
+                    "name": "columnCfg",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Creates the given column for the given table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$column",
+                        "description": "fg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param array $columnCfg\n   * @return bool\n   *\/"
         },
         "createKeys": {
             "name": "createKeys",
@@ -1301,11 +1586,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createKeys(string $table, ?array $cfg = null): bool\n  {\n    if ($sql = $this->getCreateKeys($table,  $cfg)) {\n      return (bool)$this->emulatePreparesAndQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function createKeys(string $table, ?array $cfg = null): bool\n  {\n    if (($sql = $this->getCreateKeys($table,  $cfg))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 424,
-            "endLine": 431,
+            "startLine": 613,
+            "endLine": 626,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1377,11 +1662,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function dropKey(string $table, string $key): bool\n  {\n    if ($sql = $this->getDropKey($table, $key)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function dropKey(string $table, string $key): bool\n  {\n    if (($sql = $this->getDropKey($table, $key))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 439,
-            "endLine": 446,
+            "startLine": 634,
+            "endLine": 647,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1452,11 +1737,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function createConstraints(string $table, ?array $cfg = null): bool\n  {\n    if ($sql = $this->getCreateConstraints($table,  $cfg)) {\n      return (bool)$this->emulatePreparesAndQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function createConstraints(string $table, ?array $cfg = null): bool\n  {\n    if (($sql = $this->getCreateConstraints($table,  $cfg))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 454,
-            "endLine": 461,
+            "startLine": 655,
+            "endLine": 668,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1528,11 +1813,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function dropConstraint(string $table, string $constraint): bool\n  {\n    if ($sql = $this->getDropConstraint($table, $constraint)) {\n      return (bool)$this->rawQuery($sql);\n    }\n\n    return false;\n  }",
+            "code": "  public function dropConstraint(string $table, string $constraint): bool\n  {\n    if (($sql = $this->getDropConstraint($table, $constraint))\n      && $this->emulatePreparesAndQuery($sql)\n    ) {\n      if ($cacheName = $this->_db_cache_name($table, 'columns')) {\n        $this->cacheDelete($cacheName);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 469,
-            "endLine": 476,
+            "startLine": 676,
+            "endLine": 689,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1763,22 +2048,23 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getDuplicateDatabase(string $source, string $target): string\n  {\n    if (Str::checkName($source) && Str::checkName($target)) {\n      $sql = $this->getCreateDatabase($target).PHP_EOL;\n      if ($tables = $this->getTables($source)) {\n        foreach ($tables as $table) {\n          $sql .= $this->getDuplicateTable(\"$source.$table\", \"$target.$table\", false).PHP_EOL;\n        }\n\n        foreach ($tables as $i => $table) {\n          $sql .= ($i ? PHP_EOL : '') . \"INSERT INTO \" . $this->escape(\"$target.$table\") . \" SELECT * FROM \" . $this->escape(\"$source.$table\") . \";\";\n        }\n      }\n\n      return $sql;\n    }\n\n    return '';\n  }",
+            "code": "  public function getDuplicateDatabase(string $source, string $target, bool $withData = true): ?array\n  {\n    if (Str::checkName($source)\n      && Str::checkName($target)\n      && ($sql = $this->getCreateDatabase($target, $this->getDatabaseCharset($source), $this->getDatabaseCollation($source)))\n    ) {\n      $sql = [$sql];\n      if ($tables = $this->getTables($source)) {\n        foreach ($tables as $table) {\n          if ($dtSql = $this->getDuplicateTable(\"$source.$table\", \"$target.$table\", false)) {\n            if (is_string($dtSql)) {\n              $dtSql = [$dtSql];\n            }\n\n            array_push($sql, ...$dtSql);\n          }\n        }\n\n        if ($withData) {\n          foreach ($tables as $table) {\n            $columns = array_map(\n              fn($c) => $this->escape($c),\n              array_keys(\n                array_filter(\n                  $this->getColumns(\"$source.$table\"),\n                  fn($c) => empty($c['virtual'])\n                )\n              )\n            );\n            if ($columns) {\n              $sql[] = \"INSERT INTO \" . $this->escape(\"$target.$table\") . \" (\" . implode(\", \", $columns) . \") SELECT \" . implode(\", \", $columns) . \" FROM \" . $this->escape(\"$source.$table\") . \";\";\n            }\n          }\n        }\n      }\n\n      return $sql;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 50,
-            "endLine": 68,
+            "startLine": 51,
+            "endLine": 91,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "shortName": "getDuplicateDatabase",
             "returns": [
-                "string"
+                null,
+                "array"
             ],
             "arguments": [
                 {
@@ -1810,6 +2096,21 @@
                     "default": "",
                     "default_name": "",
                     "description": "ame The name of the new database."
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "ata Whether to include data in the duplication."
                 }
             ],
             "doc": {
@@ -1826,11 +2127,17 @@
                         "type": "string",
                         "name": "$new",
                         "description": "ame The name of the new database."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata Whether to include data in the duplication."
                     }
                 ],
-                "return": "The SQL statement to duplicate the database, or an empty string if the names are invalid."
+                "return": "An array of SQL statements to duplicate the database, or null if the names are invalid."
             },
-            "comments": "  \/**\n   * Returns the SQL statement to duplicate a database.\n   * @param string $oldName The name of the database to duplicate.\n   * @param string $newName The name of the new database.\n   * @return string The SQL statement to duplicate the database, or an empty string if the names are invalid.\n   *\/"
+            "comments": "  \/**\n   * Returns the SQL statement to duplicate a database.\n   * @param string $oldName The name of the database to duplicate.\n   * @param string $newName The name of the new database.\n   * @param bool $withData Whether to include data in the duplication.\n   * @return null|array An array of SQL statements to duplicate the database, or null if the names are invalid.\n   *\/"
         },
         "getRenameDatabase": {
             "name": "getRenameDatabase",
@@ -1847,11 +2154,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getRenameDatabase(string $oldName, string $newName): string\n  {\n    if ($sql = $this->getDuplicateDatabase($oldName, $newName)) {\n      $sql .= PHP_EOL.$this->getDropDatabase($oldName);\n      return $sql;\n    }\n\n    return '';\n  }",
+            "code": "  public function getRenameDatabase(string $oldName, string $newName): ?array\n  {\n    if ($sql = $this->getDuplicateDatabase($oldName, $newName)) {\n      if (is_string($sql)) {\n        $sql = [$sql];\n      }\n\n      if ($ddSql = $this->getDropDatabase($oldName)) {\n        if (is_string($ddSql)) {\n          $ddSql = [$ddSql];\n        }\n\n        array_push($sql, ...$ddSql);\n      }\n\n      return $sql;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 78,
-            "endLine": 86,
+            "startLine": 101,
+            "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1862,7 +2169,8 @@
             "numberOfRequiredParameters": 2,
             "shortName": "getRenameDatabase",
             "returns": [
-                "string"
+                null,
+                "array"
             ],
             "arguments": [
                 {
@@ -1912,9 +2220,9 @@
                         "description": "ame The new name for the database."
                     }
                 ],
-                "return": "The SQL statement to rename the database, or an empty string if the names are invalid."
+                "return": "An array of SQL statements to rename the database, or null if the names are invalid."
             },
-            "comments": "  \/**\n   * Returns the SQL statement to rename a database.\n   * This method first duplicates the old database to the new name and then drops the old database.\n   * @param string $oldName The current name of the database.\n   * @param string $newName The new name for the database.\n   * @return string The SQL statement to rename the database, or an empty string if the names are invalid.\n   *\/"
+            "comments": "  \/**\n   * Returns the SQL statement to rename a database.\n   * This method first duplicates the old database to the new name and then drops the old database.\n   * @param string $oldName The current name of the database.\n   * @param string $newName The new name for the database.\n   * @return null|array An array of SQL statements to rename the database, or null if the names are invalid.\n   *\/"
         },
         "getAnalyzeDatabase": {
             "name": "getAnalyzeDatabase",
@@ -1931,11 +2239,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getAnalyzeDatabase(): string\n  {\n    $sql = '';\n    if ($tables = $this->getTables()\n    ) {\n      foreach ($tables as $i => $table) {\n        $sql .= $this->getAnalyzeTable($table);\n        if (!empty($tables[$i + 1])) {\n          $sql .= PHP_EOL;\n        }\n      }\n    }\n\n    return $sql;\n  }",
+            "code": "  public function getAnalyzeDatabase(): null|string|array\n  {\n    if ($tables = $this->getTables()) {\n      $sql = [];\n      foreach ($tables as $table) {\n        if ($aSql = $this->getAnalyzeTable($table)) {\n          if (is_string($aSql)) {\n            $aSql = [$aSql];\n          }\n\n          array_push($sql, ...$aSql);\n        }\n      }\n\n      return $sql;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 94,
-            "endLine": 108,
+            "startLine": 128,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1946,15 +2254,15 @@
             "numberOfRequiredParameters": 0,
             "shortName": "getAnalyzeDatabase",
             "returns": [
-                "string"
+                null
             ],
             "arguments": [],
             "doc": {
                 "description": "Returns the SQL statement to analyze the current database.\nThis method generates an ANALYZE statement for each table in the database.\n",
                 "params": [],
-                "return": "The SQL statement to analyze the database, or an empty string if there are no tables."
+                "return": "An array of SQL statements to analyze the database, or null if there are no tables."
             },
-            "comments": "  \/**\n   * Returns the SQL statement to analyze the current database.\n   * This method generates an ANALYZE statement for each table in the database.\n   * @return string The SQL statement to analyze the database, or an empty string if there are no tables.\n   *\/"
+            "comments": "  \/**\n   * Returns the SQL statement to analyze the current database.\n   * This method generates an ANALYZE statement for each table in the database.\n   * @return null|strin|array An array of SQL statements to analyze the database, or null if there are no tables.\n   *\/"
         },
         "getCreateTableRaw": {
             "name": "getCreateTableRaw",
@@ -1966,22 +2274,23 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreateTableRaw(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true\n    ): string\n  {\n    if ($sql = $this->getCreateTable($table, $cfg)) {\n      if ($createKeys) {\n        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg);\n      }\n\n      if ($createConstraints) {\n        $sql .= PHP_EOL.$this->getCreateConstraints($table, $cfg);\n      }\n\n      return $sql;\n    }\n\n    return '';\n  }",
+            "code": "  public function getCreateTableRaw(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true,\n    bool $anonymize = false\n    ): ?array\n  {\n    if ($sql = $this->getCreateTable($table, $cfg)) {\n      $sql = [$sql];\n      if ($createKeys\n        && ($createKeysSql = $this->getCreateKeys($table, $cfg, $anonymize))\n      ) {\n        if (is_string($createKeysSql)) {\n          $createKeysSql = [$createKeysSql];\n        }\n\n        array_push($sql, ...$createKeysSql);\n      }\n\n      if ($createConstraints\n        && ($createConstraintsSql = $this->getCreateConstraints($table, $cfg, $anonymize))\n      ) {\n        if (is_string($createConstraintsSql)) {\n          $createConstraintsSql = [$createConstraintsSql];\n        }\n\n        array_push($sql, ...$createConstraintsSql);\n      }\n\n      return $sql;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 119,
-            "endLine": 139,
+            "startLine": 158,
+            "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
+            "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "shortName": "getCreateTableRaw",
             "returns": [
-                "string"
+                null,
+                "array"
             ],
             "arguments": [
                 {
@@ -2042,6 +2351,20 @@
                     "default": true,
                     "default_name": "",
                     "description": "onstraints"
+                },
+                {
+                    "name": "anonymize",
+                    "position": 4,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
                 }
             ],
             "doc": {
@@ -2068,11 +2391,16 @@
                         "type": "bool",
                         "name": "$create",
                         "description": "onstraints"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$anonymize"
                     }
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the SQL statement to create a table, including keys and constraints if specified.\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return string\n   *\/"
+            "comments": "  \/**\n   * Returns the SQL statement to create a table, including keys and constraints if specified.\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @param bool $anonymize\n   * @return null|array\n   *\/"
         },
         "getCreateTable": {
             "name": "getCreateTable",
@@ -2084,11 +2412,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCreateTable(string $table, ?array $cfg = null): string\n  {\n    if (!$cfg) {\n      $cfg = $this->modelize($table);\n    }\n\n    $st = 'CREATE TABLE '.$this->escape($table).' ('.PHP_EOL;\n    $done = false;\n    foreach ($cfg['fields'] as $name => $col) {\n      if (!$done) {\n        $done = true;\n      }\n      else {\n        $st .= ',' . PHP_EOL;\n      }\n\n      $st .= $this->getColumnDefinitionStatement($name, $col);\n    }\n\n    $st .= PHP_EOL . ');';\n    return $st;\n  }",
+            "code": "  public function getCreateTable(string $table, ?array $cfg = null): string\n  {\n    if (!$cfg) {\n      $cfg = $this->modelize($table);\n    }\n\n    $st = 'CREATE TABLE '.$this->escape($table).' ('.PHP_EOL;\n    $done = false;\n    foreach ($cfg['fields'] as $name => $col) {\n      if (!$done) {\n        $done = true;\n      }\n      else {\n        $st .= ',' . PHP_EOL;\n      }\n\n      $st .= '  ' . $this->getColumnDefinitionStatement($name, $col);\n    }\n\n    $st .= PHP_EOL . ');';\n    return $st;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 148,
-            "endLine": 169,
+            "startLine": 201,
+            "endLine": 222,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2163,8 +2491,8 @@
             "code": "  public function getDropTable(string $table, ?string $database = null): string\n  {\n    if (Str::checkName($table)\n      && (empty($database) || Str::checkName($database))\n    ) {\n      $table = $this->tableFullName((!empty($database) ? \"$database.\" : '').$this->tableSimpleName($table), true);\n      return \"DROP TABLE IF EXISTS $table;\";\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 178,
-            "endLine": 188,
+            "startLine": 231,
+            "endLine": 241,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2230,6 +2558,90 @@
             },
             "comments": "  \/**\n   * Returns the SQL statement to drop a table.\n   * @param string $table The name of the table to drop.\n   * @param string|null $database The name of the database, if different from the current one.\n   * @return string The SQL statement to drop the table, or an empty string if the parameters are invalid.\n   *\/"
         },
+        "getRenameTable": {
+            "name": "getRenameTable",
+            "summary": "Returns the SQL statement to rename a table.",
+            "description": "This method generates an ALTER TABLE statement to rename the specified table.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "This method generates an ALTER TABLE statement to rename the specified table."
+                }
+            ],
+            "class": "bbn\\Db\\Languages\\Models\\Sql\\Commands",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Models\/Sql\/Formatters.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRenameTable(string $table, string $newName): string\n  {\n    if (Str::checkName($table)\n      && Str::checkName($newName)\n    ) {\n      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);\n      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);\n      return \"ALTER TABLE $t1 RENAME TO $t2;\";\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
+            "startLine": 251,
+            "endLine": 262,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getRenameTable",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The current name of the table."
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The new name for the table."
+                }
+            ],
+            "doc": {
+                "description": "Returns the SQL statement to rename a table.\nThis method generates an ALTER TABLE statement to rename the specified table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The current name of the table."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame The new name for the table."
+                    }
+                ],
+                "return": "The SQL statement to rename the table, or an empty string if the names are invalid."
+            },
+            "comments": "  \/**\n   * Returns the SQL statement to rename a table.\n   * This method generates an ALTER TABLE statement to rename the specified table.\n   * @param string $table The current name of the table.\n   * @param string $newName The new name for the table.\n   * @return string The SQL statement to rename the table, or an empty string if the names are invalid.\n   *\/"
+        },
         "getDuplicateTable": {
             "name": "getDuplicateTable",
             "summary": "Returns the SQL statement to duplicate a table.",
@@ -2245,11 +2657,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getDuplicateTable(string $source, string $target, bool $withData = true): string\n  {\n    if (Str::checkName($source) && Str::checkName($target)) {\n      $sql = $this->getCreateTable($source);\n      $sql = str_replace(\n        'CREATE TABLE '.$this->escape($source),\n        'CREATE TABLE ' . $this->escape($target),\n        $sql\n      );\n      if ($withData) {\n        $sql .= PHP_EOL . \"INSERT INTO \" . $this->escape($target) . \" SELECT * FROM \" . $this->escape($source) . \";\";\n      }\ndie(var_dump($sql));\n      return $sql;\n    }\n\n    return '';\n  }",
+            "code": "  public function getDuplicateTable(string $source, string $target, bool $withData = true): ?array\n  {\n    if ($ret = $this->getCreateTableRaw($source, null, true, false, true)) {\n      foreach ($ret as $i => $r) {\n        $ret[$i] = str_replace(\n          'TABLE ' . $this->escape($source),\n          'TABLE ' . $this->escape($target),\n          $r\n        );\n      }\n      if ($sql = $this->getCreateConstraints($source, null, true)) {\n        if (is_string($sql)) {\n          $sql = [$sql];\n        }\n\n        $sql[0] = str_replace(\n          'ALTER TABLE ' . $this->escape($source),\n          'ALTER TABLE ' . $this->escape($target),\n          $sql[0]\n        );\n        array_push($ret, ...$sql);\n      }\n\n      if ($withData) {\n        $columns = array_map(\n          fn($c) => $this->escape($c),\n          array_keys(\n            array_filter(\n              $this->getColumns($source),\n              fn($c) => empty($c['virtual'])\n            )\n          )\n        );\n        if ($columns) {\n          $ret[] = \"INSERT INTO \" . $this->escape($target) . \" (\" . implode(\", \", $columns) . \") SELECT \" . implode(\", \", $columns) . \" FROM \" . $this->escape($source) . \";\";\n        }\n      }\n\n      return $ret;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 199,
-            "endLine": 216,
+            "startLine": 273,
+            "endLine": 315,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2260,7 +2672,8 @@
             "numberOfRequiredParameters": 2,
             "shortName": "getDuplicateTable",
             "returns": [
-                "string"
+                null,
+                "array"
             ],
             "arguments": [
                 {
@@ -2331,9 +2744,9 @@
                         "description": "ata Whether to include data in the duplication."
                     }
                 ],
-                "return": "The SQL statement to duplicate the table, or an empty string if the parameters are invalid."
+                "return": "The SQL statements to duplicate the table, or null if the source table does not exist."
             },
-            "comments": "  \/**\n   * Returns the SQL statement to duplicate a table.\n   * This method generates a CREATE TABLE statement for the target table based on the source table.\n   * @param string $source The name of the source table.\n   * @param string $target The name of the target table.\n   * @param bool $withData Whether to include data in the duplication.\n   * @return string The SQL statement to duplicate the table, or an empty string if the parameters are invalid.\n   *\/"
+            "comments": "  \/**\n   * Returns the SQL statement to duplicate a table.\n   * This method generates a CREATE TABLE statement for the target table based on the source table.\n   * @param string $source The name of the source table.\n   * @param string $target The name of the target table.\n   * @param bool $withData Whether to include data in the duplication.\n   * @return null|array The SQL statements to duplicate the table, or null if the source table does not exist.\n   *\/"
         },
         "getAnalyzeTable": {
             "name": "getAnalyzeTable",
@@ -2353,8 +2766,8 @@
             "code": "  public function getAnalyzeTable(string $table): string\n  {\n    if (Str::checkName($table)) {\n      return \"ANALYZE \" . $this->tableSimpleName($table, true) . \";\";\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 225,
-            "endLine": 232,
+            "startLine": 324,
+            "endLine": 331,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2411,8 +2824,8 @@
             "code": "  public function getCreateColumn(string $table, string $column, array $columnCfg): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($column)\n      && ($columnDefinition = $this->getColumnDefinitionStatement($column, $columnCfg))\n    ) {\n      return \"ALTER TABLE $table ADD $columnDefinition;\";\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 242,
-            "endLine": 252,
+            "startLine": 341,
+            "endLine": 351,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2511,8 +2924,8 @@
             "code": "  public function getDropColumn(string $table, string $column): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($column)\n    ) {\n      return \"ALTER TABLE $table DROP COLUMN $column;\";\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 261,
-            "endLine": 270,
+            "startLine": 360,
+            "endLine": 369,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2590,8 +3003,8 @@
             "code": "  public function getDropKey(string $table, string $key): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($key)\n    ) {\n      return 'ALTER TABLE '.$this->escape($table).' DROP KEY '.$this->escape($key).';';\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 273,
-            "endLine": 282,
+            "startLine": 372,
+            "endLine": 381,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2645,11 +3058,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getDropConstraint(string $table, string $constraint): string\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($constraint)\n    ) {\n      return 'ALTER TABLE '.$this->escape($table).PHP_EOL.'  DROP FOREIGN KEY '.$this->escape($constraint).';';\n    }\n\n    return '';\n  }",
+            "code": "  public function getDropConstraint(string $table, string $constraint): string|null|array\n  {\n    if (($table = $this->tableFullName($table, true))\n      && Str::checkName($constraint)\n    ) {\n      return 'ALTER TABLE '.$this->escape($table).PHP_EOL.'  DROP FOREIGN KEY '.$this->escape($constraint).';';\n    }\n\n    return '';\n  }",
             "parent": false,
             "trait": "bbn\\Db\\Languages\\Models\\Sql\\Formatters",
-            "startLine": 291,
-            "endLine": 300,
+            "startLine": 390,
+            "endLine": 399,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2660,7 +3073,7 @@
             "numberOfRequiredParameters": 2,
             "shortName": "getDropConstraint",
             "returns": [
-                "string"
+                null
             ],
             "arguments": [
                 {
@@ -2717,6 +3130,7 @@
     "uses": {
         "bbn\\Str": "Str",
         "bbn\\X": "X",
+        "bbn\\Db": "Db",
         "Exception": "Exception",
         "PDO": "PDO",
         "bbn\\Db\\Languages\\Models\\Sql\\Formatters": "Formatters",
@@ -2728,18 +3142,20 @@
         "\/**\n   * Creates a database\n   *\n   * @param string $database\n   * @param string|null $enc\n   * @param string|null $collation\n   * @return bool\n   *\/",
         "\/**\n   * Drops the given database\n   *\n   * @param string $database\n   * @return bool\n   * @throws Exception\n   *\/",
         "\/**\n   * Renames the given database\n   *\n   * @param string $oldName\n   * @param string $newName\n   * @return bool\n   * @throws Exception\n   *\/",
-        "\/**\n   * Duplicates the given database\n   *\n   * @param string $source\n   * @param string $target\n   * @return bool\n   * @throws Exception\n   *\/",
+        "\/**\n   * Duplicates the given database\n   *\n   * @param string $source\n   * @param string $target\n   * @param bool $withData\n   * @return bool\n   * @throws Exception\n   *\/",
         "\/**\n   * Analyzes the given database.\n   *\n   * @param string $database\n   * @return bool\n   *\/",
         "\/**\n   * Returns the charset of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/",
         "\/**\n   * Returns the collation of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/",
         "\/**\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return string\n   *\/",
         "\/**\n   * Drops a table\n   *\n   * @param string $table\n   * @param string|null $database\n   * @return boolean\n   *\/",
         "\/**\n   * Duplicates the given table\n   *\n   * @param string $source\n   * @param string $target\n   * @param bool $withData\n   * @return bool\n   * @throws Exception\n   *\/",
+        "\/**\n   * Copies the given table to the target database.\n   *\n   * @param string $table The source table name\n   * @param Db $target The target database connection\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/",
         "\/**\n   * Analyzes the given table.\n   *\n   * @param string $table\n   * @param string|null $database\n   * @return bool\n   *\/",
         "\/**\n   * Returns the charset of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/",
         "\/**\n   * Returns the collation of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/",
         "\/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $columnCfg\n   * @return bool\n   *\/",
-        "\/**\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/",
+        "\/**\n   * Drops the given column from the given table.\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/",
+        "\/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param array $columnCfg\n   * @return bool\n   *\/",
         "\/**\n   * @param string $table\n   * @param array|null $cfg\n   * @return bool\n   *\/",
         "\/**\n   * @param string $table\n   * @param string $constraint\n   * @return bool\n   *\/",
         "\/**\n   * @param string $table\n   * @param array|null $cfg\n   * @return bool\n   *\/",

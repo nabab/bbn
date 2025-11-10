@@ -517,7 +517,7 @@
             "static": false,
             "visibility": "private",
             "final": false,
-            "code": "  private function groupTags(array $tags)\n  {\n    $res = [];\n    if (!empty($tags)) {\n      foreach ($tags as $i => $tag) {\n        \/\/ Skip the 'memberof' tag\n        if ($tag['tag'] === 'memberof') {\n          continue;\n        }\n        $t = $tag['tag'];\n        unset($tag['tag']);\n        $res[$t][] = $tag['text'] ?? $tag;\n      }\n    }\n    return array_map(function ($r) {\n      if (is_array($r) && (count($r) === 1)) {\n        \/\/return $r[0];\n      }\n      return $r;\n    }, $res);\n  }",
+            "code": "  private function groupTags(array $tags)\n  {\n    $res = [];\n    if (!empty($tags)) {\n      foreach ($tags as $tag) {\n        \/\/ Skip the 'memberof' tag\n        if ($tag['tag'] === 'memberof') {\n          continue;\n        }\n        $t = $tag['tag'];\n        unset($tag['tag']);\n        $res[$t][] = $tag['text'] ?? $tag;\n      }\n    }\n    return array_map(function ($r) {\n      if (is_array($r) && (count($r) === 1)) {\n        \/\/return $r[0];\n      }\n      return $r;\n    }, $res);\n  }",
             "parent": false,
             "trait": false,
             "startLine": 334,

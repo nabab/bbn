@@ -49,6 +49,7 @@ class Ai extends DbCls
       'prompt_items' => [
         'id' => 'id',
         'id_prompt' => 'id_prompt',
+        'id_setting' => 'id_setting',
         'text' => 'text',
         'author' => 'author',
         'creation_date' => 'creation_date',
@@ -101,6 +102,14 @@ class Ai extends DbCls
   private string $key;
   protected array $cfg;
   
+  private static function init()
+  {
+    if (!self::$optional_is_init) {
+      self::optionalInit();
+      self::$responseFormats = self::getOptions('formats');
+    }
+  } 
+
   /**
    * Ai constructor.
    *
@@ -125,14 +134,13 @@ class Ai extends DbCls
     $this->fs = new System();
   }
 
-  private static function init()
-  {
-    if (!self::$optional_is_init) {
-      self::optionalInit();
-      self::$responseFormats = self::getOptions('formats');
-    }
-  } 
-
+  /**
+   * Connects to the specified endpoint, sets it as the current endpoint, and optionally selects the provided model.
+   * @param string|null $id
+   * @param mixed $model
+   * @throws \Exception
+   * @return void
+   */
   public function setEndpoint(string|null $id = null, $model = null) {
     if ($endpoint = $this->getEndpoint($id)) {
       $pass = $this->pass->userGet($endpoint['data']['id'], $this->user);
@@ -155,31 +163,47 @@ class Ai extends DbCls
     $this->setModel($model);
   }
 
-  public function setModel(string|null $modelName = null) {
+  /**
+   * Sets the active model used for subsequent AI requests.
+   *
+   * @param string $modelName The model identifier (e.g. "gpt-4").
+   * @return void
+   */
+  public function setModel(string $modelName): void
+  {
     $this->model = $modelName;
   }
 
-  public function setCfg(array $cfg): void
+
+  /**
+   * Retrieves the list of available models from the current endpoint.
+   *
+   * @return array|null An array of models if the endpoint is set; otherwise, null.
+   */
+  public function getModels(): ?array
   {
+    if ($this->endpoint) {
+      $res = $this->ai->listModels();
+      if ($res && is_string($res)) {
+        $res = json_decode($res, true);
+      }
 
-  }
-
-
-  public function getModels()
-  {
-    $res = $this->ai->listModels();
-    if ($res && is_string($res)) {
-      $res = json_decode($res, true);
+      return $res;
     }
 
-    return $res;
+    return null;
   }
 
   
 
+  /**
+   * Synchronizes the models from the current endpoint with the stored preferences.
+   *
+   * @return bool True if synchronization was successful; otherwise, false.
+   */
   public function syncModels(): bool
   {
-    if (isset($this->endpoint) && ($models = $this->getModels())) {
+    if ($this->endpoint && ($models = $this->getModels())) {
       $endpoint = $this->getEndpoint($this->endpoint);
       $currentModels = $endpoint['models'] ?? [];
       $idModels = self::getOptionId('models');
@@ -198,6 +222,12 @@ class Ai extends DbCls
     return false;
   }
 
+  /**
+   * Retrieves the list of available endpoints.
+   *
+   * @return array An array of endpoints.
+   * @throws Exception If endpoints are not found.
+   */
   public function getEndpoints()
   {
     if ($idEndpoint = self::getOptionId('endpoints')) {
@@ -207,6 +237,12 @@ class Ai extends DbCls
     throw new Exception(X::_("Endpoints not found"));
   }
 
+  /**
+   * Retrieves the details of a specific endpoint by its ID.
+   *
+   * @param string $id The ID of the endpoint.
+   * @return array|null An array containing endpoint data and models, or null if not found.
+   */
   public function getEndpoint(string $id): ?array
   {
     if ($endpoint = $this->prefs->get($id)) {
@@ -229,6 +265,16 @@ class Ai extends DbCls
     return null;
   }
 
+  /**
+   * Adds a new AI endpoint with the specified parameters.
+   *
+   * @param string $name The name of the endpoint.
+   * @param string $url The URL of the endpoint.
+   * @param string $pass The password or API key for the endpoint.
+   * @param bool $public Whether the endpoint is public or not.
+   * @return array|null An array containing the newly added endpoint data, or null on failure.
+   * @throws Exception If models are not found.
+   */
   public function addEndpoint(string $name, string $url, string $pass, bool $public = false): ?array
   {
     if ($idEndpoint = self::getOptionId('endpoints')) {
@@ -286,14 +332,22 @@ class Ai extends DbCls
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $response = $this->getPromptResponse($prompt, $input, $cfg);
     if (!empty($response) && !empty($response['success']) && $insert) {
-      $this->insertItem($id_prompt, $input, false);
-      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);
+      $this->insertItem($id_prompt, $input, $cfg, false);
+      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], $cfg, true);
     }
     
     return $response;
     
   }
-  
+
+  /**
+   * Gets the AI prompt response based on input, response type, and prompt data
+   *
+   * @param array $prompt Prompt data array
+   * @param string $input Input string
+   * @param string $response_type Response type
+   * @return array Response array containing success flag and result or error message
+   */
   public function getPromptResponse(array $prompt, string $input, ?array $cfg = null): array
   {
     // check if input and id_prompt are not empty and not null
@@ -306,10 +360,12 @@ class Ai extends DbCls
     
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $built_prompt = $this->buildPromptFromRow($prompt);
+    $messages = $this->createMessages($input, $built_prompt);
+    $request = $this->createRequest($messages, $cfg);
     
-    X::log($built_prompt, 'ai_logs');
+    X::log($request, 'ai_logs');
     
-    $response = $this->request($built_prompt, $input, $cfg);
+    $response = $this->request($request);
 
     $res = [
       'success' => !isset($response['error']),
@@ -323,7 +379,14 @@ class Ai extends DbCls
 
     return $res;
   }
-  
+
+  /**
+   * Creates an array of messages for the AI request
+   *
+   * @param string $input User input
+   * @param string $prompt System prompt
+   * @return array Array of messages
+   */
   public function createMessages(string $input, string $prompt = ''): array
   {
     $messages = [];
@@ -344,6 +407,13 @@ class Ai extends DbCls
 
   }
 
+  /**
+   * Creates the request array for the OpenAI API
+   *
+   * @param array $messages Array of messages
+   * @param array $cfg Configuration array
+   * @return array Request array
+   */
   public function createRequest(array $messages, array $cfg): array
   {
     $config = new Gpt3TokenizerConfig();
@@ -353,22 +423,22 @@ class Ai extends DbCls
       $max_tokens -= $tokenizer->count($message['content']);
     }
     $request = [
-      "model" => $this->model,
+      "model" => $cfg['model'] ?? $this->model,
       "messages" => $messages,
       "max_tokens" => $max_tokens,
     ];
 
-    if (array_key_exists('temperature', $cfg)) {
-      $request['temperature'] = $cfg['temperature'];
+    if (array_key_exists('temperature', $cfg['cfg'])) {
+      $request['temperature'] = $cfg['cfg']['temperature'];
     }
-    if (array_key_exists('top_p', $cfg)) {
-      $request['top_p'] = $cfg['top_p'];
+    if (array_key_exists('top_p', $cfg['cfg'])) {
+      $request['top_p'] = $cfg['cfg']['top_p'];
     }
-    if (array_key_exists('frequency', $cfg)) {
-      $request['frequency_penalty'] = $cfg['frequency'];
+    if (array_key_exists('frequency', $cfg['cfg'])) {
+      $request['frequency_penalty'] = $cfg['cfg']['frequency'];
     }
-    if (array_key_exists('presence', $cfg)) {
-      $request['presence_penalty'] = $cfg['presence'];
+    if (array_key_exists('presence', $cfg['cfg'])) {
+      $request['presence_penalty'] = $cfg['cfg']['presence'];
     }
 
     return $request;
@@ -405,6 +475,7 @@ class Ai extends DbCls
       'request' => $query
     ];
   }
+
   
   public function getChatTitle(string $text) : string
   {
@@ -418,6 +489,15 @@ class Ai extends DbCls
     return [];
   }
   
+
+  /**
+   * Handles a chat interaction with the AI, managing conversation history and storage.
+   *
+   * @param string $input User input string
+   * @param array $cfg Configuration array for the chat
+   * @param string $id Optional conversation ID
+   * @return array Response array containing success flag and result or error message
+   */
   public function chat(string $input, array $cfg, string $id = ''): array
   {
     $startTime = time();
@@ -523,9 +603,16 @@ class Ai extends DbCls
 
     return $result;
   }
-  
+
   /**
-   * @throws Exception
+   * Saves a conversation to a specified path.
+   * @param string $path
+   * @param string $date
+   * @param string $userFormat
+   * @param string $prompt
+   * @param mixed $response
+   * @param mixed $cfg
+   * @return array<array|array{ai: int, creation_date: int, id: string, text: string|null|array{ai: int, creation_date: string, format: string, id: string, text: string}>}
    */
   public function saveConversation(
     string $path,
@@ -534,7 +621,8 @@ class Ai extends DbCls
     string $prompt,
     ?string $response,
     ?array $cfg = null
-  ): array {
+  ): array
+  {
     $timestamp = time();
     $fs = new System();
     if ($fs->exists($path)) {
@@ -571,6 +659,12 @@ class Ai extends DbCls
   }
   
   
+  /**
+   * Clears the conversation history for a given prompt ID.
+   *
+   * @param string $id The ID of the prompt whose conversation history is to be cleared.
+   * @return bool True if the conversation history was successfully cleared, otherwise false.
+   */
   public function clearConversation(string $id) : bool {
     if (empty($id)) {
       return false;
@@ -641,7 +735,7 @@ class Ai extends DbCls
       'tables' => [$ccfg['tables']['prompt']],
       'where' => [
         $ccfg['arch']['prompt']['shortcode'] => $shortcode
-]
+      ]
     ]);
     
     if (!empty($prompt)) {
@@ -739,37 +833,46 @@ class Ai extends DbCls
     }
     
     // Update the title and content of the associated note
-    $noteUpdate = [];
-    if (isset($data['lang']) && ($data['lang'] !== $note['lang'])) {
-      $noteUpdate['lang'] = $data['lang'];
+    if (($data['title'] === $note['title'])
+      && ($data['content'] === $note['content'])
+      && ($data['lang'] === $note['lang'])
+    ) {
+      $res1 = false;
     }
-
-    if ($data['title'] !== $note['title']) {
-      $noteUpdate['title'] = $data['title'];
-    }
-
-    if ($data['content'] !== $note['content']) {
-      $noteUpdate['content'] = $data['content'];
-    }
-
-    $res1 = false;
-    if (!empty($noteUpdate)) {
-      $res1 = $this->note->update($note['id'], $noteUpdate);
+    else {
+      $res1 = $this->note->update($note['id'], [
+        'title' => $note['title'],
+        'content' => $note['content'],
+        'lang' => $note['lang'],
+      ]);
     }
 
     $ccfg = $this->getClassCfg();
     // Update the prompt with the provided ID, input, and output values
-    $res2 = $this->dbTraitUpdate($id, [
-      $ccfg['arch']['prompt']['input'] => $data['input'],
-      $ccfg['arch']['prompt']['output'] => $data['output'],
-      $ccfg['arch']['prompt']['shortcode'] => $data['shortcode'],
-    ]);
+    if (($data['input'] === $prompt['input'])
+      && ($data['output'] === $prompt['output'])
+      && ($data['shortcode'] === $prompt['shortcode'])
+    ) {
+      $res2 = false;
+    }
+    else {
+      $res2 = $this->dbTraitUpdate($id, [
+        $ccfg['arch']['prompt']['input'] => $data['input'],
+        $ccfg['arch']['prompt']['output'] => $data['output'],
+        $ccfg['arch']['prompt']['shortcode'] => $data['shortcode'],
+      ]);
+    }
 
     $res3 = $this->insertSettings($id, $data['model'], $data['cfg']);
-    
     return (bool)($res1 || $res2 || $res3);
   }
-  
+
+  /**
+   * Deletes a prompt from the database.
+   *
+   * @param string $id The ID of the prompt to delete.
+   * @return bool True if the deletion was successful, false otherwise.
+   */
   public function deletePrompt(string $id) {
     $prompt = $this->getPromptById($id);
   
@@ -795,11 +898,25 @@ class Ai extends DbCls
     return true;
   }
 
+  public function getPromptItems(string $id_prompt): array
+  {
+    $ccfg = $this->getClassCfg();
+    return $this->db->rselectAll(
+      $ccfg['tables']['prompt_items'],
+      [],
+      [
+        $ccfg['arch']['prompt_items']['id_prompt'] => $id_prompt
+      ],
+      [
+        $ccfg['arch']['prompt_items']['creation_date'] => 'DESC'
+      ]
+    );
+  }
 
   public function insertSettings(string $id_prompt, string $model, ?array $cfg = null): ?string
   {
     if (empty($id_prompt) || empty($model)) {
-      return false;
+      return null;
     }
 
     ksort($cfg);
@@ -847,18 +964,21 @@ class Ai extends DbCls
    *
    * @param string $id_prompt ID of the AI prompt to insert the item into
    * @param string $text Text of the AI prompt item
+   * @param array  $cfg Configuration array for the prompt item
    * @param string $ai AI response of the prompt item
    *
    * @return void
    */
-  private function insertItem(string $id_prompt, string $text, string $ai)
+  private function insertItem(string $id_prompt, string $text, array $cfg, ?string $ai = null)
   {
     $ccfg = $this->getClassCfg();
     $tf = $ccfg['arch']['prompt_items'];
     $user = User::getInstance();
-    $this->db->insert($ccfg['tables']['prompt_items'], [
+    $id_setting = $this->insertSettings($id_prompt, $cfg['model'], $cfg['cfg']);
+    return $this->db->insert($ccfg['tables']['prompt_items'], [
       $tf['id_prompt'] => $id_prompt,
       $tf['text'] => $text,
+      $tf['id_setting'] => $id_setting,
       $tf['author'] => $user->getId(),
       $tf['ai'] => $ai ? 1 : 0,
     ]);

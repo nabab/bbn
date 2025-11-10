@@ -1,0 +1,364 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Triggers",
+    "namespace": true,
+    "realName": "Triggers",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Triggers.php",
+    "startLine": 5,
+    "endLine": 105,
+    "numMethods": 6,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Triggers",
+    "contentConstructor": null,
+    "methods": {
+        "enableTrigger": {
+            "name": "enableTrigger",
+            "summary": "Enable the triggers' functions",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::adump($ctrl->db->enableTrigger()); \/\/ bbn\\Db Object"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function enableTrigger(): self\n  {\n    $this->language->enableTrigger();\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 25,
+            "endLine": 29,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "enableTrigger",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Enable the triggers' functions\n\n```php\nX::adump($ctrl->db->enableTrigger()); \/\/ bbn\\Db Object\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Enable the triggers' functions\n   *\n   * ```php\n   * X::adump($ctrl->db->enableTrigger()); \/\/ bbn\\Db Object\n   * ```\n   * \n   * @return self\n   *\/"
+        },
+        "disableTrigger": {
+            "name": "disableTrigger",
+            "summary": "Disable the triggers' functions",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::adump($ctrl->db->disableTrigger());"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function disableTrigger(): self\n  {\n    $this->language->disableTrigger();\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 41,
+            "endLine": 45,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "disableTrigger",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Disable the triggers' functions\n\n```php\nX::adump($ctrl->db->disableTrigger());\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Disable the triggers' functions\n   * \n   * ```php\n   * X::adump($ctrl->db->disableTrigger());\n   * ```\n   * \n   * @return self\n   *\/"
+        },
+        "isTriggerEnabled": {
+            "name": "isTriggerEnabled",
+            "summary": "Checks if the triggers' functions are enable",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::adump($ctrl->db->isTriggerEnabled()); \/\/ true"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isTriggerEnabled(): bool\n  {\n    return $this->language->isTriggerEnabled();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 56,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isTriggerEnabled",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the triggers' functions are enable\n\n```php\nX::adump($ctrl->db->isTriggerEnabled()); \/\/ true\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the triggers' functions are enable\n   * \n   * ```php\n   * X::adump($ctrl->db->isTriggerEnabled()); \/\/ true\n   * ```\n   *\n   * @return boolean\n   *\/"
+        },
+        "isTriggerDisabled": {
+            "name": "isTriggerDisabled",
+            "summary": "Checks if the triggers' functions are disable",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::adump($ctrl->db->isTriggerEnabled()); \/\/ false"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isTriggerDisabled(): bool\n  {\n    return $this->language->isTriggerDisabled();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 70,
+            "endLine": 73,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isTriggerDisabled",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the triggers' functions are disable\n\n```php\nX::adump($ctrl->db->isTriggerEnabled()); \/\/ false\n```\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the triggers' functions are disable\n   * \n   * ```php\n   * X::adump($ctrl->db->isTriggerEnabled()); \/\/ false\n   * ```\n   * \n   * @return boolean\n   *\/"
+        },
+        "setTrigger": {
+            "name": "setTrigger",
+            "summary": "Apply a function each time the methods $kind are used",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self\n  {\n    $this->language->setTrigger($function, $kind, $moment, $tables);\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setTrigger",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "kind",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "select|insert|update|delete"
+                },
+                {
+                    "name": "moment",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "before|after"
+                },
+                {
+                    "name": "tables",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "*",
+                    "default_name": "",
+                    "description": "database's table(s) name(s)"
+                }
+            ],
+            "doc": {
+                "description": "Apply a function each time the methods $kind are used\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|string|null",
+                        "name": "$kind",
+                        "description": "select|insert|update|delete"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|string|null",
+                        "name": "$moment",
+                        "description": "before|after"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string|array",
+                        "name": "$tables",
+                        "description": "database's table(s) name(s)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Apply a function each time the methods $kind are used\n   *\n   * @param callable            $function\n   * @param array|string|null   $kind     select|insert|update|delete\n   * @param array|string|null   $moment   before|after\n   * @param null|string|array   $tables   database's table(s) name(s)\n   * @return self\n   *\/"
+        },
+        "getTriggers": {
+            "name": "getTriggers",
+            "summary": "Returns an array",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::adump($ctrl->db->getTriggers());"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Triggers",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Triggers.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTriggers(): array\n  {\n    return $this->language->getTriggers();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 101,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getTriggers",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns an array\n\n```php\nX::adump($ctrl->db->getTriggers());\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array \n   * \n   * ```php\n   * X::adump($ctrl->db->getTriggers());\n   * ```\n   * @return array\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Enable the triggers' functions\n   *\n   * ```php\n   * X::adump($ctrl->db->enableTrigger()); \/\/ bbn\\Db Object\n   * ```\n   * \n   * @return self\n   *\/",
+        "\/**\n   * Disable the triggers' functions\n   * \n   * ```php\n   * X::adump($ctrl->db->disableTrigger());\n   * ```\n   * \n   * @return self\n   *\/",
+        "\/**\n   * Checks if the triggers' functions are enable\n   * \n   * ```php\n   * X::adump($ctrl->db->isTriggerEnabled()); \/\/ true\n   * ```\n   *\n   * @return boolean\n   *\/",
+        "\/**\n   * Checks if the triggers' functions are disable\n   * \n   * ```php\n   * X::adump($ctrl->db->isTriggerEnabled()); \/\/ false\n   * ```\n   * \n   * @return boolean\n   *\/",
+        "\/**\n   * Apply a function each time the methods $kind are used\n   *\n   * @param callable            $function\n   * @param array|string|null   $kind     select|insert|update|delete\n   * @param array|string|null   $moment   before|after\n   * @param null|string|array   $tables   database's table(s) name(s)\n   * @return self\n   *\/",
+        "\/**\n   * Returns an array \n   * \n   * ```php\n   * X::adump($ctrl->db->getTriggers());\n   * ```\n   * @return array\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

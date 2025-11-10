@@ -283,10 +283,10 @@
                 "return": "",
                 "example": {
                     "tag": "example",
-                    "text": "```php\n\/\/ @var bbn\\Cdn\\Config $cfg\nX::hdump($cfg->get());\n\/\/ {\n\/\/     \"url\": \"lib\",\n\/\/     \"params\": {\n\/\/         \"lib\": \"jquery\",\n\/\/     },\n\/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n\/\/     \"cache_file\": \"\/home\/thomas\/domains\/apstapp.thomas.lan\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n\/\/     \"ext\": \"\",\n\/\/     \"grouped\": false,\n\/\/     \"test\": false,\n\/\/     \"lang\": \"en\",\n\/\/     \"nocompil\": false,\n\/\/     \"has_css\": true,\n\/\/     \"has_dep\": true,\n\/\/     \"latest\": false,\n\/\/     \"is_component\": false,\n\/\/     \"components\": false,\n\/\/     \"content\": {\n\/\/         \"libraries\": {\n\/\/             \"jquery\": \"3.3.1\",\n\/\/         },\n\/\/         \"prepend\": [\n\/\/         ],\n\/\/         \"includes\": [\n\/\/             {\n\/\/                 \"version\": \"3.3.1\",\n\/\/                 \"prepend\": [\n\/\/                 ],\n\/\/                 \"name\": \"jquery\",\n\/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n\/\/                 \"js\": [\n\/\/                     \"dist\/jquery.min.js\",\n\/\/                 ],\n\/\/             },\n\/\/         ],\n\/\/         \"js\": [\n\/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n\/\/         ],\n\/\/     },\n\/\/     \"num\": 2,\n\/\/ }\n```\n"
+                    "text": "```php\n\/\/ @var bbn\\Cdn\\Config $cfg\nX::hdump($cfg->get());\n\/\/ {\n\/\/     \"url\": \"lib\",\n\/\/     \"params\": {\n\/\/         \"lib\": \"jquery\",\n\/\/     },\n\/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n\/\/     \"cache_file\": \"\/home\/bbn\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n\/\/     \"ext\": \"\",\n\/\/     \"grouped\": false,\n\/\/     \"test\": false,\n\/\/     \"lang\": \"en\",\n\/\/     \"nocompil\": false,\n\/\/     \"has_css\": true,\n\/\/     \"has_dep\": true,\n\/\/     \"latest\": false,\n\/\/     \"is_component\": false,\n\/\/     \"components\": false,\n\/\/     \"content\": {\n\/\/         \"libraries\": {\n\/\/             \"jquery\": \"3.3.1\",\n\/\/         },\n\/\/         \"prepend\": [\n\/\/         ],\n\/\/         \"includes\": [\n\/\/             {\n\/\/                 \"version\": \"3.3.1\",\n\/\/                 \"prepend\": [\n\/\/                 ],\n\/\/                 \"name\": \"jquery\",\n\/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n\/\/                 \"js\": [\n\/\/                     \"dist\/jquery.min.js\",\n\/\/                 ],\n\/\/             },\n\/\/         ],\n\/\/         \"js\": [\n\/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n\/\/         ],\n\/\/     },\n\/\/     \"num\": 2,\n\/\/ }\n```\n"
                 }
             },
-            "comments": "  \/**\n   * Returns the configuration array.\n   * \n   * @example\n   * ```php\n   * \/\/ @var bbn\\Cdn\\Config $cfg\n   * X::hdump($cfg->get());\n   * \/\/ {\n   * \/\/     \"url\": \"lib\",\n   * \/\/     \"params\": {\n   * \/\/         \"lib\": \"jquery\",\n   * \/\/     },\n   * \/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n   * \/\/     \"cache_file\": \"\/home\/thomas\/domains\/apstapp.thomas.lan\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n   * \/\/     \"ext\": \"\",\n   * \/\/     \"grouped\": false,\n   * \/\/     \"test\": false,\n   * \/\/     \"lang\": \"en\",\n   * \/\/     \"nocompil\": false,\n   * \/\/     \"has_css\": true,\n   * \/\/     \"has_dep\": true,\n   * \/\/     \"latest\": false,\n   * \/\/     \"is_component\": false,\n   * \/\/     \"components\": false,\n   * \/\/     \"content\": {\n   * \/\/         \"libraries\": {\n   * \/\/             \"jquery\": \"3.3.1\",\n   * \/\/         },\n   * \/\/         \"prepend\": [\n   * \/\/         ],\n   * \/\/         \"includes\": [\n   * \/\/             {\n   * \/\/                 \"version\": \"3.3.1\",\n   * \/\/                 \"prepend\": [\n   * \/\/                 ],\n   * \/\/                 \"name\": \"jquery\",\n   * \/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n   * \/\/                 \"js\": [\n   * \/\/                     \"dist\/jquery.min.js\",\n   * \/\/                 ],\n   * \/\/             },\n   * \/\/         ],\n   * \/\/         \"js\": [\n   * \/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n   * \/\/         ],\n   * \/\/     },\n   * \/\/     \"num\": 2,\n   * \/\/ }\n   * ```\n   * \n   * @return array\n   *\/"
+            "comments": "  \/**\n   * Returns the configuration array.\n   * \n   * @example\n   * ```php\n   * \/\/ @var bbn\\Cdn\\Config $cfg\n   * X::hdump($cfg->get());\n   * \/\/ {\n   * \/\/     \"url\": \"lib\",\n   * \/\/     \"params\": {\n   * \/\/         \"lib\": \"jquery\",\n   * \/\/     },\n   * \/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n   * \/\/     \"cache_file\": \"\/home\/bbn\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n   * \/\/     \"ext\": \"\",\n   * \/\/     \"grouped\": false,\n   * \/\/     \"test\": false,\n   * \/\/     \"lang\": \"en\",\n   * \/\/     \"nocompil\": false,\n   * \/\/     \"has_css\": true,\n   * \/\/     \"has_dep\": true,\n   * \/\/     \"latest\": false,\n   * \/\/     \"is_component\": false,\n   * \/\/     \"components\": false,\n   * \/\/     \"content\": {\n   * \/\/         \"libraries\": {\n   * \/\/             \"jquery\": \"3.3.1\",\n   * \/\/         },\n   * \/\/         \"prepend\": [\n   * \/\/         ],\n   * \/\/         \"includes\": [\n   * \/\/             {\n   * \/\/                 \"version\": \"3.3.1\",\n   * \/\/                 \"prepend\": [\n   * \/\/                 ],\n   * \/\/                 \"name\": \"jquery\",\n   * \/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n   * \/\/                 \"js\": [\n   * \/\/                     \"dist\/jquery.min.js\",\n   * \/\/                 ],\n   * \/\/             },\n   * \/\/         ],\n   * \/\/         \"js\": [\n   * \/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n   * \/\/         ],\n   * \/\/     },\n   * \/\/     \"num\": 2,\n   * \/\/ }\n   * ```\n   * \n   * @return array\n   *\/"
         },
         "setCfgFromRequest": {
             "name": "setCfgFromRequest",
@@ -365,7 +365,7 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function setFiles(): self\n  {\n    \/\/ Shortcuts for files and dir\n    if (X::hasProp($this->cfg['params'], 'f', true)) {\n      $this->cfg['params']['files'] = $this->cfg['params']['f'];\n      unset($this->cfg['params']['f']);\n    }\n    if (X::hasProp($this->cfg['params'], 'd', true)) {\n      $this->cfg['params']['dir'] = $this->cfg['params']['d'];\n      unset($this->cfg['params']['d']);\n    }\n    \/\/ File\n    if (!empty($this->cfg['ext']) && is_file($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFile();\n    }\n    \/\/ Preconfigured\n    elseif (X::hasProp($this->cfg['params'], 'id', true)) {\n      $res = $this->getPreconfig();\n    }\n    \/\/ List of files\n    elseif (X::hasProp($this->cfg['params'], 'files', true) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFiles();\n    }\n    \/\/ Directory content\n    \/\/ Vue component\n    elseif (!empty($this->cfg['params']['dir']) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getDir();\n    }\n    elseif ($this->cfg['is_component'] && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = [];\n      $this->cfg['num'] = 0;\n      foreach ($this->cfg['components'] as $cp) {\n        if (!isset($res[$cp])) {\n          $res[$cp] = $this->getDir($this->cfg['url'].$cp);\n          if ($res[$cp]) {\n            $dir = false;\n            foreach ($res[$cp] as $type => $files) {\n              if (!$dir && count($files)) {\n                $dir = $this->fpath.X::dirname($files[0]);\n              }\n              $this->cfg['num'] += \\count($files);\n            }\n            \/*\n            if ( $dir && is_file($dir.'\/bbn.json') ){\n              $json = json_decode(file_get_contents($dir.'\/bbn.json'));\n              if ( isset($json->components) ){\n                foreach ( $json->components as $tmp ){\n                  if ( !isset($res[$tmp]) && !\\in_array($tmp, $this->cfg['components'], true) ){\n                    $this->cfg['components'][] = $tmp;\n                    goto cpStart;\n                    break;\n                  }\n                }\n              }\n            }\n            *\/\n          }\n        }\n      }\n    }\n    \/\/ Last but not least, libraries!\n    elseif (X::hasProp($this->cfg['params'], 'lib', true)) {\n      $res = $this->getLibraries();\n      \/\/ Adding dirs to config\n      if (!empty($this->cfg['params']['dirs'])) {\n        $dirs = explode(',', $this->cfg['params']['dirs']);\n        foreach ($dirs as $d) {\n          if ($r = $this->getDir($d)) {\n            $this->add($res, $r);\n          }\n        }\n      }\n    }\n    $this->cfg['content'] = $res ?? [];\n    return $this;\n  }",
+            "code": "  protected function setFiles(): self\n  {\n    \/\/ Shortcuts for files and dir\n    if (X::hasProp($this->cfg['params'], 'f', true)) {\n      $this->cfg['params']['files'] = $this->cfg['params']['f'];\n      unset($this->cfg['params']['f']);\n    }\n    if (X::hasProp($this->cfg['params'], 'd', true)) {\n      $this->cfg['params']['dir'] = $this->cfg['params']['d'];\n      unset($this->cfg['params']['d']);\n    }\n    \/\/ File\n    if (!empty($this->cfg['ext']) && is_file($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFile();\n    }\n    \/\/ Preconfigured\n    elseif (X::hasProp($this->cfg['params'], 'id', true)) {\n      $res = $this->getPreconfig();\n    }\n    \/\/ List of files\n    elseif (X::hasProp($this->cfg['params'], 'files', true) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFiles();\n    }\n    \/\/ Directory content\n    \/\/ Vue component\n    elseif (!empty($this->cfg['params']['dir']) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getDir();\n    }\n    elseif ($this->cfg['is_component'] && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = [];\n      $this->cfg['num'] = 0;\n      foreach ($this->cfg['components'] as $cp) {\n        if (!isset($res[$cp])) {\n          $res[$cp] = $this->getDir($this->cfg['url'].$cp);\n          if ($res[$cp]) {\n            $dir = false;\n            foreach ($res[$cp] as $files) {\n              if (!$dir && count($files)) {\n                $dir = $this->fpath.X::dirname($files[0]);\n              }\n              $this->cfg['num'] += \\count($files);\n            }\n            \/*\n            if ( $dir && is_file($dir.'\/bbn.json') ){\n              $json = json_decode(file_get_contents($dir.'\/bbn.json'));\n              if ( isset($json->components) ){\n                foreach ( $json->components as $tmp ){\n                  if ( !isset($res[$tmp]) && !\\in_array($tmp, $this->cfg['components'], true) ){\n                    $this->cfg['components'][] = $tmp;\n                    goto cpStart;\n                    break;\n                  }\n                }\n              }\n            }\n            *\/\n          }\n        }\n      }\n    }\n    \/\/ Last but not least, libraries!\n    elseif (X::hasProp($this->cfg['params'], 'lib', true)) {\n      $res = $this->getLibraries();\n      \/\/ Adding dirs to config\n      if (!empty($this->cfg['params']['dirs'])) {\n        $dirs = explode(',', $this->cfg['params']['dirs']);\n        foreach ($dirs as $d) {\n          if ($r = $this->getDir($d)) {\n            $this->add($res, $r);\n          }\n        }\n      }\n    }\n    $this->cfg['content'] = $res ?? [];\n    return $this;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 220,
@@ -1164,7 +1164,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "code": "  public function log(...$args)\n  {\n    if ($this->isDebug()) {\n      $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($args as $a){\n        X::log($a, $cn);\n      }\n    }\n  }",
             "parent": {
                 "name": "log",
                 "summary": "",
@@ -1175,37 +1175,63 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "code": "  public function log(...$args)\n  {\n    if ($this->isDebug()) {\n      $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($args as $a){\n        X::log($a, $cn);\n      }\n    }\n  }",
                 "parent": false,
                 "trait": false,
                 "startLine": 116,
-                "endLine": 125,
+                "endLine": 124,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
                 "isUserDefined": true,
-                "isVariadic": false,
+                "isVariadic": true,
                 "returnsReference": false,
-                "numberOfParameters": 0,
+                "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
                 "shortName": "log",
                 "returns": [],
-                "arguments": []
+                "arguments": [
+                    {
+                        "name": "args",
+                        "position": 0,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": true,
+                        "reference": false,
+                        "required": false,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
             },
             "trait": false,
             "startLine": 116,
-            "endLine": 125,
+            "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
-            "isVariadic": false,
+            "isVariadic": true,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "shortName": "log",
             "returns": [],
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         },
         "isDebug": {
             "name": "isDebug",
@@ -1231,8 +1257,8 @@
                 "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
                 "parent": false,
                 "trait": false,
-                "startLine": 131,
-                "endLine": 134,
+                "startLine": 130,
+                "endLine": 133,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1252,8 +1278,8 @@
                 "comments": "  \/**\n   * @return boolean\n   *\/"
             },
             "trait": false,
-            "startLine": 131,
-            "endLine": 134,
+            "startLine": 130,
+            "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1296,8 +1322,8 @@
                 "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
                 "parent": false,
                 "trait": false,
-                "startLine": 141,
-                "endLine": 144,
+                "startLine": 140,
+                "endLine": 143,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1338,8 +1364,8 @@
                 "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
             "trait": false,
-            "startLine": 141,
-            "endLine": 144,
+            "startLine": 140,
+            "endLine": 143,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

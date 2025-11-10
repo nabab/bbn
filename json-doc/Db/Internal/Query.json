@@ -1,0 +1,258 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Query",
+    "namespace": true,
+    "realName": "Query",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Query.php",
+    "startLine": 5,
+    "endLine": 109,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Query",
+    "contentConstructor": null,
+    "methods": {
+        "getOne": {
+            "name": "getOne",
+            "summary": "Executes the given query with given vars, and extracts the first cell's result.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getOne(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getOne()\n  {\n   return $this->language->getOne(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 29,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOne",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Executes the given query with given vars, and extracts the first cell's result.\n\n```php\nX::dump($db->getOne(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "description": "values"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Executes the given query with given vars, and extracts the first cell's result.\n   *\n   * ```php\n   * X::dump($db->getOne(\"SELECT name FROM table_users WHERE id>?\", 138));\n   * \/\/ (string) John\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return mixed\n   *\/"
+        },
+        "getVar": {
+            "name": "getVar",
+            "summary": "Execute the given query with given vars, and extract the first cell's result.",
+            "description": "(similar to {@link get_one()})",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "(similar to {@link get_one()})"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getVar(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n\/\/ (int) 123554154"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getVar()\n  {\n    return $this->getOne(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 48,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getVar",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Execute the given query with given vars, and extract the first cell's result.\n(similar to {@link get_one()})\n\n```php\nX::dump($db->getVar(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n\/\/ (int) 123554154\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "description": "values"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Execute the given query with given vars, and extract the first cell's result.\n   * (similar to {@link get_one()})\n   *\n   * ```php\n   * X::dump($db->getVar(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n   * \/\/ (int) 123554154\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return mixed\n   *\/"
+        },
+        "getKeyVal": {
+            "name": "getKeyVal",
+            "summary": "Return an array indexed on the first field of the request.",
+            "description": "The value will be an array if the request has more than two fields.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "The value will be an array if the request has more than two fields."
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getKeyVal(\"SELECT name,id_group FROM table_users\"));\n\/*\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n\nX::dump($db->getKeyVal(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/*\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getKeyVal(): ?array\n  {\n    return $this->language->getKeyVal(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 85,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getKeyVal",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array indexed on the first field of the request.\nThe value will be an array if the request has more than two fields.\n\n```php\nX::dump($db->getKeyVal(\"SELECT name,id_group FROM table_users\"));\n\/*\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n\nX::dump($db->getKeyVal(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/*\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "description": "values"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   *\n   * ```php\n   * X::dump($db->getKeyVal(\"SELECT name,id_group FROM table_users\"));\n   * \/*\n   * (array)[\n   *      \"John\" => 1,\n   *      \"Michael\" => 1,\n   *      \"Barbara\" => 1\n   *        ]\n   *\n   * X::dump($db->getKeyVal(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n   * \/*\n   * (array)[\n   *         \"John\" => [\n   *          \"surname\" => \"Brown\",\n   *          \"id\" => 3\n   *         ],\n   *         \"Michael\" => [\n   *          \"surname\" => \"Smith\",\n   *          \"id\" => 4\n   *         ]\n   *        ]\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return null|array\n   *\/"
+        },
+        "getColArray": {
+            "name": "getColArray",
+            "summary": "Return an array with the values of single field resulting from the query.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getColArray(\"SELECT id FROM table_users\"));\n\/*\n(array)[1, 2, 3, 4]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getColArray(): array\n  {\n    return $this->language->getColArray(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getColArray",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array with the values of single field resulting from the query.\n\n```php\nX::dump($db->getColArray(\"SELECT id FROM table_users\"));\n\/*\n(array)[1, 2, 3, 4]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "description": "values"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array with the values of single field resulting from the query.\n   *\n   * ```php\n   * X::dump($db->getColArray(\"SELECT id FROM table_users\"));\n   * \/*\n   * (array)[1, 2, 3, 4]\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return array\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Executes the given query with given vars, and extracts the first cell's result.\n   *\n   * ```php\n   * X::dump($db->getOne(\"SELECT name FROM table_users WHERE id>?\", 138));\n   * \/\/ (string) John\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return mixed\n   *\/",
+        "\/**\n   * Execute the given query with given vars, and extract the first cell's result.\n   * (similar to {@link get_one()})\n   *\n   * ```php\n   * X::dump($db->getVar(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n   * \/\/ (int) 123554154\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return mixed\n   *\/",
+        "\/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   *\n   * ```php\n   * X::dump($db->getKeyVal(\"SELECT name,id_group FROM table_users\"));\n   * \/*\n   * (array)[\n   *      \"John\" => 1,\n   *      \"Michael\" => 1,\n   *      \"Barbara\" => 1\n   *        ]\n   *\n   * X::dump($db->getKeyVal(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n   * \/*\n   * (array)[\n   *         \"John\" => [\n   *          \"surname\" => \"Brown\",\n   *          \"id\" => 3\n   *         ],\n   *         \"Michael\" => [\n   *          \"surname\" => \"Smith\",\n   *          \"id\" => 4\n   *         ]\n   *        ]\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return null|array\n   *\/",
+        "\/**\n   * Return an array with the values of single field resulting from the query.\n   *\n   * ```php\n   * X::dump($db->getColArray(\"SELECT id FROM table_users\"));\n   * \/*\n   * (array)[1, 2, 3, 4]\n   * ```\n   *\n   * @param string query\n   * @param mixed values\n   * @return array\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

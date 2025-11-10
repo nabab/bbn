@@ -32,7 +32,7 @@ class Doc
    */
   protected $modes = [
     'js',
-    'vue',
+    'cp',
     'php'
   ];
 
@@ -139,7 +139,7 @@ class Doc
       'yield' => 'yields',
       'yields' => [],
     ],
-    'vue' => [
+    'cp' => [
       'component' => ['name'],
       'computed' => ['name'],
       'data' => ['type', 'default', 'name', 'description'],
@@ -192,8 +192,8 @@ class Doc
   private function setTags()
   {
     if ($this->mode) {
-      if ($this->mode === 'vue') {
-        $tags = X::mergeArrays($this->all_tags['js'], $this->all_tags['vue']);
+      if ($this->mode === 'cp') {
+        $tags = X::mergeArrays($this->all_tags['js'], $this->all_tags['cp']);
       } else {
         $tags = $this->all_tags[$this->mode];
       }
@@ -436,10 +436,7 @@ class Doc
    */
   private function tagGetType(string $text)
   {
-    if (
-      ($this->mode === 'js') ||
-      ($this->mode === 'vue')
-    ) {
+    if (in_array($this->mode, ['js', 'cp'])) {
       preg_match('/(?:\{)(\S+)(?:\})/', $text, $type, PREG_OFFSET_CAPTURE);
     } else if ($this->mode === 'php') {
       preg_match('/(?:\@[a-z]+\s{1})(\S+)(?:\s{0,1})/', $text, $type, PREG_OFFSET_CAPTURE);
@@ -458,10 +455,7 @@ class Doc
    */
   private function tagGetDefault(string $text)
   {
-    if (
-      ($this->mode === 'js') ||
-      ($this->mode === 'vue')
-    ) {
+    if (in_array($this->mode, ['js', 'cp'])) {
       preg_match('/(?:\[)(.+)(?:\])/', $text, $def, PREG_OFFSET_CAPTURE);
     }
     return $def;
@@ -475,10 +469,7 @@ class Doc
    */
   private function tagGetName(string $text)
   {
-    if (
-      ($this->mode === 'js') ||
-      ($this->mode === 'vue')
-    ) {
+    if (in_array($this->mode, ['js', 'cp'])) {
       //preg_match('/\w+/', $text, $name, PREG_OFFSET_CAPTURE);
       preg_match('/[[:graph:]]+/', $text, $name, PREG_OFFSET_CAPTURE);
     } else if ($this->mode === 'php') {
@@ -621,7 +612,7 @@ class Doc
     if ($components = $this->get('component', $memberof)) {
       foreach ($components as $comp) {
         if (!empty($comp['name'])) {
-          $res[] = array_merge($comp, $this->getVue($comp['name']));
+          $res[] = array_merge($comp, $this->getCp($comp['name']));
         }
       }
     }
@@ -656,7 +647,7 @@ class Doc
    * @param string $src The source code or an absolute file path
    * @param string $mode The mode to use
    */
-  public function __construct(string $src = '', string $mode = 'vue')
+  public function __construct(string $src = '', string $mode = 'cp')
   {
     $this->setMode($mode);
     $this->setTags();
@@ -688,7 +679,7 @@ class Doc
       $this->mode = $mode;
       return $this;
     }
-    die(X::_('Error: mode not allowed.'));
+    die(X::_('Error: mode %s not allowed.', $mode));
   }
 
   /**
@@ -769,7 +760,7 @@ class Doc
    * @param string $memberof The parent tag name
    * @return array
    */
-  public function getVue(string $memberof = '')
+  public function getCp(string $memberof = '')
   {
     return [
       'description' => $this->getFile($memberof),

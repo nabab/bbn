@@ -1,0 +1,800 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Write",
+    "namespace": true,
+    "realName": "Write",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Write.php",
+    "startLine": 5,
+    "endLine": 201,
+    "numMethods": 8,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Write",
+    "contentConstructor": null,
+    "methods": {
+        "insert": {
+            "name": "insert",
+            "summary": "Inserts row(s) in a table.",
+            "description": "<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"Ted\"],\n   [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"July\"],\n   [\"surname\" => \"O'neill\"]\n ], [\n   [\"name\" => \"Peter\"],\n   [\"surname\" => \"Griffin\"]\n ], [\n   [\"name\" => \"Marge\"],\n   [\"surname\" => \"Simpson\"]\n ]);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"Ted\"],\n   [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"July\"],\n   [\"surname\" => \"O'neill\"]\n ], [\n   [\"name\" => \"Peter\"],\n   [\"surname\" => \"Griffin\"]\n ], [\n   [\"name\" => \"Marge\"],\n   [\"surname\" => \"Simpson\"]\n ]);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function insert($table, array|null $values = null, bool $ignore = false): ?int\n  {\n    return $this->language->insert($table, $values, $ignore);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 45,
+            "endLine": 48,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "insert",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The values to insert."
+                },
+                {
+                    "name": "ignore",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true, controls if the row is already existing and ignores it."
+                }
+            ],
+            "doc": {
+                "description": "Inserts row(s) in a table.\n\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"Ted\"],\n   [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"July\"],\n   [\"surname\" => \"O'neill\"]\n ], [\n   [\"name\" => \"Peter\"],\n   [\"surname\" => \"Griffin\"]\n ], [\n   [\"name\" => \"Marge\"],\n   [\"surname\" => \"Simpson\"]\n ]);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values",
+                        "description": "The values to insert."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ignore",
+                        "description": "If true, controls if the row is already existing and ignores it."
+                    }
+                ],
+                "return": "Number affected rows."
+            },
+            "comments": "  \/**\n   * Inserts row(s) in a table.\n   *\n   * <code>\n   * $db->insert(\"table_users\", [\n   *    [\"name\" => \"Ted\"],\n   *    [\"surname\" => \"McLow\"]\n   *  ]);\n   * <\/code>\n   *\n   * <code>\n   * $db->insert(\"table_users\", [\n   *    [\"name\" => \"July\"],\n   *    [\"surname\" => \"O'neill\"]\n   *  ], [\n   *    [\"name\" => \"Peter\"],\n   *    [\"surname\" => \"Griffin\"]\n   *  ], [\n   *    [\"name\" => \"Marge\"],\n   *    [\"surname\" => \"Simpson\"]\n   *  ]);\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The values to insert.\n   * @param bool $ignore If true, controls if the row is already existing and ignores it.\n   *\n   * @return int Number affected rows.\n   *\/"
+        },
+        "insertUpdate": {
+            "name": "insertUpdate",
+            "summary": "If not exist inserts row(s) in a table, else update.",
+            "description": "<code>\n$db->insertUpdate(\n \"table_users\",\n [\n   'id' => '12',\n   'name' => 'Frank'\n ]\n);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->insertUpdate(\n \"table_users\",\n [\n   'id' => '12',\n   'name' => 'Frank'\n ]\n);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function insertUpdate($table, array|null $values = null): ?int\n  {\n    return $this->language->insertUpdate($table, $values);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 69,
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "insertUpdate",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The values to insert."
+                }
+            ],
+            "doc": {
+                "description": "If not exist inserts row(s) in a table, else update.\n\n<code>\n$db->insertUpdate(\n \"table_users\",\n [\n   'id' => '12',\n   'name' => 'Frank'\n ]\n);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values",
+                        "description": "The values to insert."
+                    }
+                ],
+                "return": "The number of rows inserted or updated."
+            },
+            "comments": "  \/**\n   * If not exist inserts row(s) in a table, else update.\n   *\n   * <code>\n   * $db->insertUpdate(\n   *  \"table_users\",\n   *  [\n   *    'id' => '12',\n   *    'name' => 'Frank'\n   *  ]\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The values to insert.\n   *\n   * @return int The number of rows inserted or updated.\n   *\/"
+        },
+        "update": {
+            "name": "update",
+            "summary": "Updates row(s) in a table.",
+            "description": "<code>\n$db->update(\n \"table_users\",\n [\n   ['name' => 'Frank'],\n   ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->update(\n \"table_users\",\n [\n   ['name' => 'Frank'],\n   ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function update($table, array|null $values = null, array|null $where = null, bool $ignore = false): ?int\n  {\n    return $this->language->update($table, $values, $where, $ignore);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 96,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "update",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The new value(s)."
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                },
+                {
+                    "name": "ignore",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If IGNORE should be added to the statement"
+                }
+            ],
+            "doc": {
+                "description": "Updates row(s) in a table.\n\n<code>\n$db->update(\n \"table_users\",\n [\n   ['name' => 'Frank'],\n   ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values",
+                        "description": "The new value(s)."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$ignore",
+                        "description": "If IGNORE should be added to the statement"
+                    }
+                ],
+                "return": "The number of rows updated."
+            },
+            "comments": "  \/**\n   * Updates row(s) in a table.\n   *\n   * <code>\n   * $db->update(\n   *  \"table_users\",\n   *  [\n   *    ['name' => 'Frank'],\n   *    ['surname' => 'Red']\n   *  ],\n   *  ['id' => '127']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The new value(s).\n   * @param array|null $where The \"where\" condition.\n   * @param boolean $ignore If IGNORE should be added to the statement\n   *\n   * @return int The number of rows updated.\n   *\/"
+        },
+        "updateIgnore": {
+            "name": "updateIgnore",
+            "summary": "If exist updates row(s) in a table, else ignore.",
+            "description": "<code>\n$db->updateIgnore(\n  \"table_users\",\n  [\n    ['name' => 'Frank'],\n    ['surname' => 'Red']\n  ],\n  ['id' => '20']\n);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->updateIgnore(\n  \"table_users\",\n  [\n    ['name' => 'Frank'],\n    ['surname' => 'Red']\n  ],\n  ['id' => '20']\n);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updateIgnore($table, array|null $values = null, array|null $where = null): ?int\n  {\n    return $this->update($table, $values, $where, true);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 122,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "updateIgnore",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                }
+            ],
+            "doc": {
+                "description": "If exist updates row(s) in a table, else ignore.\n\n<code>\n$db->updateIgnore(\n  \"table_users\",\n  [\n    ['name' => 'Frank'],\n    ['surname' => 'Red']\n  ],\n  ['id' => '20']\n);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    }
+                ],
+                "return": "The number of rows deleted."
+            },
+            "comments": "  \/**\n   * If exist updates row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->updateIgnore(\n   *   \"table_users\",\n   *   [\n   *     ['name' => 'Frank'],\n   *     ['surname' => 'Red']\n   *   ],\n   *   ['id' => '20']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values\n   * @param array|null $where The \"where\" condition.\n   *\n   * @return int The number of rows deleted.\n   *\/"
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes row(s) in a table.",
+            "description": "<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function delete($table, array|null $where = null, bool $ignore = false): ?int\n  {\n    return $this->language->delete($table, $where, $ignore);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "delete",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                },
+                {
+                    "name": "ignore",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "default: false."
+                }
+            ],
+            "doc": {
+                "description": "Deletes row(s) in a table.\n\n<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ignore",
+                        "description": "default: false."
+                    }
+                ],
+                "return": "The number of rows deleted."
+            },
+            "comments": "  \/**\n   * Deletes row(s) in a table.\n   *\n   * <code>\n   * $db->delete(\"table_users\", ['id' => '32']);\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $where The \"where\" condition.\n   * @param bool $ignore default: false.\n   *\n   * @return int The number of rows deleted.\n   *\/"
+        },
+        "deleteIgnore": {
+            "name": "deleteIgnore",
+            "summary": "If exist deletes row(s) in a table, else ignore.",
+            "description": "<code>\n$db->deleteIgnore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->deleteIgnore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function deleteIgnore($table, array|null $where = null): ?int\n  {\n    return $this->delete(\\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 162,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "deleteIgnore",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                }
+            ],
+            "doc": {
+                "description": "If exist deletes row(s) in a table, else ignore.\n\n<code>\n$db->deleteIgnore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    }
+                ],
+                "return": "The number of rows deleted."
+            },
+            "comments": "  \/**\n   * If exist deletes row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->deleteIgnore(\n   *  \"table_users\",\n   *  ['id' => '20']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $where The \"where\" condition.\n   *\n   * @return int The number of rows deleted.\n   *\/"
+        },
+        "insertIgnore": {
+            "name": "insertIgnore",
+            "summary": "If not exist inserts row(s) in a table, else ignore.",
+            "description": "<code>\n$db->insertIgnore(\n \"table_users\",\n [\n   ['id' => '19', 'name' => 'Frank'],\n   ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<code>\n$db->insertIgnore(\n \"table_users\",\n [\n   ['id' => '19', 'name' => 'Frank'],\n   ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function insertIgnore($table, array|null $values = null): ?int\n  {\n    return $this->insert(\\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 186,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "insertIgnore",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table name or the configuration array."
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The row(s) values."
+                }
+            ],
+            "doc": {
+                "description": "If not exist inserts row(s) in a table, else ignore.\n\n<code>\n$db->insertIgnore(\n \"table_users\",\n [\n   ['id' => '19', 'name' => 'Frank'],\n   ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table name or the configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values",
+                        "description": "The row(s) values."
+                    }
+                ],
+                "return": "The number of rows inserted."
+            },
+            "comments": "  \/**\n   * If not exist inserts row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->insertIgnore(\n   *  \"table_users\",\n   *  [\n   *    ['id' => '19', 'name' => 'Frank'],\n   *    ['id' => '20', 'name' => 'Ted'],\n   *  ]\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The row(s) values.\n   *\n   * @return int The number of rows inserted.\n   *\/"
+        },
+        "truncate": {
+            "name": "truncate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Write",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Write.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function truncate($table): ?int\n  {\n    return $this->delete($table, []);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 196,
+            "endLine": 199,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "truncate",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$table"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $table\n   * @return int|null\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Inserts row(s) in a table.\n   *\n   * <code>\n   * $db->insert(\"table_users\", [\n   *    [\"name\" => \"Ted\"],\n   *    [\"surname\" => \"McLow\"]\n   *  ]);\n   * <\/code>\n   *\n   * <code>\n   * $db->insert(\"table_users\", [\n   *    [\"name\" => \"July\"],\n   *    [\"surname\" => \"O'neill\"]\n   *  ], [\n   *    [\"name\" => \"Peter\"],\n   *    [\"surname\" => \"Griffin\"]\n   *  ], [\n   *    [\"name\" => \"Marge\"],\n   *    [\"surname\" => \"Simpson\"]\n   *  ]);\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The values to insert.\n   * @param bool $ignore If true, controls if the row is already existing and ignores it.\n   *\n   * @return int Number affected rows.\n   *\/",
+        "\/**\n   * If not exist inserts row(s) in a table, else update.\n   *\n   * <code>\n   * $db->insertUpdate(\n   *  \"table_users\",\n   *  [\n   *    'id' => '12',\n   *    'name' => 'Frank'\n   *  ]\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The values to insert.\n   *\n   * @return int The number of rows inserted or updated.\n   *\/",
+        "\/**\n   * Updates row(s) in a table.\n   *\n   * <code>\n   * $db->update(\n   *  \"table_users\",\n   *  [\n   *    ['name' => 'Frank'],\n   *    ['surname' => 'Red']\n   *  ],\n   *  ['id' => '127']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The new value(s).\n   * @param array|null $where The \"where\" condition.\n   * @param boolean $ignore If IGNORE should be added to the statement\n   *\n   * @return int The number of rows updated.\n   *\/",
+        "\/**\n   * If exist updates row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->updateIgnore(\n   *   \"table_users\",\n   *   [\n   *     ['name' => 'Frank'],\n   *     ['surname' => 'Red']\n   *   ],\n   *   ['id' => '20']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values\n   * @param array|null $where The \"where\" condition.\n   *\n   * @return int The number of rows deleted.\n   *\/",
+        "\/**\n   * Deletes row(s) in a table.\n   *\n   * <code>\n   * $db->delete(\"table_users\", ['id' => '32']);\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $where The \"where\" condition.\n   * @param bool $ignore default: false.\n   *\n   * @return int The number of rows deleted.\n   *\/",
+        "\/**\n   * If exist deletes row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->deleteIgnore(\n   *  \"table_users\",\n   *  ['id' => '20']\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $where The \"where\" condition.\n   *\n   * @return int The number of rows deleted.\n   *\/",
+        "\/**\n   * If not exist inserts row(s) in a table, else ignore.\n   *\n   * <code>\n   * $db->insertIgnore(\n   *  \"table_users\",\n   *  [\n   *    ['id' => '19', 'name' => 'Frank'],\n   *    ['id' => '20', 'name' => 'Ted'],\n   *  ]\n   * );\n   * <\/code>\n   *\n   * @param string|array $table The table name or the configuration array.\n   * @param array|null $values The row(s) values.\n   *\n   * @return int The number of rows inserted.\n   *\/",
+        "\/**\n   * @param $table\n   * @return int|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

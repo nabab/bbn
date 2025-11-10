@@ -1,0 +1,322 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Types",
+    "namespace": true,
+    "realName": "Types",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Types.php",
+    "startLine": 5,
+    "endLine": 70,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Types",
+    "contentConstructor": null,
+    "methods": {
+        "getDateTypes": {
+            "name": "getDateTypes",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDateTypes(): array\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'getDateTypes']);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 18,
+            "endLine": 22,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getDateTypes",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "getBinaryTypes": {
+            "name": "getBinaryTypes",
+            "summary": "Returns the list of date types in the current language",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getBinaryTypes(): array\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'getBinaryTypes']);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 30,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getBinaryTypes",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the list of date types in the current language\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the list of date types in the current language\n   *\n   * @return array\n   *\/"
+        },
+        "getTextTypes": {
+            "name": "getTextTypes",
+            "summary": "Returns the list of text types in the current language",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTextTypes(): array\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'getTextTypes']);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 41,
+            "endLine": 45,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getTextTypes",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the list of text types in the current language\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the list of text types in the current language\n   *\n   * @return array\n   *\/"
+        },
+        "isBinaryType": {
+            "name": "isBinaryType",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isBinaryType(string $type): bool\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'isBinaryType'], $type);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 47,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isBinaryType",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isNumericType": {
+            "name": "isNumericType",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isNumericType(string $type): bool\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'isNumericType'], $type);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 53,
+            "endLine": 57,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isNumericType",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isDateType": {
+            "name": "isDateType",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDateType(string $type): bool\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'isDateType'], $type);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 59,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isDateType",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isTextType": {
+            "name": "isTextType",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Types",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Types.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isTextType(string $type): bool\n  {\n    $clsName = get_class($this->language);\n    return call_user_func([$clsName, 'isTextType'], $type);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 65,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isTextType",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Returns the list of date types in the current language\n   *\n   * @return array\n   *\/",
+        "\/**\n   * Returns the list of text types in the current language\n   *\n   * @return array\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -1,0 +1,1319 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Structure",
+    "namespace": true,
+    "realName": "Structure",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Structure.php",
+    "startLine": 5,
+    "endLine": 294,
+    "numMethods": 16,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Structure",
+    "contentConstructor": null,
+    "methods": {
+        "getFieldsList": {
+            "name": "getFieldsList",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getFieldsList($tables): array\n  {\n    return $this->language->getFieldsList($tables);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 21,
+            "endLine": 24,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getFieldsList",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "tables",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$tables"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param $tables\n   * @return array\n   * @throws Exception\n   *\/"
+        },
+        "getForeignKeys": {
+            "name": "getForeignKeys",
+            "summary": "Return an array with tables and fields related to the searched foreign key.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getForeignKeys('id', 'table_users', 'db_example'));\n\/\/ (Array)"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getForeignKeys(string $col, string $table, string|null $db = null): array\n  {\n    return $this->language->getForeignKeys($col, $table, $db);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 40,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getForeignKeys",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name"
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The database name if different from the current one"
+                }
+            ],
+            "doc": {
+                "description": "Return an array with tables and fields related to the searched foreign key.\n\n```php\nX::dump($db->getForeignKeys('id', 'table_users', 'db_example'));\n\/\/ (Array)\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$col",
+                        "description": "The column's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$db",
+                        "description": "The database name if different from the current one"
+                    }
+                ],
+                "return": "with tables and fields related to the searched foreign key"
+            },
+            "comments": "  \/**\n   * Return an array with tables and fields related to the searched foreign key.\n   *\n   * ```php\n   * X::dump($db->getForeignKeys('id', 'table_users', 'db_example'));\n   * \/\/ (Array)\n   * ```\n   *\n   * @param string $col The column's name\n   * @param string $table The table's name\n   * @param string|null $db The database name if different from the current one\n   * @return array with tables and fields related to the searched foreign key\n   *\/"
+        },
+        "hasIdIncrement": {
+            "name": "hasIdIncrement",
+            "summary": "Return true if in the table there are fields with auto-increment.",
+            "description": "Working only on mysql.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "Working only on mysql."
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->hasIdIncrement('table_users'));\n\/\/ (bool) 1"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasIdIncrement(string $table): bool\n  {\n    if (method_exists($this->language, 'hasIdIncrement')) {\n      return $this->language->hasIdIncrement($table);\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "hasIdIncrement",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Return true if in the table there are fields with auto-increment.\nWorking only on mysql.\n\n```php\nX::dump($db->hasIdIncrement('table_users'));\n\/\/ (bool) 1\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return true if in the table there are fields with auto-increment.\n   * Working only on mysql.\n   *\n   * ```php\n   * X::dump($db->hasIdIncrement('table_users'));\n   * \/\/ (bool) 1\n   * ```\n   *\n   * @param string $table The table's name\n   * @return bool\n   *\/"
+        },
+        "modelize": {
+            "name": "modelize",
+            "summary": "Return the table's structure as an indexed array.",
+            "description": "X::hdump($ctrl->db->modelize('my_date_2')); \/*\n\"fields\": {\n    \"ID\": {\n        \"position\": 1,\n        \"type\": \"int\",\n        \"null\": 0,\n        \"key\": null,\n        \"extra\": \"\",\n        \"signed\": true,\n        \"virtual\": false,\n        \"generation\": \"\",\n        \"maxlength\": 10,\n    },",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "X::hdump($ctrl->db->modelize('my_date_2')); \/*\n\"fields\": {\n    \"ID\": {\n        \"position\": 1,\n        \"type\": \"int\",\n        \"null\": 0,\n        \"key\": null,\n        \"extra\": \"\",\n        \"signed\": true,\n        \"virtual\": false,\n        \"generation\": \"\",\n        \"maxlength\": 10,\n    },"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function modelize($table = null, bool $force = false): ?array\n  {\n    return $this->language->modelize($table, $force);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 90,
+            "endLine": 93,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "modelize",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true will force the modernization to re-perform even if the cache exists"
+                }
+            ],
+            "doc": {
+                "description": "Return the table's structure as an indexed array.\n\nX::hdump($ctrl->db->modelize('my_date_2')); \/*\n\"fields\": {\n    \"ID\": {\n        \"position\": 1,\n        \"type\": \"int\",\n        \"null\": 0,\n        \"key\": null,\n        \"extra\": \"\",\n        \"signed\": true,\n        \"virtual\": false,\n        \"generation\": \"\",\n        \"maxlength\": 10,\n    },\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|array|string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force",
+                        "description": "If set to true will force the modernization to re-perform even if the cache exists"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the table's structure as an indexed array.\n   * \n   * X::hdump($ctrl->db->modelize('my_date_2')); \/*    \n   * \"fields\": {\n   *     \"ID\": {\n   *         \"position\": 1,\n   *         \"type\": \"int\",\n   *         \"null\": 0,\n   *         \"key\": null,\n   *         \"extra\": \"\",\n   *         \"signed\": true,\n   *         \"virtual\": false,\n   *         \"generation\": \"\",\n   *         \"maxlength\": 10,\n   *     },\n   * \n   *\n   * @param null|array|string $table The table's name\n   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists\n   * @return null|array\n   *\/"
+        },
+        "convert": {
+            "name": "convert",
+            "summary": "Converts the given configuration (modelize) to the given engine.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function convert(array $cfg, string $engine): array\n  {\n    return $this->language->convert($cfg, $engine);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 102,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "convert",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The configuration to convert"
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The engine to convert to"
+                }
+            ],
+            "doc": {
+                "description": "Converts the given configuration (modelize) to the given engine.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration to convert"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$engine",
+                        "description": "The engine to convert to"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Converts the given configuration (modelize) to the given engine.\n   * @param array $cfg The configuration to convert\n   * @param string $engine The engine to convert to\n   * @return array\n   *\/"
+        },
+        "getColMaxLength": {
+            "name": "getColMaxLength",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getColMaxLength(string $column, string|null $table = null): ?int\n  {\n    return $this->language->getColMaxLength($column, $table);\n  } ",
+            "parent": false,
+            "trait": false,
+            "startLine": 111,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getColMaxLength",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "column",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "tags": []
+            },
+            "comments": "  \/**\n   * \n   *\/"
+        },
+        "fmodelize": {
+            "name": "fmodelize",
+            "summary": "Return the table's structure as an indexed array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::hdump($ctrl->db->fmodelize('my_date_2'));"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fmodelize(string $table = '', bool $force = false): ?array\n  {\n    if (method_exists($this->language, 'fmodelize')) {\n      return $this->language->fmodelize($table, $force);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 127,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fmodelize",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return the table's structure as an indexed array.\n\n```php\nX::hdump($ctrl->db->fmodelize('my_date_2'));\n```\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/** \n   * Return the table's structure as an indexed array.\n   * \n   * ```php\n   * X::hdump($ctrl->db->fmodelize('my_date_2'));\n   * ```\n   * \n   * @param string $table\n   * @param bool   $force\n   * @return null|array\n   *\/"
+        },
+        "findReferences": {
+            "name": "findReferences",
+            "summary": "find_references",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findReferences($column, string $db = ''): array\n  {\n    if (method_exists($this->language, 'findReferences')) {\n      return $this->language->findReferences($column, $db);\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 145,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findReferences",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "column",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "find_references\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$column"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * find_references\n   *\n   * @param $column\n   * @param string $db\n   * @return array|bool\n   *\n   *\/"
+        },
+        "findRelations": {
+            "name": "findRelations",
+            "summary": "find_relations",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findRelations($column, string $db = ''): ?array\n  {\n    return $this->language->findRelations($column, $db);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 162,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findRelations",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "column",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "find_relations\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$column"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * find_relations\n   *\n   * @param $column\n   * @param string $db\n   * @return array|bool\n   *\/"
+        },
+        "getPrimary": {
+            "name": "getPrimary",
+            "summary": "Return primary keys of a table as a numeric array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPrimary(string $table): array\n  {\n    return $this->language->getPrimary($table);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 179,
+            "endLine": 182,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getPrimary",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Return primary keys of a table as a numeric array.\n\n```php\nX::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return primary keys of a table as a numeric array.\n   *\n   * ```php\n   * X::dump($db-> get_primary('table_users'));\n   * \/\/ (array) [\"id\"]\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/"
+        },
+        "getSinglePrimary": {
+            "name": "getSinglePrimary",
+            "summary": "Return primary keys of a table as a string if there is a single-column unique key.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db-> getSinglePrimary('table_users'));\n\/\/ (string) \"id\""
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSinglePrimary(string $table): ?string\n  {\n    $primaries = $this->language->getPrimary($table);\n    if (count($primaries) === 1) {\n      return $primaries[0];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 196,
+            "endLine": 204,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getSinglePrimary",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Return primary keys of a table as a string if there is a single-column unique key.\n\n```php\nX::dump($db-> getSinglePrimary('table_users'));\n\/\/ (string) \"id\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return primary keys of a table as a string if there is a single-column unique key.\n   *\n   * ```php\n   * X::dump($db-> getSinglePrimary('table_users'));\n   * \/\/ (string) \"id\"\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/"
+        },
+        "getUniquePrimary": {
+            "name": "getUniquePrimary",
+            "summary": "Return the unique primary key of the given table.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getUniquePrimary('table_users'));\n\/\/ (string) id"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getUniquePrimary(string $table): ?string\n  {\n    if (method_exists($this->language, 'getUniquePrimary')) {\n      return $this->language->getUniquePrimary($table);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 218,
+            "endLine": 225,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getUniquePrimary",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Return the unique primary key of the given table.\n\n```php\nX::dump($db->getUniquePrimary('table_users'));\n\/\/ (string) id\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the unique primary key of the given table.\n   *\n   * ```php\n   * X::dump($db->getUniquePrimary('table_users'));\n   * \/\/ (string) id\n   * ```\n   *\n   * @param string $table The table's name\n   * @return null|string\n   *\/"
+        },
+        "getUniqueKeys": {
+            "name": "getUniqueKeys",
+            "summary": "Return the unique keys of a table as a numeric array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getUniqueKeys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getUniqueKeys(string $table): array\n  {\n    if (method_exists($this->language, 'getUniqueKeys')) {\n      return $this->language->getUniqueKeys($table);\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 239,
+            "endLine": 246,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getUniqueKeys",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Return the unique keys of a table as a numeric array.\n\n```php\nX::dump($db->getUniqueKeys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the unique keys of a table as a numeric array.\n   *\n   * ```php\n   * X::dump($db->getUniqueKeys('table_users'));\n   * \/\/ (array) [\"userid\", \"userdataid\"]\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/"
+        },
+        "setDatabaseCharset": {
+            "name": "setDatabaseCharset",
+            "summary": "Changes the charset to the given database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDatabaseCharset(string $database, string $charset, string $collation): bool\n  {\n    if (method_exists($this->language, 'setDatabaseCharset')) {\n      return $this->language->setDatabaseCharset($database, $charset, $collation);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 255,
+            "endLine": 261,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "setDatabaseCharset",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                },
+                {
+                    "name": "charset",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The charset to set"
+                },
+                {
+                    "name": "collation",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The collation to set"
+                }
+            ],
+            "doc": {
+                "description": "Changes the charset to the given database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database",
+                        "description": "The database's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$charset",
+                        "description": "The charset to set"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$collation",
+                        "description": "The collation to set"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Changes the charset to the given database\n   * @param string $database The database's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/"
+        },
+        "setTableCharset": {
+            "name": "setTableCharset",
+            "summary": "Changes the charset to the given table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setTableCharset(string $table, string $charset, string $collation): bool\n  {\n    if (method_exists($this->language, 'setTableCharset')) {\n      return $this->language->setTableCharset($table, $charset, $collation);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 270,
+            "endLine": 276,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "setTableCharset",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "charset",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The charset to set"
+                },
+                {
+                    "name": "collation",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The collation to set"
+                }
+            ],
+            "doc": {
+                "description": "Changes the charset to the given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$charset",
+                        "description": "The charset to set"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$collation",
+                        "description": "The collation to set"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Changes the charset to the given table\n   * @param string $table The table's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/"
+        },
+        "setColumnCharset": {
+            "name": "setColumnCharset",
+            "summary": "Changes the charset to the given column",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Structure",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Structure.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setColumnCharset(string $table, string $column, string $charset, string $collation): bool\n  {\n    if (method_exists($this->language, 'setColumnCharset')) {\n      return $this->language->setColumnCharset($table, $column, $charset, $collation);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 286,
+            "endLine": 292,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "shortName": "setColumnCharset",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name"
+                },
+                {
+                    "name": "charset",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The charset to set"
+                },
+                {
+                    "name": "collation",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The collation to set"
+                }
+            ],
+            "doc": {
+                "description": "Changes the charset to the given column\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The column's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$charset",
+                        "description": "The charset to set"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$collation",
+                        "description": "The collation to set"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Changes the charset to the given column\n   * @param string $table The table's name\n   * @param string $column The column's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * @param $tables\n   * @return array\n   * @throws Exception\n   *\/",
+        "\/**\n   * Return an array with tables and fields related to the searched foreign key.\n   *\n   * ```php\n   * X::dump($db->getForeignKeys('id', 'table_users', 'db_example'));\n   * \/\/ (Array)\n   * ```\n   *\n   * @param string $col The column's name\n   * @param string $table The table's name\n   * @param string|null $db The database name if different from the current one\n   * @return array with tables and fields related to the searched foreign key\n   *\/",
+        "\/**\n   * Return true if in the table there are fields with auto-increment.\n   * Working only on mysql.\n   *\n   * ```php\n   * X::dump($db->hasIdIncrement('table_users'));\n   * \/\/ (bool) 1\n   * ```\n   *\n   * @param string $table The table's name\n   * @return bool\n   *\/",
+        "\/**\n   * Return the table's structure as an indexed array.\n   * \n   * X::hdump($ctrl->db->modelize('my_date_2')); \/*    \n   * \"fields\": {\n   *     \"ID\": {\n   *         \"position\": 1,\n   *         \"type\": \"int\",\n   *         \"null\": 0,\n   *         \"key\": null,\n   *         \"extra\": \"\",\n   *         \"signed\": true,\n   *         \"virtual\": false,\n   *         \"generation\": \"\",\n   *         \"maxlength\": 10,\n   *     },\n   * \n   *\n   * @param null|array|string $table The table's name\n   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists\n   * @return null|array\n   *\/",
+        "\/**\n   * Converts the given configuration (modelize) to the given engine.\n   * @param array $cfg The configuration to convert\n   * @param string $engine The engine to convert to\n   * @return array\n   *\/",
+        "\/**\n   * \n   *\/",
+        "\/** \n   * Return the table's structure as an indexed array.\n   * \n   * ```php\n   * X::hdump($ctrl->db->fmodelize('my_date_2'));\n   * ```\n   * \n   * @param string $table\n   * @param bool   $force\n   * @return null|array\n   *\/",
+        "\/**\n   * find_references\n   *\n   * @param $column\n   * @param string $db\n   * @return array|bool\n   *\n   *\/",
+        "\/**\n   * find_relations\n   *\n   * @param $column\n   * @param string $db\n   * @return array|bool\n   *\/",
+        "\/**\n   * Return primary keys of a table as a numeric array.\n   *\n   * ```php\n   * X::dump($db-> get_primary('table_users'));\n   * \/\/ (array) [\"id\"]\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/",
+        "\/**\n   * Return primary keys of a table as a string if there is a single-column unique key.\n   *\n   * ```php\n   * X::dump($db-> getSinglePrimary('table_users'));\n   * \/\/ (string) \"id\"\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/",
+        "\/**\n   * Return the unique primary key of the given table.\n   *\n   * ```php\n   * X::dump($db->getUniquePrimary('table_users'));\n   * \/\/ (string) id\n   * ```\n   *\n   * @param string $table The table's name\n   * @return null|string\n   *\/",
+        "\/**\n   * Return the unique keys of a table as a numeric array.\n   *\n   * ```php\n   * X::dump($db->getUniqueKeys('table_users'));\n   * \/\/ (array) [\"userid\", \"userdataid\"]\n   * ```\n   *\n   * @param string $table The table's name\n   * @return array\n   *\/",
+        "\/**\n   * Changes the charset to the given database\n   * @param string $database The database's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/",
+        "\/**\n   * Changes the charset to the given table\n   * @param string $table The table's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/",
+        "\/**\n   * Changes the charset to the given column\n   * @param string $table The table's name\n   * @param string $column The column's name\n   * @param string $charset The charset to set\n   * @param string $collation The collation to set\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -1,0 +1,456 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Native",
+    "namespace": true,
+    "realName": "Native",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Native.php",
+    "startLine": 5,
+    "endLine": 151,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Native",
+    "contentConstructor": null,
+    "methods": {
+        "fetch": {
+            "name": "fetch",
+            "summary": "Return an indexed array with the first result of the query or false if there are no results.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetch(string $query)\n  {\n    return $this->language->fetch(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 31,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fetch",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return an indexed array with the first result of the query or false if there are no results.\n\n```php\nX::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$query"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an indexed array with the first result of the query or false if there are no results.\n   *\n   * ```php\n   * X::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n   * \/* (array)\n   * [\n   *  \"name\" => \"john\",\n   *  0 => \"john\",\n   * ]\n   * ```\n   *\n   * @param string $query\n   * @return array|false\n   *\/"
+        },
+        "fetchAll": {
+            "name": "fetchAll",
+            "summary": "Return an array of indexed array with all results of the query or false if there are no results.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n   [\n   \"surname\" => \"White\",\n   0 => \"White\",\n   \"name\" => \"Michael\",\n   1 => \"Michael\",\n   \"id\"  => 1,\n   2 => 1,\n   ],\n   [\n   \"surname\" => \"Smith\",\n   0 => \"Smith\",\n   \"name\" => \"John\",\n   1  =>  \"John\",\n   \"id\" => 2,\n   2 => 2,\n   ],\n ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetchAll(string $query)\n  {\n    return $this->language->fetchAll(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 66,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fetchAll",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return an array of indexed array with all results of the query or false if there are no results.\n\n```php\nX::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n   [\n   \"surname\" => \"White\",\n   0 => \"White\",\n   \"name\" => \"Michael\",\n   1 => \"Michael\",\n   \"id\"  => 1,\n   2 => 1,\n   ],\n   [\n   \"surname\" => \"Smith\",\n   0 => \"Smith\",\n   \"name\" => \"John\",\n   1  =>  \"John\",\n   \"id\" => 2,\n   2 => 2,\n   ],\n ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$query"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array of indexed array with all results of the query or false if there are no results.\n   *\n   * ```php\n   * X::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n   * \/* (array)\n   *  [\n   *    [\n   *    \"surname\" => \"White\",\n   *    0 => \"White\",\n   *    \"name\" => \"Michael\",\n   *    1 => \"Michael\",\n   *    \"id\"  => 1,\n   *    2 => 1,\n   *    ],\n   *    [\n   *    \"surname\" => \"Smith\",\n   *    0 => \"Smith\",\n   *    \"name\" => \"John\",\n   *    1  =>  \"John\",\n   *    \"id\" => 2,\n   *    2 => 2,\n   *    ],\n   *  ]\n   * ```\n   *\n   * @param string $query\n   * @return array|false\n   *\/"
+        },
+        "fetchColumn": {
+            "name": "fetchColumn",
+            "summary": "Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetchColumn($query, int $num = 0)\n  {\n    return $this->language->fetchColumn(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 80,
+            "endLine": 83,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fetchColumn",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "num",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$num"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work"
+                }
+            },
+            "comments": "  \/**\n   * Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result\n   * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work\n   *\n   * @param $query\n   * @param int   $num\n   * @return mixed\n   *\/"
+        },
+        "fetchObject": {
+            "name": "fetchObject",
+            "summary": "Return stdClass object or false if no result.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n                   \"id\"  =>  1,\n                   \"name\"  =>  \"John\",\n                   \"surname\"  =>  \"Smith\",\n                   }"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetchObject($query)\n  {\n    return $this->language->fetchObject(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 101,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fetchObject",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return stdClass object or false if no result.\n\n```php\nX::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n                   \"id\"  =>  1,\n                   \"name\"  =>  \"John\",\n                   \"surname\"  =>  \"Smith\",\n                   }\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$query"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return stdClass object or false if no result.\n   *\n   * ```php\n   * X::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n   * \/\/ stdClass Object {\n   *                    \"id\"  =>  1,\n   *                    \"name\"  =>  \"John\",\n   *                    \"surname\"  =>  \"Smith\",\n   *                    }\n   * ```\n   *\n   * @param string $query\n   * @return bool|\\stdClass\n   *\/"
+        },
+        "query": {
+            "name": "query",
+            "summary": "Executes a writing statement and return the number of affected rows or return a query object for the reading * statement",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function query($statement)\n  {\n    if ($this->check()) {\n      return $this->language->query(...\\func_get_args());\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 121,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "query",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "statement",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Executes a writing statement and return the number of affected rows or return a query object for the reading * statement\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|string",
+                        "name": "$statement"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "far vedere a thomams perche non funziona in lettura\n\n```php\nX::dump($db->query(\"DELETE FROM table_users WHERE name LIKE '%lucy%'\"));\n\/\/ (int) 3\nX::dump($db->query(\"SELECT * FROM table_users WHERE name = 'John\"));\n\/\/ (bbn\\Db\\Query) Object\n```"
+                }
+            },
+            "comments": "  \/**\n   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement\n   * @todo far vedere a thomams perche non funziona in lettura\n   *\n   * ```php\n   * X::dump($db->query(\"DELETE FROM table_users WHERE name LIKE '%lucy%'\"));\n   * \/\/ (int) 3\n   * X::dump($db->query(\"SELECT * FROM table_users WHERE name = 'John\"));\n   * \/\/ (bbn\\Db\\Query) Object\n   * ```\n   *\n   * @param array|string $statement\n   * @return false|int|Query\n   *\/"
+        },
+        "executeStatement": {
+            "name": "executeStatement",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function executeStatement(string $statement)\n  {\n    if ($this->check()) {\n      return $this->language->executeStatement($statement);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "executeStatement",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "statement",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "rawQuery": {
+            "name": "rawQuery",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rawQuery(string $st)\n  {\n    return $this->language->rawQuery($st);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 146,
+            "endLine": 149,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "rawQuery",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param string $st\n   * @return string\n   * @throws Exception\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Return an indexed array with the first result of the query or false if there are no results.\n   *\n   * ```php\n   * X::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n   * \/* (array)\n   * [\n   *  \"name\" => \"john\",\n   *  0 => \"john\",\n   * ]\n   * ```\n   *\n   * @param string $query\n   * @return array|false\n   *\/",
+        "\/**\n   * Return an array of indexed array with all results of the query or false if there are no results.\n   *\n   * ```php\n   * X::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n   * \/* (array)\n   *  [\n   *    [\n   *    \"surname\" => \"White\",\n   *    0 => \"White\",\n   *    \"name\" => \"Michael\",\n   *    1 => \"Michael\",\n   *    \"id\"  => 1,\n   *    2 => 1,\n   *    ],\n   *    [\n   *    \"surname\" => \"Smith\",\n   *    0 => \"Smith\",\n   *    \"name\" => \"John\",\n   *    1  =>  \"John\",\n   *    \"id\" => 2,\n   *    2 => 2,\n   *    ],\n   *  ]\n   * ```\n   *\n   * @param string $query\n   * @return array|false\n   *\/",
+        "\/**\n   * Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result\n   * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work\n   *\n   * @param $query\n   * @param int   $num\n   * @return mixed\n   *\/",
+        "\/**\n   * Return stdClass object or false if no result.\n   *\n   * ```php\n   * X::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n   * \/\/ stdClass Object {\n   *                    \"id\"  =>  1,\n   *                    \"name\"  =>  \"John\",\n   *                    \"surname\"  =>  \"Smith\",\n   *                    }\n   * ```\n   *\n   * @param string $query\n   * @return bool|\\stdClass\n   *\/",
+        "\/**\n   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement\n   * @todo far vedere a thomams perche non funziona in lettura\n   *\n   * ```php\n   * X::dump($db->query(\"DELETE FROM table_users WHERE name LIKE '%lucy%'\"));\n   * \/\/ (int) 3\n   * X::dump($db->query(\"SELECT * FROM table_users WHERE name = 'John\"));\n   * \/\/ (bbn\\Db\\Query) Object\n   * ```\n   *\n   * @param array|string $statement\n   * @return false|int|Query\n   *\/",
+        "\/**\n   * @param string $st\n   * @return string\n   * @throws Exception\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

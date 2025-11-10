@@ -26,7 +26,7 @@ class Docblock {
      */
     $modes = [
       'js',
-      'vue',
+      'cp',
       'php'
     ];
   /**
@@ -124,7 +124,7 @@ class Docblock {
       'yield' => 'yields',
       'yields' => [],
     ],
-    'vue' => [
+    'cp' => [
       'component' => ['name'],
       'computed' => ['name'],
       'data' => ['type', 'default', 'name', 'description'],

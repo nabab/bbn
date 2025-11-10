@@ -426,7 +426,7 @@ class Note extends DbCls
 
   /**
    * @param string $id
-   * @param string $title
+   * @param mixed $title
    * @param string $content
    * @param bool|null $private
    * @param bool|null $locked

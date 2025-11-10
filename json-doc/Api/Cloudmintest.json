@@ -540,7 +540,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getCommand($command){\n    $command = str_replace('_', '-', $command);\n    \/\/Setting the last action performed\n    $this->last_action = \"get-command\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\".$this->sanitize($command);\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part;\n      \n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
+            "code": "  public function getCommand($command){\n    $command = str_replace('_', '-', $command);\n    \/\/Setting the last action performed\n    $this->last_action = \"get-command\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\".$this->sanitize($command);\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part;\n\n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
             "parent": false,
             "trait": false,
             "startLine": 327,

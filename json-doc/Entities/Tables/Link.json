@@ -8,15 +8,14 @@
     "realName": "Link",
     "realNamespace": "bbn\\Entities\\Tables",
     "traits": [
-        "bbn\\Models\\Tts\\DbActions",
         "bbn\\Models\\Tts\\Tagger"
     ],
     "interfaces": [],
     "fileName": "\/Entities\/Tables\/Link.php",
     "startLine": 16,
-    "endLine": 241,
-    "numMethods": 82,
-    "numProperties": 33,
+    "endLine": 289,
+    "numMethods": 81,
+    "numProperties": 32,
     "numConstants": 0,
     "numStaticProperties": 3,
     "interfaceNames": [],
@@ -72,6 +71,7 @@
         "code": null,
         "text": null,
         "where": [],
+        "hasTags": false,
         "db": null,
         "errors": [],
         "error": false,
@@ -87,11 +87,9 @@
         "dbTraitFilterCfg": [],
         "id_entity": null,
         "cache_engine": null,
-        "_isInitClassCfg": false,
-        "dbTraitRelations": [],
-        "dbTraitStructure": [],
         "taggerIsInit": false,
         "taggerTable": null,
+        "taggerType": null,
         "taggerCols": null,
         "taggerObject": null
     },
@@ -113,7 +111,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function __construct(\n    Db $db,\n    protected Entities $entities,\n    protected Entity|Nullall $entity = new Nullall()\n  )\n  {\n    parent::__construct($db, $entities, $entity);\n    if (!empty(static::$linkCfg['cfg'])) {\n      $this->class_cfg['cfg'] = static::$linkCfg['cfg'];\n    }\n    if (!empty(static::$linkCfg['tags'])) {\n      $this->taggerInit(\n        $this->class_cfg['tables']['notes_tags'],\n        [\n          'id_tag' => $this->class_cfg['arch']['notes_tags']['id_tag'],\n          'id_element' => $this->class_cfg['arch']['notes_tags']['id_note']\n        ]\n      );\n    }\n\n    $o = $this->options();\n    $codes = self::getCodes($this);\n    $this->cfg =& static::$linkCfg;\n    if (!empty($codes) && ($this->type = $o->fromCode($codes))) {\n      $option = $o->option($this->type);\n      $this->code = $option['code'];\n      $this->text = $option['text'];\n      $this->rootFilterCfg = [\n        $this->fields['link_type'] => $this->type\n      ];\n\n      if (!empty($this->cfg['option'])) {\n        if (!empty($this->cfg['option']['id_parent'])) {\n          $this->id_parent = $this->options()->fromCode(...$this->cfg['option']['id_parent']);\n          if (!$this->id_parent) {\n            throw new Exception(X::_(\"The parent for %s is not defined\", $this->text)); \n          }\n        }\n      }\n    }\n  }",
+            "code": "  public function __construct(\n    Db $db,\n    protected Entities $entities,\n    protected Entity|Nullall $entity = new Nullall()\n  )\n  {\n    parent::__construct($db, $entities, $entity);\n    $o = $this->options();\n    $codes = self::getCodes($this);\n    $this->cfg =& static::$linkCfg ?: self::$linkCfg;\n    if (!empty($this->cfg['cfg'])) {\n      $this->class_cfg['cfg'] = $this->cfg['cfg'];\n    }\n\n    if (!empty($this->cfg['tags'])) {\n      $this->hasTags = true;\n      $this->taggerInit(\n        $this->class_cfg['tables']['tags'],\n        [\n          'id_tag' => $this->class_cfg['arch']['tags']['id_tag'],\n          'id_element' => $this->class_cfg['arch']['tags']['id_link']\n        ]\n      );\n      if (is_string($this->cfg['tags'])) {\n        $this->taggerType = $this->taggerObject->retrieveType($this->cfg['tags']);\n      }\n    }\n\n    if (!empty($codes) && ($this->type = $o->fromCode($codes))) {\n      $option = $o->option($this->type);\n      $this->code = $option['code'];\n      $this->text = $option['text'];\n      $this->rootFilterCfg = [\n        $this->fields['link_type'] => $this->type\n      ];\n\n      if (!empty($this->cfg['option'])) {\n        if (!empty($this->cfg['option']['id_parent'])) {\n          $this->id_parent = $this->options()->fromCode(...$this->cfg['option']['id_parent']);\n          if (!$this->id_parent) {\n            throw new Exception(X::_(\"The parent for %s is not defined\", $this->text)); \n          }\n        }\n      }\n    }\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
@@ -171,8 +169,8 @@
                 "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
             "trait": false,
-            "startLine": 75,
-            "endLine": 115,
+            "startLine": 76,
+            "endLine": 121,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -298,8 +296,8 @@
                 "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
             "trait": false,
-            "startLine": 118,
-            "endLine": 121,
+            "startLine": 124,
+            "endLine": 127,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -327,8 +325,8 @@
             "code": "  public function getType()\n  {\n    return $this->type;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 124,
-            "endLine": 127,
+            "startLine": 130,
+            "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -354,8 +352,8 @@
             "code": "  public function getText()\n  {\n    return $this->text;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 130,
-            "endLine": 133,
+            "startLine": 136,
+            "endLine": 139,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -381,8 +379,8 @@
             "code": "  public function getCode()\n  {\n    return $this->code;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 136,
-            "endLine": 139,
+            "startLine": 142,
+            "endLine": 145,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -408,8 +406,8 @@
             "code": "  public function getCfg()\n  {\n    return static::$linkCfg;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 142,
-            "endLine": 145,
+            "startLine": 148,
+            "endLine": 151,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -435,8 +433,8 @@
             "code": "  public function getList(array $filter = [])\n  {\n    return $this->dbTraitSelectValues($this->fields['id'], $filter);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 147,
-            "endLine": 150,
+            "startLine": 153,
+            "endLine": 156,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -477,8 +475,8 @@
             "code": "  public function getFullList(array $filter = [])\n  {\n    return $this->dbTraitRselectAll($filter);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 152,
-            "endLine": 155,
+            "startLine": 158,
+            "endLine": 161,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -516,11 +514,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function get($id = null): ?array\n  {\n    if ($id) {\n      return $this->dbTraitRselect([$this->fields['id'] => $id]);\n    }\n\n    if (!empty($this->cfg['single'])) {\n      $res = $this->dbTraitRselectAll([]);\n      return $res ? $res[0] : null;\n    }\n\n    throw new Exception(X::_(\"This link is not single, you must enter an ID for get\"));\n  }",
+            "code": "  public function get($id = null): ?array\n  {\n    if ($id) {\n      $res = $this->dbTraitRselect([$this->fields['id'] => $id]);\n    }\n    elseif (!empty($this->cfg['single'])) {\n      $res = $this->dbTraitRselectAll([])[0] ?? null;\n    }\n    else {\n      throw new Exception(X::_(\"This link is not single, you must enter an ID for get\"));\n    }\n\n    if ($res) {\n      if ($this->hasTags) {\n        $res['tags'] = $this->getTags($res[$this->fields['id']]);\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 157,
-            "endLine": 169,
+            "startLine": 163,
+            "endLine": 184,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -549,6 +547,201 @@
                 }
             ]
         },
+        "getAll": {
+            "name": "getAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Tables\\Link",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Tables\/Link.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    $res = parent::getAll(\n      $filter,\n      $order,\n      $limit,\n      $start,\n      $fields\n    );\n    if ($this->hasTags) {\n      foreach ($res as &$r) {\n        $r['tags'] = $this->getTags($r[$this->fields['id']]);\n      }\n    }\n    unset($r);\n    return $res;\n  }",
+            "parent": {
+                "name": "getAll",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Entities\\Models\\EntityTable",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Models\/EntityTrait.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    return $this->dbTraitRselectAll(...func_get_args());\n  }",
+                "parent": false,
+                "trait": "bbn\\Entities\\Models\\EntityTrait",
+                "startLine": 95,
+                "endLine": 98,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 5,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getAll",
+                "returns": [
+                    "array"
+                ],
+                "arguments": [
+                    {
+                        "name": "filter",
+                        "position": 0,
+                        "type": "array",
+                        "type_arr": [
+                            "array"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": [],
+                        "default_name": ""
+                    },
+                    {
+                        "name": "order",
+                        "position": 1,
+                        "type": "array",
+                        "type_arr": [
+                            "array"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": [],
+                        "default_name": ""
+                    },
+                    {
+                        "name": "limit",
+                        "position": 2,
+                        "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "start",
+                        "position": 3,
+                        "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "fields",
+                        "position": 4,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": [],
+                        "default_name": ""
+                    }
+                ]
+            },
+            "trait": false,
+            "startLine": 186,
+            "endLine": 202,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getAll",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
         "getByIdentity": {
             "name": "getByIdentity",
             "summary": "",
@@ -559,11 +752,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getByIdentity(string $id): ?array\n  {\n    return $this->dbTraitRselect([\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id_identity'] => $id\n    ]);\n  }",
+            "code": "  public function getByIdentity(string $id): ?array\n  {\n    $res = $this->dbTraitRselect([\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id_identity'] => $id\n    ]);\n    if ($res) {\n      if ($this->hasTags) {\n        $res['tags'] = $this->getTags($res[$this->fields['id']]);\n      }\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 171,
-            "endLine": 177,
+            "startLine": 204,
+            "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -604,11 +797,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getByAddress(string $id): ?array\n  {\n    return $this->dbTraitRselect([\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id_address'] => $id\n    ]);\n  }",
+            "code": "  public function getByAddress(string $id): ?array\n  {\n    $res = $this->dbTraitRselect([\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id_address'] => $id\n    ]);\n    if ($res) {\n      if ($this->hasTags) {\n        $res['tags'] = $this->getTags($res[$this->fields['id']]);\n      }\n\n    }\n\n    return $res;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 179,
-            "endLine": 185,
+            "startLine": 219,
+            "endLine": 233,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -652,8 +845,8 @@
             "code": "  public function update(array $data, string|array $where): int\n  {\n    return $this->dbTraitUpdate($where, $data);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 187,
-            "endLine": 190,
+            "startLine": 235,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -711,8 +904,8 @@
             "code": "  public function delete(string $id): int\n  {\n    return $this->dbTraitDelete($id);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 192,
-            "endLine": 195,
+            "startLine": 240,
+            "endLine": 243,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -755,8 +948,8 @@
             "code": "  public function insert(array $data): ?string\n  {\n    $ccfg = $this->getClassCfg();\n    $rel = $ccfg['relations'];\n    foreach ($this->cfg as $k => $v) {\n      if (!empty($v['required']) && !isset($data[$this->fields[$rel[$k]]])) {\n        throw new Exception(X::_(\"The field %s is required\", $this->fields[$rel[$k]]));\n      }\n    }\n\n    $data[$this->fields['link_type']] = $this->type;\n    if ($this->entity) {\n      $data[$this->fields['id_entity']] = $this->entity->getId();\n    }\n\n    if (empty($data[$this->fields['id_entity']])) {\n      throw new Exception(X::_(\"The entity is not defined\"));\n    }\n\n    if (!empty($this->cfg['single'])\n      && ($ex = $this->get())\n    ) {\n      if ((!empty($this->cfg['identity']) && ($data[$this->fields[$rel['identity']]] !== $ex[$this->fields[$rel['identity']]]))\n        || (!empty($this->cfg['address']) && ($data[$this->fields[$rel['address']]] !== $ex[$this->fields[$rel['address']]]))\n        || (!empty($this->cfg['option']) && ($data[$this->fields[$rel['option']]] !== $ex[$this->fields[$rel['option']]]))\n      ) {\n        if ($this->dbTraitDelete($ex[$this->fields['id']])) {\n          return $this->dbTraitInsert($data);\n        }\n\n        return null;\n      }\n\n      return $this->dbTraitUpdate($ex[$this->fields['id']], $data) ? $ex[$this->fields['id']] : null;\n\n    }\n\n    return $this->dbTraitInsert($data);\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 197,
-            "endLine": 235,
+            "startLine": 245,
+            "endLine": 283,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -800,8 +993,8 @@
             "code": "  public static function getCodes(Link $link): array\n  {\n    return $link::$codes;\n  }",
             "parent": false,
             "trait": false,
-            "startLine": 237,
-            "endLine": 240,
+            "startLine": 285,
+            "endLine": 288,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1172,7 +1365,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "code": "  public function log(...$args)\n  {\n    if ($this->isDebug()) {\n      $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($args as $a){\n        X::log($a, $cn);\n      }\n    }\n  }",
             "parent": {
                 "name": "log",
                 "summary": "",
@@ -1183,37 +1376,63 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "code": "  public function log(...$args)\n  {\n    if ($this->isDebug()) {\n      $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($args as $a){\n        X::log($a, $cn);\n      }\n    }\n  }",
                 "parent": false,
                 "trait": false,
                 "startLine": 116,
-                "endLine": 125,
+                "endLine": 124,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
                 "isUserDefined": true,
-                "isVariadic": false,
+                "isVariadic": true,
                 "returnsReference": false,
-                "numberOfParameters": 0,
+                "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
                 "shortName": "log",
                 "returns": [],
-                "arguments": []
+                "arguments": [
+                    {
+                        "name": "args",
+                        "position": 0,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": true,
+                        "reference": false,
+                        "required": false,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
             },
             "trait": false,
             "startLine": 116,
-            "endLine": 125,
+            "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
-            "isVariadic": false,
+            "isVariadic": true,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "shortName": "log",
             "returns": [],
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         },
         "isDebug": {
             "name": "isDebug",
@@ -1239,8 +1458,8 @@
                 "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
                 "parent": false,
                 "trait": false,
-                "startLine": 131,
-                "endLine": 134,
+                "startLine": 130,
+                "endLine": 133,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1260,8 +1479,8 @@
                 "comments": "  \/**\n   * @return boolean\n   *\/"
             },
             "trait": false,
-            "startLine": 131,
-            "endLine": 134,
+            "startLine": 130,
+            "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1304,8 +1523,8 @@
                 "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
                 "parent": false,
                 "trait": false,
-                "startLine": 141,
-                "endLine": 144,
+                "startLine": 140,
+                "endLine": 143,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1346,8 +1565,8 @@
                 "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
             "trait": false,
-            "startLine": 141,
-            "endLine": 144,
+            "startLine": 140,
+            "endLine": 143,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1392,7 +1611,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -1499,7 +1718,7 @@
             "summary": "Inserts a new row in the table.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -1640,7 +1859,7 @@
             "summary": "Deletes a single row from the table through its id.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -1781,12 +2000,12 @@
             "summary": "Updates a single row in the table through its id.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,\"{}\")';\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", \"' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '\"';\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n\n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
+            "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,\"{}\")';\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", ' . (is_iterable($v) ? \"JSON_EXTRACT('\".Str::escapeSquotes(json_encode($v)).\"', '$')\" : ('\"'.Str::escapeDquotes($v).'\"'));\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n\n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
             "parent": {
                 "name": "dbTraitUpdate",
                 "summary": "Updates a single row in the table through its id.",
@@ -1797,7 +2016,7 @@
                 "static": false,
                 "visibility": "protected",
                 "final": false,
-                "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,\"{}\")';\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", \"' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '\"';\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n\n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
+                "code": "  protected function dbTraitUpdate(string|array $filter, array $data): int\n  {\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if (!is_array($filter)) {\n      $filter = [$f['id'] => $filter];\n    }\n\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          if (is_string($data[$col])) {\n            $data[$col] = json_decode($data[$col], true);\n          }\n\n          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,\"{}\")';\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", ' . (is_iterable($v) ? \"JSON_EXTRACT('\".Str::escapeSquotes(json_encode($v)).\"', '$')\" : ('\"'.Str::escapeDquotes($v).'\"'));\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n\n      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return 0;\n  }",
                 "parent": false,
                 "trait": "bbn\\Models\\Tts\\DbActions",
                 "startLine": 109,
@@ -1944,7 +2163,7 @@
             "summary": "Retrieves a row as an object from the table through its id.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -2119,7 +2338,7 @@
             "summary": "Retrieves a row as an object from the table through its id.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -2300,7 +2519,7 @@
             "summary": "Retrieves a row as an array from the table through its id.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -2481,7 +2700,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -2680,7 +2899,7 @@
             "summary": "Returns the number of rows from the table for the given conditions.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -2791,7 +3010,7 @@
             "summary": "Returns an array of rows as objects from the table for the given conditions.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -3040,7 +3259,7 @@
             "summary": "Returns an array of rows as arrays from the table for the given conditions.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -3289,7 +3508,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -3408,7 +3627,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -3553,7 +3772,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
             "static": false,
             "visibility": "protected",
@@ -3805,231 +4024,12 @@
                 }
             ]
         },
-        "dbTraitSingleSelection": {
-            "name": "dbTraitSingleSelection",
-            "summary": "Gets a single row and returns it",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
-            "static": false,
-            "visibility": "private",
-            "final": false,
-            "code": "  private function dbTraitSingleSelection(\n    string|array $filter,\n    array $order,\n    string $mode = 'array',\n    array $fields = []\n  ): mixed\n  {\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (isset($cfg)\n        && ($res = $this->dbTraitSelection($cfg, $order, 1, 0, $mode, $fields))\n    ) {\n      return $res[0];\n    }\n\n    return null;\n\n  }",
-            "parent": {
-                "name": "dbTraitSingleSelection",
-                "summary": "Gets a single row and returns it",
-                "description": "",
-                "description_parts": [],
-                "class": "bbn\\Entities\\Models\\EntityTable",
-                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbActions.php",
-                "static": false,
-                "visibility": "private",
-                "final": false,
-                "code": "  private function dbTraitSingleSelection(\n    string|array $filter,\n    array $order,\n    string $mode = 'array',\n    array $fields = []\n  ): mixed\n  {\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (isset($cfg)\n        && ($res = $this->dbTraitSelection($cfg, $order, 1, 0, $mode, $fields))\n    ) {\n      return $res[0];\n    }\n\n    return null;\n\n  }",
-                "parent": false,
-                "trait": "bbn\\Models\\Tts\\DbActions",
-                "startLine": 321,
-                "endLine": 344,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 4,
-                "numberOfRequiredParameters": 2,
-                "shortName": "dbTraitSingleSelection",
-                "returns": [
-                    null,
-                    "mixed"
-                ],
-                "arguments": [
-                    {
-                        "name": "filter",
-                        "position": 0,
-                        "type": "array|string",
-                        "type_arr": [
-                            {},
-                            {}
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "order",
-                        "position": 1,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "mode",
-                        "position": 2,
-                        "type": "string",
-                        "type_arr": [
-                            "string"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": "array",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "fields",
-                        "position": 3,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": ""
-                    }
-                ],
-                "doc": {
-                    "description": "Gets a single row and returns it\n",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string|array",
-                            "name": "$filter"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$order"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$mode"
-                        }
-                    ],
-                    "return": ""
-                },
-                "comments": "  \/**\n   * Gets a single row and returns it\n   *\n   * @param string|array $filter\n   * @param array $order\n   * @param string $mode\n   * @return mixed\n   *\/"
-            },
-            "trait": "bbn\\Models\\Tts\\DbActions",
-            "startLine": 321,
-            "endLine": 344,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 2,
-            "shortName": "dbTraitSingleSelection",
-            "returns": [
-                null,
-                "mixed"
-            ],
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array|string",
-                    "type_arr": [
-                        {},
-                        {}
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "mode",
-                    "position": 2,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": "array",
-                    "default_name": ""
-                },
-                {
-                    "name": "fields",
-                    "position": 3,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ],
-            "doc": {
-                "description": "Gets a single row and returns it\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|array",
-                        "name": "$filter"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$order"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mode"
-                    }
-                ],
-                "return": ""
-            },
-            "comments": "  \/**\n   * Gets a single row and returns it\n   *\n   * @param string|array $filter\n   * @param array $order\n   * @param string $mode\n   * @return mixed\n   *\/"
-        },
         "getClassCfg": {
             "name": "getClassCfg",
             "summary": "Returns the class configuration.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
@@ -4094,7 +4094,7 @@
             "summary": "Returns the fields of the main table.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
@@ -4159,12 +4159,12 @@
             "summary": "Sets the class configuration as defined in self::default_class_cfg",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function initClassCfg(array|null $cfg = null)\n  {\n    $arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n\n      foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "code": "  protected function initClassCfg(array|null $cfg = null)\n  {\n    $arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    if (count($arr) === 1) {\n      $cfg = $arr[0];\n    }\n    else {\n      $cfg = array_merge(...$arr);\n    }\n\n    if ($cfg['table'] === 'bbn_users') {\n      \/\/X::hddump($cfg, $arr);\n    } \n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n\n      foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
             "parent": {
                 "name": "initClassCfg",
                 "summary": "Sets the class configuration as defined in self::default_class_cfg",
@@ -4175,11 +4175,11 @@
                 "static": false,
                 "visibility": "protected",
                 "final": false,
-                "code": "  protected function initClassCfg(array|null $cfg = null)\n  {\n    $arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n\n      foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+                "code": "  protected function initClassCfg(array|null $cfg = null)\n  {\n    $arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    if (count($arr) === 1) {\n      $cfg = $arr[0];\n    }\n    else {\n      $cfg = array_merge(...$arr);\n    }\n\n    if ($cfg['table'] === 'bbn_users') {\n      \/\/X::hddump($cfg, $arr);\n    } \n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n\n      foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
                 "parent": false,
                 "trait": false,
                 "startLine": 59,
-                "endLine": 115,
+                "endLine": 124,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -4222,7 +4222,7 @@
             },
             "trait": false,
             "startLine": 59,
-            "endLine": 115,
+            "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4268,7 +4268,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "protected",
@@ -4287,8 +4287,8 @@
                 "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
                 "parent": false,
                 "trait": false,
-                "startLine": 118,
-                "endLine": 121,
+                "startLine": 127,
+                "endLine": 130,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -4304,8 +4304,8 @@
                 "arguments": []
             },
             "trait": false,
-            "startLine": 118,
-            "endLine": 121,
+            "startLine": 127,
+            "endLine": 130,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4325,12 +4325,12 @@
             "summary": "Prepares data before inserting or updating in the database.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $k => $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
             "parent": {
                 "name": "dbTraitPrepare",
                 "summary": "Prepares data before inserting or updating in the database.",
@@ -4341,7 +4341,7 @@
                 "static": false,
                 "visibility": "protected",
                 "final": false,
-                "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $k => $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
+                "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
                 "parent": false,
                 "trait": false,
                 "startLine": 41,
@@ -4450,12 +4450,12 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $k => $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
+            "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
             "parent": {
                 "name": "dbTraitTreat",
                 "summary": "",
@@ -4466,7 +4466,7 @@
                 "static": false,
                 "visibility": "protected",
                 "final": false,
-                "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $k => $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
+                "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
                 "parent": false,
                 "trait": false,
                 "startLine": 96,
@@ -4537,7 +4537,7 @@
             "summary": "Sets the filter configuration for database queries.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
@@ -4652,7 +4652,7 @@
             "summary": "Resets the filter configuration for database queries.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
@@ -4719,7 +4719,7 @@
             "summary": "Combines multiple filter configurations into a single array.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
@@ -4834,7 +4834,7 @@
             "summary": "Gets the structure of the specified table.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
@@ -4951,7 +4951,7 @@
             "summary": "Retrieves the relations for a given table.",
             "description": "",
             "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
+            "class": "bbn\\Entities\\Models\\EntityTable",
             "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
             "static": false,
             "visibility": "protected",
@@ -5062,624 +5062,6 @@
                 "return": "An array of relations."
             },
             "comments": "  \/**\n   * Retrieves the relations for a given table.\n   *\n   * @param string|null $table The table name (optional).\n   *\n   * @return array An array of relations.\n   *\/"
-        },
-        "dbTraitSelection": {
-            "name": "dbTraitSelection",
-            "summary": "Returns an array of rows from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
-            "static": false,
-            "visibility": "private",
-            "final": false,
-            "code": "  private function dbTraitSelection(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    string $mode = 'array',\n    array $fields = []\n  ): array\n  {\n    $returnObject = $mode === 'object';\n    $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');\n    $res = $this->db->$method($req);\n    if ($res) {\n      if (!empty($f['cfg'])) {\n        foreach ($res as &$r) {\n          if ($returnObject && !empty($r->{$f['cfg']})) {\n            $cfg = json_decode($r->{$f['cfg']});\n            $r = X::mergeObjects($cfg, $r);\n            unset($r->{$f['cfg']});\n          }\n          elseif (!$returnObject && !empty($r[$f['cfg']])) {\n            $cfg = json_decode($r[$f['cfg']], true);\n            $r = array_merge($cfg, $r);\n            unset($r[$f['cfg']]);\n          }\n        }\n\n        unset($r);\n      }\n\n      return $res;\n    }\n\n    return [];\n  }",
-            "parent": {
-                "name": "dbTraitSelection",
-                "summary": "Returns an array of rows from the table for the given conditions.",
-                "description": "",
-                "description_parts": [],
-                "class": "bbn\\Entities\\Models\\EntityTable",
-                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
-                "static": false,
-                "visibility": "private",
-                "final": false,
-                "code": "  private function dbTraitSelection(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    string $mode = 'array',\n    array $fields = []\n  ): array\n  {\n    $returnObject = $mode === 'object';\n    $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');\n    $res = $this->db->$method($req);\n    if ($res) {\n      if (!empty($f['cfg'])) {\n        foreach ($res as &$r) {\n          if ($returnObject && !empty($r->{$f['cfg']})) {\n            $cfg = json_decode($r->{$f['cfg']});\n            $r = X::mergeObjects($cfg, $r);\n            unset($r->{$f['cfg']});\n          }\n          elseif (!$returnObject && !empty($r[$f['cfg']])) {\n            $cfg = json_decode($r[$f['cfg']], true);\n            $r = array_merge($cfg, $r);\n            unset($r[$f['cfg']]);\n          }\n        }\n\n        unset($r);\n      }\n\n      return $res;\n    }\n\n    return [];\n  }",
-                "parent": false,
-                "trait": false,
-                "startLine": 267,
-                "endLine": 303,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 6,
-                "numberOfRequiredParameters": 4,
-                "shortName": "dbTraitSelection",
-                "returns": [
-                    "array"
-                ],
-                "arguments": [
-                    {
-                        "name": "filter",
-                        "position": 0,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Filter conditions."
-                    },
-                    {
-                        "name": "order",
-                        "position": 1,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Order by conditions."
-                    },
-                    {
-                        "name": "limit",
-                        "position": 2,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Maximum number of rows to return."
-                    },
-                    {
-                        "name": "start",
-                        "position": 3,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Offset of the first row to return."
-                    },
-                    {
-                        "name": "mode",
-                        "position": 4,
-                        "type": "string",
-                        "type_arr": [
-                            "string"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": "array",
-                        "default_name": "",
-                        "description": "The mode of result ('array', 'object', 'value')."
-                    },
-                    {
-                        "name": "fields",
-                        "position": 5,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": "",
-                        "description": "Fields to select."
-                    }
-                ],
-                "doc": {
-                    "description": "Returns an array of rows from the table for the given conditions.\n",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$filter",
-                            "description": "Filter conditions."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$order",
-                            "description": "Order by conditions."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "int",
-                            "name": "$limit",
-                            "description": "Maximum number of rows to return."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "int",
-                            "name": "$start",
-                            "description": "Offset of the first row to return."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$mode",
-                            "description": "The mode of result ('array', 'object', 'value')."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$fields",
-                            "description": "Fields to select."
-                        }
-                    ],
-                    "return": "The result set."
-                },
-                "comments": "  \/**\n   * Returns an array of rows from the table for the given conditions.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param string $mode The mode of result ('array', 'object', 'value').\n   * @param array $fields Fields to select.\n   *\n   * @return array The result set.\n   *\/"
-            },
-            "trait": false,
-            "startLine": 267,
-            "endLine": 303,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 6,
-            "numberOfRequiredParameters": 4,
-            "shortName": "dbTraitSelection",
-            "returns": [
-                "array"
-            ],
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Filter conditions."
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Order by conditions."
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Maximum number of rows to return."
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Offset of the first row to return."
-                },
-                {
-                    "name": "mode",
-                    "position": 4,
-                    "type": "string",
-                    "type_arr": [
-                        "string"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": "array",
-                    "default_name": "",
-                    "description": "The mode of result ('array', 'object', 'value')."
-                },
-                {
-                    "name": "fields",
-                    "position": 5,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": "",
-                    "description": "Fields to select."
-                }
-            ],
-            "doc": {
-                "description": "Returns an array of rows from the table for the given conditions.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$filter",
-                        "description": "Filter conditions."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$order",
-                        "description": "Order by conditions."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$limit",
-                        "description": "Maximum number of rows to return."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$start",
-                        "description": "Offset of the first row to return."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mode",
-                        "description": "The mode of result ('array', 'object', 'value')."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$fields",
-                        "description": "Fields to select."
-                    }
-                ],
-                "return": "The result set."
-            },
-            "comments": "  \/**\n   * Returns an array of rows from the table for the given conditions.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param string $mode The mode of result ('array', 'object', 'value').\n   * @param array $fields Fields to select.\n   *\n   * @return array The result set.\n   *\/"
-        },
-        "dbTraitGetRequestCfg": {
-            "name": "dbTraitGetRequestCfg",
-            "summary": "Prepares the request configuration for a database query.",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Entities\\Tables\\Link",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
-            "static": false,
-            "visibility": "private",
-            "final": false,
-            "code": "  private function dbTraitGetRequestCfg(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    array $fields = []\n  ): array\n  {\n    \/\/ Ensure table index is defined\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    \/\/ Validate fields\n    if (!empty($fields)) {\n      foreach (array_values($fields) as $f) {\n        if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {\n          throw new Exception(X::_(\"The field %s does not exist\", $f));\n        }\n      }\n\n      $properFields = $fields;\n    }\n    else {\n      $fields = $this->class_cfg['arch'][$this->class_table_index];\n    }\n\n    $ccfg = $this->getClassCfg();\n    if (isset($fields['cfg']) && !empty($ccfg['cfg'])) {\n      $cfgCol = $fields['cfg'];\n      unset($fields['cfg']);\n      if (!isset($properFields)) {\n        $properFields = array_values($fields);\n      }\n\n      foreach ($ccfg['cfg'] as $v) {\n        if ($v['field'] && !in_array($v['field'], $properFields)) {\n          $properFields[$v['field']] = \"IF(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              . \"') = 'null', NULL, JSON_UNQUOTE(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              .\"')))\";\n        }\n      }\n    }\n    elseif (!isset($properFields)) {\n      $properFields = array_values($fields);\n    }\n\n    \/\/ Build the request configuration\n    $req = [\n      'table' => $this->class_table,\n      'fields' => $properFields,\n      'where' => $this->dbTraitGetFilterCfg($filter),\n      'order' => $order\n    ];\n\n    if ($limit) {\n      $req['limit'] = $limit;\n      $req['start'] = $start;\n    }\n\n    return $req;\n  }",
-            "parent": {
-                "name": "dbTraitGetRequestCfg",
-                "summary": "Prepares the request configuration for a database query.",
-                "description": "",
-                "description_parts": [],
-                "class": "bbn\\Entities\\Models\\EntityTable",
-                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
-                "static": false,
-                "visibility": "private",
-                "final": false,
-                "code": "  private function dbTraitGetRequestCfg(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    array $fields = []\n  ): array\n  {\n    \/\/ Ensure table index is defined\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    \/\/ Validate fields\n    if (!empty($fields)) {\n      foreach (array_values($fields) as $f) {\n        if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {\n          throw new Exception(X::_(\"The field %s does not exist\", $f));\n        }\n      }\n\n      $properFields = $fields;\n    }\n    else {\n      $fields = $this->class_cfg['arch'][$this->class_table_index];\n    }\n\n    $ccfg = $this->getClassCfg();\n    if (isset($fields['cfg']) && !empty($ccfg['cfg'])) {\n      $cfgCol = $fields['cfg'];\n      unset($fields['cfg']);\n      if (!isset($properFields)) {\n        $properFields = array_values($fields);\n      }\n\n      foreach ($ccfg['cfg'] as $v) {\n        if ($v['field'] && !in_array($v['field'], $properFields)) {\n          $properFields[$v['field']] = \"IF(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              . \"') = 'null', NULL, JSON_UNQUOTE(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              .\"')))\";\n        }\n      }\n    }\n    elseif (!isset($properFields)) {\n      $properFields = array_values($fields);\n    }\n\n    \/\/ Build the request configuration\n    $req = [\n      'table' => $this->class_table,\n      'fields' => $properFields,\n      'where' => $this->dbTraitGetFilterCfg($filter),\n      'order' => $order\n    ];\n\n    if ($limit) {\n      $req['limit'] = $limit;\n      $req['start'] = $start;\n    }\n\n    return $req;\n  }",
-                "parent": false,
-                "trait": false,
-                "startLine": 317,
-                "endLine": 380,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 5,
-                "numberOfRequiredParameters": 4,
-                "shortName": "dbTraitGetRequestCfg",
-                "returns": [
-                    "array"
-                ],
-                "arguments": [
-                    {
-                        "name": "filter",
-                        "position": 0,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Filter conditions."
-                    },
-                    {
-                        "name": "order",
-                        "position": 1,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Order by conditions."
-                    },
-                    {
-                        "name": "limit",
-                        "position": 2,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Maximum number of rows to return."
-                    },
-                    {
-                        "name": "start",
-                        "position": 3,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": "",
-                        "description": "Offset of the first row to return."
-                    },
-                    {
-                        "name": "fields",
-                        "position": 4,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": "",
-                        "description": "Fields to select."
-                    }
-                ],
-                "doc": {
-                    "description": "Prepares the request configuration for a database query.\n",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$filter",
-                            "description": "Filter conditions."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$order",
-                            "description": "Order by conditions."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "int",
-                            "name": "$limit",
-                            "description": "Maximum number of rows to return."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "int",
-                            "name": "$start",
-                            "description": "Offset of the first row to return."
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$fields",
-                            "description": "Fields to select."
-                        }
-                    ],
-                    "return": "The request configuration.",
-                    "throws": {
-                        "tag": "throws",
-                        "type": "Exception",
-                        "description": "If the table index is not defined or a field does not exist."
-                    }
-                },
-                "comments": "  \/**\n   * Prepares the request configuration for a database query.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param array $fields Fields to select.\n   *\n   * @return array The request configuration.\n   * @throws Exception If the table index is not defined or a field does not exist.\n   *\/"
-            },
-            "trait": false,
-            "startLine": 317,
-            "endLine": 380,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 4,
-            "shortName": "dbTraitGetRequestCfg",
-            "returns": [
-                "array"
-            ],
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Filter conditions."
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Order by conditions."
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Maximum number of rows to return."
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "Offset of the first row to return."
-                },
-                {
-                    "name": "fields",
-                    "position": 4,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": "",
-                    "description": "Fields to select."
-                }
-            ],
-            "doc": {
-                "description": "Prepares the request configuration for a database query.\n",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$filter",
-                        "description": "Filter conditions."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$order",
-                        "description": "Order by conditions."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$limit",
-                        "description": "Maximum number of rows to return."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$start",
-                        "description": "Offset of the first row to return."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$fields",
-                        "description": "Fields to select."
-                    }
-                ],
-                "return": "The request configuration.",
-                "throws": {
-                    "tag": "throws",
-                    "type": "Exception",
-                    "description": "If the table index is not defined or a field does not exist."
-                }
-            },
-            "comments": "  \/**\n   * Prepares the request configuration for a database query.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param array $fields Fields to select.\n   *\n   * @return array The request configuration.\n   * @throws Exception If the table index is not defined or a field does not exist.\n   *\/"
         },
         "getEntities": {
             "name": "getEntities",
@@ -6154,201 +5536,6 @@
                     "type_arr": [
                         "array"
                     ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "getAll": {
-            "name": "getAll",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "class": "bbn\\Entities\\Models\\EntityTable",
-            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Models\/EntityTrait.php",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    return $this->dbTraitRselectAll(...func_get_args());\n  }",
-            "parent": {
-                "name": "getAll",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "class": "bbn\\Entities\\Models\\EntityTable",
-                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Models\/EntityTrait.php",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    return $this->dbTraitRselectAll(...func_get_args());\n  }",
-                "parent": false,
-                "trait": "bbn\\Entities\\Models\\EntityTrait",
-                "startLine": 95,
-                "endLine": 98,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 5,
-                "numberOfRequiredParameters": 0,
-                "shortName": "getAll",
-                "returns": [
-                    "array"
-                ],
-                "arguments": [
-                    {
-                        "name": "filter",
-                        "position": 0,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": ""
-                    },
-                    {
-                        "name": "order",
-                        "position": 1,
-                        "type": "array",
-                        "type_arr": [
-                            "array"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": ""
-                    },
-                    {
-                        "name": "limit",
-                        "position": 2,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": 0,
-                        "default_name": ""
-                    },
-                    {
-                        "name": "start",
-                        "position": 3,
-                        "type": "int",
-                        "type_arr": [
-                            "int"
-                        ],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": 0,
-                        "default_name": ""
-                    },
-                    {
-                        "name": "fields",
-                        "position": 4,
-                        "type": "",
-                        "type_arr": [],
-                        "variadic": false,
-                        "reference": false,
-                        "required": false,
-                        "has_default": true,
-                        "default": [],
-                        "default_name": ""
-                    }
-                ]
-            },
-            "trait": "bbn\\Entities\\Models\\EntityTrait",
-            "startLine": 95,
-            "endLine": 98,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 0,
-            "shortName": "getAll",
-            "returns": [
-                "array"
-            ],
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "type_arr": [
-                        "array"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "type_arr": [
-                        "int"
-                    ],
-                    "variadic": false,
-                    "reference": false,
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "fields",
-                    "position": 4,
-                    "type": "",
-                    "type_arr": [],
                     "variadic": false,
                     "reference": false,
                     "required": false,
@@ -8888,8 +8075,8 @@
             "code": "  public function getTags(string $id_element, bool $full = false, bool $force = false): array\n  {\n    $this->taggerInit();\n    $res = [];\n    $ids = $this->db->getColumnValues(\n      $this->taggerTable,\n      $this->taggerCols['id_tag'],\n      [$this->taggerCols['id_element'] => $id_element]\n    );\n    foreach ($ids as $id) {\n      if ($tmp = $this->taggerObject->getById($id, $full)) {\n        $res[] = $tmp;\n      }\n      elseif (!$force) {\n        X::log([$ids, $this->db->last()]);\n        throw new Exception(X::_(\"Impossible to find the tag %s\", $id));\n      }\n    }\n   \n    return $res;\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 41,
-            "endLine": 61,
+            "startLine": 46,
+            "endLine": 66,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8960,8 +8147,8 @@
             "code": "  public function setTags(string $id_element, array $tags, string $lang = ''): int\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if (!method_exists($this, 'dbTraitExists') || !$this->dbTraitExists($id_element)) {\n      throw new Exception(X::_(\"Impossible to find the element in %s\", __CLASS__));\n    }\n\n    foreach ($this->getTags($id_element, true) as $tag) {\n      $idx = X::indexOf($tags, $tag['tag']);\n      if ($idx > -1) {\n        array_splice($tags, $idx, 1);\n      }\n      else {\n        $this->removeTag($id_element, $tag['id']);\n      }\n    }\n\n    $num = 0;\n    foreach ($tags as $tag) {\n      if ($this->addTag($id_element, $tag, $lang)) {\n        $num++;\n      }\n    }\n\n    return $num;\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 71,
-            "endLine": 97,
+            "startLine": 76,
+            "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9053,8 +8240,8 @@
             "code": "  public function removeTag(string $id_element, string $id_tag): int\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 100,
-            "endLine": 110,
+            "startLine": 105,
+            "endLine": 115,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9111,8 +8298,8 @@
             "code": "  public function removeTags(string $id_element): int\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n      ]\n    );\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 113,
-            "endLine": 122,
+            "startLine": 118,
+            "endLine": 127,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9142,6 +8329,95 @@
                 }
             ]
         },
+        "getTagId": {
+            "name": "getTagId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Tables\\Link",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTagId(string $tag): ?string\n  {\n    if ($tmp = $this->retrieveTag($tag)) {\n      return $tmp['id'];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Tagger",
+            "startLine": 130,
+            "endLine": 137,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTagId",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "retrieveTag": {
+            "name": "retrieveTag",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Tables\\Link",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function retrieveTag(string $tag): array\n  {\n    $this->taggerInit();\n    return $this->taggerObject->get($tag, $this->taggerType, $this->taggerGetLang());\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Tagger",
+            "startLine": 140,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "retrieveTag",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "addTag": {
             "name": "addTag",
             "summary": "",
@@ -9152,11 +8428,11 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insertIgnore(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "code": "  public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $this->taggerType, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $this->taggerType, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insertIgnore(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 125,
-            "endLine": 147,
+            "startLine": 147,
+            "endLine": 169,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9241,8 +8517,8 @@
             "code": "  protected function taggerGetLang(string $lang = '')\n  {\n    if ($lang) {\n      return $lang;\n    }\n\n    if (method_exists($this, 'getLang')) {\n      return $this->getLang();\n    }\n\n    if (defined('BBN_LANG')) {\n      return BBN_LANG;\n    }\n\n    return 'en';\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 150,
-            "endLine": 165,
+            "startLine": 172,
+            "endLine": 187,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9280,11 +8556,11 @@
             "static": false,
             "visibility": "protected",
             "final": false,
-            "code": "  protected function taggerInit(string|null $table = null, array|null $columns = null)\n  {\n    if (!$this->taggerIsInit) {\n      if (!$this->db) {\n        throw new Exception(X::_(\"Impossible to init the tagger if there is no Db property\"));\n      }\n\n      if (!$this->class_cfg) {\n        throw new Exception(X::_(\"Impossible to init the tagger if the class hasn't the trait Dbconfig\"));\n      }\n\n      if (empty($table) || empty($columns)) {\n        throw new Exception(X::_(\"Impossible to init the tagger without a table name and 2 columns defined\"));\n      }\n\n      if (empty($columns['id_tag'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_tag column\"));\n      }\n\n      if (empty($columns['id_element'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_element column\"));\n      }\n\n      $this->taggerObject = new Tag($this->db);\n      $this->taggerTable  = $table;\n      $this->taggerCols   = $columns;\n      $this->taggerIsInit = true;\n    }\n\n    return $this->taggerIsInit;\n  }",
+            "code": "  protected function taggerInit(string|null $table = null, array|null $columns = null)\n  {\n    if (!$this->taggerIsInit) {\n      if (!$this->db) {\n        throw new Exception(X::_(\"Impossible to init the tagger if there is no Db property\"));\n      }\n\n      if (!$this->class_cfg) {\n        throw new Exception(X::_(\"Impossible to init the tagger if the class hasn't the trait Dbconfig\"));\n      }\n\n      if (empty($table) || empty($columns)) {\n        X::ddump(get_class($this), $table, $columns);\n        throw new Exception(X::_(\"Impossible to init the tagger without a table name and 2 columns defined\"));\n      }\n\n      if (empty($columns['id_tag'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_tag column\"));\n      }\n\n      if (empty($columns['id_element'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_element column\"));\n      }\n\n      $this->taggerObject = new Tag($this->db);\n      $this->taggerTable  = $table;\n      $this->taggerCols   = $columns;\n      $this->taggerIsInit = true;\n    }\n\n    return $this->taggerIsInit;\n  }",
             "parent": false,
             "trait": "bbn\\Models\\Tts\\Tagger",
-            "startLine": 168,
-            "endLine": 198,
+            "startLine": 190,
+            "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9498,6 +8774,21 @@
             "doc": "",
             "parent": false,
             "value": []
+        },
+        "hasTags": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Tables\\Link"
+            },
+            "declaring_trait": "bbn\\Entities\\Tables\\Link",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": false
         },
         "codes": {
             "trait": false,
@@ -10156,138 +9447,6 @@
             },
             "value": null
         },
-        "_isInitClassCfg": {
-            "trait": false,
-            "static": false,
-            "readonly": false,
-            "type": "",
-            "declaring": {
-                "name": "bbn\\Entities\\Tables\\Link"
-            },
-            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
-            "promoted": false,
-            "visibility": "private",
-            "doc": {
-                "description": "@var bool",
-                "tags": []
-            },
-            "parent": {
-                "name": "_isInitClassCfg",
-                "trait": false,
-                "static": false,
-                "readonly": false,
-                "type": "",
-                "declaring": {
-                    "name": "bbn\\Entities\\Models\\EntityTable"
-                },
-                "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
-                "promoted": false,
-                "visibility": "private",
-                "doc": {
-                    "description": "@var bool",
-                    "tags": []
-                },
-                "parent": false,
-                "value": false
-            },
-            "value": false
-        },
-        "dbTraitRelations": {
-            "trait": false,
-            "static": false,
-            "readonly": false,
-            "type": "",
-            "declaring": {
-                "name": "bbn\\Entities\\Tables\\Link"
-            },
-            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
-            "promoted": false,
-            "visibility": "private",
-            "doc": {
-                "description": "",
-                "tags": [
-                    {
-                        "tag": "var",
-                        "type": "array",
-                        "description": "Cached relations for the current table."
-                    }
-                ]
-            },
-            "parent": {
-                "name": "dbTraitRelations",
-                "trait": false,
-                "static": false,
-                "readonly": false,
-                "type": "",
-                "declaring": {
-                    "name": "bbn\\Entities\\Models\\EntityTable"
-                },
-                "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
-                "promoted": false,
-                "visibility": "private",
-                "doc": {
-                    "description": "",
-                    "tags": [
-                        {
-                            "tag": "var",
-                            "type": "array",
-                            "description": "Cached relations for the current table."
-                        }
-                    ]
-                },
-                "parent": false,
-                "value": []
-            },
-            "value": []
-        },
-        "dbTraitStructure": {
-            "trait": false,
-            "static": false,
-            "readonly": false,
-            "type": "",
-            "declaring": {
-                "name": "bbn\\Entities\\Tables\\Link"
-            },
-            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
-            "promoted": false,
-            "visibility": "private",
-            "doc": {
-                "description": "",
-                "tags": [
-                    {
-                        "tag": "var",
-                        "type": "array",
-                        "description": "Cached relations for the current table."
-                    }
-                ]
-            },
-            "parent": {
-                "name": "dbTraitStructure",
-                "trait": false,
-                "static": false,
-                "readonly": false,
-                "type": "",
-                "declaring": {
-                    "name": "bbn\\Entities\\Models\\EntityTable"
-                },
-                "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
-                "promoted": false,
-                "visibility": "private",
-                "doc": {
-                    "description": "",
-                    "tags": [
-                        {
-                            "tag": "var",
-                            "type": "array",
-                            "description": "Cached relations for the current table."
-                        }
-                    ]
-                },
-                "parent": false,
-                "value": []
-            },
-            "value": []
-        },
         "taggerIsInit": {
             "trait": false,
             "static": false,
@@ -10330,6 +9489,30 @@
                         "tag": "var",
                         "type": "array",
                         "description": "The name of the table where to insert tags relations."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "taggerType": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Tables\\Link"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Tagger",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string",
+                        "description": "The ID of the corresponding type if any."
                     }
                 ]
             },

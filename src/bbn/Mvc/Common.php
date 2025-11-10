@@ -217,6 +217,29 @@ trait Common
   }
 
 
+  public function isDev(): ?string
+  {
+    return !defined('BBN_ENV') || (constant('BBN_ENV') === 'dev');
+  }
+
+
+  public function isTest(): ?string
+  {
+    return !defined('BBN_ENV') || (constant('BBN_ENV') === 'test');
+  }
+
+
+  public function isProd(): ?string
+  {
+    return !defined('BBN_ENV') || (constant('BBN_ENV') === 'prod');
+  }
+
+  public function isNotProd(): ?string
+  {
+    return !defined('BBN_ENV') || (constant('BBN_ENV') !== 'prod');
+  }
+
+
   public function appPath($raw = false): string
   {
     return Mvc::getAppPath($raw);

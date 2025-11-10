@@ -1,0 +1,2581 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Read",
+    "namespace": true,
+    "realName": "Read",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Read.php",
+    "startLine": 5,
+    "endLine": 441,
+    "numMethods": 18,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Read",
+    "contentConstructor": null,
+    "methods": {
+        "select": {
+            "name": "select",
+            "summary": "Returns the first row resulting from the query as an object.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/*\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\\stdClass\n  {\n    return $this->language->select($table, $fields, $where, $order, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 35,
+            "endLine": 38,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "shortName": "select",
+            "returns": [
+                null,
+                "stdClass"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Returns the first row resulting from the query as an object.\n\n```php\nX::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/*\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the first row resulting from the query as an object.\n   *\n   * ```php\n   * X::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n   * \/*\n   * (object){\n   *   \"name\": \"John\",\n   *   \"surname\": \"Smith\",\n   * }\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|\\stdClass\n   *\/"
+        },
+        "selectAll": {
+            "name": "selectAll",
+            "summary": "Return table's rows resulting from the query as an array of objects.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->selectAll(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array\n  {\n    return $this->language->selectAll($table, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 69,
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "selectAll",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return table's rows resulting from the query as an array of objects.\n\n```php\nX::dump($db->selectAll(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return table's rows resulting from the query as an array of objects.\n   *\n   * ```php\n   * X::dump($db->selectAll(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array)[\n   *        Object stdClass: df {\n   *          \"id\" => 2,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\",\n   *          },\n   *        Object stdClass: df {\n   *          \"id\" => 3,\n   *          \"name\" => \"Thomas\",\n   *          \"surname\" => \"Jones\",\n   *         }\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $limit  The \"limit\" condition, default: 0\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/"
+        },
+        "iselect": {
+            "name": "iselect",
+            "summary": "Return the first row resulting from the query as a numeric array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array\n  {\n    return $this->language->iselect($table, $fields, $where, $order, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 95,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "shortName": "iselect",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return the first row resulting from the query as a numeric array.\n\n```php\nX::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * ```php\n   * X::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array)[\n   *          4,\n   *         \"Jack\",\n   *          \"Stewart\"\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return array\n   *\/"
+        },
+        "iselectAll": {
+            "name": "iselectAll",
+            "summary": "Return the searched rows as an array of numeric arrays.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->iselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/*\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array\n  {\n    return $this->language->iselectAll($table, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 129,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "iselectAll",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return the searched rows as an array of numeric arrays.\n\n```php\nX::dump($db->iselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/*\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * ```php\n   * X::dump($db->iselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n   * \/*\n   * (array)[\n   *          [\n   *            2,\n   *            \"John\",\n   *            \"Smith\",\n   *          ],\n   *          [\n   *            3,\n   *            \"Thomas\",\n   *            \"Jones\",\n   *          ]\n   *        ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param string|array  $fields The fields's name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int           $limit  The \"limit\" condition, default: 0\n   * @param int           $start  The \"start\" condition, default: 0\n   * @return array\n   *\/"
+        },
+        "rselect": {
+            "name": "rselect",
+            "summary": "Return the first row resulting from the query as an indexed array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array\n  {\n    return $this->language->rselect($table, $fields, $where, $order, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 155,
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "shortName": "rselect",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return the first row resulting from the query as an indexed array.\n\n```php\nX::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as an indexed array.\n   *\n   * ```php\n   * X::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array) [\n   *          \"id\" => 4,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\"\n   *         ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param string|array  $fields The fields' name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order  The \"order\" condition, default: false\n   * @param int           $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/"
+        },
+        "rselectAll": {
+            "name": "rselectAll",
+            "summary": "Return table's rows as an array of indexed arrays.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->rselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array\n  {\n    return $this->language->rselectAll($table, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 189,
+            "endLine": 192,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "rselectAll",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return table's rows as an array of indexed arrays.\n\n```php\nX::dump($db->rselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return table's rows as an array of indexed arrays.\n   *\n   * ```php\n   * X::dump($db->rselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array) [\n   *          [\n   *          \"id\" => 2,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\",\n   *          ],\n   *          [\n   *          \"id\" => 3,\n   *          \"name\" => \"Thomas\",\n   *          \"surname\" => \"Jones\",\n   *          ]\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  condition, default: false\n   * @param int             $limit  The \"limit\" condition, default: 0\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/"
+        },
+        "countUnion": {
+            "name": "countUnion",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function countUnion(array $union, array $where = []): ?int\n  {\n    return $this->language->countUnion($union, $where);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 194,
+            "endLine": 197,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "countUnion",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectUnion": {
+            "name": "selectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as objects",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array\n  {\n    return $this->language->selectUnion($union, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 209,
+            "endLine": 212,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "selectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as objects\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as objects\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "rselectUnion": {
+            "name": "rselectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as arrays",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array\n  {\n    return $this->language->rselectUnion($union, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 225,
+            "endLine": 228,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "rselectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as arrays\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "iselectUnion": {
+            "name": "iselectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as arrays",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array\n  {\n    return $this->language->iselectUnion($union, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 241,
+            "endLine": 244,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "iselectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as arrays\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "selectOne": {
+            "name": "selectOne",
+            "summary": "Return a single value",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->selectOne(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)\n  {\n    return $this->language->selectOne($table, $field, $where, $order, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 262,
+            "endLine": 265,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "shortName": "selectOne",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The field's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return a single value\n\n```php\nX::dump($db->selectOne(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$field",
+                        "description": "The field's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return a single value\n   *\n   * ```php\n   * X::dump($db->selectOne(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n   *  (string) 'Michael'\n   * ```\n   *\n   * @param string|array    $table The table's name or a configuration array\n   * @param string          $field The field's name\n   * @param array           $where The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int             $start The \"start\" condition, default: 0\n   * @return mixed\n   *\/"
+        },
+        "count": {
+            "name": "count",
+            "summary": "Return the number of records in the table corresponding to the $where condition (non mandatory).",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function count($table, array $where = []): ?int\n  {\n    return $this->language->count($table, $where);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 280,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "count",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                }
+            ],
+            "doc": {
+                "description": "Return the number of records in the table corresponding to the $where condition (non mandatory).\n\n```php\nX::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * ```php\n   * X::dump($db->count('table_users', ['name' => 'John']));\n   * \/\/ (int) 2\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array        $where The \"where\" condition\n   * @return int\n   *\/"
+        },
+        "selectAllByKeys": {
+            "name": "selectAllByKeys",
+            "summary": "Return an array indexed on the first field of the request.",
+            "description": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\"."
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->selectAllByKeys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/*\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array\n  {\n    return $this->language->selectAllByKeys($table, $fields, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 314,
+            "endLine": 317,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "selectAllByKeys",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The $limit condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The $limit condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Return an array indexed on the first field of the request.\nThe value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".\n\n```php\nX::dump($db->selectAllByKeys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/*\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$fields",
+                        "description": "The fields's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The $limit condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The $limit condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * ```php\n   * X::dump($db->selectAllByKeys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n   * \/*\n   * (array)[\n   *        \"John\" => [\n   *          \"surname\" => \"Brown\",\n   *          \"id\" => 3\n   *          ],\n   *        \"Michael\" => [\n   *          \"surname\" => \"Smith\",\n   *          \"id\" => 4\n   *        ]\n   *      ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param array         $fields The fields's name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order  The \"order\" condition\n   * @param int           $limit  The $limit condition, default: 0\n   * @param int           $start  The $limit condition, default: 0\n   * @return array|false\n   *\/"
+        },
+        "stat": {
+            "name": "stat",
+            "summary": "Return an array with the count of values corresponding to the where conditions.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n     \"num\" => 1,\n     \"name\" => \"alan\",\n ], [\n     \"num\" => 1,\n     \"name\" => \"karen\",\n ],\n]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function stat(string $table, string $column, array $where = [], array $order = []): ?array\n  {\n    return $this->language->stat($table, $column, $where, $order);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 343,
+            "endLine": 346,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "stat",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array."
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The field's name."
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition."
+                }
+            ],
+            "doc": {
+                "description": "Return an array with the count of values corresponding to the where conditions.\n\n```php\nX::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n     \"num\" => 1,\n     \"name\" => \"alan\",\n ], [\n     \"num\" => 1,\n     \"name\" => \"karen\",\n ],\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The field's name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * ```php\n   * X::dump($db->stat('table_user', 'name', ['name' => '%n']));\n   * \/* (array)\n   * [\n   *  [\n   *      \"num\" => 1,\n   *      \"name\" => \"alan\",\n   *  ], [\n   *      \"num\" => 1,\n   *      \"name\" => \"karen\",\n   *  ],\n   * ]\n   * ```\n   *\n   * @param string|array $table  The table's name or a configuration array.\n   * @param string       $column The field's name.\n   * @param array        $where  The \"where\" condition.\n   * @param array        $order  The \"order\" condition.\n   * @return array\n   *\/"
+        },
+        "getFieldValues": {
+            "name": "getFieldValues",
+            "summary": "Return the unique values of a column of a table as a numeric indexed array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getFieldValues(\"table_users\", \"surname\", [['id', '>', '2']]));\n\/\/ (array) [\"Smiths\", \"White\"]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getFieldValues($table, string|null $field = null, array $where = [], array $order = []): ?array\n  {\n    return $this->getColumnValues($table, $field, $where, $order);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 363,
+            "endLine": 366,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getFieldValues",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The field's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                }
+            ],
+            "doc": {
+                "description": "Return the unique values of a column of a table as a numeric indexed array.\n\n```php\nX::dump($db->getFieldValues(\"table_users\", \"surname\", [['id', '>', '2']]));\n\/\/ (array) [\"Smiths\", \"White\"]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$field",
+                        "description": "The field's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    }
+                ],
+                "return": "| false"
+            },
+            "comments": "  \/**\n   * Return the unique values of a column of a table as a numeric indexed array.\n   *\n   * ```php\n   * X::dump($db->getFieldValues(\"table_users\", \"surname\", [['id', '>', '2']]));\n   * \/\/ (array) [\"Smiths\", \"White\"]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null  $field The field's name\n   * @param array        $where The \"where\" condition\n   * @param array        $order The \"order\" condition\n   * @return array | false\n   *\/"
+        },
+        "countFieldValues": {
+            "name": "countFieldValues",
+            "summary": "Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->countFieldValues('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array\n  {\n    return $this->language->countFieldValues($table, $field, $where, $order);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 383,
+            "endLine": 386,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "countFieldValues",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The field's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                }
+            ],
+            "doc": {
+                "description": "Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.\n\n```php\nX::dump($db->countFieldValues('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$field",
+                        "description": "The field's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.\n   *\n   * ```php\n   * X::dump($db->countFieldValues('table_users','surname',[['name','=','John']]));\n   * \/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param null|string  $field The field's name\n   * @param array        $where The \"where\" condition\n   * @param array        $order The \"order\" condition\n   * @return array|null\n   *\/"
+        },
+        "getColumnValues": {
+            "name": "getColumnValues",
+            "summary": "Return a numeric indexed array with the values of the unique column ($field) from the selected $table",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array\n  {\n    return $this->language->getColumnValues($table, $field, $where, $order, $limit, $start);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 411,
+            "endLine": 414,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getColumnValues",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The field's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return a numeric indexed array with the values of the unique column ($field) from the selected $table\n\n```php\nX::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$field",
+                        "description": "The field's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table\n   *\n   * ```php\n   * X::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n   * \/*\n   * array [\n   *    \"Smith\",\n   *    \"Jones\",\n   *    \"Williams\",\n   *    \"Taylor\"\n   * ]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null $field The field's name\n   * @param array $where The \"where\" condition\n   * @param array $order The \"order\" condition\n   * @param int $limit\n   * @param int $start\n   * @return array\n   *\/"
+        },
+        "getValuesCount": {
+            "name": "getValuesCount",
+            "summary": "Return a string with the sql query to count equal values in a field of the table.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getValuesCount('table_users','name',['surname','=','smith']));\n\/*\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Read",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Read.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getValuesCount($table, string|null $field = null, array $where = [], array $order = []): array\n  {\n    return $this->countFieldValues($table, $field, $where, $order);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 436,
+            "endLine": 439,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getValuesCount",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name or a configuration array"
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The field's name"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                }
+            ],
+            "doc": {
+                "description": "Return a string with the sql query to count equal values in a field of the table.\n\n```php\nX::dump($db->getValuesCount('table_users','name',['surname','=','smith']));\n\/*\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$field",
+                        "description": "The field's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    }
+                ],
+                "return": "\/\/ TODO-testing: this method stated that it will return string but actually it returns an array!"
+            },
+            "comments": "  \/**\n   * Return a string with the sql query to count equal values in a field of the table.\n   *\n   * ```php\n   * X::dump($db->getValuesCount('table_users','name',['surname','=','smith']));\n   * \/*\n   * (string)\n   *   SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n   *     GROUP BY `name`\n   *     ORDER BY `name`\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null $field The field's name\n   * @param array $where The \"where\" condition\n   * @param array $order The \"order\" condition\n   * @return array\n   * \/\/ TODO-testing: this method stated that it will return string but actually it returns an array!\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Returns the first row resulting from the query as an object.\n   *\n   * ```php\n   * X::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n   * \/*\n   * (object){\n   *   \"name\": \"John\",\n   *   \"surname\": \"Smith\",\n   * }\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|\\stdClass\n   *\/",
+        "\/**\n   * Return table's rows resulting from the query as an array of objects.\n   *\n   * ```php\n   * X::dump($db->selectAll(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array)[\n   *        Object stdClass: df {\n   *          \"id\" => 2,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\",\n   *          },\n   *        Object stdClass: df {\n   *          \"id\" => 3,\n   *          \"name\" => \"Thomas\",\n   *          \"surname\" => \"Jones\",\n   *         }\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $limit  The \"limit\" condition, default: 0\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * ```php\n   * X::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array)[\n   *          4,\n   *         \"Jack\",\n   *          \"Stewart\"\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  The \"order\" condition, default: false\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return array\n   *\/",
+        "\/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * ```php\n   * X::dump($db->iselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n   * \/*\n   * (array)[\n   *          [\n   *            2,\n   *            \"John\",\n   *            \"Smith\",\n   *          ],\n   *          [\n   *            3,\n   *            \"Thomas\",\n   *            \"Jones\",\n   *          ]\n   *        ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param string|array  $fields The fields's name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int           $limit  The \"limit\" condition, default: 0\n   * @param int           $start  The \"start\" condition, default: 0\n   * @return array\n   *\/",
+        "\/**\n   * Return the first row resulting from the query as an indexed array.\n   *\n   * ```php\n   * X::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array) [\n   *          \"id\" => 4,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\"\n   *         ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param string|array  $fields The fields' name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order  The \"order\" condition, default: false\n   * @param int           $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n   * Return table's rows as an array of indexed arrays.\n   *\n   * ```php\n   * X::dump($db->rselectAll(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n   * \/*\n   * (array) [\n   *          [\n   *          \"id\" => 2,\n   *          \"name\" => \"John\",\n   *          \"surname\" => \"Smith\",\n   *          ],\n   *          [\n   *          \"id\" => 3,\n   *          \"name\" => \"Thomas\",\n   *          \"surname\" => \"Jones\",\n   *          ]\n   *        ]\n   * ```\n   *\n   * @param string|array    $table  The table's name or a configuration array\n   * @param string|array    $fields The fields' name\n   * @param array           $where  The \"where\" condition\n   * @param array | boolean $order  condition, default: false\n   * @param int             $limit  The \"limit\" condition, default: 0\n   * @param int             $start  The \"start\" condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as objects\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n   * Return a single value\n   *\n   * ```php\n   * X::dump($db->selectOne(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n   *  (string) 'Michael'\n   * ```\n   *\n   * @param string|array    $table The table's name or a configuration array\n   * @param string          $field The field's name\n   * @param array           $where The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int             $start The \"start\" condition, default: 0\n   * @return mixed\n   *\/",
+        "\/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * ```php\n   * X::dump($db->count('table_users', ['name' => 'John']));\n   * \/\/ (int) 2\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array        $where The \"where\" condition\n   * @return int\n   *\/",
+        "\/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * ```php\n   * X::dump($db->selectAllByKeys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n   * \/*\n   * (array)[\n   *        \"John\" => [\n   *          \"surname\" => \"Brown\",\n   *          \"id\" => 3\n   *          ],\n   *        \"Michael\" => [\n   *          \"surname\" => \"Smith\",\n   *          \"id\" => 4\n   *        ]\n   *      ]\n   * ```\n   *\n   * @param string|array  $table  The table's name or a configuration array\n   * @param array         $fields The fields's name\n   * @param array         $where  The \"where\" condition\n   * @param array|boolean $order  The \"order\" condition\n   * @param int           $limit  The $limit condition, default: 0\n   * @param int           $start  The $limit condition, default: 0\n   * @return array|false\n   *\/",
+        "\/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * ```php\n   * X::dump($db->stat('table_user', 'name', ['name' => '%n']));\n   * \/* (array)\n   * [\n   *  [\n   *      \"num\" => 1,\n   *      \"name\" => \"alan\",\n   *  ], [\n   *      \"num\" => 1,\n   *      \"name\" => \"karen\",\n   *  ],\n   * ]\n   * ```\n   *\n   * @param string|array $table  The table's name or a configuration array.\n   * @param string       $column The field's name.\n   * @param array        $where  The \"where\" condition.\n   * @param array        $order  The \"order\" condition.\n   * @return array\n   *\/",
+        "\/**\n   * Return the unique values of a column of a table as a numeric indexed array.\n   *\n   * ```php\n   * X::dump($db->getFieldValues(\"table_users\", \"surname\", [['id', '>', '2']]));\n   * \/\/ (array) [\"Smiths\", \"White\"]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null  $field The field's name\n   * @param array        $where The \"where\" condition\n   * @param array        $order The \"order\" condition\n   * @return array | false\n   *\/",
+        "\/**\n   * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.\n   *\n   * ```php\n   * X::dump($db->countFieldValues('table_users','surname',[['name','=','John']]));\n   * \/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param null|string  $field The field's name\n   * @param array        $where The \"where\" condition\n   * @param array        $order The \"order\" condition\n   * @return array|null\n   *\/",
+        "\/**\n   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table\n   *\n   * ```php\n   * X::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n   * \/*\n   * array [\n   *    \"Smith\",\n   *    \"Jones\",\n   *    \"Williams\",\n   *    \"Taylor\"\n   * ]\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null $field The field's name\n   * @param array $where The \"where\" condition\n   * @param array $order The \"order\" condition\n   * @param int $limit\n   * @param int $start\n   * @return array\n   *\/",
+        "\/**\n   * Return a string with the sql query to count equal values in a field of the table.\n   *\n   * ```php\n   * X::dump($db->getValuesCount('table_users','name',['surname','=','smith']));\n   * \/*\n   * (string)\n   *   SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n   *     GROUP BY `name`\n   *     ORDER BY `name`\n   * ```\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|null $field The field's name\n   * @param array $where The \"where\" condition\n   * @param array $order The \"order\" condition\n   * @return array\n   * \/\/ TODO-testing: this method stated that it will return string but actually it returns an array!\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

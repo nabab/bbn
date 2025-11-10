@@ -211,7 +211,7 @@
             "static": false,
             "visibility": "private",
             "final": false,
-            "code": "  private function _init()\n  {\n    \/\/ When using CLI a first parameter can be used as route,\n    \/\/ a second JSON encoded can be used as $this->_post\n    if ($this->isCli()) {\n      $this->_mode = 'cli';\n      $this->getCli();\n    }\n    \/\/ Non CLI request\n    else {\n      if (!isset($this->_post)) {\n        $this->getPost();\n      }\n\n      if ($this->_has_post || \\count($_FILES)) {\n        \/** @todo Remove the json parameter from the bbn.js functions *\/\n        $this->setMode(BBN_DEFAULT_MODE);\n      }\n      \/\/ If no post, assuming to be a DOM document\n      else {\n        $this->setMode('dom');\n      }\n\n      if (isset($_SERVER['REQUEST_URI'])) {\n        $current = $_SERVER['REQUEST_URI'];\n      }\n\n      if (isset($current) && (BBN_CUR_PATH === '\/' || strpos($current, BBN_CUR_PATH) !== false)\n      ) {\n        $url = explode(\"?\", urldecode($current))[0];\n        if (BBN_CUR_PATH === '\/') {\n          $this->setParams($url);\n        }\n        else {\n          $this->setParams(substr($url, \\strlen(BBN_CUR_PATH)));\n        }\n      }\n    }\n\n    $this->_url = implode('\/', $this->_params ?: []);\n    \/\/ This won't be changed after a reroute\n    if (!$this->_request) {\n      $this->_request = $this->_url;\n    }\n\n    if (!$this->_locale) {\n      $this->setLocale(defined('BBN_LOCALE') ? BBN_LOCALE : null);\n    }\n    return $this;\n  }",
+            "code": "  private function _init()\n  {\n    \/\/ When using CLI a first parameter can be used as route,\n    \/\/ a second JSON encoded can be used as $this->_post\n    if ($this->isCli()) {\n      $this->_mode = 'cli';\n      $this->getCli();\n    }\n    \/\/ Non CLI request\n    else {\n      if (!isset($this->_post)) {\n        $this->getPost();\n      }\n\n      if (($_SERVER['REQUEST_METHOD'] === 'POST') || \\count($_FILES)) {\n        \/** @todo Remove the json parameter from the bbn.js functions *\/\n        $this->setMode(BBN_DEFAULT_MODE);\n      }\n      \/\/ If no post, assuming to be a DOM document\n      else {\n        $this->setMode('dom');\n      }\n\n      if (isset($_SERVER['REQUEST_URI'])) {\n        $current = $_SERVER['REQUEST_URI'];\n      }\n\n      if (isset($current) && (BBN_CUR_PATH === '\/' || strpos($current, BBN_CUR_PATH) !== false)\n      ) {\n        $url = explode(\"?\", urldecode($current))[0];\n        if (BBN_CUR_PATH === '\/') {\n          $this->setParams($url);\n        }\n        else {\n          $this->setParams(substr($url, \\strlen(BBN_CUR_PATH)));\n        }\n      }\n    }\n\n    $this->_url = implode('\/', $this->_params ?: []);\n    \/\/ This won't be changed after a reroute\n    if (!$this->_request) {\n      $this->_request = $this->_url;\n    }\n\n    if (!$this->_locale) {\n      $this->setLocale(defined('BBN_LOCALE') ? BBN_LOCALE : null);\n    }\n    return $this;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 147,
@@ -1343,7 +1343,7 @@
     },
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"Oz1Dbo2P1n697102GU\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"n37E9euNNHKovxEBYj3H\"}"
     },
     "constants": null,
     "uses": {

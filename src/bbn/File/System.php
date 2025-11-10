@@ -613,6 +613,9 @@ class System extends Basic
         case 'json':
           $encoded = json_encode($value);
           break;
+        case 'json_pretty':
+          $encoded = json_encode($value, JSON_PRETTY_PRINT);
+          break;
         case 'csv':
           $encoded = X::ToCsv($value);
           break;

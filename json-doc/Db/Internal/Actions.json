@@ -1,0 +1,2552 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\Internal\\Actions",
+    "namespace": true,
+    "realName": "Actions",
+    "realNamespace": "bbn\\Db\\Internal",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Db\/Internal\/Actions.php",
+    "startLine": 9,
+    "endLine": 666,
+    "numMethods": 40,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Internal",
+    "shortName": "Actions",
+    "contentConstructor": null,
+    "methods": {
+        "getRow": {
+            "name": "getRow",
+            "summary": "Return the first row resulting from the query as an array indexed with the fields' name.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getRow(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRow(): ?array\n  {\n    return $this->language->getRow(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 37,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRow",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return the first row resulting from the query as an array indexed with the fields' name.\n\n```php\nX::dump($db->getRow(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "description": "The var ? value."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as an array indexed with the fields' name.\n   *\n   * ```php\n   * X::dump($db->getRow(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n   *\n   * \/* (array)[\n   *        \"id\" => 3,\n   *        \"name\" => \"thomas\",\n   *        ]\n   * ```\n   *\n   * @param string query.\n   * @param int The var ? value.\n   * @return array|false\n   *\n   *\/"
+        },
+        "getRows": {
+            "name": "getRows",
+            "summary": "Return an array that includes indexed arrays for every row resultant from the query.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRows(): ?array\n  {\n    return $this->language->getRows(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 50,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRows",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array that includes indexed arrays for every row resultant from the query.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "description": "The var ? value"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array that includes indexed arrays for every row resultant from the query.\n   *\n   * @param string\n   * @param int The var ? value\n   * @return array|false\n   *\/"
+        },
+        "getIrow": {
+            "name": "getIrow",
+            "summary": "Return a row as a numeric indexed array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getIrow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n             3,\n             \"john\",\n             \"brown\",\n            ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getIrow(): ?array\n  {\n    return $this->language->getIrow(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 72,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getIrow",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return a row as a numeric indexed array.\n\n```php\nX::dump($db->getIrow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n             3,\n             \"john\",\n             \"brown\",\n            ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "description": "The var ? value"
+                    }
+                ],
+                "return": "| false"
+            },
+            "comments": "  \/**\n   * Return a row as a numeric indexed array.\n   *\n   * ```php\n   * X::dump($db->getIrow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n   * \/* (array) [\n   *              3,\n   *              \"john\",\n   *              \"brown\",\n   *             ]\n   * ```\n   *\n   * @param string query\n   * @param int The var ? value\n   * @return array | false\n   *\/"
+        },
+        "getIrows": {
+            "name": "getIrows",
+            "summary": "Return an array of numeric indexed rows.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getIrows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/*\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getIrows(): ?array\n  {\n    return $this->language->getIrows(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getIrows",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array of numeric indexed rows.\n\n```php\nX::dump($db->getIrows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/*\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array of numeric indexed rows.\n   *\n   * ```php\n   * X::dump($db->getIrows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n   * \/*\n   * (array)[\n   *         [\n   *          3,\n   *         \"john\"\n   *         ],\n   *         [\n   *         4,\n   *         \"barbara\"\n   *        ]\n   *       ]\n   * ```\n   *\n   * @return null|array\n   *\/"
+        },
+        "getByColumns": {
+            "name": "getByColumns",
+            "summary": "Return an array indexed on the searched field's in which there are all the values of the column.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getByColumns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/*\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getByColumns(): ?array\n  {\n    return $this->language->getByColumns(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 125,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getByColumns",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array indexed on the searched field's in which there are all the values of the column.\n\n```php\nX::dump($db->getByColumns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/*\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "query"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array indexed on the searched field's in which there are all the values of the column.\n   *\n   * ```php\n   * X::dump($db->getByColumns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n   * \/*\n   * (array) [\n   *      \"name\" => [\n   *       \"John\",\n   *       \"Michael\"\n   *      ],\n   *      \"surname\" => [\n   *        \"Brown\",\n   *        \"Smith\"\n   *      ]\n   *     ]\n   * ```\n   *\n   * @param string query\n   * @return null|array\n   *\/"
+        },
+        "getObj": {
+            "name": "getObj",
+            "summary": "Return the first row resulting from the query as an object (similar to {@link getObject()}).",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getObj(\"SELECT surname FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"Smith\"\n      }"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getObj(): ?\\stdClass\n  {\n    return $this->getObject(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 144,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getObj",
+            "returns": [
+                null,
+                "stdClass"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return the first row resulting from the query as an object (similar to {@link getObject()}).\n\n```php\nX::dump($db->getObj(\"SELECT surname FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"Smith\"\n      }\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as an object (similar to {@link getObject()}).\n   *\n   * ```php\n   * X::dump($db->getObj(\"SELECT surname FROM table_users\"));\n   * \/*\n   * (obj){\n   *       \"name\" => \"Smith\"\n   *       }\n   * ```\n   *\n   * @return null|\\stdClass\n   *\/"
+        },
+        "getObject": {
+            "name": "getObject",
+            "summary": "Return the first row resulting from the query as an object.",
+            "description": "Synonym of get_obj.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "Synonym of get_obj."
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getObject(\"SELECT name FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"John\"\n      }"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getObject(): ?\\stdClass\n  {\n    return $this->language->getObject(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 164,
+            "endLine": 167,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getObject",
+            "returns": [
+                null,
+                "stdClass"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return the first row resulting from the query as an object.\nSynonym of get_obj.\n\n```php\nX::dump($db->getObject(\"SELECT name FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"John\"\n      }\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as an object.\n   * Synonym of get_obj.\n   *\n   * ```php\n   * X::dump($db->getObject(\"SELECT name FROM table_users\"));\n   * \/*\n   * (obj){\n   *       \"name\" => \"John\"\n   *       }\n   * ```\n   *\n   * @return null|\\stdClass\n   *\/"
+        },
+        "getObjects": {
+            "name": "getObjects",
+            "summary": "Return an array of stdClass objects.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getObjects(\"SELECT name FROM table_users\"));\n\n\/*\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]"
+                }
+            ],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getObjects(): ?array\n  {\n    return $this->language->getObjects(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 198,
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getObjects",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Return an array of stdClass objects.\n\n```php\nX::dump($db->getObjects(\"SELECT name FROM table_users\"));\n\n\/*\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array of stdClass objects.\n   *\n   * ```php\n   * X::dump($db->getObjects(\"SELECT name FROM table_users\"));\n   *\n   * \/*\n   * (array) [\n   *          Object stdClass: df {\n   *            \"name\" => \"John\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Michael\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Thomas\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"William\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Jake\",\n   *          },\n   *         ]\n   * ```\n   *\n   * @return null|array\n   *\/"
+        },
+        "charsets": {
+            "name": "charsets",
+            "summary": "Returns a list of charsets available for the current language.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function charsets(): ?array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->charsets();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 210,
+            "endLine": 215,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "charsets",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns a list of charsets available for the current language.\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Returns a list of charsets available for the current language.\n   *\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "collations": {
+            "name": "collations",
+            "summary": "Returns a list of collations available for the current language.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function collations(): ?array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->collations();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 224,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "collations",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns a list of collations available for the current language.\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Returns a list of collations available for the current language.\n   *\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "createDatabase": {
+            "name": "createDatabase",
+            "summary": "Creates a database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createDatabase(string $database): bool\n  {\n    return $this->language->createDatabase(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 238,
+            "endLine": 241,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "createDatabase",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Creates a database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a database\n   *\n   * @param string $database\n   * @return bool\n   *\/"
+        },
+        "dropDatabase": {
+            "name": "dropDatabase",
+            "summary": "Drops the given database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dropDatabase(string $database): bool\n  {\n    return $this->language->dropDatabase($database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 250,
+            "endLine": 253,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dropDatabase",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Drops the given database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Drops the given database\n   *\n   * @param string $database\n   * @return bool\n   *\/"
+        },
+        "renameDatabase": {
+            "name": "renameDatabase",
+            "summary": "Renames the given database to the new given name.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function renameDatabase(string $oldName, string $newName): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->renameDatabase($oldName, $newName);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 263,
+            "endLine": 267,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "renameDatabase",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "oldName",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The current database's name"
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The new name."
+                }
+            ],
+            "doc": {
+                "description": "Renames the given database to the new given name.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "ame The current database's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame The new name."
+                    }
+                ],
+                "return": "True if it succeeded"
+            },
+            "comments": "  \/**\n   * Renames the given database to the new given name.\n   *\n   * @param string $oldName The current database's name\n   * @param string $newName The new name.\n   * @return bool True if it succeeded\n   *\/"
+        },
+        "duplicateDatabase": {
+            "name": "duplicateDatabase",
+            "summary": "Duplicates a database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function duplicateDatabase(string $source, string $target, bool $withData = true): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->duplicateDatabase($source, $target, $withData);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 278,
+            "endLine": 282,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "duplicateDatabase",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "source",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source database name"
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The target database name"
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "ata If true, the data will be copied too"
+                }
+            ],
+            "doc": {
+                "description": "Duplicates a database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$source",
+                        "description": "The source database name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$target",
+                        "description": "The target database name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata If true, the data will be copied too"
+                    }
+                ],
+                "return": "True if it succeeded"
+            },
+            "comments": "  \/**\n   * Duplicates a database\n   *\n   * @param string $source The source database name\n   * @param string $target The target database name\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/"
+        },
+        "getDatabaseCharset": {
+            "name": "getDatabaseCharset",
+            "summary": "Returns the charset of the given database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDatabaseCharset(string $database): ?string\n  {\n    return $this->language->getDatabaseCharset($database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 291,
+            "endLine": 294,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getDatabaseCharset",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the charset of the given database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the charset of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/"
+        },
+        "getDatabaseCollation": {
+            "name": "getDatabaseCollation",
+            "summary": "Returns the collation of the given database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDatabaseCollation(string $database): ?string\n  {\n    return $this->language->getDatabaseCollation($database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 303,
+            "endLine": 306,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getDatabaseCollation",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the collation of the given database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the collation of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/"
+        },
+        "tableExists": {
+            "name": "tableExists",
+            "summary": "Returns true if the given table exists",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function tableExists(string $table, string $database = ''): bool\n  {\n    return $this->language->tableExists($table, $database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 316,
+            "endLine": 319,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tableExists",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "or currently selected if none"
+                }
+            ],
+            "doc": {
+                "description": "Returns true if the given table exists\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database",
+                        "description": "or currently selected if none"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the given table exists\n   *\n   * @param string $table\n   * @param string $database. or currently selected if none\n   * @return boolean\n   *\/"
+        },
+        "createTable": {
+            "name": "createTable",
+            "summary": "Creates a table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createTable(\n    string $table,\n    ?array $cfg = null,\n    bool $createKeys = true,\n    bool $createConstraints = true\n  ): bool\n  {\n    return $this->language->createTable($table, $cfg, $createKeys, $createConstraints);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 331,
+            "endLine": 339,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "createTable",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "createKeys",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "eys"
+                },
+                {
+                    "name": "createConstraints",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "onstraints"
+                }
+            ],
+            "doc": {
+                "description": "Creates a table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$create",
+                        "description": "eys"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$create",
+                        "description": "onstraints"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a table\n   *\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return bool\n   *\/"
+        },
+        "dropTable": {
+            "name": "dropTable",
+            "summary": "Drops the given table, in the current database if none given",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dropTable(string $table, string $database = ''): bool\n  {\n    return $this->language->dropTable($table, $database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 348,
+            "endLine": 351,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dropTable",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Drops the given table, in the current database if none given\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Drops the given table, in the current database if none given\n   *\n   * @param string $database\n   * @return bool\n   *\/"
+        },
+        "duplicateTable": {
+            "name": "duplicateTable",
+            "summary": "Duplicates a table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function duplicateTable(string $source, string $target, bool $withData = true): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->duplicateTable($source, $target, $withData);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 362,
+            "endLine": 366,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "duplicateTable",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "source",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source table name"
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The target table name"
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "ata If true, the data will be copied too"
+                }
+            ],
+            "doc": {
+                "description": "Duplicates a table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$source",
+                        "description": "The source table name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$target",
+                        "description": "The target table name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata If true, the data will be copied too"
+                    }
+                ],
+                "return": "True if it succeeded"
+            },
+            "comments": "  \/**\n   * Duplicates a table\n   *\n   * @param string $source The source table name\n   * @param string $target The target table name\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/"
+        },
+        "copyTableTo": {
+            "name": "copyTableTo",
+            "summary": "Copies a table to another database",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function copyTableTo(string $table, self $target, bool $withData = true, string $newName = ''): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->copyTableTo($table, $target, $withData, $newName);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 378,
+            "endLine": 382,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "copyTableTo",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source table name"
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "self",
+                    "type_arr": [
+                        "self"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The target database connection"
+                },
+                {
+                    "name": "withData",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "ata If true, the data will be copied too"
+                },
+                {
+                    "name": "newName",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The new name for the copied table"
+                }
+            ],
+            "doc": {
+                "description": "Copies a table to another database\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The source table name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "self",
+                        "name": "$target",
+                        "description": "The target database connection"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ata If true, the data will be copied too"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame The new name for the copied table"
+                    }
+                ],
+                "return": "True if it succeeded"
+            },
+            "comments": "  \/**\n   * Copies a table to another database\n   *\n   * @param string $table The source table name\n   * @param self $target The target database connection\n   * @param bool $withData If true, the data will be copied too\n   * @param string $newName The new name for the copied table\n   * @return bool True if it succeeded\n   *\/"
+        },
+        "getTableCharset": {
+            "name": "getTableCharset",
+            "summary": "Returns the charset of the given table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTableCharset(string $table): ?string\n  {\n    return $this->language->getTableCharset($table);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 391,
+            "endLine": 394,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTableCharset",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the charset of the given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the charset of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/"
+        },
+        "getTableCollation": {
+            "name": "getTableCollation",
+            "summary": "Returns the collation of the given table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTableCollation(string $table): ?string\n  {\n    return $this->language->getTableCollation($table);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 403,
+            "endLine": 406,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTableCollation",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the collation of the given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the collation of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/"
+        },
+        "createColumn": {
+            "name": "createColumn",
+            "summary": "Creates a column in the given table with the given configuration.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createColumn(string $table, string $col, array $cfg): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->createColumn($table, $col, $cfg);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 416,
+            "endLine": 420,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "createColumn",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "col",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name"
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The configuration of the column"
+                }
+            ],
+            "doc": {
+                "description": "Creates a column in the given table with the given configuration.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$col",
+                        "description": "The column's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration of the column"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a column in the given table with the given configuration.\n   * @param string $table The table's name\n   * @param string $col The column's name\n   * @param array $cfg The configuration of the column\n   * @return bool\n   *\/"
+        },
+        "dropColumn": {
+            "name": "dropColumn",
+            "summary": "Drops the given column from the given table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dropColumn(string $table, string $col): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->dropColumn($table, $col);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 429,
+            "endLine": 433,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dropColumn",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "col",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Drops the given column from the given table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Drops the given column from the given table.\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/"
+        },
+        "alterColumn": {
+            "name": "alterColumn",
+            "summary": "Alters the given column in the given table with the given configuration.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function alterColumn(string $table, string $col, array $cfg): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->alterColumn($table, $col, $cfg);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 443,
+            "endLine": 447,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "alterColumn",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "col",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name"
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The configuration of the column"
+                }
+            ],
+            "doc": {
+                "description": "Alters the given column in the given table with the given configuration.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$col",
+                        "description": "The column's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration of the column"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Alters the given column in the given table with the given configuration.\n   * @param string $table The table's name\n   * @param string $col The column's name\n   * @param array $cfg The configuration of the column\n   * @return bool\n   *\/"
+        },
+        "createConstraints": {
+            "name": "createConstraints",
+            "summary": "Creates the constraints for the given table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function createConstraints(string $table, ?array $cfg = null): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->createConstraints($table, $cfg);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 458,
+            "endLine": 462,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "createConstraints",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The configuration"
+                }
+            ],
+            "doc": {
+                "description": "Creates the constraints for the given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg",
+                        "description": "The configuration"
+                    }
+                ],
+                "return": "True if it succeeded",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Creates the constraints for the given table\n   *\n   * @param string $table The table's name\n   * @param array|null $cfg The configuration\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/"
+        },
+        "dropConstraint": {
+            "name": "dropConstraint",
+            "summary": "Drops the given constraint from the table",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dropConstraint(string $table, string $constraint): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->dropConstraint($table, $constraint);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 473,
+            "endLine": 477,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dropConstraint",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "constraint",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The constraint's name"
+                }
+            ],
+            "doc": {
+                "description": "Drops the given constraint from the table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$constraint",
+                        "description": "The constraint's name"
+                    }
+                ],
+                "return": "True if it succeeded",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Drops the given constraint from the table\n   *\n   * @param string $table The table's name\n   * @param string $constraint The constraint's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/"
+        },
+        "enableLast": {
+            "name": "enableLast",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function enableLast()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->enableLast();\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 483,
+            "endLine": 488,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "enableLast",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return void\n   *\/"
+        },
+        "disableLast": {
+            "name": "disableLast",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function disableLast()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->disableLast();\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 494,
+            "endLine": 499,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "disableLast",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return void\n   *\/"
+        },
+        "getRealLastParams": {
+            "name": "getRealLastParams",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRealLastParams(): ?array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getRealLastParams();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 505,
+            "endLine": 510,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRealLastParams",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "realLast": {
+            "name": "realLast",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function realLast(): ?string\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->realLast();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 517,
+            "endLine": 522,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "realLast",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return string|null\n   * @throws Exception\n   *\/"
+        },
+        "getLastParams": {
+            "name": "getLastParams",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getLastParams(): ?array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastParams();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 529,
+            "endLine": 534,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getLastParams",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "getLastValues": {
+            "name": "getLastValues",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getLastValues(): ?array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastValues();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 541,
+            "endLine": 546,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getLastValues",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "getQuery": {
+            "name": "getQuery",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getQuery(array $cfg): Query\n  {\n    if (!isset($cfg['kind'])) {\n      $cfg['kind'] = 'SELECT';\n    }\n\n    if ($cfg = $this->processCfg($cfg)) {\n      return $this->language->query($cfg['sql'], ...array_map(function($a) {\n        return Str::isUid($a) ? hex2bin($a) : $a;\n      }, $cfg['values']));\n    }\n\n    throw new Exception(X::_(\"Impossible to make a query\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 549,
+            "endLine": 562,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getQuery",
+            "returns": [
+                "bbn\\Db\\Internal\\Query"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getQueryValues": {
+            "name": "getQueryValues",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getQueryValues(array $cfg): array\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getQueryValues($cfg);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 570,
+            "endLine": 575,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getQueryValues",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @return array\n   * @throws Exception\n   *\/"
+        },
+        "export4Option": {
+            "name": "export4Option",
+            "summary": "Creates a simplified array for options from a table model",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function export4Option($table_name, $database = ''): array\n  {\n    if ($database) {\n      $table_name = $database . '.' . $table_name; \n    }\n\n    $structure = $this->modelize($table_name);\n    foreach ($structure['keys'] as $k => &$m) {\n      unset($m['ref_db'], $m['constraint']);\n      if (empty($m['ref_table'])) {\n        unset($m['ref_table'], $m['ref_column'], $m['delete'], $m['update']);\n      }\n    }\n    foreach ($structure['fields'] as &$f) {\n      unset($f['position']);\n      if (!in_array($f['type'], ['decimal', 'float', 'double'])) {\n        unset($f['decimals']);\n      }\n      if (!$this->isNumericType($f['type'])) {\n        unset($f['signed']);\n      }\n      if (empty($f['defaultExpression']) && is_null($f['default'])) {\n        unset($f['default'], $f['defaultExpression']);\n      }\n      if (empty($f['extra'])) {\n        unset($f['extra']);\n      }\n      if (empty($f['key'])) {\n        unset($f['key']);\n      }\n      if (empty($f['virtual'])) {\n        unset($f['virtual']);\n      }\n      if (empty($f['generation'])) {\n        unset($f['generation']);\n      }\n    }\n\n    return $structure;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 585,
+            "endLine": 624,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "export4Option",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table_name",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "name"
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Creates a simplified array for options from a table model\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$table",
+                        "description": "name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a simplified array for options from a table model\n   *\n   * @param [type] $table_name\n   * @param string $database\n   * @return array\n   *\/"
+        },
+        "parseQuery": {
+            "name": "parseQuery",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function parseQuery(string $query): ?array\n  {\n    return $this->language->parseQuery($query);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 626,
+            "endLine": 629,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parseQuery",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "query",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyzeDatabase": {
+            "name": "analyzeDatabase",
+            "summary": "Analyzes the given database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function analyzeDatabase(string $database): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->analyzeDatabase($database);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 638,
+            "endLine": 642,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "analyzeDatabase",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ],
+            "doc": {
+                "description": "Analyzes the given database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$database",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": "True if it succeeded",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Analyzes the given database.\n   *\n   * @param string $database The database's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/"
+        },
+        "analyzeTable": {
+            "name": "analyzeTable",
+            "summary": "Analyzes the given table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Internal\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Internal\/Actions.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function analyzeTable(string $table): bool\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n    return $this->language->analyzeTable($table);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 652,
+            "endLine": 656,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "analyzeTable",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ],
+            "doc": {
+                "description": "Analyzes the given table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": "True if it succeeded",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Analyzes the given table.\n   *\n   * @param string $table The table's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Return the first row resulting from the query as an array indexed with the fields' name.\n   *\n   * ```php\n   * X::dump($db->getRow(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n   *\n   * \/* (array)[\n   *        \"id\" => 3,\n   *        \"name\" => \"thomas\",\n   *        ]\n   * ```\n   *\n   * @param string query.\n   * @param int The var ? value.\n   * @return array|false\n   *\n   *\/",
+        "\/**\n   * Return an array that includes indexed arrays for every row resultant from the query.\n   *\n   * @param string\n   * @param int The var ? value\n   * @return array|false\n   *\/",
+        "\/**\n   * Return a row as a numeric indexed array.\n   *\n   * ```php\n   * X::dump($db->getIrow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n   * \/* (array) [\n   *              3,\n   *              \"john\",\n   *              \"brown\",\n   *             ]\n   * ```\n   *\n   * @param string query\n   * @param int The var ? value\n   * @return array | false\n   *\/",
+        "\/**\n   * Return an array of numeric indexed rows.\n   *\n   * ```php\n   * X::dump($db->getIrows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n   * \/*\n   * (array)[\n   *         [\n   *          3,\n   *         \"john\"\n   *         ],\n   *         [\n   *         4,\n   *         \"barbara\"\n   *        ]\n   *       ]\n   * ```\n   *\n   * @return null|array\n   *\/",
+        "\/**\n   * Return an array indexed on the searched field's in which there are all the values of the column.\n   *\n   * ```php\n   * X::dump($db->getByColumns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n   * \/*\n   * (array) [\n   *      \"name\" => [\n   *       \"John\",\n   *       \"Michael\"\n   *      ],\n   *      \"surname\" => [\n   *        \"Brown\",\n   *        \"Smith\"\n   *      ]\n   *     ]\n   * ```\n   *\n   * @param string query\n   * @return null|array\n   *\/",
+        "\/**\n   * Return the first row resulting from the query as an object (similar to {@link getObject()}).\n   *\n   * ```php\n   * X::dump($db->getObj(\"SELECT surname FROM table_users\"));\n   * \/*\n   * (obj){\n   *       \"name\" => \"Smith\"\n   *       }\n   * ```\n   *\n   * @return null|\\stdClass\n   *\/",
+        "\/**\n   * Return the first row resulting from the query as an object.\n   * Synonym of get_obj.\n   *\n   * ```php\n   * X::dump($db->getObject(\"SELECT name FROM table_users\"));\n   * \/*\n   * (obj){\n   *       \"name\" => \"John\"\n   *       }\n   * ```\n   *\n   * @return null|\\stdClass\n   *\/",
+        "\/**\n   * Return an array of stdClass objects.\n   *\n   * ```php\n   * X::dump($db->getObjects(\"SELECT name FROM table_users\"));\n   *\n   * \/*\n   * (array) [\n   *          Object stdClass: df {\n   *            \"name\" => \"John\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Michael\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Thomas\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"William\",\n   *          },\n   *          Object stdClass: df {\n   *            \"name\" => \"Jake\",\n   *          },\n   *         ]\n   * ```\n   *\n   * @return null|array\n   *\/",
+        "\/**\n   * Returns a list of charsets available for the current language.\n   *\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * Returns a list of collations available for the current language.\n   *\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * Creates a database\n   *\n   * @param string $database\n   * @return bool\n   *\/",
+        "\/**\n   * Drops the given database\n   *\n   * @param string $database\n   * @return bool\n   *\/",
+        "\/**\n   * Renames the given database to the new given name.\n   *\n   * @param string $oldName The current database's name\n   * @param string $newName The new name.\n   * @return bool True if it succeeded\n   *\/",
+        "\/**\n   * Duplicates a database\n   *\n   * @param string $source The source database name\n   * @param string $target The target database name\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/",
+        "\/**\n   * Returns the charset of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the collation of the given database\n   *\n   * @param string $database\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns true if the given table exists\n   *\n   * @param string $table\n   * @param string $database. or currently selected if none\n   * @return boolean\n   *\/",
+        "\/**\n   * Creates a table\n   *\n   * @param string $table\n   * @param array|null $cfg\n   * @param bool $createKeys\n   * @param bool $createConstraints\n   * @return bool\n   *\/",
+        "\/**\n   * Drops the given table, in the current database if none given\n   *\n   * @param string $database\n   * @return bool\n   *\/",
+        "\/**\n   * Duplicates a table\n   *\n   * @param string $source The source table name\n   * @param string $target The target table name\n   * @param bool $withData If true, the data will be copied too\n   * @return bool True if it succeeded\n   *\/",
+        "\/**\n   * Copies a table to another database\n   *\n   * @param string $table The source table name\n   * @param self $target The target database connection\n   * @param bool $withData If true, the data will be copied too\n   * @param string $newName The new name for the copied table\n   * @return bool True if it succeeded\n   *\/",
+        "\/**\n   * Returns the charset of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the collation of the given table\n   *\n   * @param string $table\n   * @return string|null\n   *\/",
+        "\/**\n   * Creates a column in the given table with the given configuration.\n   * @param string $table The table's name\n   * @param string $col The column's name\n   * @param array $cfg The configuration of the column\n   * @return bool\n   *\/",
+        "\/**\n   * Drops the given column from the given table.\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/",
+        "\/**\n   * Alters the given column in the given table with the given configuration.\n   * @param string $table The table's name\n   * @param string $col The column's name\n   * @param array $cfg The configuration of the column\n   * @return bool\n   *\/",
+        "\/**\n   * Creates the constraints for the given table\n   *\n   * @param string $table The table's name\n   * @param array|null $cfg The configuration\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/",
+        "\/**\n   * Drops the given constraint from the table\n   *\n   * @param string $table The table's name\n   * @param string $constraint The constraint's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/",
+        "\/**\n   * @return void\n   *\/",
+        "\/**\n   * @return void\n   *\/",
+        "\/**\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * @return string|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * @param array $cfg\n   * @return array\n   * @throws Exception\n   *\/",
+        "\/**\n   * Creates a simplified array for options from a table model\n   *\n   * @param [type] $table_name\n   * @param string $database\n   * @return array\n   *\/",
+        "\/**\n   * Analyzes the given database.\n   *\n   * @param string $database The database's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/",
+        "\/**\n   * Analyzes the given table.\n   *\n   * @param string $table The table's name\n   * @return bool True if it succeeded\n   * @throws Exception\n   *\/",
+        "\/**\n   * Throws ans exception if language class method does not exist.\n   *\n   * @param string $method\n   * @throws Exception\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}
