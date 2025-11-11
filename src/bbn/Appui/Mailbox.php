@@ -490,6 +490,42 @@ class Mailbox extends Basic
 
 
   /**
+   * Subscribes to a folder
+   *
+   * @param string $folder Folder name
+   * @return bool
+   */
+  public function subscribeFolder($folder)
+  {
+    if ($this->_is_connected()) {
+      if (imap_subscribe($this->stream, $this->mbParam . $folder)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Unsubscribes from a folder
+   *
+   * @param string $folder Folder name
+   * @return bool
+   */
+  public function unsubscribeFolder($folder)
+  {
+    if ($this->_is_connected()) {
+      if (imap_unsubscribe($this->stream, $this->mbParam . $folder)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
    * Returns an array of all the mailboxes that you have subscribed. (Test: ok)
    *
    * @return bool|array

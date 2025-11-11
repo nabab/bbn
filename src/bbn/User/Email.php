@@ -92,6 +92,9 @@ class Email extends Basic
   /** @var Passwords The passwords object */
   protected $pw;
 
+  /** @var array */
+  protected $folderTypesNotUnique = ['folders'];
+
 
   /**
    * Returns a list typical folder types as they are recorded in the options
@@ -146,6 +149,11 @@ class Email extends Basic
       if (!isset($mb['mailbox'])) {
         $cfg = $this->mboxes[$id_account];
         $cfg['pass'] = $this->_get_password()->userGet($id_account, $this->user);
+        if (!empty($cfg['type']) && Str::isUid($cfg['type'])) {
+          $cfg['type'] = $this->options->code($cfg['type']);
+
+        }
+
         $mb['mailbox'] = new Mailbox($cfg);
       }
 
@@ -212,14 +220,16 @@ class Email extends Basic
         $this->mboxes[$id_account] = [
           'id' => $a['id'],
           'host' => $a['host'] ?? null,
+          'email' => $a['email'],
           'login' => $a['login'],
-          'type' => $a['type'],
+          'type' => self::getOptionId($a['type'], 'types'),
           'port' => $a['port'] ?? null,
           'ssl' => $a['ssl'] ?? true,
           'folders' => null,
           'last_uid' => $a['last_uid'] ?? null,
           'last_check' => $a['last_check'] ?? null,
           'id_account' => $id_account,
+          'smtp' => $a['id_link'] ?? null,
           $this->localeField => !empty($a[$this->localeField])
         ];
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
@@ -238,6 +248,10 @@ class Email extends Basic
   public function checkConfig($cfg): bool
   {
     if (X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
+      if (Str::isUid($cfg['type'])) {
+        $cfg['type'] = $this->options->code($cfg['type']);
+      }
+
       $mb = new Mailbox($cfg);
       return $mb->check();
     }
@@ -257,13 +271,31 @@ class Email extends Basic
 
     $d = X::mergeArrays($this->pref->getCfg($id_account) ?: [], [
       'host' => $cfg['host'] ?? null,
+      'email' => $cfg['email'],
       'login' => $cfg['login'],
-      'type' => $cfg['type'],
+      'type' => Str::isUid($cfg['type'] ? $this->options->code($cfg['type']) : $cfg['type']),
       'port' => $cfg['port'] ?? null,
       'ssl' => $cfg['ssl'] ?? true,
+      'id_link' => $cfg['smtp'] ?? null,
       'last_uid' => $cfg['last_uid'] ?? null,
       'last_check' => $cfg['last_check'] ?? null
     ]);
+
+    if (!empty($cfg['pass'])) {
+      $p = $this->_get_password()->userGet($id_account, $this->user);
+      if ((empty($p)
+          || ($cfg['pass'] !== $p))
+        && !$this->_get_password()->userStore($cfg['pass'], $id_account, $this->user)
+      ) {
+        throw new \Exception(_("Impossible to update the password"));
+      }
+    }
+
+    if (!empty($cfg['folders'])) {
+      $this->checkFolderSubscriptions($id_account, $cfg['folders']);
+      $this->syncFolders($id_account, $cfg['folders'], $cfg['rules'] ?? []);
+    }
+
     return (bool)$this->pref->setCfg($id_account, $d);
   }
 
@@ -277,11 +309,11 @@ class Email extends Basic
   public function addAccount(array $cfg): string
   {
     if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
-      throw new \Exception("Missing arguments");
+      throw new \Exception(_("Missing arguments"));
     }
 
     if (!($id_accounts = self::getOptionId('accounts'))) {
-      throw new \Exception("Impossible to find the account option");
+      throw new \Exception(_("Impossible to find the account option"));
     }
 
     // toGroup as this option will use different user options
@@ -289,23 +321,26 @@ class Email extends Basic
       $id_accounts,
       [
         'id_user' => $this->user->getId(),
+        'email' => $cfg['email'],
         'login' => $cfg['login'],
-        'type' => $cfg['type'],
+        'type' => Str::isUid($cfg['type'] ? $this->options->code($cfg['type']) : $cfg['type']),
         'host' => $cfg['host'] ?? null,
         'port' => $cfg['port'] ?? null,
         'ssl' => $cfg['ssl'] ?? true,
+        'id_link' => $cfg['smtp'] ?? null,
         $this->localeField => !empty($cfg[$this->localeField])
       ]
     ))) {
-      throw new \Exception("Impossible to add the preference");
+      throw new \Exception(_("Impossible to add the preference"));
     }
 
     if (!$this->_get_password()->userStore($cfg['pass'], $id_pref, $this->user)) {
-      throw new \Exception("Impossible to set the password");
+      throw new \Exception(_("Impossible to set the password"));
     }
 
     $this->getAccount($id_pref, true);
     if (!empty($cfg['folders'])) {
+      $this->checkFolderSubscriptions($id_pref, $cfg['folders']);
       $this->syncFolders($id_pref, $cfg['folders'], $cfg['rules'] ?? []);
     }
 
@@ -325,6 +360,138 @@ class Email extends Basic
   }
 
 
+  /**
+   * Returns the list of the SMTPs' IDs of the current user.
+   *
+   * @return array|null
+   */
+  public function getSmtpsIds(): ?array
+  {
+    if ($idSmtps = self::getOptionId('smtps')) {
+      return $this->pref->retrieveIds($idSmtps);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the list of the SMTPs of the current user.
+   *
+   * @return array
+   */
+  public function getSmtps(): array
+  {
+    $res = [];
+    if ($ids = $this->getSmtpsIds()) {
+      foreach ($ids as $id) {
+        $res[] = $this->getSmtp($id);
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Returns a SMTP by its ID.
+   *
+   * @param string $id
+   * @return array|null
+   */
+  public function getSmtp(string $id): ?array
+  {
+    if ($smtp = $this->pref->get($id)) {
+      return [
+        'id' => $smtp['id'],
+        'name' => $smtp['name'],
+        'host' => $smtp['host'],
+        'login' => $smtp['login'],
+        'encryption' => $smtp['encryption'] ?? '',
+        'port' => $smtp['port'] ?? '',
+        $this->localeField => !empty($smtp[$this->localeField])
+      ];
+    }
+
+    return null;
+  }
+
+
+  public function addSmtp(array $cfg): string
+  {
+    if (!X::hasProps($cfg, ['name', 'host', 'login', 'pass'], true)
+      || !X::hasProps($cfg, ['encryption', 'port'])
+    ) {
+      throw new \Exception(_("Missing arguments"));
+    }
+
+    if (!($idSmtps = self::getOptionId('smtps'))) {
+      throw new \Exception(_("Impossible to find the smtps option"));
+    }
+
+    if (!($idSmtp = $this->pref->addToGroup(
+      $idSmtps,
+      [
+        'id_user' => $this->user->getId(),
+        'name' => $cfg['email'],
+        'login' => $cfg['login'],
+        'host' => $cfg['host'],
+        'port' => $cfg['port'] ?? null,
+        'encryption' => $cfg['encryption'],
+        $this->localeField => !empty($cfg[$this->localeField])
+      ]
+    ))) {
+      throw new \Exception(_("Impossible to add the preference"));
+    }
+
+    if (!$this->_get_password()->userStore($cfg['pass'], $idSmtp, $this->user)) {
+      throw new \Exception(_("Impossible to set the password"));
+    }
+
+    return $idSmtp;
+  }
+
+
+  public function updateSmtp(string $idSmtp, array $cfg): bool
+  {
+    if (!X::hasProps($cfg, ['name', 'host', 'login', 'pass'], true)
+      || !X::hasProps($cfg, ['encryption', 'port'])
+    ) {
+      throw new \Exception(_("Missing arguments"));
+    }
+
+    if (!($idSmtps = self::getOptionId('smtps'))) {
+      throw new \Exception(_("Impossible to find the smtps option"));
+    }
+
+    $d = X::mergeArrays($this->pref->getCfg($idSmtp) ?: [], [
+      'name' => $cfg['email'],
+      'login' => $cfg['login'],
+      'host' => $cfg['host'],
+      'port' => $cfg['port'] ?? null,
+      'encryption' => $cfg['encryption']
+    ]);
+
+    if (!empty($cfg['pass'])) {
+      $p = $this->_get_password()->userGet($idSmtp, $this->user);
+      if ((empty($p)
+          || ($cfg['pass'] !== $p))
+        && !$this->_get_password()->userStore($cfg['pass'], $idSmtp, $this->user)
+      ) {
+        throw new \Exception(_("Impossible to update the password"));
+      }
+    }
+
+    return (bool)$this->pref->setCfg($idSmtp, $d);
+  }
+
+
+  public function deleteSmtp(string $idSmtp): bool
+  {
+    return (bool)$this->pref->delete($idSmtp);
+  }
+
+
   public function createFolder(string $id_account, string $name, string|null $id_parent = null): bool
   {
     $mb = $this->getMailbox($id_account);
@@ -333,7 +500,10 @@ class Email extends Basic
       $uid_parent = $this->getFolder($id_parent)['uid'];
     }
     $mboxName = $id_parent ? $uid_parent . '.' . $name : $name;
-    if ($mb && $mb->createMbox($mboxName)) {
+    if ($mb
+      && $mb->createMbox($mboxName)
+      && $mb->subscribeMbox($mboxName)
+    ) {
       if ($this->createFolderDb($id_account, $name, $id_parent)) {
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
         return true;
@@ -552,6 +722,30 @@ class Email extends Basic
     }
 
     return null;
+  }
+
+
+  public function getFoldersRules(string|array $account): array
+  {
+    if (!is_array($account)) {
+      $account = $this->getAccount($account);
+    }
+
+    $res = [];
+    $folders = $this->getFolders($account);
+    $folderTypesCodes = $this->options->getCodes(self::getOptionId('folders'));
+    $bitsFields = $this->pref->getClassCfg()['arch']['user_options_bits'];
+    if ($folders) {
+      foreach ($folders as $f) {
+        if (!empty($folderTypesCodes[$f[$bitsFields['id_option']]])
+          && !in_array($folderTypesCodes[$f[$bitsFields['id_option']]], $this->folderTypesNotUnique, true)
+        ) {
+          $res[$folderTypesCodes[$f[$bitsFields['id_option']]]] = $f[$bitsFields['id']];
+        }
+      }
+    }
+
+    return $res;
   }
 
 
@@ -1550,9 +1744,19 @@ class Email extends Basic
     // get Mailbox account
     if ($mb = $this->getMailbox($id_account)) {
       // get the parameter (host and port)
-      $mbParam = $mb->getParams();
+      $mbParams = $mb->getParams();
       // get the option 'folders'
       $types = self::getFolderTypes();
+      if (empty($subscribed)) {
+        $subscribed = array_map(
+          fn($f) => substr($f, strlen($mbParams) - 1),
+          $mb->listAllSubscribed()
+        );
+      }
+
+      if (empty($rules)) {
+        $rules = $this->getFoldersRules($id_account);
+      }
 
       $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed, $mb): void {
         // set the first value of $a in $ele and remove it in the array
@@ -1586,7 +1790,7 @@ class Email extends Basic
         array $db,
         array|null &$res = null,
               $id_parent = null
-      ) use (&$compare): array {
+      ) use (&$compare, $rules, $types): array {
         if (!$res) {
           $res = [
             'add' => [],
@@ -1597,24 +1801,50 @@ class Email extends Basic
 
         foreach ($real as $r) {
           $idx = X::search($db, ['text' => $r['text']]);
-          if (null === $idx) {
+          if (is_null($idx) && !empty($r['subscribed'])) {
             if ($id_parent) {
               $r['id_parent'] = $id_parent;
             }
 
             $res['add'][] = $r;
           }
-          else {
+          else if (!is_null($idx) && empty($r['subscribed'])) {
+            $res['delete'][] = $db[$idx];
+          }
+          else if (!is_null($idx)) {
+            $u = [
+              'id' => $db[$idx]['id']
+            ];
             if (!array_key_exists('num_msg', $db[$idx])
               || !array_key_exists('last_uid', $db[$idx])
               || ($r['num_msg'] !== $db[$idx]['num_msg'])
               || ($r['last_uid'] !== $db[$idx]['last_uid'])
+              || !array_key_exists('subscribed', $db[$idx])
+              || ($r['subscribed'] !== $db[$idx]['subscribed'])
             ) {
-              $res['update'][] = [
-                'id' => $db[$idx]['id'],
+              $u = X::mergeArrays($u, [
                 'num_msg' => $r['num_msg'],
-                'last_uid' => $r['last_uid']
-              ];
+                'last_uid' => $r['last_uid'],
+                'subscribed' => $r['subscribed']
+              ]);
+            }
+
+            if (!empty($rules)) {
+              $typeCode = X::getField($types, ['id' => $db[$idx]['id_option']], 'code');
+              if (($c = array_search($db[$idx]['id'], $rules))
+                && ($c !== $typeCode)
+              ) {
+                $u['id_option'] = X::getField($types, ['code' => $c], 'id');
+              }
+              elseif (!empty($rules[$typeCode])
+                && ($rules[$typeCode] !== $db[$idx]['id'])
+              ) {
+                $u['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
+              }
+            }
+
+            if (count($u) > 1) {
+              $res['update'][] = $u;
             }
 
             if ($r['items'] && $db[$idx]['items']) {
@@ -1625,7 +1855,7 @@ class Email extends Basic
 
         foreach ($db as $r) {
           $idx = X::search($real, ['text' => $r['text']]);
-          if (null === $idx) {
+          if (is_null($idx)) {
             $res['delete'][] = $r;
           }
         }
@@ -1703,7 +1933,7 @@ class Email extends Basic
       $res = [];
       $all = $mb->listAllFolders();
       foreach ($all as $dir) {
-        $tmp = str_replace($mbParam, '', $dir);
+        $tmp = str_replace($mbParams, '', $dir);
         $bits = X::split($tmp, '.');
         $put_in_res($bits, $res);
       }
@@ -1837,13 +2067,7 @@ class Email extends Basic
       throw new \Exception(X::_("Impossible to update the database after moving the email ID: %s to the folder '%s'.", $idEmail, $folderDest['text']));
     }
 
-    return (bool)$this->syncFolders(
-      $folderSrc['id_account'],
-      array_map(
-        fn($f) => substr($f, strlen($mbParams) - 1),
-        $mb->listAllSubscribed()
-      )
-    );
+    return (bool)$this->syncFolders($folderSrc['id_account']);
   }
 
 
@@ -1945,6 +2169,42 @@ class Email extends Basic
       'subscribed' => $folder['subscribed'] ?? false,
       $this->localeField => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
     ];
+  }
+
+
+  /**
+   * Check and update the folder subscriptions on the mail server
+   * @param string $id_account
+   * @param array $folders
+   * @return void
+   */
+  protected function checkFolderSubscriptions(string $id_account, array $folders): void
+  {
+    if ($mb = $this->getMailbox($id_account)) {
+      $params = $mb->getParams();
+      $subscribed = array_map(
+        fn($f) => substr($f, strlen($params) - 1),
+        $mb->listAllSubscribed()
+      );
+      if (!empty($folders) && is_array($folders[0])) {
+        $folders = array_map(
+          fn($f) => $f['uid'],
+          array_filter($folders, fn($f) => !empty($f['uid']))
+        );
+      }
+
+      foreach ($folders as $folder) {
+        if (!in_array($folder, $subscribed)) {
+          $mb->subscribeFolder($folder);
+        }
+      }
+
+      foreach ($subscribed as $folder) {
+        if (!in_array($folder, $folders)) {
+          $mb->unsubscribeFolder($folder);
+        }
+      }
+    }
   }
 
 

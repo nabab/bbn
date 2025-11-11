@@ -96,6 +96,17 @@ trait LocaleDatabase
 
 
   /**
+   * Returns the locale field name
+   *
+   * @return string
+   */
+  public function getLocaleField(): string
+  {
+    return $this->localeField;
+  }
+
+
+  /**
    * Sets the locale database and its structure if needed
    *
    * @param User|string|null $user
