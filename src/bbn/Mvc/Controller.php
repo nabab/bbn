@@ -1054,7 +1054,7 @@ class Controller implements Api
           $write = true;
         }
 
-        if ($write || true) {
+        if ($write) {
           $fs->putContents($file, json_encode($registry, JSON_PRETTY_PRINT));
         }
 
