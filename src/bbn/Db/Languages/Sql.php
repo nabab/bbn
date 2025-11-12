@@ -1870,6 +1870,47 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             if (!isset($f['operator'])) {
               $f['operator'] = 'eq';
             }
+            elseif ($f['operator'] === 'between') {
+              if (!isset($f['value'][0], $f['value'][1])) {
+                $this->error("Error! The 'between' operator needs an array with two values.", false);
+              }
+
+              $cond = [];
+              for ($i = 0; $i < 2; $i++) {
+                if (is_array($f['value'][$i])) {
+                  $cond[] = [
+                    'field' => $f['field'],
+                    'operator' => $f['value'][$i]['operator'] ?? ($i === 0 ? 'gte' : 'lte'),
+                  ];
+                  if (array_key_exists('exp', $f['value'][$i])) {
+                    $cond[$i]['exp'] = $f['value'][$i]['exp'];
+                  }
+                  elseif (array_key_exists('value', $f['value'][$i])) {
+                    $cond[$i]['value'] = $f['value'][$i]['value'];
+                  }
+                  else {
+                    $this->error("Error! The 'between' operator doesn't support arrays as values.", false);
+                  }
+                }
+                else {
+                  $cond[] = [
+                    'field' => $f['field'],
+                    'operator' => $i === 0 ? 'gte' : 'lte',
+                    'value' => $f['value'][$i]
+                  ];
+                }
+              }
+              if ($where['logic'] === 'AND') {
+                array_push($res['conditions'], ...$cond);
+              }
+              else {
+                array_push($res['conditions'], [
+                  'conditions' => $cond,
+                  'logic' => 'AND'
+                ]);
+              }
+              continue;
+            }
 
             $res['conditions'][] = $f;
           }
@@ -1908,7 +1949,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $f   = $tmp['hashed'];
         }
         elseif (array_key_exists('value', $f)) {
-          $values[] = $f['value'];
+          array_push($values, ...(is_array($f['value']) ? $f['value'] : [$f['value']]));
           unset($f['value']);
         }
       }
