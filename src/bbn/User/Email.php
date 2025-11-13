@@ -150,8 +150,7 @@ class Email extends Basic
         $cfg = $this->mboxes[$id_account];
         $cfg['pass'] = $this->_get_password()->userGet($id_account, $this->user);
         if (!empty($cfg['type']) && Str::isUid($cfg['type'])) {
-          $cfg['type'] = $this->options->code($cfg['type']);
-
+          $cfg['type'] = self::getOptionsObject()->code($cfg['type']);
         }
 
         $mb['mailbox'] = new Mailbox($cfg);
@@ -219,17 +218,18 @@ class Email extends Basic
       if ($a = $this->pref->get($id_account)) {
         $this->mboxes[$id_account] = [
           'id' => $a['id'],
-          'host' => $a['host'] ?? null,
+          'host' => $a['host'],
           'email' => $a['email'],
           'login' => $a['login'],
           'type' => self::getOptionId($a['type'], 'types'),
-          'port' => $a['port'] ?? null,
-          'ssl' => $a['ssl'] ?? true,
+          'port' => $a['port'],
+          'encryption' => !empty($a['encryption']) ? 1 : 0,
+          'validatecert' => !empty($a['validatecert']) ? 1 : 0,
           'folders' => null,
           'last_uid' => $a['last_uid'] ?? null,
           'last_check' => $a['last_check'] ?? null,
           'id_account' => $id_account,
-          'smtp' => $a['id_link'] ?? null,
+          'smtp' => $a['id_alias'] ?? null,
           $this->localeField => !empty($a[$this->localeField])
         ];
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
@@ -249,7 +249,7 @@ class Email extends Basic
   {
     if (X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
       if (Str::isUid($cfg['type'])) {
-        $cfg['type'] = $this->options->code($cfg['type']);
+        $cfg['type'] = self::getOptionsObject()->code($cfg['type']);
       }
 
       $mb = new Mailbox($cfg);
@@ -261,8 +261,19 @@ class Email extends Basic
 
   public function updateAccount(string $id_account, array $cfg): bool
   {
-    if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
-      throw new \Exception("Missing arguments");
+    if (empty($cfg['type'])
+      || !($types = self::getAccountTypes())
+      || !X::getRow($types, ['code' => $cfg['type']])
+    ) {
+      throw new \Exception(_("The account type is not valid"));
+    }
+
+    if (!X::hasProps($cfg, ['login', 'pass', 'type', 'email'], true)
+      || !X::hasProps($cfg, ['host', 'port', 'encryption', 'validatecert', 'smtp'])
+      || (in_array($cfg['type'], ['imap', 'local'])
+        && !X::hasProps($cfg, ['host', 'port'], true))
+    ) {
+      throw new \Exception(_("Missing arguments"));
     }
 
     if (!$this->getAccount($id_account)) {
@@ -270,13 +281,14 @@ class Email extends Basic
     }
 
     $d = X::mergeArrays($this->pref->getCfg($id_account) ?: [], [
-      'host' => $cfg['host'] ?? null,
+      'host' => $cfg['host'] ?: null,
       'email' => $cfg['email'],
       'login' => $cfg['login'],
-      'type' => Str::isUid($cfg['type'] ? $this->options->code($cfg['type']) : $cfg['type']),
-      'port' => $cfg['port'] ?? null,
-      'ssl' => $cfg['ssl'] ?? true,
-      'id_link' => $cfg['smtp'] ?? null,
+      'type' => Str::isUid($cfg['type'] ? self::getOptionsObject()->code($cfg['type']) : $cfg['type']),
+      'port' => $cfg['port'] ?: null,
+      'encryption' => !empty($cfg['encryption']) ? 1 : 0,
+      'validatecert' => !empty($cfg['validatecert']) ? 1 : 0,
+      'id_alias' => $cfg['smtp'] ?: null,
       'last_uid' => $cfg['last_uid'] ?? null,
       'last_check' => $cfg['last_check'] ?? null
     ]);
@@ -308,7 +320,18 @@ class Email extends Basic
 
   public function addAccount(array $cfg): string
   {
-    if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
+    if (empty($cfg['type'])
+      || !($types = self::getAccountTypes())
+      || !X::getRow($types, ['code' => $cfg['type']])
+    ) {
+      throw new \Exception(_("The account type is not valid"));
+    }
+
+    if (!X::hasProps($cfg, ['login', 'pass', 'type', 'email'], true)
+      || !X::hasProps($cfg, ['host', 'port', 'encryption', 'validatecert', 'smtp'])
+      || (in_array($cfg['type'], ['imap', 'local'])
+        && !X::hasProps($cfg, ['host', 'port'], true))
+    ) {
       throw new \Exception(_("Missing arguments"));
     }
 
@@ -323,11 +346,12 @@ class Email extends Basic
         'id_user' => $this->user->getId(),
         'email' => $cfg['email'],
         'login' => $cfg['login'],
-        'type' => Str::isUid($cfg['type'] ? $this->options->code($cfg['type']) : $cfg['type']),
-        'host' => $cfg['host'] ?? null,
-        'port' => $cfg['port'] ?? null,
-        'ssl' => $cfg['ssl'] ?? true,
-        'id_link' => $cfg['smtp'] ?? null,
+        'type' => Str::isUid($cfg['type']) ? self::getOptionsObject()->code($cfg['type']) : $cfg['type'],
+        'host' => $cfg['host'] ?: null,
+        'port' => $cfg['port'] ?: null,
+        'encryption' => !empty($cfg['encryption']) ? 1 : 0,
+        'validatecert' => !empty($cfg['validatecert']) ? 1 : 0,
+        'id_alias' => $cfg['smtp'] ?: null,
         $this->localeField => !empty($cfg[$this->localeField])
       ]
     ))) {
@@ -407,8 +431,9 @@ class Email extends Basic
         'name' => $smtp['name'],
         'host' => $smtp['host'],
         'login' => $smtp['login'],
-        'encryption' => $smtp['encryption'] ?? '',
-        'port' => $smtp['port'] ?? '',
+        'encryption' => $smtp['encryption'],
+        'port' => $smtp['port'],
+        'validatecert' => !empty($smtp['validatecert']) ? 1 : 0,
         $this->localeField => !empty($smtp[$this->localeField])
       ];
     }
@@ -419,8 +444,8 @@ class Email extends Basic
 
   public function addSmtp(array $cfg): string
   {
-    if (!X::hasProps($cfg, ['name', 'host', 'login', 'pass'], true)
-      || !X::hasProps($cfg, ['encryption', 'port'])
+    if (!X::hasProps($cfg, ['name', 'host', 'login', 'pass', 'encryption'], true)
+      || !X::hasProps($cfg, ['port', 'validatecert'])
     ) {
       throw new \Exception(_("Missing arguments"));
     }
@@ -433,11 +458,12 @@ class Email extends Basic
       $idSmtps,
       [
         'id_user' => $this->user->getId(),
-        'name' => $cfg['email'],
+        'name' => $cfg['name'],
         'login' => $cfg['login'],
         'host' => $cfg['host'],
         'port' => $cfg['port'] ?? null,
         'encryption' => $cfg['encryption'],
+        'validatecert' => !empty($cfg['validatecert']) ? 1 : 0,
         $this->localeField => !empty($cfg[$this->localeField])
       ]
     ))) {
@@ -455,7 +481,7 @@ class Email extends Basic
   public function updateSmtp(string $idSmtp, array $cfg): bool
   {
     if (!X::hasProps($cfg, ['name', 'host', 'login', 'pass'], true)
-      || !X::hasProps($cfg, ['encryption', 'port'])
+      || !X::hasProps($cfg, ['encryption', 'port', 'validatecert'])
     ) {
       throw new \Exception(_("Missing arguments"));
     }
@@ -469,7 +495,8 @@ class Email extends Basic
       'login' => $cfg['login'],
       'host' => $cfg['host'],
       'port' => $cfg['port'] ?? null,
-      'encryption' => $cfg['encryption']
+      'encryption' => $cfg['encryption'],
+      'validatecert' => !empty($cfg['validatecert']) ? 1 : 0
     ]);
 
     if (!empty($cfg['pass'])) {
@@ -502,7 +529,7 @@ class Email extends Basic
     $mboxName = $id_parent ? $uid_parent . '.' . $name : $name;
     if ($mb
       && $mb->createMbox($mboxName)
-      && $mb->subscribeMbox($mboxName)
+      && $mb->subscribeFolder($mboxName)
     ) {
       if ($this->createFolderDb($id_account, $name, $id_parent)) {
         $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
@@ -733,7 +760,7 @@ class Email extends Basic
 
     $res = [];
     $folders = $this->getFolders($account);
-    $folderTypesCodes = $this->options->getCodes(self::getOptionId('folders'));
+    $folderTypesCodes = self::getOptionsObject()->getCodes(self::getOptionId('folders'));
     $bitsFields = $this->pref->getClassCfg()['arch']['user_options_bits'];
     if ($folders) {
       foreach ($folders as $f) {
@@ -1956,11 +1983,18 @@ class Email extends Basic
 
   public function send(string $id_account, array $cfg): int
   {
-    if ($mb = $this->getMailbox($id_account)) {
+    if (($account = $this->getAccount($id_account))
+      && ($mb = $this->getMailbox($id_account))
+    ) {
+      $smtp = null;
+      if (!empty($account['smtp'])) {
+        $smtp = $this->getSmtp($account['smtp']);
+      }
+
       if (!empty($cfg['to'])
         && (!empty($cfg['title']) || !empty($cfg['text']))
       ) {
-        $mailer = $mb->getMailer([
+        $mailerCfg = [
           'from' => $cfg['from'] ?? null,
           'name' => $cfg['name'] ?? $cfg['from'] ?? null,
           'template' => <<<HTML
@@ -1975,7 +2009,17 @@ class Email extends Basic
               </body>
             </html>
           HTML
-        ]);
+        ];
+        if ($smtp) {
+          $mailerCfg = X::mergeArrays($mailerCfg, [
+            'host' => $smtp['host'],
+            'port' => $smtp['port'],
+            'encryption' => $smtp['encryption'],
+            'user' => $smtp['login'],
+            'pass' => $this->_get_password()->userGet($smtp['id'], $this->user)
+          ]);
+        }
+        $mailer = $mb->getMailer($mailerCfg);
         return $mailer->send($cfg);
       }
     }

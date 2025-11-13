@@ -131,7 +131,9 @@ class Mailbox extends Basic
 
   protected $mailer;
 
-  protected $ssl = false;
+  protected $encryption = false;
+
+  protected $validateCertificate = false;
 
   protected $idleStream;
 
@@ -170,43 +172,35 @@ class Mailbox extends Basic
         $this->type = $cfg['type'];
       }
 
-      $this->host           = $cfg['host'] ?? null;
-      $this->login          = $cfg['login'];
-      $this->pass           = $cfg['pass'];
-      $this->folder         = $cfg['dir'] ?? 'INBOX';
+      $this->host = $cfg['host'] ?? null;
+      $this->login = $cfg['login'];
+      $this->pass = $cfg['pass'];
+      $this->folder = $cfg['dir'] ?? 'INBOX';
       $this->_ping_interval = self::$_default_ping_interval;
-      $this->ssl            = !empty($cfg['ssl']);
+      $this->encryption = !empty($cfg['encryption']);
+      $this->validateCertificate = !empty($cfg['validatecert']);
+      $this->port = $cfg['port'] ?? null;
 
       switch ($this->type){
         case 'hotmail':
-          $this->port    = 993;
-          $this->mbParam = '{imap-mail.outlook.com:' . $this->port . '/pop3/ssl}';
+          $this->port = 993;
+          $this->mbParam = '{imap-mail.outlook.com:' . $this->port . '/imap/ssl}';
           break;
         case 'gmail':
-          $this->port    = 993;
+          $this->port = 993;
           $this->mbParam = '{imap.googlemail.com:' . $this->port . '/imap/ssl}';
           break;
-        /*
-        case 'pop':
-          $this->port    = 110;
-          $this->mbParam = '{' . $this->host . ':' . $this->port . '/pop3}';
-          break;
-        */
         case 'imap':
-          if ($this->ssl) {
-            $this->port    = 993;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/ssl/novalidate-cert}';
+        case 'local':
+          $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap';
+          if ($this->encryption) {
+            $this->mbParam .= '/ssl';
+            $this->mbParam .= $this->validateCertificate ? '/validate-cert' : '/novalidate-cert';
           }
           else {
-            $this->port    = 143;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
+            $this->mbParam .= '/notls';
           }
-          break;
-        case 'local':
-          $this->host = 'localhost';
-          $this->port = 143;
-          //$this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
-          $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/notls}';
+          $this->mbParam .= '}';
           break;
       }
 
@@ -234,16 +228,16 @@ class Mailbox extends Basic
     return imap_last_error() ?: null;
   }
 
-  public function getMailer(array $cfg = []): Mail
+
+  public function getMailer(array $cfg = [], bool $force = false): Mail
   {
-    if (!$this->mailer) {
+    if (!$this->mailer || $force) {
       $c = [
-        'host'  => $this->host,
-        'user' => $this->login,
-        'pass'  => $this->pass,
-        'type'  => $this->type
+        'host'  => $cfg['host'] ?? $this->host,
+        'user' => $cfg['login'] ?? $this->login,
+        'pass'  => $cfg['pass'] ?? $this->pass
       ];
-      if ($this->ssl) {
+      if ($this->encryption) {
         $c['ssl'] = [
           'verify_peer' => false,
           'verify_peer_name' => false,
@@ -255,7 +249,7 @@ class Mailbox extends Basic
       if ($this->type === 'imap') {
         $c['imap'] = true;
         $c['imap_sent'] = 'Sent';
-        if ($this->ssl) {
+        if ($this->encryption) {
           $c['imap_ssl'] = 'ssl';
         }
       }
@@ -1406,7 +1400,7 @@ class Mailbox extends Basic
     $this->idleRunning = false;
     $this->idleTag = 0;
     $context = [];
-    if ($this->ssl) {
+    if ($this->encryption) {
       $context['ssl'] = [
         'verify_peer' => false,
         'verify_peer_name' => false,
@@ -1415,7 +1409,7 @@ class Mailbox extends Basic
 
     // Establish the connection
     $this->idleStream = stream_socket_client(
-      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      ($this->encryption ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
       $errno,
       $errstr,
       $timeout,
@@ -1481,7 +1475,7 @@ class Mailbox extends Basic
     $this->idleRunning = false;
     $this->idleTag = 0;
     $context = [];
-    if ($this->ssl) {
+    if ($this->encryption) {
       $context['ssl'] = [
         'verify_peer' => false,
         'verify_peer_name' => false,
@@ -1490,7 +1484,7 @@ class Mailbox extends Basic
 
     // Establish the connection
     $this->idleStream = stream_socket_client(
-      ($this->ssl ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
+      ($this->encryption ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
       $errno,
       $errstr,
       $timeout,
