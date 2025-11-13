@@ -230,9 +230,10 @@ class Email extends Basic
           'last_check' => $a['last_check'] ?? null,
           'id_account' => $id_account,
           'smtp' => $a['id_alias'] ?? null,
+          'rules' => $this->getFoldersRules($id_account, true),
           $this->localeField => !empty($a[$this->localeField])
         ];
-        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($id_account);
         if (!isset($a['stage'])) {
           $a['stage'] = 1;
           $this->pref->set($id_account, $a);
@@ -532,7 +533,7 @@ class Email extends Basic
       && $mb->subscribeFolder($mboxName)
     ) {
       if ($this->createFolderDb($id_account, $name, $id_parent)) {
-        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($id_account);
         return true;
       }
     }
@@ -647,7 +648,7 @@ class Email extends Basic
           }
         };
         updateChildren($id, $folder['uid'], $newUid, $this->pref, $idAccount);
-        $this->mboxes[$idAccount]['folders'] = $this->getFolders($this->mboxes[$idAccount]);
+        $this->mboxes[$idAccount]['folders'] = $this->getFolders($idAccount);
         return true;
       };
     }
@@ -662,7 +663,7 @@ class Email extends Basic
     $folder = $this->getFolder($id);
     if ($folder && $mb->deleteMbox($folder['uid'])) {
       if ($this->deleteFolderDb($id)) {
-        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($id_account);
         return true;
       }
     }
@@ -720,15 +721,11 @@ class Email extends Basic
   }
 
 
-  public function getFolders(string|array $account, bool $force = false): ?array
+  public function getFolders(string $idAccount, bool $force = false): ?array
   {
-    if (!is_array($account)) {
-      $account = $this->getAccount($account);
-    }
-
-    if (!empty($account)) {
+    if (Str::isUid($idAccount)) {
       if ($force) {
-        $this->syncFolders($account['id']);
+        $this->syncFolders($idAccount);
       }
 
       $t =& $this;
@@ -741,7 +738,7 @@ class Email extends Basic
 
           return $res;
         },
-        $this->pref->getFullBits($account['id']),
+        $this->pref->getFullBits($idAccount),
         'items'
       );
       X::sortBy($folders, 'text');
@@ -752,14 +749,10 @@ class Email extends Basic
   }
 
 
-  public function getFoldersRules(string|array $account): array
+  public function getFoldersRules(string $idAccount, bool $uid = false): array
   {
-    if (!is_array($account)) {
-      $account = $this->getAccount($account);
-    }
-
     $res = [];
-    $folders = $this->getFolders($account);
+    $folders = $this->getFolders($idAccount);
     $folderTypesCodes = self::getOptionsObject()->getCodes(self::getOptionId('folders'));
     $bitsFields = $this->pref->getClassCfg()['arch']['user_options_bits'];
     if ($folders) {
@@ -767,7 +760,7 @@ class Email extends Basic
         if (!empty($folderTypesCodes[$f[$bitsFields['id_option']]])
           && !in_array($folderTypesCodes[$f[$bitsFields['id_option']]], $this->folderTypesNotUnique, true)
         ) {
-          $res[$folderTypesCodes[$f[$bitsFields['id_option']]]] = $f[$bitsFields['id']];
+          $res[$folderTypesCodes[$f[$bitsFields['id_option']]]] = $f[$uid ? 'uid' : $bitsFields['id']];
         }
       }
     }
@@ -2010,15 +2003,33 @@ class Email extends Basic
             </html>
           HTML
         ];
+        $folders = $this->getFolders($id_account) ?: [];
+        if ($sentFolder = X::getField($folders, ['type' => 'sent'], 'uid')) {
+          $mailerCfg['imap_sent'] = $sentFolder;
+        }
+
         if ($smtp) {
           $mailerCfg = X::mergeArrays($mailerCfg, [
             'host' => $smtp['host'],
             'port' => $smtp['port'],
-            'encryption' => $smtp['encryption'],
             'user' => $smtp['login'],
             'pass' => $this->_get_password()->userGet($smtp['id'], $this->user)
           ]);
+          if (!empty($smtp['encryption'])
+            && in_array($smtp['encryption'], ['starttls', 'tls'])
+          ) {
+            $mailerCfg['encryption'] = [
+              $smtp['encryption'] === 'tls' ? 'ssl' : 'tls' => [
+                'verify_peer' => !empty($smtp['validatecert']),
+                'verify_peer_name' => false,
+                'verify_host' => false,
+                'allow_self_signed' => true
+              ]
+            ];
+          }
         }
+
+  
         $mailer = $mb->getMailer($mailerCfg);
         return $mailer->send($cfg);
       }

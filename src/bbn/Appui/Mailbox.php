@@ -235,26 +235,38 @@ class Mailbox extends Basic
       $c = [
         'host'  => $cfg['host'] ?? $this->host,
         'user' => $cfg['login'] ?? $this->login,
-        'pass'  => $cfg['pass'] ?? $this->pass
+        'pass'  => $cfg['pass'] ?? $this->pass,
+        'from'  => $cfg['from'] ?? null,
+        'name'  => $cfg['name'] ?? null,
+        'template' => $cfg['template'] ?? '',
       ];
-      if ($this->encryption) {
+      if (array_key_exists('encryption', $cfg)) {
+        if (is_array($cfg['encryption'])) {
+          $c = X::mergeArrays($c, $cfg['encryption']);
+        }
+      }
+      else if ($this->encryption) {
         $c['ssl'] = [
-          'verify_peer' => false,
+          'verify_peer' => $this->validateCertificate,
           'verify_peer_name' => false,
           'verify_host' => false,
           'allow_self_signed' => true
         ];
       }
 
-      if ($this->type === 'imap') {
+      if (in_array($this->type, ['imap', 'local'])) {
         $c['imap'] = true;
-        $c['imap_sent'] = 'Sent';
+        $c['imap_host'] = $this->host;
+        $c['imap_port'] = $this->port;
+        $c['imap_user'] = $this->login;
+        $c['imap_pass'] = $this->pass;
+        $c['imap_sent'] = !empty($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';
         if ($this->encryption) {
           $c['imap_ssl'] = 'ssl';
         }
       }
 
-      $this->mailer = new Mail(X::mergeArrays($c, $cfg));
+      $this->mailer = new Mail($c);
     }
 
     return $this->mailer;
