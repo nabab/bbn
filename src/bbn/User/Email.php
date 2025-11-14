@@ -230,7 +230,7 @@ class Email extends Basic
           'last_check' => $a['last_check'] ?? null,
           'id_account' => $id_account,
           'smtp' => $a['id_alias'] ?? null,
-          'rules' => $this->getFoldersRules($id_account, true),
+          'rules' => $this->getFoldersRules($id_account),
           $this->localeField => !empty($a[$this->localeField])
         ];
         $this->mboxes[$id_account]['folders'] = $this->getFolders($id_account);
@@ -285,7 +285,7 @@ class Email extends Basic
       'host' => $cfg['host'] ?: null,
       'email' => $cfg['email'],
       'login' => $cfg['login'],
-      'type' => Str::isUid($cfg['type'] ? self::getOptionsObject()->code($cfg['type']) : $cfg['type']),
+      'type' => Str::isUid($cfg['type']) ? self::getOptionsObject()->code($cfg['type']) : $cfg['type'],
       'port' => $cfg['port'] ?: null,
       'encryption' => !empty($cfg['encryption']) ? 1 : 0,
       'validatecert' => !empty($cfg['validatecert']) ? 1 : 0,
@@ -487,16 +487,12 @@ class Email extends Basic
       throw new \Exception(_("Missing arguments"));
     }
 
-    if (!($idSmtps = self::getOptionId('smtps'))) {
-      throw new \Exception(_("Impossible to find the smtps option"));
-    }
-
     $d = X::mergeArrays($this->pref->getCfg($idSmtp) ?: [], [
-      'name' => $cfg['email'],
+      'name' => $cfg['name'],
       'login' => $cfg['login'],
       'host' => $cfg['host'],
       'port' => $cfg['port'] ?? null,
-      'encryption' => $cfg['encryption'],
+      'encryption' => $cfg['encryption'] ?? 'none',
       'validatecert' => !empty($cfg['validatecert']) ? 1 : 0
     ]);
 
@@ -749,7 +745,7 @@ class Email extends Basic
   }
 
 
-  public function getFoldersRules(string $idAccount, bool $uid = false): array
+  public function getFoldersRules(string $idAccount): array
   {
     $res = [];
     $folders = $this->getFolders($idAccount);
@@ -760,7 +756,7 @@ class Email extends Basic
         if (!empty($folderTypesCodes[$f[$bitsFields['id_option']]])
           && !in_array($folderTypesCodes[$f[$bitsFields['id_option']]], $this->folderTypesNotUnique, true)
         ) {
-          $res[$folderTypesCodes[$f[$bitsFields['id_option']]]] = $f[$uid ? 'uid' : $bitsFields['id']];
+          $res[$folderTypesCodes[$f[$bitsFields['id_option']]]] = $f['uid'];
         }
       }
     }
@@ -1851,13 +1847,13 @@ class Email extends Basic
 
             if (!empty($rules)) {
               $typeCode = X::getField($types, ['id' => $db[$idx]['id_option']], 'code');
-              if (($c = array_search($db[$idx]['id'], $rules))
+              if (($c = array_search($db[$idx]['uid'], $rules))
                 && ($c !== $typeCode)
               ) {
                 $u['id_option'] = X::getField($types, ['code' => $c], 'id');
               }
               elseif (!empty($rules[$typeCode])
-                && ($rules[$typeCode] !== $db[$idx]['id'])
+                && ($rules[$typeCode] !== $db[$idx]['uid'])
               ) {
                 $u['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
               }
@@ -2222,6 +2218,7 @@ class Email extends Basic
       'last_check' => $folder['last_check'] ?? null,
       'hash' => $folder['hash'] ?? null,
       'subscribed' => $folder['subscribed'] ?? false,
+      'icon' => X::getField($types, ['id' => $folder['id_option']], 'icon'),
       $this->localeField => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
     ];
   }
