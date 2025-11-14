@@ -1765,7 +1765,7 @@ class Email extends Basic
       $types = self::getFolderTypes();
       if (empty($subscribed)) {
         $subscribed = array_map(
-          fn($f) => substr($f, strlen($mbParams) - 1),
+          fn($f) => substr($f, strlen($mbParams)),
           $mb->listAllSubscribed()
         );
       }
@@ -2092,10 +2092,6 @@ class Email extends Basic
 
     if (!$mb = $this->getMailbox($folderSrc['id_account'])) {
       throw new \Exception(X::_("Impossible to find the mailbox for the account ID: %s", $folderSrc['id_account']));
-    }
-
-    if (!$mbParams = $mb->getParams()) {
-      throw new \Exception(X::_("Impossible to get the mailbox connection parameters for the account ID: %s", $folderSrc['id_account']));
     }
 
     if (!$mb->selectFolder($folderSrc['uid'])) {
