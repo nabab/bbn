@@ -506,7 +506,7 @@ class Event extends modelDb
     if ( !empty($event[$rf['wd']]) ){
       $wds =& $this->weekdays;
       $days = array_map(function($d) use($wds){
-        return substr($wds[$d], 0, 2);
+        return Str::sub($wds[$d], 0, 2);
       }, $event[$rf['wd']]);
       $when->byday($days);
     }

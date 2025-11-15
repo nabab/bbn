@@ -140,7 +140,7 @@ class Medias extends DbCls
   public function setImageRoot(string $root): bool
   {
     if ($root) {
-      if (substr($root, -1) !== '/') {
+      if (Str::sub($root, -1) !== '/') {
         $root .= '/';
       }
 
@@ -155,7 +155,7 @@ class Medias extends DbCls
   public function setFileRoot(string $root): bool
   {
     if ($root) {
-      if (substr($root, -1) !== '/') {
+      if (Str::sub($root, -1) !== '/') {
         $root .= '/';
       }
 
@@ -547,7 +547,7 @@ class Medias extends DbCls
 
       $root   .= 'media/';
       $path    = X::makeStoragePath($root, '', 0, $this->fs);
-      $dpath   = substr($path, strlen($root));
+      $dpath   = Str::sub($path, Str::len($root));
       $name    = normalizer_normalize(X::basename($file));
       $mime    = mime_content_type($file) ?: null;
       $content = [
@@ -586,7 +586,7 @@ class Medias extends DbCls
         rename($path.$id.'/'.X::basename($file), $path.$id.'/'.$name);
         $newFile = $path.$id.'/'.$name;
         chmod($newFile, 0644);
-        if (strpos($mime, 'image/') === 0) {
+        if (Str::pos($mime, 'image/') === 0) {
           $image = new Image($newFile, $this->fs);
           $tst = $this->getThumbsSizesByType($id_type);
           $ts =  !empty($tst) && !empty($tst['thumbs']) ? \array_map(function($t){
@@ -851,7 +851,7 @@ class Medias extends DbCls
   {
     if (is_string($path) && $this->fs->isFile($path)) {
       $content_type = mime_content_type($path);
-      if (strpos($content_type, 'image/') === 0) {
+      if (Str::pos($content_type, 'image/') === 0) {
         return true;
       }
     }
@@ -1105,7 +1105,7 @@ class Medias extends DbCls
       }
       $this->removeThumbs($media);
       $this->fs->delete($oldFile);
-      if (strpos($mime, 'image/') === 0) {
+      if (Str::pos($mime, 'image/') === 0) {
         $tst = $this->getThumbsSizesByType($media['type']);
         $ts =  !empty($tst) && !empty($tst['thumbs']) ? \array_map(function($t){
           return [

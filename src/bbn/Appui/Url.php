@@ -4,6 +4,7 @@ namespace bbn\Appui;
 
 use bbn\Db;
 use bbn\X;
+use bbn\Str;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
 use Exception;
@@ -56,10 +57,10 @@ class Url extends DbCls
   {
     $url    = trim($url, '/ ');
     $prefix = trim($prefix, '/ ');
-    while (strpos($url, '//')) {
+    while (Str::pos($url, '//')) {
       $url = str_replace('//', '/', $url);
     }
-    if (strpos($url, '../') !== false) {
+    if (Str::pos($url, '../') !== false) {
       throw new Exception(X::_("Invalid URL: %s", $url));
     }
 

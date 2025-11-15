@@ -42,6 +42,7 @@ namespace bbn;
 
 use Exception;
 use bbn\X;
+use bbn\Str;
 use bbn\Mvc;
 use bbn\Models\Cls\Basic;
 use PHPMailer\PHPMailer\PHPMailer;

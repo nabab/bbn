@@ -6,8 +6,10 @@
  */
 
 namespace bbn\Cron;
-use bbn;
 
+use bbn\Str;
+use bbn\Mvc;
+use bbn\File\System;
 
 trait Common {
   /**
@@ -107,7 +109,7 @@ trait Common {
    */
   public function init(array $cfg = [])
   {
-    $this->path = $cfg['data_path'] ?? bbn\Mvc::getDataPath('appui-cron');
+    $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
   }
 
   /**
@@ -170,7 +172,7 @@ trait Common {
 
   public function getLogTree(array $cfg, bool $error = false)
   {
-    $fs = new bbn\File\System();
+    $fs = new System();
     $fpath = !empty($cfg['fpath']) ? $cfg['fpath'] . '/' : '';
     if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path.$fpath)) {
       $fs->cd($path.$fpath);
@@ -188,7 +190,7 @@ trait Common {
 
   public function getDayLogs(array $cfg): ?array
   {
-    if ( bbn\Str::isUid($cfg['id']) && bbn\Str::isDateSql($cfg['day']) ){
+    if ( Str::isUid($cfg['id']) && Str::isDateSql($cfg['day']) ){
       $p = \explode('-', $cfg['day']);
       \array_pop($p);
       $p = \implode('/', $p).'/';
@@ -211,7 +213,7 @@ trait Common {
 
   public function  get_log_prev_next(array $cfg): ?string
   {
-    $fs = new bbn\File\System();
+    $fs = new System();
     $fpath = $cfg['fpath'] ?: '';
     if ( ($path = $this->getLogPath($cfg, false, true)) && $fs->isDir($path.$fpath) ){
       $fs->cd($path.$fpath);

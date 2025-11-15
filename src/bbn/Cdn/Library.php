@@ -11,7 +11,7 @@
  */
 namespace bbn\Cdn;
 
-use bbn;
+use bbn\Str;
 use bbn\X;
 
 /**
@@ -368,10 +368,10 @@ class Library
       // The files from which the content will be prepended to corresponding files
       $info['prepend'] = [];
       if ($info['git']) {
-        if (strpos($info['git'], 'https://github.com/') === 0) {
-          $info['git'] = substr($info['git'], strlen('https://github.com/'));
-          if (substr($info['git'], -4) === '.git') {
-            $info['git'] = substr($info['git'], 0, -4);
+        if (Str::pos($info['git'], 'https://github.com/') === 0) {
+          $info['git'] = Str::sub($info['git'], Str::len('https://github.com/'));
+          if (Str::sub($info['git'], -4) === '.git') {
+            $info['git'] = Str::sub($info['git'], 0, -4);
           }
         }
         else {
@@ -394,7 +394,7 @@ class Library
               foreach ($info['content']->theme_files as $tf) {
                 foreach ($info['content']->files as $f) {
                   /** @todo Remove(bool)! */
-                  if (substr($f, -4) === 'less') {
+                  if (Str::sub($f, -4) === 'less') {
                     if (X::indexOf($tf, '%s') > -1) {
                       $info['prepend'][$f][] = sprintf(str_replace('%s', '%1$s', $tf), $th);
                     } else {
@@ -584,7 +584,7 @@ SQL,
         if (isset($info['content']->files) && is_array($info['content']->files)) {
           // Adding each files - no matter the type
           foreach ($info['content']->files as $f) {
-            if (isset($info['theme']) && strpos($f, '%s')) {
+            if (isset($info['theme']) && Str::pos($f, '%s')) {
               $f = sprintf($f, $info['theme']);
             }
 
@@ -685,7 +685,7 @@ SQL,
 
             if (!in_array($f, $res[$type])) {
               $res[$type][] = $f;
-              $inc[$type][] = substr($f, strlen($inc['path']));
+              $inc[$type][] = Str::sub($f, Str::len($inc['path']));
             }
           }
         }

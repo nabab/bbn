@@ -5,6 +5,7 @@
 namespace bbn;
 
 use Exception;
+use bbn\Str;
 /**
  * Perform a single file objectification and manage its manipulation.
  *
@@ -90,13 +91,13 @@ class File extends Models\Cls\Basic
     else if ( \is_string($file) )
     {
       $file = trim($file);
-      if (strrpos($file,'/'))
+      if (Str::rpos($file,'/'))
       {
         /* The -2 in strrpos means that if there is a final /, it will be kept in the file name */
-        $this->name = substr($file,strrpos($file,'/',-2)+1);
-        $this->path = substr($file,0,-\strlen($this->name));
-        if ( substr($this->path,0,2) == '//' ){
-          $this->path = 'http://'.substr($this->path,2);
+        $this->name = Str::sub($file,Str::rpos($file,'/',-2)+1);
+        $this->path = Str::sub($file,0,-\Str::len($this->name));
+        if ( Str::sub($this->path,0,2) == '//' ){
+          $this->path = 'http://' . Str::sub($this->path,2);
         }
       }
       else
@@ -169,14 +170,14 @@ class File extends Models\Cls\Basic
   public function getExtension()
   {
     if ($this->name && is_null($this->ext)) {
-      if (strrpos($this->name, '.')) {
+      if (Str::rpos($this->name, '.')) {
         $p = Str::fileExt($this->name, 1);
         $this->ext = $p[1];
         $this->title = $p[0];
       }
       else{
         $this->ext = '';
-        $this->title = substr($this->name,-1) === '/' ? substr($this->name,0,-1) : $this->name;
+        $this->title = Str::sub($this->name,-1) === '/' ? Str::sub($this->name,0,-1) : $this->name;
       }
     }
 
@@ -191,7 +192,7 @@ class File extends Models\Cls\Basic
    */
   protected function make()
   {
-    if ( !$this->file && strpos($this->path,'http://') === 0 ){
+    if ( !$this->file && Str::pos($this->path,'http://') === 0 ){
       $d = getcwd();
       chdir(__DIR__);
       chdir('../tmp');
@@ -199,8 +200,8 @@ class File extends Models\Cls\Basic
       try{
         $c = file_get_contents($this->path.$this->name);
         if ( file_put_contents($f, $c) ){
-          if ( substr($this->name,-1) == '/' ){
-            $this->name = substr($this->name,0,-1);
+          if ( Str::sub($this->name,-1) == '/' ){
+            $this->name = Str::sub($this->name,0,-1);
           }
           chmod($f, 0644);
           $this->file = $f;
@@ -310,7 +311,7 @@ class File extends Models\Cls\Basic
   public function save($dest='./')
   {
     $new_name = false;
-    if ( substr($dest,-1) === '/' ){
+    if ( Str::sub($dest,-1) === '/' ){
       if ( is_dir($dest) ){
         $new_name = 0;
       }
@@ -319,7 +320,7 @@ class File extends Models\Cls\Basic
       $dest .= '/';
       $new_name = 0;
     }
-    else if ( is_dir(substr($dest,0,strrpos($dest,'/'))) ){
+    else if ( is_dir(Str::sub($dest,0,Str::rpos($dest,'/'))) ){
       $new_name = 1;
     }
     if ( $new_name !== false ){

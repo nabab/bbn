@@ -34,7 +34,7 @@ class Actions
   {
     if (
       isset($data['file'], $data['code']) &&
-      (strpos($data['file'], '../') === false)
+      (Str::pos($data['file'], '../') === false)
     ) {
       $args = explode('/', $data['file']);
       // The root directory
@@ -57,12 +57,12 @@ class Actions
               }
               // If MVC file is not controller and no content, we delete the file
               else if (empty($data['code']) && ($f['url'] !== 'php')) {
-                $new_path = $f['fpath'] . substr(implode("/", $args), 0, -3) . $f['ext'];
+                $new_path = $f['fpath'] . Str::sub(implode("/", $args), 0, -3) . $f['ext'];
                 unlink($new_path);
                 return ['path' => $new_path];
               } else {
                 $arg = \array_slice($args, 0, \count($args) - 1);
-                $new_path = substr(implode("/", $arg), 0, -3) . $f['ext'];
+                $new_path = Str::sub(implode("/", $arg), 0, -3) . $f['ext'];
               }
               $new_path = $f['fpath'] . $new_path;
               break;
@@ -97,7 +97,7 @@ class Actions
     $dirs = $directories->dirs();
     if (
       isset($data['dir'], $data['name'], $data['path'], $data['type'], $dirs[$data['dir']]) &&
-      (strpos($data['path'], '../') === false) &&
+      (Str::pos($data['path'], '../') === false) &&
       Str::checkFilename($data['name'])
     ) {
       $cfg = &$dirs[$data['dir']];
@@ -147,7 +147,7 @@ class Actions
       $directories = new Directories();
       $dirs = $directories->dirs($data['dir']);
       $data['file'] = $this->isMvc($dirs) && (Str::fileExt($data['file']) !== 'php') ?
-        substr($data['file'], 0, Strrpos($data['file'], "/")) : $data['file'];
+        Str::sub($data['file'], 0, Strrpos($data['file'], "/")) : $data['file'];
       unset($data['act']);
       return 1;
     }
@@ -167,7 +167,7 @@ class Actions
     $cfg = $directories->dirs();
     if (
       isset($data['dir'], $data['name'], $data['path'], $data['type'], $cfg[$data['dir']]) &&
-      (strpos($data['path'], '../') === false) &&
+      (Str::pos($data['path'], '../') === false) &&
       Str::checkFilename($data['name'])
     ) {
       $type = $data['type'] === 'file' ? 'file' : 'dir';
@@ -179,7 +179,7 @@ class Actions
           $tab_url_mvc = $data['dir'] . '/' . $data['path'];
           if ($data['name'] != '_super') {
             foreach ($cfg[$data['dir']]['files'] as $f) {
-              $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
+              $p = $f['fpath'] . Str::sub($data['path'], 0, -3) . $f['ext'];
               if (file_exists($p) && !\in_array($p, $delete)) {
                 array_push($delete, $p);
               }
@@ -254,8 +254,8 @@ class Actions
   {
     if (
       isset($data['dir'], $data['path'], $data['src'], $data['name']) &&
-      (strpos($data['src'], '../') === false) &&
-      (strpos($data['path'], '../') === false) &&
+      (Str::pos($data['src'], '../') === false) &&
+      (Str::pos($data['path'], '../') === false) &&
       Str::checkFilename($data['name'])
     ) {
       $directories = new Directories();
@@ -323,8 +323,8 @@ class Actions
   {
     if (
       isset($data['dir'], $data['spath'], $data['dpath']) &&
-      (strpos($data['dpath'], '../') === false) &&
-      (strpos($data['spath'], '../') === false)
+      (Str::pos($data['dpath'], '../') === false) &&
+      (Str::pos($data['spath'], '../') === false)
     ) {
       $directories = new Directories();
       $dirs = $directories->dirs();
@@ -396,7 +396,7 @@ class Actions
   {
     if (
       isset($data['dir'], $data['name'], $data['path']) &&
-      (strpos($data['path'], '../') === false) &&
+      (Str::pos($data['path'], '../') === false) &&
       Str::checkFilename($data['name'])
     ) {
       $directories = new Directories();
@@ -491,7 +491,7 @@ class Actions
             $dest = $root_dest . $data['name'] . '/' . str_replace(Mvc::getAppPath(), '', $f['fpath']);
             if ($data['type'] === 'file') {
               $ext = Str::fileExt($data['path']);
-              $path = substr($data['path'], 0, Strrpos($data['path'], $ext));
+              $path = Str::sub($data['path'], 0, Strrpos($data['path'], $ext));
               $file = $f['fpath'] . $path . $f['ext'];
               if (file_exists($file)) {
                 if (!Dir::createPath($dest . X::dirname($data['path']))) {
@@ -523,8 +523,8 @@ class Actions
           }
           $dest = $root_dest . $data['name'] . '/' . $data['path'];
           if ($data['type'] === 'file') {
-            if (!Dir::createPath(substr($dest, 0, Strrpos($dest, '/') + 1))) {
-              return $this->error('Impossible to create the path ' . substr($dest, 0, Strrpos($dest, '/') + 1));
+            if (!Dir::createPath(Str::sub($dest, 0, Strrpos($dest, '/') + 1))) {
+              return $this->error('Impossible to create the path ' . Str::sub($dest, 0, Strrpos($dest, '/') + 1));
             }
           }
           if (!Dir::copy($dir . $data['path'], $dest)) {

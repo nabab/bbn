@@ -138,10 +138,10 @@ class Address extends DbCls
     ) {
       $cond = [];
 
-      if (!empty($p[$f['address']]) && strlen($p[$f['address']]) > 7) {
+      if (!empty($p[$f['address']]) && Str::len($p[$f['address']]) > 7) {
         array_push($cond, [$f['address'], 'LIKE', '%' . $p[$f['address']] . '%']);
       }
-      if (!empty($p[$f['phone']]) && (strlen($p[$f['phone']]) >= 6)) {
+      if (!empty($p[$f['phone']]) && (Str::len($p[$f['phone']]) >= 6)) {
         array_push($cond, [$f['phone'], 'LIKE', $p[$f['phone']] . '%']);
       }
       if (!empty($p[$f['city']])) {
@@ -243,11 +243,11 @@ class Address extends DbCls
     $cdx = $this->getCedex($ville);
     $percent = $percent ? '%' : '';
     $ville_cond = "( `apst_cp`.`ville` LIKE '" . $percent . Str::escapeSquotes($ville) . $percent . "' ";
-    if (strpos($ville, '-')) {
+    if (Str::pos($ville, '-')) {
       $ville_comp = Str::escapeSquotes(str_replace('-', ' ', $ville));
       $ville_cond .= "OR `apst_cp`.`ville` LIKE '" . $percent . $ville_comp . $percent . "' ";
     }
-    if (strpos($ville, ' ')) {
+    if (Str::pos($ville, ' ')) {
       $ville_comp = Str::escapeSquotes(str_replace(' ', '-', $cdx['ville']));
       $ville_cond .= "OR `apst_cp`.`ville` LIKE '" . $percent . $ville_comp . $percent . "' ";
     }
@@ -279,15 +279,15 @@ class Address extends DbCls
   {
     $cp = Str::getNumbers($cp);
 
-    if (strlen($cp) === 2) {
+    if (Str::len($cp) === 2) {
       $cp .= '000';
-    } else if (strlen($cp) === 4) {
+    } else if (Str::len($cp) === 4) {
       $cp = '0' . $cp;
     }
 
     $ville = trim($ville);
     $ville = str_replace('/', ' SUR ', $ville);
-    while (strpos($ville, '  ')) {
+    while (Str::pos($ville, '  ')) {
       $ville = str_replace('  ', ' ', $ville);
     }
 
@@ -385,9 +385,9 @@ class Address extends DbCls
       }
     }
 
-    $dpt = substr($cp, 0, 2);
+    $dpt = Str::sub($cp, 0, 2);
     if ($dpt == 97) {
-      $dpt = substr($cp, 0, 3);
+      $dpt = Str::sub($cp, 0, 3);
     } else if ($dpt == 20) {
       $dpt = $this->db->getOne(
         "
@@ -503,7 +503,7 @@ class Address extends DbCls
       }
       if (is_array($fn[$f['address']])) {
         $r[$f['address']] = array_filter($fn[$f['address']], function ($ad) {
-          return !empty($ad) && strlen($ad) > 1;
+          return !empty($ad) && Str::len($ad) > 1;
         });
         if (count($r[$f['address']]) > 0) {
           // On enlève la virgule après le numéro de rue si elle y est
@@ -521,13 +521,13 @@ class Address extends DbCls
       $r[$f['city']] = empty($fn[$f['city']]) ? '' : Str::changeCase($fn[$f['city']]);
       if (isset($fn[$f['phone']])) {
         $fn[$f['phone']] = Str::getNumbers($fn[$f['phone']]);
-        if (strlen($fn[$f['phone']]) > 10 && strpos($fn[$f['phone']], '33') === 0) {
-          $fn[$f['phone']] = substr($fn[$f['phone']], 2);
+        if (Str::len($fn[$f['phone']]) > 10 && Str::pos($fn[$f['phone']], '33') === 0) {
+          $fn[$f['phone']] = Str::sub($fn[$f['phone']], 2);
         }
-        if (strlen($fn[$f['phone']]) === 9 && strpos($fn[$f['phone']], '0') !== 0) {
+        if (Str::len($fn[$f['phone']]) === 9 && Str::pos($fn[$f['phone']], '0') !== 0) {
           $fn[$f['phone']] = '0' . $fn[$f['phone']];
         }
-        if (strlen($fn[$f['phone']]) === 10) {
+        if (Str::len($fn[$f['phone']]) === 10) {
           $r[$f['phone']] = $fn[$f['phone']];
         }
       }

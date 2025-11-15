@@ -3,6 +3,7 @@
 namespace bbn\tests\User;
 
 use bbn\Db;
+use bbn\Str;
 use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
@@ -2234,7 +2235,7 @@ class UserTest extends TestCase
       $result = $this->user->makeFingerprint();
 
       $this->assertIsString($result);
-      $this->assertTrue(strlen($result) >= 16 && strlen($result) <= 32);
+      $this->assertTrue(Str::len($result) >= 16 && Str::len($result) <= 32);
     }
   }
 
@@ -2247,7 +2248,7 @@ class UserTest extends TestCase
     $this->assertTrue(isset($result['hash']));
     $this->assertIsString($result['key']);
     $this->assertIsString($result['hash']);
-    $this->assertTrue(strlen($result['key']) >= 16 && strlen($result['key']) <= 32);
+    $this->assertTrue(Str::len($result['key']) >= 16 && Str::len($result['key']) <= 32);
   }
 
 

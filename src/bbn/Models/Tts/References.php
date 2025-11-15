@@ -8,7 +8,7 @@
 
 namespace bbn\Models\Tts;
 
-use bbn;
+use bbn\Str;
 
 
 trait References
@@ -27,7 +27,7 @@ trait References
     if ( \is_null($this->references) ){
       if ( $refs = $this->db->findRelations('bbn_tasks.id') ){
         $this->references = array_filter($refs, function($a, $k){
-          return strpos($k, 'bbn_tasks') !== 0;
+          return Str::pos($k, 'bbn_tasks') !== 0;
         }, ARRAY_FILTER_USE_BOTH);
       }
       if ( empty($this->references) ){

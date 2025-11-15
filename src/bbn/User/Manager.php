@@ -753,8 +753,8 @@ You can click the following link to access directly your account:<br>
       );
       $id_link = $this->db->lastId();
       $url = constant('BBN_URL');
-      if (substr($url, -1) === '/') {
-        $url = substr($url, 0, -1);
+      if (Str::sub($url, -1) === '/') {
+        $url = Str::sub($url, 0, -1);
       }
 
       $url .= constant("BBN_CUR_PATH");

@@ -1125,7 +1125,7 @@ class Server
             (empty($found) || empty($found[0]))
             || (($d['name'] !== $dom . '.')
                 && (\substr_count($d['name'], '.') > 2)
-                && (!\is_null(X::search($domains, ['name' => substr($d['name'], 0, -1)]))))
+                && (!\is_null(X::search($domains, ['name' => Str::sub($d['name'], 0, -1)]))))
         ) {
           unset($dns[$i]);
         }

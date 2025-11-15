@@ -3,7 +3,8 @@
  * @package str
  */
 namespace bbn\Str;
-use bbn;
+
+use bbn\Str;
 /**
  * A Class for hashes
  *
@@ -48,12 +49,12 @@ class Hash
 			if ( preg_match('#[A-z0-9_/]+#',$hash,$m) === 1 && $m[0] === $hash )
 			{
 				$this->hash = $hash;
-				while ( strpos($this->hash,'//') )
+				while ( Str::pos($this->hash,'//') )
 					$this->hash = str_replace('//','/',$this->hash);
-				if ( strpos($this->hash,'/') === 0 )
-					$this->hash = substr($this->hash,1);
-				if ( substr($this->hash,-1) === '/' )
-					$this->hash = substr($this->hash,0,-1);
+				if ( Str::pos($this->hash,'/') === 0 )
+					$this->hash = Str::sub($this->hash,1);
+				if ( Str::sub($this->hash,-1) === '/' )
+					$this->hash = Str::sub($this->hash,0,-1);
 			}
 		}
 		if ( !isset($this->hash) )
@@ -143,7 +144,7 @@ class Hash
 		{
 			foreach ( $this->values as $k => $v )
 				$h.= $this->keys[$k].'/'.$v.'/';
-			$h = substr($h,0,-1);
+			$h = Str::sub($h,0,-1);
 		}
 		return $h;
 	}

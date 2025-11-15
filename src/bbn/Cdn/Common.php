@@ -35,15 +35,15 @@ trait Common
   ];
 
   private function _set_prefix(){
-    if ( defined('BBN_SHARED_PATH') && (strpos(BBN_SHARED_PATH, '/') === 0) ){
-      $this->prefix = substr(BBN_SHARED_PATH, 1);
+    if ( defined('BBN_SHARED_PATH') && (Str::pos(BBN_SHARED_PATH, '/') === 0) ){
+      $this->prefix = Str::sub(BBN_SHARED_PATH, 1);
       $this->furl = '/'.$this->prefix;
     }
     else{
       $this->furl = BBN_URL;
       $parsed = parse_url(BBN_SHARED_PATH);
       if ( $parsed['path'] && ($parsed['path'] !== '/') ){
-        $this->prefix = substr($parsed['path'], 1);
+        $this->prefix = Str::sub($parsed['path'], 1);
         $this->furl .= $this->prefix;
       }
     }

@@ -8,7 +8,8 @@
  *
  */
 namespace bbn\Api;
-use bbn;
+use bbn\Str;
+use bbn\X;
 
 class Cloudmintest {
 
@@ -79,7 +80,7 @@ class Cloudmintest {
         // TODO tolto i comandi, messo gli argomenti
         foreach ( $args as $k => $v ){
           if ( !empty($v['mandatory']) && !isset($args[$k]) ){
-            if ( (strpos($k, 'pass') === false) &&
+            if ( (Str::pos($k, 'pass') === false) &&
               (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
             ){
               var_dump("Parameter $k mandatory for $name!");
@@ -188,16 +189,16 @@ class Cloudmintest {
    */
   private function sanitize($st){
     $st = trim((string)$st);
-    if ( strpos($st, ';') !== false ){
+    if ( Str::pos($st, ';') !== false ){
       return '';
     }
-    if ( strpos($st, '<') !== false ){
+    if ( Str::pos($st, '<') !== false ){
       return '';
     }
-    if ( strpos($st, '"') !== false ){
+    if ( Str::pos($st, '"') !== false ){
       return '';
     }
-    if ( strpos($st, "'") !== false ){
+    if ( Str::pos($st, "'") !== false ){
       return '';
     }
     return $st;

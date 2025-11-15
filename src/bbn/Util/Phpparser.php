@@ -6,6 +6,7 @@
  */
 namespace bbn\Util;
 
+use bbn\Str;
 // @rodneyrehm
 // http://stackoverflow.com/a/7917979/99923
 class Phpparser
@@ -31,14 +32,14 @@ class Phpparser
 
         if ($string[0] == '('){
             // killer outer parens, as they're unnecessary
-            $string = substr($string, 1, -1);
+            $string = Str::sub($string, 1, -1);
         }
 
         $this->current = [];
         $this->stack = [];
 
         $this->string = $string;
-        $this->length = \strlen($this->string);
+        $this->length = Str::len($this->string);
         // look at each character
         for ($this->position=0; $this->position < $this->length; $this->position++){
             switch ($this->string[$this->position]){
@@ -81,7 +82,7 @@ class Phpparser
     {
         if ($this->buffer_start !== null){
             // extract string from buffer start to current position
-            $buffer = substr($this->string, $this->buffer_start, $this->position - $this->buffer_start);
+            $buffer = Str::sub($this->string, $this->buffer_start, $this->position - $this->buffer_start);
             // clean buffer
             $this->buffer_start = null;
             // throw token into current scope

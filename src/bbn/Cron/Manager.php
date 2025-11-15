@@ -6,16 +6,19 @@
 
 namespace bbn\Cron;
 
-use bbn;
+use bbn\X;
+use bbn\Str;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\Models\Cls\Basic;
 use bbn\Appui\Notification;
 use bbn\Db\Enums\Errors;
-use bbn\X;
 
 /**
  * Class cron
  * @package bbn\Appui
  */
-class Manager extends bbn\Models\Cls\Basic
+class Manager extends Basic
 {
 
   use Common;
@@ -28,12 +31,12 @@ class Manager extends bbn\Models\Cls\Basic
    * @param bbn\Db $db
    * @param array $cfg
    */
-  public function __construct(bbn\Db $db, array $cfg = [])
+  public function __construct(Db $db, array $cfg = [])
   {
-    if (bbn\Mvc::getDataPath() && $db->check()) {
+    if (Mvc::getDataPath() && $db->check()) {
       // It must be called from a plugin (appui-cron actually)
       //$this->path = BBN_DATA_PATH.'plugins/appui-cron/';
-      $this->path  = bbn\Mvc::getDataPath('appui-cron');
+      $this->path  = Mvc::getDataPath('appui-cron');
       $this->db    = $db;
       $this->table = $this->prefix.'cron';
     }
@@ -187,9 +190,9 @@ class Manager extends bbn\Models\Cls\Basic
    */
   public function getNextDate(string $frequency, int $from_time = 0): ?string
   {
-    if ((\strlen($frequency) >= 2)) {
-      $letter  = bbn\Str::changeCase(substr($frequency, 0, 1), 'lower');
-      $number  = (int)substr($frequency, 1);
+    if ((Str::len($frequency) >= 2)) {
+      $letter  = Str::changeCase(Str::sub($frequency, 0, 1), 'lower');
+      $number  = (int)Str::sub($frequency, 1);
       $letters = ['y', 'm', 'w', 'd', 'h', 'i', 's'];
       if (in_array($letter, $letters, true) && ($number > 0)) {
         $time = time();
@@ -276,7 +279,7 @@ class Manager extends bbn\Models\Cls\Basic
       'field' => 'active',
       'value' => 1
     ]];
-    if (bbn\Str::isUid($id_cron)) {
+    if (Str::isUid($id_cron)) {
       $conditions[] = [
         'field' => 'id',
         'value' => $id_cron
@@ -574,6 +577,10 @@ class Manager extends bbn\Models\Cls\Basic
   public function addSingle(string $file, string $variant, int $priority = 5, int $timeout = 360)
   {
     if ($this->check()) {
+      if (!defined('BBN_PROJECT')) {
+        throw new \Exception('BBN_PROJECT is not defined');
+      }
+
       $d = [
         'file' => $file,
         'description' => X::_('One shot action'),
@@ -585,7 +592,7 @@ class Manager extends bbn\Models\Cls\Basic
             'timeout' => $timeout
           ]
         ),
-        'project' => BBN_PROJECT,
+        'project' => constant('BBN_PROJECT'),
         'active' => 1
       ];
       if ($this->db->insertUpdate($this->table, $d)) {

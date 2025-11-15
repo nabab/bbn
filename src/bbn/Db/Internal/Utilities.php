@@ -134,8 +134,8 @@ trait Utilities
           $id = random_int($min, $max);
           /** @todo */
           /*
-          if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){
-            $id = substr(md5('bbn'.$id), 0, random_int(1, 10 ** $maxlength));
+          if ( Str::pos($tab['fields'][$id_field]['type'], 'char') !== false ){
+            $id = Str::sub(md5('bbn'.$id), 0, random_int(1, 10 ** $maxlength));
           }
           */
           $i++;

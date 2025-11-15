@@ -140,11 +140,11 @@ class Sqlite extends Sql
     }
     elseif (\defined('BBN_DATA_PATH')
       && is_dir(constant('BBN_DATA_PATH').'db')
-      && (strpos($cfg['db'], '/') === false)
+      && (Str::pos($cfg['db'], '/') === false)
     ) {
       $cfg['host'] = constant('BBN_DATA_PATH').'db'.DIRECTORY_SEPARATOR;
       if (!is_file(constant('BBN_DATA_PATH').'db'.DIRECTORY_SEPARATOR.$cfg['db'])
-        && (strpos($cfg['db'], '.') === false)
+        && (Str::pos($cfg['db'], '.') === false)
       ) {
         $cfg['db'] .= '.sqlite';
       }
@@ -201,12 +201,12 @@ class Sqlite extends Sql
    */
   public function change(string $db): bool
   {
-    if (strpos($db, '.') === false) {
+    if (Str::pos($db, '.') === false) {
       $db .= '.sqlite';
     }
 
     $info = X::pathinfo($db);
-    if (($info['filename'] !== $this->getCurrent()) && file_exists($this->host.$db) && strpos($db, $this->qte) === false) {
+    if (($info['filename'] !== $this->getCurrent()) && file_exists($this->host.$db) && Str::pos($db, $this->qte) === false) {
       $this->rawQuery("ATTACH '".$this->host.$db."' AS ".$info['filename']);
       $this->current = $info['filename'];
 
@@ -365,7 +365,7 @@ class Sqlite extends Sql
       $r->closeCursor();
       if ($t1) {
         foreach ($t1 as $t){
-          if (strpos($t[0], 'sqlite') !== 0) {
+          if (Str::pos($t[0], 'sqlite') !== 0) {
             array_push($t2, $t[0]);
           }
         }
@@ -425,24 +425,24 @@ class Sqlite extends Sql
 
 
           $type  = strtolower($row['type']);
-          if (strpos($type, 'blob') !== false) {
+          if (Str::pos($type, 'blob') !== false) {
             $r[$f]['type'] = 'BLOB';
           }
-          elseif (( strpos($type, 'int') !== false ) || ( strpos($type, 'bool') !== false ) || ( strpos($type, 'timestamp') !== false )) {
+          elseif (( Str::pos($type, 'int') !== false ) || ( Str::pos($type, 'bool') !== false ) || ( Str::pos($type, 'timestamp') !== false )) {
             $r[$f]['type'] = 'INTEGER';
 
-            if (strpos($type, 'unsigned') !== false) {
+            if (Str::pos($type, 'unsigned') !== false) {
               $r[$f]['signed'] = 0;
             }
           }
-          elseif (( strpos($type, 'floa') !== false ) || ( strpos($type, 'doub') !== false ) || ( strpos($type, 'real') !== false )) {
+          elseif (( Str::pos($type, 'floa') !== false ) || ( Str::pos($type, 'doub') !== false ) || ( Str::pos($type, 'real') !== false )) {
             $r[$f]['type'] = 'REAL';
 
-            if (strpos($type, 'unsigned') !== false) {
+            if (Str::pos($type, 'unsigned') !== false) {
               $r[$f]['signed'] = 0;
             }
           }
-          elseif (( strpos($type, 'char') !== false ) || ( strpos($type, 'text') !== false )) {
+          elseif (( Str::pos($type, 'char') !== false ) || ( Str::pos($type, 'text') !== false )) {
             $r[$f]['type'] = 'TEXT';
           }
 
@@ -625,7 +625,7 @@ class Sqlite extends Sql
       }
 
       if (!empty($res)) {
-        return 'ORDER BY '.substr($res,0, Strrpos($res,',')).PHP_EOL;
+        return 'ORDER BY ' . Str::sub($res,0, Strrpos($res,',')).PHP_EOL;
       }
     }
 
@@ -1676,8 +1676,8 @@ class Sqlite extends Sql
     }
 
     if (!empty($cfg['position'])) {
-      if (strpos($cfg['position'], 'after:') === 0) {
-        $after = trim(substr($cfg['position'], 6));
+      if (Str::pos($cfg['position'], 'after:') === 0) {
+        $after = trim(Str::sub($cfg['position'], 6));
         if (Str::checkName($after)) {
           $st .= ' AFTER ' . $this->escape($after);
         }

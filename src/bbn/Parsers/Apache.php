@@ -45,11 +45,11 @@ class Apache
           $fsize = 0;
           $res = [];
           while (($buffer = fgets($handle)) !== false) {
-            $fsize += strlen($buffer);
+            $fsize += Str::len($buffer);
             $res[] = $buffer;
             while ($fsize > $size) {
               array_shift($res);
-              $fsize = strlen(implode('', $res));
+              $fsize = Str::len(implode('', $res));
             }
           }
 
@@ -171,7 +171,7 @@ class Apache
 
     $m = [];
     if (preg_match(self::$err1, $ln, $m)) {
-      $in_lib = strpos('/'.$m[4], BBN_LIB_PATH) === 0;
+      $in_lib = Str::pos('/'.$m[4], BBN_LIB_PATH) === 0;
       return [
         'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),
         'type' => $m[2],
@@ -186,7 +186,7 @@ class Apache
     }
 
     if (preg_match(self::$err2, $ln, $m)) {
-      $in_lib = strpos('/'.$m[4], BBN_LIB_PATH) === 0;
+      $in_lib = Str::pos('/'.$m[4], BBN_LIB_PATH) === 0;
       return [
         'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),
         'type' => $m[2],
@@ -201,7 +201,7 @@ class Apache
     }
 
     if (preg_match(self::$err_line, $ln, $m)) {
-      $in_lib = strpos('/'.$m[3], BBN_LIB_PATH) === 0;
+      $in_lib = Str::pos('/'.$m[3], BBN_LIB_PATH) === 0;
       return [
         'action' => Str::cut($m[2], 255),
         'file' => str_replace(
@@ -214,7 +214,7 @@ class Apache
     }
 
     if (preg_match(self::$err_line2, $ln, $m)) {
-      $in_lib = strpos('/'.$m[1], BBN_LIB_PATH) === 0;
+      $in_lib = Str::pos('/'.$m[1], BBN_LIB_PATH) === 0;
       return [
         'action' => Str::cut($m[3], 255),
         'file' => str_replace(

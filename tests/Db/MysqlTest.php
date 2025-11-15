@@ -2167,7 +2167,7 @@ first_name ASC';
     $result = self::$mysql->getUid();
 
     $this->assertIsString($result);
-    $this->assertSame(32, strlen($result));
+    $this->assertSame(32, Str::len($result));
   }
 
   /** @test */

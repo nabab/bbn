@@ -2,6 +2,7 @@
 
 namespace bbn\tests;
 
+use bbn\Str;
 use bbn\Db\Enums\Errors;
 
 trait MysqlDbSetup
@@ -57,7 +58,7 @@ trait MysqlDbSetup
   {
     $env_file = getcwd() . '/tests/.env.test';
 
-    if (strpos($env_file, '/tests/Db/') !== false) {
+    if (Str::pos($env_file, '/tests/Db/') !== false) {
       $env_file = str_ireplace('/tests/Db/', '/', $env_file);
     }
 

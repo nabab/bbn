@@ -3,6 +3,7 @@
 namespace bbn\Entities\Tables;
 
 use bbn\X;
+use bbn\Str;
 use bbn\Db;
 use bbn\User;
 use bbn\Entities\Models\Entities;

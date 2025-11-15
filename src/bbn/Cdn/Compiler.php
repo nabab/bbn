@@ -112,7 +112,7 @@ class Compiler extends Basic
         }
 
         foreach (self::$_min_suffixes as $s) {
-          if (strpos($f, $s . '.')) {
+          if (Str::pos($f, $s . '.')) {
             $minified = true;
             if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $f))) {
               $c          .= PHP_EOL . file_get_contents($this->fpath . str_replace($s . '.', '.', $f));
@@ -143,7 +143,7 @@ class Compiler extends Basic
       }
 
       foreach (self::$_min_suffixes as $s) {
-        if (strpos($file, $s . '.')) {
+        if (Str::pos($file, $s . '.')) {
           $minified = true;
           if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $file))) {
             $c = file_get_contents($this->fpath . str_replace($s . '.', '.', $file));
@@ -316,7 +316,7 @@ JAVASCRIPT;
    */
   public function hasLinks(string $css)
   {
-    return strpos($css, 'url(') || (strpos($css, '@import') !== false);
+    return Str::pos($css, 'url(') || (Str::pos($css, '@import') !== false);
   }
 
 
@@ -344,7 +344,7 @@ JAVASCRIPT;
         if (is_null($dir)) {
           $dir = $tmp . '/';
         }
-        elseif (strpos($dir, $tmp) !== 0) {
+        elseif (Str::pos($dir, $tmp) !== 0) {
           $old_tmp = null;
           while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {
             $old_tmp = $tmp;
@@ -358,7 +358,7 @@ JAVASCRIPT;
             $new_dir = '';
             foreach ($bits as $b) {
               if (!empty($b)) {
-                if (strpos($dir, $new_dir . $b) === 0) {
+                if (Str::pos($dir, $new_dir . $b) === 0) {
                   $new_dir .= $b . '/';
                 }
                 else {
@@ -437,7 +437,7 @@ JAVASCRIPT;
               $dirs[$root] = [];
             }
 
-            $dirs[$root][] = substr($file, strlen($root));
+            $dirs[$root][] = Str::sub($file, Str::len($root));
           }
           else {
             if (!isset($dirs[X::dirname($file)])) {

@@ -992,9 +992,9 @@ class I18n extends cacheCls
           array_filter(
             $to_explore_dirs, function ($a) {
               $basename = X::basename($a);
-              if(( strpos($basename, 'locale') !== 0 )
-                  && ( strpos($basename, 'data') !== 0 )
-                  && ( strpos($basename, '.') !== 0 )
+              if(( Str::pos($basename, 'locale') !== 0 )
+                  && ( Str::pos($basename, 'data') !== 0 )
+                  && ( Str::pos($basename, '.') !== 0 )
               ) {
                 return $a;
               }
@@ -1645,35 +1645,35 @@ class I18n extends cacheCls
                   || ($ext === 'php')
                   || ($ext === 'html')
                 ) {
-                  $tmp = \substr($path, \strlen($root), -(\strlen($ext) + 1));
-                  if (\strpos($tmp, 'components') === 0) {
+                  $tmp = Str::sub($path, Str::len($root), -(Str::len($ext) + 1));
+                  if (Str::pos($tmp, 'components') === 0) {
                     $name = \dirname($tmp);
                   }
-                  elseif (\strpos($tmp, 'mvc') === 0) {
-                    if (\strpos($tmp, 'js/') === 4) {
+                  elseif (Str::pos($tmp, 'mvc') === 0) {
+                    if (Str::pos($tmp, 'js/') === 4) {
                       $name = \preg_replace('/js\//', '', $tmp, 1);
                     }
-                    else if (\strpos($tmp, 'html/') === 4) {
+                    else if (Str::pos($tmp, 'html/') === 4) {
                       $name = \preg_replace('/html\//', '', $tmp, 1);
                     }
                   }
-                  elseif ((\strpos($tmp, 'plugins') === 0) && ($root === BBN_APP_PATH)) {
+                  elseif ((Str::pos($tmp, 'plugins') === 0) && ($root === BBN_APP_PATH)) {
                     continue;
                   }
-                  elseif (\strpos($tmp, 'bbn/') === 0) {
+                  elseif (Str::pos($tmp, 'bbn/') === 0) {
                     $optCode = $this->options->code($idPath);
-                    $tmp  = \str_replace($optCode.'/', '', \substr($tmp, 4));
-                    if (\strpos($tmp, 'components') === 4) {
-                      $final = \str_replace(\substr($tmp, 0,4), '', $tmp);
+                    $tmp  = \str_replace($optCode.'/', '', Str::sub($tmp, 4));
+                    if (Str::pos($tmp, 'components') === 4) {
+                      $final = \str_replace(Str::sub($tmp, 0,4), '', $tmp);
                       $name = \dirname($final);
                     }
-                    elseif (\strpos($tmp, 'mvc') === 4) {
-                      if ((\strpos($tmp, 'js/') !== 8)
-                        && (\strpos($tmp, 'html/') !== 8)
+                    elseif (Str::pos($tmp, 'mvc') === 4) {
+                      if ((Str::pos($tmp, 'js/') !== 8)
+                        && (Str::pos($tmp, 'html/') !== 8)
                       ) {
                         continue;
                       }
-                      $final = \str_replace(substr($tmp, 0, 4), '', $tmp);
+                      $final = \str_replace(Str::sub($tmp, 0, 4), '', $tmp);
                       $name  = \preg_replace(['/js\//', '/html\//'], '', $final, 1);
                     }
                   }
@@ -1724,7 +1724,7 @@ class I18n extends cacheCls
         && ($parentCode = $this->options->code($parent['id']))
       ) {
         if (($parentCode === 'lib')
-          && (\strpos($code, 'appui-') === 0)
+          && (Str::pos($code, 'appui-') === 0)
         ) {
           if ($idOpt = $this->options->fromCode(\preg_replace('/appui-/', '', $code, 1), 'appui')) {
             $options = $this->options->findI18n($idOpt);

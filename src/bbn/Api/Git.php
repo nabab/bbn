@@ -11,6 +11,7 @@ namespace bbn\Api;
 
 use Exception;
 use bbn\X;
+use bbn\Str;
 //use function GuzzleHttp\json_encode;
 use CzProject\GitPhp\Git as GitCz;
 use CzProject\GitPhp\GitRepository as GitRepoCz;
@@ -58,7 +59,7 @@ class Git extends GitRepoCz
     if (
       $token &&
       !empty($scope['name']) &&
-      (strlen($api) > 0)
+      (Str::len($api) > 0)
     ) {
       //todo ceck create repository remote with this api for github
       try {
@@ -82,29 +83,29 @@ class Git extends GitRepoCz
 
         foreach ($output as $val) {
 
-          $sigle = substr($val, 0, 2);
+          $sigle = Str::sub($val, 0, 2);
 
           $element = [
             'file' => false,
             'folder' => false,
             'action' => false,
             'commit' => false,
-            'added' => (strpos($val, 'A') == 0) ? true : false,
+            'added' => (Str::pos($val, 'A') == 0) ? true : false,
             'other' => false
           ];
 
           // for name file
-          if (strpos($val, '"') == 3) {
-            if (substr($val, -1, 1) === "/") {
-              $element['folder'] = substr($val, 4);
+          if (Str::pos($val, '"') == 3) {
+            if (Str::sub($val, -1, 1) === "/") {
+              $element['folder'] = Str::sub($val, 4);
             } else {
-              $element['file'] = substr($val, 4);
+              $element['file'] = Str::sub($val, 4);
             }
           } else {
-            if (substr($val, -1, 1) === "/") {
-              $element['folder'] = substr($val, 3);
+            if (Str::sub($val, -1, 1) === "/") {
+              $element['folder'] = Str::sub($val, 3);
             } else {
-              $element['file'] = substr($val, 3);
+              $element['file'] = Str::sub($val, 3);
             }
           }
 
@@ -260,35 +261,35 @@ class Git extends GitRepoCz
 
     foreach ($diff as $i => $ele) {
 
-      $start = strpos($ele, '--git');
+      $start = Str::pos($ele, '--git');
 
       if ($start != 0) {
         $idx = 0;
-        $file = substr($ele, $start + 5);
-        $file = substr($file, Strpos($file, 'a/') + 2, Strpos($file, 'b/') - 3);
+        $file = Str::sub($ele, $start + 5);
+        $file = Str::sub($file, Strpos($file, 'a/') + 2, Strpos($file, 'b/') - 3);
 
         $idx = $i + 5;
 
-        if (strpos($diff[$i + 5], '@@') === false) {
+        if (Str::pos($diff[$i + 5], '@@') === false) {
           $idx--;
         }
         if (!empty($diff[$idx + 1])) {
 
-          $x = strpos($diff[$idx + 1], '-]{+') === false ? '-]' : '-]{+';
+          $x = Str::pos($diff[$idx + 1], '-]{+') === false ? '-]' : '-]{+';
 
           $remote_code = false;
           $local_code = false;
 
           //for code remote
           if ($x === '-]{+') {
-            $code = substr($diff[$idx + 1], strpos($diff[$idx + 1], $x) + 4);
-            $remote_code = substr($code, 0, Strpos($code, '+}'));
+            $code = Str::sub($diff[$idx + 1], Str::pos($diff[$idx + 1], $x) + 4);
+            $remote_code = Str::sub($code, 0, Strpos($code, '+}'));
           }
 
           //for code local
-          if (strpos($diff[$idx + 1], '[-') !== false) {
-            $code = substr($diff[$idx + 1],  strpos($diff[$idx + 1], '[-') + 2);
-            $local_code = substr($code, 0, Strpos($code, $x));
+          if (Str::pos($diff[$idx + 1], '[-') !== false) {
+            $code = Str::sub($diff[$idx + 1],  Str::pos($diff[$idx + 1], '[-') + 2);
+            $local_code = Str::sub($code, 0, Strpos($code, $x));
           }
           $arr[] = [
             'file' => $file,

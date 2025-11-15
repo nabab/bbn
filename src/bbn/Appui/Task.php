@@ -926,7 +926,7 @@ class Task extends DbCls
         }
       }
       else if ( isset($fields['dates'][$w[0]]) ){
-        if ( strpos($w[1], 'IS ') === 0 ){
+        if ( Str::pos($w[1], 'IS ') === 0 ){
           $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
         }
         else if ( Date::validateSQL($w[2]) ){
@@ -1002,7 +1002,7 @@ class Task extends DbCls
       }
     }
     if ( !empty($order) ){
-      $order = "ORDER BY ".substr($order, 0, -2);
+      $order = "ORDER BY " . Str::sub($order, 0, -2);
     }
     $args0 = [
       hex2bin($this->idState('closed')),
@@ -1118,7 +1118,7 @@ class Task extends DbCls
         }
       }
       else if ( isset($fields['dates'][$w[0]]) ){
-        if ( strpos($w[1], 'IS ') === 0 ){
+        if ( Str::pos($w[1], 'IS ') === 0 ){
           $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
         }
         else if ( Date::validateSQL($w[2]) ){
@@ -1194,7 +1194,7 @@ class Task extends DbCls
       }
     }
     if ( !empty($order) ){
-      $order = "ORDER BY ".substr($order, 0, -2);
+      $order = "ORDER BY " . Str::sub($order, 0, -2);
     }
     $sql = "
       SELECT bbn_notes_versions.title,
@@ -1398,14 +1398,14 @@ class Task extends DbCls
           foreach ( $cfg['files'] as $f ){
             $ext = Str::fileExt($f, true);
             if (
-              (\strlen($ext[0]) < $length) ||
+              (Str::len($ext[0]) < $length) ||
               ($ext[1] !== $extension) ||
-              (strpos($ext[0], $filename) !== 0) ||
-              !preg_match('/_h[\d]+/i', substr($ext[0], $length))
+              (Str::pos($ext[0], $filename) !== 0) ||
+              !preg_match('/_h[\d]+/i', Str::sub($ext[0], $length))
             ){
               $filename = $ext[0];
               $extension = $ext[1];
-              $length = \strlen($filename);
+              $length = Str::len($filename);
               $note->addMedia($r, $f);
             }
           }
@@ -1413,7 +1413,7 @@ class Task extends DbCls
         if ( !empty($cfg['links']) ){
           foreach ( $cfg['links'] as $f ){
             $ext = Str::fileExt($f['image'], true);
-            if ( !preg_match('/_h[\d]+/i', substr($ext[0], 0)) ){
+            if ( !preg_match('/_h[\d]+/i', Str::sub($ext[0], 0)) ){
               $note->addMedia(
                 $r,
                 $f['image'],
@@ -1473,7 +1473,7 @@ class Task extends DbCls
   public function addRole($id_task, $role, $id_user = null){
     if ( $this->exists($id_task) ){
       if ( !Str::isUid($role) ){
-        /*if ( substr($role, -1) !== 's' ){
+        /*if ( Str::sub($role, -1) !== 's' ){
           $role .= 's';
         }*/
         $role = $this->idRole($role);

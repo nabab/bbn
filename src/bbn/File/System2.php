@@ -14,7 +14,7 @@
  */
 
 namespace bbn\File;
-use bbn;
+use bbn\Str;
 
 
 /**
@@ -143,7 +143,7 @@ class System2 extends bbn\Models\Cls\Basic
   {
     if ( $filter ){
       if ( is_string($filter) ){
-        return strtolower(substr(\is_array($item) ? $item['path'] : $item, - strlen($filter))) === strtolower($filter);
+        return strtolower(Str::sub(\is_array($item) ? $item['path'] : $item, - Str::len($filter))) === strtolower($filter);
       }
       if ( is_callable($filter) ){
         return $filter($item);
@@ -218,9 +218,9 @@ class System2 extends bbn\Models\Cls\Basic
       }
     }
     if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
-      $fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)));
+      $fs = ftp_mlsd($this->obj, Str::sub($path, Str::len($this->prefix)));
       foreach ( $fs as $f ){
-        if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
+        if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (Str::pos(basename($f['name']), '.') !== 0)) ){
           $ok = 0;
           if ( $type === 'both' ){
             $ok = 1;
@@ -245,12 +245,12 @@ class System2 extends bbn\Models\Cls\Basic
               ];
               if ( $has_mod ){
                 $tmp['mtime'] = mktime(
-                  substr($f['modify'], 8, 2),
-                  substr($f['modify'], 10, 2),
-                  substr($f['modify'], 12, 2),
-                  substr($f['modify'], 4, 2),
-                  substr($f['modify'], 6, 2),
-                  substr($f['modify'], 0, 4)
+                  Str::sub($f['modify'], 8, 2),
+                  Str::sub($f['modify'], 10, 2),
+                  Str::sub($f['modify'], 12, 2),
+                  Str::sub($f['modify'], 4, 2),
+                  Str::sub($f['modify'], 6, 2),
+                  Str::sub($f['modify'], 0, 4)
                 );
               }
               if ( $has_type ){
@@ -282,7 +282,7 @@ class System2 extends bbn\Models\Cls\Basic
     else{
       $fs = scandir($path, SCANDIR_SORT_ASCENDING);
       foreach ( $fs as $f ){
-        if ( ($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0)) ){
+        if ( ($f !== '.') && ($f !== '..') && ($hidden || (Str::pos(basename($f), '.') !== 0)) ){
           $ok = 0;
           $is_dir = is_dir($path.'/'.$f);
           $is_file = !$is_dir;
@@ -444,10 +444,10 @@ class System2 extends bbn\Models\Cls\Basic
       }
       if ( $full ){
         if ( $this->mode === 'ssh' ){
-          return @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          return @ssh2_sftp_rmdir($this->obj, Str::sub($path, Str::len($this->prefix)));
         }
         if ( $this->mode === 'ftp' ){
-          return @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          return @ftp_rmdir($this->obj, Str::sub($path, Str::len($this->prefix)));
         }
         else if ( $this->mode === 'nextcloud' ){
           if ( $this->obj->request('DELETE', $path) ){
@@ -463,10 +463,10 @@ class System2 extends bbn\Models\Cls\Basic
     }
     if ( $this->isFile($path) ){
       if ( $this->mode === 'ssh' ){
-        return ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
+        return ssh2_sftp_unlink($this->obj, Str::sub($path, Str::len($this->prefix)));
       }
       if ( $this->mode === 'ftp' ){
-        return ftp_delete($this->obj, substr($path, strlen($this->prefix)));
+        return ftp_delete($this->obj, Str::sub($path, Str::len($this->prefix)));
       }
       else if ( $this->mode === 'nextcloud' ){
         if ( $this->obj->request('DELETE', $path) ){
@@ -518,8 +518,8 @@ class System2 extends bbn\Models\Cls\Basic
    */
   private function _rename($source, $dest): bool
   {
-    $file1 = substr($source, strlen($this->prefix));
-    $file2 = substr($dest, strlen($this->prefix));
+    $file1 = Str::sub($source, Str::len($this->prefix));
+    $file2 = Str::sub($dest, Str::len($this->prefix));
     
     if ( $this->mode === 'ssh' ){
       return ssh2_sftp_rename($this->obj, $file1, $file2);
@@ -602,7 +602,7 @@ class System2 extends bbn\Models\Cls\Basic
 
   private function _is_dir(string $path)
   {
-    if ( strpos($path, '/') !== 0 ){
+    if ( Str::pos($path, '/') !== 0 ){
       $path = $this->getRealPath($path);
     } 
     if ( $this->mode === 'nextcloud' ){
@@ -665,8 +665,8 @@ class System2 extends bbn\Models\Cls\Basic
     if ( ($path === '.') || ($path === './') ){
       $path = '';
     }
-    while ( $path && (substr($path, -1) === '/') ){
-      $path = substr($path, 0, strlen($path) - 1);
+    while ( $path && (Str::sub($path, -1) === '/') ){
+      $path = Str::sub($path, 0, Str::len($path) - 1);
     }
     return $path;
   }
@@ -678,7 +678,7 @@ class System2 extends bbn\Models\Cls\Basic
       if (  ( '/'.$path.'/' === $this->prefix ) ){
         return $this->prefix; 
       }
-      else if ( strpos($path, $this->prefix) === 0 ) {
+      else if ( Str::pos($path, $this->prefix) === 0 ) {
         return $path;
       }
       else {
@@ -688,13 +688,13 @@ class System2 extends bbn\Models\Cls\Basic
     }
     else {
       return $this->prefix.(
-      strpos($path, '/') === 0 ?
+      Str::pos($path, '/') === 0 ?
         $path :
         (
           ($this->current ? $this->current.($path ? '/' : '') : '').
           (
-          substr($path, -1) === '/' ?
-            substr($path, 0, -1) :
+          Str::sub($path, -1) === '/' ?
+            Str::sub($path, 0, -1) :
             $path
           )
         )
@@ -721,12 +721,12 @@ class System2 extends bbn\Models\Cls\Basic
     // The full path without the obj prefix, and if it's not absolute we remove the initial slash
     
     if ( $this->mode ===  'nextcloud' ){
-      return $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1) -1 );  
+      return $file = Str::sub($file, Str::len($this->prefix) + ($is_absolute ? 0 : 1) -1 );  
     }
-    $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
+    $file = Str::sub($file, Str::len($this->prefix) + ($is_absolute ? 0 : 1));
     
     if ( !$is_absolute && isset($this->current) ){
-      $file = substr($file, strlen($this->current));
+      $file = Str::sub($file, Str::len($this->current));
     }
     return $file;
   }
@@ -766,7 +766,7 @@ class System2 extends bbn\Models\Cls\Basic
   {
     if ( $this->check() && $this->isDir($path) ){
       //die(var_dump($path));
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs =& $this;
       clearstatcache();
       $type = $including_dirs ? 'both' : 'file';
@@ -790,7 +790,7 @@ class System2 extends bbn\Models\Cls\Basic
   public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs =& $this;
       clearstatcache();
       return array_map(function ($a) use ($is_absolute, $fs, $detailed){
@@ -823,10 +823,10 @@ class System2 extends bbn\Models\Cls\Basic
     public function cd(string $path): bool
   {
     if ($this->check()) {
-      while ( strpos($path, '../') ===  0 ){
+      while ( Str::pos($path, '../') ===  0 ){
         $tmp = dirname($this->current);
         if ( $tmp !== $this->current ){
-          $path = substr($path, 3);
+          $path = Str::sub($path, 3);
         }
         else {
           break;
@@ -889,7 +889,7 @@ class System2 extends bbn\Models\Cls\Basic
   {
     if ( $this->check() && $this->isDir($path) ){
       clearstatcache();
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs =& $this;
       return array_map(function($a)use($is_absolute, $fs, $detailed){
         if ( $detailed ){
@@ -913,7 +913,7 @@ class System2 extends bbn\Models\Cls\Basic
   {
     if ( $this->check() && $this->isDir($path) ){
       clearstatcache();
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs =& $this;
       return array_map(function($a)use($is_absolute, $fs, $detailed){
         if ( $detailed ){
@@ -1066,7 +1066,7 @@ class System2 extends bbn\Models\Cls\Basic
    */
   public function rename(string $file, $name, bool $overwrite = false): bool
   {
-    if ( $this->exists($file) && (strpos($name, '/') === false) ){
+    if ( $this->exists($file) && (Str::pos($name, '/') === false) ){
       $path = $this->getRealPath(dirname($file));
       if ( $this->_exists($path.'/'.$name) && ( !$overwrite || !$this->_delete($path.'/'.$name)) ){
         return false;

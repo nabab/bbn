@@ -232,7 +232,7 @@ class Note extends DbCls
         foreach ($ct as $n => $c) {
           if (is_string($c) && in_array($n, ['title', 'text', 'html'])) {
             if (Str::isHTML($c)) {
-              $excerpt .= Str::html2text($c, strpos($c, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
+              $excerpt .= Str::html2text($c, Str::pos($c, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
             }
             else {
               $excerpt .= $c;
@@ -244,7 +244,7 @@ class Note extends DbCls
                   $excerpt .= $k . ': ';
                 }
 
-                $excerpt .= Str::html2text($v, strpos($v, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
+                $excerpt .= Str::html2text($v, Str::pos($v, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
               }
             }
           }
@@ -720,7 +720,7 @@ class Note extends DbCls
       throw new Exception(
         X::_(
           "Impossible to retrieve the note with ID %s",
-          Str::isUid($id_note) ? $id_note : '[String (' . strlen($id_note) . ')]'
+          Str::isUid($id_note) ? $id_note : '[String (' . Str::len($id_note) . ')]'
         )
         );
     }

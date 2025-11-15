@@ -5,6 +5,7 @@
 namespace bbn\Util;
 
 use bbn\X;
+use bbn\Str;
 
 /**
  * Encryption Class
@@ -86,7 +87,7 @@ class Enc
       $key = self::$salt;
     }
     if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {
-      $iv = substr(md5(self::$prefix.$password), 0, $length);
+      $iv = Str::sub(md5(self::$prefix.$password), 0, $length);
       $res = null;
       try {
         $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);
@@ -119,7 +120,7 @@ class Enc
       $key = self::$salt;
     }
     if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {
-      $iv = substr(md5(self::$prefix.$password), 0, $length);
+      $iv = Str::sub(md5(self::$prefix.$password), 0, $length);
       try {
         $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);
       }
@@ -152,7 +153,7 @@ class Enc
         && in_array($algo, hash_algos(), true)
         && ($key = self::generateCert($algo, $key_bits))
     ) {
-      if (is_dir($path) && (substr($path, -1) !== '/')) {
+      if (is_dir($path) && (Str::sub($path, -1) !== '/')) {
         $path .= '/';
       }
       $public = $path.'_rsa.pub';
@@ -231,7 +232,7 @@ class Enc
    */
   private static function _sshEncodeBuffer($buffer)
   {
-    $len = strlen($buffer);
+    $len = Str::len($buffer);
     if (ord($buffer[0]) & 0x80) {
       $len++;
       $buffer = "\x00" . $buffer;

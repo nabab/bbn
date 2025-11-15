@@ -146,7 +146,7 @@ class Sales extends DbCls
     if ($period) {
       $hasValue = Str::isDateSql($value);
       if ($hasValue) {
-        $start = substr($value, 0, 10) . ' 00:00:00';
+        $start = Str::sub($value, 0, 10) . ' 00:00:00';
       }
       else {
         $end = date('Y-m-d H:i:s', time() + 1);

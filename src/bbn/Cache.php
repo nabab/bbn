@@ -1,6 +1,7 @@
 <?php
 namespace bbn;
 
+use bbn\Str;
 use Closure;
 use Exception;
 use Traversable;
@@ -85,8 +86,8 @@ class Cache implements CacheInterface
     if (empty($dir)) {
       return $path;
     }
-    elseif (substr($dir, -1) === '/') {
-      $dir = substr($dir, 0, -1);
+    elseif (Str::sub($dir, -1) === '/') {
+      $dir = Str::sub($dir, 0, -1);
     }
 
     return self::_sanitize(
@@ -335,7 +336,7 @@ class Cache implements CacheInterface
       $items = $this->items($st);
       $res   = 0;
       foreach ($items as $item){
-        if (!$st || strpos($item, $st) === 0) {
+        if (!$st || Str::pos($item, $st) === 0) {
           switch (self::$type){
             case 'apc':
               $res += (int)apcu_delete($item);

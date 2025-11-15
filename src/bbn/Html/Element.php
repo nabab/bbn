@@ -3,7 +3,8 @@
  * @package html
  */
 namespace bbn\Html;
-use bbn;
+use bbn\Str;
+use bbn\X;
 /**
  * Creates DOM elements
  * 
@@ -174,7 +175,7 @@ class Element
       }
     }
     if ( !empty(static::$schema) ){
-      static::$schema = bbn\X::mergeObjects(self::$schema, bbn\X::toObject(static::$schema));
+      static::$schema = X::mergeObjects(self::$schema, X::toObject(static::$schema));
     }
     else{
       static::$schema = self::$schema;
@@ -234,7 +235,7 @@ class Element
       self::$error = "The configuration is not a valid array";
       return false;
     }
-    self::$validator->check(bbn\X::toObject($cfg), static::$schema);
+    self::$validator->check(X::toObject($cfg), static::$schema);
     self::$error = '';
     if ( self::$validator->isValid() ){
       return 1;
@@ -265,20 +266,20 @@ class Element
 	 */
   public static function cssToString($css){
     if ( \is_string($css) ){
-      return ' style="'.bbn\Str::escapeDquotes($css).'"';
+      return ' style="'.Str::escapeDquotes($css).'"';
     }
     else if ( \is_array($css) && \count($css) > 0 ){
       $st = '';
       foreach ( $css as $prop => $val ){
         $st .= $prop.':'.$val.';';
       }
-      return ' style="'.bbn\Str::escapeDquotes($st).'"';
+      return ' style="'.Str::escapeDquotes($st).'"';
     }
   }
   
   public function css(array $cfg){
     foreach ( $cfg as $i => $k ){
-      if ( !bbn\Str::isNumber($i) ){
+      if ( !Str::isNumber($i) ){
         $this->css[$i] = $k;
       }
     }
@@ -441,7 +442,7 @@ class Element
 	public function getConfig()
 	{
     $this->update();
-		$tmp = bbn\X::removeEmpty($this->cfg);
+		$tmp = X::removeEmpty($this->cfg);
     if ( isset($tmp['content']) && \is_array($tmp['content']) ){
       foreach ( $tmp['content'] as $i => $c ){
         if ( \is_object($c) ){
@@ -461,7 +462,7 @@ class Element
 	 */
   public function getParam()
   {
-    return bbn\Str::makeReadable($this->getConfig());
+    return Str::makeReadable($this->getConfig());
   }
   
 	/**
@@ -471,7 +472,7 @@ class Element
 	 */
   public function showConfig()
   {
-    return bbn\Str::export(bbn\Str::makeReadable($this->getConfig()), 1);
+    return Str::export(Str::makeReadable($this->getConfig()), 1);
   }
 	
 	/**
@@ -487,7 +488,7 @@ class Element
       if ( isset($this->cfg['events']) ){
         foreach ( $this->cfg['events'] as $event => $fn ){
           $r .= '.'.$event.'('.
-                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).
+                  ( Str::pos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).
                   ')';
         }
       }
@@ -499,11 +500,11 @@ class Element
             $r .= '"'.$n.'":';
             if ( \is_string($o) ){
               $o = trim($o);
-              if ( (strpos($o, 'function(') === 0) ){
+              if ( (Str::pos($o, 'function(') === 0) ){
                 $r .= $o;
               }
               else{
-                $r .= '"'.bbn\Str::escapeDquotes($o).'"';
+                $r .= '"'.Str::escapeDquotes($o).'"';
               }
             }
             else if ( \is_bool($o) ){
@@ -576,7 +577,7 @@ class Element
   public function text($txt=null)
   {
     if ( !\is_null($txt) ){
-      $this->text = bbn\Str::html2text($txt);
+      $this->text = Str::html2text($txt);
       return $this;
     }
 
@@ -652,7 +653,7 @@ class Element
 				$html .= '</'.$this->tag.'>';
 			}
 			
-			if ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){
+			if ( isset($this->placeholder) && Str::pos($this->placeholder,'%s') !== false ){
 				$html = sprintf($this->placeholder, $html);
 			}
       
@@ -662,7 +663,7 @@ class Element
   
   public function eleAndScript()
   {
-    return ['$(\''.bbn\Str::escapeSquotes($this->html()).'\')',$this->script(false)];
+    return ['$(\''.Str::escapeSquotes($this->html()).'\')',$this->script(false)];
   }
 	
   public function makeEmpty()

@@ -14,6 +14,7 @@
 
 namespace bbn\Util;
 
+use bbn\Str;
 /**
  * Convert CSS selector to xpath selector
  *
@@ -242,7 +243,7 @@ class CssXpath
           break;
         case '$=':
             // ends with
-            // $return = '[substring(@'.$name.',string-length(@'.$name.')-'.(strlen($value)-1).')="'.$value.'"]';
+            // $return = '[substring(@'.$name.',string-length(@'.$name.')-'.(Str::len($value)-1).')="'.$value.'"]';
             $return = '[ends-with(@' . $name . ', "' . $value . '")]';
           break;
         case '*=':

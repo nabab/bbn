@@ -18,9 +18,10 @@
 
 namespace bbn\Mvc;
 
-use bbn;
+use bbn\Str;
 use bbn\X;
 use bbn\Mvc;
+use bbn\Tpl;
 
 class View
 {
@@ -153,7 +154,7 @@ class View
           // Language variables inclusions in the javascript files
           if (!empty($this->_lang_file) && is_file($this->_lang_file)) {
             $tmp  = json_decode(file_get_contents($this->_lang_file), true);
-            $path = $this->_plugin && !$this->_component ? substr($this->_path, \strlen($this->_plugin) + 1) : $this->_path;
+            $path = $this->_plugin && !$this->_component ? Str::sub($this->_path, Str::len($this->_plugin) + 1) : $this->_path;
             //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));
             $idx = $this->_component ? 'components/' : 'mvc/';
             //die(var_dump($idx.$path, $tmp));
@@ -181,12 +182,12 @@ JAVASCRIPT;
 
           $tmp = false;
           try {
-            if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {
+            if (!defined('BBN_IS_DEV') || !constant('BBN_IS_DEV')) {
               $tmp = \JShrink\Minifier::minify($this->_content, ['flaggedComments' => false]);
             }
           }
           catch (\RuntimeException $e){
-            \bbn\X::log([$e->getMessage(), $this->_file], 'js_shrink');
+            X::log([$e->getMessage(), $this->_file], 'js_shrink');
           }
           return $tmp ?: $this->_content;
         case 'css':
@@ -202,7 +203,7 @@ JAVASCRIPT;
           $scss = new \ScssPhp\ScssPhp\Compiler();
           return $scss->compile($this->_content);
         case 'html':
-          return empty($data) ? $this->_content : bbn\Tpl::render($this->_content, $data);
+          return empty($data) ? $this->_content : Tpl::render($this->_content, $data);
         case 'php':
           $dir = getcwd();
           /** @todo explain why */
@@ -220,7 +221,7 @@ JAVASCRIPT;
             }
           }
 
-          $r = bbn\Mvc::includePhpView($this->_file, $this->_content, $data ?: []);
+          $r = Mvc::includePhpView($this->_file, $this->_content, $data ?: []);
           if (!empty($oldTextDomain)) {
             textdomain($oldTextDomain);
           }

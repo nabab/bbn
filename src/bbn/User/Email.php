@@ -633,7 +633,7 @@ class Email extends Basic
               if (!empty($it['uid'])) {
                 $uid = $it['uid'];
                 if (str_starts_with($uid, $ouid.'.')) {
-                  $newUid = $nuid . substr($uid, strlen($ouid));
+                  $newUid = $nuid . Str::sub($uid, Str::len($ouid));
                   $pref->updateBit($it['id'], ['uid' => $newUid]);
                   if (!empty($it['numChildren'])) {
                     updateChildren($it['id'], $uid, $newUid, $pref, $idAccount);
@@ -1525,8 +1525,8 @@ class Email extends Basic
           if ($number) {
             $msg = $mb->getMsg($number);
             $text = Str::toUtf8($msg['plain'] ?: (!empty($msg['html']) ? Str::html2text(quoted_printable_decode($msg['html'])) : ''));
-            if (strlen($text) > 65500) {
-              $text = substr($text, 0, 65500);
+            if (Str::len($text) > 65500) {
+              $text = Str::sub($text, 0, 65500);
             }
           }
 
@@ -1534,7 +1534,7 @@ class Email extends Basic
           try {
             $db->update($table, [$cfg['excerpt'] => trim(normalizer_normalize($text))], [$cfg['id'] => $id]);
           }
-          catch (\Exception $e) {
+          catch (Exception $e) {
             X::log([
               'id' => $id,
               'email' => $email,
@@ -1542,7 +1542,7 @@ class Email extends Basic
               'text' => trim($text),
               'error' => $e->getMessage()
             ], 'user_email_error');
-            throw new \Exception($e->getMessage());
+            throw new Exception($e->getMessage());
           }
 
           foreach (Mailbox::getDestFields() as $df) {
@@ -1577,7 +1577,7 @@ class Email extends Basic
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
       if ($db->insert($table_contacts, [
         $cfg_contacts['id_user'] => $this->user->getId(),
-        $cfg_contacts['name'] => empty($dest['name']) ? null : mb_substr($dest['name'], 0, 100),
+        $cfg_contacts['name'] => empty($dest['name']) ? null : Str::sub($dest['name'], 0, 100),
         $cfg_contacts['blacklist'] => $blacklist ? 1 : 0
       ])) {
         $id_contact = $db->lastId();
@@ -1765,7 +1765,7 @@ class Email extends Basic
       $types = self::getFolderTypes();
       if (empty($subscribed)) {
         $subscribed = array_map(
-          fn($f) => substr($f, strlen($mbParams)),
+          fn($f) => Str::sub($f, Str::len($mbParams)),
           $mb->listAllSubscribed()
         );
       }
@@ -1949,7 +1949,7 @@ class Email extends Basic
       $res = [];
       $all = $mb->listAllFolders();
       foreach ($all as $dir) {
-        $tmp = str_replace($mbParams, '', $dir);
+        $tmp = Str::replace($mbParams, '', $dir);
         $bits = X::split($tmp, '.');
         $put_in_res($bits, $res);
       }
@@ -2231,7 +2231,7 @@ class Email extends Basic
     if ($mb = $this->getMailbox($id_account)) {
       $params = $mb->getParams();
       $subscribed = array_map(
-        fn($f) => substr($f, strlen($params) - 1),
+        fn($f) => Str::sub($f, Str::len($params) - 1),
         $mb->listAllSubscribed()
       );
       if (!empty($folders) && is_array($folders[0])) {

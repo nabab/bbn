@@ -275,10 +275,10 @@ trait DbActions
     if (empty($cols)) {
       $tableCols = $this->db->modelize($cfg['table'])['fields'];
       foreach ($tableCols as $col => $colCfg) {
-        if ((strpos($colCfg['type'], 'text') !== false) || (strpos($colCfg['type'], 'char') !== false)) {
+        if ((Str::pos($colCfg['type'], 'text') !== false) || (Str::pos($colCfg['type'], 'char') !== false)) {
           $cols[] = $col;
         }
-        elseif ($isNumber && (strpos($colCfg['type'], 'int') !== false)) {
+        elseif ($isNumber && (Str::pos($colCfg['type'], 'int') !== false)) {
           $cols[] = $col;
         }
       }

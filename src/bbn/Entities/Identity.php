@@ -140,7 +140,7 @@ class Identity extends DbCls
         if (isset($nameParts[0]) && in_array($nameParts[0], self::$stes)) {
           $fn[$arc['name']] = implode(" ", $nameParts);
         }
-        elseif ((count($nameParts) === 3) && strlen($nameParts[0]) <= 3) {
+        elseif ((count($nameParts) === 3) && Str::len($nameParts[0]) <= 3) {
           $fn[$arc['name']]    = Str::changeCase(Str::changeCase($nameParts[0] . ' ' . $nameParts[1], 'lower'));
           $fn[$arc['fname']] = Str::changeCase(Str::changeCase($nameParts[2], 'lower'));
         }

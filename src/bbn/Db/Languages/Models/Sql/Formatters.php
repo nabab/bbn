@@ -253,8 +253,8 @@ trait Formatters {
     if (Str::checkName($table)
       && Str::checkName($newName)
     ) {
-      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
-      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+      $t1 = Str::pos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = Str::pos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
       return "ALTER TABLE $t1 RENAME TO $t2;";
     }
 

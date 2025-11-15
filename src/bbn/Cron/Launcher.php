@@ -5,13 +5,16 @@
  */
 
 namespace bbn\Cron;
-use bbn;
+
+use bbn\Str;
+use bbn\Models\Cls\Basic;
+use bbn\Cron;
 
 /**
  * Class cron
  * @package bbn\Appui
  */
-class Launcher extends bbn\Models\Cls\Basic {
+class Launcher extends Basic {
 
   use Common;
 
@@ -22,9 +25,9 @@ class Launcher extends bbn\Models\Cls\Basic {
   /**
    * Constructor
    *
-   * @param bbn\Cron $cron
+   * @param Cron $cron
    */
-  public function __construct(bbn\Cron $cron)
+  public function __construct(Cron $cron)
   {
     if ($cron->check()) {
       $this->cron = $cron;
@@ -46,7 +49,7 @@ class Launcher extends bbn\Models\Cls\Basic {
       $cfg['log_file'] = $log;
       exec(sprintf('php -f router.php %s "%s" > %s 2>&1 &',
         $this->exe_path,
-        bbn\Str::escapeDquotes(json_encode($cfg)),
+        Str::escapeDquotes(json_encode($cfg)),
         $log
       ));
 

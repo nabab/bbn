@@ -3,7 +3,11 @@
 namespace bbn\Ide;
 
 use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
+use bbn\Util\Timer;
 use bbn\File\Dir;
+use bbn\Appui\Option;
 use bbn\Models\Tts\Optional;
 
 class Directories {
@@ -126,7 +130,7 @@ class Directories {
    * @return array
    */
   private function remDirOpt($d){
-    $sub_files = bbn\File\Dir::scan($d);
+    $sub_files = Dir::scan($d);
     $files = [];
     foreach ( $sub_files as $sub ){
       if ( is_file($sub) ){
@@ -153,10 +157,10 @@ class Directories {
    * @return array
    */
   private function superiorSctrl($tab, $path=''){
-    if ( ($pos = strpos($tab, '_super')) ){
+    if ( ($pos = Str::pos($tab, '_super')) ){
       // Fix the right path
       $bits = explode('/', $path);
-      $count = \strlen(substr($tab, 0, $pos));
+      $count = Str::len(Str::sub($tab, 0, $pos));
       if ( !empty($bits) ){
         while ( $count >= 0 ){
           array_pop($bits);
@@ -179,7 +183,7 @@ class Directories {
    * @param string $st
    */
   protected function error($st){
-    \bbn\X::log($st, "directories");
+    X::log($st, "directories");
     $this->last_error = $st;
   }
 
@@ -206,13 +210,13 @@ class Directories {
    *
    * @param bbn\Appui\Option $options
    */
-  public function __construct(bbn\Appui\Option $options = null, array|null $routes = null) {
+  public function __construct(?Option $options = null, ?array $routes = null) {
     if ($options === null) {
-      $options = bbn\Appui\Option::getInstance();
+      $options = Option::getInstance();
     }
 
     if ($routes === null) {
-      $mvc = bbn\Mvc::getInstance();
+      $mvc = Mvc::getInstance();
       if (!$mvc) {
         throw new \Exception("No MVC instance found");
       }
@@ -226,7 +230,7 @@ class Directories {
   }
 
   public function addRoutes(array $routes){
-    $this->routes = bbn\X::mergeArrays($this->routes, $routes);
+    $this->routes = X::mergeArrays($this->routes, $routes);
     return $this;
   }
 
@@ -235,12 +239,12 @@ class Directories {
     $res = [];
     foreach ( $dirs as $i => $d ){
       if ( !empty($d['tabs']) &&
-        is_dir(\bbn\Mvc::getAppPath())
+        is_dir(Mvc::getAppPath())
       ){
         $d['real_path'] = $this->decipherPath($d['path']);
-        $d['prefix'] = strpos($d['real_path'], \bbn\Mvc::getAppPath()) === 0 ? '' : false;
+        $d['prefix'] = Str::pos($d['real_path'], Mvc::getAppPath()) === 0 ? '' : false;
         foreach ( $this->routes as $alias => $route ){
-          if ( strpos($d['real_path'], $route) === 0 ){
+          if ( Str::pos($d['real_path'], $route) === 0 ){
             $d['prefix'] = $alias.'/';
             break;
           }
@@ -263,15 +267,15 @@ class Directories {
     foreach ( $dirs as $i => $d ){
       // Dir's root path (directories)
       $root = $this->getRootPath($i);
-      if ( strpos($file, $root) === 0 ){
+      if ( Str::pos($file, $root) === 0 ){
         $res = $i . '/';
-        $bits = explode('/', substr($file, \strlen($root)));
+        $bits = explode('/', Str::sub($file, Str::len($root)));
         // MVC
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
           $fn = array_pop($bits);
-          $ext = bbn\Str::fileExt($fn);
-          $fn = bbn\Str::fileExt($fn, 1)[0];
+          $ext = Str::fileExt($fn);
+          $fn = Str::fileExt($fn, 1)[0];
           $res .= implode('/', $bits);
           foreach ( $d['tabs'] as $t ){
             if ( empty($t['fixed']) &&
@@ -289,7 +293,7 @@ class Directories {
         else {
           $res .= implode('/', $bits);
         }
-        return bbn\Str::parsePath($res);
+        return Str::parsePath($res);
       }
     }
     return false;
@@ -303,19 +307,19 @@ class Directories {
    * @return bool|string
    */
   public function realToId($file){
-    $timer = new bbn\Util\Timer();
+    $timer = new Timer();
     $timer->start('real_to_id');
     $url = self::realToUrl($file);
     $dir = self::dir(self::dirFromUrl($url));
     if ( !empty($dir) &&
       \defined($dir['bbn_path'])
     ){
-      $bbn_p = $dir['bbn_path'] === 'BBN_APP_PATH' ? \bbn\Mvc::getAppPath() : constant($dir['bbn_path']); 
-      if ( strpos($file, $bbn_p) === 0 ){
-        $f = substr($file, \strlen($bbn_p));
+      $bbn_p = $dir['bbn_path'] === 'BBN_APP_PATH' ? Mvc::getAppPath() : constant($dir['bbn_path']); 
+      if ( Str::pos($file, $bbn_p) === 0 ){
+        $f = Str::sub($file, Str::len($bbn_p));
         $timer->stop('real_to_id');
-        bbn\X::log($timer->results(), "directories");
-        return bbn\Str::parsePath($dir['bbn_path'].'/'.$f);
+        X::log($timer->results(), "directories");
+        return Str::parsePath($dir['bbn_path'].'/'.$f);
       }
     }
 
@@ -328,9 +332,9 @@ class Directories {
     foreach ( $dirs as $i => $d ){
       if ( !empty($d['bbn_path']) ){
         $bbn_p = constant($d['bbn_path']);
-        if ( strpos($file, $bbn_p) === 0 ){
-          $p = substr($file, \strlen($bbn_p));
-          if ( strpos($p, $d['code']) === 0 ){
+        if ( Str::pos($file, $bbn_p) === 0 ){
+          $p = Str::sub($file, Str::len($bbn_p));
+          if ( Str::pos($p, $d['code']) === 0 ){
             die(var_dump($file, $bbn_p, $p));
             $len_tmp = \count(explode('/', $d['code']));
             if ( $len_tmp > $len ){
@@ -342,7 +346,7 @@ class Directories {
         }
       }
     }
-    return bbn\Str::parsePath($bbn_path.'/'.$f);
+    return Str::parsePath($bbn_path.'/'.$f);
     */
   }
 
@@ -357,7 +361,7 @@ class Directories {
       ($dir = $this->dir($dn)) &&
       ($res = $this->getRootPath($dn))
     ){
-      $bits = explode('/', substr($url, \strlen($dn), \strlen($url)));
+      $bits = explode('/', Str::sub($url, Str::len($dn), Str::len($url)));
       if ( !empty($dir['tabs']) && !empty($bits) ){
         // Tab's nane
         $tab = array_pop($bits);
@@ -402,7 +406,7 @@ class Directories {
         }
         $res .= implode('/', $bits);
       }
-      return bbn\Str::parsePath($res);
+      return Str::parsePath($res);
     }
     return false;
   }
@@ -416,8 +420,8 @@ class Directories {
   public function dirFromUrl($url){
     $dir = false;
     foreach ( $this->dirs() as $i => $d ){
-      if ( (strpos($url, $i) === 0) &&
-        (\strlen($i) > \strlen($dir) )
+      if ( (Str::pos($url, $i) === 0) &&
+        (Str::len($i) > Str::len($dir) )
       ){
         $dir = $i;
         break;
@@ -472,9 +476,9 @@ class Directories {
     /** @var array $dir The directory configuration */
     $dir = $this->dir($code);
     if ( $dir ){
-      $path = $this->decipherPath(bbn\Str::parsePath($dir['bbn_path'].(!empty($dir['path']) ? '/' . $dir['path'] : '')));
+      $path = $this->decipherPath(Str::parsePath($dir['bbn_path'].(!empty($dir['path']) ? '/' . $dir['path'] : '')));
 
-      $r = bbn\Str::parsePath($path.'/');
+      $r = Str::parsePath($path.'/');
       return $r;
     }
     return false;
@@ -488,14 +492,14 @@ class Directories {
    */
   public function decipherPath($st){
 
-    $st = bbn\Str::parsePath($st);
+    $st = Str::parsePath($st);
     $bits = explode('/', $st);
     /** @var string $constant The first path of the path which might be a constant */
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
     $path = '';
     if ( \defined($constant) ){      
-      $path .= $constant === 'BBN_APP_PATH' ? \bbn\Mvc::getAppPath() : constant($constant);
+      $path .= $constant === 'BBN_APP_PATH' ? Mvc::getAppPath() : constant($constant);
       array_shift($bits);
     }
     $path .= implode('/', $bits);
@@ -512,10 +516,10 @@ class Directories {
       FROM bbn_ide_directories') + 1;
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
-      'path' => bbn\Str::parsePath($data['path']),
+      'path' => Str::parsePath($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'outputs' => \strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'outputs' => Str::len($data['outputs']) ? $data['outputs'] : NULL,
       'files' => $data['files'],
       'position' => $data['position']
     ]) ){
@@ -532,10 +536,10 @@ class Directories {
   public function edit($data){
     if ( $this->db->update('bbn_ide_directories', [
       'name' => $data['name'],
-      'path' => bbn\Str::parsePath($data['path']),
+      'path' => Str::parsePath($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'outputs' => \strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'outputs' => Str::len($data['outputs']) ? $data['outputs'] : NULL,
       'files' => $data['files'],
       'position' => $data['position']
     ], ['id' => $data['id']]) ){
@@ -550,7 +554,7 @@ class Directories {
    */
   public function get($name=''){
     $all = $this->options->fullOptions(self::_path_type());
-    die(\bbn\X::dump($all));
+    die(X::dump($all));
     if ( empty($name) ){
       return $all;
     }
@@ -629,7 +633,7 @@ class Directories {
       ($root = $this->getRootPath($dir))
     ){
       $path = $path === './' ? '' : $path . '/';
-      $ext = bbn\Str::fileExt($name);
+      $ext = Str::fileExt($name);
       $default = '';
 
       // MVC
@@ -655,12 +659,12 @@ class Directories {
           $ext = $cfg['extensions'][0]['ext'];
           $default = $cfg['extensions'][0]['default'];
         }
-        $file = $path . bbn\Str::fileExt($name, 1)[0] . '.' . $ext;
+        $file = $path . Str::fileExt($name, 1)[0] . '.' . $ext;
         $real = $root . $file;
         if ( is_file($real) ){
           return $this->error("The file already exists");
         }
-        if ( !bbn\File\Dir::createPath(X::dirname($real)) ){
+        if ( !Dir::createPath(X::dirname($real)) ){
           return $this->error("Impossible to create the container directory");
         }
         if ( !file_put_contents($real, $default) ){
@@ -680,7 +684,7 @@ class Directories {
         if ( is_dir($real) ){
           return $this->error("The directory already exists");
         }
-        if ( !bbn\File\Dir::createPath($real) ){
+        if ( !Dir::createPath($real) ){
           return $this->error("Impossible to create the directory");
         }
       }
@@ -701,7 +705,7 @@ class Directories {
   public function load($file, $dir, $tab, bbn\User\Preferences $pref = null){
     /** @var boolean|array $res */
     $res = false;
-    $file = bbn\Str::parsePath($file);
+    $file = Str::parsePath($file);
 
     if ( $file && $dir ){
       /** @var array $dir_cfg The directory configuration from DB */
@@ -713,7 +717,7 @@ class Directories {
         $dir_cfg = $this->dir($dir);
       }
       if ( !\is_array($dir_cfg) ){
-        die(\bbn\X::dump("Problem with the function Directories::dir with argument ".$dir));
+        die(X::dump("Problem with the function Directories::dir with argument ".$dir));
       }
       $res = $this->getFile($file, $dir, $tab, $dir_cfg, $pref);
     }
@@ -722,7 +726,7 @@ class Directories {
 
   protected function getTab(string $url, string $title, array $cfg){
     return [
-      'url' => bbn\Str::parsePath($url),
+      'url' => Str::parsePath($url),
       'title' => $title,
       'load' => 1,
       'bcolor' => $cfg['bcolor'],
@@ -743,9 +747,9 @@ class Directories {
   protected function getFile($file, $dir, $tab, array $cfg, bbn\User\Preferences $pref = null){
     if ( isset($cfg['title'], $cfg['bcolor'], $cfg['fcolor']) ){
       /** @var string $name The file's name - without path and extension */
-      $name = bbn\Str::fileExt($file, 1)[0];
+      $name = Str::fileExt($file, 1)[0];
       /** @var string $ext The file's extension */
-      $ext = bbn\Str::fileExt($file);
+      $ext = Str::fileExt($file);
       /** @var string $path The file's path without file's name  */
       $path = X::dirname($file) !== '.' ? X::dirname($file) . '/' : '';
       $url = $dir . $path . $name;
@@ -793,7 +797,7 @@ class Directories {
         }
         // _CTRL
         if ( !empty($cfg['fixed']) ){
-          $ext = bbn\Str::fileExt($cfg['fixed']);
+          $ext = Str::fileExt($cfg['fixed']);
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext ){
               $file = X::dirname($file) . '/' . $cfg['fixed'];
@@ -875,7 +879,7 @@ class Directories {
           'marks' => !empty($o['marks']) ? $o['marks'] : []
         ];
       }
-      bbn\X::log($timer->results(), "directories");
+      X::log($timer->results(), "directories");
       return $r;
     }
   }
@@ -891,13 +895,13 @@ class Directories {
    */
   public function save($file, $code, array|null $cfg = null, bbn\User\Preferences $pref = null){
     die(var_dump($file, $code, $cfg ));
-    if ( ($file = bbn\Str::parsePath($file)) &&
+    if ( ($file = Str::parsePath($file)) &&
       ($real = $this->urlToReal($file)) &&
       ($dir = $this->dir($this->dirFromUrl($file))) &&
       \defined('BBN_USER_PATH')
     ){
       $id_file = $this->realToId($real);
-      $ext = bbn\Str::fileExt($real, 1);
+      $ext = Str::fileExt($real, 1);
       $id_user = false;
       if ( $session = bbn\User\Session::getInstance() ){
         $id_user = $session->get('user', 'id');
@@ -917,7 +921,7 @@ class Directories {
                 // Remove file's options
                 $this->options->remove($this->options->fromCode($id_file, $this->_files_pref()));
                 // Remove ide backups
-                bbn\File\Dir::delete(X::dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
+                Dir::delete(X::dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
               }
               return [
                 'deleted' => 1
@@ -929,11 +933,11 @@ class Directories {
       if ( is_file($real) && $id_file ){
         $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
         $backup = X::dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
-        bbn\File\Dir::createPath(X::dirname($backup));
+        Dir::createPath(X::dirname($backup));
         rename($real, $backup);
       }
       else if ( !is_dir(X::dirname($real)) ){
-        bbn\File\Dir::createPath(X::dirname($real));
+        Dir::createPath(X::dirname($real));
       }
       file_put_contents($real, $code);
       if ( $pref && $id_user ){
@@ -990,14 +994,14 @@ class Directories {
   public function copy($dir, $path, $name, $type, $file){
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->getRootPath($dir)) &&
-      bbn\Str::checkFilename($name)
+      Str::checkFilename($name)
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
       $path = $path === './' ? '' : $path . '/';
       $bits = explode('/', $file);
       // File cfg
-      $file_cfg =  bbn\Str::fileExt(array_pop($bits), 1);
+      $file_cfg =  Str::fileExt(array_pop($bits), 1);
       // Existing filename without its extension
       $fn = $file_cfg[0];
       // Existing file's extension
@@ -1064,12 +1068,12 @@ class Directories {
       }
       foreach ($files as $s => $d ){
         if ( !file_exists(X::dirname($d)) ){
-          if ( !bbn\File\Dir::createPath(X::dirname($d)) ){
+          if ( !Dir::createPath(X::dirname($d)) ){
             $this->error("Impossible to create the path $d");
             return false;
           }
         }
-        if ( !bbn\File\Dir::copy($s, $d) ){
+        if ( !Dir::copy($s, $d) ){
           $this->error("Impossible to duplicate the $wtype: $s -> $d");
           return false;
         }
@@ -1089,11 +1093,11 @@ class Directories {
                 self::createPermByReal($f);
               }
               else if ( is_dir($f) ){
-                $dir_perms(bbn\File\Dir::getFiles($f, 1));
+                $dir_perms(Dir::getFiles($f, 1));
               }
             }
           };
-          $dir_perms(bbn\File\Dir::getFiles($perms, 1));
+          $dir_perms(Dir::getFiles($perms, 1));
         }
       }
 
@@ -1178,7 +1182,7 @@ class Directories {
           $f = $this->remDirOpt($d);
           $files = array_merge($files, $f);
           // Delete directory
-          if ( !bbn\File\Dir::delete($d) ){
+          if ( !Dir::delete($d) ){
             $this->error("Impossible to delete the directory $d");
             return false;
           }
@@ -1205,7 +1209,7 @@ class Directories {
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
-      $rnd = bbn\Str::genpwd();
+      $rnd = Str::genpwd();
       $root_dest = BBN_USER_PATH . 'tmp/' . $rnd . '/';
       $files = [];
       if ( !empty($cfg['tabs']) ){
@@ -1253,12 +1257,12 @@ class Directories {
       }
       foreach ( $files as $f ){
         if ( $f['is_file'] ){
-          if ( !bbn\File\Dir::createPath(X::dirname($f['dest'])) ){
+          if ( !Dir::createPath(X::dirname($f['dest'])) ){
             $this->error("Impossible to create the path " . X::dirname($f['dest']));
             return false;
           }
         }
-        if ( !bbn\File\Dir::copy($f['src'], $f['dest']) ){
+        if ( !Dir::copy($f['src'], $f['dest']) ){
           $this->error('Impossible to export the ' . $wtype . ' ' . $f['src']);
           return false;
         }
@@ -1271,7 +1275,7 @@ class Directories {
           if ( file_exists($root_dest) ){
             if ( (!$is_file) || !empty($cfg['tabs']) ){
               // Create recursive directory iterator
-              $files = bbn\File\Dir::scan($root_dest);
+              $files = Dir::scan($root_dest);
               foreach ($files as $file){
                 $tmp_dest = str_replace(
                   $root_dest . (empty($cfg['tabs']) ? '/' : ''),
@@ -1295,7 +1299,7 @@ class Directories {
               }
             }
             if ( $zip->close() ){
-              if ( !bbn\File\Dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ){
+              if ( !Dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ){
                 $this->error("Impossible to delete the directory " . BBN_USER_PATH . 'tmp/' . $rnd);
                 return false;
               }
@@ -1328,7 +1332,7 @@ class Directories {
   public function rename($dir, $path, $new, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->getRootPath($dir)) &&
-      bbn\Str::checkFilename($new)
+      Str::checkFilename($new)
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
@@ -1552,7 +1556,7 @@ class Directories {
         }
 
         foreach ( $files as $s => $d ){
-          if ( !bbn\File\Dir::move($s, $d) ){
+          if ( !Dir::move($s, $d) ){
             $this->error("Impossible to rename the $wtype: $s -> $d");
             return false;
           }
@@ -1616,18 +1620,18 @@ class Directories {
   public function realToPerm($file, $type='file'): ?string
   {
     if ( !empty($file) &&
-      is_dir(\bbn\Mvc::getAppPath()) &&
+      is_dir(Mvc::getAppPath()) &&
       // It must be a controller
-      (strpos($file, '/mvc/public/') !== false)
+      (Str::pos($file, '/mvc/public/') !== false)
     ){
       $is_file = $type === 'file';
       // Check if it's an external route
       foreach ( $this->routes as $i => $r ){
-        if ( strpos($file, $r) === 0 ){
+        if ( Str::pos($file, $r) === 0 ){
           // Remove route
-          $f = substr($file, \strlen($r), \strlen($file));
+          $f = Str::sub($file, Str::len($r), Str::len($file));
           // Remove /mvc/public
-          $f = substr($f, \strlen('/mvc/public'), \strlen($f));
+          $f = Str::sub($f, Str::len('/mvc/public'), Str::len($f));
           // Add the route's name to path
           $f = $i . $f;
           break;
@@ -1635,16 +1639,16 @@ class Directories {
       }
       // Internal route
       if ( empty($f) ){
-        $root_path = \bbn\Mvc::getAppPath().'mvc/public/';
-        if ( strpos($file, $root_path) === 0 ){
+        $root_path = Mvc::getAppPath().'mvc/public/';
+        if ( Str::pos($file, $root_path) === 0 ){
           // Remove root path
-          $f = substr($file, \strlen($root_path), \strlen($file));
+          $f = Str::sub($file, Str::len($root_path), Str::len($file));
         }
       }
       $id_parent = $this->options->fromCode('page', 'bbn_permissions');
       if ( !empty($f) ){
-        $bits = bbn\X::removeEmpty(explode('/', $f));
-        $code = $is_file ? bbn\Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
+        $bits = X::removeEmpty(explode('/', $f));
+        $code = $is_file ? Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
         foreach ( $bits as $b ){
           $id_parent = $this->options->fromCode($b.'/', $id_parent);
         }
@@ -1665,34 +1669,34 @@ class Directories {
    */
   public function createPermByReal($file, $type='file'){
     if ( !empty($file) &&
-      is_dir(\bbn\Mvc::getAppPath()) &&
+      is_dir(Mvc::getAppPath()) &&
       file_exists($file) &&
       // It must be a controller
-      (strpos($file, '/mvc/public/') !== false)
+      (Str::pos($file, '/mvc/public/') !== false)
     ){
       $is_file = $type === 'file';
       // Check if it's an external route
       foreach ( $this->routes as $i => $r ){
-        if ( strpos($file, $r) === 0 ){
+        if ( Str::pos($file, $r) === 0 ){
           // Remove route
-          $f = substr($file, \strlen($r), \strlen($file));
+          $f = Str::sub($file, Str::len($r), Str::len($file));
           // Remove /mvc/public
-          $f = substr($f, \strlen('/mvc/public'), \strlen($f));
+          $f = Str::sub($f, Str::len('/mvc/public'), Str::len($f));
           // Add the route's name to path
           $f = $i . $f;
         }
       }
       // Internal route
       if ( empty($f) ){
-        $root_path = \bbn\Mvc::getAppPath().'mvc/public/';
-        if ( strpos($file, $root_path) === 0 ){
+        $root_path = Mvc::getAppPath().'mvc/public/';
+        if ( Str::pos($file, $root_path) === 0 ){
           // Remove root path
-          $f = substr($file, \strlen($root_path), \strlen($file));
+          $f = Str::sub($file, Str::len($root_path), Str::len($file));
         }
       }
       if ( !empty($f) ){
-        $bits = bbn\X::removeEmpty(explode('/', $f));
-        $code = $is_file ? bbn\Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
+        $bits = X::removeEmpty(explode('/', $f));
+        $code = $is_file ? Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
         $id_parent = $this->options->fromCode('page', 'bbn_permissions');
         foreach ( $bits as $b ){
           if ( !$this->options->fromCode($b.'/', $id_parent) ){
@@ -1737,7 +1741,7 @@ class Directories {
       !$this->realToPerm($file_new, $type)
     ){
       $is_file = $type === 'file';
-      $code = $is_file ? bbn\Str::fileExt(X::basename($file_new), 1)[0] : X::basename($file_new).'/';
+      $code = $is_file ? Str::fileExt(X::basename($file_new), 1)[0] : X::basename($file_new).'/';
       if ( ($id_parent = $this->createPermByReal(X::dirname($file_new).'/', 'dir'))
       ){
         $this->options->setProp($id_opt, ['code' => $code]);
@@ -1778,11 +1782,11 @@ class Directories {
       \is_array($all)
     ){
       // Get all files in the path
-      if ( $files = bbn\File\Dir::getFiles($path) ){
+      if ( $files = Dir::getFiles($path) ){
         // Get the creation date and time of each backups and insert them into result array
         foreach ( $files as $f ){
           $mode = false;
-          $ext = bbn\Str::fileExt($f, 1);
+          $ext = Str::fileExt($f, 1);
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext[1] ){
               $mode = $e['mode'];
@@ -1846,7 +1850,7 @@ class Directories {
       // IDE backup path
       $path = BBN_USER_PATH."ide/backup/$dir";
       // Remove dir name from url
-      $file = substr($url, \strlen($dir), \strlen($url));
+      $file = Str::sub($url, Str::len($dir), Str::len($url));
       // MVC
       if ( !empty($dir_cfg['tabs']) ){
         foreach ( $dir_cfg['tabs'] as $t ){
@@ -1894,11 +1898,11 @@ class Directories {
       ( $dir_cfg = $this->dir($dir) )
     ){
       // Remove dir name from url
-      $file = substr($url, \strlen($dir), \strlen($url));
+      $file = Str::sub($url, Str::len($dir), Str::len($url));
       $path .= $dir . $file;
     }
     if ( is_dir($path) &&
-      bbn\File\Dir::delete($path, !empty($url))
+      Dir::delete($path, !empty($url))
     ){
       return ['success' => 1];
     }

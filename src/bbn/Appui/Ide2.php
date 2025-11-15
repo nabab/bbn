@@ -3,6 +3,7 @@ namespace bbn\Appui;
 
 use Exception;
 use bbn\X;
+use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
 use bbn\Models\Cls\Db as modelDb;
@@ -108,7 +109,7 @@ class Ide2 extends modelDb {
       if ($path_info['path'] === '/') {
         $path_info['path'] = '';
       }
-      elseif (substr($path_info['path'], -1) !== '/') {
+      elseif (Str::sub($path_info['path'], -1) !== '/') {
         $path_info['path'] .= '/';
       }
       $res = [
@@ -200,7 +201,7 @@ class Ide2 extends modelDb {
       $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);
       if (
         $root
-        && (strpos($file, $root) === 0)
+        && (Str::pos($file, $root) === 0)
       ) {
         $rep = $i;
         break;
@@ -209,7 +210,7 @@ class Ide2 extends modelDb {
     if (isset($rep)) {
       X::log([561, $file, $rep, $root], 'real');
       $res = $rep . '/';
-      $bits = explode('/', substr($file, \strlen($root)));
+      $bits = explode('/', Str::sub($file, Str::len($root)));
       $filename  = array_pop($bits);
       $extension = \bbn\Str::fileExt($filename);
       $basename  = \bbn\Str::fileExt($filename, 1)[0];
@@ -371,7 +372,7 @@ class Ide2 extends modelDb {
     $info_git = false;
     if (!empty($difference_git['ide'])) {
       foreach($difference_git['ide'] as $commit){
-        $info_git = strpos($commit['ele'], $ele) === 0;
+        $info_git = Str::pos($commit['ele'], $ele) === 0;
         if (!empty($info_git)) {
           return $info_git;
         }
@@ -642,7 +643,7 @@ class Ide2 extends modelDb {
                 $ele  = explode(".", basename($f));
                 $item = $ele[0];
                 $ext  = isset($ele[1]) ? $ele[1] : false;
-                if (($model->inc->fs->isDir($f) && (strpos(basename($f), '.') === 0))
+                if (($model->inc->fs->isDir($f) && (Str::pos(basename($f), '.') === 0))
                     || ($model->inc->fs->isFile($f) && (($item !== basename($t)) || (!empty($ext) && (in_array($ext, $excludeds) === true))))
                    ) {
                   $element_exluded++;

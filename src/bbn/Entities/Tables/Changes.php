@@ -154,7 +154,7 @@ class Changes extends EntityTable
    */
   public static function decryptCode(string $code): ?string
   {
-    $val = \bbn\Util\Enc::decrypt(base64_decode(strtr($code, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($code)) % 4)));
+    $val = \bbn\Util\Enc::decrypt(base64_decode(strtr($code, '-_', '+/') . str_repeat('=', 3 - (3 + Str::len($code)) % 4)));
     if (preg_match('/^[a-zA-Z0-9]+$/', $val)) {
       return $val;
     }

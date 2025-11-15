@@ -149,8 +149,8 @@ class System extends Basic
       $path = '';
     }
 
-    while ($path && (substr($path, -1) === '/')) {
-      $path = substr($path, 0, strlen($path) - 1);
+    while ($path && (Str::sub($path, -1) === '/')) {
+      $path = Str::sub($path, 0, Str::len($path) - 1);
     }
 
     return $path;
@@ -170,9 +170,9 @@ class System extends Basic
       case 'webdav':
         return $path;
       default:
-        return $this->prefix . (strpos($path, '/') === 0 ?
+        return $this->prefix . (Str::pos($path, '/') === 0 ?
           $path : (($this->current ?
-            $this->current . ($path ? '/' : '') : '') . (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
+            $this->current . ($path ? '/' : '') : '') . (Str::sub($path, -1) === '/' ? Str::sub($path, 0, -1) : $path)));
     }
   }
 
@@ -191,9 +191,9 @@ class System extends Basic
       case 'webdav':
         return $file;
       default:
-        $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
+        $file = Str::sub($file, Str::len($this->prefix) + ($is_absolute ? 0 : 1));
         if (!$is_absolute && $this->current) {
-          $file = substr($file, strlen($this->current));
+          $file = Str::sub($file, Str::len($this->current));
         }
         return $file;
     }
@@ -241,7 +241,7 @@ class System extends Basic
       if ($this->mode === 'nextcloud') {
         return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
       } else {
-        $is_absolute = strpos($path, '/') === 0;
+        $is_absolute = Str::pos($path, '/') === 0;
         $fs          = &$this;
         clearstatcache();
         $type = $including_dirs ? 'both' : 'file';
@@ -272,7 +272,7 @@ class System extends Basic
   public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check()) {
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs          = &$this;
       clearstatcache();
       return array_map(
@@ -300,10 +300,10 @@ class System extends Basic
   public function cd(string $path): bool
   {
     if ($this->check()) {
-      while (strpos($path, '../') === 0) {
+      while (Str::pos($path, '../') === 0) {
         $tmp = X::dirname($this->current);
         if ($tmp !== $this->current) {
-          $path = substr($path, 3);
+          $path = Str::sub($path, 3);
         } else {
           break;
         }
@@ -386,7 +386,7 @@ class System extends Basic
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs          = &$this;
       return array_map(
         function ($a) use ($is_absolute, $fs, $detailed) {
@@ -416,7 +416,7 @@ class System extends Basic
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs          = &$this;
       return array_map(
         function ($a) use ($is_absolute, $fs, $detailed) {
@@ -446,7 +446,7 @@ class System extends Basic
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
-      $is_absolute = strpos($path, '/') === 0;
+      $is_absolute = Str::pos($path, '/') === 0;
       $fs          = &$this;
       return array_map(
         function ($a) use ($is_absolute, $fs, $detailed) {
@@ -704,7 +704,7 @@ class System extends Basic
    */
   public function rename(string $file, $name, bool $overwrite = false): bool
   {
-    if ($this->exists($file) && (strpos($name, '/') === false)) {
+    if ($this->exists($file) && (Str::pos($name, '/') === false)) {
       $path = $this->getRealPath(X::dirname($file));
       if ($this->_exists($path . '/' . $name) && (!$overwrite || !$this->_delete($path . '/' . $name))) {
         return false;
@@ -895,7 +895,7 @@ class System extends Basic
           $res[$s] = [];
           while (($n = X::indexOf($content, $s, $idx)) > -1) {
             $res[$s][] = $n;
-            $idx       = $n + strlen($s);
+            $idx       = $n + Str::len($s);
           }
         }
       } else {
@@ -1242,7 +1242,7 @@ class System extends Basic
 
         $extensions = array_map(
           function ($a) {
-            if (substr($a, 0, 1) !== '.') {
+            if (Str::sub($a, 0, 1) !== '.') {
               $a = '.' . $a;
             }
 
@@ -1251,7 +1251,7 @@ class System extends Basic
           X::split($filter, '|')
         );
         foreach ($extensions as $ext) {
-          if (strtolower(substr($name, -strlen($ext))) === $ext) {
+          if (strtolower(Str::sub($name, -Str::len($ext))) === $ext) {
             return true;
           }
         }
@@ -1285,9 +1285,9 @@ class System extends Basic
       $has_children = stripos((string)$detailed, 'c') !== false;
       $has_ext      = stripos((string)$detailed, 'e') !== false;
       if (($this->mode === 'ftp') && ($detailed || ($type !== 'both'))) {
-        if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
+        if ($fs = ftp_mlsd($this->obj, Str::sub($path, Str::len($this->prefix)))) {
           foreach ($fs as $f) {
-            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(X::basename($f['name']), '.') !== 0))) {
+            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (Str::pos(X::basename($f['name']), '.') !== 0))) {
               if ($this->_check_filter($f['name'], $type)) {
                 if ($detailed) {
                   $tmp = [
@@ -1295,12 +1295,12 @@ class System extends Basic
                   ];
                   if ($has_mod) {
                     $tmp['mtime'] = mktime(
-                      substr($f['modify'], 8, 2),
-                      substr($f['modify'], 10, 2),
-                      substr($f['modify'], 12, 2),
-                      substr($f['modify'], 4, 2),
-                      substr($f['modify'], 6, 2),
-                      substr($f['modify'], 0, 4)
+                      Str::sub($f['modify'], 8, 2),
+                      Str::sub($f['modify'], 10, 2),
+                      Str::sub($f['modify'], 12, 2),
+                      Str::sub($f['modify'], 4, 2),
+                      Str::sub($f['modify'], 6, 2),
+                      Str::sub($f['modify'], 0, 4)
                     );
                   }
 
@@ -1343,7 +1343,7 @@ class System extends Basic
         }
 
         foreach ($fs as $f) {
-          if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
+          if (($f !== '.') && ($f !== '..') && ($hidden || (Str::pos(X::basename($f), '.') !== 0))) {
             $file = $path . '/' . $f;
             if ($this->_check_filter($file, $type)) {
               $is_dir = is_dir($path . '/' . $f);
@@ -1554,10 +1554,10 @@ class System extends Basic
 
         if ($full) {
           if ($this->mode === 'ssh') {
-            return $this->preventError(fn() => ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix))));
+            return $this->preventError(fn() => ssh2_sftp_rmdir($this->obj, Str::sub($path, Str::len($this->prefix))));
           }
           elseif ($this->mode === 'ftp') {
-            return $this->preventError(fn() => ftp_rmdir($this->obj, substr($path, strlen($this->prefix))));
+            return $this->preventError(fn() => ftp_rmdir($this->obj, Str::sub($path, Str::len($this->prefix))));
           }
           else {
             return $this->preventError(fn() => rmdir($path));
@@ -1569,10 +1569,10 @@ class System extends Basic
       }
       elseif ($this->_is_file($path)) {
         if ($this->mode === 'ssh') {
-          return $this->preventError(fn() => ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix))));
+          return $this->preventError(fn() => ssh2_sftp_unlink($this->obj, Str::sub($path, Str::len($this->prefix))));
         }
         elseif ($this->mode === 'ftp') {
-          return $this->preventError(fn() => ftp_delete($this->obj, substr($path, strlen($this->prefix))));
+          return $this->preventError(fn() => ftp_delete($this->obj, Str::sub($path, Str::len($this->prefix))));
         }
         else if (is_file($path)) {
           return $this->preventError(fn() => unlink($path));
@@ -1617,8 +1617,8 @@ class System extends Basic
   private function _rename($source, $dest): bool
   {
     if ($this->mode !== 'nextcloud') {
-      $file1 = substr($source, strlen($this->prefix));
-      $file2 = substr($dest, strlen($this->prefix));
+      $file1 = Str::sub($source, Str::len($this->prefix));
+      $file2 = Str::sub($dest, Str::len($this->prefix));
       if ($this->mode === 'ssh') {
         return $this->preventError(fn() => ssh2_sftp_rename($this->obj, $file1, $file2));
       }

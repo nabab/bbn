@@ -11,7 +11,7 @@ namespace bbn\Parsers;
  * @version 1.0
  */
 
-use bbn;
+use bbn\Str;
 use bbn\X;
 
 class Doc
@@ -217,12 +217,12 @@ class Doc
     $newLines = [];
     foreach ($lines as $line) {
       $tmp = trim($line);
-      if (substr($tmp, 0, 1) === '*') {
+      if (Str::sub($tmp, 0, 1) === '*') {
         if ($tmp === '*') {
           $tmp = '';
         }
         else {
-          $tmp = substr($tmp, 2);
+          $tmp = Str::sub($tmp, 2);
           $tmp = rtrim($tmp);
         }
       }
@@ -245,16 +245,16 @@ class Doc
   {
     $res = [];
     $text = $this->clearText($text);
-    //$tag_end = strpos($text, ' ');
+    //$tag_end = Str::pos($text, ' ');
     preg_match('/^\@{1}\w+\s{0,1}/', $text, $tag);
-    $tag_end = !empty($tag) && !empty($tag[0]) ? strlen($tag[0]) - 1 : false;
+    $tag_end = !empty($tag) && !empty($tag[0]) ? Str::len($tag[0]) - 1 : false;
     if ($tag_end !== false) {
       // Get tag
-      $res['tag'] = substr($text, 1, $tag_end - 1);
+      $res['tag'] = Str::sub($text, 1, $tag_end - 1);
       if (in_array($res['tag'], array_keys($this->tags))) {
         if (
           $this->tagHasText($res['tag']) &&
-          ($text = substr($text, $tag_end + 1))
+          ($text = Str::sub($text, $tag_end + 1))
         ) {
           $res['text'] = $this->clearText($text);
         } else {
@@ -276,29 +276,29 @@ class Doc
           }
           // Get name
           if (isset($def[1])) {
-            $n = $def[0][1] + strlen($def[0][0]) + 1;
+            $n = $def[0][1] + Str::len($def[0][0]) + 1;
           } else if (isset($type[1])) {
-            $n = $type[0][1] + strlen($type[0][0]) + 1;
+            $n = $type[0][1] + Str::len($type[0][0]) + 1;
           } else {
             $n = $tag_end + 1;
           }
           if (
             $this->tagHasName($res['tag']) &&
-            ($name = $this->tagGetName(substr($text, $n)))
+            ($name = $this->tagGetName(Str::sub($text, $n)))
           ) {
             $res['name'] = $this->clearText($name[0][0]);
           }
           // Get description
           if (isset($name[0])) {
-            $d = $n + $name[0][1] + strlen($name[0][0]) + 1;
+            $d = $n + $name[0][1] + Str::len($name[0][0]) + 1;
           } else if (isset($type[1])) {
-            $d = $type[0][1] + strlen($type[0][0]) + 1;
+            $d = $type[0][1] + Str::len($type[0][0]) + 1;
           } else {
             $d = $tag_end + 1;
           }
           if (
             $this->tagHasDesc($res['tag']) &&
-            ($desc = substr($text, $d))
+            ($desc = Str::sub($text, $d))
           ) {
             $res['description'] = trim($desc);
           }
@@ -695,7 +695,7 @@ class Doc
         preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);
         $start = $match[1];
         $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;
-        if ($db = $this->parseDocblock(substr($this->source, $start, $length))) {
+        if ($db = $this->parseDocblock(Str::sub($this->source, $start, $length))) {
           $this->parsed[] = $db;
         }
       }
@@ -717,16 +717,16 @@ class Doc
       'tags' => []
     ];
     // Remove start pattern
-    //$block = trim(substr($block, 3));
+    //$block = trim(Str::sub($block, 3));
     // Remove end pattern
-    $block = trim(substr($block, 0, strlen($block) - 2));
+    $block = trim(Str::sub($block, 0, Str::len($block) - 2));
     // Tags
     $tags = $this->getTags($block);
     foreach ($tags as $i => $tag) {
       if (
         (isset($tags[$i + 1]) &&
-          ($t = $this->parseTag(substr($block, $tag[1], $tags[$i + 1][1] - $tag[1])))) ||
-        ($t = $this->parseTag(substr($block, $tag[1])))
+          ($t = $this->parseTag(Str::sub($block, $tag[1], $tags[$i + 1][1] - $tag[1])))) ||
+        ($t = $this->parseTag(Str::sub($block, $tag[1])))
       ) {
         if (!empty($t['tag']) && ($t['tag'] === 'ignore')) {
           return null;
@@ -735,7 +735,7 @@ class Doc
       }
     }
     // Get Description
-    $b['description'] = $this->clearText(isset($tags[0]) ? substr($block, 3, $tags[0][1] - 1) : substr($block, 3));
+    $b['description'] = $this->clearText(isset($tags[0]) ? Str::sub($block, 3, $tags[0][1] - 1) : Str::sub($block, 3));
     return $b;
   }
 

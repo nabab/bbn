@@ -168,12 +168,12 @@ class Ftp extends bbn\Models\Cls\Basic
     if ( $dirs = $this->listFiles($dir) ){
       foreach ( $dirs as $d ){
         if ( $type &&
-                (strpos($type, 'file') === 0) &&
+                (Str::pos($type, 'file') === 0) &&
                 !isset($d['num']) ){
           $res[] = $d['name'];
         }
         else if ( $type &&
-                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&
+                ((Str::pos($type, 'dir') === 0) || (Str::pos($type, 'fold') === 0)) &&
                 isset($d['num']) ){
           $res[] = $d['name'];
         }
@@ -220,7 +220,7 @@ class Ftp extends bbn\Models\Cls\Basic
 				else
 				{
 					$add = $new[$i-1];
-					if ( substr($add,-1) != '/' )
+					if ( Str::sub($add,-1) != '/' )
 						$add .= '/';
 					break;
 				}
@@ -230,16 +230,16 @@ class Ftp extends bbn\Models\Cls\Basic
 				$new_path .= $add;
 			return $new_path;
 		}
-		else if ( strpos($path,'/') === 0 )
+		else if ( Str::pos($path,'/') === 0 )
 			return $path;
 		else if ( $path == '.' )
 			return $this->dir;
-		else if ( \strlen($path) > 0 )
+		else if ( Str::len($path) > 0 )
 		{
-			if ( substr($path,-1) != '/' )
+			if ( Str::sub($path,-1) != '/' )
 				$path .= '/';
 			$path = $this->dir.$path;
-			if ( substr($path,0,1) != '/' )
+			if ( Str::sub($path,0,1) != '/' )
 				$path = '/'.$path;
 			return $path;
 		}
@@ -249,10 +249,10 @@ class Ftp extends bbn\Models\Cls\Basic
 	 * @return false|string
 	 */
 	public function checkFilePath($file){
-		$slash = strrpos($file, '/');
+		$slash = Str::rpos($file, '/');
 		if ( ($slash !== false) &&
-                ($dir = $this->checkPath(substr($file, 0, $slash))) ){
-      return $dir.substr($file, $slash);
+                ($dir = $this->checkPath(Str::sub($file, 0, $slash))) ){
+      return $dir . Str::sub($file, $slash);
 		}
 		else if ( $slash === false ){
 			return $this->dir.$file;

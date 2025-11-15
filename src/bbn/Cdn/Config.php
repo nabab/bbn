@@ -11,7 +11,7 @@
  */
 namespace bbn\Cdn;
 
-use bbn;
+use bbn\Str;
 use bbn\X;
 
 /**
@@ -161,7 +161,7 @@ class Config extends bbn\Models\Cls\Basic
   {
     $parsed = parse_url($request);
     // URL without the root slash
-    $this->cfg['url'] = empty($parsed['path']) ? '' : substr($parsed['path'], 1 + strlen($this->prefix));
+    $this->cfg['url'] = empty($parsed['path']) ? '' : Str::sub($parsed['path'], 1 + Str::len($this->prefix));
     if (!empty($parsed['query'])) {
       parse_str($parsed['query'], $params);
     }
@@ -349,7 +349,7 @@ class Config extends bbn\Models\Cls\Basic
         break;
       }
     }
-    if ( !$supported && strpos($this->cfg['url'], 'cache/') !== 0 ){
+    if ( !$supported && Str::pos($this->cfg['url'], 'cache/') !== 0 ){
       $this->cfg['cache_file'] = $this->fpath.$this->cfg['url'];
     }
     return $res;
@@ -398,7 +398,7 @@ class Config extends bbn\Models\Cls\Basic
     if (!$dir) {
       $dir = $this->cfg['url'];
     }
-    if (!empty($dir) && (substr($dir, -1) !== '/')) {
+    if (!empty($dir) && (Str::sub($dir, -1) !== '/')) {
       $dir .= '/';
     }
     $res = [

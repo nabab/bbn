@@ -16,8 +16,12 @@
 namespace bbn\Mvc;
 
 use Exception;
-use bbn;
+use bbn\Str;
 use bbn\X;
+use bbn\Mvc;
+use bbn\Mvc\Common;
+use bbn\File\Dir;
+use bbn\Models\Tts\Retriever;
 
 /**
  * @category MVC
@@ -29,7 +33,7 @@ use bbn\X;
 class Router
 {
   use Common;
-  use bbn\Models\Tts\Retriever;
+  use Retriever;
 
   /**
    * The list of types of controllers.
@@ -138,13 +142,13 @@ class Router
    */
   public static function parse(string $path): string
   {
-    while (strpos($path, '//') !== false){
+    while (Str::pos($path, '//') !== false){
       $path = str_replace('//', '/', $path);
     }
 
     // case like my/dir/.
-    if ((strlen($path) > 0) && (X::basename($path) === '.')) {
-      $path = substr($path, 0, -1);
+    if ((Str::len($path) > 0) && (X::basename($path) === '.')) {
+      $path = Str::sub($path, 0, -1);
     }
 
     return $path ?: '.';
@@ -178,10 +182,10 @@ class Router
   /**
    * Router constructor.
    *
-   * @param bbn\Mvc $mvc
+   * @param Mvc $mvc
    * @param array $routes
    */
-  public function __construct(bbn\Mvc $mvc, array $routes = [])
+  public function __construct(Mvc $mvc, array $routes = [])
   {
     self::retrieverInit($this);
     $this->_mvc    = $mvc;
@@ -214,7 +218,7 @@ class Router
     }
 
     $this->_prepath = $path;
-    if (substr($this->_prepath, -1) !== '/') {
+    if (Str::sub($this->_prepath, -1) !== '/') {
       $this->_prepath .= '/';
     }
 
@@ -232,7 +236,7 @@ class Router
   public function getPrepath($with_slash = 1): string
   {
     if (!empty($this->_prepath)) {
-      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);
+      return $with_slash ? $this->_prepath : Str::sub($this->_prepath, 0, -1);
     }
 
     return '';
@@ -283,14 +287,14 @@ class Router
       $root       = $this->appPath();
       $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';
       if (X::indexOf($name, $prefix) !== 0) {
-        $prefix = substr($name, 0, strpos($name, '-') + 1);
+        $prefix = Str::sub($name, 0, Str::pos($name, '-') + 1);
       }
       $plugin     = null;
       $plugin_url = null;
     }
 
     if (!empty($root) && (X::indexOf($name, $prefix) === 0)) {
-      $local_name = substr($name, strlen($prefix));
+      $local_name = Str::sub($name, Str::len($prefix));
       $parts      = explode('-', $local_name);
       $root      .= 'components/';
       $path       = implode('/', $parts);
@@ -413,7 +417,7 @@ class Router
   {
     if (self::isMode($mode)) {
       // If there is a prepath defined we prepend it to the path
-      if ($this->_prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {
+      if ($this->_prepath && (Str::pos($path, '/') !== 0) && (Str::pos($path, $this->_prepath) !== 0)) {
         $path = $this->_prepath . $path;
       }
 
@@ -444,8 +448,8 @@ class Router
 
     // If there is a prepath defined we prepend it to the path
     if ($this->_prepath
-        && (strpos($path, '/') !== 0)
-        && (strpos($path, $this->_prepath) !== 0)
+        && (Str::pos($path, '/') !== 0)
+        && (Str::pos($path, $this->_prepath) !== 0)
     ) {
       $path = $this->_prepath . $path;
     }
@@ -462,11 +466,14 @@ class Router
 
     $dir = false;
     $dir1 = self::parse($root . $path);
-    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
+    if (is_dir($dir1) && (Str::pos($dir1, $root) === 0)) {
       $dir = $dir1;
     }
-    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)
-        && is_dir($dir2)
+    elseif (!empty($alt_path) 
+      && !empty($alt_root)
+      && ($dir2 = self::parse($alt_root . Str::sub($path, Str::len($alt_path) + 1)))
+      && (Str::pos($dir2, $alt_root) === 0)
+      && is_dir($dir2)
     ) {
       $dir = $dir2;
     }
@@ -476,15 +483,15 @@ class Router
     }
 
     $res   = [];
-    $files = bbn\File\Dir::getFiles($dir);
+    $files = Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
       throw new Exception(X::_("Impossible to find the directory for %s", $dir));
     }
 
     foreach ($files as $f) {
-      if (\in_array(bbn\Str::fileExt($f), self::$_filetypes[$mode], true)) {
-        $res[] = $prepath.bbn\Str::fileExt($f, true)[0];
+      if (\in_array(Str::fileExt($f), self::$_filetypes[$mode], true)) {
+        $res[] = $prepath.Str::fileExt($f, true)[0];
       }
     }
 
@@ -506,8 +513,8 @@ class Router
 
     // If there is a prepath defined we prepend it to the path
     if ($this->_prepath
-        && (strpos($path, '/') !== 0)
-        && (strpos($path, $this->_prepath) !== 0)
+        && (Str::pos($path, '/') !== 0)
+        && (Str::pos($path, $this->_prepath) !== 0)
     ) {
       $path = $this->_prepath . $path;
     }
@@ -517,7 +524,7 @@ class Router
 
     $dir = false;
     $dir1 = self::parse($root . $path);
-    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
+    if (is_dir($dir1) && (Str::pos($dir1, $root) === 0)) {
       $dir = $dir1;
     }
 
@@ -527,15 +534,15 @@ class Router
 
 
     $res     = [];
-    $files   = bbn\File\Dir::getFiles($dir);
+    $files   = Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
       throw new Exception(X::_("The directory %s doesn't exist", $dir));
     }
 
     foreach ($files as $f) {
-      if (\in_array(bbn\Str::fileExt($f), self::$_filetypes[$mode], true)) {
-        $res[] = $prepath.bbn\Str::fileExt($f, true)[0];
+      if (\in_array(Str::fileExt($f), self::$_filetypes[$mode], true)) {
+        $res[] = $prepath.Str::fileExt($f, true)[0];
       }
     }
 
@@ -557,8 +564,8 @@ class Router
 
     // If there is a prepath defined we prepend it to the path
     if ($this->_prepath
-        && (strpos($path, '/') !== 0)
-        && (strpos($path, $this->_prepath) !== 0)
+        && (Str::pos($path, '/') !== 0)
+        && (Str::pos($path, $this->_prepath) !== 0)
     ) {
       $path = $this->_prepath . $path;
     }
@@ -568,7 +575,7 @@ class Router
 
     $dir = false;
     $dir1 = self::parse($root . $path);
-    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
+    if (is_dir($dir1) && (Str::pos($dir1, $root) === 0)) {
       $dir = $dir1;
     }
 
@@ -578,15 +585,15 @@ class Router
     }
 
     $res     = [];
-    $files   = bbn\File\Dir::getFiles($dir);
+    $files   = Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
       throw new Exception(X::_("The directory %s doesn't exist", $dir));
     }
 
     foreach ($files as $f) {
-      if (\in_array(bbn\Str::fileExt($f), self::$_filetypes[$mode], true)) {
-        $res[] = $prepath.bbn\Str::fileExt($f, true)[0];
+      if (\in_array(Str::fileExt($f), self::$_filetypes[$mode], true)) {
+        $res[] = $prepath.Str::fileExt($f, true)[0];
       }
     }
 
@@ -658,7 +665,7 @@ class Router
         && self::isMode($mode)
         && isset($this->_routes['root'][$path ?: $this->alt_root])
     ) {
-      $res = bbn\Str::parsePath($this->_routes['root'][$path ?: $this->alt_root]['path']) .
+      $res = Str::parsePath($this->_routes['root'][$path ?: $this->alt_root]['path']) .
         '/src/' . $this->_get_mode_path($mode);
       return $res;
     }
@@ -683,7 +690,7 @@ class Router
       }
 
       foreach (array_keys($this->_routes['alias']) as $p) {
-        if (strpos($path, $p . '/') === 0) {
+        if (Str::pos($path, $p . '/') === 0) {
           return $p;
         }
       }
@@ -772,7 +779,7 @@ class Router
     if (!empty($o['plugin'])) {
       $this->_registerLocaleDomain($o['plugin']);
       $plugin_root = $this->_get_alt_root($mode, $o['plugin']);
-      $plugin_path = substr($path, strlen($o['plugin']) + 1);
+      $plugin_path = Str::sub($path, Str::len($o['plugin']) + 1);
     }
 
     // About to define self::$_known[$mode][$path] so first check it has not already been defined
@@ -790,7 +797,7 @@ class Router
           $tmp .= '/index';
         }
         // Going backwards in the tree, so adding reversely to the array (prepending)
-        while (\strlen($tmp) > 0) {
+        while (Str::len($tmp) > 0) {
           $tmp     = self::parse(X::dirname($tmp));
           $checker = ($tmp === '.' ? '' : $tmp . '/') . $checker_file;
           if (!empty($o['plugin'])) {
@@ -876,11 +883,11 @@ class Router
     /** @var string $root The alternative directory corresponding to mode where the files will be searched for */
     $plugin_root = $plugin ? $this->_get_alt_root($mode, $plugin['url']) : null;
     /** The path parsed from this alternative root */
-    $plugin_path = $plugin ? substr($tmp, strlen($plugin['url']) + 1) : null;
+    $plugin_path = $plugin ? Str::sub($tmp, Str::len($plugin['url']) + 1) : null;
     /** @var string $real_path The real application path (ie from root to the controller) */
     $real_path = null;
     // We go through the path, removing a bit each time until we find the corresponding file
-    while (\strlen($tmp) > 0) {
+    while (Str::len($tmp) > 0) {
       // navigation (we are in dom and dom is default or we are not in dom, i.e. public)
       if ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom')) {
         // Then looks for a corresponding file in the regular MVC
@@ -955,9 +962,9 @@ class Router
       }
 
       array_unshift($args, X::basename($tmp));
-      $tmp = strpos($tmp, '/') === false ? '' : substr($tmp, 0, strrpos($tmp, '/'));
+      $tmp = Str::pos($tmp, '/') === false ? '' : Str::sub($tmp, 0, Str::rpos($tmp, '/'));
       if ($plugin) {
-        $plugin_path = strpos($plugin_path, '/') === false ? '' : X::dirname($plugin_path);
+        $plugin_path = Str::pos($plugin_path, '/') === false ? '' : X::dirname($plugin_path);
       }
 
       if (empty($tmp) && ($mode === 'dom')) {
@@ -1028,7 +1035,7 @@ class Router
   {
     if ($plugins = $this->getPlugins()) {
       foreach ($plugins as $p) {
-        if ((strpos($path, $p['url'] . '/') === 0) || ($p['url'] === $path)) {
+        if ((Str::pos($path, $p['url'] . '/') === 0) || ($p['url'] === $path)) {
           return $p;
         }
       }
@@ -1045,7 +1052,7 @@ class Router
   private function _find_translation(string|null $plugin = null): ?string
   {
     if ($locale = $this->getLocale()) {
-      $locale = strtolower(substr($locale, 0, 2));
+      $locale = strtolower(Str::sub($locale, 0, 2));
       $fpath = $plugin ? $this->pluginPath($plugin) : $this->_mvc->appPath();
       if (file_exists($fpath."locale/$locale/$locale.json")) {
         return $fpath."locale/$locale/$locale.json";
@@ -1136,7 +1143,7 @@ class Router
       if ($plugin_url) {
         $p        = $this->_routes['root'][$plugin_url];
         $plugin   = $p['name'];
-        $alt_path = substr($path, strlen($plugin_url) + 1);
+        $alt_path = Str::sub($path, Str::len($plugin_url) + 1);
         $alt_root = $this->_get_plugin_root($mode, $plugin);
       }
 

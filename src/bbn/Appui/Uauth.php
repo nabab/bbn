@@ -43,7 +43,7 @@ class Uauth extends DbCls
     }
     else if (defined(BBN_LOCALE)) {
       $st = explode('.', BBN_LOCALE)[0];
-      $cfg['uauth_phone_region'] = strtoupper(substr($st, -2));
+      $cfg['uauth_phone_region'] = strtoupper(Str::sub($st, -2));
     }
 
     // Setting up the class configuration

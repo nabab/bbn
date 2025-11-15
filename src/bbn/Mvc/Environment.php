@@ -17,8 +17,9 @@
 
 namespace bbn\Mvc;
 
-use bbn;
+use bbn\Str;
 use bbn\X;
+use bbn\Mvc;
 
 class Environment
 {
@@ -160,7 +161,7 @@ class Environment
 
       if (($_SERVER['REQUEST_METHOD'] === 'POST') || \count($_FILES)) {
         /** @todo Remove the json parameter from the bbn.js functions */
-        $this->setMode(BBN_DEFAULT_MODE);
+        $this->setMode(constant('BBN_DEFAULT_MODE'));
       }
       // If no post, assuming to be a DOM document
       else {
@@ -171,14 +172,15 @@ class Environment
         $current = $_SERVER['REQUEST_URI'];
       }
 
-      if (isset($current) && (BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false)
+      $cur_path = constant('BBN_CUR_PATH');
+      if (isset($current) && ($cur_path === '/' || Str::pos($current, $cur_path) !== false)
       ) {
         $url = explode("?", urldecode($current))[0];
-        if (BBN_CUR_PATH === '/') {
+        if ($cur_path === '/') {
           $this->setParams($url);
         }
         else {
-          $this->setParams(substr($url, \strlen(BBN_CUR_PATH)));
+          $this->setParams(Str::sub($url, Str::len($cur_path)));
         }
       }
     }
@@ -245,12 +247,12 @@ class Environment
         else {
           $user_locales = self::detectLanguage();
           if (!defined('BBN_LANG') && $user_locales) {
-            if (strpos($user_locales[0], '-')) {
+            if (Str::pos($user_locales[0], '-')) {
               if ($lang = X::split($user_locales[0], '-')[0]) {
                 define('BBN_LANG', $lang);
               }
             }
-            elseif (strpos($user_locales[0], '_')) {
+            elseif (Str::pos($user_locales[0], '_')) {
               if ($lang = X::split($user_locales[0], '_')[0]) {
                 define('BBN_LANG', $lang);
               }
@@ -282,7 +284,7 @@ class Environment
         }
       }
     }
-    elseif (!strpos($locale, '-') && !strpos($locale, '_')) {
+    elseif (!Str::pos($locale, '-') && !Str::pos($locale, '_')) {
       if ($locale === 'en') {
         array_unshift(
           $locales,
@@ -345,7 +347,7 @@ class Environment
       foreach ($path as $p) {
         if (!empty($this->_params[0]) && $this->_params[0] === $p) {
           array_shift($this->_params);
-          $this->_url = substr($this->_url, \strlen($p) + 1);
+          $this->_url = Str::sub($this->_url, Str::len($p) + 1);
         } else {
           throw new \Exception(
             X::_("The prepath $p doesn't seem to correspond to the current path {$this->_url}")
@@ -431,7 +433,7 @@ class Environment
       if (isset($argv[1])) {
         $this->setParams($argv[1]);
         if (isset($argv[2])) {
-          if (!isset($argv[3]) && \bbn\Str::isJson($argv[2])) {
+          if (!isset($argv[3]) && Str::isJson($argv[2])) {
             $this->_post = json_decode($argv[2], 1);
           } else {
             for ($i = 2, $iMax = \count($argv); $i < $iMax; $i++) {
@@ -458,7 +460,7 @@ class Environment
       if (\count($_GET) > 0) {
         $this->_get = array_map(
           function ($a) {
-            return bbn\Str::correctTypes($a);
+            return Str::correctTypes($a);
           }, $_GET
         );
       }
@@ -479,7 +481,7 @@ class Environment
   public function getPost()
   {
     if (!isset($this->_post)) {
-      if (self::$_input && \bbn\Str::isJson(self::$_input)) {
+      if (self::$_input && Str::isJson(self::$_input)) {
         $this->_post = json_decode(self::$_input, 1);
       }
       elseif (!empty($_POST)) {
@@ -491,11 +493,11 @@ class Environment
       }
       else {
         $this->_has_post = true;
-        //$this->_post     = bbn\Str::correctTypes($this->_post);
+        //$this->_post     = Str::correctTypes($this->_post);
         foreach ($this->_post as $k => $v) {
           if (X::indexOf($k, '_bbn_') === 0) {
-            if (!defined(strtoupper(substr($k, 1)))) {
-              define(strtoupper(substr($k, 1)), $v);
+            if (!defined(strtoupper(Str::sub($k, 1)))) {
+              define(strtoupper(Str::sub($k, 1)), $v);
             }
 
             unset($this->_post[$k]);
@@ -529,7 +531,7 @@ class Environment
                 }
 
                 $j++;
-                $file = bbn\Str::fileExt($f['name'][$i], true);
+                $file = Str::fileExt($f['name'][$i], true);
                 $v    = $file[0] . '_' . $j . '.' . $file[1];
               }
 
@@ -549,7 +551,7 @@ class Environment
               }
 
               $jj++;
-              $file       = bbn\Str::fileExt($f['name'], true);
+              $file       = Str::fileExt($f['name'], true);
               $f['name']  = $file[0] . '_' . $jj . '.' . $file[1];
             }
 
@@ -615,7 +617,7 @@ class Environment
    */
   private static function _getWeightedLocales($httpAcceptLanguageHeader)
   {
-    if (strlen($httpAcceptLanguageHeader) == 0) {
+    if (Str::len($httpAcceptLanguageHeader) == 0) {
       return [];
     }
 
@@ -695,13 +697,13 @@ class Environment
   {
     if (!isset($this->_params)) {
       $this->_params = [];
-      $tmp           = explode('/', bbn\Str::parsePath($path));
+      $tmp           = explode('/', Str::parsePath($path));
       foreach ($tmp as $t) {
         $t = trim($t);
-        if (!empty($t) || bbn\Str::isNumber($t)) {
-          if (\in_array($t, bbn\Mvc::$reserved, true)) {
+        if (!empty($t) || Str::isNumber($t)) {
+          if (\in_array($t, Mvc::$reserved, true)) {
             $msg = X::_('The controller you are asking for contains one of these reserved words')
-                .': '.implode(', ', bbn\Mvc::$reserved);
+                .': '.implode(', ', Mvc::$reserved);
             throw new \Exception($msg);
           }
 

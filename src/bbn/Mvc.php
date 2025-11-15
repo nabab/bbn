@@ -17,6 +17,7 @@ namespace bbn;
  * @todo Add $this->dom to public controllers (?)
  */
 
+use bbn\Str;
 use bbn\Mvc\Router;
 use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
@@ -489,8 +490,8 @@ class Mvc implements Mvc\Api
       }
       else {
         foreach ($aliases as $alias => $real) {
-          if (strpos($a, $alias . '/') === 0) {
-            $todo[] = $real . substr($a, strlen($alias));
+          if (Str::pos($a, $alias . '/') === 0) {
+            $todo[] = $real . Str::sub($a, Str::len($alias));
             break;
           }
         }
@@ -524,11 +525,11 @@ class Mvc implements Mvc\Api
 
     foreach ($this->static_routes as $ar) {
       if (
-        (substr($ar, -1) === '*')
-        && (strpos($url, substr($ar, 0, -1)) === 0)
+        (Str::sub($ar, -1) === '*')
+        && (Str::pos($url, Str::sub($ar, 0, -1)) === 0)
       ) {
-        if (strlen($ar) > strlen($auth_applicable)) {
-          $auth_applicable = substr($ar, 0, -1);
+        if (Str::len($ar) > Str::len($auth_applicable)) {
+          $auth_applicable = Str::sub($ar, 0, -1);
         }
       }
     }
@@ -536,10 +537,10 @@ class Mvc implements Mvc\Api
     if ($auth_applicable) {
       foreach ($this->forbidden_routes as $forbidden) {
         if (
-          (substr($forbidden, -1) === '*')
-          && (strpos($url, substr($forbidden, 0, -1)) === 0)
+          (Str::sub($forbidden, -1) === '*')
+          && (Str::pos($url, Str::sub($forbidden, 0, -1)) === 0)
           // Should be as or more precise
-          && (strlen($auth_applicable) < strlen($forbidden))
+          && (Str::len($auth_applicable) < Str::len($forbidden))
         ) {
           return false;
         } elseif ($url === $forbidden) {
@@ -612,11 +613,11 @@ class Mvc implements Mvc\Api
       }
 
       if (
-        (substr($ar, -1) === '*')
-        && (strpos($url, substr($ar, 0, -1)) === 0)
+        (Str::sub($ar, -1) === '*')
+        && (Str::pos($url, Str::sub($ar, 0, -1)) === 0)
       ) {
-        if (strlen($ar) > strlen($auth_applicable)) {
-          $auth_applicable = substr($ar, 0, -1);
+        if (Str::len($ar) > Str::len($auth_applicable)) {
+          $auth_applicable = Str::sub($ar, 0, -1);
         }
       }
     }
@@ -624,10 +625,10 @@ class Mvc implements Mvc\Api
     if ($auth_applicable || $has_allow_all) {
       foreach ($this->forbidden_routes as $forbidden) {
         if (
-          (substr($forbidden, -1) === '*')
-          && (strpos($url, substr($forbidden, 0, -1)) === 0)
+          (Str::sub($forbidden, -1) === '*')
+          && (Str::pos($url, Str::sub($forbidden, 0, -1)) === 0)
           // Should be as or more precise
-          && (strlen($auth_applicable) < strlen($forbidden))
+          && (Str::len($auth_applicable) < Str::len($forbidden))
         ) {
           return false;
         } elseif ($url === $forbidden) {
@@ -651,7 +652,7 @@ class Mvc implements Mvc\Api
   public function setRoot($root)
   {
     /** @todo a proper verification of the path */
-    if (strpos($root, '/', -1) === false) {
+    if (Str::pos($root, '/', -1) === false) {
       $root .= '/';
     }
 
@@ -851,7 +852,7 @@ class Mvc implements Mvc\Api
     self::singletonInit($this);
     self::initPath();
     $this->env = new Environment();
-    if (\is_object($db) && ($class = \get_class($db)) && ($class === 'PDO' || strpos($class, '\Db') !== false)) {
+    if (\is_object($db) && ($class = \get_class($db)) && ($class === 'PDO' || Str::pos($class, '\Db') !== false)) {
       $this->db = $db;
     } else {
       $this->db = null;
@@ -865,7 +866,7 @@ class Mvc implements Mvc\Api
             $route['path'] = constant('BBN_' . strtoupper($route['root']) . '_PATH') . $route['path'];
           }
 
-          if (!empty($route['path']) && (substr($route['path'], -1) !== '/')) {
+          if (!empty($route['path']) && (Str::sub($route['path'], -1) !== '/')) {
             $route['path'] .= '/';
           }
 
@@ -948,14 +949,14 @@ class Mvc implements Mvc\Api
 
   public function pluginUrl($plugin)
   {
-    return $this->hasPlugin($plugin) ? substr($this->plugins[$plugin]['url'], \strlen($this->root)) : false;
+    return $this->hasPlugin($plugin) ? Str::sub($this->plugins[$plugin]['url'], Str::len($this->root)) : false;
   }
 
 
   public function pluginName($path)
   {
     foreach ($this->plugins as $name => $p) {
-      if (strpos($path, $p['url']) === 0) {
+      if (Str::pos($path, $p['url']) === 0) {
         return $name;
       }
     }

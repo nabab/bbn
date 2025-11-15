@@ -461,7 +461,7 @@ class Grid extends bbn\Models\Cls\Cache
         }
 
         if (\is_string($r)) {
-          $r = strpos($r, '=') === 0 ? ' ' . $r : $r;
+          $r = Str::pos($r, '=') === 0 ? ' ' . $r : $r;
         }
         if ((($k = X::search($dates, ['field' => $i])) !== null)) {
           if (!empty($dates[$k]['format']) && !empty($r)) {

@@ -156,7 +156,7 @@ class GitLab
     $response = X::curl($this->lastRequest, null, $options);
     if ($mode === 'get') {
       $headerSize = X::lastCurlInfo()['header_size'];
-      $header = explode("\r\n", substr($response, 0, $headerSize));
+      $header = explode("\r\n", Str::sub($response, 0, $headerSize));
       $this->lastResponseHeader = [];
       foreach ($header as $v) {
         $tmp = \explode(':', $v);
@@ -164,7 +164,7 @@ class GitLab
           $this->lastResponseHeader[\trim(array_shift($tmp))] = \trim(\implode(' ', $tmp));
         }
       }
-      $response = substr($response, $headerSize);
+      $response = Str::sub($response, $headerSize);
     }
     // Check if the response is a JSON string and convert it
     if (Str::isJson(($response))) {

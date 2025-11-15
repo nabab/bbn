@@ -4,6 +4,7 @@
  */
 namespace bbn;
 
+use bbn\Str;
 use Brick\PhoneNumber\PhoneNumber;
 use Brick\PhoneNumber\PhoneNumberFormat;
 use Brick\PhoneNumber\PhoneNumberParseException;
@@ -44,13 +45,13 @@ class Phone
 
   public static function isPhone(string $phone, ?string $region = null): bool
   {
-    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(substr(explode('.', BBN_LOCALE)[0], -2)) : null));
+    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(Str::sub(explode('.', BBN_LOCALE)[0], -2)) : null));
     return $ph ? $ph->isPossibleNumber() : false;
   }
 
   public static function isValid(string $phone, ?string $region = null): bool
   {
-    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(substr(explode('.', BBN_LOCALE)[0], -2)) : null));
+    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(Str::sub(explode('.', BBN_LOCALE)[0], -2)) : null));
     return $ph ? $ph->isValidNumber() : false;
   }
 

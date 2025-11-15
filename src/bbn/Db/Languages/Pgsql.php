@@ -491,7 +491,7 @@ class Pgsql extends Sql
   public function createUser(string $user, string $pass, string|null $db = null): bool
   {
     if (Str::checkName($user)
-      && (strpos($pass, "'") === false)
+      && (Str::pos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
         <<<PGSQL
@@ -960,8 +960,8 @@ PGSQL;
               : (in_array($row['column_name'], $unique_keys)
                 ? 'UNI'
                 : null),
-            'extra' => strpos($row['column_default'], 'nextval') !== false &&
-                       strpos($row['data_type'], 'int') !== false
+            'extra' => Str::pos($row['column_default'], 'nextval') !== false &&
+                       Str::pos($row['data_type'], 'int') !== false
               ? 'auto_increment'
               : '',
             'signed' => $row['numeric_precision'] !== null,
@@ -969,7 +969,7 @@ PGSQL;
             'generation' => $row['generation_expression'],
           ];
           if ($row['column_default'] !== null || $row['is_nullable'] === 'YES') {
-            $r[$f]['default'] = \is_null($row['column_default']) || strpos($row['column_default'], 'NULL') !== false
+            $r[$f]['default'] = \is_null($row['column_default']) || Str::pos($row['column_default'], 'NULL') !== false
               ? 'NULL'
               : $row['column_default'];
 
@@ -1451,7 +1451,7 @@ PGSQL
 
     $col_type = $cfg['type'];
 
-    if (array_key_exists('default', $cfg) && strpos($cfg['default'], '::') !== FALSE) {
+    if (array_key_exists('default', $cfg) && Str::pos($cfg['default'], '::') !== FALSE) {
       [$cfg['default']] = explode('::', $cfg['default']);
     }
 
@@ -1530,8 +1530,8 @@ PGSQL
     }
 
     if (!empty($cfg['position'])) {
-      if (strpos($cfg['position'], 'after:') === 0) {
-        $after = trim(substr($cfg['position'], 6));
+      if (Str::pos($cfg['position'], 'after:') === 0) {
+        $after = trim(Str::sub($cfg['position'], 6));
         if (Str::checkName($after)) {
           $st .= ' AFTER ' . $this->escape($after);
         }

@@ -57,7 +57,7 @@ trait Cache
   protected function _cache_name($uid, $method = '', string $locale = ''): string
   {
     $uid  = (string)$uid;
-    $path = Str::isUid($uid) ? substr($uid, 0, 3).'/'.substr($uid, 3, 3).'/'.substr($uid, 6) : $uid;
+    $path = Str::isUid($uid) ? Str::sub($uid, 0, 3).'/' . Str::sub($uid, 3, 3).'/' . Str::sub($uid, 6) : $uid;
     return $this->_cache_prefix.$path.(empty($method) ? '' : '/'.(string)$method).(empty($locale) ? '' : "-$locale");
   }
 

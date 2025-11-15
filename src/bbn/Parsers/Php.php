@@ -275,7 +275,7 @@ class Php extends bbn\Models\Cls\Basic
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
         //'cloneable' =>  $rc->isCloneable(),
-        'fileName' => substr($rc->getFileName(), strlen($path)),
+        'fileName' => Str::sub($rc->getFileName(), Str::len($path)),
         'startLine' => $rc->getStartLine(),
         'endLine' => $rc->getEndLine(),
         'numMethods' => $methods ? count($methods) : 0,
@@ -343,7 +343,7 @@ class Php extends bbn\Models\Cls\Basic
   public function getLibraryClasses(string $path, string $namespace = ''): ?array
   {
     if (!empty($namespace)) {
-      if (substr($namespace, -1) !== '\\') {
+      if (Str::sub($namespace, -1) !== '\\') {
         $namespace = '\\' . $namespace;
       }
     }
@@ -816,9 +816,9 @@ class Php extends bbn\Models\Cls\Basic
       
       if ($arr['description']) {
         $start_example = stripos($arr['description'], "* ```php");
-        $end_example = strpos($arr['description'], "```");
+        $end_example = Str::pos($arr['description'], "```");
         if (($start_example !== false) && ($end_example !== false)) {
-          $arr['example_method'] = (string)$docBlock->getDescription(); //substr($arr['description'], $start_example+1,);
+          $arr['example_method'] = (string)$docBlock->getDescription(); //Str::sub($arr['description'], $start_example+1,);
           $arr['description'] = $this->parser->parseDocblock($txt);//$docBlock->getSummary();
         }
       }
@@ -914,7 +914,7 @@ class Php extends bbn\Models\Cls\Basic
     if ($filename = $rfx->getFileName()) {
       $content = file($filename);
       $s = $rfx->getStartLine();
-      while (strpos(trim($content[$s - 1]), '{') === false) {
+      while (Str::pos(trim($content[$s - 1]), '{') === false) {
         $s++;
       }
       
@@ -1162,7 +1162,7 @@ class Php extends bbn\Models\Cls\Basic
       if (!empty($bits)) {
         $description = trim(X::join($bits, PHP_EOL));
         $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $description, $matches, PREG_OFFSET_CAPTURE);
-        $len = strlen($description);
+        $len = Str::len($description);
         $start = 0;
         
         if ($num_matches) {
@@ -1171,7 +1171,7 @@ class Php extends bbn\Models\Cls\Basic
               if (
                 ($i === 0)
                 && ($m[1] !== 0)
-                && $tmp = trim(substr($description, $start, $m[1]))
+                && $tmp = trim(Str::sub($description, $start, $m[1]))
               ) {
                 //$content = trim(Str::markdown2html($tmp));
                 $content = $tmp;
@@ -1187,11 +1187,11 @@ class Php extends bbn\Models\Cls\Basic
                 'type' => 'code',
                 'content' => trim($matches[1][$i][0])
               ];
-              $start = $m[1] + strlen($m[0]);
+              $start = $m[1] + Str::len($m[0]);
               $end = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;
               if (
                 ($start < $len)
-                && ($tmp = trim(substr($description, $start, $end - $start)))
+                && ($tmp = trim(Str::sub($description, $start, $end - $start)))
               ) {
                 $ar['description_parts'][] = [
                   'type' => 'text',

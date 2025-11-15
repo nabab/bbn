@@ -807,12 +807,12 @@ class Menu extends bbn\Models\Cls\Basic
         $res['public']        = !empty($opt['public']) ? 1 : 0;
         $res['id_permission'] = $menu['id_option'];
         $res['link']          = $this->perm->toPath($menu['id_option']);
-        if ($prepath && (strpos($res['link'], $prepath) === 0)) {
-          $res['link'] = substr($res['link'], strlen($prepath));
+        if ($prepath && (Str::pos($res['link'], $prepath) === 0)) {
+          $res['link'] = Str::sub($res['link'], Str::len($prepath));
         }
 
         if (!empty($menu['argument'])) {
-          $res['link'] .= (substr($menu['argument'], 0, 1) === '/' ? '' : '/').$menu['argument'];
+          $res['link'] .= (Str::sub($menu['argument'], 0, 1) === '/' ? '' : '/').$menu['argument'];
         }
       }
 

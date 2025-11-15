@@ -2,6 +2,8 @@
 
 namespace bbn\Parsers;
 
+use bbn\Str;
+
 /**
  * Documentation block parser
  *
@@ -218,19 +220,19 @@ class Docblock {
             $ln = '';
           }
           // Removing the asterisk and the first space
-          elseif (substr($ln, 0, 2) === '* ') {
-            $ln = substr($ln, 2);
+          elseif (Str::sub($ln, 0, 2) === '* ') {
+            $ln = Str::sub($ln, 2);
           }
           /** @var string The completely trimmed line (but we will need the spaces for markdown) */
           $trimmed = trim($ln);
           // If trimmed is empty this is an empty line to treat as is
-          if (strlen($trimmed)) {
+          if (Str::len($trimmed)) {
             // Case where the line is a tag
-            if (substr($ln, 0, 1) === '@') {
+            if (Str::sub($ln, 0, 1) === '@') {
               /** @var array The line split in bits by space */
               $bits = preg_split('/\s+/', $trimmed);
               // The first part is the tag
-              $tag = substr(array_shift($bits), 1);
+              $tag = Str::sub(array_shift($bits), 1);
               // The first tag MUST be the type (i.e. file, method, var...)
               if (!$num_tags) {
                 $tmp['type'] = $tag;

@@ -240,7 +240,7 @@ class Statistic extends DbCls
   {
     if ($this->db_cfg && !empty($this->db_cfg['values'])) {
       if (is_string($start)) {
-        $start = strtotime($start . (strlen($start) === 10 ? ' 00:00:00' : ''));
+        $start = strtotime($start . (Str::len($start) === 10 ? ' 00:00:00' : ''));
       }
 
       if (!$start || !is_int($start)) {
@@ -321,9 +321,9 @@ class Statistic extends DbCls
           12,
           0,
           0,
-          (int)substr($real_start, 5, 2),
-          (int)substr($real_start, 8, 2),
-          (int)substr($real_start, 0, 4)
+          (int)Str::sub($real_start, 5, 2),
+          (int)Str::sub($real_start, 8, 2),
+          (int)Str::sub($real_start, 0, 4)
         );
         $test      = date('Ymd', $time);
         while ($test <= $today) {
@@ -412,7 +412,7 @@ class Statistic extends DbCls
     }
 
     if (Str::isDateSql($start, $end)) {
-      $tsStart = mktime(12, 0, 0, substr($start, 5, 2), substr($start, 8, 2), substr($start, 0, 4));
+      $tsStart = mktime(12, 0, 0, Str::sub($start, 5, 2), Str::sub($start, 8, 2), Str::sub($start, 0, 4));
       $res = [];
       $labels = [];
       switch ($unit) {
@@ -486,7 +486,7 @@ class Statistic extends DbCls
       if (!Str::isDateSql($end)) {
         $end = date('Y-m-d');
       }
-      $tst = mktime(12, 0, 0, substr($end, 5, 2), substr($end, 8, 2), substr($end, 0, 4));
+      $tst = mktime(12, 0, 0, Str::sub($end, 5, 2), Str::sub($end, 8, 2), Str::sub($end, 0, 4));
       switch ($unit) {
         case 'd':
           $exp = 'days';
@@ -531,9 +531,9 @@ class Statistic extends DbCls
         switch (strtolower($unit)) {
           case 'y':
             $funit = 'years';
-            $tmp   = date('Y-m-d', mktime(23, 59, 59, 12, 31, substr($end, 0, 4)));
+            $tmp   = date('Y-m-d', mktime(23, 59, 59, 12, 31, Str::sub($end, 0, 4)));
             if ($end !== $tmp) {
-              $end = date('Y-m-d', mktime(23, 59, 59, 12, 31, (int)substr($end, 0, 4) - 1));
+              $end = date('Y-m-d', mktime(23, 59, 59, 12, 31, (int)Str::sub($end, 0, 4) - 1));
             }
             break;
           case 't':
@@ -541,15 +541,15 @@ class Statistic extends DbCls
             $values *= 3;
           case 'm':
             $funit  = 'months';
-            $month  = (int)substr($end, 5, 2);
+            $month  = (int)Str::sub($end, 5, 2);
             $remain = $month % 3;
             if ($remain) {
               $remain = 3 - $remain;
             }
 
-            $tmp = date('Y-m-d', mktime(23, 59, 59, $month + 1, 0, substr($end, 0, 4)));
+            $tmp = date('Y-m-d', mktime(23, 59, 59, $month + 1, 0, Str::sub($end, 0, 4)));
             if (($end !== $tmp) || $remain) {
-              $end = date('Y-m-d', mktime(23, 59, 59, $month - $remain + 1, 0, (int)substr($end, 0, 4)));
+              $end = date('Y-m-d', mktime(23, 59, 59, $month - $remain + 1, 0, (int)Str::sub($end, 0, 4)));
             }
             break;
           case 'w':

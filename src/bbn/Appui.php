@@ -10,6 +10,7 @@ use function yaml_emit;
 use bbn\File\System;
 use bbn\Util\Enc;
 use bbn\Db;
+use bbn\Str;
 use bbn\User;
 use bbn\User\Preferences;
 use bbn\User\Permissions;
@@ -250,7 +251,7 @@ class Appui
       $url .= $c['cur_path'];
     }
 
-    if (substr($url, -1) !== '/') {
+    if (Str::sub($url, -1) !== '/') {
       $url .= '/';
     }
 
@@ -510,7 +511,7 @@ class Appui
           && ($file = $this->getSettingsFile())
           && ($content = $this->_currentFs->getContents($file))
       ) {
-        if (substr($file, -4) === '.yml') {
+        if (Str::sub($file, -4) === '.yml') {
           $this->_settings = yaml_parse($content);
         }
         else {
@@ -537,7 +538,7 @@ class Appui
           && ($file = $this->getRoutesFile())
           && ($content = $this->_currentFs->getContents($file))
       ) {
-        if (substr($file, -4) === '.yml') {
+        if (Str::sub($file, -4) === '.yml') {
           $this->_routes = yaml_parse($content);
         }
         else {
@@ -603,7 +604,7 @@ class Appui
           && ($file = $this->getEnvironmentFile())
           && ($content = $this->_currentFs->getContents($file))
       ) {
-        if (substr($file, -4) === '.yml') {
+        if (Str::sub($file, -4) === '.yml') {
           $envs = yaml_parse($content);
         }
         else {
@@ -748,7 +749,7 @@ class Appui
 
       $file = $this->getEnvironmentFile();
       $envs = $this->getEnvironment(true);
-      if (substr($file, -4) === '.yml') {
+      if (Str::sub($file, -4) === '.yml') {
         $content = \yaml_emit($envs);
       }
       else {
@@ -784,7 +785,7 @@ class Appui
       }
 
       $file = $this->getSettingsFile();
-      if (substr($file, -4) === '.yml') {
+      if (Str::sub($file, -4) === '.yml') {
         $content = \yaml_emit($this->_settings);
       }
       else {
@@ -851,8 +852,8 @@ class Appui
       mkdir($this->appPath() . "plugins/$name");
     }
 
-    if (substr($name, 0, 6) === 'appui-') {
-      $name   = substr($name, 6);
+    if (Str::sub($name, 0, 6) === 'appui-') {
+      $name   = Str::sub($name, 6);
       $params = ['appui'];
     }
     else {

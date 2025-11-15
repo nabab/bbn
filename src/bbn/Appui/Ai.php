@@ -539,7 +539,7 @@ class Ai extends DbCls
         $conversation = $this->fs->decodeContents($row['file'], 'json', true);
       }
       else {
-        $subpath = substr(X::makeStoragePath('conversations', 'Y', 100, $this->fs), strlen($path) + 1);
+        $subpath = Str::sub(X::makeStoragePath('conversations', 'Y', 100, $this->fs), Str::len($path) + 1);
         $result['file'] = $subpath . $result['id'] . '.json';
         $row = [
           'title' => $result['title'],

@@ -619,7 +619,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function isTableFullName(string $table): bool
   {
-    return (bool)strpos($table, '.');
+    return (bool)Str::pos($table, '.');
   }
 
   /**
@@ -630,7 +630,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function isColFullName(string $col): bool
   {
-    return (bool)strpos($col, '.');
+    return (bool)Str::pos($col, '.');
   }
 
   /**
@@ -725,9 +725,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $res[] = hex2bin($v);
         }
         elseif (is_string($v)
-          && ((($cfg['values_desc'][$i]['type'] === 'date') && (\strlen($v) < 10))
-            || (($cfg['values_desc'][$i]['type'] === 'time') && (\strlen($v) < 8))
-            || (($cfg['values_desc'][$i]['type'] === 'datetime') && (\strlen($v) < 19)))
+          && ((($cfg['values_desc'][$i]['type'] === 'date') && (Str::len($v) < 10))
+            || (($cfg['values_desc'][$i]['type'] === 'time') && (Str::len($v) < 8))
+            || (($cfg['values_desc'][$i]['type'] === 'datetime') && (Str::len($v) < 19)))
           && (!isset($cfg['values_desc'][$i]['operator'])
             || (($cfg['values_desc'][$i]['operator'] !== 'gten')
               && ($cfg['values_desc'][$i]['operator'] !== 'gtn')
@@ -1015,7 +1015,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
           elseif (isset($cfg['available_fields'][$field])) {
             $realField = $cfg['fields'][$field] ?? $field;
-            $isFunction = strpos($realField, '(') !== false;
+            $isFunction = Str::pos($realField, '(') !== false;
             $table  = $cfg['tables_full'][$cfg['available_fields'][$realField]] ?? false;
             if ($isFunction) {
               $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $realField . ' ';
@@ -1323,10 +1323,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
 
           // Adding the alias in $fields
-          if (strpos($f, '(')) {
+          if (Str::pos($f, '(')) {
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (is_string($alias) ? ' AS ' . $this->escape($alias) : '');
           }
-          elseif (is_string($alias) && ((strpos($f, "'") === 0) || (strpos($f, '"') === 0))) {
+          elseif (is_string($alias) && ((Str::pos($f, "'") === 0) || (Str::pos($f, '"') === 0))) {
             $fields_to_put[] = $f . ' AS ' . $this->escape($alias);
           }
           elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
@@ -1415,7 +1415,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $sql .= ', ';
         }
 
-        $sql .= strpos($f, '(') === false ? $this->colSimpleName($f, true) : $f;
+        $sql .= Str::pos($f, '(') === false ? $this->colSimpleName($f, true) : $f;
       }
     }
 
@@ -1720,7 +1720,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
 
       if (!empty($res)) {
-        return 'ORDER BY ' . substr($res, 0, Strrpos($res, ',')) . PHP_EOL;
+        return 'ORDER BY ' . Str::sub($res, 0, Strrpos($res, ',')) . PHP_EOL;
       }
     }
 
@@ -2331,7 +2331,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
       else{
         if (Str::isJson($st)) {
-          if (\strpos($st, '": ') && ($json = \json_decode($st))) {
+          if (Str::pos($st, '": ') && ($json = \json_decode($st))) {
             return \json_encode($json);
           }
 
@@ -2340,7 +2340,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
         $st = \trim(\trim($st, " "), "\t");
         if (Str::isInteger($st)
-            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
+            && ((Str::sub((string)$st, 0, 1) !== '0') || ($st === '0'))
         ) {
           $tmp = (int)$st;
           if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {
@@ -3070,16 +3070,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
       foreach ($res['fields'] as $idx => &$col){
         if (!empty($res['union'])
-          || strpos($col, '(')
-          || strpos($col, '-')
-          || strpos($col, "+")
-          || strpos($col, '*')
-          || strpos($col, "/")
+          || Str::pos($col, '(')
+          || Str::pos($col, '-')
+          || Str::pos($col, "+")
+          || Str::pos($col, '*')
+          || Str::pos($col, "/")
           /*
-        strpos($col, '->"$.')  ||
-        strpos($col, "->'$.") ||
-        strpos($col, '->>"$.')  ||
-        strpos($col, "->>'$.") ||
+        Str::pos($col, '->"$.')  ||
+        Str::pos($col, "->'$.") ||
+        Str::pos($col, '->>"$.')  ||
+        Str::pos($col, "->>'$.") ||
         */
           // string as value
           || preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)

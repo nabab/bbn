@@ -160,7 +160,7 @@ class Ide
       $project_name   = $rep['text'];
     }
     //case project is name
-    elseif ((strlen($project) > 0) && !empty($opt = $this->options->fromCode($project, 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
+    elseif ((Str::len($project) > 0) && !empty($opt = $this->options->fromCode($project, 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
       $this->projects = new Project($this->db, $opt);
       $project_name   = $this->options->text($opt);
     }
@@ -299,12 +299,12 @@ class Ide
     $root = $this->getRootPath($repository);
     if ($type === 'mvc') {
       if (is_string($path)) {
-        if (strpos($path, 'mvc/') === 0) {
-          $path = substr($path, 4);
+        if (Str::pos($path, 'mvc/') === 0) {
+          $path = Str::sub($path, 4);
         }
 
-        if (strpos($path, '/mvc') === 0) {
-          $path = substr($path, 5);
+        if (Str::pos($path, '/mvc') === 0) {
+          $path = Str::sub($path, 5);
         }
       }
     }
@@ -467,7 +467,7 @@ class Ide
     }
     //get root absolute of the file
     foreach ($this->repositories as $i => $rep) {
-      if (strpos($st, $rep['name']) === 0) {
+      if (Str::pos($st, $rep['name']) === 0) {
         $root    = $rep['root_path']; //$this->getRootPath($i);
         $bit_rep = explode('/', $i);
         break;
@@ -505,8 +505,8 @@ class Ide
   {
     /*
     if ($this->project !== 'my-project') {
-      if ((strlen($plugin) > 0)
-        && empty(array_search(substr($plugin, strlen('appui-')), array_keys($this->routes)))
+      if ((Str::len($plugin) > 0)
+        && empty(array_search(Str::sub($plugin, Str::len('appui-')), array_keys($this->routes)))
       ) {
         return false;
       }
@@ -576,12 +576,12 @@ class Ide
 
         $root = $this->getRootPath($real['repository']['name']);
 
-        $file      = substr($real['file'], strlen($root));
+        $file      = Str::sub($real['file'], Str::len($root));
         $file_name = Str::fileExt($real['file'], 1)[0];
 
-        $file_path = substr($url,  strlen($real['repository']['name']) + 1);
+        $file_path = Str::sub($url,  Str::len($real['repository']['name']) + 1);
 
-        $file_path = substr($file_path, 0, strpos($file_path, $file_name) - 1);
+        $file_path = Str::sub($file_path, 0, Str::pos($file_path, $file_name) - 1);
 
         $val = [
           'repository' => $real['repository'],
@@ -591,7 +591,7 @@ class Ide
           'component_vue' => $this->isComponentFromUrl($url),
           'extension' => Str::fileExt($real['file'], 1)[1],
           'full_path' => Str::parsePath($real['repository']['path'] . '/' . $file),
-          'path' => $file_path, // substr($file_path,  strlen($real['repository']['path'])+1),
+          'path' => $file_path, // Str::sub($file_path,  Str::len($real['repository']['path'])+1),
           'tab' => $real['tab']
         ];
 
@@ -657,7 +657,7 @@ class Ide
       if (empty($file['code']) && ($file['tab'] !== '_super')) {
         if (@unlink(self::$current_file)) {
           if ($file['extension'] === 'ts') {
-            @unlink(substr(self::$current_file, 0, -2) . 'js');
+            @unlink(Str::sub(self::$current_file, 0, -2) . 'js');
           }
 
           //temporaney
@@ -962,21 +962,21 @@ class Ide
     if (
       !empty($file)
       // It must be a controller
-      && (strpos($file, '/src/mvc/public/') !== false)
+      && (Str::pos($file, '/src/mvc/public/') !== false)
       && ($perm = Permissions::getInstance())
     ) {
       $is_file = $type === 'file';
       // Check if it's an external route
       $root_path = $this->getAppPath() . 'mvc/public/';
-      if (strpos($file, $root_path) === 0) {
+      if (Str::pos($file, $root_path) === 0) {
         // Remove root path
-        $f = substr($file, \strlen($root_path), \strlen($file) - 4);
+        $f = Str::sub($file, Str::len($root_path), Str::len($file) - 4);
       }
       else {
         foreach ($this->routes as $r) {
-          if (strpos($file, $r['path']) === 0) {
+          if (Str::pos($file, $r['path']) === 0) {
             // Remove route
-            $f = substr($file, strlen($r['path']) + strlen('src/mvc/public'), -4);
+            $f = Str::sub($file, Str::len($r['path']) + Str::len('src/mvc/public'), -4);
             // Add the route's name to path
             $f = str_replace('//', '/', $r['url'] . '/' . $f);
             break;
@@ -1099,29 +1099,29 @@ class Ide
     if (
       !empty($file)
       // It must be a controller
-      && (strpos($file, '/src/mvc/public/') !== false)
+      && (Str::pos($file, '/src/mvc/public/') !== false)
     ) {
       $is_file = $type === 'file';
       $plugin = false;
       $root_path = $this->getAppPath() . 'mvc/public/';
-      if (strpos($file, $root_path) === 0) {
+      if (Str::pos($file, $root_path) === 0) {
         // Remove root path
-        $f = substr($file, \strlen($root_path));
+        $f = Str::sub($file, Str::len($root_path));
       }
       // Internal route
       if (empty($f)) {
         // Check if it's an external route
         foreach ($this->routes as  $r) {
-          if (substr($r['path'], -1) !== '/') {
+          if (Str::sub($r['path'], -1) !== '/') {
             $r['path'] .= '/';
           }
 
-          if (strpos($file, $r['path']) === 0) {
+          if (Str::pos($file, $r['path']) === 0) {
             $plugin = $r['name'];
             // Remove route
-            $f = substr($file, \strlen($r['path']));
+            $f = Str::sub($file, Str::len($r['path']));
             // Remove /mvc/public
-            $f = substr($f, \strlen('src/mvc/public/'));
+            $f = Str::sub($f, Str::len('src/mvc/public/'));
             break;
           }
         }
@@ -1142,8 +1142,8 @@ class Ide
             $bits,
             'access',
             'permissions',
-            strpos($plugin, 'appui-') === 0 ? substr($plugin, 6) : $plugin,
-            strpos($plugin, 'appui-') === 0 ? 'appui' : 'plugins'
+            Str::pos($plugin, 'appui-') === 0 ? Str::sub($plugin, 6) : $plugin,
+            Str::pos($plugin, 'appui-') === 0 ? 'appui' : 'plugins'
           );
         } else {
           array_push($bits, $this->_permissions());
@@ -1525,7 +1525,7 @@ class Ide
       $root = $d['root_path'];
       if (
         $root &&
-        (strpos($file, $root) === 0)
+        (Str::pos($file, $root) === 0)
       ){
         $rep = $i;
         break;
@@ -1533,7 +1533,7 @@ class Ide
     }
     if ( isset($rep) ){
       $res = $rep.'/src/';
-      $bits = explode('/', substr($file, \strlen($root)));
+      $bits = explode('/', Str::sub($file, Str::len($root)));
 
       // MVC
       if ( !empty($d['tabs']) ){
@@ -1598,7 +1598,7 @@ class Ide
       && ($res = $this->getRootPath($rep['name']))
     ) {
       //for analyze url for get tab , type etc..
-      $bits = explode('/', substr($url, \strlen($rep['name']) + 1));
+      $bits = explode('/', Str::sub($url, Str::len($rep['name']) + 1));
       //if is project get tabs or if is components or is mvc
       if ($rep['alias_code'] === 'bbn-project') {
         if (
@@ -1742,8 +1742,8 @@ class Ide
   /* public function real_to_id($file){
     if ( ($rep = $this->repositoryFromUrl($this->realToUrl($file), true)) && \defined($rep['bbn_path']) ){
       $bbn_p = $rep['bbn_path'] === 'BBN_APP_PATH' ? \bbn\Mvc::getAppPath() : constant($rep['bbn_path']);
-      if ( strpos($file, $bbn_p) === 0 ){
-        $f = substr($file, \strlen($bbn_p));
+      if ( Str::pos($file, $bbn_p) === 0 ){
+        $f = Str::sub($file, Str::len($bbn_p));
         return Str::parsePath($rep['bbn_path'].'/'.$f);
       }
     }
@@ -1761,7 +1761,7 @@ class Ide
     if ( $this->isMVC($rep) ){
       $last = X::basename($url);
       if ( $repo = $this->repository($rep) ){
-      $path = $this->getRootPath($rep).substr($url, \strlen($rep));
+      $path = $this->getRootPath($rep) . Str::sub($url, Str::len($rep));
         $tabs = $repo['tabs'];
 
         foreach ( $tabs as $key => $r ){
@@ -1780,7 +1780,7 @@ class Ide
       }
     }
     endFunc:
-    return substr($url, \strlen($rep));
+    return Str::sub($url, Str::len($rep));
   }*/
 
   /************************* END FILE *************************/
@@ -1800,7 +1800,7 @@ class Ide
     $backups      = [];
     $history_super = [];
     if (!empty($repository) && !empty($repository['name'])) {
-      $path = self::$backup_path . $repository['root'] . '/' . substr($url, Strpos($url, $repository['code'], 1));
+      $path = self::$backup_path . $repository['root'] . '/' . Str::sub($url, Strpos($url, $repository['code'], 1));
     } else {
       // File's backup path
       $path = self::$backup_path . $url;
@@ -2213,7 +2213,7 @@ class Ide
                     if ($typeSearch($this->fs->getContents($val), $info['search'], $info['typeSearch']) !== false) {
                       $path      = $base_rep . $part;
                       $path_file = $val;
-                      $link      = explode("/", substr($val, strlen($path) + 1, strlen($val)));
+                      $link      = explode("/", Str::sub($val, Str::len($path) + 1, Str::len($val)));
                       if ((!empty($info['isProject']) && $info['type'] === 'mvc')
                         || !empty($info['mvc'])
                       ) {
@@ -2248,9 +2248,9 @@ class Ide
                         //current line reading
                         $lineCurrent = $file->current();
                         //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
-                        if (($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false) && (strpos($lineCurrent, '\n') === false)) {
+                        if (($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false) && (Str::pos($lineCurrent, '\n') === false)) {
                           $lineNumber = $file->key() + 1;
-                          $name_path  = $info['repository']['path'] . substr(X::dirname($val), strlen($base_rep));
+                          $name_path  = $info['repository']['path'] . Str::sub(X::dirname($val), Str::len($base_rep));
                           $position   = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                           $line       = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
 
@@ -2270,11 +2270,11 @@ class Ide
 
                           $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
                           $file_name   = X::basename($path_file);
-                          $path        = X::dirname($base . '/' . substr($path_file, strlen($base_rep)));
+                          $path        = X::dirname($base . '/' . Str::sub($path_file, Str::len($base_rep)));
                           $occourences += substr_count($lineCurrent, $info['search']);
                           // info for code
                           $list[] = [
-                            'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
+                            'text' => Str::len($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
                             'line' => $lineNumber - 1,
                             'position' => $position,
                             'link' => $link,
@@ -2301,7 +2301,7 @@ class Ide
                         $tab = explode("/", $path_file)[1];
                       }
 
-                      $link = explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
+                      $link = explode(".", Str::sub($path_file, Str::len(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
                     }
 
                     //info file
@@ -2353,22 +2353,22 @@ class Ide
               $tot_num_files++;
               $list = [];
               if ($typeSearch($this->fs->getContents($v), $info['search'], $info['typeSearch']) !== false) {
-                $path_file = substr($v, Strpos($v, $info['repository']['path']));
+                $path_file = Str::sub($v, Strpos($v, $info['repository']['path']));
                 $file      = new \SplFileObject($v);
                 while (!$file->eof()) {
                   $lineCurrent = $file->current();
                   if (($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false)
-                    && (strpos($lineCurrent, '\n') === false)
+                    && (Str::pos($lineCurrent, '\n') === false)
                   ) {
                     $lineNumber  = $file->key() + 1;
-                    $link        = explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
-                    $name_path   = substr(X::dirname($v), Strpos($v, $info['repository']['path']));
+                    $link        = explode(".", Str::sub($path_file, Str::len(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
+                    $name_path   = Str::sub(X::dirname($v), Strpos($v, $info['repository']['path']));
                     $position    = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                     $text        = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
                     $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>" . $info['search'] . "</span></strong>", $lineCurrent);
                     $occourences += substr_count($lineCurrent, $info['search']);
                     //see
-                    $path = str_replace($base, (strpos($path_file, $this->getAppPath()) === 0 ? 'app/' : 'lib/'), $path);
+                    $path = str_replace($base, (Str::pos($path_file, $this->getAppPath()) === 0 ? 'app/' : 'lib/'), $path);
 
                     if (!empty($info['mvc'])) {
                       if (explode("/", $path_file)[1] === "public") {
@@ -2377,18 +2377,18 @@ class Ide
                         $tab = explode("/", $path_file)[1];
                       }
 
-                      $link = explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
+                      $link = explode(".", Str::sub($path_file, Str::len(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
                     }
 
                     // info for file
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $lineNumber . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
+                      'text' => Str::len($text) > 1000 ? $lineNumber . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       'code' => true,
                       'uid' => $path . '/' . $v,
                       'icon' => 'nf nf-fa-code',
-                      'linkPosition' => explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0],
+                      'linkPosition' => explode(".", Str::sub($path_file, Str::len(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0],
                       'tab' => !empty($tab) ? $tab : false
                     ];
                   }
@@ -2466,7 +2466,7 @@ class Ide
                   //current line reading
                   $lineCurrent = $file->current();
                   //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
-                  if (!empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\n') === false)) {
+                  if (!empty($position = Str::pos($lineCurrent, $seek) !== false) && (Str::pos($lineCurrent, '\n') === false)) {
                     $lineNumber = $file->key() + 1;
                     $line       = "<strong>" . 'line ' . $lineNumber . ' : ' . "</strong>";
 
@@ -2482,7 +2482,7 @@ class Ide
 
                     // info for code
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
+                      'text' => Str::len($text) > 1000 ? $line . "<strong><i>" . X::_('content too long to be shown') . "</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       // 'link' => $link,
@@ -2506,22 +2506,22 @@ class Ide
                     $tab = explode("/", $path_file)[1];
                   }
 
-                  $link = explode(".", substr($path_file, strlen(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
+                  $link = explode(".", Str::sub($path_file, Str::len(explode("/", $path_file)[0] . '/' . explode("/", $path_file)[1]) + 1))[0];
                 }
 
                 //info file
                 $ext      = Str::fileExt($fn, 0);
                 $fileData = [
-                  'text' => $rep['name'] . '/' . substr($fn, strlen($rep['root_path'])) . "&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>" . count($list) . "</span>",
+                  'text' => $rep['name'] . '/' . Str::sub($fn, Str::len($rep['root_path'])) . "&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>" . count($list) . "</span>",
                   'icon' => 'nf nf-fa-file_code_o',
                   'numChildren' => count($list),
                   'repository' => $rep['name'],
-                  'uid' => $rep['name'] . '/' . substr($fn, strlen($rep['root_path'])),
+                  'uid' => $rep['name'] . '/' . Str::sub($fn, Str::len($rep['root_path'])),
                   'file' => X::basename($fn),
                   'items' => $list,
                 ];
 
-                $path = explode('/', substr($fn, strlen($rep['root_path'])));
+                $path = explode('/', Str::sub($fn, Str::len($rep['root_path'])));
                 //die(var_dump("sss", $path));
                 if ($path[0] === 'mvc') {
                   if ($path[1] === "public") {
@@ -2537,7 +2537,7 @@ class Ide
                 unset($path[1]);
                 $path = implode('/', $path);
 
-                $link             = $rep['name'] . '/' . substr($path, 0,  strpos($path, '.' . $ext)).
+                $link             = $rep['name'] . '/' . Str::sub($path, 0,  Str::pos($path, '.' . $ext)).
                   ($components === true ? '/' . X::basename($path, '.' . $ext) : '');
                 $fileData['tab']  = !empty($tab) ? $tab : false;
                 $fileData['link'] = $link;
@@ -2747,13 +2747,13 @@ class Ide
    */
   private function _superior_sctrl(string $tab, string $path = '')
   {
-    if (($pos = strpos($tab, '_super')) > -1) {
+    if (($pos = Str::pos($tab, '_super')) > -1) {
       if (($pos === 0)) {
         $path = '';
       } else {
         // Fix the right path
         $bits  = explode('/', $path);
-        $count = \strlen(substr($tab, 0, $pos));
+        $count = Str::len(Str::sub($tab, 0, $pos));
         if (!empty($bits)) {
           foreach ($bits as $i => $b) {
             if (($i + 1) > $count) {
@@ -2782,11 +2782,11 @@ class Ide
     if (!empty($cfg) && !empty($path) && !empty($cfg['name'])) {
       $old = $new = $path;
       if (!empty($cfg['path']) && ($cfg['path'] !== './')) {
-        $old .= $cfg['path'] . (substr($cfg['path'], -1) !== '/' ? '/' : '');
+        $old .= $cfg['path'] . (Str::sub($cfg['path'], -1) !== '/' ? '/' : '');
       }
 
       if (!empty($cfg['new_path']) && ($cfg['new_path'] !== './')) {
-        $new .= $cfg['new_path'] . (substr($cfg['new_path'], -1) !== '/' ? '/' : '');
+        $new .= $cfg['new_path'] . (Str::sub($cfg['new_path'], -1) !== '/' ? '/' : '');
       }
 
       if (
@@ -2844,11 +2844,11 @@ class Ide
         $old = $new = $tmp;
 
         if (!empty($cfg['path']) && ($cfg['path'] !== './')) {
-          $old .= (($cfg['path'] === 'mvc/') ? '' : $cfg['path']) . (substr($cfg['path'], -1) !== '/' ? '/' : '');
+          $old .= (($cfg['path'] === 'mvc/') ? '' : $cfg['path']) . (Str::sub($cfg['path'], -1) !== '/' ? '/' : '');
         }
 
         if (!empty($cfg['new_path']) && ($cfg['new_path'] !== './')) {
-          $new .= (($cfg['new_path'] === 'mvc/') ? '' : $cfg['new_path']) . (substr($cfg['new_path'], -1) !== '/' ? '/' : '');
+          $new .= (($cfg['new_path'] === 'mvc/') ? '' : $cfg['new_path']) . (Str::sub($cfg['new_path'], -1) !== '/' ? '/' : '');
         }
 
         if (($tab['url'] !== '_super') && !empty($tab['extensions'])) {
@@ -3624,7 +3624,7 @@ class Ide
                 if (
                   empty($this->realToPerm($t['old']))
                   && !empty($cfg['is_file'])
-                  && (strpos($t['old'], '/mvc/public/') !== false)
+                  && (Str::pos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
                     return $this->error(X::_("Impossible to create the option for rename"));
@@ -3649,7 +3649,7 @@ class Ide
 
                 if (
                   !empty($this->realToPerm($t['old']))
-                  && !empty($cfg['is_file']) && (strpos($t['old'], '/mvc/public/') !== false)
+                  && !empty($cfg['is_file']) && (Str::pos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
                     return $this->error(X::_("Impossible to create the option for move"));

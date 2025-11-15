@@ -153,7 +153,7 @@ class Project extends DbCls
     if ( !empty($difference_git) ){
       $arr['elements'] = array_map(function($a) use($path){
         return [
-          'ele' => $path.'/'.(!empty($i = strpos($a['file'], ' -> ')) ? substr($a['file'], $i+4)  : $a['file']),
+          'ele' => $path.'/'.(!empty($i = Str::pos($a['file'], ' -> ')) ? Str::sub($a['file'], $i+4)  : $a['file']),
           'state' => $a['action']
         ];
       }, $difference_git);
@@ -267,7 +267,7 @@ class Project extends DbCls
       if ($path_info['path'] === '/') {
         $path_info['path'] = '';
       }
-      elseif (substr($path_info['path'], -1) !== '/') {
+      elseif (Str::sub($path_info['path'], -1) !== '/') {
         $path_info['path'] .= '/';
       }
       $res = [
@@ -591,7 +591,7 @@ class Project extends DbCls
     $info_git = false;
     if (!empty($difference_git['ide'])) {
       foreach($difference_git['ide'] as $commit){
-        $info_git = strpos($commit['ele'], $ele) === 0;
+        $info_git = Str::pos($commit['ele'], $ele) === 0;
         if (!empty($info_git)) {
           return $info_git;
         }
@@ -820,7 +820,7 @@ class Project extends DbCls
                 $ele  = explode(".", basename($f));
                 $item = $ele[0];
                 $ext  = isset($ele[1]) ? $ele[1] : false;
-                if (($this->fs->isDir($f) && (strpos(basename($f), '.') === 0))
+                if (($this->fs->isDir($f) && (Str::pos(basename($f), '.') === 0))
                     || ($this->fs->isFile($f) && (($item !== basename($t['name'])) || (!empty($ext) && (in_array($ext, $excludeds) === true))))
                    ) {
                   $element_exluded++;
@@ -1231,7 +1231,7 @@ class Project extends DbCls
       && !empty($repository['root'])
       && X::hasProps($repository, ['path', 'root', 'code'], true)
     ) {
-      if (strpos($repository['root'], '/') === 0) {
+      if (Str::pos($repository['root'], '/') === 0) {
         $path = $repository['root'];
       } else {
         switch ($repository['root']) {
@@ -1272,7 +1272,7 @@ class Project extends DbCls
       throw new Exception(X::_("Impossible to determine the path for %s (root: %s -> %s)", $rep, $repository['root'] ?? X::_('Unknown'), $this->getAppPath()));
     }
 
-    if ($path && substr($path, -1) !== '/') {
+    if ($path && Str::sub($path, -1) !== '/') {
       $path .= '/';
     }
 
@@ -1299,7 +1299,7 @@ class Project extends DbCls
 
         if ($env = X::getRow($envs, ['type' => constant('BBN_ENV')])) {
           $this->appPath = $env['text'];
-          if (substr($this->appPath, -4) !== 'src/') {
+          if (Str::sub($this->appPath, -4) !== 'src/') {
             $this->appPath .= 'src/';
           }
         }
@@ -1398,7 +1398,7 @@ class Project extends DbCls
   {
     $cats         = [];
     $repositories = [];
-    if (strlen($project_name) === 0) {
+    if (Str::len($project_name) === 0) {
       $project_name = $this->name;
     }
 
@@ -1496,7 +1496,7 @@ class Project extends DbCls
       $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);
       if (
         $root
-        && (strpos($file, $root) === 0)
+        && (Str::pos($file, $root) === 0)
       ) {
         $rep = $i;
         break;
@@ -1506,7 +1506,7 @@ class Project extends DbCls
 
     if (isset($rep)) {
       $res = $rep . '/';
-      $bits = explode('/', substr($file, \strlen($root)));
+      $bits = explode('/', Str::sub($file, Str::len($root)));
       $filename  = array_pop($bits);
       $extension = Str::fileExt($filename);
       $basename  = Str::fileExt($filename, 1)[0];
@@ -1570,7 +1570,7 @@ class Project extends DbCls
       && count($this->repositories)
     ) { //if in url name of repository break loop
       foreach ($this->repositories as $i => $d) {
-        if ((strpos($url, $i) === 0)) {
+        if ((Str::pos($url, $i) === 0)) {
           $repository = $i;
           break;
         }

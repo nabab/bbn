@@ -170,9 +170,9 @@ class Image extends bbn\File
           $img      = self::removeAlphaImagick($img);
           $filename = $dir.$f[0];
           if ($pages_number > 1) {
-            $l = \strlen((string)$i);
+            $l = Str::len((string)$i);
             if ($l < $pages_number) {
-              $filename .= '-'.str_repeat('0', \strlen($pages_number) - $l).$i;
+              $filename .= '-'.str_repeat('0', Str::len($pages_number) - $l).$i;
             }
           }
 
@@ -196,7 +196,7 @@ class Image extends bbn\File
   {
     if (class_exists('\\Imagick')) {
       $img = new \Imagick();
-      if (strpos($svg, '<svg') !== 0) {
+      if (Str::pos($svg, '<svg') !== 0) {
         $svg = @file_get_contents($svg);
       }
 
@@ -214,7 +214,7 @@ class Image extends bbn\File
   public static function setImageClassMode(string $mode) 
   {
     $mode = strtolower($mode);
-    if (strpos($mode, 'gd') === 0) {
+    if (Str::pos($mode, 'gd') === 0) {
       if (!function_exists('\\imagecreate')) {
         throw new Exception(X::_("The GD library is not installed"));
       }

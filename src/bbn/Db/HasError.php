@@ -158,8 +158,8 @@ trait HasError
       $text = ' '.$text.' ';
     }
 
-    $tot  = \strlen(self::$LINE) - \strlen($text);
-    $char = \substr(self::$LINE, 0, 1);
+    $tot  = Str::len(self::$LINE) - Str::len($text);
+    $char = Str::sub(self::$LINE, 0, 1);
     return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
   }
 

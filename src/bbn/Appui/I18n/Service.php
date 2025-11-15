@@ -101,7 +101,7 @@ class Service implements ServiceInterface
 
   protected function request(string $endpoint, ?array $data = null): ?array
   {
-    $url = str_ends_with($this->url, '/') ? substr($this->url, 0, -1) : $this->url;
+    $url = str_ends_with($this->url, '/') ? Str::sub($this->url, 0, -1) : $this->url;
     $response = X::curl(
       $url.(!empty($this->port) ? ':'.$this->port : '').'/'.$endpoint,
       $data

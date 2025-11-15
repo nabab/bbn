@@ -104,7 +104,7 @@ class OptionTest extends TestCase
 
   protected function getUidCacheName(string $uid)
   {
-    return \bbn\Str::isUid($uid) ? substr($uid, 0, 3) . '/' . substr($uid, 3, 3) . '/' . substr($uid, 6) : $uid;
+    return \bbn\Str::isUid($uid) ? Str::sub($uid, 0, 3) . '/' . Str::sub($uid, 3, 3) . '/' . Str::sub($uid, 6) : $uid;
   }
 
   protected function mockOptionClass()

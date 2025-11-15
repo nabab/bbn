@@ -4,6 +4,7 @@ namespace bbn\Api;
 
 use Error;
 use stdClass;
+use bbn\Str;
 
 /**
  * Webmin API class
@@ -195,7 +196,7 @@ class Webmin
    */
   private function getUrl(): string
   {
-    return (strpos($this->hostname, 'https://') !== 0 ? 'https://' : '')
+    return (Str::pos($this->hostname, 'https://') !== 0 ? 'https://' : '')
       . $this->hostname . ':10000/xmlrpc.cgi';
   }
 }

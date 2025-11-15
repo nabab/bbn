@@ -11,8 +11,8 @@
 
 namespace bbn\Api;
 
-use bbn;
 use bbn\X;
+use bbn\Str;
 
 class Virtualmin
 {
@@ -70,7 +70,7 @@ class Virtualmin
   {
     $infoStr = $this->__call('info', [$arguments]);
     $info    = [];
-    if (strlen($infoStr)) {
+    if (Str::len($infoStr)) {
       preg_match_all('/^[a-z|_]*\:\h{1}/m', $infoStr, $delimiters, PREG_OFFSET_CAPTURE);
       $delimiters = \array_map(
           function ($m) {
@@ -84,8 +84,8 @@ class Virtualmin
       foreach ($delimiters as $i => $d) {
         $pos1 = $d['pos'];
         $pos2 = isset($delimiters[$i + 1]) ? ($delimiters[$i + 1]['pos'] - $pos1) : null;
-        $st   = \is_null($pos2) ? \trim(substr($infoStr, $pos1)) : \trim(substr($infoStr, $pos1, $pos2));
-        if (strlen($st)) {
+        $st   = \is_null($pos2) ? \trim(Str::sub($infoStr, $pos1)) : \trim(Str::sub($infoStr, $pos1, $pos2));
+        if (Str::len($st)) {
           $info[$d['name']] = [];
           switch ($d['name']) {
             case 'disk_fs':
@@ -117,7 +117,7 @@ class Virtualmin
               $info[$d['name']] = array_values($info[$d['name']]);
               foreach ($info[$d['name']] as $istr => $str) {
                 $info[$d['name']][$istr] = \trim(str_replace("\n", '', $str));
-                if (!strlen($info[$d['name']][$istr])) {
+                if (!Str::len($info[$d['name']][$istr])) {
                   unset($info[$d['name']][$istr]);
                 }
               }
@@ -149,9 +149,9 @@ class Virtualmin
                   }
                 );
                 foreach ($fields as $field) {
-                  if (($pos = strpos($field, ':')) !== false) {
-                    $idx   = str_replace(' ', '', substr($field, 0, $pos));
-                    $value = substr($field, $pos, strlen($field) - $pos);
+                  if (($pos = Str::pos($field, ':')) !== false) {
+                    $idx   = str_replace(' ', '', Str::sub($field, 0, $pos));
+                    $value = Str::sub($field, $pos, Str::len($field) - $pos);
                     $value = str_replace(': ', '', $value);
                     if (count($fields) > 1) {
                       $info[$d['name']][$idx] = $value;

@@ -7,6 +7,7 @@ use stdClass;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\X;
+use bbn\Str;
 use bbn\Tpl;
 use bbn\File\System;
 
@@ -209,7 +210,7 @@ class Controller implements Api
           ['content' => $data]
           : (is_array($data) ? $data : ['success' => false])
       ) . PHP_EOL;
-      $len = strlen($st);
+      $len = Str::len($st);
       if ($len < 8192) {
         $st .= str_repeat(' ', 8192 - $len);
       }
@@ -394,8 +395,8 @@ class Controller implements Api
    */
   public function getLocalPath()
   {
-    if (($pp = $this->getPrepath()) && (strpos($this->_path, $pp) === 0)) {
-      return substr($this->_path, \strlen($pp));
+    if (($pp = $this->getPrepath()) && (Str::pos($this->_path, $pp) === 0)) {
+      return Str::sub($this->_path, Str::len($pp));
     }
 
     return $this->_path;
@@ -409,8 +410,8 @@ class Controller implements Api
    */
   public function getLocalRoute()
   {
-    if (($pp = $this->getPrepath()) && (strpos($this->_request, $pp) === 0)) {
-      return substr($this->_request, \strlen($pp));
+    if (($pp = $this->getPrepath()) && (Str::pos($this->_request, $pp) === 0)) {
+      return Str::sub($this->_request, Str::len($pp));
     }
 
     return $this->_request;
@@ -432,9 +433,9 @@ class Controller implements Api
 
       if (
           ($prepath = $this->getPrepath())
-          && (strpos($p, $prepath) === 0)
+          && (Str::pos($p, $prepath) === 0)
       ) {
-        return substr($p, \strlen($prepath));
+        return Str::sub($p, Str::len($prepath));
       }
 
       return $p;
@@ -509,11 +510,11 @@ class Controller implements Api
   {
     if ($this->exists()) {
       $d = X::dirname($this->_file) . '/';
-      if (substr($file_name, -4) !== '.php') {
+      if (Str::sub($file_name, -4) !== '.php') {
         $file_name .= '.php';
       }
 
-      if ((strpos($file_name, '..') === false) && file_exists($d . $file_name)) {
+      if ((Str::pos($file_name, '..') === false) && file_exists($d . $file_name)) {
         $bbn_path = $d . $file_name;
         unset($d, $file_name);
         include $bbn_path;
@@ -555,8 +556,8 @@ class Controller implements Api
     spl_autoload_register(
         function ($class_name) use ($plugin_path): void {
           if (
-              (strpos($class_name, '/') === false)
-              && (strpos($class_name, '.') === false)
+              (Str::pos($class_name, '/') === false)
+              && (Str::pos($class_name, '.') === false)
           ) {
             $cls  = explode('\\', $class_name);
             $path = implode('/', $cls);
@@ -1129,8 +1130,8 @@ class Controller implements Api
         $r['path'] .= '/index';
       }
     }
-    elseif (strpos($r['path'], './') === 0) {
-      $r['path'] = $this->getCurrentDir() . substr($r['path'], 1);
+    elseif (Str::pos($r['path'], './') === 0) {
+      $r['path'] = $this->getCurrentDir() . Str::sub($r['path'], 1);
     }
 
     if (!isset($r['data'])) {
@@ -1359,8 +1360,8 @@ class Controller implements Api
    */
   private function retrieveVar($var)
   {
-    if (\is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)])) {
-      return $this->data[substr($var, 1)];
+    if (\is_string($var) && (Str::pos($var, '$') === 0) && isset($this->data[Str::sub($var, 1)])) {
+      return $this->data[Str::sub($var, 1)];
     }
 
     return false;
@@ -1567,8 +1568,8 @@ class Controller implements Api
         $path .= '/index';
       }
     }
-    elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    elseif (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1594,8 +1595,8 @@ class Controller implements Api
 
   public function getModelGroup(string $path, array|null $data = null)
   {
-    if (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    if (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1610,8 +1611,8 @@ class Controller implements Api
 
   public function getCustomModelGroup(string $path, string $plugin, array|null $data = null): array
   {
-    if (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    if (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1655,7 +1656,7 @@ class Controller implements Api
     $die  = false;
     $ttl  = 0;
     foreach ($args as $a) {
-      if (\is_string($a) && \strlen($a)) {
+      if (\is_string($a) && Str::len($a)) {
         $path = $a;
       }
       elseif (\is_array($a)) {
@@ -1672,8 +1673,8 @@ class Controller implements Api
     if (!isset($path)) {
       $path = $this->_path;
     }
-    elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    elseif (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1709,7 +1710,7 @@ class Controller implements Api
     $args = \func_get_args();
 
     foreach ($args as $a) {
-      if (\is_string($a) && \strlen($a)) {
+      if (\is_string($a) && Str::len($a)) {
         $path = $a;
       }
       elseif (\is_array($a)) {
@@ -1720,8 +1721,8 @@ class Controller implements Api
     if (!isset($path)) {
       $path = $this->_path;
     }
-    elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    elseif (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1744,7 +1745,7 @@ class Controller implements Api
     $args = \func_get_args();
 
     foreach ($args as $a) {
-      if (\is_string($a) && \strlen($a)) {
+      if (\is_string($a) && Str::len($a)) {
         $path = $a;
       }
       elseif (\is_array($a)) {
@@ -1758,8 +1759,8 @@ class Controller implements Api
     if (!isset($path)) {
       $path = $this->_path;
     }
-    elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    elseif (Str::pos($path, './') === 0) {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if (!isset($data)) {
@@ -1986,8 +1987,8 @@ class Controller implements Api
    */
   public function add($path, $data = [], $private = false)
   {
-    if (substr($path, 0, 2) === './') {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    if (Str::sub($path, 0, 2) === './') {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if ($route = $this->_mvc->getRoute($path, $private ? 'private' : 'public')) {
@@ -2010,8 +2011,8 @@ class Controller implements Api
    */
   public function addToObj(string $path, $data = [], $private = false): self
   {
-    if (substr($path, 0, 2) === './') {
-      $path = $this->getCurrentDir() . substr($path, 1);
+    if (Str::sub($path, 0, 2) === './') {
+      $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
     if ($route = $this->_mvc->getRoute($path, $private ? 'private' : 'public')) {

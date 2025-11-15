@@ -310,7 +310,7 @@ class Mysql extends Sql
     $enc = $enc ?: self::$defaultCharset;
     $collation = $collation ?: self::$defaultCollation;
     if ($st = parent::getCreateDatabase($database, $enc, $collation)) {
-      return substr($st, 0, -1)." DEFAULT CHARACTER SET '$enc' COLLATE '$collation';";
+      return Str::sub($st, 0, -1)." DEFAULT CHARACTER SET '$enc' COLLATE '$collation';";
     }
 
     return '';
@@ -374,7 +374,7 @@ class Mysql extends Sql
 
     if (($db = $this->escape($db))
       && Str::checkName($user, $db)
-      && (strpos($pass, "'") === false)
+      && (Str::pos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
         <<<MYSQL
@@ -462,8 +462,8 @@ MYSQL
     if (Str::checkName($table)
       && Str::checkName($newName)
     ) {
-      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
-      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+      $t1 = Str::pos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = Str::pos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
       return "RENAME TABLE $t1 TO $t2;";
     }
 
@@ -865,7 +865,7 @@ MYSQL;
             'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
             'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
             'extra' => $row['EXTRA'],
-            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false ? 1 : 0,
+            'signed' => Str::pos($row['COLUMN_TYPE'], ' unsigned') === false ? 1 : 0,
             'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
             'generation' => $row['GENERATION_EXPRESSION'],
             'charset' => $row['CHARACTER_SET_NAME'] ?? null,
@@ -885,7 +885,7 @@ MYSQL;
               && \is_string($matches[1][0])
               && ($matches[1][0][0] === "'")
             ) {
-              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
+              $r[$f]['values'] = explode("','", Str::sub($matches[1][0], 1, -1));
               $r[$f]['extra'] = $matches[1][0];
             } else {
               $r[$f]['values'] = [];
@@ -905,23 +905,23 @@ MYSQL;
         /*
         else{
         preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
-        if ( strpos($row['Type'],'text') !== false ){
+        if ( Str::pos($row['Type'],'text') !== false ){
         $r[$f]['type'] = 'text';
         }
-        else if ( strpos($row['Type'],'blob') !== false ){
+        else if ( Str::pos($row['Type'],'blob') !== false ){
         $r[$f]['type'] = 'blob';
         }
-        else if ( strpos($row['Type'],'int(') !== false ){
+        else if ( Str::pos($row['Type'],'int(') !== false ){
         $r[$f]['type'] = 'int';
         }
-        else if ( strpos($row['Type'],'char(') !== false ){
+        else if ( Str::pos($row['Type'],'char(') !== false ){
         $r[$f]['type'] = 'varchar';
         }
         if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
         $r[$f]['maxlength'] = (int)$matches[1][0];
         }
         if ( !isset($r[$f]['type']) ){
-        $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
+        $r[$f]['type'] = Str::pos($row['Type'], '(') ? Str::sub($row['Type'],0,Str::pos($row['Type'], '(')) : $row['Type'];
         }
         }
         */
@@ -1068,7 +1068,7 @@ MYSQL
         }
       }
 
-      $st = substr($st, 0, -1)." ENGINE=".
+      $st = Str::sub($st, 0, -1)." ENGINE=".
         (!empty($cfg['engine']) ? Str::encodeFilename($cfg['engine']) : static::$defaultEngine).
         " DEFAULT CHARSET=".Str::encodeFilename($charset).
         ($collate ? " COLLATE=" . Str::encodeFilename($collate) : '').";";
@@ -1154,7 +1154,7 @@ MYSQL
       if (!empty($columnCfg['after'])
         && is_string($columnCfg['after'])
       ) {
-        $st = substr($st, 0, -1)." AFTER " . $this->escape($columnCfg['after']);
+        $st = Str::sub($st, 0, -1)." AFTER " . $this->escape($columnCfg['after']);
       }
 
       return $st;
@@ -1671,8 +1671,8 @@ MYSQL
     }
 
     if (!empty($cfg['position'])) {
-      if (strpos($cfg['position'], 'after:') === 0) {
-        $after = trim(substr($cfg['position'], 6));
+      if (Str::pos($cfg['position'], 'after:') === 0) {
+        $after = trim(Str::sub($cfg['position'], 6));
         if (Str::checkName($after)) {
           $st .= ' AFTER ' . $this->escape($after);
         }

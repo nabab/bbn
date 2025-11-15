@@ -514,7 +514,7 @@ class X
     // One dir per $format
     $spath = date($format);
     if ($spath) {
-      $path = $fs->createPath($path.(substr($path, -1) === '/' ? '' : '/').$spath);
+      $path = $fs->createPath($path.(Str::sub($path, -1) === '/' ? '' : '/').$spath);
       if ($fs->isDir($path)) {
         $num = count($fs->getDirs($path));
         if ($num) {
@@ -892,7 +892,7 @@ class X
         }
         elseif (\is_string($value)
             // Look for values starting with 'function('
-            && (strpos(trim($value), 'function(') === 0)
+            && (Str::pos(trim($value), 'function(') === 0)
         ) {
           // Store function string.
           $value_arr[] = $value;
@@ -942,7 +942,7 @@ class X
   {
     $result      = '';
     $pos         = 0;
-    $strLen      = \strlen($json);
+    $strLen      = Str::len($json);
     $indentStr   = '  ';
     $newLine     = "\n";
     $prevChar    = '';
@@ -950,7 +950,7 @@ class X
 
     for ($i = 0; $i <= $strLen; $i++) {
       // Grab the next character in the string.
-      $char = substr($json, $i, 1);
+      $char = Str::sub($json, $i, 1);
 
       // Are we inside a quoted string?
       if ($char == '"' && $prevChar != '\\') {
@@ -1166,7 +1166,7 @@ class X
     }
     elseif (Str::isBuid($a)) {
       $tmp = bin2hex($a);
-      if (strlen($tmp) === 32) {
+      if (Str::len($tmp) === 32) {
         $r = '0x'.bin2hex($a);
       }
     }
@@ -1354,7 +1354,7 @@ class X
   public static function pathinfo(string $path, $options = null)
   {
     $ret = ['dirname' => '', 'basename' => '', 'extension' => '', 'filename' => ''];
-    if (strpos($path, '://')) {
+    if (Str::pos($path, '://')) {
       $isAbsolute = true;
       [$protocol, $remain] = X::split($path, '://');
       $bits = X::split($remain, '/');
@@ -1362,7 +1362,7 @@ class X
     }
     else {
       $bits = self::split($path, '/');
-      $isAbsolute = substr($path, 0, 1) === '/';
+      $isAbsolute = Str::sub($path, 0, 1) === '/';
     }
 
     $pbits = [];
@@ -1418,8 +1418,8 @@ class X
   public static function basename(string $path, string $suffix = ''): string
   {
     $res = self::pathinfo($path, 'filename');
-    if ($res && $suffix && (substr($res, - strlen($suffix)) === $suffix)) {
-      return substr($res, 0, - strlen($suffix));
+    if ($res && $suffix && (Str::sub($res, - Str::len($suffix)) === $suffix)) {
+      return Str::sub($res, 0, - Str::len($suffix));
     }
 
     return $res;
@@ -2012,7 +2012,7 @@ class X
 
         $v1 = (string)$v1;
         $v2 = (string)$v2;
-        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) !== false;
+        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) !== false;
       case "doesnotcontain":
       case "donotcontain":
         if (empty($v1) || empty($v2)) {
@@ -2021,7 +2021,7 @@ class X
 
         $v1 = (string)$v1;
         $v2 = (string)$v2;
-        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === false;
+        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === false;
       case "starts":
       case "start":
         if (empty($v1) || empty($v2)) {
@@ -2030,7 +2030,7 @@ class X
 
         $v1 = (string)$v1;
         $v2 = (string)$v2;
-        return strpos($v1, $v2) === 0;
+        return Str::pos($v1, $v2) === 0;
       case "startswith":
       case "startsi":
       case "starti":
@@ -2042,7 +2042,7 @@ class X
 
         $v1 = (string)$v1;
         $v2 = (string)$v2;
-        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === 0;
+        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === 0;
       case "endswith":
       case "endsi":
       case "endi":
@@ -2054,7 +2054,7 @@ class X
 
         $v1 = (string)$v1;
         $v2 = (string)$v2;
-        return strrpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === strlen($v1) - strlen($v2);
+        return Str::rpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === Str::len($v1) - Str::len($v2);
       case "like":
         if (empty($v1) || empty($v2)) {
           return false;
@@ -2680,7 +2680,7 @@ class X
    */
   public static function isWindows(): bool
   {
-    return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
+    return strtoupper(Str::sub(PHP_OS, 0, 3)) == 'WIN';
   }
 
 
@@ -3438,7 +3438,7 @@ class X
   public static function fixJson($json) {
     $newJSON = '';
 
-    $jsonLength = strlen($json);
+    $jsonLength = Str::len($json);
     $escaped = false;
     $opened_b = 0;
     $opened_cb = 0;
@@ -3488,7 +3488,7 @@ class X
             $opened_cb--;
             $end_value = true;
             if ($last_char === ',') {
-              $newJSON = substr($newJSON, 0, -1);
+              $newJSON = Str::sub($newJSON, 0, -1);
             }
           }
           break;
@@ -3503,7 +3503,7 @@ class X
             $opened_b--;
             $end_value = true;
             if ($last_char === ',') {
-              $newJSON = substr($newJSON, 0, -1);
+              $newJSON = Str::sub($newJSON, 0, -1);
             }
           }
           break;
@@ -3536,7 +3536,7 @@ class X
         }
         elseif ($last_quotes === "'") {
           $current = trim($current);
-          $add .= '"'.Str::escapeDquote(Str::unescapeSquote(substr($current, 1, -1))).'":';
+          $add .= '"'.Str::escapeDquote(Str::unescapeSquote(Str::sub($current, 1, -1))).'":';
         }
         else {
           $add .= '"'.Str::escapeDquote($current).'":';
@@ -3548,7 +3548,7 @@ class X
         if ($current) {
           if ($last_quotes) {
             $current = trim($current);
-            $add .= '"'.Str::escapeDquote(substr($current, 1, -1)).'"';
+            $add .= '"'.Str::escapeDquote(Str::sub($current, 1, -1)).'"';
           }
           else {
             $add .= Str::escapeDquote($current);
@@ -3771,7 +3771,7 @@ class X
    */
   public static function split(string $st, string $separator): array
   {
-    return explode($separator, $st);
+    return mb_split($separator === '.' ? '\.' : $separator, $st);
   }
 
 
@@ -3815,7 +3815,7 @@ class X
       }
     }
     elseif (is_string($subject)) {
-      $res = strpos($subject, $search, $start);
+      $res = Str::pos($subject, $search, $start);
     }
 
     return $res === false ? -1 : $res;
@@ -3878,10 +3878,10 @@ class X
     }
     elseif (is_string($subject)) {
       if ($start > 0) {
-        $start = strlen($subject) - (strlen($subject) - $start);
+        $start = Str::len($subject) - (Str::len($subject) - $start);
       }
 
-      $res = strrpos($subject, $search, $start);
+      $res = Str::rpos($subject, $search, $start);
     }
 
     return $res === false ? -1 : $res;
@@ -4006,7 +4006,7 @@ class X
    */
   public static function __callStatic($name, $arguments)
   {
-    if ((strpos($name, 'is_') === 0) && function_exists($name)) {
+    if ((Str::pos($name, 'is_') === 0) && function_exists($name)) {
       $res = null;
       foreach ($arguments as $a) {
         $res = $name($a);

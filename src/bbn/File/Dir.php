@@ -3,8 +3,10 @@
 		* @package file
 		*/
 namespace bbn\File;
-use bbn;
+
+use bbn\Str;
 use bbn\X;
+use bbn\Models\Cls\Basic;
 
 /**
 	* A class for dealing with directories (folders)
@@ -17,7 +19,7 @@ use bbn\X;
 	* @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
 	* @version 0.2r89
 	*/
-class Dir extends bbn\Models\Cls\Basic
+class Dir extends Basic
 {
 	/**
 		* Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.
@@ -33,8 +35,8 @@ class Dir extends bbn\Models\Cls\Basic
   public static function clean(string $dir): string
   {
     $new = trim(str_replace('\\', '/', $dir));
-    if ( substr($new, -1) === '/' ){
-      $new = substr($new, 0, -1);
+    if ( Str::sub($new, -1) === '/' ){
+      $new = Str::sub($new, 0, -1);
     }
     return $new;
   }
@@ -81,7 +83,7 @@ class Dir extends bbn\Models\Cls\Basic
 		*/
   public static function cur(string $dir): string
   {
-    return strpos($dir, './') === 0 ? substr($dir, 2) : $dir;
+    return Str::pos($dir, './') === 0 ? Str::sub($dir, 2) : $dir;
   }
 
 	/**
@@ -104,7 +106,7 @@ class Dir extends bbn\Models\Cls\Basic
     if ( $dir === './' ){
       $dir = '.';
 		}
-    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){
+    if ( is_dir($dir) && (($dir === '.') || ((Str::pos(X::basename($dir), '.') !== 0) || $hidden)) ){
 			$dirs = [];
 			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
 			foreach ( $fs as $f ){
@@ -113,7 +115,7 @@ class Dir extends bbn\Models\Cls\Basic
         }
 			}
       if ( !empty($dirs) ){
-        bbn\X::sort($dirs);
+        X::sort($dirs);
       }
 			return $dirs;
 		}
@@ -147,7 +149,7 @@ class Dir extends bbn\Models\Cls\Basic
     if ( $dir === './' ){
       $dir = '.';
     }
-    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){
+    if ( is_dir($dir) && (($dir === '.') || ((Str::pos(X::basename($dir), '.') !== 0) || $hidden)) ){
 			$files = [];
 			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
       //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
@@ -159,12 +161,12 @@ class Dir extends bbn\Models\Cls\Basic
             $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
           }
           */
-          if ( $hidden || (strpos(X::basename($f), '.') !== 0) ){
+          if ( $hidden || (Str::pos(X::basename($f), '.') !== 0) ){
             if ( $including_dirs ){
               $files[] = self::cur($dir.'/').$f;
             }
             else if ( is_file($dir.'/'.$f) ){
-              $fileExt = strtolower(bbn\Str::fileExt($f));
+              $fileExt = strtolower(Str::fileExt($f));
               if (!$extension
                 || ((is_string($extension)
                     && (strtolower($extension) === $fileExt))
@@ -178,7 +180,7 @@ class Dir extends bbn\Models\Cls\Basic
 				}
 			}
       if ( \count($files) > 0 ){
-        bbn\X::sort($files);
+        X::sort($files);
       }
 			return $files;
 		}
@@ -248,15 +250,15 @@ class Dir extends bbn\Models\Cls\Basic
 	   $dir = self::clean($dir);
 	   $dirs = self::getDirs($dir);
 	   if ( \is_array($dirs) ){
-	     if ( $type && (strpos($type, 'file') === 0) ){
+	     if ( $type && (Str::pos($type, 'file') === 0) ){
 	       $all = self::getFiles($dir, false, $hidden);
 	     }
-	     else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
+	     else if ( $type && ((Str::pos($type, 'dir') === 0) || (Str::pos($type, 'fold') === 0)) ){
 	       $all = $dirs;
 	     }
 	     else if ( $type ){
 	       $all = array_filter(self::getFiles($dir, false, $hidden), function($a)use($type){
-	         $ext = bbn\Str::fileExt($a);
+	         $ext = Str::fileExt($a);
 	         return strtolower($ext) === strtolower($type);
 	       });
 	     }
@@ -458,7 +460,7 @@ class Dir extends bbn\Models\Cls\Basic
           $x = [
             'name' => $f,
             'type' => 'file',
-            'ext' => bbn\Str::fileExt($f)
+            'ext' => Str::fileExt($f)
           ];
           if ( $filter ){
             if ( $filter($x) ){
@@ -507,7 +509,7 @@ class Dir extends bbn\Models\Cls\Basic
 							mkdir($path);
 						}
 						catch (\Exception $e) {
-							\bbn\X::log($e->getMessage(), 'errors');
+							X::log($e->getMessage(), 'errors');
 						}
 					}
 					if (!is_dir($path)) {
@@ -518,7 +520,7 @@ class Dir extends bbn\Models\Cls\Basic
 							chmod($path, $chmod);
 						}
 						catch (\Exception $e) {
-							\bbn\X::log($e->getMessage(), 'errors');
+							X::log($e->getMessage(), 'errors');
 						}
 					}
 				}
@@ -558,16 +560,16 @@ class Dir extends bbn\Models\Cls\Basic
           $i = 1;
           while ( $i ){
             $dir = X::dirname($dest).'/';
-            $file_name = bbn\Str::fileExt($dest, 1);
+            $file_name = Str::fileExt($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
-              $len = \strlen(bbn\Str::cast($i));
+              $len = Str::len(Str::cast($i));
               if ( $len > $length ){
                 return false;
               }
               $file .= str_repeat('0', $length - $len);
             }
-            $file .= bbn\Str::cast($i);
+            $file .= Str::cast($i);
             if ( !empty($file_name[1]) ){
               $file .= '.'.$file_name[1];
             }

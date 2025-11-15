@@ -185,7 +185,7 @@ class Database extends bbn\Models\Cls\Cache
       switch ($c1) {
         case 'mysql':
         case 'pgsql':
-          if (strpos($c2, '@')) {
+          if (Str::pos($c2, '@')) {
             $bits = bbn\X::split($c2, '@');
             if (count($bits) === 2) {
               if (!($password = $this->getPassword($info['host']['id']))) {
@@ -1871,7 +1871,7 @@ class Database extends bbn\Models\Cls\Cache
                 $dcols = [];
                 $dcIdx = 0;
                 foreach ($tmodel['option']['dcolumns'] as $dcol) {
-                  if (strpos($dcol, ':')) {
+                  if (Str::pos($dcol, ':')) {
                     [$tmp1, $tmp2] = X::split($dcol, ':');
                     [$originField, $extPrimary] = X::split($tmp1, '.');
                     [$extTable, $extField] = X::split($tmp2, '.');
@@ -1923,7 +1923,7 @@ class Database extends bbn\Models\Cls\Cache
                 }
               }
 
-              if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
+              if ($displayColumn && (Str::pos($field, 'CONCAT(') !== 0)) {
                 if (!isset($f['option']['editor'])) {
                   $f['option']['editor'] = 'appui-database-table-browser';
                   $f['option']['options'] = [
@@ -2389,7 +2389,7 @@ class Database extends bbn\Models\Cls\Cache
     if (!empty($cfg['columns'])) {
       $dbCfg['fields'] = [];
       foreach ($cfg['columns'] as $c) {
-        if (strpos($c, ':')) {
+        if (Str::pos($c, ':')) {
           [$tmp1, $tmp2] = X::split($c, ':');
           [$originField, $extPrimary] = X::split($tmp1, '.');
           [$extTable, $extField] = X::split($tmp2, '.');
@@ -2427,7 +2427,7 @@ class Database extends bbn\Models\Cls\Cache
       if (!empty($cfg['columns'])) {
         $fieldsToUnset = [];
         foreach ($cfg['columns'] as $c) {
-          if (strpos($c, ':')) {
+          if (Str::pos($c, ':')) {
             [$tmp1, $tmp2] = X::split($c, ':');
             [$originField, $extPrimary] = X::split($tmp1, '.');
             [$extTable, $extField] = X::split($tmp2, '.');
@@ -2646,7 +2646,7 @@ class Database extends bbn\Models\Cls\Cache
       }
       else {
         $t = strtotime($date);
-        $date = date('U', $t) . '.' . substr(date('u', $t), 0, 4);
+        $date = date('U', $t) . '.' . Str::sub(date('u', $t), 0, 4);
       }
 
       $sql = "SELECT " . $conn->escape($primaryField) . (!empty($activeColumn) ? ", " . $conn->escape($activeColumn) : "") . " FROM " . $conn->escape($table);

@@ -3,6 +3,7 @@
 namespace bbn\Parsers;
 
 use bbn\X;
+use bbn\Str;
 
 class Generator {
   
@@ -53,7 +54,7 @@ class Generator {
     }
     
     /*if (str_contains($this->cfg['name'], $this->cfg['namespace'])) {
-      $res .= "class " . substr($this->cfg['name'], strlen($this->cfg['namespace']) + 1);
+      $res .= "class " . Str::sub($this->cfg['name'], Str::len($this->cfg['namespace']) + 1);
     } else {
       $res .= "class " . $this->cfg['name'];
     }*/
@@ -317,13 +318,13 @@ class Generator {
             foreach ($arg['type_arr'] as $t) {
               if ($t !== 'null') {
                 if (!empty($this->cfg['realNamespace'])
-                    && (strpos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
+                    && (Str::pos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
                 {
                   $t = str_replace(($this->cfg['realNamespace'] . '\\'), '', $t);
                 }
                 if (!in_array($t, self::$nonClassesReturns)
                     && !in_array($t, $this->cfg['uses'] ?? [])
-                    && (strpos($t, '\\') !== 0)
+                    && (Str::pos($t, '\\') !== 0)
                     && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $t))
                 ) {
                   $t = '\\' . $t;
@@ -331,9 +332,9 @@ class Generator {
                 $type .= $t . "|";
               }
             }
-            $last_pipe = strrpos($type, '|');
+            $last_pipe = Str::rpos($type, '|');
             
-            $type = substr($type, 0, $last_pipe);
+            $type = Str::sub($type, 0, $last_pipe);
             $argStr .= $type . " ";
           }
 
@@ -352,7 +353,7 @@ class Generator {
         
           $orig_res .= $argStr . ", ";
         }
-        if (strlen($orig_res) >= 100) {
+        if (Str::len($orig_res) >= 100) {
           $res .= PHP_EOL . "      ";
           foreach ($cfg['arguments'] as $arg) {
             $argStr = "";
@@ -380,13 +381,13 @@ class Generator {
               foreach ($arg['type_arr'] as $t) {
                 if ($t !== 'null') {
                   if (!empty($this->cfg['realNamespace'])
-                      && (strpos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
+                      && (Str::pos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
                   {
                     $t = str_replace(($this->cfg['realNamespace'] . '\\'), '', $t);
                   }
                   if (!in_array($t, self::$nonClassesReturns)
                       && !in_array($t, $this->cfg['uses'] ?? [])
-                      && (strpos($t, '\\') !== 0)
+                      && (Str::pos($t, '\\') !== 0)
                       && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $t))
                   ) {
                     $t = '\\' . $t;
@@ -394,9 +395,9 @@ class Generator {
                   $type .= $t . "|";
                 }
               }
-              $last_pipe = strrpos($type, '|');
+              $last_pipe = Str::rpos($type, '|');
               
-              $type = substr($type, 0, $last_pipe);
+              $type = Str::sub($type, 0, $last_pipe);
               $argStr .= $type . " ";
             }
   
@@ -415,12 +416,12 @@ class Generator {
           
             $res .= $argStr. "," . PHP_EOL . "      ";
           }
-          $res = substr($res, 0, -8);
+          $res = Str::sub($res, 0, -8);
           $res .= PHP_EOL . "  )";
         }
         else {
           $res = $orig_res;
-          $res = substr($res, 0, -2);
+          $res = Str::sub($res, 0, -2);
           $res .= ")";
         }
       }
@@ -451,7 +452,7 @@ class Generator {
           if ($ret !== null) {
             if (!in_array($ret, self::$nonClassesReturns)
                 && !in_array($ret, $this->cfg['uses'] ?? [])
-                && (strpos($ret, '\\') !== 0)
+                && (Str::pos($ret, '\\') !== 0)
                 && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $ret))
             ) {
               $ret = '\\' . $ret;
@@ -459,9 +460,9 @@ class Generator {
             $res_returns .= $ret . "|";
           }
         }
-        $last_pipe = strrpos($res_returns, '|');
+        $last_pipe = Str::rpos($res_returns, '|');
         
-        $res .= substr($res_returns, 0, $last_pipe) . " ";
+        $res .= Str::sub($res_returns, 0, $last_pipe) . " ";
         
         
       }
@@ -472,10 +473,10 @@ class Generator {
    
     if (!empty($cfg['code'])) {
       // Get the position of the first opening curly brace
-      $pos = strpos($cfg['code'], '{');
+      $pos = Str::pos($cfg['code'], '{');
         
         // Get everything from the opening curly brace to the end of the string
-      $newCode = substr($cfg['code'], $pos);
+      $newCode = Str::sub($cfg['code'], $pos);
     
       // Add the code to the function definition
       $res .= "\n" . str_repeat(' ', $this->spacing) . $newCode;

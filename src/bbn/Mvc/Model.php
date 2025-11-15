@@ -2,6 +2,7 @@
 namespace bbn\Mvc;
 
 use bbn\X;
+use bbn\Str;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\Models\Cls\Db as DbClass;
@@ -534,7 +535,7 @@ class Model extends DbClass
   {
     if ($cn = $this->_cache_name($data, $spec)) {
       if ($path) {
-        $cn = 'models/' . $path . substr($cn, strlen('models/' . $this->_path));
+        $cn = 'models/' . $path . Str::sub($cn, Str::len('models/' . $this->_path));
       }
 
       return $this->cache_engine->deleteAll($cn, '');

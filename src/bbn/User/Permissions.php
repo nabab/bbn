@@ -116,15 +116,15 @@ class Permissions extends Basic
     }
 
     foreach ($this->allowedRoutes as $ar) {
-      if (substr($ar, -1) === '*') {
-        if ((strlen($ar) === 1) || (strpos($url, substr($ar, 0, -1)) === 0)) {
+      if (Str::sub($ar, -1) === '*') {
+        if ((Str::len($ar) === 1) || (Str::pos($url, Str::sub($ar, 0, -1)) === 0)) {
           if (in_array($url, $this->forbiddenRoutes, true)) {
             return false;
           }
 
           foreach ($this->forbiddenRoutes as $ar2) {
-            if (substr($ar2, -1) === '*') {
-              if (strpos($url, substr($ar2, 0, -1)) === 0) {
+            if (Str::sub($ar2, -1) === '*') {
+              if (Str::pos($url, Str::sub($ar2, 0, -1)) === 0) {
                 return false;
               }
             }
@@ -184,16 +184,16 @@ class Permissions extends Basic
     $old_path = $path;
     if (($type === 'access') && $this->plugins && !empty($path)) {
       foreach ($this->plugins as $plugin) {
-        if (strpos($path, $plugin['url'].'/') === 0) {
-          if (strpos($plugin['name'], 'appui-') === 0) {
+        if (Str::pos($path, $plugin['url'].'/') === 0) {
+          if (Str::pos($plugin['name'], 'appui-') === 0) {
             $root = $this->opt->fromCode(
               $type,
               'permissions',
-              substr($plugin['name'], 6),
+              Str::sub($plugin['name'], 6),
               'appui',
               'plugins'
             );
-            $path = substr($path, strlen($plugin['url']) + 1);
+            $path = Str::sub($path, Str::len($plugin['url']) + 1);
           }
           elseif ($plugin['name']) {
             $root = $this->opt->fromCode(
@@ -202,7 +202,7 @@ class Permissions extends Basic
               $plugin['name'],
               'plugins',
             );
-            $path = substr($path, strlen($plugin['url']) + 1);
+            $path = Str::sub($path, Str::len($plugin['url']) + 1);
           }
 
           break;
@@ -733,15 +733,15 @@ class Permissions extends Basic
     if (!empty($access)) {
       $path_to_file = $this->opt->toPath($id_perm, '', $access);
       if ($pluginName) {
-        if (substr($path_to_file, -1) === '/') {
-          return is_dir(Mvc::getPluginPath($pluginName).'mvc/public/'.substr($path_to_file, 0, -1));
+        if (Str::sub($path_to_file, -1) === '/') {
+          return is_dir(Mvc::getPluginPath($pluginName).'mvc/public/' . Str::sub($path_to_file, 0, -1));
         }
 
         return file_exists(Mvc::getPluginPath($pluginName).'mvc/public/'.$path_to_file.'.php');
       }
       else {
-            if (substr($path_to_file, -1) === '/') {
-        return is_dir(Mvc::getAppPath().'mvc/public/'.substr($path_to_file, 0, -1));
+            if (Str::sub($path_to_file, -1) === '/') {
+        return is_dir(Mvc::getAppPath().'mvc/public/' . Str::sub($path_to_file, 0, -1));
       }
 
       return file_exists(Mvc::getAppPath().'mvc/public/'.$path_to_file.'.php');
@@ -762,8 +762,8 @@ class Permissions extends Basic
   public function accessPluginRoot(string $name): ?string
   {
     $args = ['access', 'permissions'];
-    if (strpos($name, 'appui-') === 0) {
-      array_push($args, substr($name, 6), 'appui', 'plugins');
+    if (Str::pos($name, 'appui-') === 0) {
+      array_push($args, Str::sub($name, 6), 'appui', 'plugins');
     }
     else {
       array_push($args, $name, 'plugins');
@@ -790,7 +790,7 @@ class Permissions extends Basic
       array $res = []
   ): array
   {
-    if (!empty($url) && (substr($url, -1) !== '/')) {
+    if (!empty($url) && (Str::sub($url, -1) !== '/')) {
       $url .= '/';
     }
 
@@ -798,14 +798,14 @@ class Permissions extends Basic
     $fs  = new System();
     $ff  = function ($a) use ($url, $path) {
       if (empty($url)) {
-        $a['path'] = substr($a['name'], strlen(Mvc::getAppPath() . 'mvc/public/'));
+        $a['path'] = Str::sub($a['name'], Str::len(Mvc::getAppPath() . 'mvc/public/'));
       }
       else {
-        $a['path'] = $url.substr($a['name'], strlen($path.'mvc/public/'));
+        $a['path'] = $url . Str::sub($a['name'], Str::len($path.'mvc/public/'));
       }
 
-      if (substr($a['path'], -4) === '.php') {
-        $a['path'] = substr($a['path'], 0, -4);
+      if (Str::sub($a['path'], -4) === '.php') {
+        $a['path'] = Str::sub($a['path'], 0, -4);
       }
 
       return $this->fFilter($a);
@@ -1114,7 +1114,7 @@ class Permissions extends Basic
         $alias = $this->opt->fromCode(
           'options',
           'permissions',
-          substr($subplugin, $root_original === $appui ? 6: 0),
+          Str::sub($subplugin, $root_original === $appui ? 6: 0),
           $root_original
         );
 
@@ -1269,7 +1269,7 @@ class Permissions extends Basic
   public function fFilter(array $a): bool
   {
     if (!empty($a['num'])
-      || ((substr($a['name'], -4) === '.php')
+      || ((Str::sub($a['name'], -4) === '.php')
           && (X::basename($a['name']) !== '_super.php'))
     ) {
       if (!$this->isAuthorizedRoute($a['path'])) {
@@ -1309,11 +1309,11 @@ class Permissions extends Basic
   // Sort names between folders and files
   public static function fSort($a, $b)
   {
-    if (substr($a['code'], -1) === '/') {
+    if (Str::sub($a['code'], -1) === '/') {
       $a['code'] = '00'.$a['code'];
     }
 
-    if (substr($b['code'], -1) === '/') {
+    if (Str::sub($b['code'], -1) === '/') {
       $b['code'] = '00'.$b['code'];
     }
 
@@ -1340,7 +1340,7 @@ class Permissions extends Basic
       if (!empty($p)) {
         foreach ($target as $i => $a){
           if (($a['code'] === $p.'/') && !empty($target[$i]['items'])) {
-            self::fMerge($target[$i]['items'], $src, substr($path, \strlen($p) + 1));
+            self::fMerge($target[$i]['items'], $src, Str::sub($path, Str::len($p) + 1));
             return;
           }
         }
@@ -1378,7 +1378,7 @@ class Permissions extends Basic
     */
     if (\is_array($items)) {
       foreach ($items as $it){
-        if (substr($path, -1) !== '/') {
+        if (Str::sub($path, -1) !== '/') {
           $path .= '/';
         }
 

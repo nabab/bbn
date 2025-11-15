@@ -12,6 +12,7 @@
  */
 
 namespace bbn;
+use bbn\Str;
 
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
@@ -382,7 +383,7 @@ class Cdn extends Models\Cls\Basic
       // get the HTTP_IF_MODIFIED_SINCE header if set
       $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;
       // get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)
-      $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('"', '', Stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;
+      $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('"', '', stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;
 
       // We get a unique hash of this file (etag)
       $file_tag = md5($file . $this->file_mtime);
@@ -426,7 +427,7 @@ class Cdn extends Models\Cls\Basic
         ) {
           if (
               isset($_SERVER['HTTP_ACCEPT_ENCODING'])
-              && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
+              && (Str::pos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
           ) {
             header('Content-Encoding: gzip');
             $file .= '.gzip';

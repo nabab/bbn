@@ -40,6 +40,7 @@
 
 namespace bbn;
 
+use bbn\Str;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class Mail extends Models\Cls\Basic

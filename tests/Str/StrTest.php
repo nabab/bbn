@@ -181,10 +181,10 @@ class StrTest extends TestCase
   {
     $this->assertIsString($password = Str::genpwd());
     // Default min and max
-    $this->assertTrue(strlen($password) >= 6 && strlen($password) <= 12);
+    $this->assertTrue(Str::len($password) >= 6 && Str::len($password) <= 12);
 
     $password = Str::genpwd(10, 3);
-    $this->assertTrue(strlen($password) >= 3 && strlen($password) <= 10);
+    $this->assertTrue(Str::len($password) >= 3 && Str::len($password) <= 10);
   }
 
 
@@ -258,7 +258,7 @@ class StrTest extends TestCase
   {
     $this->assertTrue(Str::isBuid(hex2bin($this->app_ids[0])));
     $this->assertFalse(Str::isBuid(hex2bin($this->app_ids[0] . 'ee')));
-    $this->assertFalse(Str::isBuid(hex2bin(substr($this->app_ids[0], 0, -2))));
+    $this->assertFalse(Str::isBuid(hex2bin(Str::sub($this->app_ids[0], 0, -2))));
     $this->assertFalse(Str::isBuid('akvotlarpvkrlgta'));
   }
 

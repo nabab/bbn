@@ -8,7 +8,7 @@
 
 namespace bbn\Mvc;
 
-use bbn;
+use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
@@ -51,13 +51,13 @@ trait Common
 
   /**
    * @param $msg
-   * @throws \Exception
+   * @throws Exception
    */
   private function error($msg)
   {
     $msg = "Error from ".\get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
-    throw new \Exception(X::_($msg));
+    throw new Exception(X::_($msg));
   }
 
 

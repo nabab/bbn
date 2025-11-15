@@ -67,12 +67,12 @@ class Scaleway
    */
   private function _makeApiUrl(string $command): string
   {
-    if (strpos($command, '/') === 0) {
-      $command = substr($command, 1);
+    if (Str::pos($command, '/') === 0) {
+      $command = Str::sub($command, 1);
     }
 
     return self::API_URL .
-      (strpos($command, self::API_URL_PREFIX) !== 0 ? self::API_URL_PREFIX : '') .
+      (Str::pos($command, self::API_URL_PREFIX) !== 0 ? self::API_URL_PREFIX : '') .
       $command;
   }
 

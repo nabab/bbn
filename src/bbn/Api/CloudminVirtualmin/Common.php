@@ -2,6 +2,8 @@
 
 namespace bbn\Api\CloudminVirtualmin;
 
+use bbn\Str;
+
 /**
  * Cloudmin Virtualmin Common trait
  */
@@ -84,7 +86,7 @@ trait Common
               /*
               if (!empty($v['mandatory']) && !isset($args[$k])) {
                 if (
-                    (strpos($k, 'pass') === false)
+                    (Str::pos($k, 'pass') === false)
                     && (!isset($args['pass']) && !isset($args['encpass'])
                     && !isset($args['passfile']))
                 ) {
@@ -255,10 +257,10 @@ trait Common
   {
     $st = trim((string)$st);
     if (
-        (strpos($st, ';') !== false)
-        || (strpos($st, '<') !== false)
-        || (strpos($st, '"') !== false)
-        || (strpos($st, "'") !== false)
+        (Str::pos($st, ';') !== false)
+        || (Str::pos($st, '<') !== false)
+        || (Str::pos($st, '"') !== false)
+        || (Str::pos($st, "'") !== false)
     ) {
       return '';
     }

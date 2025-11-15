@@ -1,8 +1,8 @@
 <?php
 //https://medium.com/@cetteup/how-to-access-nextcloud-using-webdav-and-php-2c00a04e35b9
 namespace bbn\Api;
-use bbn;
 use bbn\X;
+use bbn\Str;
 
 class Nextcloud extends bbn\Models\Cls\Basic{
   
@@ -295,10 +295,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     if ($this->isDir($path)) {
       $props = ['{DAV:}getcontenttype'];
       if ($detailed) {
-        if (strpos($detailed, 's')) {
+        if (Str::pos($detailed, 's')) {
           $props[] = '{http://owncloud.org/ns}size';
         }
-        if (strpos($detailed, 'm')) {
+        if (Str::pos($detailed, 'm')) {
           $props[] = '{DAV:}getlastmodified';
         }
       }
@@ -321,7 +321,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           $npath = $name = str_replace(self::prefix, '', $i);
           // removing trailing slash
           if (empty($c['{DAV:}getcontenttype'])) {
-            $name = substr($npath, 0, -1);
+            $name = Str::sub($npath, 0, -1);
           }
 
           $tmp = [
@@ -331,10 +331,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
             'name' => urldecode(X::basename($name)),
           ];
           if ($detailed) {
-            if (strpos($detailed, 's')) {
+            if (Str::pos($detailed, 's')) {
               $tmp['size'] = $c['{http://owncloud.org/ns}size'];
             }
-            if (strpos($detailed, 'm')) {
+            if (Str::pos($detailed, 'm')) {
               $props['mtime'] = $c['{DAV:}getlastmodified'];
             }
           }
@@ -371,7 +371,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getRealPath(string $path): string
   {
-    if ( strpos($path, self::prefix) !== 0 ){
+    if ( Str::pos($path, self::prefix) !== 0 ){
       return self::prefix.$path;
     }
     else {
@@ -388,8 +388,8 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getSystemPath(string $file, bool $is_absolute = true): string
   {
-    if ( strpos($file, self::prefix) === 0 ){
-      return substr($file, strlen(self::prefix) + ($is_absolute ? 0 : 1) -1 );
+    if ( Str::pos($file, self::prefix) === 0 ){
+      return Str::sub($file, Str::len(self::prefix) + ($is_absolute ? 0 : 1) -1 );
     }
     else {
       return $path;
@@ -426,7 +426,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function getFiles(string|null $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     //exists and is_dir is checked $path in the function get_items
-    $is_absolute = strpos($path, '/') === 0;
+    $is_absolute = Str::pos($path, '/') === 0;
     $type = $including_dirs ? 'both' : 'file';
     //die(var_dump($path, $filter , $type, $hidden, $detailed))//die(var_dump($this->getItems('.', 'both', true, 't')));
     return $this->getItems($path, $filter ?: $type, $hidden, $detailed);
@@ -436,7 +436,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     $success = false;
     if ( !empty($files) && !empty($path) ){
-      if ( strpos($path, '.') === 0){
+      if ( Str::pos($path, '.') === 0){
         $path = '';
       }
       foreach ( $files as $f ){
@@ -456,8 +456,8 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
   private static function fixURL(string $path): string
   {
-    if ( strpos($path, self::prefix) === 0 ){
-      $path = substr($path, strlen(self::prefix));
+    if ( Str::pos($path, self::prefix) === 0 ){
+      $path = Str::sub($path, Str::len(self::prefix));
     }
     $fpath = '';
     $bits = X::split($path, '/');

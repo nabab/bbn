@@ -68,9 +68,9 @@ class Svn
     $tmp = explode("\n", $st);
     $res = [];
     foreach ( $tmp as $t ){
-      $i = strpos($t, ':');
+      $i = Str::pos($t, ':');
       if ( $i > 0 ){
-        $res[Str::changeCase(Str::encodeFilename(substr($t, 0, $i)), 'lower')] = trim(substr($t, $i+1));
+        $res[Str::changeCase(Str::encodeFilename(Str::sub($t, 0, $i)), 'lower')] = trim(Str::sub($t, $i+1));
       }
     }
     return $res;

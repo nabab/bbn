@@ -743,14 +743,14 @@ class Cart extends DbCls
           if (($i !== 'territory')
             && ($i !== 'disabled')
           ) {
-            if (\substr($i, 0, 2) === 'gm') {
-              $res['surcharge'][(int)\substr($i, 2)] = $v;
+            if (Str::sub($i, 0, 2) === 'gm') {
+              $res['surcharge'][(int)\Str::sub($i, 2)] = $v;
             }
             else {
               if ($i === 'g3000') {
                 $res['default'] = (float)$v;
               }
-              $prices[(int)\substr($i, 1)] = (float)$v;
+              $prices[(int)\Str::sub($i, 1)] = (float)$v;
             }
           }
         }

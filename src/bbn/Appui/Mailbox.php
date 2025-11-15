@@ -713,11 +713,11 @@ class Mailbox extends Basic
         $encoding = $matches[2][$i];
         $encoded_text = $matches[3][$i];
         if (strtolower($encoding) == "q") {
-          $decoded_text = quoted_printable_decode(str_replace("_", " ", $encoded_text));
+          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
         } else {
           $decoded_text = base64_decode($encoded_text);
         }
-        $string = str_replace($matches[0][$i], $decoded_text, $string);
+        $string = Str::replace($matches[0][$i], $decoded_text, $string);
       }
     }
 
@@ -759,7 +759,7 @@ class Mailbox extends Basic
             && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
           ) {
             $a = [
-              'id' => !empty($part->id) ? substr($part->id, 1, -1) : null,
+              'id' => !empty($part->id) ? Str::sub($part->id, 1, -1) : null,
               'name' => $name_row->value,
               'size' => $part->bytes,
               'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
@@ -838,7 +838,7 @@ class Mailbox extends Basic
                 if (mb_detect_encoding($v) !== 'UTF-8') {
                   $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
                 }
-                if (strlen($tmp[$k]) > 1000) {
+                if (Str::len($tmp[$k]) > 1000) {
                   $tmp[$k] = Str::cut($tmp[$k], 1000);
                 }
               }
@@ -864,13 +864,13 @@ class Mailbox extends Basic
             }
           }
 
-          $tmp['references'] = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
+          $tmp['references'] = empty($tmp['references']) ? [] : X::split(Str::sub($tmp['references'], 1, -1), '> <');
           if (!isset($tmp['subject'])) {
             $tmp['subject'] = '';
           }
-          $tmp['message_id'] = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so';
+          $tmp['message_id'] = isset($tmp['message_id']) ? Str::sub($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so';
 
-          $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
+          $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : Str::sub($tmp['in_reply_to'], 1, -1);
           $tmp['attachments'] = [];
           $tmp['inline'] = [];
           $tmp['is_html'] = false;
@@ -886,7 +886,7 @@ class Mailbox extends Basic
           if (!empty($generator)) {
             yield $tmp;
           }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           X::log([
             'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
             'tmp' => $tmp,
@@ -998,7 +998,7 @@ class Mailbox extends Basic
           $purifier    = new HTMLPurifier($config);
           $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));*/
           $res['html'] = Str::toUtf8($res['html']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           X::log([
             'error' => $e->getMessage(),
             'html' => $save
@@ -1124,7 +1124,7 @@ class Mailbox extends Basic
       try {
         $res = imap_headerinfo($this->stream, $msgnum);
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         $this->log($e->getMessage().' '.(string)$msgnum);
       }
 
@@ -1429,7 +1429,7 @@ class Mailbox extends Basic
       stream_context_create($context)
     );
     if (!$this->idleStream) {
-      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+      throw new Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
     }
 
     try {
@@ -1444,7 +1444,7 @@ class Mailbox extends Basic
           //$response = $this->readCommandResponse();
           $response = $this->readCommandResponseLine();
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
           $errCode = $e->getCode();
           if (($errCode === 1) && $this->isIdleConnected()) {
             continue;
@@ -1455,8 +1455,8 @@ class Mailbox extends Basic
           }
         }
 
-        if (($pos = strpos($response, "EXISTS")) !== false) {
-          $msgn = (int)substr($response, 2, $pos - 2);
+        if (($pos = Str::pos($response, "EXISTS")) !== false) {
+          $msgn = (int)Str::sub($response, 2, $pos - 2);
 
           // Check if the stream is still alive or should be considered stale
           if (!$this->_is_connected() || ($this->idleLastTime < time())) {
@@ -1473,7 +1473,7 @@ class Mailbox extends Basic
         }
       }
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $this->stopIdle();
       throw $e;
     }
@@ -1504,7 +1504,7 @@ class Mailbox extends Basic
       stream_context_create($context)
     );
     if (!$this->idleStream) {
-      throw new \Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
+      throw new Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
     }
 
     try {
@@ -1531,7 +1531,7 @@ class Mailbox extends Basic
           //$response = $this->readCommandResponse();
           $response = $this->readCommandResponseLine();
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
           $errCode = $e->getCode();
           if (($errCode === 1) && $this->isIdleConnected()) {
             continue;
@@ -1543,7 +1543,7 @@ class Mailbox extends Basic
         }
 
         if (($pos = strpos($response, "EXISTS")) !== false) {
-          $msgn = (int)substr($response, 2, $pos - 2);
+          $msgn = (int)Str::sub($response, 2, $pos - 2);
 
           // Check if the stream is still alive or should be considered stale
           if (!$this->_is_connected() || ($this->idleLastTime < time())) {
@@ -1560,7 +1560,7 @@ class Mailbox extends Basic
         }
       }
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $this->stopIdle();
       throw $e;
     }
@@ -1606,7 +1606,7 @@ class Mailbox extends Basic
         if (str_starts_with($line, $prefix . 'BAD ')
           || str_starts_with($line, $prefix . 'NO ')
         ) {
-          throw new \Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
+          throw new Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
         }
 
         if (empty($asArray)) {
@@ -1622,7 +1622,7 @@ class Mailbox extends Basic
   protected function readCommandResponseLine(): string
   {
     $line = '';
-    while (substr($line, -1) !== "\n") {
+    while (Str::sub($line, -1) !== "\n") {
       $line .= fgets($this->idleStream, 1024);
     }
     /* while ((($c = fread($this->idleStream, 1)) !== false)
@@ -1636,7 +1636,7 @@ class Mailbox extends Basic
       //&& (($c === false)
       //  || ($c === ''))
     ) {
-      throw new \Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
+      throw new Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
     }
 
     return $line;
@@ -1650,7 +1650,7 @@ class Mailbox extends Basic
         $this->sendCommand("NOOP");
         return true;
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         return false;
       }
     }
@@ -1878,7 +1878,7 @@ class Mailbox extends Basic
         && isset($structure->disposition)
       ) {
         $a = [
-          'id' => !empty($structure->id) ? substr($structure->id, 1, -1) : null,
+          'id' => !empty($structure->id) ? Str::sub($structure->id, 1, -1) : null,
           'type' => Str::fileExt($filename) ?: strtolower($structure->subtype),
           'name' => $filename,
           'size' => $params['size'] ?? $structure->bytes ?? 0
