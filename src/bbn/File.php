@@ -95,7 +95,7 @@ class File extends Models\Cls\Basic
       {
         /* The -2 in strrpos means that if there is a final /, it will be kept in the file name */
         $this->name = Str::sub($file,Str::rpos($file,'/',-2)+1);
-        $this->path = Str::sub($file,0,-\Str::len($this->name));
+        $this->path = Str::sub($file,0,-Str::len($this->name));
         if ( Str::sub($this->path,0,2) == '//' ){
           $this->path = 'http://' . Str::sub($this->path,2);
         }
