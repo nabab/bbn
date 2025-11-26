@@ -333,10 +333,10 @@ class Sales extends DbCls
       && ($d = $this->getMailData($idTransaction))
       && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
     ) {
-            $masksCls = new Masks($this->db);
+      $masksCls = new Masks($this->db);
       if ($template = $masksCls->getDefault($opt->fromCode('client_order', 'masks', 'appui'))) {
-        $title = Tpl::render($template['title'], $d);
-        $content = Tpl::render($template['content'], $d);
+        $title = $masksCls->render($template['title'], $d);
+        $content = $masksCls->render($template['content'], $d, 'client_order');
         if(!$mailCls) {
           $mailing = new \bbn\Appui\Mailing($this->db);
           return (bool) $mailing->insertEmail($email, $title, $content);
@@ -379,8 +379,8 @@ class Sales extends DbCls
             if (!empty($providersEmails)) {
               foreach ($providersEmails as $email){
                 $d = $this->getMailDataProvider($idTransaction, $providerId);
-                $title = Tpl::render($template['title'], $d);
-                $content = Tpl::render($template['content'], $d);
+                $title = $masksCls->render($template['title'], $d);
+                $content = $masksCls->render($template['content'], $d, 'provider_order_confirm');
                 if(!$mailCls) {
                   $mailing = new \bbn\Appui\Mailing($this->db);
                   $mailing->insertEmail($email['email'], $title, $content);
@@ -421,8 +421,8 @@ class Sales extends DbCls
       if (!empty($email)
         && ($template = $masksCls->getDefault($opt->fromCode('order', 'masks', 'appui')))
       ) {
-        $title = Tpl::render($template['title'], $d);
-        $content = Tpl::render($template['content'], $d);
+        $title = $masksCls->render($template['title'], $d);
+        $content = $masksCls->render($template['content'], $d, 'order');
         if(!$mailCls) {
           $mailing = new \bbn\Appui\Mailing($this->db);
           return (bool) $mailing->insertEmail($email, $title, $content);

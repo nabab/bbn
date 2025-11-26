@@ -801,8 +801,8 @@ class Cart extends DbCls
         }
         $mailData['total'] = '€ ' . (string)number_format(round((float)$this->getProductsAmount($idCart), 2), 2, ',', '');
         $mailData['link'] = BBN_URL.'checkout';
-        $title = Tpl::render($template['title'], $mailData);
-        $content = Tpl::render($template['content'], $mailData);
+        $title = $masksCls->render($template['title'], $mailData);
+        $content = $masksCls->render($template['content'], $mailData, 'abandoned_cart');
         if($mailCls->insertEmail($email, $title, $content)) {
           $id_email = $this->db->lastId();
           return $this->insertReminder($idCart, $id_email);

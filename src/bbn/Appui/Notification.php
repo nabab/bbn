@@ -762,11 +762,11 @@ class Notification extends DbCls
         && ($mgr = $this->user->getManager())
         && ($usr = $mgr->getUser($id_user))
         && ($ucfg = $this->user->getClassCfg())
-        && ($rendered = Tpl::render(
+        && ($rendered = $masks->render(
           $templ['content'], [
-          'user' => $mgr->getName($id_user),
-          'notifications' => $notifications
-          ]
+            'user' => $mgr->getName($id_user),
+            'notifications' => $notifications
+          ], 'notifications'
         ))
         && ($email = $usr[$ucfg['arch']['users']['email']])
         && Str::isEmail($email)

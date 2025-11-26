@@ -11,6 +11,12 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Appui\Option;
+use bbn\Tpl;
+use bbn\User\Manager;
+use bbn\User;
+use bbn\Date;
+use bbn\Str;
+use bbn\Db;
 
 class Masks extends bbn\Models\Cls\Db
 {
@@ -26,9 +32,9 @@ class Masks extends bbn\Models\Cls\Db
   /**
    * Constructor.
    *
-   * @param bbn\Db $db Database object.
+   * @param Db $db Database object.
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     $this->initOptional();
@@ -102,7 +108,7 @@ class Masks extends bbn\Models\Cls\Db
    */
   public function getAll($id_type = null, $simple = true)
   {
-    if (!empty($id_type) && !bbn\Str::isUid($id_type)) {
+    if (!empty($id_type) && !Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
     $r = [];
@@ -124,12 +130,12 @@ class Masks extends bbn\Models\Cls\Db
    */
   public function getTextValue($id_type, $fulltext = false)
   {
-    if (!bbn\Str::isUid($id_type)) {
+    if (!Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
-    if (bbn\Str::isUid($id_type)) {
+    if (Str::isUid($id_type)) {
       $all = $this->getAll($id_type);
-      $admin = new bbn\User\Manager(\bbn\User::getInstance());
+      $admin = new Manager(User::getInstance());
       if (\is_array($all)) {
         $res = [];
         foreach ($all as $a) {
@@ -141,7 +147,7 @@ class Masks extends bbn\Models\Cls\Db
             $tmp['fulltext'] = $a['title'] .
               ($a['default'] ? ' (' . X::_('default') . ')' : '') .
               ' - v' . $a['version'] . ' ' .
-              \bbn\Date::format($a['creation']) . ' ' . X::_('by') . ' ' .
+              Date::format($a['creation']) . ' ' . X::_('by') . ' ' .
               $admin->getName($a['id_user']);
           }
           $res[] = $tmp;
@@ -160,7 +166,7 @@ class Masks extends bbn\Models\Cls\Db
    */
   public function getDefault($id_type)
   {
-    if (!bbn\Str::isUid($id_type)) {
+    if (!Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
     if ($id_note = $this->db->selectOne('bbn_notes_masks', 'id_note', [
@@ -203,7 +209,7 @@ class Masks extends bbn\Models\Cls\Db
    */
   public function insert($name, $id_type, $title, $content): ?string
   {
-    if (!bbn\Str::isUid($id_type)) {
+    if (!Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
     if ($this->options->exists($id_type)
@@ -269,18 +275,51 @@ class Masks extends bbn\Models\Cls\Db
   /**
    * Render a mask.
    *
-   * @param string $note Mask ID or data.
+   * @param string $template Mask's ID or mask's template or note array.
    * @param array $data Data to render with.
+   * @param string|null $code Mask's code.
    * @return string|null Rendered mask content.
    */
-  public function render($note, $data)
+  public function render(string|array $template, array $data, ?string $code = null)
   {
-    if (bbn\Str::isUid($note)) {
-      $note = $this->get($note);
+    if (is_string($template) && Str::isUid($template)) {
+      $template = $this->get($template);
     }
-    if (!empty($note['content'])) {
-      return \bbn\Tpl::render($note['content'], $data);
+
+    if (is_array($template) && isset($template['content'])) {
+      $template = $template['content'];
     }
+
+    if (is_string($template) && !empty($template)) {
+      if (!empty($data)
+        && !empty($code)
+        && ($opt = self::getOption($code))
+        && !empty($opt['id_parent'])
+        && ($opt['id_parent'] === $this->getIdCategories())
+        && empty($opt['preview'])
+      ) {
+        $opt['preview'] = 'custom';
+        $opt['preview_inputs'] = [];
+        foreach ($data as $k => $v) {
+          if (!is_array($v) && !is_object($v)) {
+            $opt['preview_inputs'][] = [
+              'field' => $k,
+              'label' => $k,
+              'required' => 0,
+              'component' => 'bbn-input',
+              'default' => $v
+            ];
+          }
+        }
+
+        if (!empty($opt['preview_inputs'])) {
+          $this->updateCategory($opt['id'], $opt);
+        }
+      }
+
+      return Tpl::render($template, $data);
+    }
+
     return null;
   }
 
@@ -292,6 +331,74 @@ class Masks extends bbn\Models\Cls\Db
   public function getCategories()
   {
     return self::getOptions();
+  }
+
+
+  /**
+   * Insert a category.
+   */
+  public function insertCategory(array $data): ?string
+  {
+    $opt = Option::getInstance();
+    $data = $this->normalizeCategory($data);
+    return $opt->add($data);
+  }
+
+
+  /**
+   * Update a category.
+   */
+  public function updateCategory(string $id, array $data): bool
+  {
+    $opt = Option::getInstance();
+    $data = $this->normalizeCategory($data);
+    if ($opt->getIdParent($id) === $this->getIdCategories()) {
+      return (bool)$opt->set($id, $data);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Delete a category.
+   */
+  public function deleteCategory(string $id): bool
+  {
+    $opt = Option::getInstance();
+    if ($opt->getIdParent($id) === $this->getIdCategories()) {
+      return (bool)$opt->remove($id);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Normalize category data.
+   */
+  protected function normalizeCategory($cat): array
+  {
+    $opt = Option::getInstance();
+    $optCfg = $opt->getClassCfg();
+    $optFields = $optCfg['arch']['options'];
+    $idCategories = $this->getIdCategories();
+    return [
+      $optFields['id_parent'] => !empty($cat[$optFields['id_parent']]) ? $cat[$optFields['id_parent']] : $idCategories,
+      $optFields['text'] => $cat[$optFields['text']] ?? '',
+      $optFields['code'] => $cat[$optFields['code']] ?? '',
+      'preview' => empty($cat['preview']) ? false : $cat['preview'],
+      'preview_model' => !empty($cat['preview']) && ($cat['preview'] === 'model') ? $cat['preview_model'] : '',
+      'preview_inputs' => !empty($cat['preview_inputs']) ? $cat['preview_inputs'] : [],
+      'fields' => !empty($cat['fields']) ? $cat['fields'] : []
+    ];
+  }
+
+
+  protected function getIdCategories(): ?string
+  {
+    $opt = Option::getInstance();
+    return $opt->fromCode('options', 'masks', 'appui');
   }
 
  /*

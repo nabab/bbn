@@ -124,8 +124,8 @@ class Provider extends DbCls
      ($template = $masksCls->getDefault($this->opt->fromCode('product_sold_out', 'masks', 'appui')))
      ) 
     {
-      $title = Tpl::render($template['title'], $product['product']);
-      $content = Tpl::render($template['content'], $product['product']);
+      $title = $masksCls->render($template['title'], $product['product']);
+      $content = $masksCls->render($template['content'], $product['product'], 'product_sold_out');
       foreach($emails as $email) {
         $mailCls->insertEmail($email, $title, $content);
 
