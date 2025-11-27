@@ -1356,12 +1356,13 @@ class Mailbox extends Basic
    *
    * @param string $mbox Destination mailbox name
    * @param string $msg  Message
+   * @param string|null $opt  Options string
    * @return bool
    */
-  public function append($mbox, $msg)
+  public function append(string $mbox, string $msg, ?string $opt = null)
   {
     if ($this->_is_connected()) {
-      return @imap_append($this->stream, $this->mbParam. $mbox, $msg);
+      return @imap_append($this->stream, $this->mbParam. $mbox, $msg, $opt);
     }
 
     return false;

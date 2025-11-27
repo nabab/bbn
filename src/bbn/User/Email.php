@@ -812,6 +812,18 @@ class Email extends Basic
   }
 
 
+  /**
+   * Returns a folder by its UID.
+   */
+  public function getFolderByUid(string $id_account, string $uid, bool $force = false): ?array
+  {
+    return X::getRow(
+      $this->getFolders($id_account, $force) ?: [],
+      ['uid' => $uid]
+    );
+  }
+
+
   public function getNextUid(array $folder, int $uid): ?int
   {
     $mb = $this->getMailbox($folder['id_account']);
@@ -2115,6 +2127,77 @@ class Email extends Basic
     }
 
     return (bool)$this->syncFolders($folderSrc['id_account']);
+  }
+
+
+  public function saveDraft(string $idAccount, array $mail)
+  {
+    if (!($rules = $this->getFoldersRules($idAccount))
+      || empty($rules['drafts'])
+    ) {
+      throw new \Exception(X::_("No drafts folder defined for the account ID: %s", $idAccount));
+    }
+
+    $draftFolder = $rules['drafts'];
+    if (!($mb = $this->getMailbox($idAccount))) {
+      throw new \Exception(X::_("Impossible to find the mailbox for the account ID: %s", $idAccount));
+    }
+
+    if (!$mb->selectFolder($draftFolder)) {
+      throw new \Exception(X::_("Impossible to select the drafts folder '%s' in the mailbox.", $draftFolder));
+    }
+
+    $boundary = '--' . md5(uniqid(time(), true));
+    $message = "Content-type: multipart/mixed; boundary=\"$boundary\"\r\n\r\n";
+    $message .= "MIME-Version: 1.0\r\n";
+    if (!empty($cfg['from'])) {
+      $message .= "From: {$mail['from']}\r\n\r\n";
+    }
+
+    if (!empty($mail['to'])) {
+      $message .= "To: {$mail['to']}\r\n\r\n";
+    }
+
+    if (!empty($mail['cc'])) {
+      $message .= "Cc: {$mail['cc']}\r\n\r\n";
+    }
+
+    if (!empty($mail['bcc'])) {
+      $message .= "Bcc: {$mail['bcc']}\r\n\r\n";
+    }
+
+    if (!empty($mail['title']) || !empty($mail['subject'])) {
+      $subject = !empty($mail['title']) ? $mail['title'] : $mail['subject'];
+      $message .= "Subject: $subject\r\n\r\n";
+    }
+
+    if (!empty($mail['text'])) {
+      $message .= "$boundary\r\n";
+      $message .= "Content-Type: text/html\r\n";
+      $message .= "Content-Encoding: base64\r\n\r\n";
+      $message .= "{$mail['text']}\r\n";
+    }
+
+    if (!empty($mail['attachments'])
+      && is_array($mail['attachments'])
+    ) {
+      foreach ($mail['attachments'] as $att) {
+        if (X::hasProps($att, ['filename', 'path'])) {
+          $message .= "$boundary\r\n";
+          $message .= "Content-Type: application/octet-stream\r\n";
+          $message .= "Content-Transfer-Encoding: base64\r\n";
+          $message .= "Content-Disposition: attachment; filename=\"{$att['filename']}\"\r\n\r\n";
+          $message .= chunk_split(base64_encode(file_get_contents($att['path']))) . "\r\n";
+        }
+      }
+    }
+
+    $message .= "$boundary--";
+    die(var_dump($message));
+    if ($mb->append($draftFolder, $message, "\\Draft")) {
+    }
+
+
   }
 
 
