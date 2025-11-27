@@ -131,25 +131,39 @@ class Address extends DbCls
   public function seek($p, int $start = 0, int $limit = 100)
   {
     $f = $this->getClassCfg()['arch']['addresses'];
-    if (
-      is_array($p) && (!empty($p[$f['address']]) ||
-        !empty($p[$f['phone']]) ||
-        !empty($p[$f['postcode']]))
+    if (is_array($p)
+      && ((isset($f['address']) && !empty($p[$f['address']]))
+        || (isset($f['phone']) &&!empty($p[$f['phone']]))
+        || (isset($f['postcode']) && !empty($p[$f['postcode']])))
     ) {
       $cond = [];
 
-      if (!empty($p[$f['address']]) && Str::len($p[$f['address']]) > 7) {
+      if (isset($f['address'])
+        && !empty($p[$f['address']])
+        && Str::len($p[$f['address']]) > 7
+      ) {
         array_push($cond, [$f['address'], 'LIKE', '%' . $p[$f['address']] . '%']);
       }
-      if (!empty($p[$f['phone']]) && (Str::len($p[$f['phone']]) >= 6)) {
+
+      if (isset($f['phone'])
+        && !empty($p[$f['phone']])
+        && (Str::len($p[$f['phone']]) >= 6)
+      ) {
         array_push($cond, [$f['phone'], 'LIKE', $p[$f['phone']] . '%']);
       }
-      if (!empty($p[$f['city']])) {
+
+      if (isset($f['city'])
+        && !empty($p[$f['city']])
+      ) {
         array_push($cond, [$f['city'], 'LIKE', $p[$f['city']]]);
       }
-      if (!empty($p[$f['postcode']])) {
+
+      if (isset($f['postcode'])
+        && !empty($p[$f['postcode']])
+      ) {
         array_push($cond, [$f['postcode'], 'LIKE', $p[$f['postcode']]]);
       }
+
       return $this->db->getColumnValues("bbn_addresses", $f['id'], $cond, [$f['address'], $f['city']], $limit, $start);
     }
     return false;
