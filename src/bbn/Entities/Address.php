@@ -498,10 +498,11 @@ class Address extends DbCls
     $r = [];
 
     if (is_array($fn)) {
-      if (!is_array($fn[$f['address']])) {
+      if (isset($f['address']) && !is_array($fn[$f['address']])) {
         $fn[$f['address']] = explode("\n", $fn[$f['address']]);
       }
-      if (is_array($fn[$f['address']])) {
+
+      if (isset($f['address']) && is_array($fn[$f['address']])) {
         $r[$f['address']] = array_filter($fn[$f['address']], function ($ad) {
           return !empty($ad) && Str::len($ad) > 1;
         });
@@ -512,14 +513,20 @@ class Address extends DbCls
           unset($r[$f['address']]);
         }
       }
-      if (isset($fn[$f['postcode']])) {
+
+      if (isset($f['postcode'], $fn[$f['postcode']])) {
         $r[$f['postcode']] = (int) Str::getNumbers($fn[$f['postcode']]);
       }
-      if (isset($fn['id_country'])) {
-        $r['id_country'] = $fn['id_country'];
+
+      if (isset($f['id_country'], $fn[$f['id_country']])) {
+        $r[$f['id_country']] = $fn[$f['id_country']];
       }
-      $r[$f['city']] = empty($fn[$f['city']]) ? '' : Str::changeCase($fn[$f['city']]);
-      if (isset($fn[$f['phone']])) {
+
+      if (isset($f['city'])) {
+        $r[$f['city']] = empty($fn[$f['city']]) ? '' : Str::changeCase($fn[$f['city']]);
+      }
+
+      if (isset($f['phone'], $fn[$f['phone']])) {
         $fn[$f['phone']] = Str::getNumbers($fn[$f['phone']]);
         if (Str::len($fn[$f['phone']]) > 10 && Str::pos($fn[$f['phone']], '33') === 0) {
           $fn[$f['phone']] = Str::sub($fn[$f['phone']], 2);
@@ -532,6 +539,7 @@ class Address extends DbCls
         }
       }
     }
+
     return $r;
   }
 
