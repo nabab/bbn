@@ -136,6 +136,11 @@ TEMPLATE;
    */
   private $imap_sent;
 
+  /*
+  * @var string
+  */
+  private $imap_drafts;
+
   /**
    * @todo document
    * 
@@ -301,6 +306,7 @@ TEMPLATE;
     $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];
     $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];
     $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';
+    $this->imap_drafts = isset($cfg['imap_drafts']) ? $cfg['imap_drafts'] : 'Drafts';
     if (isset($cfg['imap_port'])) {
       $imap_port = $cfg['imap_port'];
     }
@@ -371,10 +377,78 @@ TEMPLATE;
   }
 
   public function send($cfg){
-    $valid = false;
     $r = false;
+    if ($this->makeMail($cfg)) {
+      try {
+        $r = $this->mailer->send();
+      }
+      catch (Exception $e) {
+        $this->log($e->getMessage());
+        $this->log(\imap_last_error());
+      }
 
-    if (!defined('BBN_IS_PROD') || !constant('BBN_IS_PROD')) {
+      if ($r && !empty($this->imap_string)) {
+        $mail_string = $this->mailer->getSentMIMEMessage();
+        if (!\is_resource($this->imap)
+          && !($this->imap instanceof \IMAP\Connection)
+        ) {
+          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
+        }
+
+        if ((!\is_resource($this->imap)
+            && !($this->imap instanceof \IMAP\Connection))
+          || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
+        ) {
+          $this->log(\imap_errors());
+        }
+      }
+    }
+
+    $this->mailer->ClearAllRecipients();
+    $this->mailer->ClearAttachments();
+    return $r;
+  }
+
+  public function draft(array $cfg): ?string
+  {
+    $r = null;
+    if ($this->makeMail($cfg, true)) {
+      try {
+        $r = $this->mailer->preSend();
+      }
+      catch (Exception $e) {
+        $this->log($e->getMessage());
+      }
+
+      if ($r && !empty($this->imap_string)) {
+        $mailString = $this->mailer->getSentMIMEMessage();
+        $r = $this->mailer->getLastMessageID();
+        if (!\is_resource($this->imap)
+          && !($this->imap instanceof \IMAP\Connection)
+        ) {
+          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
+        }
+
+        if ((!\is_resource($this->imap)
+            && !($this->imap instanceof \IMAP\Connection))
+          || !\imap_append($this->imap, $this->imap_string.$this->imap_drafts, $mailString, "\\Seen")
+        ) {
+          $this->log(\imap_errors());
+        }
+      }
+    }
+
+    $this->mailer->ClearAllRecipients();
+    $this->mailer->ClearAttachments();
+    return $r;
+  }
+
+  protected function makeMail($cfg, $skipEnvCheck = false){
+    $valid = false;
+    if (!$skipEnvCheck
+      && (!defined('BBN_IS_PROD')
+        || !constant('BBN_IS_PROD'))
+    ) {
       $cfg['to'] = constant('BBN_ADMIN_EMAIL');
       $cfg['cc'] = '';
       $cfg['bcc'] = '';
@@ -394,28 +468,32 @@ TEMPLATE;
           }
 
           foreach ($cfg[$dest_field] as $dest) {
-            if (PHPMailer::validateAddress($dest)) {
-              switch ($dest_field) {
-                case "to":
-                  $this->mailer->AddAddress($dest);
-                  break;
-                case "cc":
-                  $this->mailer->AddCC($dest);
-                  break;
-                case "bcc":
-                  $this->mailer->AddBCC($dest);
-                  break;
+            if (!empty($dest)) {
+              if (PHPMailer::validateAddress($dest)) {
+                switch ($dest_field) {
+                  case "to":
+                    $this->mailer->AddAddress($dest);
+                    break;
+                  case "cc":
+                    $this->mailer->AddCC($dest);
+                    break;
+                  case "bcc":
+                    $this->mailer->AddBCC($dest);
+                    break;
+                }
+
+                $valid = 1;
               }
-              $valid = 1;
-            }
-            else {
-              X::log("Adresse email invalide: ".$dest);
-              $valid = false;
+              else {
+                X::log("Adresse email invalide: ".$dest);
+                $valid = false;
+              }
             }
           }
         }
       }
     }
+
     if ($valid) {
       if (!empty($cfg['from'])) {
         $this->setFrom($cfg['from']);
@@ -429,12 +507,12 @@ TEMPLATE;
           if (preg_match('/^<(.*)>$/', $ref, $m)) {
             $mailbox = explode('@', $m[1])[0];
             $hostname = explode('@', $m[1])[1];
-            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, '');
           }
           else {
             $mailbox = explode('@', $ref)[0];
             $hostname = explode('@', $ref)[1];
-            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, '');
           }
         }
         // for each ref add '<' and '>' around the message id if not present
@@ -453,11 +531,11 @@ TEMPLATE;
         if (preg_match('/^<(.*)>$/', $cfg['in_reply_to'], $m)) {
           $mailbox = explode('@', $m[1])[0];
           $hostname = explode('@', $m[1])[1];
-          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, '');
         } else {
           $mailbox = explode('@', $cfg['in_reply_to'])[0];
           $hostname = explode('@', $cfg['in_reply_to'])[1];
-          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, '');
         }
         // add '<' and '>' around the message id if not present
         if (!preg_match('/^<(.*)>$/', $cfg['in_reply_to'])) {
@@ -476,8 +554,6 @@ TEMPLATE;
       }
 
       $this->mailer->Subject = $ar['title'];
-
-      
       if (empty($cfg['text'])) {
         $ar['text'] = '';
       }
@@ -511,34 +587,8 @@ TEMPLATE;
       $text = $renderer($ar);
       self::setContent($text);
       $this->mailer->msgHTML(self::$_content, $this->path);
-
-      try {
-        $r = $this->mailer->send();
-      }
-      catch (Exception $e) {
-        $this->log($e->getMessage());
-        $this->log(\imap_last_error());
-      }
-
-      if ($r && !empty($this->imap_string)) {
-        $mail_string = $this->mailer->getSentMIMEMessage();
-        if (!\is_resource($this->imap)
-          && !($this->imap instanceof \IMAP\Connection)
-        ) {
-          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
-        }
-
-        if ((!\is_resource($this->imap)
-            && !($this->imap instanceof \IMAP\Connection))
-          || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
-        ) {
-          $this->log(\imap_errors());
-        }
-      }
     }
 
-    $this->mailer->ClearAllRecipients();
-    $this->mailer->ClearAttachments();
-    return $r;
+    return $valid;
   }
 }

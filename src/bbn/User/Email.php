@@ -1982,65 +1982,15 @@ class Email extends Basic
   }
 
 
-  public function send(string $id_account, array $cfg): int
+  public function send(string $idAccount, array $cfg): int
   {
-    if (($account = $this->getAccount($id_account))
-      && ($mb = $this->getMailbox($id_account))
+    if (($mb = $this->getMailbox($idAccount))
+      && ($mailerCfg = $this->getMailerCfg($idAccount, $cfg))
+      && ($mailer = $mb->getMailer($mailerCfg))
+      && !empty($cfg['to'])
+      && (!empty($cfg['title']) || !empty($cfg['text']))
     ) {
-      $smtp = null;
-      if (!empty($account['smtp'])) {
-        $smtp = $this->getSmtp($account['smtp']);
-      }
-
-      if (!empty($cfg['to'])
-        && (!empty($cfg['title']) || !empty($cfg['text']))
-      ) {
-        $mailerCfg = [
-          'from' => $cfg['from'] ?? null,
-          'name' => $cfg['name'] ?? $cfg['from'] ?? null,
-          'template' => <<<HTML
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>{{title}}</title>
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-              </head>
-              <body style="background-color:#FFF; color:#333; font-family:Arial; margin:20px; padding:0; font-size:14px">
-                <div>{{{text}}}</div>
-              </body>
-            </html>
-          HTML
-        ];
-        $folders = $this->getFolders($id_account) ?: [];
-        if ($sentFolder = X::getField($folders, ['type' => 'sent'], 'uid')) {
-          $mailerCfg['imap_sent'] = $sentFolder;
-        }
-
-        if ($smtp) {
-          $mailerCfg = X::mergeArrays($mailerCfg, [
-            'host' => $smtp['host'],
-            'port' => $smtp['port'],
-            'user' => $smtp['login'],
-            'pass' => $this->_get_password()->userGet($smtp['id'], $this->user)
-          ]);
-          if (!empty($smtp['encryption'])
-            && in_array($smtp['encryption'], ['starttls', 'tls'])
-          ) {
-            $mailerCfg['encryption'] = [
-              $smtp['encryption'] === 'tls' ? 'ssl' : 'tls' => [
-                'verify_peer' => !empty($smtp['validatecert']),
-                'verify_peer_name' => false,
-                'verify_host' => false,
-                'allow_self_signed' => true
-              ]
-            ];
-          }
-        }
-
-  
-        $mailer = $mb->getMailer($mailerCfg);
-        return $mailer->send($cfg);
-      }
+      return $mailer->send($cfg);
     }
 
     throw new \Exception(X::_("Impossible to find the mailbox"));
@@ -2130,7 +2080,7 @@ class Email extends Basic
   }
 
 
-  public function saveDraft(string $idAccount, array $mail)
+  public function saveDraft(string $idAccount, array $mail): ?string
   {
     if (!($rules = $this->getFoldersRules($idAccount))
       || empty($rules['drafts'])
@@ -2147,57 +2097,24 @@ class Email extends Basic
       throw new \Exception(X::_("Impossible to select the drafts folder '%s' in the mailbox.", $draftFolder));
     }
 
-    $boundary = '--' . md5(uniqid(time(), true));
-    $message = "Content-type: multipart/mixed; boundary=\"$boundary\"\r\n\r\n";
-    $message .= "MIME-Version: 1.0\r\n";
-    if (!empty($cfg['from'])) {
-      $message .= "From: {$mail['from']}\r\n\r\n";
+    if (!($mailerCfg = $this->getMailerCfg($idAccount, $mail))) {
+      throw new \Exception(X::_("Impossible to get the mailer configuration for the account ID: %s", $idAccount));
     }
 
-    if (!empty($mail['to'])) {
-      $message .= "To: {$mail['to']}\r\n\r\n";
+    if (!($mailer = $mb->getMailer($mailerCfg))) {
+      throw new \Exception(X::_("Impossible to get the mailer for the account ID: %s", $idAccount));
     }
 
-    if (!empty($mail['cc'])) {
-      $message .= "Cc: {$mail['cc']}\r\n\r\n";
-    }
-
-    if (!empty($mail['bcc'])) {
-      $message .= "Bcc: {$mail['bcc']}\r\n\r\n";
-    }
-
-    if (!empty($mail['title']) || !empty($mail['subject'])) {
-      $subject = !empty($mail['title']) ? $mail['title'] : $mail['subject'];
-      $message .= "Subject: $subject\r\n\r\n";
-    }
-
-    if (!empty($mail['text'])) {
-      $message .= "$boundary\r\n";
-      $message .= "Content-Type: text/html\r\n";
-      $message .= "Content-Encoding: base64\r\n\r\n";
-      $message .= "{$mail['text']}\r\n";
-    }
-
-    if (!empty($mail['attachments'])
-      && is_array($mail['attachments'])
-    ) {
-      foreach ($mail['attachments'] as $att) {
-        if (X::hasProps($att, ['filename', 'path'])) {
-          $message .= "$boundary\r\n";
-          $message .= "Content-Type: application/octet-stream\r\n";
-          $message .= "Content-Transfer-Encoding: base64\r\n";
-          $message .= "Content-Disposition: attachment; filename=\"{$att['filename']}\"\r\n\r\n";
-          $message .= chunk_split(base64_encode(file_get_contents($att['path']))) . "\r\n";
-        }
+    try {
+      if ($id = $mailer->draft($mail)) {
+        return $id;
       }
     }
-
-    $message .= "$boundary--";
-    die(var_dump($message));
-    if ($mb->append($draftFolder, $message, "\\Draft")) {
+    catch (\Exception $e) {
+      throw new \Exception(X::_("Impossible to save draft for the account ID: %s: %s", $idAccount, $e->getMessage()));
     }
 
-
+    return null;
   }
 
 
@@ -2336,6 +2253,68 @@ class Email extends Basic
         }
       }
     }
+  }
+
+
+  protected function getMailerCfg(string $idAccount, array $cfg): ?array
+  {
+    if (($account = $this->getAccount($idAccount))) {
+      $smtp = null;
+      if (!empty($account['smtp'])) {
+        $smtp = $this->getSmtp($account['smtp']);
+      }
+
+      $mailerCfg = [
+        'imap' => true,
+        'from' => $cfg['from'] ?? null,
+        'name' => $cfg['name'] ?? $cfg['from'] ?? null,
+        'template' => <<<HTML
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>{{title}}</title>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body style="background-color:#FFF; color:#333; font-family:Arial; margin:20px; padding:0; font-size:14px">
+              <div>{{{text}}}</div>
+            </body>
+          </html>
+        HTML
+      ];
+      $folders = $this->getFolders($idAccount) ?: [];
+      if ($sentFolder = X::getField($folders, ['type' => 'sent'], 'uid')) {
+        $mailerCfg['imap_sent'] = $sentFolder;
+      }
+
+      if ($draftsFolder = X::getField($folders, ['type' => 'drafts'], 'uid')) {
+        $mailerCfg['imap_drafts'] = $draftsFolder;
+      }
+
+      if ($smtp) {
+        $mailerCfg = X::mergeArrays($mailerCfg, [
+          'host' => $smtp['host'],
+          'port' => $smtp['port'],
+          'user' => $smtp['login'],
+          'pass' => $this->_get_password()->userGet($smtp['id'], $this->user)
+        ]);
+        if (!empty($smtp['encryption'])
+          && in_array($smtp['encryption'], ['starttls', 'tls'])
+        ) {
+          $mailerCfg['encryption'] = [
+            $smtp['encryption'] === 'tls' ? 'ssl' : 'tls' => [
+              'verify_peer' => !empty($smtp['validatecert']),
+              'verify_peer_name' => false,
+              'verify_host' => false,
+              'allow_self_signed' => true
+            ]
+          ];
+        }
+      }
+
+      return $mailerCfg;
+    }
+
+    return null;
   }
 
 
