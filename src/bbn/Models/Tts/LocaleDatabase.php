@@ -61,7 +61,8 @@ trait LocaleDatabase
     $currentUserCls = User::getInstance();
     $userCls = $user instanceof User ? $user : $currentUserCls;
     $userId = is_string($user) && Str::isUid($user) ? $user : $userCls->getId();
-    if (($userId === $this->id_user)
+    if (isset($this->id_user)
+      && ($userId === $this->id_user)
       && !empty($this->localeDb)
     ) {
       return true;

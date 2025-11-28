@@ -351,6 +351,15 @@ class Manager
         if ($status['running']) {
           proc_terminate($w['proc']);
         }
+
+        if (!empty($w['pipes'][0])) {
+          fclose($w['pipes'][0]);
+        }
+
+        if (!empty($w['pipes'][1])) {
+          fclose($w['pipes'][1]);
+        }
+
         proc_close($w['proc']);
         $this->fs->delete($w['log']);
         $this->fs->delete($w['data']);
@@ -389,6 +398,7 @@ class Manager
     // Create and clear the log file
     $logFile = $this->logFileBase . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
+    $this->fs->mkdir(dirname($logFile));
     @$this->fs->putContents($logFile, '');
 
     // Attach the log file as stderr
@@ -407,8 +417,13 @@ class Manager
     );
 
     // Non-blocking read from the stdout pipe
-    stream_set_blocking($pipes[0], 0);
-    stream_set_blocking($pipes[1], 0);
+    if (!empty($pipes[0])) {
+      stream_set_blocking($pipes[0], 0);
+    }
+
+    if (!empty($pipes[1])) {
+      stream_set_blocking($pipes[1], 0);
+    }
 
     // Track the worker
     $this->workers[] = [

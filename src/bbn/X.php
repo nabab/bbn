@@ -3166,7 +3166,9 @@ class X
       foreach ($data as $i => $d) {
         $t = [];
         foreach ($cfg['fields'] as $c) {
-          $t[$c['field']] = $d[$c['field']] ?? null;
+          if (isset($c['field'])) {
+            $t[$c['field']] = $d[$c['field']] ?? null;
+          }
         }
         $data[$i] = $t;
       }
@@ -3224,7 +3226,9 @@ class X
 
       array_walk($data, function (&$item) use ($cfg, $dates): void {
         foreach ($cfg['fields'] as $field) {
-          if (!isset($item[$field['field']])) {
+          if (!isset($field['field'])
+            || !isset($item[$field['field']])
+          ) {
             continue;
           }
 
