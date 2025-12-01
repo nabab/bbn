@@ -1098,7 +1098,7 @@ class Task extends DbCls
         // For id_parent, no other search for now
         if ( $w[0] === 'id_parent' ){
           $query = "AND ".$fields['ids'][$w[0]]." = ? ";
-          $args = [$w[2]];
+          $args = [Str::isUid($w[2]) ? hex2bin($w[2]) : $w[2]];
           break;
         }
         else if ( \is_array($w[2]) ){
@@ -1108,13 +1108,13 @@ class Task extends DbCls
               $query .= " OR ";
             }
             $query .= $fields['ids'][$w[0]]." = ? ";
-            array_push($args1, $v);
+            array_push($args1, Str::isUid($v) ? hex2bin($v) : $v);
           }
           $query .= ") ";
         }
         else{
           $query .= " AND ".$fields['ids'][$w[0]]." $w[1] ? ";
-          array_push($args1, $w[2]);
+          array_push($args1, Str::isUid($w[2]) ? hex2bin($w[2]) : $w[2]);
         }
       }
       else if ( isset($fields['dates'][$w[0]]) ){
@@ -1161,7 +1161,7 @@ class Task extends DbCls
         if ( !empty($w[2]) ){
           if ( $w[0] === 'my_user' ){
             $query .= " AND user_role.id_user = ?";
-            array_push($args1, hex2bin($w[2]));
+            array_push($args1, Str::isUid($w[2]) ? hex2bin($w[2]) : $w[2]);
             $join .= "
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
@@ -1170,7 +1170,7 @@ class Task extends DbCls
             $usr_table = $usr->getTables()['users'];
             $usr_fields = $usr->getFields('users');
             $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
-            array_push($args1, hex2bin($w[2]));
+            array_push($args1, Str::isUid($w[2]) ? hex2bin($w[2]) : $w[2]);
             $join .= "
         JOIN bbn_tasks_roles AS group_role
           ON group_role.id_task = bbn_tasks.id
@@ -1180,9 +1180,9 @@ class Task extends DbCls
         }
       }
       else if ( isset($fields['refs'][$w[0]]) ){
-        if ( \is_int($w[2]) ){
+        if (\is_int($w[2]) || Str::isUid($w[2])) {
           $having .= " AND ".$fields['refs'][$w[0]]." $w[1] ? ";
-          array_push($args1, $w[2]);
+          array_push($args1, Str::isUid($w[2]) ? hex2bin($w[2]) : $w[2]);
         }
       }
     }
