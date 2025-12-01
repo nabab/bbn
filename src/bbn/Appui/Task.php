@@ -461,8 +461,8 @@ class Task extends DbCls
     SELECT `role`, bbn_tasks.*,
     notevers.title AS title,
     notevers.content AS content,
-    FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
-    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+    FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono), '%Y-%m-%d %H:%i:%s') AS `first`,
+    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono), '%Y-%m-%d %H:%i:%s') AS `last`,
     {$this->references_select}
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
@@ -526,7 +526,7 @@ class Task extends DbCls
     SELECT bbn_tasks.*, role,
     notevers.title AS title,
     notevers.content AS content,
-    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
+    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono), '%Y-%m-%d %H:%i:%s') AS `last_action`,
     {$this->references_select}
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
@@ -1013,7 +1013,7 @@ class Task extends DbCls
       bbn_tasks.*,
       bbn_notes_versions.title,
       bbn_notes_versions.content,
-      FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
+      FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono), '%Y-%m-%d %H:%i:%s') AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
       {$this->references_select}
@@ -1052,7 +1052,7 @@ class Task extends DbCls
       $sql .= " LIMIT $start, $num";
     }
 
-    $data = $this->db->getRows($sql, $args);
+    $data = $this->db->getRows($sql, array_map(fn($a) => Str::isUid($a) ? hex2bin($a) : $a, $args));
     /** @var User $user */
     $user = User::getInstance();
     foreach ( $data as $i => $d ){
