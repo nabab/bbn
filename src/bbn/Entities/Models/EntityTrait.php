@@ -101,17 +101,4 @@ trait EntityTrait
   {
     return $this->dbTraitRselect(...func_get_args());
   }
-
-  public function update(array|string $filter, array $data): bool
-  {
-    if (is_string($filter)) {
-      $filter = [$this->fields['id'] => $filter];
-    }
-
-    if ($this->id_entity) {
-      $filter[$this->fields['id_entity']] = $this->id_entity;
-    }
-
-    return $this->dbTraitUpdate($filter, $data);
-  }
 }
