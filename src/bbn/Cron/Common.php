@@ -9,7 +9,9 @@ namespace bbn\Cron;
 
 use bbn\Str;
 use bbn\Mvc;
+use bbn\Db;
 use bbn\File\System;
+use bbn\Mvc\Controller;
 
 trait Common {
   /**
@@ -22,11 +24,11 @@ trait Common {
   private $path;
 
   /**
-   * @var bbn\Db The DB connection
+   * @var Db The DB connection
    */
   protected $db;
   /**
-   * @var bbn\Mvc\Controller The controller
+   * @var Controller The controller
    */
   protected $ctrl;
   /**
@@ -323,3 +325,4 @@ trait Common {
   }
 
 }
+

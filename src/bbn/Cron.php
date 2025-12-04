@@ -2,6 +2,14 @@
 namespace bbn;
 
 use bbn\X;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\Mvc\Controller;
+use bbn\Cron\Common;
+use bbn\Cron\Launcher;
+use bbn\Cron\Runner;
+use bbn\Cron\Manager;
+use bbn\Models\Cls\Basic;
 
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
@@ -12,10 +20,10 @@ use bbn\X;
  * @category  Cache
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
-class Cron extends Models\Cls\Basic
+class Cron extends Basic
 {
 
-  use Cron\Common;
+  use Common;
 
   private $_runner;
 
@@ -39,14 +47,14 @@ class Cron extends Models\Cls\Basic
 
   /**
    * @param Db $db
-   * @param Mvc\Controller|null $ctrl
+   * @param Controller|null $ctrl
    * @param array $cfg
    */
-  public function __construct(Db $db, Mvc\Controller $ctrl = null, array $cfg = [])
+  public function __construct(Db $db, ?Controller $ctrl = null, array $cfg = [])
   {
     if ($db->check()) {
-      $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
       $this->db = $db;
+      $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
       $this->timer = new Util\Timer();
       $this->table = ($cfg['prefix'] ?? $this->prefix).'cron';
       if (!empty($cfg['exe_path'])) {
@@ -72,12 +80,12 @@ class Cron extends Models\Cls\Basic
 
 
   /**
-   * @return Cron\Launcher|null
+   * @return Launcher|null
    */
-  public function getLauncher(): ?Cron\Launcher
+  public function getLauncher(): ?Launcher
   {
     if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
-      $this->_launcher = new Cron\Launcher($this);
+      $this->_launcher = new Launcher($this);
     }
 
     return $this->_launcher;
@@ -86,13 +94,13 @@ class Cron extends Models\Cls\Basic
 
   /**
    * @param array $cfg
-   * @return Cron\Runner|null
+   * @return Runner|null
    */
-  public function getRunner(array $cfg = []): ?Cron\Runner
+  public function getRunner(array $cfg = []): ?Runner
   {
     X::log($cfg, 'cron');
     if ($this->check() && $this->controller) {
-      return new Cron\Runner($this, $cfg);
+      return new Runner($this, $cfg);
     }
 
     return null;
@@ -101,9 +109,9 @@ class Cron extends Models\Cls\Basic
 
   /**
    * @param array $cfg
-   * @return Mvc\Controller|null
+   * @return Controller|null
    */
-  public function getController(array $cfg = []): ?Mvc\Controller
+  public function getController(array $cfg = []): ?Controller
   {
     if ($this->check() && $this->controller) {
       return $this->controller;
@@ -114,12 +122,12 @@ class Cron extends Models\Cls\Basic
 
 
   /**
-   * @return Cron\Manager|null
+   * @return Manager|null
    */
-  public function getManager(): ?Cron\Manager
+  public function getManager(): ?Manager
   {
     if (!$this->_manager && $this->check() && $this->controller) {
-      $this->_manager = new Cron\Manager($this->db);
+      $this->_manager = new Manager($this->db);
     }
 
     return $this->_manager;

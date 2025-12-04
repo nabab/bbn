@@ -28,6 +28,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   use Formatters;
 
 
+  public $qte = '"';
   public static $operators = [];
 
   public static $numeric_types = [];
@@ -1355,7 +1356,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
             if ($is_uid) {
               if (method_exists($this, 'getHexStatement')) {
-                $st = 'LOWER(' . $this->getHexStatement($this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
+                $st = 'LOWER(' . call_user_func([$this, 'getHexStatement'], $this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
               }
               else {
                 $st = 'LOWER(HEX(' . $this->colFullName($csn, $cfg['available_fields'][$f], true) . '))';

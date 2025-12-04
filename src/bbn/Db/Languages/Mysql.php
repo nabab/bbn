@@ -218,7 +218,7 @@ class Mysql extends Sql
         . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
-      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $cfg['charset']],
+      [Pdo\Mysql::ATTR_INIT_COMMAND => 'SET NAMES ' . $cfg['charset']],
     ];
 
     return $cfg;

@@ -107,7 +107,7 @@ abstract class Basic
   }
 
 
-  public function getErrors()
+  public function getErrors(): array
   {
     return $this->errors;
   }
@@ -127,7 +127,7 @@ abstract class Basic
   /**
    * @return boolean
    */
-  public function isDebug()
+  public function isDebug(): bool
   {
     return $this->debug || constant("BBN_IS_DEV");
   }
@@ -137,7 +137,7 @@ abstract class Basic
    * @param boolean $debug
    * @return self
    */
-  public function setDebug(bool $debug)
+  public function setDebug(bool $debug): void
   {
     $this->debug = $debug;
   }

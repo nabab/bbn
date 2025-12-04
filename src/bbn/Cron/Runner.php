@@ -10,6 +10,9 @@ use bbn\File\Dir;
 use bbn\Util\Timer;
 use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
+use function defined;
+use function call_user_func;
+
 /**
  * Cron runner.
  * This class runs the jobs properly. It has three modalities:
@@ -32,7 +35,7 @@ class Runner extends Basic
   protected $timer;
 
   /**
-   * @var bbn\Cron
+   * @var Cron
    */
   protected Cron $cron;
 
@@ -54,7 +57,7 @@ class Runner extends Basic
     // The DB and the controller exist
     if ($this->check() && isset($this->data['type'])) {
       if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
-        \bbn\Appui\History::setUser(BBN_EXTERNAL_USER_ID);
+        call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
       }
       // only 2 types: poll or cron
       $type = $this->data['type'] === 'poll' ? 'poll' : 'cron';
@@ -64,9 +67,11 @@ class Runner extends Basic
 
       // Checking for the presence of the manual files
       if (
-        !$this->isActive() ||
-        (($type === 'cron') && !$this->isCronActive()) ||
-        (($type === 'poll') && !$this->isPollActive())
+        !$this->isActive() || (
+          ($type === 'cron') && !$this->isCronActive()
+        ) || (
+          ($type === 'poll') && !$this->isPollActive()
+        )
       ) {
         // Exiting the script if one is missing
         /*
@@ -135,7 +140,7 @@ class Runner extends Basic
   /**
    * Runner constructor.
    *
-   * @param bbn\Cron $cron
+   * @param Cron $cron
    * @param array $cfg
    */
   public function __construct(Cron $cron, array $cfg)
@@ -307,7 +312,7 @@ class Runner extends Basic
             foreach ($sessions as $sess) {
               $file = $this->controller->userDataPath($id_user, 'appui-core')."poller/queue/{$sess->id}/observer-$time.json";
               if (Dir::createPath(X::dirname($file))) {
-                file_put_contents($file, Json_encode(['observers' => $o]));
+                file_put_contents($file, json_encode(['observers' => $o]));
               }
             }
           }
@@ -418,7 +423,7 @@ class Runner extends Basic
           $idx = count($logs);
         }
         $logs[] = $log;
-        file_put_contents($json_file, Json_encode($logs, JSON_PRETTY_PRINT));
+        file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
         $this->timer->start($cfg['file']);
         $this->controller->reroute($cfg['file']);
         $this->controller->process();
@@ -433,7 +438,7 @@ class Runner extends Basic
         }
 
         $logs[$idx]['end'] = date('Y-m-d H:i:s');
-        file_put_contents($json_file, Json_encode($logs, JSON_PRETTY_PRINT));
+        file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
 
         $default_month_data = [
           'total' => 0,
@@ -461,7 +466,7 @@ class Runner extends Basic
         if (!in_array($day, $mlogs['dates'])) {
           $mlogs['dates'][] = $day;
         }
-        file_put_contents($month_file, Json_encode($mlogs, JSON_PRETTY_PRINT));
+        file_put_contents($month_file, json_encode($mlogs, JSON_PRETTY_PRINT));
 
         $default_year_data = [
           'total' => 0,
@@ -486,10 +491,10 @@ class Runner extends Basic
           $ylogs['duration_content'] += $logs[$idx]['duration'];
         }
         $ylogs['last'] = $logs[$idx]['start'];
-        if (!in_array($month, $ylogs['month'])) {
+        if (!\in_array($month, $ylogs['month'])) {
           $ylogs['month'][] = $month;
         }
-        file_put_contents($year_file, Json_encode($ylogs, JSON_PRETTY_PRINT));
+        file_put_contents($year_file, json_encode($ylogs, JSON_PRETTY_PRINT));
       }
     }
 
