@@ -12,6 +12,7 @@ use bbn\Mvc;
 use bbn\Db;
 use bbn\File\System;
 use bbn\Mvc\Controller;
+use function count;
 
 trait Common {
   /**
@@ -190,29 +191,6 @@ trait Common {
     }
   }
 
-  public function getDayLogs(array $cfg): ?array
-  {
-    if ( Str::isUid($cfg['id']) && Str::isDateSql($cfg['day']) ){
-      $p = \explode('-', $cfg['day']);
-      \array_pop($p);
-      $p = \implode('/', $p).'/';
-      if (
-        ($task = $this->getManager()->getCron($cfg['id'])) &&
-        !empty($task['file']) &&
-        ($path = $this->getLogPath($cfg, false, true)) &&
-        ($file = $path.$p.$cfg['day'].'.json') &&
-        \is_file($file) &&
-        ($file = \json_decode(\file_get_contents($file), true))
-      ){
-        return array_reverse(array_filter($file, function($f) use($task){
-          return isset($f['file']) && ($f['file'] === $task['file']);
-        }));
-      }
-      return [];
-    }
-    return null;
-  }
-
   public function  get_log_prev_next(array $cfg): ?string
   {
     $fs = new System();
@@ -232,7 +210,7 @@ trait Common {
 
   public function getLastLogs(array $cfg, bool $error = false, $start = 0, $num = 10): ?array
   {
-    $fs = new \bbn\File\System();
+    $fs = new System();
     if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path)) {
       $res = [];
       $fs->cd($path);
@@ -242,9 +220,9 @@ trait Common {
         foreach ($months as $m) {
           $days = array_reverse($fs->getDirs($m));
           foreach ($days as $d) {
-            $nums = array_reverse($fs->getDirs($d));
-            foreach ($nums as $num) {
-              foreach (array_reverse($fs->getFiles($num)) as $f) {
+            $numbers = array_reverse($fs->getDirs($d));
+            foreach ($numbers as $number) {
+              foreach (array_reverse($fs->getFiles($number)) as $f) {
                 if ($start) {
                   $start--;
                 }

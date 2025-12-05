@@ -16,7 +16,8 @@ use bbn\Cron;
  */
 class Launcher extends Basic {
 
-  use Common;
+  use Config;
+  use Filesystem;
 
   protected $exe_path;
 

@@ -3,14 +3,16 @@ namespace bbn;
 
 use bbn\X;
 use bbn\Db;
+use bbn\File\System;
 use bbn\Mvc;
 use bbn\Mvc\Controller;
-use bbn\Cron\Common;
+use bbn\Cron\Config;
+use bbn\Cron\Filesystem;
 use bbn\Cron\Launcher;
 use bbn\Cron\Runner;
 use bbn\Cron\Manager;
 use bbn\Models\Cls\Basic;
-
+use bbn\Util\Timer;
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
  *
@@ -23,26 +25,19 @@ use bbn\Models\Cls\Basic;
 class Cron extends Basic
 {
 
-  use Common;
+  use Config;
+  use Filesystem;
 
-  private $_runner;
+  private ?Runner $runner   = null;
+  private ?Launcher $launcher = null;
+  private ?Manager $manager   = null;
 
-  private $_launcher;
+  protected ?Controller $controller = null;
+  protected ?string $exe_path = null;
+  protected ?string $log_file = null;
+  protected string $table;
 
-  private $_manager;
-
-  protected $controller;
-
-  protected $exe_path;
-
-  protected $log_file;
-
-  protected $table;
-
-  /**
-   * @var Util\Timer
-   */
-  protected $timer;
+  protected Timer $timer;
 
 
   /**
@@ -55,7 +50,7 @@ class Cron extends Basic
     if ($db->check()) {
       $this->db = $db;
       $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
-      $this->timer = new Util\Timer();
+      $this->timer = new Timer();
       $this->table = ($cfg['prefix'] ?? $this->prefix).'cron';
       if (!empty($cfg['exe_path'])) {
         $this->exe_path = $cfg['exe_path'];
@@ -84,11 +79,11 @@ class Cron extends Basic
    */
   public function getLauncher(): ?Launcher
   {
-    if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
-      $this->_launcher = new Launcher($this);
+    if (!$this->launcher && $this->check() && $this->exe_path && $this->controller) {
+      $this->launcher = new Launcher($this);
     }
 
-    return $this->_launcher;
+    return $this->launcher;
   }
 
 
@@ -126,11 +121,11 @@ class Cron extends Basic
    */
   public function getManager(): ?Manager
   {
-    if (!$this->_manager && $this->check() && $this->controller) {
-      $this->_manager = new Manager($this->db);
+    if (!$this->manager && $this->check() && $this->controller) {
+      $this->manager = new Manager($this->db);
     }
 
-    return $this->_manager;
+    return $this->manager;
   }
 
 
@@ -164,6 +159,108 @@ class Cron extends Basic
   public function getPath(): ?string
   {
     return $this->path;
+  }
+
+  public function getDayLogs(array $cfg): ?array
+  {
+    if ( Str::isUid($cfg['id']) && Str::isDateSql($cfg['day']) ){
+      $p = \explode('-', $cfg['day']);
+      \array_pop($p);
+      $p = \implode('/', $p).'/';
+      if (
+        ($task = $this->getManager()->getCron($cfg['id'])) &&
+        !empty($task['file']) &&
+        ($path = $this->getLogPath($cfg, false, true)) &&
+        ($file = $path.$p.$cfg['day'].'.json') &&
+        \is_file($file) &&
+        ($file = \json_decode(\file_get_contents($file), true))
+      ){
+        return array_reverse(array_filter($file, function($f) use($task){
+          return isset($f['file']) && ($f['file'] === $task['file']);
+        }));
+      }
+      return [];
+    }
+    return null;
+  }
+
+
+  public function getLogTree(array $cfg, bool $error = false)
+  {
+    $fs = new System();
+    $fpath = !empty($cfg['fpath']) ? $cfg['fpath'] . '/' : '';
+    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path.$fpath)) {
+      $fs->cd($path.$fpath);
+      $dirs = array_reverse($fs->getFiles('./', true, true, null, 'cts'));
+      foreach ( $dirs as &$t ){
+        $t['numChildren'] = $t['num'] ?? 0;
+        $t['fpath'] = $fpath . $t['name'];
+        if ( isset($t['num']) ){
+          unset($t['num']);
+        }
+      }
+      return $dirs;
+    }
+  }
+
+  public function  get_log_prev_next(array $cfg): ?string
+  {
+    $fs = new System();
+    $fpath = $cfg['fpath'] ?: '';
+    if ( ($path = $this->getLogPath($cfg, false, true)) && $fs->isDir($path.$fpath) ){
+      $fs->cd($path.$fpath);
+      $files = array_reverse($fs->getFiles('./', true, true, null, 'cts'));
+      foreach ( $files as $i => $f ){
+        if ( $f['name'] === $cfg['filename'] ){
+          $tf = $files[$i + ($cfg['action'] === 'prev' ? 1 : -1)];
+          return $path . $fpath . (!empty($tf) ? $tf['name'] : $f['name']);
+        }
+      }
+    }
+    return null;
+  }
+
+  public function getLastLogs(array $cfg, bool $error = false, $start = 0, $num = 10): ?array
+  {
+    $fs = new System();
+    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path)) {
+      $res = [];
+      $fs->cd($path);
+      $years = array_reverse($fs->getDirs($path));
+      foreach ($years as $y) {
+        $months = array_reverse($fs->getDirs($y));
+        foreach ($months as $m) {
+          $days = array_reverse($fs->getDirs($m));
+          foreach ($days as $d) {
+            $numbers = array_reverse($fs->getDirs($d));
+            foreach ($numbers as $number) {
+              foreach (array_reverse($fs->getFiles($number)) as $f) {
+                if ($start) {
+                  $start--;
+                }
+                if (!$start) {
+                  $res[] = $f;
+                  if (count($res) >= $num) {
+                    return $res;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
+
+  public function getLastLog(array $cfg, bool $error = false): ?string
+  {
+    if ($tmp = $this->getLastLogs($cfg, $error, 0, 1)) {
+      return $tmp[0];
+    }
+    return null;
+
   }
 
   /**

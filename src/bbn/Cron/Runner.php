@@ -12,6 +12,11 @@ use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
 use function defined;
 use function call_user_func;
+use function is_array;
+use function in_array;
+use function is_bool;
+use function is_string;
+use function array_key_exists;
 
 /**
  * Cron runner.
@@ -23,7 +28,8 @@ use function call_user_func;
 class Runner extends Basic
 {
 
-  use Common;
+  use Config;
+  use Filesystem;
 
   protected $controller;
 
@@ -52,89 +58,72 @@ class Runner extends Basic
   /**
    * The script as executed by the CLI in which the real task will come executed.
    */
-  private function _run(): void
+  private function _run(): RunResult
   {
-    // The DB and the controller exist
-    if ($this->check() && isset($this->data['type'])) {
-      if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
-        call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
-      }
-      // only 2 types: poll or cron
-      $type = $this->data['type'] === 'poll' ? 'poll' : 'cron';
-      // Removing file cache
-      clearstatcache();
-      $pid_file = $this->getPidPath($this->data);
-
-      // Checking for the presence of the manual files
-      if (
-        !$this->isActive() || (
-          ($type === 'cron') && !$this->isCronActive()
-        ) || (
-          ($type === 'poll') && !$this->isPollActive()
-        )
-      ) {
-        // Exiting the script if one is missing
-        /*
-        if ( is_file($pid) ){
-           @unlink($pid);
-        }
-        */
-        $message = "GETTING OUT of $type BECAUSE one of the manual files is missing";
-
-        $this->log($message);
-
-        if ($this->isTestingEnvironment()) {
-          throw new Exception($message);
-        }
-
-        exit($message);
-      }
-      // Loooking for a running PID
-      if (is_file($pid_file)
-        && ($file_content = file_get_contents($pid_file))
-      ) {
-        [$pid, $time] = explode('|', $file_content);
-        // If the process file really exists the process is ongoing and it stops
-        if (file_exists('/proc/' . $pid)) {
-          $this->log("There is already a process running with PID " . $pid);
-          // If it's currently running we exit
-          //$this->output(X::_('Existing process'), $pid);
-          exit();
-        }
-        else {
-          // Otherwise we delete the PID file
-          $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
-          $this->output(X::_('Dead process'), $pid);
-          @unlink($pid_file);
-        }
-      }
-      // We create the PID file corresponding to the current process
-      if (!is_dir(dirname($pid_file))) {
-        mkdir(dirname($pid_file), 0777, true);
-      }
-      if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
-        // Shutdown function, will be always executed, except if the server is stopped
-        register_shutdown_function([$this, 'shutdown']);
-        // And here we really do what we have to do
-        // Poll case
-        if ($type === 'poll') {
-          $this->poll();
-        }
-        // Cron
-        else if ($type === 'cron') {
-          // Real task
-          if (array_key_exists('id', $this->data)) {
-            //$this->output(X::_('Launching'), $this->data['file']);
-            $this->runTask($this->data);
-          }
-          // Or task system
-          else {
-            $this->runTaskSystem();
-          }
-        }
-      }
+    if (!$this->check() || empty($this->data['type'])) {
+      return RunResult::error(1, 'Invalid runner configuration');
     }
-    exit();
+
+    if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
+      call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
+    }
+
+    $type = Type::fromString($this->data['type']);
+    clearstatcache();
+    $pid_file = $this->getPidPath($this->data);
+
+    // Manual files check
+  if (!$this->isActive() || ($type->isCron() && !$this->isCronActive()) || ($type->isPoll() && !$this->isPollActive())) {
+      $message = "GETTING OUT of {$this->data['type']} BECAUSE one of the manual files is missing";
+      $this->log($message);
+
+      if ($this->isTestingEnvironment()) {
+        throw new Exception($message);
+      }
+
+      // Instead of exit($message), just return it
+      return RunResult::success($message); // same semantics as exit($message)
+    }
+
+    // Existing PID check, etc...
+    if (is_file($pid_file)
+      && ($file_content = file_get_contents($pid_file))
+    ) {
+      [$pid, $time] = explode('|', $file_content);
+      if (file_exists("/proc/$pid")) {
+        $message = "There is already a process running with PID " . $pid;
+        $this->log($message);
+        // Previously: exit(); → here, we just stop normally
+        return RunResult::error();
+      }
+
+      $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
+      $this->output(X::_('Dead process'), $pid);
+      @unlink($pid_file);
+    }
+
+    // Create PID
+    if (!is_dir(dirname($pid_file))) {
+      mkdir(dirname($pid_file), 0777, true);
+    }
+
+    if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
+      register_shutdown_function([$this, 'shutdown']);
+
+      if ($type === 'poll') {
+        $this->poll();
+      }
+      elseif (array_key_exists('id', $this->data)) {
+        $this->runTask($this->data);
+      }
+      else {
+        $this->runTaskSystem();
+      }
+
+      return RunResult::success();
+    }
+
+    return RunResult::error(2, "Couldn't create PID file");
   }
 
   /**
@@ -164,7 +153,7 @@ class Runner extends Basic
    * @param string|bool $name
    * @param mixed $log
    */
-  public function output($name = '', $log = ''): void
+  public function output(string | bool $name = '', $log = ''): void
   {
     $output = '';
     if ($name === false) {
@@ -175,8 +164,8 @@ class Runner extends Basic
     }
     else if ($name) {
       $is_number = Str::isNumber($log);
-      $is_boolean = \is_bool($log);
-      $is_string = \is_string($log);
+      $is_boolean = is_bool($log);
+      $is_string = is_string($log);
       if (!$is_number && !$is_boolean && !$is_string) {
         $log = X::getDump($log);
       }
@@ -193,9 +182,7 @@ class Runner extends Basic
     }
 
     if (!empty($output)) {
-      ob_start();
       echo $output;
-      ob_end_clean();
     }
   }
 
@@ -261,14 +248,14 @@ class Runner extends Basic
   /**
    * @return bool
    */
-  public function check()
+  public function check(): bool
   {
     return (bool) $this->type;
   }
 
-  public function run(): void
+  public function run(): RunResult
   {
-    $this->_run();
+    return $this->_run();
   }
 
   /**
@@ -297,7 +284,7 @@ class Runner extends Basic
       while ($this->isPollActive()) {
         // The only centralized action are the observers
         $res = $obs->observe();
-        if (\is_array($res)) {
+        if (is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
             $user = User::getInstance();
@@ -382,7 +369,7 @@ class Runner extends Basic
 
   /**
    * @param array $cfg
-   * @throws \Exception
+   * @throws Exception
    */
   public function runTask(array $cfg)
   {
@@ -491,7 +478,7 @@ class Runner extends Basic
           $ylogs['duration_content'] += $logs[$idx]['duration'];
         }
         $ylogs['last'] = $logs[$idx]['start'];
-        if (!\in_array($month, $ylogs['month'])) {
+        if (!in_array($month, $ylogs['month'])) {
           $ylogs['month'][] = $month;
         }
         file_put_contents($year_file, json_encode($ylogs, JSON_PRETTY_PRINT));
@@ -509,9 +496,9 @@ class Runner extends Basic
   {
     $time = 0;
     $done = [];
-    while (($time < $this->timeout) &&
+    while ($time < $this->timeout &&
       ($cron = $this->cron->getManager()->getNext()) &&
-      !\in_array($cron['id'], $done)
+      !in_array($cron['id'], $done)
     ) {
       $this->timer->start('timeout');
       $this->data = $cron;

@@ -6,6 +6,7 @@
 
 namespace bbn\Cron;
 
+use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
@@ -13,32 +14,35 @@ use bbn\Mvc;
 use bbn\Models\Cls\Basic;
 use bbn\Appui\Notification;
 use bbn\Db\Enums\Errors;
-
+use function in_array;
+use function is_array;
+use function defined;
 /**
  * Class cron
  * @package bbn\Appui
  */
 class Manager extends Basic
 {
-
-  use Common;
+  use Config;
+  use Filesystem;
 
   protected ?string $table = null;
 
   /**
    * Manager constructor.
    *
-   * @param bbn\Db $db
+   * @param Db $db
    * @param array $cfg
    */
-  public function __construct(Db $db, array $cfg = [])
-  {
-    if (Mvc::getDataPath() && $db->check()) {
+  public function __construct(
+    private Db $db,
+    array $cfg = []
+  ) {
+    if (Mvc::getDataPath() && $this->db->check()) {
       // It must be called from a plugin (appui-cron actually)
       //$this->path = BBN_DATA_PATH.'plugins/appui-cron/';
       $this->path  = Mvc::getDataPath('appui-cron');
-      $this->db    = $db;
-      $this->table = $this->prefix.'cron';
+      $this->table = "{$this->prefix}cron";
     }
   }
 
@@ -48,7 +52,7 @@ class Manager extends Basic
    */
   public function check(): bool
   {
-    return (bool)($this->db && $this->db->check());
+    return (bool)$this->db && $this->db->check();
   }
 
 
@@ -81,7 +85,7 @@ class Manager extends Basic
         && is_file($path)
     ) {
       [$pid, $time] = X::split(file_get_contents($path), '|');
-      return (($time + $cron['cfg']['timeout']) < time());
+      return $time + $cron['cfg']['timeout'] < time();
     }
 
     return false;
@@ -182,91 +186,105 @@ class Manager extends Basic
 
 
   /**
-   * Returns a SQL date for the next event given a frequency and a time to count from (now if 0).
+   * Returns a SQL datetime for the next event given a frequency and a base timestamp.
    *
-   * @param  string $frequency A string made of 1 letter (i, h, d, w, m, or y) and a number.
-   * @param  int    $from_time A SQL formatted date which will be the base of the operation.
-   * @return null|string
+   * Frequency syntax:
+   *   - 1 letter (y, m, w, d, h, i, s) + positive integer
+   *   - Examples: "h1", "d2", "w1", "m3", "y1"
+   *
+   * @param string $frequency A string like "h1", "d2", etc.
+   * @param int    $fromTime  Unix timestamp to count from (0 = now).
+   * @return string|null      The next execution datetime in "Y-m-d H:i:s" or null on invalid input.
    */
-  public function getNextDate(string $frequency, int $from_time = 0): ?string
+  public function getNextDate(string $frequency, int $fromTime = 0): ?string
   {
-    if ((Str::len($frequency) >= 2)) {
-      $letter  = Str::changeCase(Str::sub($frequency, 0, 1), 'lower');
-      $number  = (int)Str::sub($frequency, 1);
-      $letters = ['y', 'm', 'w', 'd', 'h', 'i', 's'];
-      if (in_array($letter, $letters, true) && ($number > 0)) {
-        $time = time();
-        if (!$from_time) {
-          $from_time = $time;
-        }
+    $frequency = trim($frequency);
 
-        $year   = intval(date('Y', $from_time));
-        $month  = intval(date('n', $from_time));
-        $day    = intval(date('j', $from_time));
-        $hour   = intval(date('G', $from_time));
-        $minute = intval(date('i', $from_time));
-        $second = intval(date('s', $from_time));
-        $adders = [];
-        foreach ($letters as $lt) {
-          $adders[$lt] = 0;
-        }
-
-        $r    = 0;
-        $step = 0;
-        if (!is_numeric($number)) {
-          X::log($number, 'next_date');
-        }
-
-        $test   = mktime(
-          $hour + ($letter === 'h' ? $number : 0),
-          $minute + ($letter === 'i' ? $number : 0),
-          $second + ($letter === 's' ? $number : 0),
-          $month + ($letter === 'm' ? $number : 0),
-          $day + ($letter === 'd' ? $number : ($letter === 'w' ? 7 * $number : 0)),
-          $year + ($letter === 'y' ? $number : 0)
-        );
-        $length = $test - $from_time;
-        if ($test < $time) {
-          $diff = $time - $test;
-          $step = floor($diff / $length);
-        }
-
-        while ($r <= $time) {
-          $step++;
-          if ($letter === 'w') {
-            $adders['d'] = $step * 7 * $number;
-          }
-          else {
-            $adders[$letter] = $step * $number;
-          }
-
-          $r = mktime(
-            $hour + $adders['h'],
-            $minute + $adders['i'],
-            $second + $adders['s'],
-            $month + $adders['m'],
-            $day + $adders['d'],
-            $year + $adders['y']
-          );
-        }
-
-        if ($r) {
-          return date('Y-m-d H:i:s', $r);
-        }
-      }
+    // Minimum is 2 chars: one letter + digits
+    if ($frequency === '' || Str::len($frequency) < 2) {
+      return null;
     }
 
-    return null;
+    // First char is the unit, rest is the amount
+    $unitChar = Str::changeCase(Str::sub($frequency, 0, 1), 'lower');
+    $value    = Str::sub($frequency, 1);
+
+    if (!Str::isNumber($value)) {
+      // Keep old behavior: log but do not throw
+      X::log($value, 'next_date');
+      return null;
+    }
+
+    $interval = (int)$value;
+    $unit = FrequencyUnit::tryFromCode($unitChar);
+
+    if ($unit === null || $interval <= 0) {
+      return null;
+    }
+
+    $now = time();
+    if ($fromTime <= 0) {
+      $fromTime = $now;
+    }
+
+    $year   = (int)date('Y', $fromTime);
+    $month  = (int)date('n', $fromTime);
+    $day    = (int)date('j', $fromTime);
+    $hour   = (int)date('G', $fromTime);
+    $minute = (int)date('i', $fromTime);
+    $second = (int)date('s', $fromTime);
+
+    // First candidate (one interval ahead)
+    $test = match ($unit) {
+      FrequencyUnit::Year   => mktime($hour, $minute, $second, $month,          $day,          $year + $interval),
+      FrequencyUnit::Month  => mktime($hour, $minute, $second, $month + $interval, $day,       $year),
+      FrequencyUnit::Week   => mktime($hour, $minute, $second, $month,          $day + 7*$interval, $year),
+      FrequencyUnit::Day    => mktime($hour, $minute, $second, $month,          $day + $interval,   $year),
+      FrequencyUnit::Hour   => mktime($hour + $interval, $minute, $second, $month, $day,       $year),
+      FrequencyUnit::Minute => mktime($hour, $minute + $interval, $second, $month, $day,       $year),
+      FrequencyUnit::Second => mktime($hour, $minute, $second + $interval, $month, $day,       $year),
+    };
+    $length = $test - $fromTime;
+
+    // If somehow the test time is equal or before the base, don't continue
+    if ($length <= 0) {
+      return null;
+    }
+
+    // How many intervals do we need to skip to reach the future?
+    $step = 0;
+    if ($test < $now) {
+      $diff = $now - $test;
+      $step = (int)floor($diff / $length);
+    }
+
+    $candidate = $test;
+
+    // Move forward in steps until we are in the future
+    while ($candidate <= $now) {
+      $step++;
+      $candidate = match ($unit) {
+        FrequencyUnit::Year   => mktime($hour, $minute, $second, $month,               $day,               $year + ($interval * $step)),
+        FrequencyUnit::Month  => mktime($hour, $minute, $second, $month + ($interval*$step), $day,         $year),
+        FrequencyUnit::Week   => mktime($hour, $minute, $second, $month,               $day + 7*($interval*$step), $year),
+        FrequencyUnit::Day    => mktime($hour, $minute, $second, $month,               $day + ($interval*$step),   $year),
+        FrequencyUnit::Hour   => mktime($hour + ($interval*$step), $minute, $second,   $month, $day,       $year),
+        FrequencyUnit::Minute => mktime($hour, $minute + ($interval*$step), $second,   $month, $day,       $year),
+        FrequencyUnit::Second => mktime($hour, $minute, $second + ($interval*$step),   $month, $day,       $year),
+      };
+    }
+
+    return date('Y-m-d H:i:s', $candidate);
   }
 
 
   /**
    * Returns the whole row for the next CRON to be executed from now if there is any.
    *
-   * @param null $id_cron
+   * @param null|string $id_cron
    * @return null|array
    */
-  public function getNext($id_cron = null): ?array
+  public function getNext(?string $id_cron = null): ?array
   {
     $conditions = [[
       'field' => 'next',
@@ -315,13 +333,13 @@ class Manager extends Basic
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getRunningRows(): ?array
   {
     if ($this->check()) {
       return array_map(
-        function ($a) {
+        function ($a): array {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
           return X::mergeArrays($a, $cfg);
@@ -355,7 +373,7 @@ class Manager extends Basic
    * @param int $limit
    * @param int $sec
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getNextRows(int $limit = 10, int $sec = 0): ?array
   {
@@ -365,7 +383,7 @@ class Manager extends Basic
 
     if ($this->check()) {
       return array_map(
-        function ($a) {
+        function ($a): array {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
           return X::mergeArrays($a, $cfg);
@@ -408,13 +426,13 @@ class Manager extends Basic
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getFailed(): ?array
   {
     if ($this->check()) {
       return array_map(
-        function ($a) {
+        function ($a): array {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
           return X::mergeArrays($a, $cfg);
@@ -456,9 +474,9 @@ class Manager extends Basic
 
   /**
    * @param Notification|null $notification
-   * @throws \Exception
+   * @throws Exception
    */
-  public function notifyFailed(?Notification $notification = null)
+  public function notifyFailed(?Notification $notification = null): void
   {
     $notifications = $notification ?? new Notification($this->db);
     if ($failed = $this->getFailed()) {
@@ -478,7 +496,7 @@ class Manager extends Basic
    * @param string $id_cron
    * @return bool
    */
-  public function isRunning(string $id_cron)
+  public function isRunning(string $id_cron): bool
   {
     return (bool)( $this->check() && $this->db->count(
       $this->table, [
@@ -495,7 +513,7 @@ class Manager extends Basic
    * @param $id_cron
    * @return int|null
    */
-  public function activate($id_cron)
+  public function activate($id_cron): int
   {
     return $this->db->update($this->table, ['active' => 1], ['id' => $id_cron]);
   }
@@ -507,7 +525,7 @@ class Manager extends Basic
    * @param $id_cron
    * @return int|null
    */
-  public function deactivate($id_cron)
+  public function deactivate($id_cron): int
   {
     return $this->db->update($this->table, ['active' => 0], ['id' => $id_cron]);
   }
@@ -519,7 +537,7 @@ class Manager extends Basic
    * @param $id_cron
    * @return int|null
    */
-  public function setPid($id_cron, $pid)
+  public function setPid($id_cron, $pid): int
   {
     return $this->db->update($this->table, ['pid' => $pid], ['id' => $id_cron]);
   }
@@ -531,7 +549,7 @@ class Manager extends Basic
    * @param $id_cron
    * @return int|null
    */
-  public function unsetPid($id_cron)
+  public function unsetPid($id_cron): int
   {
     return $this->db->update(
       $this->table, [
@@ -543,10 +561,10 @@ class Manager extends Basic
 
 
   /**
-   * @param $cfg
+   * @param array $cfg
    * @return array|null
    */
-  public function add($cfg): ?array
+  public function add(array $cfg): ?array
   {
     if ($this->check()
         && X::hasProps($cfg, ['file', 'priority', 'frequency', 'timeout'], true)
@@ -578,7 +596,7 @@ class Manager extends Basic
   {
     if ($this->check()) {
       if (!defined('BBN_PROJECT')) {
-        throw new \Exception('BBN_PROJECT is not defined');
+        throw new Exception('BBN_PROJECT is not defined');
       }
 
       $d = [
@@ -606,36 +624,63 @@ class Manager extends Basic
 
 
   /**
-   * @param string $id
-   * @param array $cfg
-   * @return array|null
+   * Edits an existing CRON row.
+   *
+   * @param string $id   The cron ID.
+   * @param array  $cfg  New values: file, description, next, priority, frequency, timeout.
+   * @return array|null  The updated row (id + fields) or null on failure.
    */
   public function edit(string $id, array $cfg): ?array
   {
-    if ($this->check()
-        && ($cron = $this->getCron($id))
-    ) {
-      $d = [
-        'file' => $cfg['file'] ?? $cron['file'],
-        'description' => $cfg['description'] ?? $cron['description'],
-        'next' => $cfg['next'] ?? $cron['next'],
-        'priority' => $cfg['priority'] ?? $cron['priority'],
-        'cfg' => json_encode(
-          [
-          'frequency' => $cfg['frequency'] ?? $cron['frequency'],
-          'timeout' => $cfg['timeout'] ?? $cron['timeout']
-          ]
-        ),
-        'active' => 1
+    if (!$this->check()) {
+      return null;
+    }
+
+    // Existing cron row with decoded cfg (see getCron())
+    $cron = $this->getCron($id);
+    if (!$cron) {
+      return null;
+    }
+
+    // Current configuration stored as JSON in the DB
+    $currentCfg = is_array($cron['cfg']) ? $cron['cfg'] : [];
+
+    // Fallbacks for frequency and timeout
+    $currentFrequency = $currentCfg['frequency'] ?? null;
+    $currentTimeout   = $currentCfg['timeout']   ?? self::$cron_timeout;
+
+    // New configuration, falling back to existing values
+    $newFrequency = $cfg['frequency'] ?? $currentFrequency;
+    $newTimeout   = $cfg['timeout']   ?? $currentTimeout;
+
+    $data = [
+      'file'        => $cfg['file']        ?? $cron['file'],
+      'description' => $cfg['description'] ?? $cron['description'],
+      'next'        => $cfg['next']        ?? $cron['next'],
+      'priority'    => $cfg['priority']    ?? $cron['priority'],
+      'cfg'         => json_encode(
+        [
+          'frequency' => $newFrequency,
+          'timeout'   => $newTimeout,
+        ],
+        JSON_THROW_ON_ERROR
+      ),
+      // Editing always (re)activates the cron
+      'active'      => 1,
+    ];
+
+    if ($this->db->update($this->table, $data, ['id' => $id])) {
+      $data['id']  = $id;
+      // Be nice and return the decoded cfg as well:
+      $data['cfg'] = [
+        'frequency' => $newFrequency,
+        'timeout'   => $newTimeout,
       ];
-      if ($this->db->update($this->table, $d, ['id' => $id])) {
-        $d['id'] = $id;
-        return $d;
-      }
+
+      return $data;
     }
 
     return null;
   }
-
 
 }
