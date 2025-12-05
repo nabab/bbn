@@ -6,8 +6,7 @@ The BBN Cron system provides:
 - A **database-backed scheduler** for recurring or one-shot tasks  
 - A **task runner** that executes MVC routes in isolated processes  
 - A **poller** that observes users and dispatches updates  
-- A **logging system** with daily/monthly/yearly statistics  
-- Optional PHP 8.1+ enum-based scheduling helpers  
+- A **logging system** with daily/monthly/yearly statistics
 
 It is designed for long-running, reliable background processing in environments where PHP FPM or HTTP workers cannot safely handle periodic tasks.
 
@@ -125,7 +124,7 @@ flowchart LR
 
 ## 📦 Installation & Requirements
 
-- PHP ≥ 8.1  
+- PHP ≥ 8.4  
 - Database supported by BBN Db layer  
 - BBN MVC controller system present  
 - Ability to spawn OS processes (Linux recommended)  
@@ -138,8 +137,8 @@ flowchart LR
 The Cron system expects a table named (by default) `bbn_cron` with fields:
 
 ```sql
-id          CHAR(32) PRIMARY KEY
-file        VARCHAR(...)   -- MVC route to execute
+id          BINARY(16) PRIMARY KEY
+file        VARCHAR(128)   -- MVC route to execute
 description TEXT
 priority    INT
 prev        DATETIME NULL  -- last start time
@@ -148,7 +147,7 @@ pid         INT NULL       -- active process PID
 active      TINYINT(1)
 cfg         JSON           -- {"frequency": "h1", "timeout": 300}
 notification DATETIME NULL -- when a failure notification was sent
-project     VARCHAR(...) NULL -- optional
+project     BINARY(16) NULL -- optional
 ```
 
 ---
@@ -162,8 +161,8 @@ use bbn\Cron;
 use bbn\Db;
 use bbn\Mvc\Controller;
 
+/** @var Controller $ctrl */
 $db    = new Db($yourConnectionInfo);
-$ctrl  = new Controller();
 $cron  = new Cron($db, $ctrl);
 ```
 
@@ -187,7 +186,7 @@ $manager = $cron->getManager();
 
 $task = $manager->add([
   'file'        => 'my/plugin/cron/my-task',
-  'description' => 'Runs once every hour',
+  'description' => 'My recurring task every hour',
   'priority'    => 5,
   'frequency'   => 'h1',   // every hour
   'timeout'     => 1800,   // seconds
@@ -205,8 +204,8 @@ The frequency string is 1 letter + amount, e.g.:
 | `y`  | years           | `y1`    |
 | `m`  | months          | `m2`    |
 | `w`  | weeks           | `w1`    |
-| `d`  | days            | `d1`    |
-| `h`  | hours           | `h1`    |
+| `d`  | days            | `d15`    |
+| `h`  | hours           | `h6`    |
 | `i`  | minutes         | `i30`   |
 | `s`  | seconds         | `s10`   |
 
@@ -347,7 +346,7 @@ If running outside Linux, you should replace the process-alive detection logic w
 
 ---
 
-# 🧩 Enums (PHP 8.1+)
+# 🧩 Enums
 
 ### `bbn\Cron\Type`
 
@@ -376,6 +375,7 @@ Returned by the modern Runner instead of calling `exit()` internally.
 <?php
 require __DIR__.'/vendor/autoload.php';
 
+
 $db    = new Db($cfg);
 $ctrl  = new Controller();
 $cron  = new Cron($db, $ctrl);
@@ -397,5 +397,5 @@ A real environment typically triggers this from system cron:
 
 - The system is production-tested and safe for long-running workloads  
 - Supports complex scheduling requirements via the database  
-- Plays nicely with MVC applications — cron tasks are just controller routes  
+- Plays nicely with the bbn MVC framework — cron tasks are just controller routes  
 - Self-healing design means no third-party daemons needed  
