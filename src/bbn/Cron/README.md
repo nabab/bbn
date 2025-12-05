@@ -372,23 +372,57 @@ Returned by the modern Runner instead of calling `exit()` internally.
 # 💡 Example: Full Cron Bootstrap Script
 
 ```php
-<?php
-require __DIR__.'/vendor/autoload.php';
+use bbn\Mvc\Controller;
+use bbn\Cron;
 
+/** @var Controller $ctrl */
 
-$db    = new Db($cfg);
-$ctrl  = new Controller();
-$cron  = new Cron($db, $ctrl);
+$launched = [];
+$cron = new \bbn\Cron($ctrl->db, $ctrl);
+$files = ['', 'poll', 'cron'];
+$globalFile = $cron->getStatusPath('active');
+if (is_file($globalFile)) {
+  $taskFile = $cron->getStatusPath('cron');
+  if (is_file($taskFile)) {
+    $taskPid = $cron->getPidPath(['type' => 'cron']);
+    $do = true;
+    if (is_file($taskPid)) {
+      $pid = file_get_contents($taskPid);
+      if (is_file('/proc/'.$pid)) {
+        $do = false;
+      }
+    }
 
-// Start background workers
-$cron->launchPoll();
-$cron->launchTaskSystem();
-```
+    if ($do) {
+      $cron->launchTaskSystem();
+      $launched[] = 'cron';
+    }
+  }
 
-A real environment typically triggers this from system cron:
+  $pollFile = $cron->getStatusPath('poll');
+  if (is_file($pollFile)) {
+    $pollPid = $cron->getPidPath(['type' => 'poll']);
+    $do = true;
+    if (is_file($pollPid)) {
+      $pid = file_get_contents($pollPid);
+      if (is_file('/proc/'.$pid)) {
+        $do = false;
+      }
+    }
 
-```bash
-@reboot /usr/bin/php /path/to/bootstrap-cron.php
+    if ($do) {
+      $cron->launchPoll();
+      $launched[] = 'poll';
+    }
+  }
+}
+
+if (count($launched)) {
+  foreach ($launched as $l) {
+    echo "Launched $l\n";
+  }
+}
+
 ```
 
 ---
