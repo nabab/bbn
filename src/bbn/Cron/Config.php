@@ -25,10 +25,6 @@ trait Config {
   private $path;
 
   /**
-   * @var Db The DB connection
-   */
-  protected $db;
-  /**
    * @var Controller The controller
    */
   protected $ctrl;

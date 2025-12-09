@@ -16,7 +16,9 @@ namespace bbn;
  * @todo Add feature to auto-detect a different corresponding index and redirect to it through Appui
  * @todo Add $this->dom to public controllers (?)
  */
-
+use function is_null;
+use bbn\Mvc\Common;
+use bbn\Models\Tts\Singleton;
 use bbn\Str;
 use bbn\Mvc\Router;
 use bbn\Mvc\Controller;
@@ -31,8 +33,8 @@ use bbn\Mvc\View;
  */
 class Mvc implements Mvc\Api
 {
-  use Models\Tts\Singleton;
-  use Mvc\Common;
+  use Singleton;
+  use Common;
 
   /**
    * @var array The list of views which have been loaded
@@ -168,6 +170,8 @@ class Mvc implements Mvc\Api
    * @var null|object
    */
   public $obj;
+
+  public $checkerDone = false;
 
   // These strings are forbidden to use in URL
   public static $reserved = ['_private', '_common', '_htaccess'];
@@ -515,8 +519,12 @@ class Mvc implements Mvc\Api
    * @param $url
    * @return bool
    */
-  public function isStaticRoute($url): bool
+  public function isStaticRoute(?string $url = null): bool
   {
+    if (is_null($url)) {
+      $url = $this->getRequest();
+    }
+
     if (in_array($url, $this->static_routes, true)) {
       return true;
     }
@@ -813,14 +821,6 @@ class Mvc implements Mvc\Api
   }
 
 
-  private static function destructSingleton()
-  {
-    self::$singleton_instance = null;
-    self::$singleton_exists = false;
-    self::$_app_name = null;
-  }
-
-
   /**
    * This should be called only once from within the app
    *
@@ -849,6 +849,7 @@ class Mvc implements Mvc\Api
     if (!\defined("BBN_DATA_PATH")) {
       throw new \Exception("BBN_DATA_PATH must be defined");
     }
+
     self::singletonInit($this);
     self::initPath();
     $this->env = new Environment();
@@ -894,9 +895,11 @@ class Mvc implements Mvc\Api
   }
 
 
-  public function __destruct()
+  public function destruct()
   {
-    self::destructSingleton();
+    X::log('Critical error, MVC reseted', 'mvc_ouch');
+    self::$_app_name = null;
+    self::singletonUnset();
   }
 
   public function getDefault() :string
@@ -1725,7 +1728,7 @@ class Mvc implements Mvc\Api
           echo $obj->content;
         }
 
-        exit();
+        return;
       }
 
       if (\is_array($obj)) {

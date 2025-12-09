@@ -585,9 +585,9 @@ class Controller implements Api
         $this->registerPluginClasses($this->pluginPath());
       }
 
-      if (defined('BBN_IS_STATIC_ROUTE') && defined('BBN_ROOT_CHECKER') && !BBN_IS_STATIC_ROUTE) {
-        if (!defined('BBN_ROOT_CHECKER_OK')) {
-          define('BBN_ROOT_CHECKER_OK', true);
+      if (!$this->_mvc->isStaticRoute() && defined('BBN_ROOT_CHECKER')) {
+        if (!$this->_mvc->checkerDone) {
+          $this->_mvc->checkerDone = true;
           array_unshift($this->_checkers, constant('BBN_ROOT_CHECKER'));
         }
       }

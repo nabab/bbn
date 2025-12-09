@@ -81,6 +81,11 @@ class Session
     $this->close();
   }
 
+  public function destruct()
+  {
+    self::singletonUnset();
+  }
+
   public function regenerate(): ?string
   {
     if (!X::isCli()) {
@@ -114,14 +119,6 @@ class Session
     }
 
     return null;
-  }
-
-  public static function destroyInstance()
-  {
-    if (self::singletonExists()) {
-      self::$singleton_instance = null;
-      self::$singleton_exists   = false;
-    }
   }
 
   public function isOpened(): bool

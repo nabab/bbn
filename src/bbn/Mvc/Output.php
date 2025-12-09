@@ -25,7 +25,7 @@ final class Output extends Basic {
    * @param bool    $send If false the header won't be sent
    * @return array
    */
-  static function statusHeader(int $code, bool $send = true): array
+  static function statusHeader(int $code, bool $send = true)
   {
     $http = [
       100 => 'HTTP/1.1 100 Continue',
@@ -77,7 +77,7 @@ final class Output extends Basic {
     if ($send) {
       header($http[$code]);
       if ($code !== 200) {
-        exit();
+        return;
       }
     }
  
@@ -110,12 +110,12 @@ final class Output extends Basic {
 
     if ($this->mode === 'cli') {
       if (!headers_sent() && !$this->obj->content) {
-        exit('No output...');
+        echo 'No output...';
       }
-      if ( $this->obj->content ){
+      elseif ( $this->obj->content ){
         echo $this->obj->content;
       }
-      exit();
+      return;
     }
 
     if ( isset($this->obj->prescript) ){

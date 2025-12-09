@@ -32,7 +32,6 @@ class Cron extends Basic
   private ?Launcher $launcher = null;
   private ?Manager $manager   = null;
 
-  protected ?Controller $controller = null;
   protected ?string $exe_path = null;
   protected ?string $log_file = null;
   protected string $table;
@@ -45,10 +44,12 @@ class Cron extends Basic
    * @param Controller|null $ctrl
    * @param array $cfg
    */
-  public function __construct(Db $db, ?Controller $ctrl = null, array $cfg = [])
-  {
+  public function __construct(
+    protected Db $db,
+    protected ?Controller $controller = null,
+    array $cfg = []
+  ) {
     if ($db->check()) {
-      $this->db = $db;
       $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
       $this->timer = new Timer();
       $this->table = ($cfg['prefix'] ?? $this->prefix).'cron';
@@ -60,15 +61,14 @@ class Cron extends Basic
         $this->log_file = $cfg['log_file'];
       }
 
-      if ($ctrl) {
+      if ($this->controller) {
         if (empty($this->exe_path)) {
-          $this->exe_path = $ctrl->pluginUrl('appui-cron');
+          $this->exe_path = $this->controller->pluginUrl('appui-cron');
           if ($this->exe_path) {
             $this->exe_path .= '/run';
           }
         }
 
-        $this->controller = $ctrl;
       }
     }
   }

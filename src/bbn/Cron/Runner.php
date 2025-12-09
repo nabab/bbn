@@ -4,6 +4,7 @@ namespace bbn\Cron;
 use Exception;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 use bbn\Cron;
 use bbn\User;
 use bbn\File\Dir;
@@ -33,6 +34,7 @@ class Runner extends Basic
 
   protected $controller;
 
+  protected Db $db;
   /**
    * Timer
    *

@@ -43,6 +43,20 @@ trait Singleton
   }
 
   /**
+   * Initialize the singleton by putting its own instance as static property.
+   *
+   * @param self $instance The instance object.
+   * @return void
+   */
+  protected static function singletonUnset()
+  {
+    if (self::singletonExists()) {
+      self::$singleton_exists = 0;
+      self::$singleton_instance = null;
+    }
+  }
+
+  /**
    * Returns the instance of the singleton or null.
    * 
    * @return self

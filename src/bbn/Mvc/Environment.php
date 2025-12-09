@@ -481,11 +481,11 @@ class Environment
   public function getPost()
   {
     if (!isset($this->_post)) {
-      if (self::$_input && Str::isJson(self::$_input)) {
-        $this->_post = json_decode(self::$_input, 1);
-      }
-      elseif (!empty($_POST)) {
+      if (!empty($_POST)) {
         $this->_post = $_POST;
+      }
+      elseif (self::$_input && Str::isJson(self::$_input)) {
+        $this->_post = json_decode(self::$_input, 1);
       }
 
       if (!$this->_post) {
