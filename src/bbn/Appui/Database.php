@@ -2297,9 +2297,15 @@ class Database extends bbn\Models\Cls\Cache
         ];
         $isDef = true;
       }
-      if (!empty($f['option']) && !empty($f['option']['options'])) {
+      elseif (!empty($f['option']) && !empty($f['option']['options'])) {
         $def = [
           'options' => $f['option']['options']
+        ];
+        $isDef = true;
+      }
+      elseif (!empty($f['options'])) {
+        $def = [
+          'options' => $f['options']
         ];
         $isDef = true;
       }
@@ -2489,6 +2495,11 @@ class Database extends bbn\Models\Cls\Cache
                 'value' => $changes[$name]
               ]);
             }
+            elseif (!empty($f['options'])) {
+              $tmp['old_value'] = array_merge($tmp, [
+                'value' => $changes[$name]
+              ]);
+            }
             elseif (!empty($f['type'])) {
               if (($f['type'] === 'text') && Str::isJson($changes[$name])) {
                 $tmp['old_value'] = array_merge($tmp, [
@@ -2515,6 +2526,16 @@ class Database extends bbn\Models\Cls\Cache
           }
         }
         elseif (!empty($f['component'])) {
+          $tmp = array_merge($f, [
+            'value' => $data[$name]
+          ]);
+          if ($hasChange) {
+            $tmp['old_value'] = array_merge($f, [
+              'value' => $changes[$name]
+            ]);
+          }
+        }
+        elseif (!empty($f['options'])) {
           $tmp = array_merge($f, [
             'value' => $data[$name]
           ]);
