@@ -3,9 +3,22 @@ namespace bbn;
 
 use Exception;
 use Throwable;
+use stdClass;
 use bbn\File\System;
 use bbn\File\Dir;
 use function dgettext;
+use function floatval;
+use function array_key_exists;
+use function func_get_args;
+use function is_string;
+use function is_object;
+use function is_array;
+use function is_resource;
+use function get_class;
+use function defined;
+use function count;
+use function sprintf;
+use function gettype;
 
 /**
  * A container of tools.
@@ -138,7 +151,7 @@ class X
    */
   public static function microtime(): float
   {
-    return round(\microtime(true), 4);
+    return round(microtime(true), 4);
   }
 
 
@@ -176,7 +189,7 @@ class X
     if (!defined('BBN_X_MAX_LOG_FILE')) {
       define('BBN_X_MAX_LOG_FILE', 1048576);
     }
-    if (\defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH').'logs')) {
+    if (defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH').'logs')) {
       $log_file  = constant('BBN_DATA_PATH') . 'logs/' . $file . '.log';
       $backtrace = array_filter(
         debug_backtrace(), function ($a) {
@@ -235,10 +248,6 @@ class X
       }
 
       $t = date('Y-m-d H:i:s');
-      if (class_exists('\\bbn\\Mvc')) {
-        $mvc = Mvc::getInstance();
-      }
-
       $errfile = str_replace(constant('BBN_APP_PATH'), '', $errfile);
       $idx     = self::search(
         $r, [
@@ -293,6 +302,14 @@ class X
     throw $err;
   }
 
+  public static function percent(float | int $val, float | int $total, int $decimals = 2)
+  {
+    if (!floatval($total)) {
+      $total = 100;
+    }
+
+    return round(floatval($val) / floatval($total) * 100, $decimals);
+  }
 
   /**
    * Check if an array or an object has the given property
@@ -335,10 +352,10 @@ class X
   public static function hasProp($obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
-      return \array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
+      return array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
     }
     elseif (is_object($obj)) {
-      return \property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));
+      return property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));
     }
 
     return null;
@@ -442,7 +459,7 @@ class X
     $o =& $obj;
     foreach ($prop_path as $p) {
       if (is_array($o)) {
-        if (!\array_key_exists($p, $o)) {
+        if (!array_key_exists($p, $o)) {
           return false;
         }
 
@@ -452,8 +469,8 @@ class X
 
         $o =& $o[$p];
       }
-      elseif (\is_object($o)) {
-        if (!\property_exists($o, $p)) {
+      elseif (is_object($o)) {
+        if (!property_exists($o, $p)) {
           return false;
         }
 
@@ -515,12 +532,12 @@ class X
     $spath = date($format);
     if ($spath) {
       $path = $fs->createPath($path.(Str::sub($path, -1) === '/' ? '' : '/').$spath);
-      if ($fs->isDir($path)) {
+      if ($path && $fs->isDir($path)) {
         $num = count($fs->getDirs($path));
         if ($num) {
           // Dir or files
-          if ($fs->isDir($path.'/'.$num)) {
-            $num_files = count($fs->getFiles($path.'/'.$num, true));
+          if ($fs->isDir("$path/$num")) {
+            $num_files = count($fs->getFiles("$path/$num", true));
             if ($num_files >= $max) {
               $num++;
             }
@@ -530,8 +547,8 @@ class X
           $num = 1;
         }
 
-        if ($fs->createPath($path.'/'.$num)) {
-          return $path.'/'.$num.'/';
+        if ($fs->createPath("$path/$num")) {
+          return "$path/$num/";
         }
       }
     }
@@ -616,12 +633,12 @@ class X
    * @return object The merged object.
    * @throws Exception
    */
-  public static function mergeObjects(object $o1, object $o2): \stdClass
+  public static function mergeObjects(object $o1, object $o2): stdClass
   {
-    $args = \func_get_args();
+    $args = func_get_args();
 
-    if (\count($args) > 2) {
-      for ($i = \count($args) - 1; $i > 1; $i--) {
+    if (count($args) > 2) {
+      for ($i = count($args) - 1; $i > 1; $i--) {
         if (!is_object($args[$i])) {
           throw new Exception('The provided argument must be an object, ' . gettype($args[$i]) . ' given.');
         }
@@ -766,9 +783,9 @@ class X
    */
   public static function mergeArrays(array $a1, array $a2): array
   {
-    $args = \func_get_args();
-    if (\count($args) > 2) {
-      for ($i = \count($args) - 1; $i > 1; $i--) {
+    $args = func_get_args();
+    if (count($args) > 2) {
+      for ($i = count($args) - 1; $i > 1; $i--) {
         if (!is_array($args[$i])) {
           throw new Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.' );
         }
@@ -788,7 +805,7 @@ class X
         elseif (!array_key_exists($k, $a2)) {
           $r[$k] = $a1[$k];
         }
-        elseif (!array_key_exists($k, $a1) || !\is_array($a2[$k]) || !\is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
+        elseif (!array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
           $r[$k] = $a2[$k];
         }
         else{
@@ -813,14 +830,14 @@ class X
    * ```
    *
    * @param mixed $ar The array or JSON to convert.
-   * @return \stdClass|null
+   * @return stdClass|null
    */
-  public static function toObject($ar): ?\stdClass
+  public static function toObject($ar): ?stdClass
   {
-    if (\is_string($ar)) {
+    if (is_string($ar)) {
       $ar = json_decode($ar);
     }
-    elseif (\is_array($ar)) {
+    elseif (is_array($ar)) {
       $ar = json_decode(json_encode($ar));
     }
 
@@ -847,7 +864,7 @@ class X
    */
   public static function toArray($obj): ?array
   {
-    $obj = \is_string($obj) ? $obj : json_encode($obj);
+    $obj = is_string($obj) ? $obj : json_encode($obj);
     return json_decode($obj, true) ?: [];
   }
 
@@ -887,10 +904,10 @@ class X
     $transform = function ($o, $idx = 0) use (&$transform, &$value_arr, &$replace_keys) {
       foreach($o as $key => &$value) {
         $idx++;
-        if (\is_array($value) || \is_object($value)) {
+        if (is_array($value) || is_object($value)) {
           $value = $transform($value, $idx);
         }
-        elseif (\is_string($value)
+        elseif (is_string($value)
             // Look for values starting with 'function('
             && (Str::pos(trim($value), 'function(') === 0)
         ) {
@@ -917,7 +934,7 @@ class X
     }
     */
     // Replace the special keys with the original string.
-    return \count($replace_keys) ? str_replace($replace_keys, $value_arr, $json) : $json;
+    return count($replace_keys) ? str_replace($replace_keys, $value_arr, $json) : $json;
   }
 
 
@@ -1009,8 +1026,8 @@ class X
   {
     $isAssoc = X::isAssoc($arr);
     foreach ($arr as $k => $v) {
-      if (\is_object($arr)) {
-        if (\is_array($v) || \is_object($v)) {
+      if (is_object($arr)) {
+        if (is_array($v) || is_object($v)) {
           $arr->$k = self::removeEmpty($v, $remove_space);
         }
         else {
@@ -1025,7 +1042,7 @@ class X
         }
       }
       else{
-        if (\is_array($v) || \is_object($v)) {
+        if (is_array($v) || is_object($v)) {
           $arr[$k] = self::removeEmpty($v, $remove_space);
         }
         elseif ($remove_space && is_string($v)) {
@@ -1077,13 +1094,13 @@ class X
    * Checks if the given array is associative.
 
    * ```php
-   * \bbn\\X::isAssoc(['id' => 0, 'name' => 'Allison']);
+   * X::isAssoc(['id' => 0, 'name' => 'Allison']);
    *
-   * \bbn\\X::isAssoc(['Allison', 'John', 'Bert']);
+   * X::isAssoc(['Allison', 'John', 'Bert']);
    *
-   * \bbn\\X::isAssoc([0 => "Allison", 1 => "John", 2 => "Bert"]);
+   * X::isAssoc([0 => "Allison", 1 => "John", 2 => "Bert"]);
    *
-   * \bbn\\X::isAssoc([0 => "Allison", 1 => "John", 3 => "Bert"]);
+   * X::isAssoc([0 => "Allison", 1 => "John", 3 => "Bert"]);
    *
    * // boolean true
    * // boolean false
@@ -1097,7 +1114,7 @@ class X
   public static function isAssoc(array $r): bool
   {
     $keys = array_keys($r);
-    $c    = \count($keys);
+    $c    = count($keys);
     return (bool)($c && ($keys !== range(0, $c - 1)));
   }
 
@@ -1125,7 +1142,7 @@ class X
   public static function getRawDump($a, int $maxDepth = 0, int $maxLength = 0): string
   {
     $r = $a;
-    if (\is_null($a)) {
+    if (is_null($a)) {
       $r = 'null';
     }
     elseif ($a === false) {
@@ -1146,22 +1163,22 @@ class X
     elseif (!$a) {
       $r = '0';
     }
-    elseif (!\is_string($a) && \is_callable($a)) {
+    elseif (!is_string($a) && is_callable($a)) {
       $r = 'Function';
     }
-    elseif (\is_object($a)) {
-      $n = \get_class($a);
+    elseif (is_object($a)) {
+      $n = get_class($a);
       if ($n === 'stdClass') {
         $r = Str::export($a, false, $maxDepth, $maxLength);
       }
       else{
-        $r = $n.' Object';
+        $r = "$n Object";
       }
     }
-    elseif (\is_array($a)) {
+    elseif (is_array($a)) {
       $r = Str::export($a, false, $maxDepth, $maxLength);
     }
-    elseif (\is_resource($a)) {
+    elseif (is_resource($a)) {
       $r = 'Resource '.get_resource_type($a);
     }
     elseif (Str::isBuid($a)) {
@@ -1495,7 +1512,7 @@ class X
     $is_assoc = self::isAssoc($values);
     foreach ($values as $k => $v)
     {
-      if (\is_array($v) && \count($v) == 2) {
+      if (is_array($v) && count($v) == 2) {
         $value = $v[0];
         $title = $v[1];
       }
@@ -1534,12 +1551,12 @@ class X
    */
   public static function toKeypair(array $arr, bool $protected = true)
   {
-    $num = \count($arr);
+    $num = count($arr);
     $res = [];
     if (($num % 2) === 0) {
       $i = 0;
       while (isset($arr[$i])) {
-        if (!\is_string($arr[$i]) || ($protected && preg_match('/[^0-9A-Za-z\-_]/', Str::cast($arr[$i])))) {
+        if (!is_string($arr[$i]) || ($protected && preg_match('/[^0-9A-Za-z\-_]/', Str::cast($arr[$i])))) {
           return false;
         }
 
@@ -1573,7 +1590,7 @@ class X
    */
   public static function maxWithKey(array $ar, $key)
   {
-    if (\count($ar) == 0) {
+    if (count($ar) == 0) {
       return null;
     }
 
@@ -1618,7 +1635,7 @@ class X
    */
   public static function minWithKey(array $array, $key)
   {
-    if (\count($array) == 0) {
+    if (count($array) == 0) {
       return null;
     }
 
@@ -1749,7 +1766,7 @@ class X
         $res[] = $r;
       }
       elseif ($r !== false) {
-        if (\is_array($r) && $items && isset($r[$items]) && \is_array($r[$items])) {
+        if (is_array($r) && $items && isset($r[$items]) && is_array($r[$items])) {
           $r[$items] = self::map($fn, $r[$items], $items);
         }
 
@@ -1839,7 +1856,7 @@ class X
   {
     $res = [];
     foreach ($ar as $key => $a) {
-      if (\is_array($a) && $items && isset($a[$items]) && \is_array($a[$items])) {
+      if (is_array($a) && $items && isset($a[$items]) && is_array($a[$items])) {
         $a[$items] = self::map($fn, $a[$items], $items);
       }
       $is_false = $a === false;
@@ -1867,7 +1884,7 @@ class X
       $where['conditions'] = $where;
     }
 
-    if (isset($where['conditions']) && \is_array($where['conditions'])) {
+    if (isset($where['conditions']) && is_array($where['conditions'])) {
       if (!isset($where['logic']) || (strtoupper($where['logic']) !== 'OR')) {
         $where['logic'] = 'AND';
       }
@@ -1877,15 +1894,15 @@ class X
         'logic' => $where['logic']
       ];
       foreach ($where['conditions'] as $key => $f) {
-        $is_array = \is_array($f);
+        $is_array = is_array($f);
         if ($is_array
           && array_key_exists('conditions', $f)
-          && \is_array($f['conditions'])
+          && is_array($f['conditions'])
         ) {
           $res['conditions'][] = self::treatConditions($f);
         }
         else {
-          if (\is_string($key)) {
+          if (is_string($key)) {
             // 'id_user' => [1, 2] Will do OR
             if (!$is_array) {
               if (null === $f) {
@@ -2482,7 +2499,7 @@ class X
    */
   public static function pick(array $ar, array $keys)
   {
-    while (\count($keys)) {
+    while (count($keys)) {
       $r = array_shift($keys);
       if (is_array($ar) && array_key_exists($r, $ar)) {
         $ar = $ar[$r];
@@ -2565,7 +2582,7 @@ class X
       []
     ];
 
-    $args = \func_get_args();
+    $args = func_get_args();
     array_shift($args);
     if (is_array($key)) {
       $args = $key;
@@ -2573,7 +2590,7 @@ class X
         $args = [$args];
       }
     }
-    elseif (\is_string($key)) {
+    elseif (is_string($key)) {
       $args = [[
         'key' => $key,
         'dir' => $dir
@@ -2594,7 +2611,7 @@ class X
           }
 
           $dir = strtolower($arg['dir'] ?? 'asc');
-          if (!\is_array($key)) {
+          if (!is_array($key)) {
             $key = [$key];
           }
 
@@ -2722,11 +2739,11 @@ class X
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     }
 
-    if (\is_object($param)) {
+    if (is_object($param)) {
       $param = self::toArray($param);
     }
 
-    if (\defined('BBN_IS_SSL') && \defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV) {
+    if (defined('BBN_IS_SSL') && defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV) {
       if (!in_array('ssl_verifypeer', $defined)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
       }
@@ -2740,7 +2757,7 @@ class X
 
     $options = array_change_key_case($options, CASE_UPPER);
     foreach ($options as $opt => $val) {
-      if (\defined('CURLOPT_'.$opt)) {
+      if (defined('CURLOPT_'.$opt)) {
         curl_setopt($ch, constant('CURLOPT_'.$opt), $val);
       }
     }
@@ -2838,14 +2855,14 @@ class X
     $res = [];
     foreach ($ar as $k => $a) {
       $r = ['text' => $k];
-      if (\is_object($a)) {
+      if (is_object($a)) {
         $a = self::toArray($a);
       }
 
-      if (\is_array($a)) {
+      if (is_array($a)) {
         $r['items'] = self::getTree($a);
       }
-      elseif (\is_null($a)) {
+      elseif (is_null($a)) {
         $r['text'] .= ': null';
       }
       elseif ($a === false) {
@@ -2939,7 +2956,7 @@ class X
    */
   public static function makeTree(array $ar): string
   {
-    return "<bbn-tree :source='".\bbn\Str::escapeSquotes(json_encode(self::getTree($ar)))."'></bbn-tree>";
+    return "<bbn-tree :source='" . Str::escapeSquotes(json_encode(self::getTree($ar))) . "'></bbn-tree>";
   }
 
 
@@ -3072,7 +3089,7 @@ class X
   {
     $cur = &$ar;
     foreach ($props as $p) {
-      if (\is_array($cur) && array_key_exists($p, $cur)) {
+      if (is_array($cur) && array_key_exists($p, $cur)) {
         $cur =& $cur[$p];
       }
       else{
@@ -3141,7 +3158,7 @@ class X
    */
   public static function countProperties(object $obj): int
   {
-    return \count(get_object_vars($obj));
+    return count(get_object_vars($obj));
   }
 
 
@@ -3327,7 +3344,7 @@ class X
         && Dir::createPath(self::dirname($file))
     ) {
       $ow->save($file);
-      return \is_file($file);
+      return is_file($file);
     }
 
     return false;
@@ -3384,7 +3401,7 @@ class X
   */
   public static function convertUids($st)
   {
-    if (\is_array($st) || \is_object($st)) {
+    if (is_array($st) || is_object($st)) {
       foreach ($st as &$s) {
         $s = self::convertUids($s);
       }
@@ -3647,13 +3664,13 @@ class X
   */
   public static function jsonBase64Decode($st): ?array
   {
-    $res = \is_string($st) ? json_decode($st, true) : $st;
-    if (\is_array($res)) {
+    $res = is_string($st) ? json_decode($st, true) : $st;
+    if (is_array($res)) {
       foreach ($res as $i => $a) {
-        if (\is_array($a)) {
+        if (is_array($a)) {
           $res[$i] = self::jsonBase64Decode($a);
         }
-        elseif (\is_string($a)) {
+        elseif (is_string($a)) {
           $res[$i] = base64_decode($a);
         }
         else{
@@ -3692,13 +3709,13 @@ class X
   */
   public static function indexByFirstVal(array $ar): array
   {
-    if (empty($ar) || !isset($ar[0]) || !\count($ar[0])) {
+    if (empty($ar) || !isset($ar[0]) || !count($ar[0])) {
       return $ar;
     }
 
     $cols     = array_keys($ar[0]);
     $idx      = array_shift($cols);
-    $num_cols = \count($cols);
+    $num_cols = count($cols);
     $res      = [];
     foreach ($ar as $d) {
       $index = $d[$idx];
