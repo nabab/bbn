@@ -2297,6 +2297,12 @@ class Database extends bbn\Models\Cls\Cache
         ];
         $isDef = true;
       }
+      if (!empty($f['option']) && !empty($f['option']['options'])) {
+        $def = [
+          'options' => $f['option']['options']
+        ];
+        $isDef = true;
+      }
       elseif ($f['key']) {
         foreach ($cfg['cols'][$name] as $k) {
           if ($k === 'PRIMARY') {
