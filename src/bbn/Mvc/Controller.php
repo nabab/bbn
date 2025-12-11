@@ -5,7 +5,7 @@ namespace bbn\Mvc;
 use Exception;
 use stdClass;
 use bbn\Db;
-use bbn\Mvc;
+use bbn\Mvc as MvcCls;
 use bbn\X;
 use bbn\Str;
 use bbn\Tpl;
@@ -17,7 +17,7 @@ class Controller implements Api
 
   /**
    * The MVC class from which the controller is called
-   * @var Mvc
+   * @var MvcCls
    */
   private $_mvc;
 
@@ -149,11 +149,11 @@ class Controller implements Api
    * It should be called only once from within the script.
    * All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param Mvc       $mvc
+   * @param MvcCls       $mvc
    * @param array         $route
    * @param array|boolean $data
    */
-  public function __construct(Mvc $mvc, array $route, $data = false)
+  public function __construct(MvcCls $mvc, array $route, $data = false)
   {
     $this->_mvc = $mvc;
     $this->reset($route, $data);

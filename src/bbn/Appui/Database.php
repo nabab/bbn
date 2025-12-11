@@ -1252,7 +1252,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     };
 
-    if ($model = $conn->modelize($ftable)) {
+    if ($conn && ($model = $conn->modelize($ftable))) {
       if ($table
           && ($table_id = $this->tableId($table, $db, $host, $engine))
       ) {
@@ -1277,7 +1277,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    if (!empty($old_db) && ($old_db !== $db)) {
+    if ($conn && !empty($old_db) && ($old_db !== $db)) {
       $conn->change($old_db);
     }
 
