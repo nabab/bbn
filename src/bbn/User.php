@@ -947,8 +947,8 @@ use bbn\Cache;
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
+      $this->session->destruct();
       $this->session  = null;
-      Session::destroyInstance();
     }
 
     return $this;
