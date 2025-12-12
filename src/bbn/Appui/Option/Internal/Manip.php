@@ -624,7 +624,7 @@ trait Manip
    */
   public function mapCfg(callable $f, $id, $deep = false)
   {
-    $opts = \is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );
+    $opts = \is_array($id) ? $id : ( $deep ? $this->fullTree($id ?: 'options') : $this->fullOptions($id ?: 'options') );
     if (isset($opts['items'])) {
       $opts = $opts['items'];
     }
