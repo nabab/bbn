@@ -3792,7 +3792,7 @@ class X
    */
   public static function split(string $st, string $separator): array
   {
-    return mb_split($separator === '.' ? '\.' : $separator, $st);
+    return mb_split($separator === '.' ? '\.' : $separator, $st) ?: [];
   }
 
 
