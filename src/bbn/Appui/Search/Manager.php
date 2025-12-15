@@ -347,9 +347,11 @@ class Manager
       if (isset($this->workers[$idx])) {
         $w = array_splice($this->workers, $idx, 1)[0];
         //X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'] . ' AND ' . $w['data'], 'searchTimings');
-        $status = proc_get_status($w['proc']);
-        if ($status['running']) {
-          proc_terminate($w['proc']);
+        if (!empty($w['proc'])) {
+          $status = proc_get_status($w['proc']);
+          if ($status['running']) {
+            proc_terminate($w['proc']);
+          }
         }
 
         if (!empty($w['pipes'][0])) {
@@ -360,7 +362,10 @@ class Manager
           fclose($w['pipes'][1]);
         }
 
-        proc_close($w['proc']);
+        if (!empty($w['proc'])) {
+          proc_close($w['proc']);
+        }
+
         $this->fs->delete($w['log']);
         $this->fs->delete($w['data']);
       }
@@ -398,8 +403,8 @@ class Manager
     // Create and clear the log file
     $logFile = $this->logFileBase . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
-    $this->fs->mkdir(dirname($logFile));
-    @$this->fs->putContents($logFile, '');
+    mkdir($this->logFileBase);
+    file_put_contents($logFile, '');
 
     // Attach the log file as stderr
     $descriptors = [
@@ -409,33 +414,37 @@ class Manager
     ];
 
     // Open the process
-    $proc = proc_open(
-      $cmd,
-      $descriptors,
-      $pipes,
-      $this->ctrl->appPath()
-    );
+    if (is_dir($this->logFileBase)
+      && is_file($logFile)
+      && ($proc = proc_open(
+        $cmd,
+        $descriptors,
+        $pipes,
+        $this->ctrl->appPath()
+      ))
+    ) {
+      // Non-blocking read from the stdout pipe
+      if (!empty($pipes[0])) {
+        stream_set_blocking($pipes[0], 0);
+      }
 
-    // Non-blocking read from the stdout pipe
-    if (!empty($pipes[0])) {
-      stream_set_blocking($pipes[0], 0);
+      if (!empty($pipes[1])) {
+        stream_set_blocking($pipes[1], 0);
+      }
+
+      // Track the worker
+      $this->workers[] = [
+        'proc'    => $proc,
+        'id'      => $result['id'],
+        'timeout' => $result['timeout'] ?? 10,
+        'cmd'     => $cmd,
+        'uid'     => $workerUid,
+        'pipes'   => $pipes,
+        'log'     => $logFile,
+        'data'    => $dataFile,
+        'step'    => $step
+      ];
     }
 
-    if (!empty($pipes[1])) {
-      stream_set_blocking($pipes[1], 0);
-    }
-
-    // Track the worker
-    $this->workers[] = [
-      'proc'    => $proc,
-      'id'      => $result['id'],
-      'timeout' => $result['timeout'] ?? 10,
-      'cmd'     => $cmd,
-      'uid'     => $workerUid,
-      'pipes'   => $pipes,
-      'log'     => $logFile,
-      'data'    => $dataFile,
-      'step'    => $step
-    ];
   }
 }
