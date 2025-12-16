@@ -403,7 +403,10 @@ class Manager
     // Create and clear the log file
     $logFile = $this->logFileBase . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
-    mkdir($this->logFileBase);
+    if (!is_dir($this->logFileBase)) {
+      mkdir($this->logFileBase);
+    }
+
     file_put_contents($logFile, '');
 
     // Attach the log file as stderr
