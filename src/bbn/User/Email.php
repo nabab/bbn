@@ -50,6 +50,7 @@ class Email extends Basic
         'attachments' => 'attachments',
         'flags' => 'flags',
         'is_read' => 'is_read',
+        'is_draft' => 'is_draft',
         'id_parent' => 'id_parent',
         'id_thread' => 'id_thread',
         'external_uids' => 'external_uids'
@@ -95,6 +96,8 @@ class Email extends Basic
   /** @var array */
   protected $folderTypesNotUnique = ['folders'];
 
+  /** @var string */
+  protected $cachePrefix = 'emails/';
 
   /**
    * Returns a list typical folder types as they are recorded in the options
@@ -837,7 +840,6 @@ class Email extends Basic
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
     }
-
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       try {
         $check = $this->checkFolder($folder);
@@ -852,6 +854,7 @@ class Email extends Basic
           $this->getLocaleDb() :
           $this->db;
         $added = 0;
+        $deleted = 0;
         $mb = $this->getMailbox($folder['id_account']);
         $info = $mb->getInfoFolder($folder['uid']);
         $mb->selectFolder($folder['uid']);
@@ -861,8 +864,13 @@ class Email extends Basic
           $folder['uid'],
           $info->Nmsgs
         );
+
         if ($info->Nmsgs === 0) {
-          if ($generator) {
+          if (!empty($folder['db_num_msg'])) {
+            $deleted += $db->delete($this->class_table, [$this->fields['id_folder'] => $folder['id']]);
+            return $deleted;
+          }
+          else if ($generator) {
             yield 0;
           }
 
@@ -873,6 +881,7 @@ class Email extends Basic
         $last_uid = $mb->getLastUid();
         $start = null;
         $real_end = null;
+
         if (isset($folder['db_uid_min'])
           && isset($folder['db_uid_max'])
         ) {
@@ -1245,9 +1254,8 @@ class Email extends Basic
   {
     $db = $this->getRightDb($id, $this->class_table);
     if ($em = $db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]) ){
-      $cachePrefix = 'emails/';
       if ($force
-        || (!($arr = $this->user->getCache($cachePrefix . $id)))
+        || (!($arr = $this->user->getCache($this->cachePrefix . $id)))
       ) {
         if (($folder = $this->getFolder($em['id_folder']))
           && ($mb = $this->getMailbox($folder['id_account']))
@@ -1262,10 +1270,10 @@ class Email extends Basic
           $arr = $mb->getMsg($number);
           $arr['id_account'] = $folder['id_account'];
           $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
-          $this->user->setCache($cachePrefix . $id, $arr, 86400);
+          $this->user->setCache($this->cachePrefix . $id, $arr, 86400);
           $fs = new System();
-          if ($fs->getNumFiles($this->user->getCachePath() . $cachePrefix) > 50) {
-            $files = $fs->getFiles($this->user->getCachePath() . $cachePrefix, false, false, null, 'm');
+          if ($fs->getNumFiles($this->user->getCachePath() . $this->cachePrefix) > 50) {
+            $files = $fs->getFiles($this->user->getCachePath() . $this->cachePrefix, false, false, null, 'm');
             X::sortBy($files, 'mtime', 'desc');
             array_splice($files, 0, 50);
             foreach ($files as $f) {
@@ -1280,6 +1288,26 @@ class Email extends Basic
 
 
     return null;
+  }
+
+
+  public function getEmailIdByUniqueId(string $uid, string $idFolder): ?string
+  {
+    if (str_starts_with($uid, '<') && str_ends_with($uid, '>')) {
+      $uid = Str::sub($uid, 1, Str::len($uid) - 2);
+    }
+
+    $isLocale = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']);
+    $db = $isLocale ? $this->getLocaleDb() : $this->db;
+    $where = [
+      $this->fields['msg_unique_id'] => $uid,
+      $this->fields['id_folder'] => $idFolder,
+    ];
+    if (!$isLocale) {
+      $where[$this->fields['id_user']] = $this->user->getId();
+    }
+
+    return $db->selectOne($this->class_table, $this->fields['id'], $where);
   }
 
 
@@ -1518,7 +1546,8 @@ class Email extends Basic
           $cfg['size'] => $email['Size'],
           $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),
           $cfg['flags'] => $email['Flagged'] ?: null,
-          $cfg['is_read'] => $email['Unseen'] ? 0 : 1,
+          $cfg['is_read'] => !empty($email['Unseen']) ? 0 : 1,
+          $cfg['is_draft'] => !empty($email['Draft']) ? 1 : 0,
           $cfg['id_parent'] => $id_parent,
           $cfg['id_thread'] => $id_thread,
           $cfg['external_uids'] => $external ? json_encode($external) : null,
@@ -1573,6 +1602,35 @@ class Email extends Basic
     }
 
     return $id;
+  }
+
+
+  public function deleteEmail(string $id): bool
+  {
+    $db = $this->getRightDb($id, $this->class_table);
+    $msgUid = $db->selectOne(
+      $this->class_table,
+      $this->fields['msg_uid'],
+      [$this->fields['id'] => $id]
+    );
+    $folderId = $this->getEmailFolderId($id);
+    if (!empty($msgUid)
+      && !empty($folderId)
+      && ($folder = $this->getFolder($folderId))
+      && !empty($folder['id_account'])
+      && ($mb = $this->getMailbox($folder['id_account']))
+    ) {
+      $mb->selectFolder($folder['uid']);
+      $d1 = $mb->deleteMsg($msgUid) && $mb->expunge();
+      $d2 = $db->delete($this->class_table, [$this->fields['id'] => $id]);
+      if ($this->user->hasCache($this->cachePrefix . $id)) {
+        $this->user->deleteCache($this->cachePrefix . $id);
+      }
+
+      return $d1 && $d2;
+    }
+
+    return false;
   }
 
 
@@ -2107,6 +2165,10 @@ class Email extends Basic
 
     try {
       if ($id = $mailer->draft($mail)) {
+        if (str_starts_with($id, '<') && str_ends_with($id, '>')) {
+          $id = Str::sub($id, 1, Str::len($id) - 2);
+        }
+
         return $id;
       }
     }

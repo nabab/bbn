@@ -1226,7 +1226,7 @@ class Mailbox extends Basic
    * @param int $uid UID of the message
    * @return bool
    */
-  public function deleteMsg($uid)
+  public function deleteMsg($uid): bool
   {
     if ($this->_is_connected()) {
       return imap_delete($this->stream, $this->getMsgNo($uid));
@@ -1258,7 +1258,7 @@ class Mailbox extends Basic
    *
    * @return bool
    */
-  public function expunge()
+  public function expunge(): bool
   {
     if ($this->_is_connected()) {
       return imap_expunge($this->stream);

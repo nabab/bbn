@@ -431,7 +431,7 @@ TEMPLATE;
 
         if ((!\is_resource($this->imap)
             && !($this->imap instanceof \IMAP\Connection))
-          || !\imap_append($this->imap, $this->imap_string.$this->imap_drafts, $mailString, "\\Seen")
+          || !\imap_append($this->imap, $this->imap_string.$this->imap_drafts, $mailString, "\\Seen \\Draft")
         ) {
           $this->log(\imap_errors());
         }
