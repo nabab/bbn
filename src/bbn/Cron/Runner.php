@@ -397,12 +397,18 @@ class Runner extends Basic
         $month_file = X::dirname(X::dirname($json_file)).'/'.X::join($path_elements, '-').'.json';
         array_pop($path_elements);
         $year_file = X::dirname(X::dirname($month_file)).'/'.X::join($path_elements, '-').'.json';
-        if (!is_file($json_file)) {
-          $logs = [];
-        }
-        elseif ($logs = file_get_contents($json_file)) {
+        $logs = [];
+        if (is_file($json_file)
+          && ($logs = file_get_contents($json_file))
+        ) {
           try {
             $logs = json_decode($logs, true, 512, JSON_THROW_ON_ERROR);
+            if (empty($logs)) {
+              $logs = [];
+            }
+            else if (!is_array($logs)) {
+              $logs = [$logs];
+            }
           }
           catch (Exception $e) {
             $logs = [];
