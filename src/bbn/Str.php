@@ -112,12 +112,14 @@ class Str
 
   public static function replace(string $search, string $replace, string $subject, ?string $options = null): string
   {
-    return mb_ereg_replace(preg_quote($search), $replace, $subject, $options);
+    $r = mb_ereg_replace(preg_quote($search), $replace, $subject, $options);
+    return ($r === false) || is_null($r) ? $subject : $r;
   }
 
   public static function regplace(string $search, string $replace, string $subject, ?string $options = null): string
   {
-    return mb_ereg_replace($search, $replace, $subject, $options);
+    $r = mb_ereg_replace($search, $replace, $subject, $options);
+    return ($r === false) || is_null($r) ? $subject : $r;
   }
 
   /**
