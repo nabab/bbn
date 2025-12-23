@@ -16,6 +16,9 @@ use bbn\Models\Cls\Basic;
 use Generator;
 use bbn\User;
 use bbn\File\Dir;
+use DOMDocument;
+use DOMXPath;
+use DOMNode;
 
 /*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
 
@@ -1846,6 +1849,149 @@ class Mailbox extends Basic
 
 
   /**
+   * Splits the quoted part from the reply in an email HTML content.
+   */
+  public function splitQuoteFromEmail(string $html): ?array
+  {
+    $html = trim($html);
+    if (empty($html)) {
+      return null;
+    }
+
+    libxml_use_internal_errors(true);
+    $dom = new DOMDocument();
+    $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $xpath = new DOMXPath($dom);
+    $outerHTML = fn(DOMNode $node) => $dom->saveHTML($node);
+
+    /** -------------------------------
+     *  1) Strong HTML markers
+     *  ------------------------------- */
+    $queries = [[
+      '//div[contains(concat(" ", normalize-space(@class), " "), " gmail_quote ")]',
+      'gmail_quote_div'
+    ], [
+      '//blockquote[contains(concat(" ", normalize-space(@class), " "), " gmail_quote ")]',
+      'gmail_quote_blockquote'
+    ], [
+      '//blockquote[translate(@type,"CITE","cite")="cite"]',
+      'blockquote_type_cite'
+    ], [
+      '//div[contains(concat(" ", normalize-space(@class), " "), " moz-cite-prefix ")]',
+      'moz_cite_prefix'
+    ]];
+
+    foreach ($queries as [$q, $method]) {
+      $nodes = $xpath->query($q);
+      if ($nodes && $nodes->length > 0) {
+        $quoteNode = $nodes->item(0);
+        $quoteHtml = $outerHTML($quoteNode);
+        $replyDom = $this->cloneDomDocument($dom);
+        $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
+        return [
+          'text' => trim($replyDom->saveHTML()),
+          'quote' => $quoteHtml,
+          'method' => $method,
+        ];
+      }
+    }
+
+    /** -------------------------------
+     *  2) Textual fallback (multi-lang)
+     *  ------------------------------- */
+    $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+    $patterns = [
+      // ---------- English ----------
+      '/\ROn\s.+?\swrote:\R/i',
+      '/\R-{2,}\s*Original Message\s*-{2,}\R/i',
+      '/\RFrom:\s.+\R/i',
+      '/\RSent:\s.+\R/i',
+      '/\RSubject:\s.+\R/i',
+
+      // ---------- Italian ----------
+      '/\RIl\s.+?\sha scritto:\R/i',
+      '/\R-{2,}\s*Messaggio originale\s*-{2,}\R/i',
+      '/\RDa:\s.+\R/i',
+      '/\RInviato:\s.+\R/i',
+      '/\ROggetto:\s.+\R/i',
+
+      // ---------- French ----------
+      '/\RLe\s.+?\sa écrit\s*:\R/i',
+      '/\R-{2,}\s*Message d\'origine\s*-{2,}\R/i',
+      '/\RDe\s*:\s.+\R/i',
+      '/\REnvoyé\s*:\s.+\R/i',
+      '/\RObjet\s*:\s.+\R/i',
+
+      // ---------- Spanish ----------
+      '/\REl\s.+?\sescribió\s*:\R/i',
+      '/\R-{2,}\s*Mensaje original\s*-{2,}\R/i',
+      '/\RDe\s*:\s.+\R/i',
+      '/\REnviado\s*:\s.+\R/i',
+      '/\RAsunto\s*:\s.+\R/i',
+
+      // ---------- German ----------
+      '/\RAm\s.+?\schrieb\s.+?\s*:\R/i',
+      '/\R-{2,}\s*Ursprüngliche Nachricht\s*-{2,}\R/i',
+      '/\RVon\s*:\s.+\R/i',
+      '/\RGesendet\s*:\s.+\R/i',
+      '/\RBetreff\s*:\s.+\R/i',
+
+      // ---------- Russian ----------
+      '/\R.+?\sнаписал\(а\)\s*:\R/iu',
+      '/\R-{2,}\s*Исходное сообщение\s*-{2,}\R/iu',
+      '/\RОт\s*:\s.+\R/iu',
+      '/\RОтправлено\s*:\s.+\R/iu',
+      '/\RТема\s*:\s.+\R/iu',
+    ];
+
+    foreach ($patterns as $p) {
+      if (preg_match($p, $text, $m, PREG_OFFSET_CAPTURE)) {
+        $needle = trim($m[0][0]);
+        $htmlPos = mb_stripos($html, $needle);
+        if ($htmlPos !== false) {
+          return [
+            'text' => trim(mb_substr($html, 0, $htmlPos)),
+            'quote' => trim(mb_substr($html, $htmlPos)),
+            'method' => 'text_separator',
+            'separator_regex' => $p,
+          ];
+        }
+
+        return [
+          'text' => $html,
+          'quote' => '',
+          'method' => 'text_separator_found_but_not_split_in_html',
+          'separator_regex' => $p,
+        ];
+      }
+    }
+
+    /** -------------------------------
+     *  3) Last resort: first blockquote
+     *  ------------------------------- */
+    $bq = $xpath->query('//blockquote');
+    if ($bq && $bq->length > 0) {
+      $quoteHtml = $outerHTML($bq->item(0));
+      $replyDom = $this->cloneDomDocument($dom);
+      $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
+
+      return [
+        'text' => trim($replyDom->saveHTML()),
+        'quote' => $quoteHtml,
+        'method' => 'first_blockquote',
+      ];
+    }
+
+    return [
+      'text' => $html,
+      'quote' => '',
+      'method' => 'no_quote_detected',
+    ];
+  }
+
+
+  /**
    *
    *
    * @param $msgno
@@ -1911,7 +2057,6 @@ class Mailbox extends Basic
       }
       else {
         $htmlmsg = trim(Str::toUtf8($data));
-
         if (!empty($htmlmsg)) {
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
           preg_match($body_pattern, $htmlmsg, $body);
@@ -1929,7 +2074,10 @@ class Mailbox extends Basic
     // but AOL uses type 1 (multipart), which is not handled here.
     // There are no PHP functions to parse embedded messages,
     // so this just appends the raw source to the main message.
-    elseif (($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain') {
+    elseif (($structure->type === 2)
+      && !empty($data)
+      && (strtolower($structure->subtype) === 'plain')
+    ) {
       if (stripos($this->_charset, 'ISO') !== false) {
         $utfConverter     = new utf8($this->_charset);
         $this->_plainmsg .= $utfConverter->loadCharset($this->_charset) ? $utfConverter->strToUtf8(trim($data)) . PHP_EOL : $this->_plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
@@ -1948,6 +2096,34 @@ class Mailbox extends Basic
   }
 
 
+  /**
+   * Clones a DOMDocument
+   */
+  private function cloneDomDocument(DOMDocument $dom): DOMDocument
+  {
+    $clone = new DOMDocument();
+    $clone->loadHTML($dom->saveHTML(), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    return $clone;
+  }
 
+
+  /**
+   * Removes the first node matching the given outer HTML from the DOMDocument
+   */
+  private function removeFirstNodeByOuterHTML(DOMDocument $dom, string $targetOuterHtml): void
+  {
+    $xpath = new DOMXPath($dom);
+    $nodes = $xpath->query('//*');
+    if (!$nodes) {
+      return;
+    }
+
+    foreach ($nodes as $node) {
+      if ($dom->saveHTML($node) === $targetOuterHtml) {
+        $node->parentNode?->removeChild($node);
+        return;
+      }
+    }
+  }
 
 }

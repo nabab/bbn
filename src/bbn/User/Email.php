@@ -1270,6 +1270,15 @@ class Email extends Basic
           $arr = $mb->getMsg($number);
           $arr['id_account'] = $folder['id_account'];
           $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
+          $arr['quote'] = '';
+          if (!empty($arr['html'])) {
+            $splitQuote = $mb->splitQuoteFromEmail($arr['html']);
+            if (!empty($splitQuote['quote'])) {
+              $arr['html'] = $splitQuote['text'];
+              $arr['quote'] = $splitQuote['quote'];
+            }
+          }
+
           $this->user->setCache($this->cachePrefix . $id, $arr, 86400);
           $fs = new System();
           if ($fs->getNumFiles($this->user->getCachePath() . $this->cachePrefix) > 50) {
