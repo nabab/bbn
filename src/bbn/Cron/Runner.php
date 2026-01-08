@@ -423,9 +423,12 @@ class Runner extends Basic
         $this->controller->reroute($cfg['file']);
         $this->controller->process();
         $logs[$idx]['duration'] = $this->timer->stop($cfg['file']);
-        $content = file_get_contents($cfg['log_file']);
+        $content = is_file($cfg['log_file']) ? file_get_contents($cfg['log_file']) : '';
         if (empty($content)) {
-          unlink($cfg['log_file']);
+          if (is_file($cfg['log_file'])) {
+            unlink($cfg['log_file']);
+          }
+
           $logs[$idx]['content'] = false;
         }
         else {
