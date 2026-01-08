@@ -190,7 +190,7 @@ class Manager
                       // Stream partial results
                       yield [
                         'value' => $condition['value'],
-                        'data' => $data['results'],
+                        'data' => !empty($data['results']) ? $data['results'] : [],
                         'step' => $worker['step'],
                         'item' => $ret['item'],
                         'id'   => $worker['id']
