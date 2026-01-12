@@ -14,7 +14,7 @@ class CacheUnitTest extends TestCase
      */
   protected function setUp(): void
   {
-      $this->cache = Cache::getEngine('files');
+      $this->cache = Cache::getEngine();
   }
 
 
@@ -109,7 +109,7 @@ class CacheUnitTest extends TestCase
   {
       $this->expectException(Exception::class);
 
-      Cache::getEngine('files');
+      Cache::getEngine();
       new Cache();
   }
 

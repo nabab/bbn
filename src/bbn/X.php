@@ -2215,10 +2215,11 @@ class X
         $where = self::treatConditions($where);
       }
 
+      $callable = is_callable($where);
       foreach ($ar as $i => $v) {
         if (!$from || ($i >= $from)) {
           $ok = 1;
-          if (is_callable($where)) {
+          if ($callable) {
             $ok = (bool)$where($v);
           }
           elseif (!is_array($where)) {

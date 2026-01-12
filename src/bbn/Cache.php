@@ -3,12 +3,14 @@ namespace bbn;
 
 use bbn\Str;
 use Closure;
+use Memcached;
 use Exception;
 use Traversable;
-use function Opis\Closure\serialize as serializeFn;
-use function Opis\Closure\unserialize as unserializeFn;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
+use function Opis\Closure\serialize as serializeFn;
+use function Opis\Closure\unserialize as unserializeFn;
+use function defined;
 
 /**
  * Universal caching class: called once per request, it holds the cache system.
@@ -188,7 +190,7 @@ class Cache implements CacheInterface
    * @param string $engine
    * @return self
    */
-  public static function getCache(string|null $engine = null): self
+  public static function getCache(?string $engine = null): self
   {
     self::_init($engine);
     return self::$engine;
@@ -217,19 +219,21 @@ class Cache implements CacheInterface
   public function __construct(?string $engine = null)
   {
     /** @todo APC doesn't work */
-    $engine = 'files';
+    $engine = defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files';
     if (self::$is_init) {
       throw new Exception(
         X::_("Only one cache object can be called. Use static function Cache::getEngine()")
       );
     }
 
-    if ((!$engine || ($engine === 'apc')) && function_exists('apcu_clear_cache')) {
+    if ((($engine === 'apc')) && function_exists('apcu_clear_cache')) {
       self::_set_type('apc');
     }
-    elseif ((!$engine || ($engine === 'memcache')) && class_exists("Memcache")) {
-      $this->obj = new \Memcache();
-      if ($this->obj->connect("127.0.0.1", 11211)) {
+    elseif ((($engine === 'memcache')) && class_exists("Memcached")) {
+      $this->obj = new Memcached();
+      $host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
+      $port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
+      if ($this->obj->addServer($host, $port)) {
         self::_set_type('memcache');
       }
     }
@@ -310,7 +314,7 @@ class Cache implements CacheInterface
      *
      * @return bool|int
      */
-  public function deleteAll(string|null $st = null): bool
+  public function deleteAll(?string $st = null): bool
   {
     if (self::$type === 'files') {
       if ($st === null) {
@@ -335,17 +339,19 @@ class Cache implements CacheInterface
     elseif (self::$type) {
       $items = $this->items($st);
       $res   = 0;
-      foreach ($items as $item){
-        if (!$st || Str::pos($item, $st) === 0) {
-          switch (self::$type){
-            case 'apc':
-              $res += (int)apcu_delete($item);
-              break;
-            case 'memcache':
-              $res += (int)$this->obj->delete($item);
-              break;
+      switch (self::$type){
+        case 'apc':
+          foreach ($items as $item){
+            $res += (int)apcu_delete($item);
           }
-        }
+          break;
+        case 'memcache':
+          if (!$st) {
+            $this->obj->flush();
+          }
+
+          $res = count($this->obj->deleteMulti($items));
+          break;
       }
 
       return $res;
@@ -418,6 +424,34 @@ class Cache implements CacheInterface
     return true;
   }
 
+  public function setRaw($key, $val, $ttl): bool
+  {
+    if (self::$type) {
+      $ttl  = self::ttl($ttl);
+      $hash = self::makeHash($val);
+      switch (self::$type){
+        case 'apc':
+          if (!function_exists('\\apcu_store')) {
+            throw new Exception(X::_("The APC extension doesn't seem to be installed"));
+          }
+
+          return \apcu_store($key, $val, $ttl);
+        case 'memcache':
+          return $this->obj->set(
+            $key, json_encode($val), $ttl
+          );
+        case 'files':
+          $file = self::_file($key, $this->path);
+          if ($this->fs->createPath(X::dirname($file))) {
+            if ($this->fs->putContents($file, json_encode($val, JSON_PRETTY_PRINT))) {
+              return true;
+            }
+          }
+      }
+    }
+
+    return false;
+  }
 
   /**
    * Stores the given value in the cache for as long as says the TTL.
@@ -432,46 +466,16 @@ class Cache implements CacheInterface
     if (self::$type) {
       $ttl  = self::ttl($ttl);
       $hash = self::makeHash($val);
-      switch (self::$type){
-        case 'apc':
-          if (!function_exists('\\apcu_store')) {
-            throw new Exception(X::_("The APC extension doesn't seem to be installed"));
-          }
+      $value = [
+        'timestamp' => microtime(1),
+        'hash' => $hash,
+        'expire' => $ttl ? time() + $ttl : 0,
+        'ttl' => $ttl,
+        'exec' => $exec,
+        'value' => $val
+      ];
 
-          return \apcu_store(
-
-            $key, [
-            'timestamp' => microtime(1),
-            'hash' => $hash,
-            'ttl' => $ttl,
-            'value' => $val
-            ], $ttl
-          );
-        case 'memcache':
-          return $this->obj->set(
-            $key, [
-            'timestamp' => microtime(1),
-            'hash' => $hash,
-            'ttl' => $ttl,
-            'value' => $val
-            ], false, $ttl
-          );
-        case 'files':
-          $file = self::_file($key, $this->path);
-          if ($this->fs->createPath(X::dirname($file))) {
-            $value = [
-              'timestamp' => microtime(1),
-              'hash' => $hash,
-              'expire' => $ttl ? time() + $ttl : 0,
-              'ttl' => $ttl,
-              'exec' => $exec,
-              'value' => $val
-            ];
-            if ($this->fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT))) {
-              return true;
-            }
-          }
-      }
+      return $this->setRaw($key, $value, $ttl);
     }
 
     return false;
@@ -498,7 +502,7 @@ class Cache implements CacheInterface
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $key, ?int $ttl = null, bool $force = false): ?array
+  private function getRaw(string $key, ?int $ttl = null, bool $force = false, int $attempts = 0): ?array
   {
     switch (self::$type) {
       case 'apc':
@@ -507,30 +511,42 @@ class Cache implements CacheInterface
         }
 
         if (\apcu_exists($key)) {
-          return \apcu_fetch($key);
+          $t = \apcu_fetch($key);
         }
         break;
       case 'memcache':
         $tmp = $this->obj->get($key);
-        if ($tmp !== $key) {
-          return $tmp;
+        if ($tmp) {
+          $t = json_decode($tmp, true);
         }
+
         break;
       case 'files':
         $file = self::_file($key, $this->path);
         if ($this->fs->isFile($file)
-          && ($t = $this->fs->getContents($file))
-          && ($t = json_decode($t, true))
-        ) {
-          if ((!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
-              && (!$t['expire'] || ($t['expire'] > time()))
-          ) {
-            return $t;
-          }
+          && ($t = $this->fs->getContents($file))) {
+          $t = json_decode($t, true);
         }
         break;
     }
 
+    if (!empty($t)) {
+      if (!empty($t['building'])) {
+        if ($attempts < 5) {
+          usleep(100000);
+          return $this->getRaw($key, $ttl, $force, $attempts + 1);
+        }
+        else {
+          return null;
+        }
+      }
+
+      if ((!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
+          && (empty($t['expire']) || ($t['expire'] > time()))
+      ) {
+        return $t;
+      }
+    }
     return null;
   }
 
@@ -564,64 +580,25 @@ class Cache implements CacheInterface
      */
   public function getSet(callable $fn, string $key, ?int $ttl = null)
   {
-    switch (self::$type) {
-      case 'apc':
-        break;
-      case 'memcache':
-        break;
-      case 'files':
-        // Getting the data
-        $tmp  = $this->getRaw($key, $ttl);
-        $data = null;
-        // Can't get the data
-        if (!$tmp) {
-          $file = self::_file($key, $this->path);
-          // Temporary file will be created to tell other processes the cache is being created
-          $tmp_file = X::dirname($file).'/_'.X::basename($file);
-          // Will become true if the cache should be created
-          $do = false;
-          // If the temporary file doesn't exist we create one
-          if (!$this->fs->isFile($tmp_file)) {
-            $this->fs->createPath(X::dirname($tmp_file));
-            $this->fs->putContents($tmp_file, ' ');
-            // If the original file exists we delete it
-            if ($this->fs->isFile($file)) {
-              $this->fs->delete($file);
-            }
+    $tmp  = $this->getRaw($key, $ttl);
+    $data = null;
+    // Can't get the data
+    if (!$tmp) {
+      $this->setRaw($key, ['value' => null, 'building' => true, 'ttl' => 10, 'expire' => time() + 10], 10);
+      try {
+        $data = $fn();
+      }
+      catch (Exception $e) {
+        $this->delete($key);
+        throw $e;
+      }
 
-            $timer = new Util\Timer();
-            $timer->start();
-            try {
-              $data = $fn();
-            }
-            catch (Exception $e) {
-              unlink($tmp_file);
-              throw $e;
-            }
-
-            $exec = $timer->stop();
-            $this->set($key, $data, $ttl, $exec);
-            $this->fs->delete($tmp_file);
-          }
-          // Otherwise another process is certainly creating the cache, so wait for it
-          else {
-            $timeout = time() + self::$max_wait;
-            while (time() < $timeout) {
-              if (($r = $this->get($key)) !== false) {
-                return $r;
-              }
-
-              usleep(500);
-            }
-
-            return $this->get($key);
-          }
-        }
-        else {
-          $data = $tmp['value'];
-        }
-        return $data;
+      $this->set($key, $data, $ttl);
     }
+    else {
+      $data = $tmp['value'];
+    }
+    return $data;
   }
 
 
@@ -665,7 +642,7 @@ class Cache implements CacheInterface
    * @param string $dir
    * @return array
    */
-  public function items(string $dir = '')
+  public function items(?string $dir = null): array 
   {
     if (self::$type) {
       switch (self::$type){
@@ -677,18 +654,11 @@ class Cache implements CacheInterface
           }
           return $list;
         case 'memcache':
-          $list     = [];
-          $allSlabs = $this->obj->getExtendedStats('slabs');
-          foreach ($allSlabs as $slabs){
-            foreach ($slabs as $slabId => $slabMeta){
-              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);
-              foreach ($cdump AS $arrVal){
-                foreach ($arrVal AS $k => $v){
-                  if ($k !== 'CLIENT_ERROR') {
-                    echo array_push($list, $k);
-                  }
-                }
-              }
+          $list = [];
+          $arr  = $this->obj->getAllKeys();
+          foreach ($arr as $key){
+            if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
+              $list[] = $key;
             }
           }
           return $list;
@@ -697,15 +667,15 @@ class Cache implements CacheInterface
           $list  = array_filter(
             array_map(
               function ($a) use ($dir) {
-                return ( $dir ? $dir.'/' : '' ).X::basename($a, '.bbn.cache');
-              }, $this->fs->getFiles($this->path.($dir ? '/'.$dir : ''))
+                return ( $dir ? "$dir/" : '' ).X::basename($a, '.bbn.cache');
+              }, $this->fs->getFiles($this->path.($dir ? "/$dir" : ''))
             ),
             function ($a) use ($cache) {
               // Only gives valid cache
               return $cache->has($a);
             }
           );
-          $dirs  = $this->fs->getDirs($this->path.($dir ? '/'.$dir : ''));
+          $dirs  = $this->fs->getDirs($this->path.($dir ? "/$dir" : ''));
           if (\count($dirs)) {
             foreach ($dirs as $d){
               $res = $this->items($dir ? $dir.'/'.X::basename($d) : X::basename($d));
@@ -717,6 +687,8 @@ class Cache implements CacheInterface
           return $list;
       }
     }
+
+    return [];
   }
 
 

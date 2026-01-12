@@ -160,7 +160,9 @@ class Ai extends DbCls
     }
 
     $this->endpoint = $id;
-    $this->setModel($model);
+    if ($model) {
+      $this->setModel($model);
+    }
   }
 
   /**

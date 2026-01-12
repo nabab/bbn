@@ -10,7 +10,7 @@ class FilesCacheTest extends TestCase
      */
   protected function setUp(): void
   {
-      $this->cache = Cache::getEngine('files');
+      $this->cache = Cache::getEngine();
   }
 
 
