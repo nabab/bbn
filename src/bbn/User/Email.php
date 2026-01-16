@@ -1161,7 +1161,7 @@ class Email extends Basic
           ]]
         ]],
         'filters' => $filters,
-        'group_by' => [$db->cfn($this->fields['id'], $this->class_table)],
+        'group_by' => [$db->cfn($this->fields['id'], $this->class_table)]
       ]);
 
 
@@ -1173,6 +1173,7 @@ class Email extends Basic
             $dataTable['data'][$i]['external_uids'] = !empty($d['external_uids']) ? json_decode($d['external_uids'], true) : new stdClass();
           }
         }
+
         return $dataTable;
       }
     }
@@ -1181,13 +1182,20 @@ class Email extends Basic
   }
 
 
-  public function getListAsThreads(string|array $id_folder, array $cfg): ?array
+  public function getListAsThreads(string|array $idFolder, array $cfg): ?array
   {
-    if (($folder = $this->getFolder($id_folder))
-      && !empty($folder['id_account'])
-      && ($folders = $this->getFolders($folder['id_account']))
-    ) {
-      $res = $this->getList($id_folder, $cfg);
+    $ids = [];
+    if (is_array($idFolder)) {
+      foreach ($idFolder as $i) {
+        $ids = array_merge($ids, $this->idsFromFolder($i));
+      }
+    }
+    else {
+      $ids = $this->idsFromFolder($idFolder);
+    }
+
+    if (!empty($ids)) {
+      $res = $this->getList($idFolder, $cfg);
       if ($res && !empty($res['data'])) {
         $grouped = [];
         foreach ($res['data'] as $d) {
@@ -1216,13 +1224,18 @@ class Email extends Basic
           return $res;
         }
 
-        $foldersIds = extractIds($folders, ['inbox', 'sent', 'folders']);
-        $res['data'] = array_values(array_map(function($d) use($t, $foldersIds) {
-          X::sortBy($d, 'date', 'desc');
-          $threadId = $d[0]['id_thread'] ?: $d[0]['id'];
-          $d[0]['thread'] = $t->getThread($threadId, $foldersIds);
-          return $d[0];
-        }, $grouped));
+        $res['data'] = array_values(
+          array_map(
+            function($d) use($t) {
+              X::sortBy($d, 'date', 'desc');
+              $foldersIds = extractIds($t->getFolders($d[0]['id_account']), ['inbox', 'sent', 'folders']);
+              $threadId = $d[0]['id_thread'] ?: $d[0]['id'];
+              $d[0]['thread'] = $t->getThread($threadId, $foldersIds);
+              return $d[0];
+            },
+            $grouped
+          )
+        );
         $res['total'] -= $numData - count($res['data']);
       }
 
