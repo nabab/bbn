@@ -222,6 +222,22 @@ class Controller implements Api
 
 
   /**
+   * Pings the stream to check if the connection is still alive
+   *
+   * @return bool
+   */
+  public function pingStream(): bool
+  {
+    if ($this->isStream()) {
+      $this->stream(['__bbn_ping__' => 1]);
+      return !connection_aborted();
+    }
+
+    return false;
+  }
+
+
+  /**
    * @param array $info
    * @param false $data
    */

@@ -7,6 +7,7 @@ use Exception;
 use bbn\Mail;
 use bbn\X;
 use bbn\Str;
+use bbn\Mvc\Controller;
 use HTMLPurifier_Config;
 use HTMLPurifier_URIScheme;
 use HTMLPurifier;
@@ -753,33 +754,6 @@ class Mailbox extends Basic
       && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
-      function analyzeParts($parts, &$t) {
-        foreach ($parts as $part) {
-          if ($part->ifdisposition
-            && ((strtolower($part->disposition) === 'attachment')
-              || (strtolower($part->disposition) === 'inline'))
-            && $part->ifparameters
-            && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
-          ) {
-            $a = [
-              'id' => !empty($part->id) ? Str::sub($part->id, 1, -1) : null,
-              'name' => $name_row->value,
-              'size' => $part->bytes,
-              'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
-            ];
-            $t['attachments'][] = $a;
-            if ((strtolower($part->disposition) === 'inline')) {
-              $t['inline'][] = $a;
-            }
-          }
-          elseif (!empty($part->parts)) {
-            analyzeParts($part->parts, $t);
-          }
-          elseif ($part->subtype === 'HTML') {
-            $t['is_html'] = true;
-          }
-        }
-      }
       while ($start >= $end) {
         try {
           $msgHeaderInfo = $this->getMsgHeaderinfo($start);
@@ -871,7 +845,7 @@ class Mailbox extends Basic
           if (!isset($tmp['subject'])) {
             $tmp['subject'] = '';
           }
-          $tmp['message_id'] = isset($tmp['message_id']) ? Str::sub($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so';
+          $tmp['message_id'] = isset($tmp['message_id']) ? Str::sub($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.solutions';
 
           $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : Str::sub($tmp['in_reply_to'], 1, -1);
           $tmp['attachments'] = [];
@@ -881,7 +855,7 @@ class Mailbox extends Basic
             $tmp['is_html'] = $structure->subtype === 'HTML';
           }
           else {
-            analyzeParts($structure->parts, $tmp);
+            $this->analyzeEmailParts($structure->parts, $tmp);
           }
 
           $res[] = $tmp;
@@ -1411,7 +1385,7 @@ class Mailbox extends Basic
   }
 
 
-  public function idle(callable $callback, int $timeout = 300): bool
+  public function idle(callable $callback, int $timeout = 300, ?Controller $ctrl = null): bool
   {
     $this->idleRunning = false;
     $this->idleTag = 0;
@@ -1437,13 +1411,40 @@ class Mailbox extends Basic
     }
 
     try {
+      if ($ctrl) {
+        $callback('Before ping1');
+        $ping = $ctrl->pingStream();
+        $callback('Ping1: ' . ($ping ? 'ok' : 'failed'));
+        if (!$ping) {
+          $this->stopIdle();
+          X::log('stoppppppp111', 'mirko');
+          throw new Exception(_("User connection lost"));
+        }
+      }
+
       $this->sendCommand("LOGIN {$this->login} {$this->pass}");
       $this->sendCommand("SELECT {$this->folder}");
       //$this->sendCommand("CAPABILITY", false);
       //$callback([$this->readCommandResponse(true), 'idle']);
       $this->sendCommand("IDLE", false);
       $this->idleRunning = true;
+      $checkUserConnectionTime = 10;
+      $checkUserConnection = time() + $checkUserConnectionTime;
+      $callback('MIRKO IDLE STARTED');
       while ($this->idleRunning) {
+        if ($ctrl && ($checkUserConnection <= time())) {
+          $callback('Before ping');
+          $ping = $ctrl->pingStream();
+          $callback('Ping: ' . ($ping ? 'ok' : 'failed'));
+          if (!$ping) {
+            $this->stopIdle();
+            X::log('stoppppppp', 'mirko');
+            throw new Exception(_("User connection lost"));
+          }
+
+          $checkUserConnection = time() + $checkUserConnectionTime;
+        }
+
         try {
           //$response = $this->readCommandResponse();
           $response = $this->readCommandResponseLine();
@@ -1461,19 +1462,20 @@ class Mailbox extends Basic
 
         if (($pos = Str::pos($response, "EXISTS")) !== false) {
           $msgn = (int)Str::sub($response, 2, $pos - 2);
-
-          // Check if the stream is still alive or should be considered stale
-          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
-            $this->stopIdle();
-            // Establish a new connection
-            imap_close($this->stream);
-            $this->connect();
-            return $this->idle($callback, $timeout);
-          }
-
-          $this->idleLastTime = time() + $timeout;
+          $this->idleLastTime = time();
           $this->selectFolder($this->folder);
           $callback($this->getMsg($msgn));
+        }
+
+        // Check if the stream is still alive or should be considered stale
+        if (!$this->_is_connected()
+          || (($this->idleLastTime + $timeout) < time())
+        ) {
+          $this->stopIdle();
+          // Establish a new connection
+          imap_close($this->stream);
+          $this->connect();
+          return $this->idle($callback, $timeout, $ctrl);
         }
       }
     }
@@ -1619,6 +1621,7 @@ class Mailbox extends Basic
       }
     }
 
+    $this->idleLastTime = time();
     return !empty($asArray) ? $response : (!empty($response) ? $response[count($response) - 1] : '');
   }
 
@@ -1635,6 +1638,7 @@ class Mailbox extends Basic
       $line .= $c;
     } */
 
+    $this->idleLastTime = time();
     if ($this->idleRunning
       && ($line === '')
       //&& (($c === false)
@@ -2122,6 +2126,38 @@ class Mailbox extends Basic
       if ($dom->saveHTML($node) === $targetOuterHtml) {
         $node->parentNode?->removeChild($node);
         return;
+      }
+    }
+  }
+
+
+  /**
+   * Analyzes email parts recursively.
+   */
+  private function analyzeEmailParts($parts, &$t) {
+    foreach ($parts as $part) {
+      if ($part->ifdisposition
+        && ((strtolower($part->disposition) === 'attachment')
+          || (strtolower($part->disposition) === 'inline'))
+        && $part->ifparameters
+        && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+      ) {
+        $a = [
+          'id' => !empty($part->id) ? Str::sub($part->id, 1, -1) : null,
+          'name' => $name_row->value,
+          'size' => $part->bytes,
+          'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
+        ];
+        $t['attachments'][] = $a;
+        if ((strtolower($part->disposition) === 'inline')) {
+          $t['inline'][] = $a;
+        }
+      }
+      elseif (!empty($part->parts)) {
+        $this->analyzeEmailParts($part->parts, $t);
+      }
+      elseif ($part->subtype === 'HTML') {
+        $t['is_html'] = true;
       }
     }
   }
