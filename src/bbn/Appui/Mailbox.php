@@ -135,21 +135,61 @@ class Mailbox extends Basic
 
   protected $mailer;
 
+  /**
+   * @var bool Whether the connection is encrypted
+   */
   protected $encryption = false;
 
+  /**
+   * @var bool Whether to validate the certificate
+   */
   protected $validateCertificate = false;
 
+  /**
+   * IMAP IDLE related properties
+   */
   protected $idleStream;
 
+  /**
+   * @var float Last time an IDLE command was sent
+   */
   protected $idleLastTime;
 
+  /**
+   * @var string The last IDLE command sent
+   */
   protected $idleLastCommand;
 
+  /**
+   * @var string The IDLE tag
+   */
   protected $idleTag;
 
+  /**
+   * @var string The IDLE tag prefix
+   */
   protected $idleTagPrefix = 'BBN_';
 
+  /**
+   * @var bool Whether the IDLE is running
+   */
   protected $idleRunning = false;
+
+  /**
+   * @var bbn\Mvc\Controller|null The controller instance
+   */
+  protected $idleCtrl = null;
+
+  /**
+   * @var int The timeout for the controller to stop the IDLE
+   */
+  protected $idleCtrlTimeout = 10;
+
+  /**
+   * @var int The timeout for the IDLE command
+   */
+  protected $idleTimeout = 300;
+
 
   public static function setDefaultPingInterval(int $val): void
   {
@@ -1385,7 +1425,11 @@ class Mailbox extends Basic
   }
 
 
-  public function idle(callable $callback, int $timeout = 300, ?Controller $ctrl = null): bool
+  public function idle(
+    callable $callback,
+    ?int $timeout = null,
+    ?Controller $ctrl = null
+  ): bool
   {
     $this->idleRunning = false;
     $this->idleTag = 0;
@@ -1397,12 +1441,20 @@ class Mailbox extends Basic
       ];
     }
 
+    if (!empty($timeout)) {
+      $this->idleTimeout = $timeout;
+    }
+
+    if (!empty($ctrl)) {
+      $this->idleCtrl = $ctrl;
+    }
+
     // Establish the connection
     $this->idleStream = stream_socket_client(
       ($this->encryption ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
       $errno,
       $errstr,
-      $timeout,
+      $this->idleTimeout,
       STREAM_CLIENT_CONNECT,
       stream_context_create($context)
     );
@@ -1411,9 +1463,9 @@ class Mailbox extends Basic
     }
 
     try {
-      if ($ctrl) {
+      if (!empty($this->idleCtrl)) {
         $callback('Before ping1');
-        $ping = $ctrl->pingStream();
+        $ping = $this->idleCtrl->pingStream();
         $callback('Ping1: ' . ($ping ? 'ok' : 'failed'));
         if (!$ping) {
           $this->stopIdle();
@@ -1428,23 +1480,8 @@ class Mailbox extends Basic
       //$callback([$this->readCommandResponse(true), 'idle']);
       $this->sendCommand("IDLE", false);
       $this->idleRunning = true;
-      $checkUserConnectionTime = 10;
-      $checkUserConnection = time() + $checkUserConnectionTime;
       $callback('MIRKO IDLE STARTED');
       while ($this->idleRunning) {
-        if ($ctrl && ($checkUserConnection <= time())) {
-          $callback('Before ping');
-          $ping = $ctrl->pingStream();
-          $callback('Ping: ' . ($ping ? 'ok' : 'failed'));
-          if (!$ping) {
-            $this->stopIdle();
-            X::log('stoppppppp', 'mirko');
-            throw new Exception(_("User connection lost"));
-          }
-
-          $checkUserConnection = time() + $checkUserConnectionTime;
-        }
-
         try {
           //$response = $this->readCommandResponse();
           $response = $this->readCommandResponseLine();
@@ -1455,12 +1492,16 @@ class Mailbox extends Basic
             continue;
           }
 
-          if (!str_contains($e->getMessage(), "connection closed")) {
+          if (!str_contains($e->getMessage(), "connection closed")
+            && ($errCode !== 3)
+          ) {
             throw $e;
           }
         }
 
-        if (($pos = Str::pos($response, "EXISTS")) !== false) {
+        if (!empty($response)
+          && (($pos = Str::pos($response, "EXISTS")) !== false)
+        ) {
           $msgn = (int)Str::sub($response, 2, $pos - 2);
           $this->idleLastTime = time();
           $this->selectFolder($this->folder);
@@ -1469,13 +1510,19 @@ class Mailbox extends Basic
 
         // Check if the stream is still alive or should be considered stale
         if (!$this->_is_connected()
-          || (($this->idleLastTime + $timeout) < time())
+          || (($this->idleLastTime + $this->idleTimeout) < time())
         ) {
+          // Stop current IDLE connection
           $this->stopIdle();
+          // Close the main stream
+          if (!empty($this->stream)) {
+            imap_close($this->stream);
+          }
+
           // Establish a new connection
-          imap_close($this->stream);
           $this->connect();
-          return $this->idle($callback, $timeout, $ctrl);
+          // Run IDLE again
+          return $this->idle($callback, $this->idleTimeout, $ctrl);
         }
       }
     }
@@ -1578,6 +1625,7 @@ class Mailbox extends Basic
   public function stopIdle()
   {
     $this->idleRunning = false;
+    $this->idleCtrl = null;
     if (!empty($this->idleStream)) {
       fwrite($this->idleStream, "DONE\r\n");
       fclose($this->idleStream);
@@ -1629,7 +1677,28 @@ class Mailbox extends Basic
   protected function readCommandResponseLine(): string
   {
     $line = '';
+    $ctrlTimeout = time() + $this->idleCtrlTimeout;
     while (Str::sub($line, -1) !== "\n") {
+      if (!empty($this->idleCtrl)
+        && ($ctrlTimeout <= time())
+      ) {
+        X::log('Before ping', 'mirko');
+        $ping = $this->idleCtrl->pingStream();
+        X::log('Ping: ' . ($ping ? 'ok' : 'failed'), 'mirko');
+        if (!$ping) {
+          X::log('stoppppppp', 'mirko');
+          throw new Exception(_("User connection lost"));
+        }
+
+        $ctrlTimeout = time() + $this->idleCtrlTimeout;
+      }
+
+      if (!$this->_is_connected()
+        || (($this->idleLastTime + $this->idleTimeout) < time())
+      ) {
+        throw new Exception(X::_('IDLE Connection lost'), 3);
+      }
+
       $line .= fgets($this->idleStream, 1024);
     }
     /* while ((($c = fread($this->idleStream, 1)) !== false)
