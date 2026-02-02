@@ -3,12 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db.local
--- Generation Time: Jan 11, 2026 at 11:50 PM
+-- Generation Time: Jan 13, 2026 at 12:03 AM
 -- Server version: 11.7.2-MariaDB-ubu2404
 -- PHP Version: 8.5.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
 SET time_zone = "+00:00";
 
 --
@@ -270,4 +269,3 @@ ALTER TABLE `bbn_ai_lab_runs`
   ADD CONSTRAINT `fk_runs_dataset_item` FOREIGN KEY (`dataset_item_id`) REFERENCES `bbn_ai_lab_dataset_items` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_runs_experiment` FOREIGN KEY (`experiment_id`) REFERENCES `bbn_ai_lab_experiments` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_runs_prompt_version` FOREIGN KEY (`prompt_version_id`) REFERENCES `bbn_ai_lab_prompt_versions` (`id`) ON DELETE SET NULL;
-COMMIT;

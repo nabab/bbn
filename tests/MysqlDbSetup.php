@@ -18,7 +18,7 @@ trait MysqlDbSetup
         "mysql:host={$db_cfg['host']};port={$db_cfg['port']};}",
         $db_cfg['user'],
         $db_cfg['pass'],
-        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
+        [\Pdo\Mysql::ATTR_INIT_COMMAND => 'SET NAMES utf8']
       );
 
       self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -29,7 +29,7 @@ trait MysqlDbSetup
         "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
         $db_cfg['user'],
         $db_cfg['pass'],
-        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
+        [\Pdo\Mysql::ATTR_INIT_COMMAND => 'SET NAMES utf8']
       );
 
       self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");

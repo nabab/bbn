@@ -5,13 +5,9 @@ namespace bbn\Ai\Lab;
 
 use bbn\X;
 use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class PromptVersion extends DbCls
+class PromptVersion extends Base
 {
-  use DbActions;
-
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_prompt_versions",
     "tables" => [

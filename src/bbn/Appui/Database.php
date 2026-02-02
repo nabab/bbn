@@ -173,6 +173,9 @@ class Database extends bbn\Models\Cls\Cache
   public function connection(string|null $host = null, string $engine = 'mysql', string $db = ''): Db
   {
     $info = $this->getConnectionInfo($host, $engine, $db);
+    if ($engine === 'mysql') {
+      X::hddump($info);
+    }
     [$c1, $c2] = $info['sequence'];
     if (!isset($this->connections[$c1])) {
       throw new Exception(X::_("Unknown engine")." ".$c1);
@@ -1202,11 +1205,27 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
     elseif ($db) {
-      try {
-        $conn = $this->connection($host, $engine, $db);
+      if ($host === $this->db->getConnectionCode()
+          && $engine === $this->db->getEngine()
+      ) {
+        $conn = $this->db;
+        $old_db = $conn->getCurrent();
+        if ($db !== $conn->getCurrent()) {
+          try {
+            $conn->change($db);
+          }
+          catch (Exception $e) {
+            throw new Exception(X::_("Impossible to use the database %s", $db));
+          }
+        }
       }
-      catch (Exception $e) {
-        throw new Exception($e->getMessage() . " ($host, $engine, $db)");
+      else {
+        try {
+          $conn = $this->connection($host, $engine, $db);
+        }
+        catch (Exception $e) {
+          throw new Exception($e->getMessage() . " ($host, $engine, $db)");
+        }
       }
     }
 

@@ -12,6 +12,9 @@ use bbn\X;
 use bbn\Str;
 use stdClass;
 use Exception;
+use function array_key_exists;
+use function is_string;
+use function is_array;
 
 trait DbActions
 {
@@ -140,6 +143,29 @@ trait DbActions
     }
 
     return 0;
+  }
+
+  protected function dbTraitInsertUpdate(array $data): ?string
+  {
+    $cfg = $this->getClassCfg();
+    $keys = $this->db->getUniqueKeys($this->class_cfg['table']);
+    $update = false;
+    if (!empty($keys)) {
+      foreach ($keys as $key => $columns) {
+        $checked = array_filter($columns, fn($col) => !array_key_exists($col, $data) || is_null($data[$col]));
+        if (empty($checked)) {
+          $update = $this->db->selectOne($cfg['table'], $cfg['arch'][$this->class_table_index]['id'], array_intersect_key($data, array_flip($columns)));
+          break;
+        }
+      }
+    }
+    if ($update) {
+      $this->dbTraitUpdate($update, $data);
+      return $update;
+    }
+    else {
+      return $this->dbTraitInsert($data);
+    }
   }
 
 

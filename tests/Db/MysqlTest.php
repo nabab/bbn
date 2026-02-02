@@ -208,7 +208,7 @@ class MysqlTest extends TestCase
         'args'      => ["mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
           $db_cfg['user'],
           $db_cfg['pass'],
-          [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+          [\Pdo\Mysql::ATTR_INIT_COMMAND => 'SET NAMES utf8'],
         ]
       ]),
       $this->getNonPublicProperty('cfg')
@@ -294,7 +294,7 @@ class MysqlTest extends TestCase
         'args'      => ["mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
           $db_cfg['user'],
           $db_cfg['pass'],
-          [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+          [\Pdo\Mysql::ATTR_INIT_COMMAND => 'SET NAMES utf8'],
         ]
       ]),
       self::$mysql->getCfg()

@@ -852,15 +852,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function getUniqueKeys(string $table): array
   {
+    $ar = [];
     if ($ks = $this->getKeys($table)) {
-      foreach ($ks['keys'] as $k){
+      foreach ($ks['keys'] as $n => $k){
         if ($k['unique']) {
-          return $k['columns'];
+          $ar[$n] = $k['columns'];
         }
       }
     }
 
-    return [];
+    return $ar;
   }
 
   /**

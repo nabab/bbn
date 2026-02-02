@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: BBN
- * Date: 14/04/2016
- * Time: 20:38.
- */
-
 namespace bbn\Appui;
 
 use Exception;
@@ -551,6 +544,32 @@ class Note extends DbCls
         $cf['arch']['versions']['id_note'] => $id,
       ]
     );
+  }
+
+  public function updateToLatest(string $id): bool
+  {
+    $cf = &$this->class_cfg;
+    $latest = $this->latest($id);
+    if ($latest) {
+      $this->db->update(
+        $cf['tables']['versions'],
+        [$cf['arch']['versions']['latest'] => 0],
+        [
+          $cf['arch']['versions']['id_note'] => $id,
+          [$cf['arch']['versions']['version'], '!=', $latest],
+        ]
+      );
+      return (bool)$this->db->update(
+        $cf['tables']['versions'],
+        [$cf['arch']['versions']['latest'] => 1],
+        [
+          $cf['arch']['versions']['id_note'] => $id,
+          $cf['arch']['versions']['version'] => $latest,
+        ]
+      );
+    }
+
+    return false;
   }
 
 
@@ -1370,6 +1389,42 @@ class Note extends DbCls
     }
 
     return false;
+  }
+
+
+  /**
+   * @param string $id   The note's uid
+   * @param bool   $keep Set it to true if you want change active property to 0 instead of delete the row from db
+   *
+   * @return false|null|int
+   */
+  public function removeVersion(string $id, int $version): bool
+  {
+    $res = false;
+    if (Str::isUid($id)) {
+      $cf = $this->getClassCfg();
+      if ($latest = $this->latest($id) && ($res = $this->db->delete($cf['tables']['versions'], [$cf['arch']['versions']['id_note'] => $id, $cf['arch']['versions']['version'] => $version]))) {
+        if ($latest === $version) {
+          if (!$this->updateToLatest($id)) {
+            $this->remove($id);
+          }
+        }
+        else {
+          $this->db->update(
+            $cf['tables']['versions'],
+            [
+              $cf['arch']['versions']['version'] => [null, $cf['arch']['versions']['version'] . ' - 1']
+            ],
+            [
+              $cf['arch']['versions']['id_note'] => $id,
+              [$cf['arch']['versions']['version'], '>', $version]
+            ]
+          );
+        }
+      }
+    }
+
+    return (bool)$res;
   }
 
 

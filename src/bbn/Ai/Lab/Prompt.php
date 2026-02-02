@@ -2,15 +2,12 @@
 
 namespace bbn\Ai\Lab;
 
+use bbn\Models\Tts\Note;
 
-use bbn\X;
-use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
-
-class Prompt extends DbCls
+class Prompt extends Base
 {
-  use DbActions;
+
+  use Note;
 
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_prompts",
@@ -21,20 +18,28 @@ class Prompt extends DbCls
       "prompts" => [
         "id" => "id",
         "name" => "name",
-        "description" => "description",
-        "created_at" => "created_at",
+        "id_note" => "id_note"
       ],
     ],
+    "type_note" => "ai_lab_prompt"
   ];
 
   public function findByName(string $name): ?array
   {
-    return $this->dbTraitRselect(['name' => $name]);
+    if ($id = $this->dbTraitSelectOne('id', ['name' => $name])) {
+      return $this->findById($id);
+    }
+
+    return null;
   }
 
   public function findById(string $id): ?array
   {
-    return $this->dbTraitRselect(['id' => $id]);
+    if ($res = $this->dbTraitRselect(['id' => $id])) {
+      $res = [...$this->noteGet($res['id_note']), ...$res];
+    }
+
+    return $res ?? null;
   }
 
   public function list(int $limit = 50, int $start = 0, array $filter = []): array
@@ -44,11 +49,41 @@ class Prompt extends DbCls
 
   public function create(array $data): ?string
   {
-    return $this->dbTraitInsert($data);
+    $cfg = $this->getClassCfg();
+    if ($this->findByName($data['name'])) {
+      return null;
+    }
+    if (($id_note = $this->noteInsert($data['name'], $data['content'] ?? '', $this->noteGetDefaultType())) &&
+      ($id = $this->dbTraitInsert([
+        $cfg['arch']['prompts']['id_note'] => $id_note,
+        $cfg['arch']['prompts']['name'] => $data['name']
+      ]))
+    ) {
+      return $id;
+    }
+    
+    return null;
   }
 
   public function updateById(string $id, array $data): bool
   {
-    return $this->dbTraitUpdate($id, $data);
+    $cfg = $this->getClassCfg();
+    $res1 = $this->noteUpdate($data['id_note'], [
+      'title' => $data['name'],
+      'content' => $data['content'] ?? ''
+    ]);
+    $res2 = $this->dbTraitUpdate($id, [
+      $cfg['arch']['prompts']['name'] => $data['name'],
+    ]);
+    return $res1 || $res2;
+  }
+
+  public function latestVersion($id): ?int
+  {
+    if ($idNote = $this->dbTraitSelectOne('id_note', ['id' => $id])) {
+      return $this->noteLatestVersion($idNote);
+    }
+
+    return null;
   }
 }

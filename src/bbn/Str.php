@@ -412,6 +412,19 @@ class Str
   }
 
 
+  public static function tag(string $tag, string $content, array $attrs = []): string
+  {
+    $st = "<$tag";
+    foreach ($attrs as $k => $v){
+      $st .= ' ' . $k . '="' . self::escapeDquotes($v) . '"';
+    }
+
+    $st .= ">$content</$tag>";
+
+    return $st;
+  }
+
+
   /**
    * Strip special characters except the below:
    * - ~ , ; [ ] ( ) .

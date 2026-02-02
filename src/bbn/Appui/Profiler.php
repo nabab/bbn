@@ -79,17 +79,19 @@ class Profiler extends DbCls
       if ($force || !$last || (time() - strtotime($last) > self::$delay)) {
         $this->chrono->start();
         if (function_exists('tideways_xhprof_enable')) {
-          tideways_xhprof_enable(
-            TIDEWAYS_XHPROF_FLAGS_MEMORY | 
-            TIDEWAYS_XHPROF_FLAGS_CPU
+          call_user_func(
+            'tideways_xhprof_enable',
+            constant('TIDEWAYS_XHPROF_FLAGS_MEMORY') | 
+            constant('TIDEWAYS_XHPROF_FLAGS_CPU')
           );
           $this->is_started = true;
           return true;
         }
         elseif (function_exists('xhprof_enable')) {
-          xhprof_enable(
-            XHPROF_FLAGS_MEMORY | 
-            XHPROF_FLAGS_CPU
+          call_user_func(
+            'xhprof_enable',
+            constant('XHPROF_FLAGS_MEMORY') | 
+            constant('XHPROF_FLAGS_CPU')
           );
           $this->is_started = true;
           return true;
@@ -112,7 +114,13 @@ class Profiler extends DbCls
   {
     if ($this->is_started && $this->check()) {
       $this->is_started = false;
-      $data = function_exists('tideways_xhprof_disable') ? tideways_xhprof_disable() : xhprof_disable();
+      $data = null;
+      if (function_exists('tideways_xhprof_disable')) {
+        call_user_func('tideways_xhprof_disable');
+      }
+      elseif (function_exists('xhprof_disable')) {
+        $data = call_user_func('xhprof_disable');
+      }
       $c = &$this->class_cfg['arch']['bbn_profiler'];
       return (bool)$this->db->insert(
         $this->class_table,

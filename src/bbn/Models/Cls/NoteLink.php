@@ -2,12 +2,17 @@
 
 namespace bbn\Models\Cls;
 
-use bbn\Db as DbCls;
-use bbn\Models\Tts\DbConfig;
+use bbn\Db;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Cache;
+use bbn\Entities\Models\Entities;
+use bbn\Entities\Entity;
 
 class NoteLink extends DbCls
 {
-  use DbConfig;
+  use DbActions;
+  use Cache;
 
   protected static $default_class_cfg;
 

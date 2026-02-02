@@ -4,6 +4,9 @@ namespace bbn\Models\Tts;
 
 use bbn\X;
 use Exception;
+use function array_key_exists;
+use function in_array;
+use function count;
 
 /**
  * Trait DbTrait
@@ -61,11 +64,11 @@ trait DbTrait
         $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
         unset($data[$f['cfg']]);
       }
-      elseif (isset($ccfg['cfg'])) {
+      else {
         $cfg = [];
         foreach ($ccfg['cfg'] as $v) {
           if (array_key_exists($v['field'], $data)) {
-            $cfg[$v['field']] = $data[$v['field']];
+            $cfg[$v['field']] = $data[$v['field']] ?? null;
             unset($data[$v['field']]);
           }
         }
@@ -81,6 +84,7 @@ trait DbTrait
         // Set the value to null if it's empty and not 0 and the field allows null
         if (empty($v)
           && ($v !== 0)
+          && isset($structure['fields'][$k])
           && $structure['fields'][$k]['null']
         ) {
           $v = null;

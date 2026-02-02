@@ -4,14 +4,9 @@ namespace bbn\Ai\Lab;
 
 
 use bbn\X;
-use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class DatasetItem extends DbCls
+class DatasetItem extends Base
 {
-  use DbActions;
-
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_dataset_items",
     "tables" => [

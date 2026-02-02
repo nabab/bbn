@@ -6,10 +6,12 @@ namespace bbn\Db\Languages;
 
 use Exception;
 use PDO;
+use PDO\Mysql as PDOMysql;
 use PDOException;
 use bbn\Str;
 use bbn\X;
-
+use function count;
+use function defined;
 /**
  * Database Class
  *
@@ -174,7 +176,12 @@ class Mysql extends Sql
    */
   public function getConnection(array $cfg = []): ?array
   {
-    if (!X::hasProps($cfg, ['host', 'db'])) {
+    $numParams = count(array_keys($cfg));
+    if (($numParams > 1) && empty($cfg['host'])) {
+      throw new Exception(X::_("No DB host defined"));
+    }
+
+    if ($numParams < 2) {
       if (!defined('BBN_DB_HOST')) {
         throw new Exception(X::_("No DB host defined"));
       }
@@ -218,7 +225,7 @@ class Mysql extends Sql
         . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
-      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $cfg['charset']],
+      [PDOMysql::ATTR_INIT_COMMAND => 'SET NAMES ' . $cfg['charset']],
     ];
 
     return $cfg;

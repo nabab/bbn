@@ -878,8 +878,13 @@ class Project extends DbCls
       elseif ($t['ext'] === 'less') {
         $icon = 'nf nf-dev-less';
       }
-      else{
-        $icon = "icon-$t[ext]";
+      elseif (empty($icon)) {
+        if ($t['ext'] === 'php') {
+          $icon = "nf nf-oct-terminal";
+        }
+        else {
+          $icon = "nf nf-cod-file";
+        }
       }
     }
     //case component o folder who contain other component

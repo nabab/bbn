@@ -2,12 +2,9 @@
 
 namespace bbn\Ai\Lab;
 
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class Run extends DbCls
+class Run extends Base
 {
-  use DbActions;
 
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_runs",
@@ -19,9 +16,9 @@ class Run extends DbCls
         "id" => "id",
         "experiment_id" => "experiment_id",
         "configuration_id" => "configuration_id",
-        "prompt_version_id" => "prompt_version_id",
+        "prompt_id" => "prompt_id",
+        "prompt_version" => "prompt_version",
         "dataset_item_id" => "dataset_item_id",
-
         // IMPORTANT: you are using it in methods, so it must exist in arch
         "variant_key" => "variant_key",
 

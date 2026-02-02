@@ -9,6 +9,7 @@
 namespace bbn\Models\Tts;
 
 use bbn\Str;
+use bbn\Db;
 
 
 trait References
@@ -19,7 +20,7 @@ trait References
     $references_join = '';
 
   /**
-   * @var bbn\Db
+   * @var Db
    */
   protected $db;
 

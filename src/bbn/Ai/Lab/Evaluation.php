@@ -4,13 +4,9 @@ namespace bbn\Ai\Lab;
 
 
 use bbn\X;
-use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class Evaluation extends DbCls
+class Evaluation extends Base
 {
-  use DbActions;
 
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_evaluations",

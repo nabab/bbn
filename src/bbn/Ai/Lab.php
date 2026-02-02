@@ -30,7 +30,7 @@ class Lab extends DbCls
   protected Run $runCls;
   protected Evaluation $evaluationCls;
 
-  public function __construct(protected Db $db) {
+  public function __construct(Db $db) {
     parent::__construct($db);
   }
 
@@ -178,43 +178,47 @@ class Lab extends DbCls
    * - Uses runs()->create() if present; falls back to insert().
    */
   public function createRunWithConfigAndPrompt(
-    array $experiment,
-    array $configuration,
-    array $promptVersion,
-    ?array $datasetItem,
+    string $experimentId,
+    string $configurationId,
+    string $promptId,
+    ?string $datasetItemId,
     array $input,
     array $output,
-    array $metrics
+    array $metrics = [],
+    ?int $promptVersion = null,
   ): array {
 
-    $experimentId = $experiment['id'] ?? null;
-    $configurationId = $configuration['id'] ?? null;
-
-    if (!$configurationId) {
-      throw new \InvalidArgumentException("Missing configuration['id']");
+    if (!$experimentId) {
+      throw new \InvalidArgumentException("Missing experiment");
     }
 
-    $promptVersionId = $promptVersion['id'] ?? null;
-    $datasetItemId = $datasetItem['id'] ?? null;
+    if (!$configurationId) {
+      throw new \InvalidArgumentException("Missing configuration");
+    }
 
+    $promptVersionNumber = $promptVersion ?: $this->prompts()->latestVersion($promptId);
+
+    $configuration = $this->configurations()->findById($configurationId);
+    $prompt = $this->prompts()->findById($promptId);
     // Tolerate either "row + config_snapshot" or direct normalized config arrays.
     $configSnapshot = $configuration['config_snapshot'] ?? $configuration;
-    $promptSnapshot = $promptVersion['prompt_snapshot'] ?? $promptVersion;
+    $promptSnapshot = $prompt['prompt_snapshot'] ?? $prompt;
 
-    $variantKey = $this->computeVariantKey($configSnapshot, $promptVersionId);
+    $variantKey = $this->computeVariantKey($configSnapshot, $promptId.((string)$promptVersionNumber));
 
     $runData = [
       'experiment_id'       => $experimentId,
       'configuration_id'    => $configurationId,
-      'prompt_version_id'   => $promptVersionId,
+      'prompt_id'           => $promptId,
+      'prompt_version'      => $promptVersionNumber,
       'dataset_item_id'     => $datasetItemId,
       'variant_key'         => $variantKey,
 
       'input_text'          => $input['text'] ?? null,
       'input_metadata'      => $input['metadata'] ?? [],
 
-      'config_snapshot'     => $configSnapshot,
-      'prompt_snapshot'     => $promptSnapshot,
+      'config_snapshot'     => is_array($configSnapshot) ? json_encode($configSnapshot) : $configSnapshot,
+      'prompt_snapshot'     => is_array($promptSnapshot) ? json_encode($promptSnapshot) : $promptSnapshot,
 
       'output_text'         => $output['text'] ?? null,
       'output_structured'   => $output['structured'] ?? null,

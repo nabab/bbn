@@ -4,13 +4,9 @@ namespace bbn\Ai\Lab;
 
 
 use bbn\X;
-use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class Configuration extends DbCls
+class Configuration extends Base
 {
-  use DbActions;
 
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_configurations",
@@ -23,9 +19,14 @@ class Configuration extends DbCls
         "model_id" => "model_id",
         "temperature" => "temperature",
         "top_p" => "top_p",
+        "top_k" => "top_k",
         "max_tokens" => "max_tokens",
         "stop_sequences" => "stop_sequences",
         "seed" => "seed",
+        "repeat_penalty" => "repeat_penalty",
+        "presence_penalty" => "presence_penalty",
+        "frequency_penalty" => "frequency_penalty",
+        "logit_bias" => "logit_bias",
         "extra_params" => "extra_params",
         "created_at" => "created_at",
       ],
@@ -61,3 +62,4 @@ class Configuration extends DbCls
     return $this->dbTraitRselectAll(['model_id' => $modelId], [], $limit, $start);
   }
 }
+

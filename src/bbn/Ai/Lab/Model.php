@@ -5,13 +5,9 @@ namespace bbn\Ai\Lab;
 
 use bbn\X;
 use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
 
-class Model extends DbCls
+class Model extends Base
 {
-  use DbActions;
-
   protected static $default_class_cfg = [
     "table" => "bbn_ai_lab_models",
     "tables" => [
@@ -48,9 +44,13 @@ class Model extends DbCls
     return $this->dbTraitRselectAll($filter, ['limit' => $limit, 'start' => $start]);
   }
 
-  public function create(array $data): ?string
+  public function create(array $data): ?array
   {
-    return $this->dbTraitInsert($data);
+    if ($id = $this->dbTraitInsertUpdate($data)) {
+      return $this->findById($id);
+    }
+
+    return null;
   }
 
   public function updateById(string $id, array $data): bool

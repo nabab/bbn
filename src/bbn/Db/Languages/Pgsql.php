@@ -5,6 +5,7 @@
 namespace bbn\Db\Languages;
 
 use PDO;
+use PDO\Pgsql as PDOPgsql;
 use PDOException;
 use bbn\Str;
 use bbn\X;
@@ -250,8 +251,7 @@ class Pgsql extends Sql
       . ';port=' . $cfg['port']
       . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
-      $cfg['pass'],
-      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+      $cfg['pass']
     ];
 
     return $cfg;

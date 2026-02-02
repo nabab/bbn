@@ -13,7 +13,6 @@ use Exception;
 
 trait DbConfig
 {
-
   /** @var bool */
   private $_isInitClassCfg = false;
 

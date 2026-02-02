@@ -521,7 +521,7 @@ class Mvc implements Mvc\Api
    */
   public function isStaticRoute(?string $url = null): bool
   {
-    if (is_null($url)) {
+    if ($url === null) {
       $url = $this->getRequest();
     }
 
@@ -998,13 +998,13 @@ class Mvc implements Mvc\Api
    *
    * @return string|null
    */
-  public function getUrl(): ?string
+  public function getUrl(): string
   {
     return $this->env->getUrl();
   }
 
 
-  public function getRequest(): ?string
+  public function getRequest(): string
   {
     return $this->env->getRequest();
   }

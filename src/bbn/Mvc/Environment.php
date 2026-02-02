@@ -205,10 +205,8 @@ class Environment
    */
   public function __construct()
   {
-    if (!self::$_initiated) {
-      self::_initialize();
-      $this->_init();
-    }
+    self::_initialize();
+    $this->_init();
   }
 
 
@@ -398,7 +396,7 @@ class Environment
    * @param array|null $arguments
    * @throws \Exception
    */
-  public function simulate($url, $post = false, $arguments = null)
+  public function simulate(string $url, $post = false, $arguments = null)
   {
     unset($this->_params);
     $this->setParams($url . (empty($arguments) ? '' : '/' . implode('/', $arguments)));
@@ -590,9 +588,9 @@ class Environment
   /**
    * Returns the original request sent to the server.
    * 
-   * @return string|null
+   * @return string
    */
-  public function getRequest(): ?string
+  public function getRequest(): string
   {
     return $this->_request;
   }
