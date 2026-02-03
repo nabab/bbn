@@ -78,7 +78,7 @@ class Permissions extends Basic
     }
 
     if (!($this->pref = Preferences::getInstance())) {
-      throw new Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
+      //throw new Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
     }
 
     /** @todo Add the default routes from Mvc::getInstance */
@@ -302,7 +302,8 @@ class Permissions extends Basic
    */
   public function options(string|null $id_option = null, string $type = 'access'): ?array
   {
-    if (($id_option = $this->_get_id_option($id_option, $type))
+    if ($this->pref
+        && ($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->options($id_option))
     ) {
       $res = [];
@@ -357,7 +358,7 @@ class Permissions extends Basic
    */
   public function getAll(string|null $id_option = null, string $type = 'access'): ?array
   {
-    if ($id_option = $this->_get_id_option($id_option, $type)) {
+    if ($this->pref && ($id_option = $this->_get_id_option($id_option, $type))) {
       return $this->pref->options($id_option ?: $this->getCurrent());
     }
 
@@ -374,7 +375,7 @@ class Permissions extends Basic
    */
   public function getFull($id_option = null, string $type = 'access'): ?array
   {
-    if ($id_option = $this->_get_id_option($id_option, $type)) {
+    if ($this->pref && ($id_option = $this->_get_id_option($id_option, $type))) {
       return $this->pref->fullOptions($id_option ?: $this->getCurrent());
     }
 
@@ -403,7 +404,8 @@ class Permissions extends Basic
       return $r;
     }
     */
-    if (($id_option = $this->_get_id_option($id_option, $type))
+    if ($this->pref
+        && ($id_option = $this->_get_id_option($id_option, $type))
         && $this->has($id_option, $type, $force)
     ) {
       return $this->pref->option($id_option);
@@ -427,7 +429,7 @@ class Permissions extends Basic
       return true;
     }
 
-    if ($id_option = $this->_get_id_option($id_option, $type)) {
+    if ($this->pref && ($id_option = $this->_get_id_option($id_option, $type))) {
       $option = $this->opt->option($id_option);
       if (!empty($option['public'])) {
         return true;
@@ -498,7 +500,7 @@ class Permissions extends Basic
    */
   public function add(string $id_option, string $type = 'access'): ?int
   {
-    if ($id_option = $this->_get_id_option($id_option, $type)) {
+    if ($this->pref && ($id_option = $this->_get_id_option($id_option, $type))) {
       return $this->pref->setByOption($id_option, []);
     }
 
@@ -515,7 +517,7 @@ class Permissions extends Basic
    */
   public function remove($id_option, string $type = 'access'): ?int
   {
-    if ($id_option = $this->_get_id_option($id_option, $type)) {
+    if ($this->pref && ($id_option = $this->_get_id_option($id_option, $type))) {
       return $this->pref->delete($id_option);
     }
 
@@ -609,7 +611,7 @@ class Permissions extends Basic
       return true;
     }
 
-    if ($id_perm = $this->optionToPermission($id_option)) {
+    if ($this->pref && ($id_perm = $this->optionToPermission($id_option))) {
       return $this->pref->has($id_perm, $force) ?: $this->user->isAdmin();
     }
 
@@ -629,7 +631,7 @@ class Permissions extends Basic
       return true;
     }
 
-    if ($id_perm = $this->optionToPermission($id_option)) {
+    if ($this->pref && ($id_perm = $this->optionToPermission($id_option))) {
       $p = $this->pref->get($id_perm);
       if (is_array($p) && isset($p['write']) && $p['write']) {
         return true;

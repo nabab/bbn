@@ -354,13 +354,14 @@ You can click the following link to access directly your account:<br>
 
   public function getUsers($group_id = null): array
   {
+    $filter = [$this->class_cfg['arch']['users']['active'] => 1];
+    if ($group_id) {
+      $filter[$this->class_cfg['arch']['users']['id_group']] = $group_id;
+    }
     return $this->db->getColumnValues(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users']['id'],
-      [
-        $this->class_cfg['arch']['users']['active'] => 1,
-        $this->class_cfg['arch']['users']['id_group'] => $group_id
-      ]
+      $filter
     );
   }
 
