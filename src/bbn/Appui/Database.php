@@ -173,9 +173,6 @@ class Database extends bbn\Models\Cls\Cache
   public function connection(string|null $host = null, string $engine = 'mysql', string $db = ''): Db
   {
     $info = $this->getConnectionInfo($host, $engine, $db);
-    if ($engine === 'mysql') {
-      X::hddump($info);
-    }
     [$c1, $c2] = $info['sequence'];
     if (!isset($this->connections[$c1])) {
       throw new Exception(X::_("Unknown engine")." ".$c1);
