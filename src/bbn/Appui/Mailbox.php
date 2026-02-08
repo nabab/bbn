@@ -1653,20 +1653,25 @@ class Mailbox extends Basic
   protected function readCommandResponse(bool $asArray = false): string|array
   {
     $response = [];
-    while ($line = trim($this->readCommandResponseLine())) {
-      $response[] = $line;
-      $prefix = $this->idleTagPrefix . $this->idleTag . ' ';
-      if (str_starts_with($line, $prefix)) {
-        if (str_starts_with($line, $prefix . 'BAD ')
-          || str_starts_with($line, $prefix . 'NO ')
-        ) {
-          throw new Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
-        }
+    try {
+      while ($line = trim($this->readCommandResponseLine())) {
+        $response[] = $line;
+        $prefix = $this->idleTagPrefix . $this->idleTag . ' ';
+        if (str_starts_with($line, $prefix)) {
+          if (str_starts_with($line, $prefix . 'BAD ')
+            || str_starts_with($line, $prefix . 'NO ')
+          ) {
+            throw new Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
+          }
 
-        if (empty($asArray)) {
-          return $line;
+          if (empty($asArray)) {
+            return $line;
+          }
         }
       }
+    }
+    catch(Exception $e) {
+      throw $e;
     }
 
     $this->idleLastTime = time();
