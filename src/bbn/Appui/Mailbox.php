@@ -183,7 +183,12 @@ class Mailbox extends Basic
   /**
    * @var int The timeout for the controller to stop the IDLE
    */
-  protected $idleCtrlTimeout = 10;
+  protected $idleCtrlTimeout = 3;
+
+  /**
+   * @var int The time of the last CTRL ping
+   */
+  protected $idleCtrlLastPing = 0;
 
   /**
    * @var int The timeout for the IDLE command
@@ -1431,6 +1436,8 @@ class Mailbox extends Basic
     ?Controller $ctrl = null
   ): bool
   {
+    set_time_limit(0);
+    ignore_user_abort(false);
     $this->idleRunning = false;
     $this->idleTag = 0;
     $context = [];
@@ -1464,14 +1471,7 @@ class Mailbox extends Basic
 
     try {
       if (!empty($this->idleCtrl)) {
-        $callback('Before ping1');
-        $ping = $this->idleCtrl->pingStream();
-        $callback('Ping1: ' . ($ping ? 'ok' : 'failed'));
-        if (!$ping) {
-          $this->stopIdle();
-          X::log('stoppppppp111', 'mirko');
-          throw new Exception(_("User connection lost"));
-        }
+        $this->pingIdleCtrl();
       }
 
       $this->sendCommand("LOGIN {$this->login} {$this->pass}");
@@ -1483,7 +1483,6 @@ class Mailbox extends Basic
       $callback('MIRKO IDLE STARTED');
       while ($this->idleRunning) {
         try {
-          //$response = $this->readCommandResponse();
           $response = $this->readCommandResponseLine();
         }
         catch (Exception $e) {
@@ -1492,8 +1491,9 @@ class Mailbox extends Basic
             continue;
           }
 
-          if (!str_contains($e->getMessage(), "connection closed")
-            && ($errCode !== 3)
+          if (($errCode === 4)
+            || (!str_contains($e->getMessage(), "connection closed")
+              && ($errCode !== 3))
           ) {
             throw $e;
           }
@@ -1506,6 +1506,12 @@ class Mailbox extends Basic
           $this->idleLastTime = time();
           $this->selectFolder($this->folder);
           $callback($this->getMsg($msgn));
+        }
+
+        if (!empty($this->idleCtrl)
+          && (($this->idleCtrlLastPing + $this->idleCtrlTimeout) <= time())
+        ) {
+          $this->pingIdleCtrl();
         }
 
         // Check if the stream is still alive or should be considered stale
@@ -1681,47 +1687,63 @@ class Mailbox extends Basic
 
   protected function readCommandResponseLine(): string
   {
+    // (opzionale ma utile) evita blocchi lunghi
+    stream_set_blocking($this->idleStream, false);
     $line = '';
-    $ctrlTimeout = time() + $this->idleCtrlTimeout;
     while (Str::sub($line, -1) !== "\n") {
       if (!empty($this->idleCtrl)
-        && ($ctrlTimeout <= time())
+        && (($this->idleCtrlLastPing + $this->idleCtrlTimeout) <= time())
       ) {
-        X::log('Before ping', 'mirko');
-        $ping = $this->idleCtrl->pingStream();
-        X::log('Ping: ' . ($ping ? 'ok' : 'failed'), 'mirko');
-        if (!$ping) {
-          X::log('stoppppppp', 'mirko');
-          throw new Exception(_("User connection lost"));
-        }
-
-        $ctrlTimeout = time() + $this->idleCtrlTimeout;
+        $this->pingIdleCtrl();
       }
 
       if (!$this->_is_connected()
         || (($this->idleLastTime + $this->idleTimeout) < time())
       ) {
+        X::log('IDLE Connection lost', 'mirko');
         throw new Exception(X::_('IDLE Connection lost'), 3);
       }
 
-      $line .= fgets($this->idleStream, 1024);
+      //$line .= fgets($this->idleStream, 1024);
+      $read = [$this->idleStream];
+      $write = $except = [];
+      $n = @stream_select($read, $write, $except, $this->idleCtrlTimeout ?: 10);
+
+      if (($n === 0) || ($n === false)) {
+        continue;
+      }
+
+      $chunk = fgets($this->idleStream, 1024);
+      if ($chunk === false) {
+        continue;
+      }
+
+      $line .= $chunk;
     }
-    /* while ((($c = fread($this->idleStream, 1)) !== false)
-      && !in_array($c, ['', "\n"])
-    ) {
-      $line .= $c;
-    } */
 
     $this->idleLastTime = time();
     if ($this->idleRunning
       && ($line === '')
-      //&& (($c === false)
-      //  || ($c === ''))
     ) {
       throw new Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
     }
 
     return $line;
+  }
+
+
+  protected function pingIdleCtrl(): bool
+  {
+    $this->idleCtrlLastPing = time();
+    X::log('Before ping', 'mirko');
+    $ping = $this->idleCtrl->pingStream();
+    X::log('Ping: ' . ($ping ? 'ok' : 'failed'), 'mirko');
+    if (empty($ping)) {
+      X::log('stoppppppp', 'mirko');
+      throw new Exception(_("User connection lost"), 4);
+    }
+
+    return true;
   }
 
 

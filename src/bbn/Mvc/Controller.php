@@ -204,11 +204,11 @@ class Controller implements Api
       while (ob_get_level()) {
         ob_flush();
       }
-      
+
       $st = json_encode(
-        is_string($data) ? 
-          ['content' => $data]
-          : (is_array($data) ? $data : ['success' => false])
+        is_string($data) ?
+          ['content' => $data] :
+          (is_array($data) ? $data : ['success' => false])
       ) . PHP_EOL;
       $len = Str::len($st);
       if ($len < 8192) {
@@ -228,12 +228,15 @@ class Controller implements Api
    */
   public function pingStream(): bool
   {
-    if ($this->isStream()) {
-      $this->stream(['__bbn_ping__' => 1]);
-      return !connection_aborted();
+    if (!$this->isStream()) {
+      return false;
     }
 
-    return false;
+    //$this->stream(['__bbn_ping__' => 1]);
+    echo json_encode(['__bbn_ping__' => 1]);
+    flush();
+    return (connection_status() === CONNECTION_NORMAL)
+      && !connection_aborted();
   }
 
 
