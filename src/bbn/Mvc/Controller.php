@@ -232,9 +232,7 @@ class Controller implements Api
       return false;
     }
 
-    //$this->stream(['__bbn_ping__' => 1]);
-    echo json_encode(['__bbn_ping__' => 1]);
-    flush();
+    $this->stream(['__bbn_ping__' => 1]);
     return (connection_status() === CONNECTION_NORMAL)
       && !connection_aborted();
   }

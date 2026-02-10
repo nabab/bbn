@@ -1437,7 +1437,7 @@ class Mailbox extends Basic
   ): bool
   {
     set_time_limit(0);
-    ignore_user_abort(false);
+    ignore_user_abort(true);
     $this->idleRunning = false;
     $this->idleTag = 0;
     $context = [];
@@ -1476,8 +1476,16 @@ class Mailbox extends Basic
 
       $this->sendCommand("LOGIN {$this->login} {$this->pass}");
       $this->sendCommand("SELECT {$this->folder}");
-      //$this->sendCommand("CAPABILITY", false);
-      //$callback([$this->readCommandResponse(true), 'idle']);
+      $this->sendCommand("CAPABILITY", false);
+      $capabilityResponse = $this->readCommandResponseLine();
+      $canIdle = !empty($capabilityResponse)
+        && str_contains($capabilityResponse, "CAPABILITY")
+        && in_array("IDLE", explode(" ", $capabilityResponse));
+      if (empty($canIdle)) {
+        $this->stopIdle();
+        throw new Exception(X::_("IDLE not supported by the server"));
+      }
+
       $this->sendCommand("IDLE", false);
       $this->idleRunning = true;
       $callback('MIRKO IDLE STARTED');
@@ -1541,93 +1549,6 @@ class Mailbox extends Basic
   }
 
 
-  /* public function idle2(int $timeout = 300): bool
-  {
-    $this->idleRunning = false;
-    $this->idleTag = 0;
-    $context = [];
-    if ($this->encryption) {
-      $context['ssl'] = [
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-      ];
-    }
-
-    // Establish the connection
-    $this->idleStream = stream_socket_client(
-      ($this->encryption ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
-      $errno,
-      $errstr,
-      $timeout,
-      STREAM_CLIENT_CONNECT,
-      stream_context_create($context)
-    );
-    if (!$this->idleStream) {
-      throw new Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
-    }
-
-    try {
-      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
-      $this->sendCommand("SELECT {$this->folder}");
-      $this->sendCommand("CAPABILITY", false);
-      //$this->readCommandResponseLine();
-  
-      $this->sendCommand("IDLE", false);
-      $user = User::getInstance();
-      $path = $user->getTmpPath() . 'mailbox/' . $this->getHash() . '/';
-      if (is_dir($path)) {
-        Dir::delete($path, true);
-      }
-
-      sleep(1);
-      if (Dir::createPath($path)) {
-        
-      }
-
-      $this->idleRunning = true;
-      while ($this->idleRunning) {
-        try {
-          //$response = $this->readCommandResponse();
-          $response = $this->readCommandResponseLine();
-        }
-        catch (Exception $e) {
-          $errCode = $e->getCode();
-          if (($errCode === 1) && $this->isIdleConnected()) {
-            continue;
-          }
-
-          if (!str_contains($e->getMessage(), "connection closed")) {
-            throw $e;
-          }
-        }
-
-        if (($pos = strpos($response, "EXISTS")) !== false) {
-          $msgn = (int)Str::sub($response, 2, $pos - 2);
-
-          // Check if the stream is still alive or should be considered stale
-          if (!$this->_is_connected() || ($this->idleLastTime < time())) {
-            $this->stopIdle();
-            // Establish a new connection
-            imap_close($this->stream);
-            $this->connect();
-            return $this->idle($callback, $timeout);
-          }
-
-          $this->idleLastTime = time() + $timeout;
-          $this->selectFolder($this->folder);
-          $callback($this->getMsg($msgn));
-        }
-      }
-    }
-    catch (Exception $e) {
-      $this->stopIdle();
-      throw $e;
-    }
-
-    return true;
-  } */
-
-
   public function stopIdle()
   {
     $this->idleRunning = false;
@@ -1646,13 +1567,19 @@ class Mailbox extends Basic
   }
 
 
-  protected function sendCommand(string $command, bool $response = true): string
+  protected function getCurrentIdleTagPrefix(): string
+  {
+    return $this->idleTagPrefix . $this->idleTag . ' ';
+  }
+
+
+  protected function sendCommand(string $command, bool $response = true, bool $responseAsArray = false): string|array
   {
     $this->idleTag++;
-    $this->idleLastCommand = $this->idleTagPrefix . $this->idleTag . ' ' . $command;
+    $this->idleLastCommand = $this->getCurrentIdleTagPrefix() . $command;
     fwrite($this->idleStream, $this->idleLastCommand . "\r\n");
     $this->idleLastTime = time();
-    return !empty($response) ? $this->readCommandResponse() : '';
+    return empty($response) ? (empty($responseAsArray) ? '' : []) : $this->readCommandResponse($responseAsArray);
   }
 
 
@@ -1662,7 +1589,7 @@ class Mailbox extends Basic
     try {
       while ($line = trim($this->readCommandResponseLine())) {
         $response[] = $line;
-        $prefix = $this->idleTagPrefix . $this->idleTag . ' ';
+        $prefix = $this->getCurrentIdleTagPrefix();
         if (str_starts_with($line, $prefix)) {
           if (str_starts_with($line, $prefix . 'BAD ')
             || str_starts_with($line, $prefix . 'NO ')
@@ -1687,10 +1614,9 @@ class Mailbox extends Basic
 
   protected function readCommandResponseLine(): string
   {
-    // (opzionale ma utile) evita blocchi lunghi
     stream_set_blocking($this->idleStream, false);
     $line = '';
-    while (Str::sub($line, -1) !== "\n") {
+    while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL])) {
       if (!empty($this->idleCtrl)
         && (($this->idleCtrlLastPing + $this->idleCtrlTimeout) <= time())
       ) {
@@ -1700,7 +1626,6 @@ class Mailbox extends Basic
       if (!$this->_is_connected()
         || (($this->idleLastTime + $this->idleTimeout) < time())
       ) {
-        X::log('IDLE Connection lost', 'mirko');
         throw new Exception(X::_('IDLE Connection lost'), 3);
       }
 
@@ -1735,11 +1660,8 @@ class Mailbox extends Basic
   protected function pingIdleCtrl(): bool
   {
     $this->idleCtrlLastPing = time();
-    X::log('Before ping', 'mirko');
     $ping = $this->idleCtrl->pingStream();
-    X::log('Ping: ' . ($ping ? 'ok' : 'failed'), 'mirko');
     if (empty($ping)) {
-      X::log('stoppppppp', 'mirko');
       throw new Exception(_("User connection lost"), 4);
     }
 
