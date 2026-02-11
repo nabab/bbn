@@ -16,8 +16,8 @@ namespace bbn;
  * @todo Add feature to auto-detect a different corresponding index and redirect to it through Appui
  * @todo Add $this->dom to public controllers (?)
  */
-use function is_null;
 use bbn\Mvc\Common;
+use bbn\Mvc\Api;
 use bbn\Models\Tts\Singleton;
 use bbn\Str;
 use bbn\Mvc\Router;
@@ -26,12 +26,24 @@ use bbn\Mvc\Model;
 use bbn\Mvc\Environment;
 use bbn\Mvc\Output;
 use bbn\Mvc\View;
+use bbn\Util\Timer;
+use stdClass;
+use Exception;
+use function is_null;
+use function is_object;
+use function is_array;
+use function in_array;
+use function count;
+use function func_get_args;
+use function get_class;
+use function defined;
+use function gettype;
 
 
 /**
  * MVC
  */
-class Mvc implements Mvc\Api
+class Mvc implements Api
 {
   use Singleton;
   use Common;
@@ -153,7 +165,7 @@ class Mvc implements Mvc\Api
   protected $forbidden_routes = [];
 
   /**
-   * @var \stdClass An external object that can be filled after the object creation and can be used as a global with the function add_inc
+   * @var stdClass An external object that can be filled after the object creation and can be used as a global with the function add_inc
    */
   public $inc;
 
@@ -173,6 +185,7 @@ class Mvc implements Mvc\Api
 
   public $checkerDone = false;
 
+  public Timer $timer;
   // These strings are forbidden to use in URL
   public static $reserved = ['_private', '_common', '_htaccess'];
 
@@ -391,7 +404,7 @@ class Mvc implements Mvc\Api
   {
 
     if (!$id_user) {
-      $usr = \bbn\User::getInstance();
+      $usr = User::getInstance();
       if ($usr) {
         $id_user = $usr->getId();
       }
@@ -419,7 +432,7 @@ class Mvc implements Mvc\Api
     }
 
     if (!$id_user) {
-      $usr = \bbn\User::getInstance();
+      $usr = User::getInstance();
       if ($usr) {
         $id_user = $usr->getId();
       }
@@ -450,11 +463,11 @@ class Mvc implements Mvc\Api
         return $d;
       }
 
-      if (\is_object($d)) {
+      if (is_object($d)) {
         $d = X::toArray($d);
       }
 
-      if (!\is_array($d)) {
+      if (!is_array($d)) {
         return false;
       }
 
@@ -571,7 +584,7 @@ class Mvc implements Mvc\Api
   public function addAuthorizedRoute(): int
   {
     $res = 0;
-    foreach (\func_get_args() as $a) {
+    foreach (func_get_args() as $a) {
       if (!in_array($a, $this->authorized_routes, true)) {
         $this->authorized_routes[] = $a;
         $res++;
@@ -585,7 +598,7 @@ class Mvc implements Mvc\Api
   public function addForbiddenRoute(): int
   {
     $res = 0;
-    foreach (\func_get_args() as $a) {
+    foreach (func_get_args() as $a) {
       if (!in_array($a, $this->forbidden_routes, true)) {
         $this->forbidden_routes[] = $a;
         $res++;
@@ -717,7 +730,7 @@ class Mvc implements Mvc\Api
     ob_start();
     (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random): void {
       if ($bbn_inc_content) {
-        if (\count($bbn_inc_data)) {
+        if (count($bbn_inc_data)) {
           foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {
             $$bbn_inc_key = $bbn_inc_val;
           }
@@ -729,7 +742,7 @@ class Mvc implements Mvc\Api
 
         try {
           eval (' ?>' .$bbn_inc_content);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           error_log("Error for $bbn_inc_file: ". $e->getMessage());
           X::logError($e->getCode(), $e->getMessage(), $bbn_inc_file, $e->getLine());
         }
@@ -789,7 +802,7 @@ class Mvc implements Mvc\Api
 
   private function route($url = false)
   {
-    if (\is_null($this->info)) {
+    if (is_null($this->info)) {
       $this->info = $this->getRoute($this->getUrl() ?: '', $this->getMode() ?: '');
     }
 
@@ -829,38 +842,39 @@ class Mvc implements Mvc\Api
    */
   public function __construct($db = null, $routes = [])
   {
-    if (!\defined("BBN_DEFAULT_MODE")) {
+    if (!defined("BBN_DEFAULT_MODE")) {
       define("BBN_DEFAULT_MODE", 'public');
     }
 
     // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
-    if (!\defined("BBN_CUR_PATH")) {
+    if (!defined("BBN_CUR_PATH")) {
       define('BBN_CUR_PATH', '/');
     }
 
-    if (!\defined("BBN_APP_NAME")) {
-      throw new \Exception("BBN_APP_NAME must be defined");
+    if (!defined("BBN_APP_NAME")) {
+      throw new Exception("BBN_APP_NAME must be defined");
     }
 
-    if (!\defined("BBN_APP_PATH")) {
-      throw new \Exception("BBN_APP_PATH must be defined");
+    if (!defined("BBN_APP_PATH")) {
+      throw new Exception("BBN_APP_PATH must be defined");
     }
 
-    if (!\defined("BBN_DATA_PATH")) {
-      throw new \Exception("BBN_DATA_PATH must be defined");
+    if (!defined("BBN_DATA_PATH")) {
+      throw new Exception("BBN_DATA_PATH must be defined");
     }
 
     self::singletonInit($this);
     self::initPath();
+    $this->timer = new Timer();
     $this->env = new Environment();
-    if (\is_object($db) && ($class = \get_class($db)) && ($class === 'PDO' || Str::pos($class, '\Db') !== false)) {
+    if (is_object($db) && ($class = get_class($db)) && ($class === 'PDO' || Str::pos($class, '\Db') !== false)) {
       $this->db = $db;
     } else {
       $this->db = null;
     }
 
-    $this->inc = new \stdClass();
-    if (\is_array($routes)) {
+    $this->inc = new stdClass();
+    if (is_array($routes)) {
       if (isset($routes['root'])) {
         foreach ($routes['root'] as $url => &$route) {
           if (isset($route['root']) && defined('BBN_' . strtoupper($route['root']) . '_PATH')) {
@@ -1113,12 +1127,12 @@ class Mvc implements Mvc\Api
    * @param string     $mode
    * @param array|null $data
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getView(string $path, string $mode = 'html', ?array $data = null)
   {
     if (!router::isMode($mode) || !($path = Router::parse($path))) {
-      throw new \Exception(
+      throw new Exception(
         X::_("Incorrect mode $path $mode")
       );
     }
@@ -1131,7 +1145,7 @@ class Mvc implements Mvc\Api
       $this->addToViews($path, $mode, $view);
     }
 
-    if (\is_object($view) && $view->check()) {
+    if (is_object($view) && $view->check()) {
       return $view->get($data);
     }
 
@@ -1203,7 +1217,7 @@ class Mvc implements Mvc\Api
   public function getExternalView(string $full_path, string $mode = 'html', ?array $data = null)
   {
     if (!router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {
-      throw new \Exception(
+      throw new Exception(
         X::_("Incorrect mode $full_path $mode")
       );
     }
@@ -1220,7 +1234,7 @@ class Mvc implements Mvc\Api
       $this->addToViews($full_path, $mode, $view);
     }
 
-    if (\is_object($view) && $view->check()) {
+    if (is_object($view) && $view->check()) {
       return $view->get($data);
     }
 
@@ -1269,7 +1283,7 @@ class Mvc implements Mvc\Api
     if ($plugin && ($route = $this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin))) {
       $view = new View($route);
       if ($view->check()) {
-        return \is_array($data) ? $view->get($data) : $view->get();
+        return is_array($data) ? $view->get($data) : $view->get();
       }
 
       return '';
@@ -1319,7 +1333,7 @@ class Mvc implements Mvc\Api
 
     return null;
     /*
-    throw new \Exception(
+    throw new Exception(
       X::_(
         "Impossible to find the find the model %s in the plugin %s",
         $path,
@@ -1413,7 +1427,7 @@ class Mvc implements Mvc\Api
       return $res;
     }
 
-    throw new \Exception(
+    throw new Exception(
       X::_(
         "Impossible to find the model %s from subplugin %s in plugin %s",
         $path,
@@ -1447,7 +1461,7 @@ class Mvc implements Mvc\Api
       return $view->get($data);
     }
 
-    throw new \Exception(
+    throw new Exception(
       X::_(
         "Impossible to find the model %s from subplugin %s in plugin %s",
         $path,
@@ -1589,7 +1603,7 @@ class Mvc implements Mvc\Api
    */
   public function getCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 10)
   {
-    if (\is_null($data)) {
+    if (is_null($data)) {
       $data = $this->data;
     }
 
@@ -1611,7 +1625,7 @@ class Mvc implements Mvc\Api
    */
   public function setCachedModel($path, array $data, Controller $ctrl, int $ttl = 10)
   {
-    if (\is_null($data)) {
+    if (is_null($data)) {
       $data = $this->data;
     }
 
@@ -1631,7 +1645,7 @@ class Mvc implements Mvc\Api
    */
   public function deleteCachedModel($path, array $data, Controller $ctrl)
   {
-    if (\is_null($data)) {
+    if (is_null($data)) {
       $data = $this->data;
     }
 
@@ -1650,7 +1664,7 @@ class Mvc implements Mvc\Api
   public function addInc(string $name, object $obj): void
   {
     if (isset($this->inc->{$name})) {
-      throw new \Exception(X::_("Impossible to add twice the same property (%s) to inc", $name));
+      throw new Exception(X::_("Impossible to add twice the same property (%s) to inc", $name));
     }
 
     $this->inc->{$name} = $obj;
@@ -1662,15 +1676,15 @@ class Mvc implements Mvc\Api
    * process() (or check()) must have been called before.
    *
    * @return void
-   * @throws \Exception
+   * @throws Exception
    */
   public function process()
   {
     if ($this->check()) {
-      $this->obj = new \stdClass();
-      if (!\is_array($this->info)) {
+      $this->obj = new stdClass();
+      if (!is_array($this->info)) {
         $this->log("No info in MVC", $this->info);
-        throw new \Exception(X::_("No info in MVC"));
+        throw new Exception(X::_("No info in MVC"));
       }
 
       if (!$this->controller) {
@@ -1713,7 +1727,7 @@ class Mvc implements Mvc\Api
   /**
    *
    *
-   * @throws \Exception
+   * @throws Exception
    */
   public function output()
   {
@@ -1731,12 +1745,12 @@ class Mvc implements Mvc\Api
         return;
       }
 
-      if (\is_array($obj)) {
+      if (is_array($obj)) {
         $obj = X::toObject($obj);
       }
 
-      if ((\gettype($obj) !== 'object') || (\get_class($obj) !== 'stdClass')) {
-        throw new \Exception(X::_("Unexpected output: " . \gettype($obj)));
+      if ((gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass')) {
+        throw new Exception(X::_("Unexpected output: " . gettype($obj)));
       }
 
       if ($this->obj && X::countProperties($this->obj)) {
@@ -1770,7 +1784,7 @@ class Mvc implements Mvc\Api
   /**
    * @param string $path
    * @return int
-   * @throws \Exception
+   * @throws Exception
    */
   public function setPrepath($path)
   {
@@ -1784,7 +1798,7 @@ class Mvc implements Mvc\Api
       }
     }
 
-    throw new \Exception(
+    throw new Exception(
       X::_("The setPrepath method cannot be used in this MVC")
     );
   }

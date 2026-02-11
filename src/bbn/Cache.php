@@ -568,16 +568,33 @@ class Cache implements CacheInterface
   }
 
 
-    /**
-     * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
-     *
-     * @param callable $fn   The function which returns the value for the cache
-     * @param string   $key The name of the item
-     * @param int      $ttl  The cache length
-     *
-     * @return mixed
-     * @throws Exception
-     */
+  /**
+   * Returns the cache value, false otherwise.
+   *
+   * @param string $key The name of the item
+   * @param int    $ttl  The cache length
+   * @return mixed
+   */
+  public function getFull(string $key, ?int $ttl = null): ?array
+  {
+    if ($r = $this->getRaw($key, $ttl)) {
+      return $r;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
+   *
+   * @param callable $fn   The function which returns the value for the cache
+   * @param string   $key The name of the item
+   * @param int      $ttl  The cache length
+   *
+   * @return mixed
+   * @throws Exception
+   */
   public function getSet(callable $fn, string $key, ?int $ttl = null)
   {
     $tmp  = $this->getRaw($key, $ttl);

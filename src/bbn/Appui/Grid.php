@@ -21,6 +21,10 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use function array_key_exists;
+use function in_array;
+use function is_array;
+use function is_string;
 
 class Grid extends bbn\Models\Cls\Cache
 {
@@ -199,15 +203,22 @@ class Grid extends bbn\Models\Cls\Cache
         if (array_key_exists('observer', $cfg) && isset($cfg['observer']['request'])) {
           $this->observer = $cfg['observer'];
         }
-        if (X::hasProp($cfg, 'count')) {
+        if (array_key_exists('num', $cfg)) {
+           $this->num = $cfg['num'];
+        }
+        elseif (array_key_exists('count_query', $cfg)) {
+          $this->count = $cfg['count_query'];
+        }
+        elseif (array_key_exists('count_cfg', $cfg)) {
+          $this->count_cfg = $this->db->processCfg($cfg['count_cfg']);
+        }
+        elseif (X::hasProp($cfg, 'count')) {
           $this->count = $cfg['count'];
-        } else {
+        }
+        else {
           $db_cfg['count'] = true;
           $this->count_cfg = $this->db->processCfg($db_cfg);
           //die(X::dump($this->count_cfg));
-        }
-        if (!empty($cfg['num'])) {
-          $this->num = $cfg['num'];
         }
       }
     }
@@ -287,7 +298,7 @@ class Grid extends bbn\Models\Cls\Cache
         $this->sql = $this->getQuery();
         $q = $this->db->query(
           $this->sql,
-          \array_map(
+          array_map(
             function ($v) {
               if (Str::isUid($v)) {
                 $v = hex2bin($v);
@@ -314,7 +325,7 @@ class Grid extends bbn\Models\Cls\Cache
 
   public function getTotal($force = false): ?int
   {
-    if ($this->num && !$force) {
+    if ($this->num) {
       return $this->num;
     }
     /*
@@ -324,7 +335,7 @@ class Grid extends bbn\Models\Cls\Cache
       return $this->num;
     }
     */
-    if ($this->count) {
+    if (!$this->num && $this->count) {
       $this->chrono->start();
       if (is_string($this->count)) {
         $this->num = $this->db->getOne(
@@ -379,8 +390,9 @@ class Grid extends bbn\Models\Cls\Cache
           'value' => $obs->getResult($id_obs)
         ];
       }
-      return null;
     }
+
+    return null;
   }
 
   public function getDatatable($force = false): array

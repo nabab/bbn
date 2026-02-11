@@ -7,12 +7,13 @@
  */
 
 namespace bbn\Appui;
+
 use bbn\Db;
 use bbn\X;
 use bbn\Appui\Note;
 use bbn\Appui\Option;
 use bbn\Models\Tts\References;
-  use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\User\Permissions;
 
@@ -355,6 +356,7 @@ class Imessages extends DbCls
     $now = date('Y-m-d H:i:s');
     // Get the user's group
     $id_group = $this->db->selectOne('bbn_users', 'id_group', ['id' => $id_user]);
+    $db =& $this->db;
     $fields = array_map(
       function ($a) use ($db, $cfg) {
         return $db->cfn($a, $cfg['table']);

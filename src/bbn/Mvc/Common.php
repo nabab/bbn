@@ -15,12 +15,11 @@ use bbn\Mvc;
 
 trait Common
 {
-
   /**
    * The MVC class from which the controller is called
-   * @var bbn\Mvc
+   * @var Mvc
    */
-  private $_mvc;
+  private Mvc $_mvc;
 
   /**
    * @var null|string If the controller is inside a plugin this property will be set to its name

@@ -26,7 +26,7 @@ abstract class Db extends Basic
   /**
    * @var dbClass
    */
-  protected $db;
+  protected dbClass $db;
 
 
   /**

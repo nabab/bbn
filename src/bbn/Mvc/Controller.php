@@ -9,17 +9,12 @@ use bbn\Mvc as MvcCls;
 use bbn\X;
 use bbn\Str;
 use bbn\Tpl;
+use bbn\Util\Timer;
 use bbn\File\System;
 
 class Controller implements Api
 {
   use Common;
-
-  /**
-   * The MVC class from which the controller is called
-   * @var MvcCls
-   */
-  private $_mvc;
 
   /**
    * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
@@ -143,19 +138,22 @@ class Controller implements Api
    */
   public ?stdClass $inc;
 
+  public Timer $timer;
+
 
   /**
    * This will call the initial build a new instance.
    * It should be called only once from within the script.
    * All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param MvcCls       $mvc
+   * @param MvcCls        $mvc
    * @param array         $route
    * @param array|boolean $data
    */
   public function __construct(MvcCls $mvc, array $route, $data = false)
   {
     $this->_mvc = $mvc;
+    $this->timer = $mvc->timer;
     $this->reset($route, $data);
   }
 

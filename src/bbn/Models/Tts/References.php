@@ -14,15 +14,9 @@ use bbn\Db;
 
 trait References
 {
-  private
-    $references,
-    $references_select = '',
-    $references_join = '';
-
-  /**
-   * @var Db
-   */
-  protected $db;
+  private $references;
+  private $references_select = '';
+  private $references_join = '';
 
   private function _get_references(){
     if ( \is_null($this->references) ){

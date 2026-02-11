@@ -1,11 +1,14 @@
 <?php
 namespace bbn\Mvc;
 
+use Exception;
+use stdClass;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\Models\Cls\Db as DbClass;
+use bbn\Util\Timer;
 use bbn\Models\Tts\Cache;
 
 /**
@@ -69,23 +72,24 @@ class Model extends DbClass
    */
   private $_plugin_name;
 
-  public
-    /**
-     * The database connection instance
-     * @var null|Db
-     */
-    $db,
-    /**
-     * The data model
-     * @var null|array
-     */
-    $data,
+  /**
+   * The database connection instance
+   * @var null|Db
+   */
+  public Db $db;
+
+  /**
+   * The data model
+   * @var null|array
+   */
+  public ?array $data;
   /**
    * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-   * @var \stdClass
+   * @var stdClass
    */
-    $inc;
+  public ?stdClass $inc;
 
+  public Timer $timer;
 
   /**
    * Models are always recreated and reincluded, even if they have from the same path
@@ -107,6 +111,7 @@ class Model extends DbClass
       $this->cacheInit();
       $this->_ctrl = $ctrl;
       $this->_mvc  = $mvc;
+      $this->timer = $mvc->timer;
       $this->inc = &$mvc->inc;
       if (is_file($info['file'])) {
         $this->_path        = $info['path'];
@@ -579,12 +584,5 @@ class Model extends DbClass
 
     return null;
   }
-
-
-  public function applyLocale($plugin)
-  {
-    return $this->_mvc->applyLocale($plugin);
-  }
-
 
 }

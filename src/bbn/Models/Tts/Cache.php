@@ -17,7 +17,7 @@ trait Cache
 {
   private $_cache_prefix;
 
-  protected $cache_engine;
+  protected ?CacheCls $cache_engine = null;
 
   /**
    * Initializes the cache object, must be called in __construct
@@ -117,6 +117,19 @@ trait Cache
   {
     $this->cacheCheck();
     return $this->cache_engine->get($this->_cache_name($uid, $method));
+  }
+
+  /**
+   * Gets the cached data
+   *
+   * @param string $uid
+   * @param string $method
+   * @return ?array
+   */
+  protected function cacheGetFull(string $uid, string $method = ''): ?array
+  {
+    $this->cacheCheck();
+    return $this->cache_engine->getFull($this->_cache_name($uid, $method));
   }
 
 

@@ -222,6 +222,8 @@ class Dashboard extends Basic
       unset($data[$this->archPref['id']]);
       return (bool)$this->db->update($this->cfgPref['table'], $data, [$this->archPref['id'] => $this->id]);
     }
+
+    return false;
   }
 
 
