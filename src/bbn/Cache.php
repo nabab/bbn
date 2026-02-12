@@ -2,15 +2,18 @@
 namespace bbn;
 
 use bbn\Str;
-use Closure;
+use bbn\File\System;
 use Memcached;
 use Exception;
 use Traversable;
-use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
-use function Opis\Closure\serialize as serializeFn;
-use function Opis\Closure\unserialize as unserializeFn;
 use function defined;
+use function in_array;
+use function is_array;
+use function mb_ereg_replace;
+use function is_object;
+use function is_string;
+use function count;
 
 /**
  * Universal caching class: called once per request, it holds the cache system.
@@ -30,7 +33,7 @@ class Cache implements CacheInterface
 
   protected static $max_wait = 10;
 
-  protected static $default_ttl = 60;
+  protected static $default_ttl = 0;
 
   protected static $engine;
 
@@ -67,8 +70,8 @@ class Cache implements CacheInterface
 
   private static function _sanitize($st)
   {
-    $st = \mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
-    $st = \mb_ereg_replace("([\.]{2,})", '', $st);
+    $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
+    $st = mb_ereg_replace("([\.]{2,})", '', $st);
     return $st;
   }
 
@@ -125,7 +128,7 @@ class Cache implements CacheInterface
    */
   public static function makeHash($value): string
   {
-    if (\is_object($value) || \is_array($value)) {
+    if (is_object($value) || is_array($value)) {
       $value = serialize($value);
     }
 
@@ -160,7 +163,7 @@ class Cache implements CacheInterface
       return (int)$ttl;
     }
 
-    if (\is_string($ttl)) {
+    if (is_string($ttl)) {
       switch ($ttl) {
         case 'xxs':
           return 30;
@@ -239,7 +242,7 @@ class Cache implements CacheInterface
     }
     elseif ($this->path = Mvc::getCachePath()) {
       self::_set_type('files');
-      $this->fs = new File\System();
+      $this->fs = new System();
     }
   }
 
@@ -256,7 +259,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return (bool)apcu_exists($key);
+          return (bool)call_user_func('\\apcu_exists', $key);
         case 'memcache':
           return $this->obj->get($key) !== $key;
         case 'files':
@@ -291,7 +294,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apcu_delete($key);
+          return call_user_func('\\apcu_delete', $key);
         case 'memcache':
           return $this->obj->delete($key);
         case 'files':
@@ -342,7 +345,7 @@ class Cache implements CacheInterface
       switch (self::$type){
         case 'apc':
           foreach ($items as $item){
-            $res += (int)apcu_delete($item);
+            $res += (int)call_user_func('\\apcu_delete', $item);
           }
           break;
         case 'memcache':
@@ -435,7 +438,7 @@ class Cache implements CacheInterface
             throw new Exception(X::_("The APC extension doesn't seem to be installed"));
           }
 
-          return \apcu_store($key, $val, $ttl);
+          return call_user_func('\\apcu_store', $key, $val, $ttl);
         case 'memcache':
           return $this->obj->set(
             $key, json_encode($val), $ttl
@@ -510,8 +513,8 @@ class Cache implements CacheInterface
           throw new Exception(X::_("The APC extension doesn't seem to be installed"));
         }
 
-        if (\apcu_exists($key)) {
-          $t = \apcu_fetch($key);
+        if (call_user_func('\\apcu_exists', $key)) {
+          $t = call_user_func('\\apcu_fetch', $key);
         }
         break;
       case 'memcache':
@@ -627,7 +630,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apcu_cache_info();
+          return call_user_func('\\apcu_cache_info');
         case 'memcache':
           return $this->obj->getStats('slabs');
         case 'files':
@@ -645,7 +648,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apcu_cache_info();
+          return call_user_func('\\apcu_cache_info');
         case 'memcache':
           return $this->obj->getStats();
         case 'files':
@@ -664,7 +667,7 @@ class Cache implements CacheInterface
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          $all  = apcu_cache_info();
+          $all  = call_user_func('\\apcu_cache_info');
           $list = [];
           foreach ($all['cache_list'] as $a){
             array_push($list, $a['info']);
@@ -693,7 +696,7 @@ class Cache implements CacheInterface
             }
           );
           $dirs  = $this->fs->getDirs($this->path.($dir ? "/$dir" : ''));
-          if (\count($dirs)) {
+          if (count($dirs)) {
             foreach ($dirs as $d){
               $res = $this->items($dir ? $dir.'/'.X::basename($d) : X::basename($d));
               foreach ($res as $r){
@@ -749,6 +752,95 @@ class Cache implements CacheInterface
     }
 
     return true;
+  }
+
+
+  public function browse(string $path = ''): array
+  {
+    if (self::$type) {
+      switch (self::$type){
+        case 'apc':
+          $all  = call_user_func('\\apcu_cache_info');
+          $list = [];
+          foreach ($all['cache_list'] as $a){
+            array_push($list, $a['info']);
+          }
+
+          return $list;
+        case 'memcache':
+          $keys = $this->obj->getAllKeys();
+          $list = [];
+          $done = [];
+          foreach ($keys as $k){
+            $isFolder = false;
+            $bits = X::split($k, '/');
+            $idx = 0;
+            if (empty($path)) {
+              $name = $bits[0];
+            }
+            elseif (mb_strpos($k, $path) === 0) {
+              $idx = count(X::split($path, '/'));
+              $name = $bits[$idx];
+            }
+            else {
+              continue;
+            }
+
+            if (count($bits) > count(X::split($path, '/'))) {
+              $isFolder = true;
+              $name .= '/';
+            }
+
+            if ($name && !in_array($name, $done)) {
+              $done[] = $name;
+              $num = count(array_filter($keys, fn ($a) => strpos($a, ($path ? $path . '/' : '') . $name) === 0));
+              //X::dump($name, $k, $path, $num, $bits);
+              $list[] = [
+                'text' => $name,
+                'nodePath' => trim($path . '/' . $name, '/'),
+                'items'=> [],
+                'num' => $num,
+                'path' => $isFolder ? [...($path ? X::split($path, '/') : []), $bits[0]] : [],
+                'folder' => $num > 0
+              ];
+            }
+            //X::ddump(count($list));
+          }
+
+          return $list;
+        case 'files':
+          $this->fs->cd($this->path);
+          $content = $this->fs->getFiles($path ? "/$path" : '', true);
+          $all = [];
+          if (!empty($content)) {
+            foreach ($content as $nodePath) {
+              $arr = X::split($nodePath, '/');
+              $element = array_last($arr);
+              $ele =  [
+                'text' => $element,
+                //'path' => [],
+                'nodePath' => $nodePath,
+                'items'=> [],
+                'num' => $this->fs->isDir($nodePath) ? count($this->fs->getFiles($nodePath, true)) : 0,
+                'folder' => $this->fs->isDir($nodePath)
+              ];
+        
+        
+              if ($this->fs->isDir($nodePath)) {
+                $paths = $element !== $nodePath ? X::split($nodePath, '/') : [];
+                $ele['path'] = count($paths) ? array_splice($paths, 0, count($paths) - 1) : $paths;
+              }
+
+              array_push($all, $ele);
+            }
+          }
+
+          $this->fs->back();
+          return $this->fs->getFiles($this->path.($path ? "/$path" : ''));
+      }
+    }
+
+    return [];
   }
 
 }

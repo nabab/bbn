@@ -1354,6 +1354,21 @@ use bbn\Cache;
   }
 
 
+  /**
+   * Deletes a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+  public function deleteAllCache(): bool
+  {
+    return $this->cacheInit()
+      && ($path = $this->getCachePath())
+      && ($fs = new System())
+      && $fs->delete($path, false);
+  }
+
+
 
   public function getLocaleDatabase(?string $idUser = null, bool $createIfNotExists = true): ?Db
   {
