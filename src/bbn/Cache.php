@@ -27,6 +27,8 @@ use function count;
 
 class Cache implements CacheInterface
 {
+  private string $host;
+  private int $port;
   protected static $is_init = false;
 
   protected static $type = null;
@@ -42,71 +44,6 @@ class Cache implements CacheInterface
   protected $obj;
 
   protected $fs;
-
-
-  /**
-   * @param ?string $engine
-   * @return int
-   */
-  private static function _init(?string $engine = null): int
-  {
-    if (!self::$is_init) {
-      self::$engine  = new Cache($engine);
-      self::$is_init = 1;
-    }
-
-    return 1;
-  }
-
-
-  /**
-   * @param string $type
-   */
-  private static function _set_type(string $type): void
-  {
-    self::$type = $type;
-  }
-
-
-  private static function _sanitize($st)
-  {
-    $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
-    $st = mb_ereg_replace("([\.]{2,})", '', $st);
-    return $st;
-  }
-
-
-  /**
-   * @param string $dir
-   * @param string $path
-   * @param bool   $parent
-   * @return string
-   */
-  private static function _dir(string $dir, string $path, $parent = true): string
-  {
-    if ($parent) {
-      $dir = X::dirname($dir);
-    }
-
-    if (empty($dir)) {
-      return $path;
-    }
-    elseif (Str::sub($dir, -1) === '/') {
-      $dir = Str::sub($dir, 0, -1);
-    }
-
-    return self::_sanitize(
-      str_replace(
-        '../',
-        '',
-        str_replace(
-          '\\',
-          '/',
-          str_replace('//', '/', $path.$dir)
-        )
-      )
-    );
-  }
 
 
   /**
@@ -234,9 +171,9 @@ class Cache implements CacheInterface
     }
     elseif ((($engine === 'memcache')) && class_exists("Memcached")) {
       $this->obj = new Memcached();
-      $host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
-      $port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
-      if ($this->obj->addServer($host, $port)) {
+      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
+      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
+      if ($this->obj->addServer($this->host, $this->port)) {
         self::_set_type('memcache');
       }
     }
@@ -261,7 +198,19 @@ class Cache implements CacheInterface
         case 'apc':
           return (bool)call_user_func('\\apcu_exists', $key);
         case 'memcache':
-          return $this->obj->get($key) !== $key;
+          $t = $this->getRaw($key);
+          if ($t) {
+            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+                && (!$t['expire'] || ($t['expire'] > time()))
+            ) {
+              return true;
+            }
+
+            $this->delete($key);
+          }
+
+          return false;
+
         case 'files':
           $file = self::_file($key, $this->path);
           if (($content = $this->fs->getContents($file))
@@ -675,7 +624,7 @@ class Cache implements CacheInterface
           return $list;
         case 'memcache':
           $list = [];
-          $arr  = $this->obj->getAllKeys();
+          $arr  = $this->getAllKeys();
           foreach ($arr as $key){
             if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
               $list[] = $key;
@@ -771,37 +720,62 @@ class Cache implements CacheInterface
           $keys = $this->obj->getAllKeys();
           $list = [];
           $done = [];
-          foreach ($keys as $k){
-            $isFolder = false;
+          foreach ($keys as $i => $k){
             $bits = X::split($k, '/');
             $idx = 0;
             if (empty($path)) {
               $name = $bits[0];
             }
             elseif (mb_strpos($k, $path) === 0) {
-              $idx = count(X::split($path, '/'));
+              $idx = count(X::split(trim($path, '/'), '/'));
               $name = $bits[$idx];
             }
             else {
               continue;
             }
 
-            if (count($bits) > count(X::split($path, '/'))) {
-              $isFolder = true;
-              $name .= '/';
-            }
+            if ($name) {
+              $fullName = trim(trim($path, '/') . '/' . $name, '/');
+              $num = 0;
+              if ($isFolder = $k !== $fullName) {
+                $num++;
+                $name .= '/';
+                $fullName .= '/';
+              }
+              if (in_array($name, $done)) {
+                continue;
+              }
 
-            if ($name && !in_array($name, $done)) {
               $done[] = $name;
-              $num = count(array_filter($keys, fn ($a) => strpos($a, ($path ? $path . '/' : '') . $name) === 0));
+              if ($isFolder) {
+                $subdone = [];
+                $num += $isFolder ? count(array_filter(
+                  $keys,
+                  function($a, $j) use ($i, $fullName, $idx, &$subdone) {
+                    if (($i !== $j) && (strpos($a, $fullName) === 0)) {
+                      $bits = X::split($a, '/');
+                      $subname = $bits[$idx+1];
+                      if (!in_array($subname, $subdone)) {
+                        $subdone[] = $subname;
+                        return true;
+                      }
+                    }
+
+                    return false;
+                  },
+                  ARRAY_FILTER_USE_BOTH 
+                )) : 0;
+              }
+
               //X::dump($name, $k, $path, $num, $bits);
               $list[] = [
                 'text' => $name,
-                'nodePath' => trim($path . '/' . $name, '/'),
+                'key' => $k,
+                'nodePath' => $fullName,
                 'items'=> [],
                 'num' => $num,
-                'path' => $isFolder ? [...($path ? X::split($path, '/') : []), $bits[0]] : [],
-                'folder' => $num > 0
+                'path' => X::split(dirname($fullName), '/'),
+                'folder' => $isFolder
               ];
             }
             //X::ddump(count($list));
@@ -842,5 +816,127 @@ class Cache implements CacheInterface
 
     return [];
   }
+
+  private function getAllKeys() {
+    $sock = fsockopen($this->host, $this->port, $errno, $errstr);
+    if ($sock === false) {
+        throw new Exception("Error connection to server {$this->host} on port {$this->port}: ({$errno}) {$errstr}");
+    }
+
+    if (fwrite($sock, "stats items\n") === false) {
+        throw new Exception("Error writing to socket");
+    }
+
+    $slabCounts = [];
+    while (($line = fgets($sock)) !== false) {
+        $line = trim($line);
+        if ($line === 'END') {
+            break;
+        }
+
+        // STAT items:8:number 3
+        if (preg_match('!^STAT items:(\d+):number (\d+)$!', $line, $matches)) {
+            $slabCounts[$matches[1]] = (int)$matches[2];
+        }
+    }
+
+    foreach ($slabCounts as $slabNr => $slabCount) {
+        if (fwrite($sock, "lru_crawler metadump {$slabNr}\n") === false) {
+            throw new Exception('Error writing to socket');
+        }
+
+        $count = 0;
+        while (($line = fgets($sock)) !== false) {
+            $line = trim($line);
+            if ($line === 'END') {
+                break;
+            }
+
+            // key=foobar exp=1596440293 la=1596439293 cas=8492 fetch=no cls=24 size=14908
+            if (preg_match('!^key=(\S+)!', $line, $matches)) {
+                $name = urldecode($matches[1]);
+                if ($this->has($name)) {
+                  $allKeys[] = $name;
+                  $count++;
+                }
+            }
+        }
+
+//        if ($count !== $slabCount) {
+//            throw new Exception("Surprise, got {$count} keys instead of {$slabCount} keys");
+//        }
+    }
+
+    if (fclose($sock) === false) {
+        throw new Exception('Error closing socket');
+    }
+    
+    return $allKeys;
+  }
+
+  /**
+   * @param ?string $engine
+   * @return int
+   */
+  private static function _init(?string $engine = null): int
+  {
+    if (!self::$is_init) {
+      self::$engine  = new Cache($engine);
+      self::$is_init = 1;
+    }
+
+    return 1;
+  }
+
+
+  /**
+   * @param string $type
+   */
+  private static function _set_type(string $type): void
+  {
+    self::$type = $type;
+  }
+
+
+  private static function _sanitize($st)
+  {
+    $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
+    $st = mb_ereg_replace("([\.]{2,})", '', $st);
+    return $st;
+  }
+
+
+  /**
+   * @param string $dir
+   * @param string $path
+   * @param bool   $parent
+   * @return string
+   */
+  private static function _dir(string $dir, string $path, $parent = true): string
+  {
+    if ($parent) {
+      $dir = X::dirname($dir);
+    }
+
+    if (empty($dir)) {
+      return $path;
+    }
+    elseif (Str::sub($dir, -1) === '/') {
+      $dir = Str::sub($dir, 0, -1);
+    }
+
+    return self::_sanitize(
+      str_replace(
+        '../',
+        '',
+        str_replace(
+          '\\',
+          '/',
+          str_replace('//', '/', $path.$dir)
+        )
+      )
+    );
+  }
+
 
 }
