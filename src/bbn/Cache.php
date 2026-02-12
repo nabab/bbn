@@ -717,7 +717,7 @@ class Cache implements CacheInterface
 
           return $list;
         case 'memcache':
-          $keys = $this->obj->getAllKeys();
+          $keys = $this->getAllKeys();
           $list = [];
           $done = [];
           foreach ($keys as $i => $k){
