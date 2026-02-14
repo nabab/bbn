@@ -11,6 +11,7 @@ use bbn\File\Dir;
 use bbn\Util\Timer;
 use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
+use function count;
 use function defined;
 use function call_user_func;
 use function is_array;
@@ -399,10 +400,10 @@ class Runner extends Basic
         $year_file = X::dirname(X::dirname($month_file)).'/'.X::join($path_elements, '-').'.json';
         $logs = [];
         if (is_file($json_file)
-          && ($logs = file_get_contents($json_file))
+          && ($json = file_get_contents($json_file))
         ) {
           try {
-            $logs = json_decode($logs, true, 512, JSON_THROW_ON_ERROR);
+            $logs = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             if (empty($logs)) {
               $logs = [];
             }
