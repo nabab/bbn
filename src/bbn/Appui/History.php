@@ -173,7 +173,7 @@ class History
    * @param $d
    * @return null|float
    */
-  public static function validDate($d): ?float
+  public static function validTimestamp($d): ?float
   {
     if (!Str::isNumber($d)) {
       $d = strtotime($d);
@@ -404,7 +404,7 @@ MYSQL;
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
       Str::checkName($table) &&
-      ($date = self::validDate($from_when)) &&
+      ($date = self::validTimestamp($from_when)) &&
       ($db = self::_get_db()) &&
       ($dbc = self::_get_database()) &&
       ($id_table = $dbc->tableId($table))
@@ -499,7 +499,7 @@ MYSQL;
   {
     if (
       Str::checkName($table) &&
-      ($date = self::validDate($from_when)) &&
+      ($date = self::validTimestamp($from_when)) &&
       ($dbc = self::_get_database()) &&
       ($db = self::_get_db())
     ) {
@@ -578,7 +578,7 @@ MYSQL;
    */
   public static function getRowBack(string $table, string $id, string|float $when, array $columns = []): ?array
   {
-    if (!($when = self::validDate($when))) {
+    if (!($when = self::validTimestamp($when))) {
       self::_report_error("The date $when is incorrect", __CLASS__, __LINE__);
     } else if (
       ($db = self::_get_db()) &&
@@ -652,11 +652,12 @@ MYSQL;
     return false;
   }
 
-  public static function getCreationDate(string $table, string $id): ?float
+  public static function getCreationDate(string $table, string $id, bool $asString = false): null|float|string
   {
     if ($res = self::getCreation($table, $id)) {
-      return $res['date'];
+      return $asString ? $res['date'] : $res['timestamp'];
     }
+
     return null;
   }
 
@@ -678,7 +679,7 @@ MYSQL;
         self::disable();
       }
 
-      $r = $db->rselect(self::$table, ['date' => 'tst', 'user' => 'usr'], [
+      $r = $db->rselect(self::$table, ['date' => 'dt', 'timestamp' => 'tst', 'user' => 'usr'], [
         'uid' => $id,
         'col' => $id_col,
         'opr' => 'INSERT'

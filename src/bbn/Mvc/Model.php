@@ -111,7 +111,7 @@ class Model extends DbClass
       $this->cacheInit();
       $this->_ctrl = $ctrl;
       $this->_mvc  = $mvc;
-      $this->timer = $mvc->timer;
+      $this->timer = &$mvc->timer;
       $this->inc = &$mvc->inc;
       if (is_file($info['file'])) {
         $this->_path        = $info['path'];
