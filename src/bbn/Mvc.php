@@ -1601,7 +1601,7 @@ class Mvc implements Api
    * @param array data to send to the model
    * @return array|null A data model
    */
-  public function getCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 10)
+  public function getCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 0)
   {
     if (is_null($data)) {
       $data = $this->data;
@@ -1623,7 +1623,7 @@ class Mvc implements Api
    * @param array data to send to the model
    * @return void
    */
-  public function setCachedModel($path, array $data, Controller $ctrl, int $ttl = 10)
+  public function setCachedModel($path, array $data, Controller $ctrl, int $ttl = 0)
   {
     if (is_null($data)) {
       $data = $this->data;

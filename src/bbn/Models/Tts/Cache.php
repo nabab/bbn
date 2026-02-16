@@ -124,6 +124,19 @@ trait Cache
    *
    * @param string $uid
    * @param string $method
+   * @return mixed
+   */
+  protected function cacheGetRaw(string $uid, string $method = ''): mixed
+  {
+    $this->cacheCheck();
+    return $this->cache_engine->getFull($this->_cache_name($uid, $method));
+  }
+
+  /**
+   * Gets the cached data
+   *
+   * @param string $uid
+   * @param string $method
    * @return ?array
    */
   protected function cacheGetFull(string $uid, string $method = ''): ?array

@@ -26,7 +26,8 @@ trait Cfg
   public function getCfg(...$codes): ?array
   {
     // Get the ID of the option from its code.
-    $id = $this->fromCode($codes);
+    $id = $this->fromCode(...$codes);
+    $originalId = $id;
 
     if (!Str::isUid($id)) {
       // If the ID is not valid, return null.
@@ -34,8 +35,8 @@ trait Cfg
     }
 
     // Check if the ID is valid and if the result is cached.
-    if ($tmp = $this->getCache($id, __FUNCTION__)) {
-      return $tmp;
+    if ($tmp = $this->cacheGetRaw($id, __FUNCTION__)) {
+      return $tmp['value'];
     }
 
     // Get references to class configuration and fields.
@@ -168,7 +169,8 @@ trait Cfg
     }
 
     // Cache the result and return it.
-    $this->setCache($id, __FUNCTION__, $cfg);
+    $this->setCache($originalId, __FUNCTION__, $cfg);
+    //X::ddump("YYYY", $id, $this->cacheGetRaw($id, __FUNCTION__));
     return $cfg;
   }
 
@@ -183,7 +185,6 @@ trait Cfg
   {
     // Get the ID of the option from its code.
     $id = $this->fromCode($codes);
-
     // Check if the ID is valid and retrieve the raw cfg value from the database.
     if (Str::isUid($id)) {
       $c = &$this->class_cfg;
