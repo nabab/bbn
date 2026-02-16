@@ -21,7 +21,7 @@ trait Manip
   public function export(string $id, string $mode = 'single'): ?array
   {
     $this->isExporting = true;
-    $this->deleteCache();
+    //$this->deleteCache($id, true, true);
     $o = null;
     $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
     if (!in_array($mode, $modes)) {
@@ -173,7 +173,6 @@ trait Manip
     }
     
     $this->isExporting = false;
-    $this->deleteCache();
     return $o;
   }
 
@@ -311,11 +310,11 @@ trait Manip
         $options = [$options];
       }
 
-      $this->deleteCache();
+      //$this->deleteCache();
       $realParent = $id_parent ?: $this->default;
       $currentOptions = $this->fullOptions($realParent);
       foreach ($options as $o) {
-        $this->deleteCache();
+        //$this->deleteCache();
         $after = [];
         $items = [];
         /** @todo Temp solution */
@@ -478,7 +477,7 @@ trait Manip
         }
       }
 
-      $this->deleteCache();
+      //$this->deleteCache();
       foreach ($withParent as $o) {
         if (!empty($o['items']) &&  ($idParent = $this->fromCode(...$o[$c['id_parent']]))) {
           $this->import(

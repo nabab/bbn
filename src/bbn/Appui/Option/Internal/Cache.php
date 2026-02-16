@@ -3,6 +3,7 @@
 namespace bbn\Appui\Option\Internal;
 
 use bbn\Str;
+use bbn\X;
 use bbn\Appui\Option;
 
 /**
@@ -32,8 +33,8 @@ trait Cache
   public function setCache(string $id, string $method, $data, ?string $locale = null): self
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
-    if (empty($locale)) {
-      //$locale = $this->getTranslatingLocale($id);
+    if (($method !== 'findI18nById') && empty($locale)) {
+      $locale = $this->getTranslatingLocale($id);
     }
 
     // If a locale exists, cache with locale support; otherwise, cache without locale.
@@ -58,8 +59,8 @@ trait Cache
   public function getCache(string $id, string $method, ?string $locale = null)
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
-    if (empty($locale)) {
-     // $locale = $this->getTranslatingLocale($id);
+    if (($method !== 'findI18nById') && empty($locale)) {
+      $locale = $this->getTranslatingLocale($id);
     }
 
     // If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.

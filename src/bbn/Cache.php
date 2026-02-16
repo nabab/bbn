@@ -2,9 +2,8 @@
 namespace bbn;
 
 use bbn\Str;
-use bbn\File\System;
-use Memcached;
 use Exception;
+use Memcached;
 use Traversable;
 use Psr\SimpleCache\CacheInterface;
 use function defined;
@@ -44,6 +43,8 @@ class Cache implements CacheInterface
   protected $obj;
 
   protected $fs;
+
+  protected $prefix;
 
 
   /**
@@ -119,7 +120,6 @@ class Cache implements CacheInterface
       }
     }
 
-    X::log($ttl);
     throw new Exception(X::_("Wrong ttl parameter"));
   }
 
@@ -169,8 +169,22 @@ class Cache implements CacheInterface
     if ((($engine === 'apc')) && function_exists('apcu_clear_cache')) {
       self::_set_type('apc');
     }
+    elseif ((($engine === 'redis')) && class_exists("Redis")) {
+      $this->obj = new \Redis();
+      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
+      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
+      if ($this->obj->connect($this->host, $this->port, 2.5)) {
+        $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
+        $this->obj->select($dbIndex);
+        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_NAME') . '/';
+        if ($this->prefix) {
+          $this->obj->setOption(\Redis::OPT_PREFIX, $this->prefix);
+        }
+        self::_set_type('redis');
+      }
+    }
     elseif ((($engine === 'memcache')) && class_exists("Memcached")) {
-      $this->obj = new Memcached();
+      $this->obj = new \Memcached();
       $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
       $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
       if ($this->obj->addServer($this->host, $this->port)) {
@@ -179,7 +193,7 @@ class Cache implements CacheInterface
     }
     elseif ($this->path = Mvc::getCachePath()) {
       self::_set_type('files');
-      $this->fs = new System();
+      $this->fs = new \bbn\File\System();
     }
   }
 
@@ -197,6 +211,21 @@ class Cache implements CacheInterface
       switch (self::$type){
         case 'apc':
           return (bool)call_user_func('\\apcu_exists', $key);
+
+        case 'redis':
+          $t = $this->getRaw($key);
+          if ($t) {
+            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+                && (!$t['expire'] || ($t['expire'] > time()))
+            ) {
+              return true;
+            }
+
+            $this->delete($key);
+          }
+
+          return false;
+
         case 'memcache':
           $t = $this->getRaw($key);
           if ($t) {
@@ -244,6 +273,8 @@ class Cache implements CacheInterface
       switch (self::$type){
         case 'apc':
           return call_user_func('\\apcu_delete', $key);
+        case 'redis':
+          return $this->obj->unlink($key);
         case 'memcache':
           return $this->obj->delete($key);
         case 'files':
@@ -296,6 +327,9 @@ class Cache implements CacheInterface
           foreach ($items as $item){
             $res += (int)call_user_func('\\apcu_delete', $item);
           }
+          break;
+        case 'redis':
+          $res = $this->obj->unlink(...$items);
           break;
         case 'memcache':
           if (!$st) {
@@ -388,6 +422,15 @@ class Cache implements CacheInterface
           }
 
           return call_user_func('\\apcu_store', $key, $val, $ttl);
+        case 'redis':
+          if ($ttl) {
+            return $this->obj->set(
+              $key, json_encode($val)
+            );
+          }
+          else {
+            return $this->obj->set($key, json_encode($val));
+          }
         case 'memcache':
           return $this->obj->set(
             $key, json_encode($val), $ttl
@@ -465,6 +508,13 @@ class Cache implements CacheInterface
         if (call_user_func('\\apcu_exists', $key)) {
           $t = call_user_func('\\apcu_fetch', $key);
         }
+        break;
+      case 'redis':
+        $tmp = $this->obj->get($key);
+        if ($tmp) {
+          $t = json_decode($tmp, true);
+        }
+
         break;
       case 'memcache':
         $tmp = $this->obj->get($key);
@@ -621,7 +671,25 @@ class Cache implements CacheInterface
           foreach ($all['cache_list'] as $a){
             array_push($list, $a['info']);
           }
+
           return $list;
+
+        case 'redis':
+          $list = [];
+          $it = null;
+          $prefixLength = strlen($this->prefix);
+          while ($keys = $this->obj->scan($it, $dir ? "$dir/*" : '*')) {
+            foreach ($keys as $key) {
+              $key = mb_substr($key, $prefixLength);
+              if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
+                $list[] = $key;
+              }
+            }
+          }
+
+          sort($list);
+          return $list;
+
         case 'memcache':
           $list = [];
           $arr  = $this->getAllKeys();
@@ -630,7 +698,10 @@ class Cache implements CacheInterface
               $list[] = $key;
             }
           }
+
+          sort($list);
           return $list;
+
         case 'files':
           $cache =& $this;
           $list  = array_filter(
@@ -653,6 +724,7 @@ class Cache implements CacheInterface
               }
             }
           }
+
           return $list;
       }
     }
@@ -713,6 +785,72 @@ class Cache implements CacheInterface
           $list = [];
           foreach ($all['cache_list'] as $a){
             array_push($list, $a['info']);
+          }
+
+          return $list;
+        case 'redis':
+          $keys = $this->items($path);
+          $list = [];
+          $done = [];
+          foreach ($keys as $i => $k){
+            $bits = X::split($k, '/');
+            $idx = 0;
+            if (empty($path)) {
+              $name = $bits[0];
+            }
+            elseif (mb_strpos($k, $path) === 0) {
+              $idx = count(X::split(trim($path, '/'), '/'));
+              $name = $bits[$idx];
+            }
+            else {
+              continue;
+            }
+
+            if ($name) {
+              $fullName = trim(trim($path, '/') . '/' . $name, '/');
+              $num = 0;
+              if ($isFolder = $k !== $fullName) {
+                $num++;
+                $name .= '/';
+                $fullName .= '/';
+              }
+              if (in_array($name, $done)) {
+                continue;
+              }
+
+              $done[] = $name;
+              if ($isFolder) {
+                $subdone = [];
+                $num += $isFolder ? count(array_filter(
+                  $keys,
+                  function($a, $j) use ($i, $fullName, $idx, &$subdone) {
+                    if (($i !== $j) && (strpos($a, $fullName) === 0)) {
+                      $bits = X::split($a, '/');
+                      $subname = $bits[$idx+1];
+                      if (!in_array($subname, $subdone)) {
+                        $subdone[] = $subname;
+                        return true;
+                      }
+                    }
+
+                    return false;
+                  },
+                  ARRAY_FILTER_USE_BOTH 
+                )) : 0;
+              }
+
+              //X::dump($name, $k, $path, $num, $bits);
+              $list[] = [
+                'text' => $name,
+                'key' => $k,
+                'nodePath' => $fullName,
+                'items'=> [],
+                'num' => $num,
+                'path' => X::split(dirname($fullName), '/'),
+                'folder' => $isFolder
+              ];
+            }
+            //X::ddump(count($list));
           }
 
           return $list;

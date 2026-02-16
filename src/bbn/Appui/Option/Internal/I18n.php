@@ -243,45 +243,40 @@ trait I18n
   }
 
 
-  public function findI18nById(string $id): ?string
+  public function findI18nById(string $id, int $level = 0): ?string
   {
-    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id)) {
       if ($c = $this->getCache($id, __FUNCTION__)) {
         return $c['i18n'];
       }
-
+        
       $i18n = null;
-      if ($cfg = $this->getCfg($id)) {
-        if (!empty($cfg['i18n'])) {
+      $clsCfg = $this->getClassCfg();
+      $idParent = $this->dbTraitSelectOne($clsCfg['arch']['options']['id_parent'], $id);
+      if ($idParent === $this->getRoot()) {
+        $this->setCache($id, __FUNCTION__, ['i18n' => null]);
+        return null;
+      }
+
+      if ($jsonCfg = $this->dbTraitSelectOne($clsCfg['arch']['options']['cfg'], $idParent)) {
+        $cfg = json_decode($jsonCfg, true);
+        X::ddump($cfg);
+        if (!$level && !empty($cfg['i18n'])) {
+          $i18n = $cfg['i18n'];
+        }
+        elseif ($level && !empty($cfg['i18n_inheritance'])
+            && (($cfg['i18n_inheritance'] === 'cascade')
+              || (($cfg['i18n_inheritance'] === 'children')
+                && ($level === 1)))
+        ) {
           $i18n = $cfg['i18n'];
         }
       }
 
-      if (empty($i18n)
-        && ($parents = $this->parents($id))
-      ) {
-        foreach ($parents as $i => $parent) {
-          $pcfg = $this->getCfg($parent);
-          if (empty($pcfg)
-            || empty($pcfg['i18n'])
-          ) {
-            continue;
-          }
-
-          if (!empty($pcfg['i18n_inheritance'])
-            && (($pcfg['i18n_inheritance'] === 'cascade')
-              || (($pcfg['i18n_inheritance'] === 'children')
-                && ($i === 0)))
-          ) {
-            $i18n = $pcfg['i18n'];
-            break;
-          }
-
-          $i18n = null;
-          break;
-        }
+      if (empty($i18n)) {
+        $i18n = $this->findI18nById($idParent, $level + 1);
       }
-
+      
       $this->setCache($id, __FUNCTION__, ['i18n' => $i18n]);
       return $i18n;
     }

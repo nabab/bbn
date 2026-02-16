@@ -490,7 +490,7 @@ class Model extends DbClass
    * @param string $spec
    * @return string|null
    */
-    protected function _cache_name($data, string $spec = ''): ?string
+    protected function modelCacheName($data, string $spec = ''): ?string
     {
       if ($this->_path) {
         $cn = 'models/'.$this->_path;
@@ -521,11 +521,10 @@ class Model extends DbClass
    * @param int $ttl
    * @return void
    */
-  public function setCache(array|null $data = null, string $spec = '', $ttl = 10)
+  public function setCache(array $cacheData, array|null $data = null, string $spec = '', $ttl = 0)
   {
     if ($this->_path) {
-      $d = $this->get($data);
-      $this->cacheSet($this->_cache_name($data, $spec), '', $d, $ttl);
+      $this->cacheSet($this->modelCacheName($data, $spec), '', $cacheData, $ttl);
     }
   }
 
@@ -538,11 +537,7 @@ class Model extends DbClass
    */
   public function deleteCache(array|null $data = null, $spec = '', string $path = '')
   {
-    if ($cn = $this->_cache_name($data, $spec)) {
-      if ($path) {
-        $cn = 'models/' . $path . Str::sub($cn, Str::len('models/' . $this->_path));
-      }
-
+    if ($cn = $this->modelCacheName($data, $spec)) {
       return $this->cache_engine->deleteAll($cn, '');
     }
   }
@@ -556,7 +551,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 10)
+  public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 0)
   {
     $model =& $this;
     return $this->getSetFromCache(
@@ -576,9 +571,9 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getSetFromCache(\Closure $fn, array|null $data = null, string $spec = '', int $ttl = 10): ?array
+  public function getSetFromCache(\Closure $fn, array|null $data = null, string $spec = '', int $ttl = 0): ?array
   {
-    if ($cn = $this->_cache_name($data, $spec)) {
+    if ($cn = $this->modelCacheName($data, $spec)) {
       return $this->cacheGetSet($fn, $cn, '', $ttl) ?: null;
     }
 
