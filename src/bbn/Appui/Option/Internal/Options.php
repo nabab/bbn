@@ -155,7 +155,7 @@ trait Options
   public function items(...$code): ?array
   {
     if (Str::isUid($id = $this->fromCode(...$code))) {
-      if (($res = $this->cacheGetRaw($id, __FUNCTION__)) !== false) {
+      if ($res = $this->cacheGetRaw($id, __FUNCTION__)) {
         return $res['value'];
       }
 

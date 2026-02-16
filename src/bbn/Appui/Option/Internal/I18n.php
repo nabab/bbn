@@ -253,7 +253,7 @@ trait I18n
       $i18n = null;
       $clsCfg = $this->getClassCfg();
       $idParent = $this->dbTraitSelectOne($clsCfg['arch']['options']['id_parent'], $id);
-      if ($idParent === $this->getRoot()) {
+      if (!$idParent || ($idParent === $this->getRoot())) {
         $this->setCache($id, __FUNCTION__, ['i18n' => null]);
         return null;
       }
