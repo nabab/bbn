@@ -349,7 +349,7 @@ class X
    * @param string       $prop
    * @return boolean|null
    */
-  public static function hasProp($obj, string $prop, bool $check_empty = false): ?bool
+  public static function hasProp(array|stdClass $obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
       return array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));

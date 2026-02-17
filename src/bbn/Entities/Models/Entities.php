@@ -185,6 +185,8 @@ abstract class Entities extends DbCls
       return $this->getClass($path . 'Tables\\' . $cls, $method, $entity);
     } else if (class_exists($path . 'Junctions\\' . $cls)) {
       return $this->getClass($path . 'Junctions\\' . $cls, $method, $entity);
+    } else if (class_exists($path . $cls)) {
+      return $this->getClass($path . $cls, $method, $entity);
     } else if (class_exists($path . 'Links\\' . $cls)) {
       return $this->getLink($path . 'Links\\' . $cls, $entity);
     } else if (class_exists($path . 'Documents\\' . $cls)) {

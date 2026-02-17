@@ -84,6 +84,10 @@ class Cache implements CacheInterface
     return self::$type;
   }
 
+  public function getObj() {
+    return $this->obj;
+  }
+
 
   /**
    * Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments.
@@ -297,7 +301,7 @@ class Cache implements CacheInterface
      *
      * @return bool|int
      */
-  public function deleteAll(?string $st = null): bool
+  public function deleteAll(?string $st = null): int
   {
     if (self::$type === 'files') {
       if ($st === null) {
@@ -306,17 +310,17 @@ class Cache implements CacheInterface
 
       $dir = self::_dir($st, $this->path, false);
       if ($this->fs->isDir($dir)) {
-        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);
+        return $this->fs->delete($dir, $dir === $this->path ? false : true);
       }
       else {
         try {
           $res = $this->fs->delete($dir.'.bbn.cache');
         }
         catch (Exception $e) {
-          $res = false;
+          $res = 0;
         }
 
-        return (bool)$res;
+        return $res;
       }
     }
     elseif (self::$type) {
@@ -329,21 +333,21 @@ class Cache implements CacheInterface
           }
           break;
         case 'redis':
-          $res = $this->obj->unlink(...$items);
+          $res = count($items) ? $this->obj->unlink(...$items) : 0;
           break;
         case 'memcache':
           if (!$st) {
             $this->obj->flush();
           }
 
-          $res = count($this->obj->deleteMulti($items));
+          $res = count($items) ? $this->obj->deleteMulti($items) : 0;
           break;
       }
 
       return $res;
     }
 
-    return false;
+    return 0;
   }
 
 
@@ -678,7 +682,7 @@ class Cache implements CacheInterface
           $list = [];
           $it = null;
           $prefixLength = strlen($this->prefix);
-          while ($keys = $this->obj->scan($it, $dir ? "$dir/*" : '*')) {
+          while ($keys = $this->obj->scan($it, ($this->prefix ?? '' ).($dir ? "$dir*" : '*'))) {
             foreach ($keys as $key) {
               $key = mb_substr($key, $prefixLength);
               if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
