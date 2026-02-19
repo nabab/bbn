@@ -78,6 +78,19 @@ class Timer
 
 
   /**
+   * Resets the timer for the given key.
+   *
+   * @return void
+   */
+  public function resetAll()
+  {
+    foreach (array_keys($this->_measures) as $k) {
+      unset($this->_measures[$k]);
+    }
+  }
+
+
+  /**
    * Stops a timer for a given key
    *
    * @param string $key

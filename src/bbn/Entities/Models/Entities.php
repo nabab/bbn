@@ -26,6 +26,8 @@ use bbn\Appui\History;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbActions;
 
+use function is_int;
+
 /**
  * Class Entities
  * Abstract base class for entity-related operations.
@@ -340,12 +342,13 @@ abstract class Entities extends DbCls
    *
    * @param array $filter
    * @param array $order
-   * @param array $limit
-   * @param array $start
+   * @param int $limit
+   * @param int $start
+   * @param array $fields
    *
    * @return array
    */
-  public function selectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function selectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, array $fields = []): array
   {
     return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
   }
@@ -358,10 +361,10 @@ abstract class Entities extends DbCls
    * @param array $order
    * @param int $limit
    * @param int $start
-   *
+   * @param array $fields
    * @return array
    */
-  public function rselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function rselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, array $fields = []): array
   {
     return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
   }
@@ -568,7 +571,7 @@ abstract class Entities extends DbCls
   protected function treatWhere(string|array $where): string|array
   {
     $cfg = $this->getClassCfg();
-    if (!empty($cfg['arch'][$this->class_table_index]['easy_id']) && Str::isNumber($where)) {
+    if (is_int($where)) {
       $where = [$cfg['arch'][$this->class_table_index]['easy_id'] => $where];
     }
 

@@ -3,7 +3,12 @@
  * @package bbn
  */
 namespace bbn\Models\Cls;
-use bbn;
+
+use bbn\Cache as CacheCls;
+use bbn\Db;
+use bbn\Models\Cls\Basic;
+
+use function is_array;
 /**
  * Object Class with Db and cache
  *
@@ -18,17 +23,17 @@ use bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-abstract class Cache extends bbn\Models\Cls\Basic
+abstract class Cache extends Basic
 {
   /** @var string */
 	protected string $_cache_prefix;
 
-  /** @var $cacher cache */
-  protected bbn\Cache $cacher;
+  /** @var CacheCls $cacher */
+  protected CacheCls $cacher;
 
-  public function __construct(protected bbn\Db $db)
+  public function __construct(protected Db $db)
   {
-    $this->cacher = bbn\Cache::getEngine();
+    $this->cacher = CacheCls::getEngine();
     $this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
   }
 

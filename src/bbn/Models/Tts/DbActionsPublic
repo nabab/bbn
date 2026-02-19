@@ -1,0 +1,52 @@
+<?php
+
+use bbn\Models\Tts\DbActions;
+
+trait DbActionsPublic
+{
+  use DbActions;
+  public function insert(array $data, bool $ignore = false): ?string
+  {
+    return $this->dbTraitInsert($data, $ignore);
+  }
+
+  public function update(string|array $filter, array $data): int
+  {
+    return $this->dbTraitUpdate($filter, $data);
+  }
+
+  public function delete(string|array $filter, bool $cascade = false): int
+  {
+    return $this->dbTraitDelete($filter, $cascade);
+  }
+
+  public function rselect(string|array $filter = [], array $order = [], array $fields = []): ?array
+  {
+    return $this->dbTraitRselect($filter, $order, $fields);
+  }
+
+  public function select(string|array $filter = [], array $order = [], array $fields = []): ?\stdClass
+  {
+    return $this->dbTraitSelect($filter, $order, $fields);
+  }
+
+  public function selectOne(string $field, string|array $filter = [], array $order = []): mixed
+  {
+    return $this->dbTraitSelectOne($field, $filter, $order);
+  }
+
+  public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
+  {
+    return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
+  }
+
+  public function selectAll(string|array $filter = [], array $order = [], $limit = 0, $start = 0, array $fields = []): array
+  {
+    return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
+  }
+
+  public function rselectAll(string|array $filter = [], array $order = [], $limit = 0, $start = 0, array $fields = []): array
+  {
+    return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
+  }
+}

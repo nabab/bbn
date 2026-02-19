@@ -3,6 +3,7 @@
 namespace bbn\Db\Languages;
 
 use Exception;
+use stdClass;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -19,6 +20,14 @@ use bbn\Db\Types;
 use PHPSQLParser\PHPSQLParser;
 use bbn\Db\Languages\Models\Sql\Commands;
 use bbn\Db\Languages\Models\Sql\Formatters;
+
+use function array_key_exists;
+use function count;
+use function in_array;
+use function is_string;
+use function is_array;
+use function is_int;
+use function is_callable;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Types
 {
@@ -122,18 +131,18 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   protected $last_insert_id;
 
   /**
-   * The information that will be accessed by Db\Query as the current statement's options
+   * The information that will be accessed by Query as the current statement's options
    * @var array $last_params
    */
   protected $last_params = ['sequences' => false, 'values' => false];
 
   /**
-   * @var string \$last_query
+   * @var string $last_query
    */
   protected $last_query;
 
   /**
-   * @var string \$last_query
+   * @var string $last_real_query
    */
   protected $last_real_query;
 
@@ -248,7 +257,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function __construct(array $cfg)
   {
-    if (!\extension_loaded('pdo_mysql')) {
+    if (!extension_loaded('pdo_mysql')) {
       throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
@@ -513,10 +522,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     $bits = explode('.', $table);
 
-    if (\count($bits) === 3) {
+    if (count($bits) === 3) {
       $db    = trim($bits[0], ' ' . $this->qte);
       $table = trim($bits[1]);
-    } elseif (\count($bits) === 2) {
+    } elseif (count($bits) === 2) {
       $db    = trim($bits[0], ' ' . $this->qte);
       $table = trim($bits[1], ' ' . $this->qte);
     } else {
@@ -544,7 +553,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     if ($table = trim($table)) {
       $bits = explode('.', $table);
-      switch (\count($bits)) {
+      switch (count($bits)) {
         case 1:
           $table = trim($bits[0], ' ' . $this->qte);
           break;
@@ -578,7 +587,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $col  = trim(array_pop($bits), ' ' . $this->qte);
       if ($table && ($table = $this->tableSimpleName($table))) {
         $ok = 1;
-      } elseif (\count($bits)) {
+      } elseif (count($bits)) {
         $table = trim(array_pop($bits), ' ' . $this->qte);
         $ok    = 1;
       }
@@ -688,7 +697,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         return null;
       }
 
-      if (isset($r['BRACKET']) && (\count($r) === 1)) {
+      if (isset($r['BRACKET']) && (count($r) === 1)) {
         /** @todo Is it impossible to parse queries with brackets ? */
         //throw new Exception('Bracket in the query '.$statement);
         return null;
@@ -831,7 +840,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     if (($keys = $this->getKeys($table))
       && isset($keys['keys']['PRIMARY'])
-      && (\count($keys['keys']['PRIMARY']['columns']) === 1)
+      && (count($keys['keys']['PRIMARY']['columns']) === 1)
     ) {
       return $keys['keys']['PRIMARY']['columns'][0];
     }
@@ -1074,17 +1083,17 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
                   $is_uid = true;
                 }
               }
-              elseif (\in_array($model['type'], static::$numeric_types, true)) {
+              elseif (in_array($model['type'], static::$numeric_types, true)) {
                 $is_number = true;
               }
-              elseif (\in_array($model['type'], static::$date_types, true)) {
+              elseif (in_array($model['type'], static::$date_types, true)) {
                 $is_date = true;
               }
             }
             elseif ($f['value'] && Str::isUid($f['value'])) {
               $is_uid = true;
             }
-            elseif (\is_int($f['value']) || \is_float($f['value'])) {
+            elseif (is_int($f['value']) || is_float($f['value'])) {
               $is_number = true;
             }
           }
@@ -1981,11 +1990,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
     $column = $this->colFullName($column);
     $bits   = explode('.', $column);
-    if (\count($bits) === 2) {
+    if (count($bits) === 2) {
       array_unshift($bits, $this->getCurrent());
     }
 
-    if (\count($bits) !== 3) {
+    if (count($bits) !== 3) {
       return null;
     }
 
@@ -2024,11 +2033,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
     $column = $this->colFullName($column);
     $bits   = explode('.', $column);
-    if (\count($bits) === 2) {
+    if (count($bits) === 2) {
       array_unshift($bits, $db ?: $this->current);
     }
 
-    if (\count($bits) !== 3) {
+    if (count($bits) !== 3) {
       return null;
     }
 
@@ -2047,13 +2056,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
                   // Has a reference
                   && !empty($k2['ref_column'])
                   // and refers to a single column
-                  && (\count($k['columns']) === 1)
+                  && (count($k['columns']) === 1)
                   // A unique reference
-                  && (\count($k2['columns']) === 1)
+                  && (count($k2['columns']) === 1)
                   // To a table with a primary
                   && isset($schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']])
                   // which is a sole column
-                  && (\count($schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
+                  && (count($schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
                   // We retrieve the key name
                   && ($key_name = $schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']][0])
                   // which is unique
@@ -2101,7 +2110,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     }
 
     // The function can be called directly with func_get_args()
-    while ((\count($args) === 1) && is_array($args[0])){
+    while ((count($args) === 1) && is_array($args[0])){
       $args = $args[0];
     }
 
@@ -2130,7 +2139,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $driver_options = array_shift($args);
         }
         // Case where values are in a single argument
-        elseif (\count($args) === 1) {
+        elseif (count($args) === 1) {
           $args = $args[0];
         }
       }
@@ -2160,15 +2169,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           /* Or looking for question marks */
           $sequences = array_keys($sequences);
           preg_match_all('/(\?)/', $statement, $exp);
-          $placeholders = isset($exp[1]) && is_array($exp[1]) ? \count($exp[1]) : 0;
+          $placeholders = isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0;
           while ($sequences[0] === 'OPTIONS'){
             array_shift($sequences);
           }
 
           $params['kind']      = $sequences[0];
           $params['union']     = isset($sequences['UNION']);
-          $params['write']     = !\in_array($params['kind'], self::$read_kinds, true);
-          $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
+          $params['write']     = !in_array($params['kind'], self::$read_kinds, true);
+          $params['structure'] = in_array($params['kind'], self::$structure_kinds, true);
           if (($this->getEngine() === 'sqlite')
             && str_starts_with(strtolower($statement), 'pragma')
           ) {
@@ -2182,7 +2191,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         }
         else {
           throw new Exception(
-            \defined('BBN_IS_DEV') && BBN_IS_DEV
+            defined('BBN_IS_DEV') && BBN_IS_DEV
               ? "Impossible to parse the query $statement"
               : 'Impossible to parse the query'
           );
@@ -2214,7 +2223,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $params['values'],
           array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
         );
-        $num_values       = \count($params['values']);
+        $num_values       = count($params['values']);
       }
 
       /* The number of values must match the number of placeholders to bind */
@@ -2252,7 +2261,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         // This is a writing statement, it will execute the statement and return the number of affected rows
         if ($q['write']) {
           // A prepared query already exists for the writing
-          /** @var \bbn\Db\Query */
+          /** @var Query */
           if ($q['prepared']) {
             $r = $q['prepared']->init($params['values'])->execute();
           }
@@ -2263,8 +2272,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
           // Preparing the query
           else{
-            // Native PDO function which will use Db\Query as base class
-            /** @var \bbn\Db\Query */
+            // Native PDO function which will use Query as base class
+            /** @var Query */
             $q['prepared'] = $this->pdo->prepare($q['sql'], $q['options']);
             $r             = $q['prepared']->execute();
           }
@@ -2272,11 +2281,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         // This is a reading statement, it will prepare the statement and return a query object
         else {
           if (!$q['prepared']) {
-            // Native PDO function which will use Db\Query as base class
+            // Native PDO function which will use Query as base class
             $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
           }
           else {
-            // Returns the same Db\Query object
+            // Returns the same Query object
             $q['prepared']->init($params['values']);
           }
         }
@@ -2329,18 +2338,18 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     if (is_string($st)) {
       if (Str::isBuid($st)) {
-        $st = \bin2hex($st);
+        $st = bin2hex($st);
       }
       else{
         if (Str::isJson($st)) {
           if (Str::pos($st, '": ') && ($json = \json_decode($st))) {
-            return \json_encode($json);
+            return json_encode($json);
           }
 
           return $st;
         }
 
-        $st = \trim(\trim($st, " "), "\t");
+        $st = trim(trim($st, " "), "\t");
         if (Str::isInteger($st)
             && ((Str::sub((string)$st, 0, 1) !== '0') || ($st === '0'))
         ) {
@@ -2354,7 +2363,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           return (float)$st;
         }
 
-        return \normalizer_normalize($st);
+        return normalizer_normalize($st);
       }
     }
     elseif (is_array($st)) {
@@ -2362,7 +2371,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         $st[$k] = $this->correctTypes($v);
       }
     }
-    elseif (\is_object($st)) {
+    elseif (is_object($st)) {
       $vs = get_object_vars($st);
       foreach ($vs as $k => $v) {
         $st->$k = $this->correctTypes($v);
@@ -2387,8 +2396,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     $this->queries[$hash] = [
       'sql' => $statement,
       'kind' => $kind,
-      'write' => \in_array($kind, self::$write_kinds, true),
-      'structure' => \in_array($kind, self::$structure_kinds, true),
+      'write' => in_array($kind, self::$write_kinds, true),
+      'structure' => in_array($kind, self::$structure_kinds, true),
       'placeholders' => $placeholders,
       'options' => $options,
       'num' => 0,
@@ -2416,7 +2425,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     if (X::hasProp($this->queries, $hash)) {
       unset($this->queries[$hash]);
-      while ($idx = \array_search($hash, $this->queries, true)) {
+      while ($idx = array_search($hash, $this->queries, true)) {
         unset($this->queries[$idx]);
       }
     }
@@ -2431,7 +2440,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     if (isset($this->queries[$hash]) && is_array(($this->queries[$hash]))) {
       $last_index                   = count($this->list_queries) - 1;
-      $now                          = \microtime(true);
+      $now                          = microtime(true);
       $this->queries[$hash]['last'] = $now;
       $this->queries[$hash]['num']++;
       if ($this->list_queries[$last_index]['hash'] !== $hash) {
@@ -2501,7 +2510,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
                 'cols' => $keys['cols'],
                 'fields' => $cols,
                 'charset' => $this->getTableCharset($item),
-                'collation' => $this->getTableCollation($item)
+                'collation' => $this->getTableCollation($item),
+                'primary' => isset($keys['keys']['PRIMARY']) ? $keys['keys']['PRIMARY']['columns'] : []
               ];
             }
             break;
@@ -2719,9 +2729,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     }
 
     foreach ($kind as $k){
-      if (\in_array($k, $kinds, true)) {
+      if (in_array($k, $kinds, true)) {
         foreach ($moment as $m){
-          if (array_key_exists($m, $this->_triggers[$k]) && \in_array($m, $moments, true)) {
+          if (array_key_exists($m, $this->_triggers[$k]) && in_array($m, $moments, true)) {
             if ($tables === '*') {
               $tables = $this->getTables();
             }
@@ -2787,7 +2797,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       // Specific to a table
       if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
         foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $f){
-          if ($f && \is_callable($f)) {
+          if ($f && is_callable($f)) {
             if (!($tmp = $f($cfg))) {
               $cfg['run']  = false;
               $cfg['trig'] = false;
@@ -2911,15 +2921,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         }
 
         $this->last_cfg = $cfg;
-        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
+        if (!in_array($cfg['kind'], self::$write_kinds, true)) {
           return $cfg['run'] ?? null;
         }
 
-        if (isset($cfg['value'])) {
+        if (array_key_exists('value', $cfg)) {
           return $cfg['value'];
         }
 
-        if (isset($cfg['run'])) {
+        if (array_key_exists('run', $cfg)) {
           return $cfg['run'];
         }
       }
@@ -2987,7 +2997,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       if (!empty($args['tables'])) {
         foreach ($args['tables'] as $key => $tab) {
           if (empty($tab)) {
-            $this->log(\debug_backtrace());
+            $this->log(debug_backtrace());
             throw new Exception("$key is not defined");
           }
 
@@ -3008,10 +3018,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
         }
 
-        if ((\count($res['tables']) === 1)
+        if ((count($res['tables']) === 1)
           && ($tfn = array_values($res['tables'])[0])
           && isset($models[$tfn]['keys']['PRIMARY'])
-          && (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
+          && (count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
           && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
         ) {
           $p                     = $models[$tfn]['fields'][$res['primary']];
@@ -3020,7 +3030,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           $res['primary_type']   = $p['type'];
           if (($res['kind'] === 'INSERT')
             && !$res['auto_increment']
-            && !\in_array($this->colSimpleName($res['primary']), $res['fields'], true)
+            && !in_array($this->colSimpleName($res['primary']), $res['fields'], true)
           ) {
             $res['generate_id'] = true;
             $res['fields'][]    = $res['primary'];
@@ -3367,7 +3377,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       ]
     );
     $res['kind']   = strtoupper($res['kind']);
-    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
+    $res['write']  = in_array($res['kind'], self::$write_kinds, true);
     $res['ignore'] = $res['write'] && !empty($res['ignore']);
     $res['count']  = !$res['write'] && !empty($res['count']);
 
@@ -3387,7 +3397,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
     }
     elseif (empty($res['union'])) {
-      throw new \Error(X::_('No table given'));
+      throw new Exception(X::_('No table given'));
     }
 
     if (!empty($res['fields'])) {
@@ -3818,7 +3828,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function countQueries(): int
   {
-    return \count($this->queries);
+    return count($this->queries);
   }
 
   /**
@@ -3828,7 +3838,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function flush(): int
   {
-    $num                = \count($this->queries);
+    $num                = count($this->queries);
     $this->queries      = [];
     $this->list_queries = [];
     return $num;
@@ -3851,7 +3861,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   protected function makeHash(): string
   {
     $args = func_get_args();
-    if ((\count($args) === 1) && is_array($args[0])) {
+    if ((count($args) === 1) && is_array($args[0])) {
       $args = $args[0];
     }
 
@@ -3899,7 +3909,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function startFancyStuff(): self
   {
-    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [\bbn\Db\Query::class, [$this]]);
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [Query::class, [$this]]);
     $this->_fancy = 1;
 
     return $this;
@@ -4065,7 +4075,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function getOne()
   {
-    /** @var \bbn\Db\Query $r */
+    /** @var Query $r */
     if ($r = $this->query(...func_get_args())) {
       return $r->fetchColumn(0);
     }
@@ -4165,19 +4175,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param array $where The "where" condition
    * @param array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
-   * @return null|\stdClass
+   * @return null|stdClass
    * @throws Exception
    */
-  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
+  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?stdClass
   {
     $args = $this->_add_kind($this->_set_limit_1(func_get_args()));
     if ($r = $this->_exec(...$args)) {
-      if (!is_object($r)) {
-        $this->log([$args, $this->processCfg($args)]);
-      }
-      else{
-        return $r->getObject();
-      }
+      return $r->getObject();
     }
 
     return null;
@@ -4480,7 +4485,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       unset($args['bbn_db_processed']);
     }
 
-    if (\is_object($r = $this->_exec($args))) {
+    if (is_object($r = $this->_exec($args))) {
       $a = $r->getIrow();
       return $a ? (int)$a[0] : null;
     }
@@ -4798,7 +4803,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         // Only if the number of known field values matches the number of columns
         // which are parts of the unique key
         // If a value is null it won't pass isset and so won't be used
-        if (($i === \count($k['columns'])) && $this->count($table, $unique)) {
+        if (($i === count($k['columns'])) && $this->count($table, $unique)) {
           // Removing unique matching fields from the values (as it is the where)
           foreach ($unique as $f => $v){
             unset($values[$f]);
@@ -4988,7 +4993,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * ```
    *
    * @param string $query
-   * @return bool|\stdClass
+   * @return bool|stdClass
    */
   public function fetchObject($query)
   {
@@ -5160,10 +5165,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *       }
    * ```
    *
-   * @return null|\stdClass
+   * @return null|stdClass
    * @throws Exception
    */
-  public function getObject(): ?\stdClass
+  public function getObject(): ?stdClass
   {
     if ($r = $this->query(...func_get_args())) {
       /** @var Query $r */
@@ -5239,7 +5244,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         if (($t['ref_table'] === $table)
           && ($t['ref_column'] === $col)
           && ($t['ref_db'] === $db)
-          && (\count($t['columns']) === 1)
+          && (count($t['columns']) === 1)
         ) {
           if (!isset($res[$tn])) {
             $res[$tn] = [$t['columns'][0]];
@@ -5270,7 +5275,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     return ($model = $this->modelize($table)) &&
       isset($model['keys']['PRIMARY']) &&
-      (\count($model['keys']['PRIMARY']['columns']) === 1) &&
+      (count($model['keys']['PRIMARY']['columns']) === 1) &&
       ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');
   }
 

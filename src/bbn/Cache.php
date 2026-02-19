@@ -547,9 +547,10 @@ class Cache implements CacheInterface
         }
       }
 
-      if ((!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
-          && (empty($t['expire']) || ($t['expire'] > time()))
-      ) {
+      if (!empty($t['expire']) && ($t['expire'] < time())) {
+        $this->delete($key);
+      }
+      elseif (!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl'])) {
         return $t;
       }
     }
@@ -606,6 +607,13 @@ class Cache implements CacheInterface
     $tmp  = $this->getRaw($key, $ttl);
     $data = null;
     // Can't get the data
+    $this->setRaw($key, [
+      'value' => $tmp ? $tmp['value'] : null,
+      'hash' => $tmp ? $tmp['hash'] : null,
+      'building' => true,
+      'ttl' => 10,
+      'expire' => time() + 10
+    ], 10);
     if (!$tmp) {
       $this->setRaw($key, ['value' => null, 'building' => true, 'ttl' => 10, 'expire' => time() + 10], 10);
       try {
@@ -621,6 +629,7 @@ class Cache implements CacheInterface
     else {
       $data = $tmp['value'];
     }
+
     return $data;
   }
 

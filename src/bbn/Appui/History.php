@@ -1,5 +1,4 @@
 <?php
-
 namespace bbn\Appui;
 
 use Exception;
@@ -1208,7 +1207,37 @@ MYSQL;
     return (bool)$num;
   }
 
+  private static $cachedTables = [
+    'apst_adherents',
+    'bbn_identities',
+    'bbn_addresses',
+    'bbn_options',    
+    'bbn_entities_links',
+    'apst_clotures',
+    'apst_documents',
+    'apst_cotisations_annuelles',
+    'apst_cotisations',
+    'apst_adherents_notes',
+    'apst_adherents_tasks',
+    'apst_attestations'
+  ];
 
+  private static function get_primary_value(array $cfg): ?string
+  {
+    $primary = null;
+    $idx = X::search($cfg['values_desc'], ['primary' => true]);
+    if ($idx !== null) {
+      $primary = $cfg['values'][$idx];
+    }
+
+    if (isset($cfg['primary'], $cfg['fields'])) {
+      $idx = array_search($cfg['primary'], $cfg['fields'], true);
+      if (($idx !== false) && isset($cfg['values'][$idx])) {
+        $primary = $cfg['values'][$idx];
+      }
+    }
+    return $primary;
+  }
   /**
    * The function used by the db trigger
    * This will basically execute the history query if it's configured for.
@@ -1232,7 +1261,7 @@ MYSQL;
     if (
       ($cfg['kind'] === 'SELECT') &&
       ($cfg['moment'] === 'before') &&
-      !empty($cfg['tables']) &&
+      !empty($tables) &&
       !in_array($db->tfn(self::$table), $cfg['tables_full'], true) &&
       !in_array($db->tfn(self::$table_uids), $cfg['tables_full'], true)
     ) {
