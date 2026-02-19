@@ -1,6 +1,6 @@
 <?php
 
-use bbn\Models\Tts\DbActions;
+namespace bbn\Models\Tts;
 
 trait DbActionsPublic
 {

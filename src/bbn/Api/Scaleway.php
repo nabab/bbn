@@ -4,6 +4,7 @@ namespace bbn\Api;
 use bbn\Cache;
 use bbn\X;
 use bbn\Str;
+use bbn\Models\Tts\Cache as cacheTts;
 
 /**
  * Scaleway API
@@ -15,7 +16,7 @@ use bbn\Str;
  */
 class Scaleway
 {
-  use \bbn\Models\Tts\Cache;
+  use cacheTts;
   use Scaleway\Server;
   use Scaleway\Dedibox;
   use Scaleway\Failover;

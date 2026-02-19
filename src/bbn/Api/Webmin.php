@@ -2,9 +2,10 @@
 
 namespace bbn\Api;
 
-use Error;
+use Exception;
 use stdClass;
 use bbn\Str;
+use bbn\Models\Tts\Cache;
 
 /**
  * Webmin API class
@@ -16,7 +17,7 @@ use bbn\Str;
  */
 class Webmin
 {
-  use \bbn\Models\Tts\Cache;
+  use Cache;
 
   const CACHE_NAME = 'bbn/Api/Webmin';
 
@@ -37,11 +38,11 @@ class Webmin
   public function __construct(array $cfg)
   {
     if (empty($cfg['user'])) {
-      throw Error(_('The username is mandatory'));
+      throw new Exception(_('The username is mandatory'));
     }
 
     if (empty($cfg['pass'])) {
-      throw Error(_('The password is mandatory'));
+      throw new Exception(_('The password is mandatory'));
     }
 
     $this->cacheInit();

@@ -11,6 +11,7 @@ use bbn\Tpl;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Optional;
 use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
 use bbn\Util\Timer;
@@ -19,8 +20,9 @@ use function Opis\Closure\unserialize as unserializeFn;
 
 class Search extends Basic
 {
-  use DbActions, Cache;
-  use \bbn\Models\Tts\Optional;
+  use DbActions;
+  use Cache;
+  use Optional;
 
   /**
    * @var Db

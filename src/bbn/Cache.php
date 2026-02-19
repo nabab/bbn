@@ -394,6 +394,13 @@ class Cache implements CacheInterface
   }
 
 
+  public function isSame(string $key, mixed $data): bool
+  {
+    $hash = self::makeHash($data);
+    return $hash === $this->hash($key);
+  }
+
+
   /**
    * Checks whether or not the given item is more recent than the given timestamp.
    *
