@@ -183,7 +183,7 @@ class Mailbox extends Basic
   /**
    * @var int The timeout for the controller to stop the IDLE
    */
-  protected $idleCtrlTimeout = 3;
+  protected $idleCtrlTimeout = 10;
 
   /**
    * @var int The time of the last CTRL ping
@@ -1301,10 +1301,10 @@ class Mailbox extends Basic
   {
     if ($this->_is_connected()) {
       if (empty($part)) {
-        return imap_body($this->stream, $msgno);
+        return imap_body($this->stream, $msgno, FT_PEEK);
       }
 
-      return imap_fetchbody($this->stream, $msgno, $part);
+      return imap_fetchbody($this->stream, $msgno, $part, FT_PEEK);
     }
 
     return false;
@@ -1488,7 +1488,7 @@ class Mailbox extends Basic
 
       $this->sendCommand("IDLE", false);
       $this->idleRunning = true;
-      $callback('MIRKO IDLE STARTED');
+      $callback(['start' => true]);
       while ($this->idleRunning) {
         try {
           $response = $this->readCommandResponseLine();
@@ -1507,13 +1507,28 @@ class Mailbox extends Basic
           }
         }
 
-        if (!empty($response)
-          && (($pos = Str::pos($response, "EXISTS")) !== false)
-        ) {
-          $msgn = (int)Str::sub($response, 2, $pos - 2);
-          $this->idleLastTime = time();
-          $this->selectFolder($this->folder);
-          $callback($this->getMsg($msgn));
+        if (!empty($response)) {
+          // New message arrived, fetch it and call the callback with the message data
+          if (($pos = Str::pos($response, "EXISTS")) !== false) {
+            $msgn = (int)Str::sub($response, 2, $pos - 2);
+            $this->idleLastTime = time();
+            $this->selectFolder($this->folder);
+            $callback(['exists' => $this->getMsg($msgn)]);
+          }
+          // Message deleted
+          elseif (($pos = Str::pos($response, "EXPUNGE")) !== false) {
+            $msgn = (int)Str::sub($response, 2, $pos - 2);
+            $this->idleLastTime = time();
+            $callback(['expunge' => $response]);
+          }
+          // Message flagged
+          elseif ((($pos = Str::pos($response, "FETCH")) !== false)
+            && str_contains($response, "FLAGS")
+          ) {
+            $msgn = (int)Str::sub($response, 2, $pos - 2);
+            $this->idleLastTime = time();
+            $callback(['flags' => $response]);
+          }
         }
 
         if (!empty($this->idleCtrl)

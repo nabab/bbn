@@ -230,7 +230,7 @@ class Controller implements Api
       return false;
     }
 
-    $this->stream(['__bbn_ping__' => 1]);
+    $this->stream(['__bbn_stream_ping__' => 1]);
     return (connection_status() === CONNECTION_NORMAL)
       && !connection_aborted();
   }
