@@ -5,9 +5,14 @@ namespace bbn\Models\Tts;
 trait DbActionsPublic
 {
   use DbActions;
-  public function insert(array $data, bool $ignore = false): ?string
+  public function insert(array $data): ?string
   {
-    return $this->dbTraitInsert($data, $ignore);
+    return $this->dbTraitInsert($data);
+  }
+
+  public function insertIgnore(array $data): ?string
+  {
+    return $this->dbTraitInsert($data, true);
   }
 
   public function update(string|array $filter, array $data): int
@@ -15,9 +20,9 @@ trait DbActionsPublic
     return $this->dbTraitUpdate($filter, $data);
   }
 
-  public function delete(string|array $filter, bool $cascade = false): int
+  public function delete(string|array $filter): int
   {
-    return $this->dbTraitDelete($filter, $cascade);
+    return $this->dbTraitDelete($filter);
   }
 
   public function rselect(string|array $filter = [], array $order = [], array $fields = []): ?array

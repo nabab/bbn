@@ -232,15 +232,6 @@ class Link extends EntityTable
     return $res;
   }
 
-  public function update(array $data, string|array $where): int
-  {
-    return $this->dbTraitUpdate($where, $data);
-  }
-
-  public function delete(string $id): int
-  {
-    return $this->dbTraitDelete($id);
-  }
 
   public function insert(array $data): ?string
   {

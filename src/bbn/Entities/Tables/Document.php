@@ -33,7 +33,7 @@ abstract class Document extends EntityTable
     ]
   ];
 
-  public function update(array|string $filter, array $data): bool
+  public function update(array|string $filter, array $data): int
   {
     if (is_string($filter)) {
       $filter = [$this->fields['id'] => $filter];

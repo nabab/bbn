@@ -602,7 +602,6 @@ trait Commands {
    */
   public function alterColumn(string $table, string $column, array $columnCfg): bool
   {
-    die(var_dump($this->getAlterColumn($table, $columnCfg)));
     if (($sql = $this->getAlterColumn($table, $columnCfg))
       && $this->emulatePreparesAndQuery($sql)
     ) {

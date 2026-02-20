@@ -295,13 +295,13 @@ abstract class DocumentRequest extends EntityTable
    *
    * @todo Envoyer un mail
    */
-  public function delete(string $docType, ?string $idCloture = null)
+  public function deleteByType(string $docType, ?string $idCloture = null)
   {
     $res = false;
     $dTable = $this->class_cfg['tables']['documents'];
     $dFields = $this->class_cfg['arch']['documents'];
     if ($this->entity->check()
-      && ($request = $this->get($docType))
+      && ($request = $this->get($docType, $idCloture))
       && ($id = $this->db->selectOne($dTable, 'id', [
         $dFields['id_request'] => $request[$this->fields['id']],
         $dFields['doc_type'] => $docType

@@ -386,13 +386,13 @@ class Changes extends EntityTable
    * @param string $id
    * @return null|int
    */
-  public function delete(string $id): ?int
+  public function delete(string|array $id): int
   {
     if (Str::isUid($id) && $this->deleteFileAndLink($id)) {
       return $this->dbTraitDelete($id);
     }
 
-    return null;
+    return 0;
   }
 
 

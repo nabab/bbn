@@ -1158,7 +1158,10 @@ MYSQL
   public function getCreateColumn(string $table, string $column, array $columnCfg): string
   {
     if ($st = parent::getCreateColumn($table, $column, $columnCfg)) {
-      if (!empty($columnCfg['after'])
+      if (!empty($columnCfg['first'])) {
+        $st = Str::sub($st, 0, -1)." FIRST";
+      }
+      elseif (!empty($columnCfg['after'])
         && is_string($columnCfg['after'])
       ) {
         $st = Str::sub($st, 0, -1)." AFTER " . $this->escape($columnCfg['after']);
@@ -1315,7 +1318,8 @@ MYSQL
    */
   public function getAlterTable(string $table, array $cfg): string
   {
-    if (empty($cfg['fields'])) {
+    $fields = X::isAssoc($cfg) ? $cfg['fields'] ?? [] : $cfg;
+    if (empty($fields)) {
       throw new Exception(X::_('Fields are not specified'));
     }
 
@@ -1323,7 +1327,11 @@ MYSQL
       $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
       $done = false;
 
-      foreach ($cfg['fields'] as $name => $col) {
+      foreach ($fields as $name => $col) {
+        if (!empty($col['name'])) {
+          $name = $col['name'];
+        }
+
         if (!$done) {
           $done = true;
         } else {
@@ -1395,7 +1403,10 @@ MYSQL
     }
 
     if ($alter_type !== 'DROP') {
-      if (!empty($cfg['after']) && is_string($cfg['after'])) {
+      if (!empty($cfg['first'])) {
+        $st .= " FIRST";
+      }
+      elseif (!empty($cfg['after']) && is_string($cfg['after'])) {
         $st .= " AFTER " . $this->escape($cfg['after']);
       }
     }
