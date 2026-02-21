@@ -66,6 +66,10 @@
     "psr-4": {
       "bbn\\tests\\": "tests/"
     }
-  },  "minimum-stability": "dev",
+  },
+  "config": {
+    "optimize-autoloader": true
+  },
+  "minimum-stability": "dev",
   "prefer-stable" : true
 }
