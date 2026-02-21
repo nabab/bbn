@@ -1614,10 +1614,6 @@ class Controller implements Api
       $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
-    if (!isset($data)) {
-      $data = $this->data;
-    }
-
     $m = $this->_mvc->getModelGroup($path, $data, $this);
     if (\is_object($m)) {
       $m = X::toArray($m);
@@ -1630,10 +1626,6 @@ class Controller implements Api
       $path = $this->getCurrentDir() . Str::sub($path, 1);
     }
 
-    if (!isset($data)) {
-      $data = $this->data;
-    }
-
     $res = $this->_mvc->getCustomModelGroup($path, $plugin, $data, $this);
     if (\is_object($res)) {
       $res = X::toArray($res);
@@ -1643,12 +1635,8 @@ class Controller implements Api
   }
 
   
-  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array|null $data = null): array
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data = []): array
   {
-    if (!isset($data)) {
-      $data = $this->data;
-    }
-
     $res = $this->_mvc->getSubpluginModelGroup($path, $plugin_from, $plugin_for, $data, $this);
     if (\is_object($res)) {
       $res = X::toArray($res);
@@ -1693,7 +1681,7 @@ class Controller implements Api
     }
 
     if (!isset($data)) {
-      $data = $this->data;
+      $data = [];
     }
 
     $m = $this->_mvc->getCachedModel($path, $data, $this, $ttl);
@@ -1741,7 +1729,7 @@ class Controller implements Api
     }
 
     if (!isset($data)) {
-      $data = $this->data;
+      $data = [];
     }
 
     $this->_mvc->deleteCachedModel($path, $data, $this);
@@ -1779,7 +1767,7 @@ class Controller implements Api
     }
 
     if (!isset($data)) {
-      $data = $this->data;
+      $data = [];
     }
 
     if (!isset($ttl)) {

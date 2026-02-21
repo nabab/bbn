@@ -313,6 +313,7 @@ class Session
   protected function open()
   {
     if (!$this->was_opened && !$this->isOpened()) {
+      $t1 = microtime(true);
       if (!$this->once_opened) {
         $this->once_opened = true;
 
@@ -322,6 +323,10 @@ class Session
       }
 
       session_start();
+      $t2 = microtime(true);
+      if ($t2 - $t1 > 0.1) {
+        X::ddump("EEEEEEE");
+      }
     }
 
     return $this;

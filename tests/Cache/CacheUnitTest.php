@@ -141,11 +141,11 @@ class CacheUnitTest extends TestCase
       $file = $this->invokeGetRawMethod('foo');
 
       $this->assertTrue(
-        $this->cache->isNew('foo', $file['timestamp'] - 10)
+        $this->cache->isAfter('foo', $file['timestamp'] - 10)
       );
 
       $this->assertFalse(
-        $this->cache->isNew('foo', $file['timestamp'] + 10)
+        $this->cache->isAfter('foo', $file['timestamp'] + 10)
       );
   }
 

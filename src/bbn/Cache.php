@@ -36,6 +36,8 @@ class Cache implements CacheInterface
 
   protected static $default_ttl = 0;
 
+  protected static $max_ttl;
+
   protected static $engine;
 
   protected $path;
@@ -55,6 +57,13 @@ class Cache implements CacheInterface
   public static function _file(string $key, string $path): string
   {
     return self::_dir($key, $path).'/'.self::_sanitize(X::basename($key)).'.bbn.cache';
+  }
+
+  private static function setMaxTtl(): void
+  {
+    if (!isset(self::$max_ttl)) {
+      self::$max_ttl = defined('BBN_MAX_TTL') ? constant('BBN_MAX_TTL') : 90 * 24 * 3600;
+    }
   }
 
 
@@ -162,6 +171,7 @@ class Cache implements CacheInterface
      */
   public function __construct(?string $engine = null)
   {
+    self::setMaxTtl();
     /** @todo APC doesn't work */
     $engine = defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files';
     if (self::$is_init) {
@@ -408,12 +418,8 @@ class Cache implements CacheInterface
    * @param null|int $time The timestamp to which the item's timestamp will be compared
    * @return bool
    */
-  public function isNew(string $key, ?int $time = null): bool
+  public function isAfter(string $key, int $time): bool
   {
-    if (!$time) {
-      return false;
-    }
-
     if ($r = $this->getRaw($key)) {
       return $r['timestamp'] > $time;
     }
@@ -425,26 +431,20 @@ class Cache implements CacheInterface
   {
     if (self::$type) {
       $ttl  = self::ttl($ttl);
-      $hash = self::makeHash($val);
       switch (self::$type){
         case 'apc':
           if (!function_exists('\\apcu_store')) {
             throw new Exception(X::_("The APC extension doesn't seem to be installed"));
           }
 
-          return call_user_func('\\apcu_store', $key, $val, $ttl);
+          return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
         case 'redis':
-          if ($ttl) {
-            return $this->obj->set(
-              $key, json_encode($val)
-            );
-          }
-          else {
-            return $this->obj->set($key, json_encode($val));
-          }
+          return $this->obj->set(
+            $key, json_encode($val), ['ex' => $ttl ?: self::$max_ttl]
+          );
         case 'memcache':
           return $this->obj->set(
-            $key, json_encode($val), $ttl
+            $key, json_encode($val), $ttl ?: self::$max_ttl
           );
         case 'files':
           $file = self::_file($key, $this->path);
@@ -469,22 +469,19 @@ class Cache implements CacheInterface
    */
   public function set($key, $val, $ttl = null, ?float $exec = null): bool
   {
-    if (self::$type) {
-      $ttl  = self::ttl($ttl);
-      $hash = self::makeHash($val);
-      $value = [
-        'timestamp' => microtime(1),
-        'hash' => $hash,
-        'expire' => $ttl ? time() + $ttl : 0,
-        'ttl' => $ttl,
-        'exec' => $exec,
-        'value' => $val
-      ];
+    $ttl  = self::ttl($ttl);
+    $hash = self::makeHash($val);
+    $t = time();
+    $value = [
+      'timestamp' => $t,
+      'hash' => $hash,
+      'expire' => $t + ($ttl ?: self::$max_ttl),
+      'ttl' => $ttl,
+      'exec' => $exec,
+      'value' => $val
+    ];
 
-      return $this->setRaw($key, $value, $ttl);
-    }
-
-    return false;
+    return $this->setRaw($key, $value, $ttl);
   }
 
 
@@ -545,8 +542,9 @@ class Cache implements CacheInterface
 
     if (!empty($t)) {
       if (!empty($t['building'])) {
-        if ($attempts < 5) {
-          usleep(100000);
+        if ($attempts < 500) {
+          usleep(10000);
+          X::log("$attempts : Waiting for cache $key to be built...", 'wait');
           return $this->getRaw($key, $ttl, $force, $attempts + 1);
         }
         else {
@@ -554,10 +552,13 @@ class Cache implements CacheInterface
         }
       }
 
-      if (!empty($t['expire']) && ($t['expire'] < time())) {
+      $ttl = self::ttl($ttl);
+      $time = time();
+      $diff = $time - $t['timestamp'];
+      if ($t['expire'] < $time) {
         $this->delete($key);
       }
-      elseif (!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl'])) {
+      elseif (!$ttl || ($ttl <= $t['ttl']) || (($diff > 0) && ($diff <= $ttl))) {
         return $t;
       }
     }
@@ -609,29 +610,35 @@ class Cache implements CacheInterface
    * @return mixed
    * @throws Exception
    */
-  public function getSet(callable $fn, string $key, ?int $ttl = null)
+  public function getSet(callable $fn, string $key, int $ttl = 0)
   {
     $tmp  = $this->getRaw($key, $ttl);
     $data = null;
     // Can't get the data
-    $this->setRaw($key, [
-      'value' => $tmp ? $tmp['value'] : null,
-      'hash' => $tmp ? $tmp['hash'] : null,
-      'building' => true,
-      'ttl' => 10,
-      'expire' => time() + 10
-    ], 10);
     if (!$tmp) {
-      $this->setRaw($key, ['value' => null, 'building' => true, 'ttl' => 10, 'expire' => time() + 10], 10);
-      try {
-        $data = $fn();
+      $ttl = self::ttl($ttl);
+      if ($this->setRaw($key, [
+        'value' => null,
+        'hash' => null,
+        'building' => true,
+        'ttl' => $ttl,
+        'expire' => time() + ($ttl ?: self::$max_ttl)
+      ], $ttl)) {
+        try {
+          $data = $fn();
+        }
+        catch (Exception $e) {
+          $this->delete($key);
+          throw new Exception(X::_("Error while building cache for key $key: ").$e->getMessage(), $e->getCode(), $e);
+        }
+  
+        $this->set($key, $data, $ttl);
       }
-      catch (Exception $e) {
-        $this->delete($key);
-        throw $e;
+      else {
+        usleep(10000);
+        X::log("Redirecting cache $key being built...", 'wait');
+        return $this->getRaw($key, $ttl);
       }
-
-      $this->set($key, $data, $ttl);
     }
     else {
       $data = $tmp['value'];
