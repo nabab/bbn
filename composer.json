@@ -34,7 +34,6 @@
     "nikic/php-parser": "^5.4",
     "sabre/dav": "^4.7",
     "michelf/php-markdown": "^2.0",
-    "phpdocumentor/reflection-docblock": "^5.6",
     "sepia/po-parser": "^6.0",
     "tplaner/when": "^3.2",
     "mck89/peast": "^1.17",
@@ -49,6 +48,7 @@
     "ezyang/htmlpurifier": "^4.18"
   },
   "require-dev": {
+    "phpdocumentor/reflection-docblock": "^5.6",
     "squizlabs/php_codesniffer": "*",
     "phpunit/phpunit": "*",
     "pdepend/pdepend": "*",
