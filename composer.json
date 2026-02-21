@@ -13,10 +13,10 @@
     }
   ],
   "require": {
-    "php": "^8.3",
+    "php": "^8.4",
     "ext-mbstring": "*",
     "ext-json": "*",
-    "composer/composer": "^2.8",
+    "ext-yaml": "*",
     "zordius/lightncandy": "^1.2",
     "greenlion/php-sql-parser": "^4.7",
     "mpdf/mpdf": "^8.2",
@@ -32,7 +32,6 @@
     "gettext/gettext": "^5.7",
     "gettext/php-scanner": "^2.0",
     "gettext/js-scanner": "^1.1",
-    "nesbot/carbon": "^3.8",
     "nikic/php-parser": "^5.4",
     "sabre/dav": "^4.7",
     "michelf/php-markdown": "^2.0",
