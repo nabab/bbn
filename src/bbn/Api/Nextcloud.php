@@ -1,10 +1,15 @@
 <?php
 //https://medium.com/@cetteup/how-to-access-nextcloud-using-webdav-and-php-2c00a04e35b9
 namespace bbn\Api;
+
 use bbn\X;
 use bbn\Str;
+use bbn\File;
+use bbn\Mvc;
+use bbn\Models\Cls\Basic;
 
-class Nextcloud extends bbn\Models\Cls\Basic{
+class Nextcloud extends Basic
+{
   
   private $obj;
   private $path;
@@ -247,11 +252,13 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     }
   }
   
-  public function getFile(string $file): ?bbn\File
+  public function getFile(string $file): ?File
   {
     if ( $this->isFile($file) ){
-      return new \bbn\File(\bbn\Mvc::getTmpPath().X::basename($file));
+      return new File(Mvc::getTmpPath().X::basename($file));
     }
+
+    return null;
   }
 
   /**
@@ -262,14 +269,14 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     if ($this->isFile($file)) {
       //the tmp file destination
-      $dest = \bbn\Mvc::getTmpPath().X::basename($file);
+      $dest = Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
       $res = $this->obj->request('GET', $this->path.self::fixURL($file));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
-          // instantiates the new file to the class \bbn\File
-          $tmp = new \bbn\File($dest);
+          // instantiates the new file to the class File
+          $tmp = new File($dest);
           $tmp->download();
           //unlink($dest);
         } 
