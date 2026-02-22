@@ -13,11 +13,13 @@ namespace bbn\Api;
 
 use bbn\X;
 use bbn\Str;
+use bbn\Models\Tts\Cache;
+use bbn\Api\CloudminVirtualmin\Common;
 
 class Virtualmin
 {
-  use bbn\Models\Tts\Cache;
-  use CloudminVirtualmin\Common;
+  use Cache;
+  use Common;
 
   const CACHE_NAME = 'bbn/Api/Virtualmin';
 
