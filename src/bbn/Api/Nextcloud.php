@@ -399,7 +399,7 @@ class Nextcloud extends Basic
       return Str::sub($file, Str::len(self::prefix) + ($is_absolute ? 0 : 1) -1 );
     }
     else {
-      return $path;
+      return $file;
     }
   }
 
@@ -418,6 +418,8 @@ class Nextcloud extends Basic
         return $res['body'];
       }
     }
+
+    return '';
   }
 
   /**
