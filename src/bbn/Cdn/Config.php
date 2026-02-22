@@ -13,6 +13,8 @@ namespace bbn\Cdn;
 
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
+use bbn\Models\Cls\Basic;
 
 /**
  * Makes a usable configuration array out of a request string.
@@ -23,7 +25,7 @@ use bbn\X;
  * @license  https://opensource.org/licenses/mit-license.php MIT
  * @link     https://bbnio2.thomas.lan/bbn-php/doc/class/cdn/library
  */
-class Config extends bbn\Models\Cls\Basic
+class Config extends Basic
 {
   use Common;
 
@@ -49,7 +51,7 @@ class Config extends bbn\Models\Cls\Basic
    * @param string      $request A request string
    * @param bbn\Db|null $db      A DB connection to the libraries' tables (if needed)
    */
-  public function __construct(string|null $request = null, bbn\Db $db = null)
+  public function __construct(string|null $request = null, ?Db $db = null)
   {
     // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if (!defined('BBN_PUBLIC')) {
@@ -57,7 +59,7 @@ class Config extends bbn\Models\Cls\Basic
     }
     $this->_set_prefix();
     if (!$db) {
-      $db = bbn\Db::getInstance();
+      $db = Db::getInstance();
     }
     if (!$db) {
       die(X::_('Impossible to initialize the CDN without a DB connection'));
