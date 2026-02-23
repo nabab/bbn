@@ -2208,7 +2208,7 @@ class X
    * @param array|callable $where The where condition
    * @return null|int
    */
-  public static function search(array $ar, $where, int $from = 0): ?int
+  public static function search(array $ar, $where, int $from = 0)
   {
     if (!empty($where)) {
       if (is_array($where)) {

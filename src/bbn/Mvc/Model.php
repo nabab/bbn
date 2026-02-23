@@ -554,7 +554,7 @@ class Model extends DbClass
   public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 0)
   {
     $model =& $this;
-    return $this->getSetFromCache(fn () => $model->get($data), $data, $spec, $ttl);
+    return $this->getSetFromCache(fn () => $model->get($data), $data, 'auto-' . $spec, $ttl);
   }
 
 

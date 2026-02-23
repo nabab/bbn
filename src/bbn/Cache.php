@@ -613,6 +613,7 @@ class Cache implements CacheInterface
   public function getSet(callable $fn, string $key, int $ttl = 0)
   {
     $tmp  = $this->getRaw($key, $ttl);
+    X::log([1, $key, (bool)$tmp, $ttl], 'getset');
     $data = null;
     // Can't get the data
     if (!$tmp) {
@@ -624,20 +625,20 @@ class Cache implements CacheInterface
         'ttl' => $ttl,
         'expire' => time() + ($ttl ?: self::$max_ttl)
       ], $ttl)) {
+        X::log([2.5, $key, (bool)$data, $ttl], 'getset');
         try {
           $data = $fn();
+          X::log([2, $key, (bool)$data, $ttl], 'getset');
+          $this->set($key, $data, $ttl);
         }
         catch (Exception $e) {
+          X::log([4, $key, (bool)$data, $ttl], 'getset');
           $this->delete($key);
           throw new Exception(X::_("Error while building cache for key $key: ").$e->getMessage(), $e->getCode(), $e);
         }
-  
-        $this->set($key, $data, $ttl);
       }
       else {
-        usleep(10000);
-        X::log("Redirecting cache $key being built...", 'wait');
-        return $this->getRaw($key, $ttl);
+        X::log([3, $key, (bool)$tmp, $ttl], 'getset');
       }
     }
     else {
