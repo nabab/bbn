@@ -749,7 +749,7 @@ class Cms extends DbCls
    *
    * @param string $id_note
    * @param string $url
-   * @return Boolean
+   * @return bool
    * @throws Exception
    */
   public function setUrl(string $id_note, string $url, $ignore = false): ?bool
@@ -1173,7 +1173,7 @@ class Cms extends DbCls
    *
    * @param string|null $start
    * @param null|string $end
-   * @return Boolean
+   * @return bool
    */
   private function _check_date(?string $start, ?string $end): bool
   {

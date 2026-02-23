@@ -16,10 +16,34 @@ use bbn\Str;
 use bbn\Models\Tts\Cache;
 use bbn\Api\CloudminVirtualmin\Common;
 
+use function ssh2_connect;
+use function ssh2_auth_password;
+use function ssh2_exec;
+use function ssh2_fetch_stream;
+use function stream_set_blocking;
+use function stream_get_contents;
+use function preg_match_all;
+use function explode;
+use function array_map;
+use function array_filter;
+use function array_values;
+use function in_array;
+use function count;
+use function trim;
+use function substr_count;
+use function md5;
+use function json_encode;
+use function is_null;
+use function str_replace;
+
 class Virtualmin
 {
   use Cache;
   use Common;
+
+  private $hostname;
+  private $user;
+  private $pass;
 
   const CACHE_NAME = 'bbn/Api/Virtualmin';
 

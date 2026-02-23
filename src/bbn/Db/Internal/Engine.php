@@ -782,15 +782,18 @@ trait Engine
    */
   public function alter(string $table, array $cfg): int
   {
+    $res = 0;
     if (method_exists($this->language, 'alter')) {
-      return $this->language->alter($table, $cfg);
+      $res = $this->language->alter($table, $cfg);
     }
 
     if ($st = $this->language->getAlterTable($table, $cfg)) {
-      return (int)$this->language->rawQuery($st);
+      $res = (int)$this->language->rawQuery($st);
     }
 
-    return 0;
+    $this->modelize($table, true);
+
+    return $res;
   }
 
 

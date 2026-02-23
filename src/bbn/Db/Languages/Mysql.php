@@ -1191,12 +1191,22 @@ MYSQL
       $keys = [];
       foreach ($cfg['keys'] as $a) {
         if (!empty($a['columns'])
-          && !empty($a['constraint'])
           && !empty($a['ref_table'])
           && !empty($a['ref_column'])
-          && is_null(X::search($keys, ['constraint' => $a['constraint']]))
         ) {
-          $keys[] = $a;
+          if (empty($a['constraint'])) {
+            $a['constraint'] = $table . '_' . implode('_', $a['columns']) . '_fk';
+            $i = 1;
+            while (!is_null(X::search($keys, ['constraint' => $a['constraint']]))) {
+              $a['constraint'] = $table . '_' . implode('_', $a['columns']) . '_fk'.$i;
+              $i++;
+            }
+
+            $keys[] = $a;
+          }
+          elseif (count(X::filter($keys, ['constraint' => $a['constraint']])) < 2) {
+            $keys[] = $a;
+          }
         }
       }
 

@@ -2529,6 +2529,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           throw new Exception($st);
         }
 
+        $tmp['fingerprint'] = md5(json_encode($tmp));
         $this->cacheSet($cache_name, '', $tmp, $this->cache_renewal);
       }
 

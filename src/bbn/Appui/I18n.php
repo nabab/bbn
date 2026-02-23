@@ -1394,7 +1394,7 @@ class I18n extends cacheCls
    * It only works if i18n class is constructed by giving the id_project
    *
    * @param string $id_option
-   * @return String|null
+   * @return string|null
    */
   public function getPathToExplore(string $id_option) :? String
   {
@@ -1417,7 +1417,7 @@ class I18n extends cacheCls
    * Returns the path of the locale dir of the given $id_option
    *
    * @param string $id_option
-   * @return String
+   * @return string
    */
   public function getLocaleDirPath(string $id_option) : String
   {

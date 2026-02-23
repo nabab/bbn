@@ -42,8 +42,8 @@ trait DbActions
    */
   private static function dbTraitCacheInit(): void
   {
-    if (!isset(self::$dbTraitCache)) {
-      self::$dbTraitCache = Cache::getEngine();
+    if (!isset(static::$dbTraitCache)) {
+      static::$dbTraitCache = Cache::getEngine();
     }
   }
 
@@ -84,13 +84,12 @@ trait DbActions
    */
   private function dbTraitCacheGet(string $id, array $fields = []): ?array
   {
-    self::dbTraitCacheInit();
+    static::dbTraitCacheInit();
     $res = null;
 
-    if ($full = self::$dbTraitCache->getFull($this->dbTraitRowCacheKey($id))) {
-      $res = $full['value'] ?? null;
-
-      if ($res && $fields) {
+    X::log($this->dbTraitRowCacheKey($id), 'cache');
+    if ($res = static::$dbTraitCache->get($this->dbTraitRowCacheKey($id))) {
+      if (count($fields)) {
         $arr = [];
         foreach ($fields as $alias => $field) {
           if (array_key_exists($field, $res)) {
@@ -100,9 +99,11 @@ trait DbActions
 
         return $arr;
       }
+
+      return $res;
     }
 
-    return $res;
+    return null;
   }
 
   /**
@@ -116,12 +117,12 @@ trait DbActions
    */
   private function dbTraitCacheSet(string $id, array $fields = []): ?array
   {
-    self::dbTraitCacheInit();
+    static::dbTraitCacheInit();
     $cfg = $this->getClassCfg();
     $f = $cfg['arch'][$this->class_table_index];
 
     if ($data = $this->dbTraitSingleSelection([$f['id'] => $id], [], 'array', [])) {
-      self::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
+      static::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
 
       if ($fields) {
         $arr = [];
@@ -148,8 +149,8 @@ trait DbActions
    */
   private function dbTraitCacheDelete(string $id): void
   {
-    self::dbTraitCacheInit();
-    self::$dbTraitCache->delete($this->dbTraitRowCacheKey($id));
+    static::dbTraitCacheInit();
+    static::$dbTraitCache->delete($this->dbTraitRowCacheKey($id));
   }
 
   /**
@@ -173,6 +174,7 @@ trait DbActions
     }
 
     $cfg = $this->getClassCfg();
+    $filter = $this->dbTraitGetFilterCfg($filter);
     $f = $cfg['arch'][$this->class_table_index];
 
     // If the filter is exactly "id = X", return it directly without a DB call.
@@ -182,11 +184,11 @@ trait DbActions
 
     // Cached ids list by query signature.
     if ($cfg['cache'] ?? false) {
-      self::dbTraitCacheInit();
+      static::dbTraitCacheInit();
       $cacheKey = $this->dbTraitIdsCacheKey($filter, $order);
 
       /** @var array|null $res */
-      if ($res = self::$dbTraitCache->get($cacheKey)) {
+      if ($res = static::$dbTraitCache->get($cacheKey)) {
         return $res;
       }
     }
@@ -195,7 +197,7 @@ trait DbActions
     $res = $this->db->getColumnValues($this->class_table, $f['id'], $filter, $order);
 
     if ($cfg['cache'] ?? false) {
-      self::$dbTraitCache->set($cacheKey, $res);
+      static::$dbTraitCache->set($cacheKey, $res);
     }
 
     return $res;
@@ -264,8 +266,8 @@ trait DbActions
         $id = $this->db->lastId();
 
         if ($this->class_cfg['cache'] ?? false) {
-          self::dbTraitCacheInit();
-          self::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
+          static::dbTraitCacheInit();
+          static::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
           $this->dbTraitCacheSet($id);
         }
 
@@ -319,8 +321,8 @@ trait DbActions
         }
 
         if ($this->class_cfg['cache'] ?? false) {
-          self::dbTraitCacheInit();
-          self::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
+          static::dbTraitCacheInit();
+          static::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
         }
 
         return $res;
@@ -388,8 +390,8 @@ trait DbActions
           $this->dbTraitCacheSet($id);
         }
 
-        self::dbTraitCacheInit();
-        self::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
+        static::dbTraitCacheInit();
+        static::$dbTraitCache->deleteAll('table/' . $this->class_table . '/ids/');
       }
 
       return $res;

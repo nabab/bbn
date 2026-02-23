@@ -476,6 +476,18 @@ trait Actions
     return $this->language->dropConstraint($table, $constraint);
   }
 
+  public function createKeys(string $table, array $cfg): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->createKeys($table, $cfg);
+  }
+
+  public function dropKey(string $table, string $key): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->dropKey($table, $key);
+  }
+
 
   /**
    * @return void

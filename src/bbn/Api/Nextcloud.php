@@ -2,18 +2,21 @@
 //https://medium.com/@cetteup/how-to-access-nextcloud-using-webdav-and-php-2c00a04e35b9
 namespace bbn\Api;
 
+use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\File;
 use bbn\Mvc;
 use bbn\Models\Cls\Basic;
+use Sabre\DAV\Client;
+use Sabre\HTTP\ClientException;
 
 class Nextcloud extends Basic
 {
-  
+
   private $obj;
   private $path;
-  
+
   private const prefix = '/remote.php/webdav/';
   /**
    * Instantiate the class Nextcloud by connecting the given user to the given url
@@ -22,15 +25,15 @@ class Nextcloud extends Basic
    */
   public function __construct(array $cfg)
   {
-    if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
-      $this->path = 'https://'.$cfg['host'].self::prefix;
-      $this->obj = new \Sabre\DAV\Client([
+    if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
+      $this->path = 'https://' . $cfg['host'] . self::prefix;
+      $this->obj = new Client([
         'baseUri' => $this->path,
         'userName' => $cfg['user'],
         'password' => $cfg['pass']
       ]);
     }
-    if ( !$this->obj ){
+    if (!$this->obj) {
       $this->error = X::_("Missing parameters");
     }
   }
@@ -54,23 +57,24 @@ class Nextcloud extends Basic
 
     return null;
   }
-  
+
   /**
    * Deletes the given file or folder
    *
    * @param string $file
-   * @return Boolean
+   * @return bool
    */
   public function delete($path)
   {
     $success = false;
     //die(var_dump($path));
-    if ( !empty($path) && $this->exists($path) && !empty($this->obj->request('DELETE', $path)) ){
+    if (!empty($path) && $this->exists($path) && !empty($this->obj->request('DELETE', $path))) {
       $success = true;
     }
+
     return $success;
   }
-  
+
   protected function getProps($path, array|null $props = null, int $depth = 0): ?array
   {
     try {
@@ -79,20 +83,12 @@ class Nextcloud extends Basic
         '{DAV:}getcontenttype'
       ], $depth);
       return $res ?: null;
-    }
-    catch (\Sabre\HTTP\ClientException $e) {
-      if (isset($e->getResponse) && is_callable($e->getResponse)) {
-        if ( $e->getResponse()->getStatus() !== 404 ){
-          $this->error = $e->getResponse()->getStatusText();
-        }
-      }
-      else {
-        $this->error = $e->getMessage();
-      }
+    } catch (ClientException $e) {
+      $this->error = $e->getMessage();
     }
 
     if ($this->error) {
-      throw new \Exception($this->error);
+      throw new Exception($this->error);
     }
 
     return null;
@@ -102,45 +98,38 @@ class Nextcloud extends Basic
    * Returns true if the given $path exists
    *
    * @param string $path
-   * @return Boolean
+   * @return bool
    */
   public function exists($path)
   {
     try {
-      if ( $this->getProps($path, [
+      if ($this->getProps($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
-      ], 0) ){
+      ], 0)) {
         return true;
       }
-    }
-    catch (\Sabre\HTTP\ClientException $e) {
-      if (isset($e->getResponse) && is_callable($e->getResponse)) {
-        if ( $e->getResponse()->getStatus() !== 404 ){
-          $this->error = $e->getResponse()->getStatusText();
-        }
-      }
-      else {
-        $this->error = $e->getMessage();
-      }
+    } catch (ClientException $e) {
+      $this->error = $e->getMessage();
     }
 
     if ($this->error) {
-      throw new \Exception($this->error);
+      throw new Exception($this->error);
     }
 
     return false;
   }
-  
+
   /**
    * Creates a dir at the given path
    *
    * @param string $dir
-   * @return Boolean
+   * @return bool
    */
-  public function mkdir($dir){
+  public function mkdir($dir)
+  {
     $success = false;
-    if ( !$this->exists($dir) && !empty($this->obj->request('MKCOL', $dir)) ){
+    if (!$this->exists($dir) && !empty($this->obj->request('MKCOL', $dir))) {
       $success = true;
     }
     return $success;
@@ -150,112 +139,102 @@ class Nextcloud extends Basic
    * Copies the given file or folder to the given destination, if the given destination already exists throws an error.
    * @param string $source
    * @param string $dest
-   * @return Boolean
+   * @return bool
    */
   public function copy(string $source, string $dest): bool
   {
-    
-    if ( $this->exists($source) ){
-      
-      if ( !empty($dest) ){
-        if ( !$this->exists($dest) ){
+    if ($this->exists($source)) {
+      if (!empty($dest)) {
+        if (!$this->exists($dest)) {
           return (bool)$this->obj->request('COPY', $source, null, [
-            'Destination' => self::prefix.$dest
+            'Destination' => self::prefix . $dest
           ]);
-        }
-        else {
+        } else {
           $this->error = X::_("The given destination already exists");
-          return false;
         }
       }
     }
-  }  
+
+    return false;
+  }
   /**
    * Renames files or folder from the $old name to the $new name-
    * @param string $old
    * @param string $new
-   * @return Boolean
+   * @return bool
    */
   public function rename(string $old, string $new): bool
   {
-    if ( $this->exists($old) ){
-      if ( !$this->exists($new) ){
+    if ($this->exists($old)) {
+      if (!$this->exists($new)) {
         return (bool)$this->obj->request('MOVE', $old, null, [
           'Destination' => $new
         ]);
-      }
-      else {
+      } else {
         $this->error = X::_("The new name given already exists");
         return false;
       }
-    }
-    else {
+    } else {
       $this->error = X::_("The given path does not correspond to a file or a directory");
       return false;
     }
   }
-  
+
   /**
    * Returns true if the given $path corresponds to a file.
    * @param string $path
-   * @return Boolean
+   * @return bool
    */
   public function isFile(string $path): bool
   {
-    return !empty(
-      $this->getProps(
+    return !empty($this->getProps(
         $path,
         ['{DAV:}getcontenttype'],
         0
-      )
-    );
+      ));
   }
-  
+
   /**
    * Returns true if the given $path corresponds to a directory.
    * @param string $path
-   * @return Boolean
+   * @return bool
    */
   public function isDir(string $path): bool
   {
 
     return $this->exists($path) &&
-        empty(
-          $this->getProps(
-            $path,
-            ['{DAV:}getcontenttype'],
-            0
-          )
-        );
+      empty($this->getProps(
+          $path,
+          ['{DAV:}getcontenttype'],
+          0
+        ));
   }
-  
+
   /**
    * Returns the date of last modification of the given path
    * @param string $path
    */
   public function filemtime(string $path)
   {
-    if ( $this->exists($path) ){
+    if ($this->exists($path)) {
       $mtime = $this->getProps($path, [
         '{DAV:}getlastmodified'
       ]);
-      if ( !empty($mtime['{DAV:}getlastmodified']) ){
+      if (!empty($mtime['{DAV:}getlastmodified'])) {
         return $mtime['{DAV:}getlastmodified'];
-      }
-      else {
+      } else {
         $this->error = X::_("The last modification date cannot be retrieved");
         return null;
-      }  
-    }
-    else {
-       $this->error = X::_("The given path doesn't exist");
+      }
+    } else {
+      $this->error = X::_("The given path doesn't exist");
     }
   }
-  
+
   public function getFile(string $file): ?File
   {
-    if ( $this->isFile($file) ){
-      return new File(Mvc::getTmpPath().X::basename($file));
+    if ($this->isFile($file)) {
+      return new File(Mvc::getTmpPath() . X::basename($file));
     }
 
     return null;
@@ -269,9 +248,9 @@ class Nextcloud extends Basic
   {
     if ($this->isFile($file)) {
       //the tmp file destination
-      $dest = Mvc::getTmpPath().X::basename($file);
+      $dest = Mvc::getTmpPath() . X::basename($file);
       //gets the content of the file
-      $res = $this->obj->request('GET', $this->path.self::fixURL($file));
+      $res = $this->obj->request('GET', $this->path . self::fixURL($file));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
@@ -279,11 +258,11 @@ class Nextcloud extends Basic
           $tmp = new File($dest);
           $tmp->download();
           //unlink($dest);
-        } 
+        }
       }
     }
   }
-  
+
   /**
    * Returns an array of items contained in the given path, if no path is given it returns the root content, if the argument $detailed is given includes details of size and last modification time in the item
    *
@@ -295,10 +274,10 @@ class Nextcloud extends Basic
    */
   public function getItems(string $path = '', $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
-    if ( empty($path) || ($path === '.') ){
+    if (empty($path) || ($path === '.')) {
       $path = self::prefix;
     }
-   // $path = $this->getSystemPath($path);
+    // $path = $this->getSystemPath($path);
     if ($this->isDir($path)) {
       $props = ['{DAV:}getcontenttype'];
       if ($detailed) {
@@ -311,14 +290,14 @@ class Nextcloud extends Basic
       }
 
       $collection = $this->getProps($path, $props, 1);
-      if ( !empty($collection) ){
+      if (!empty($collection)) {
         //arrayt_shift to remove the parent included in the array
         $dirs = [];
         $files = [];
         $has_dir = in_array($type, ['both', 'dir']);
         $has_file = in_array($type, ['both', 'file']);
         $num = 0;
-        foreach ( $collection as $i => $c ){
+        foreach ($collection as $i => $c) {
           $num++;
           // The 2 first child are .. and .
           if ($num < 3) {
@@ -348,40 +327,39 @@ class Nextcloud extends Basic
 
           if ($has_dir && $tmp['dir']) {
             $dirs[] = $tmp;
-          }
-          else if ($has_file && $tmp['file']) {
-            $files[] = $tmp ;
+          } else if ($has_file && $tmp['file']) {
+            $files[] = $tmp;
           }
         }
-        
+
         if ($type === 'dir') {
           return $dirs;
         }
-        
+
         if ($type === 'file') {
           return $files;
         }
 
         // both
         return array_merge($dirs, $files);
-      }  
-    }
-    else {
+      }
+    } else {
       $this->error = X::_("The path doesn't exists or it's not a directory");
     }
+
+    return [];
   }
 
   /**
    * Returns the real path. 
    * @param string $path
-   * @return String
+   * @return string
    */
   public function getRealPath(string $path): string
   {
-    if ( Str::pos($path, self::prefix) !== 0 ){
-      return self::prefix.$path;
-    }
-    else {
+    if (Str::pos($path, self::prefix) !== 0) {
+      return self::prefix . $path;
+    } else {
       return $path;
     }
   }
@@ -391,14 +369,13 @@ class Nextcloud extends Basic
    * Returns the system path. 
    * @param string $path
    * @param Boolean $is_absolute
-   * @return String
+   * @return string
    */
   public function getSystemPath(string $file, bool $is_absolute = true): string
   {
-    if ( Str::pos($file, self::prefix) === 0 ){
-      return Str::sub($file, Str::len(self::prefix) + ($is_absolute ? 0 : 1) -1 );
-    }
-    else {
+    if (Str::pos($file, self::prefix) === 0) {
+      return Str::sub($file, Str::len(self::prefix) + ($is_absolute ? 0 : 1) - 1);
+    } else {
       return $file;
     }
   }
@@ -407,14 +384,14 @@ class Nextcloud extends Basic
    * Returns the content of the given file
    *
    * @param string $file
-   * @return String
+   * @return string
    */
   public function getContents($file): string
   {
-    if ( $this->exists($file) && $this->isFile($file) ){
-    //gets the content of the file
+    if ($this->exists($file) && $this->isFile($file)) {
+      //gets the content of the file
       $res = $this->obj->request('GET', $this->getRealPath($file));
-      if ( !empty($res) && !empty($res['body']) ){
+      if (!empty($res) && !empty($res['body'])) {
         return $res['body'];
       }
     }
@@ -444,16 +421,16 @@ class Nextcloud extends Basic
   public function upload(array $files, string $path): bool
   {
     $success = false;
-    if ( !empty($files) && !empty($path) ){
-      if ( Str::pos($path, '.') === 0){
+    if (!empty($files) && !empty($path)) {
+      if (Str::pos($path, '.') === 0) {
         $path = '';
       }
-      foreach ( $files as $f ){
-        if ( is_file($f['tmp_name']) && ($content = file_get_contents($f['tmp_name'])) ){
+      foreach ($files as $f) {
+        if (is_file($f['tmp_name']) && ($content = file_get_contents($f['tmp_name']))) {
           // wanted to put '%' instead of ' ' in the filename but not accepted
-          $full_name =  $path . (($path !== '') ? '/' : '' ) . str_replace(' ', '_',$f['name']);
-          if (!$this->exists($full_name) ){
-            if ( $this->obj->request('PUT', $full_name, $content) ){
+          $full_name =  $path . (($path !== '') ? '/' : '') . str_replace(' ', '_', $f['name']);
+          if (!$this->exists($full_name)) {
+            if ($this->obj->request('PUT', $full_name, $content)) {
               return $success = true;
             }
           }
@@ -465,7 +442,7 @@ class Nextcloud extends Basic
 
   private static function fixURL(string $path): string
   {
-    if ( Str::pos($path, self::prefix) === 0 ){
+    if (Str::pos($path, self::prefix) === 0) {
       $path = Str::sub($path, Str::len(self::prefix));
     }
     $fpath = '';
@@ -474,8 +451,8 @@ class Nextcloud extends Basic
     foreach ($bits as $i => $bit) {
       if ($bit) {
         $fpath .= rawurlencode($bit);
-        if ($i < $num -1) {
-          $fpath .= '/';          
+        if ($i < $num - 1) {
+          $fpath .= '/';
         }
       }
     }
@@ -483,9 +460,5 @@ class Nextcloud extends Basic
     //X::log([$path, $fpath], 'nextcloud');
 
     return $fpath;
-
   }
 }
-
-
-

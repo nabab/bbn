@@ -14,7 +14,13 @@ namespace bbn\Cdn;
 use bbn\Str;
 use bbn\X;
 use bbn\Db;
+use bbn\File\Dir;
 use bbn\Models\Cls\Basic;
+
+use function is_array;
+use function in_array;
+use function count;
+use function defined;
 
 /**
  * Makes a usable configuration array out of a request string.
@@ -38,24 +44,26 @@ class Config extends Basic
    * @var array The configuration array
    */
   protected $cfg = [];
+  protected ?Db $db;
+  protected string $mode;
 
   /**
    * Constructor.
    * 
    * @example
    * ```php
-   * // @var bbn\Db $db
-   * $cfg = new \bbn\Cdn\Config('/lib?lib=moment,vuejs', $db);
+   * // @var Db $db
+   * $cfg = new Config('/lib?lib=moment,vuejs', $db);
    * ```
    * 
    * @param string      $request A request string
-   * @param bbn\Db|null $db      A DB connection to the libraries' tables (if needed)
+   * @param Db|null $db      A DB connection to the libraries' tables (if needed)
    */
   public function __construct(string|null $request = null, ?Db $db = null)
   {
     // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if (!defined('BBN_PUBLIC')) {
-      $this->error('You must define the constant BBN_PUBLIC as the root of your public document');
+      $this->error = 'You must define the constant BBN_PUBLIC as the root of your public document';
     }
     $this->_set_prefix();
     if (!$db) {
@@ -96,7 +104,7 @@ class Config extends Basic
    * 
    * @example
    * ```php
-   * // @var bbn\Cdn\Config $cfg
+   * // @var Config $cfg
    * X::hdump($cfg->get());
    * // {
    * //     "url": "lib",
@@ -174,7 +182,7 @@ class Config extends Basic
     // The cache file is in the cache directory and has the hash as name
     $this->cfg['cache_file'] = $this->fpath.'cache/'.$this->cfg['hash'].'.cache';
     // If a specific file is pointed to, ext will be its extension
-    $this->cfg['ext'] = bbn\Str::fileExt($this->cfg['url']);
+    $this->cfg['ext'] = Str::fileExt($this->cfg['url']);
     // Grouped
     $this->cfg['grouped'] = !empty($this->cfg['params']['grouped']);
     // Processing the config
@@ -186,9 +194,9 @@ class Config extends Basic
     if (empty($this->cfg['num'])) {
       $this->cfg['num'] = 0;
       foreach ($this->cfg['content'] as $type => $content) {
-        if (($type !== 'libraries') && \is_array($content)) {
-          if (\count($content)) {
-            $this->cfg['num'] += \count($content);
+        if (($type !== 'libraries') && is_array($content)) {
+          if (count($content)) {
+            $this->cfg['num'] += count($content);
             // For a sole file
             if ($this->cfg['num'] === 1) {
               $file = $content[0];
@@ -259,14 +267,14 @@ class Config extends Basic
               if (!$dir && count($files)) {
                 $dir = $this->fpath.X::dirname($files[0]);
               }
-              $this->cfg['num'] += \count($files);
+              $this->cfg['num'] += count($files);
             }
             /*
             if ( $dir && is_file($dir.'/bbn.json') ){
               $json = json_decode(file_get_contents($dir.'/bbn.json'));
               if ( isset($json->components) ){
                 foreach ( $json->components as $tmp ){
-                  if ( !isset($res[$tmp]) && !\in_array($tmp, $this->cfg['components'], true) ){
+                  if ( !isset($res[$tmp]) && !in_array($tmp, $this->cfg['components'], true) ){
                     $this->cfg['components'][] = $tmp;
                     goto cpStart;
                     break;
@@ -380,7 +388,7 @@ class Config extends Basic
     $files = explode(",", $this->cfg['params']['files']);
     foreach ($files as $f) {
       if (is_file($this->fpath.$this->cfg['url'].'/'.$f)) {
-        $ext = bbn\Str::fileExt($f);
+        $ext = Str::fileExt($f);
         foreach (self::$types as $type => $extensions) {
           if (in_array($ext, $extensions, true)) {
             $res[$type][] = $this->sanitize($this->cfg['url'].'/'.$f);
@@ -409,14 +417,14 @@ class Config extends Basic
       'html' => [],
       'lang' => []
     ];
-    $files = bbn\File\Dir::getFiles($this->fpath.$dir);
+    $files = Dir::getFiles($this->fpath.$dir);
     foreach ($files as $f) {
       if (is_file($f)) {
-        $ext = bbn\Str::fileExt($f);
+        $ext = Str::fileExt($f);
         $file = X::basename($f);
         if ($file !== '_def.less') {
           foreach (self::$types as $type => $extensions) {
-            if (\in_array($ext, $extensions, true) ){
+            if (in_array($ext, $extensions, true) ){
               $res[$type][] = $this->sanitize($dir.$file);
             }
           }
@@ -449,7 +457,7 @@ class Config extends Basic
    */
   private function _setCfg()
   {
-    if (\is_array($this->cfg)) {
+    if (is_array($this->cfg)) {
       $p =& $this->cfg['params'];
       $components = false;
       if (!empty($p['components'])) {

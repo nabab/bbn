@@ -1574,7 +1574,7 @@
                     "type": "Exception"
                 }
             },
-            "comments": "  \/**\n   * Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.\n   *\n   * @param string $id_note\n   * @param string $url\n   * @return Boolean\n   * @throws Exception\n   *\/"
+            "comments": "  \/**\n   * Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.\n   *\n   * @param string $id_note\n   * @param string $url\n   * @return bool\n   * @throws Exception\n   *\/"
         },
         "removeUrl": {
             "name": "removeUrl",
@@ -2645,7 +2645,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * If a date is given for $end checks if it's after the start date.\n   *\n   * @param string|null $start\n   * @param null|string $end\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * If a date is given for $end checks if it's after the start date.\n   *\n   * @param string|null $start\n   * @param null|string $end\n   * @return bool\n   *\/"
         },
         "normalizeItems": {
             "name": "normalizeItems",

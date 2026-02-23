@@ -13,6 +13,7 @@ namespace bbn\Cdn;
 
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 
 /**
  * Library retriever tool.
@@ -240,10 +241,10 @@ class Library
    * $lib = new \bbn\Cdn\Library($db, 'fr');
    * ```
    *
-   * @param bbn\Db $db   The database connection
+   * @param Db $db   The database connection
    * @param string $lang The default language for the libraries
    */
-  public function __construct(bbn\Db $db, $lang = 'en')
+  public function __construct(Db $db, $lang = 'en')
   {
     $this->db   = $db;
     $this->lang = $lang;
@@ -675,7 +676,7 @@ SQL,
 
       $inc = $lib;
       foreach ($lib['files'] as $f) {
-        $ext = bbn\Str::fileExt($f);
+        $ext = Str::fileExt($f);
         foreach (self::$types as $type => $extensions) {
           if (in_array($ext, $extensions)) {
             if (!isset($res[$type])) {
