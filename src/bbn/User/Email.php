@@ -15,6 +15,7 @@ use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\LocaleDatabase;
+use bbn\Mvc\Controller;
 use bbn\File\System;
 use Generator;
 use stdClass;
@@ -98,6 +99,12 @@ class Email extends Basic
 
   /** @var string */
   protected $cachePrefix = 'emails/';
+
+  /** @var int The frequency for idle synchronization */
+  protected $idleSyncFrequency = 300;
+
+  /** @var int The timestamp of the last idle synchronization */
+  protected $idleLastSync = 0;
 
   /**
    * Returns a list typical folder types as they are recorded in the options
@@ -768,6 +775,16 @@ class Email extends Basic
   }
 
 
+  public function getInboxName(string $idAccount): ?string
+  {
+    if ($rules = $this->getFoldersRules($idAccount)) {
+      return !empty($rules['inbox']) ? $rules['inbox'] : null;
+    }
+
+    return null;
+  }
+
+
   public function flattenFolders($folders): array
   {
     $res = [];
@@ -840,6 +857,7 @@ class Email extends Basic
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
     }
+
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       try {
         $check = $this->checkFolder($folder);
@@ -856,13 +874,12 @@ class Email extends Basic
         $added = 0;
         $deleted = 0;
         $mb = $this->getMailbox($folder['id_account']);
-        $info = $mb->getInfoFolder($folder['uid']);
         $mb->selectFolder($folder['uid']);
-        $this->setAccountSync(
-          $folder['id_account'],
+        $info = $mb->getInfoFolder($folder['uid']);
+        $this->setFolderSync(
           $folder['id'],
-          $folder['uid'],
-          $info->Nmsgs
+          $info->Nmsgs ?: 0,
+          $mb->getLastUid() ?: 0
         );
 
         if ($info->Nmsgs === 0) {
@@ -2202,6 +2219,71 @@ class Email extends Basic
   }
 
 
+  public function idle(
+    string $idAccount,
+    callable $callback,
+    ?Controller $ctrl = null,
+    ?int $timeout = null
+  )
+  {
+    if (($mailbox = $this->getMailbox($idAccount))
+      && ($inbox = $this->getInboxName($idAccount))
+    ) {
+      X::log(imap_mailboxmsginfo($mailbox->getStream()), 'mirko_idle');
+      die(1);
+      $mailbox->idle(
+        $inbox,
+        fn($d) => $this->idleCallback($idAccount, $callback, $d, $ctrl),
+        $timeout
+      );
+    }
+  }
+
+
+  public function stopIdle(string $idAccount): bool
+  {
+    if (($mailbox = $this->getMailbox($idAccount))
+      && $mailbox->isIdleRunning()
+    ) {
+      $mailbox->stopIdle();
+    }
+
+    return !$mailbox->isIdleRunning();
+  }
+
+
+  protected function idleCallback(
+    string $idAccount,
+    callable $callback,
+    array $data,
+    ?Controller $ctrl = null
+  )
+  {
+    if (array_key_exists('ping', $data)) {
+      return !empty($ctrl) ? $ctrl->pingStream() : true;
+    }
+
+    if (!empty($data['exists'])) {
+
+    }
+
+    if (!empty($data['expunge'])) {
+      
+    }
+
+    if (!empty($data['flags'])) {
+      
+    }
+
+    if (!empty($data['sync'])
+      && (($this->idleLastSync + $this->idleSyncFrequency) <= time())
+    ) {
+      $this->idleLastSync = time();
+      
+    }
+  }
+
+
   protected function idsFromFolder($id_folder): ?array
   {
     $types = self::getFolderTypes();
@@ -2273,6 +2355,25 @@ class Email extends Basic
         'msg' => $numMsg,
       ];
       return (bool)$this->pref->set($idAccount, $account);
+    }
+
+    return false;
+  }
+
+
+  protected function setFolderSync(
+    string $idFolder,
+    int $numMsg,
+    int $lastUid
+  ): bool
+  {
+    if ($bit = $this->pref->getBit($idFolder)) {
+      $bit['db_num_msg'] = $this->getNumMsg($idFolder) ?: 0;
+      $bit['db_uid_max'] = $this->getDbUidMax($idFolder) ?: null;
+      $bit['db_uid_min'] = $this->getDbUidMin($idFolder) ?: null;
+      $bit['num_msg'] = $numMsg ?: 0;
+      $bit['last_uid'] = $lastUid ?: null;
+      return (bool)$this->pref->updateBit($idFolder, $bit);
     }
 
     return false;
