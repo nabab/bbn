@@ -134,26 +134,27 @@ trait Idle
         }
 
         if (!empty($response)) {
-          // New message arrived, fetch it and call the callback with the message data
+          $m = null;
+          // New message
           if (($pos = Str::pos($response, "EXISTS")) !== false) {
-            $msgn = (int)Str::sub($response, 2, $pos - 2);
-            $this->idleLastTime = time();
-            $this->selectFolder($folder);
-            $this->idleCallback(['exists' => $this->getMsg($msgn)]);
+            $m = 'exists';
           }
           // Message deleted
           elseif (($pos = Str::pos($response, "EXPUNGE")) !== false) {
-            $msgn = (int)Str::sub($response, 2, $pos - 2);
-            $this->idleLastTime = time();
-            $this->idleCallback(['expunge' => $response]);
+            $m = 'expunge';
           }
           // Message flagged
           elseif ((($pos = Str::pos($response, "FETCH")) !== false)
             && str_contains($response, "FLAGS")
           ) {
-            $msgn = (int)Str::sub($response, 2, $pos - 2);
+            $m = 'flags';
+          }
+
+          if (!is_null($m)) {
             $this->idleLastTime = time();
-            $this->idleCallback(['flags' => $response]);
+            $msgn = (int)Str::sub($response, 2, $pos - 2);
+            $this->selectFolder($folder);
+            $this->idleCallback([$m => $this->getMsg($msgn)]);
           }
         }
 

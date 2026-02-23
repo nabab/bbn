@@ -775,7 +775,7 @@ class Email extends Basic
   }
 
 
-  public function getInboxName(string $idAccount): ?string
+  public function getInboxUid(string $idAccount): ?string
   {
     if ($rules = $this->getFoldersRules($idAccount)) {
       return !empty($rules['inbox']) ? $rules['inbox'] : null;
@@ -876,15 +876,12 @@ class Email extends Basic
         $mb = $this->getMailbox($folder['id_account']);
         $mb->selectFolder($folder['uid']);
         $info = $mb->getInfoFolder($folder['uid']);
-        $this->setFolderSync(
-          $folder['id'],
-          $info->Nmsgs ?: 0,
-          $mb->getLastUid() ?: 0
-        );
 
         if ($info->Nmsgs === 0) {
           if (!empty($folder['db_num_msg'])) {
+            $this->setFolderSync($folder['id']);
             $deleted += $db->delete($this->class_table, [$this->fields['id_folder'] => $folder['id']]);
+            $this->setFolderSync($folder['id'], false);
             return $deleted;
           }
           else if ($generator) {
@@ -971,15 +968,10 @@ class Email extends Basic
 
         $end = $start;
         $all = $mb->getEmailsList($folder, $start, $real_end, true);
+        $this->setFolderSync($folder['id']);
         if ($all) {
           foreach ($all as $i => $a) {
             if ($this->insertEmail($folder, $a)) {
-              $this->setAccountSync(
-                $folder['id_account'],
-                $folder['id'],
-                $folder['uid'],
-                $info->Nmsgs
-              );
               $added++;
               if ($generator) {
                 yield $i + 1;
@@ -1027,6 +1019,7 @@ class Email extends Basic
           }
         }
 
+        $this->setFolderSync($folder['id'], false);
         if ($added) {
           $this->syncThreads();
         }
@@ -2227,12 +2220,10 @@ class Email extends Basic
   )
   {
     if (($mailbox = $this->getMailbox($idAccount))
-      && ($inbox = $this->getInboxName($idAccount))
+      && ($inboxUid = $this->getInboxUid($idAccount))
     ) {
-      X::log(imap_mailboxmsginfo($mailbox->getStream()), 'mirko_idle');
-      die(1);
       $mailbox->idle(
-        $inbox,
+        $inboxUid,
         fn($d) => $this->idleCallback($idAccount, $callback, $d, $ctrl),
         $timeout
       );
@@ -2263,24 +2254,56 @@ class Email extends Basic
       return !empty($ctrl) ? $ctrl->pingStream() : true;
     }
 
-    if (!empty($data['exists'])) {
-
+    if (!empty($data['start'])) {
+      return $callback(['idle_start' => true]);
     }
 
-    if (!empty($data['expunge'])) {
-      
+    if ($mailbox = $this->getMailbox($idAccount)) {
+      if (($inboxUid = $this->getInboxUid($idAccount))
+        && ($folder = $this->getFolderByUid($idAccount, $inboxUid))
+      ) {
+        if (!empty($data['exists'])) {
+          if (($folder = $this->getFolderByUid($idAccount, $inboxUid))
+            && !empty($folder['last_sync_end'])
+            && $this->syncEmails($folder)
+          ) {
+            $callback(['exists' => [
+              'email' => $data['exists'],
+              'folder' => $folder
+            ]]);
+          }
+        }
+
+        if (!empty($data['expunge'])) {
+
+        }
+
+        if (!empty($data['flags'])) {
+
+        }
+      }
+
+      if (!empty($data['sync'])
+        && (($this->idleLastSync + $this->idleSyncFrequency) <= time())
+      ) {
+        $this->idleLastSync = time();
+        $mbParams = $mailbox->getParams();
+        if ($subscribed = array_map(
+          fn($f) => Str::sub($f, Str::len($mbParams)),
+          $mailbox->listAllSubscribed()
+        )) {
+          foreach ($subscribed as $folderUid) {
+            if (($folder = $this->getFolderByUid($idAccount, $folderUid))
+              && !empty($folder['last_sync_end'])
+              && $this->syncEmails($folder)
+            ) {
+              $callback(['sync_folder' => $folder]);
+            }
+          }
+        }
+      }
     }
 
-    if (!empty($data['flags'])) {
-      
-    }
-
-    if (!empty($data['sync'])
-      && (($this->idleLastSync + $this->idleSyncFrequency) <= time())
-    ) {
-      $this->idleLastSync = time();
-      
-    }
   }
 
 
@@ -2363,16 +2386,12 @@ class Email extends Basic
 
   protected function setFolderSync(
     string $idFolder,
-    int $numMsg,
-    int $lastUid
+    bool $synchronizing = true
   ): bool
   {
     if ($bit = $this->pref->getBit($idFolder)) {
-      $bit['db_num_msg'] = $this->getNumMsg($idFolder) ?: 0;
-      $bit['db_uid_max'] = $this->getDbUidMax($idFolder) ?: null;
-      $bit['db_uid_min'] = $this->getDbUidMin($idFolder) ?: null;
-      $bit['num_msg'] = $numMsg ?: 0;
-      $bit['last_uid'] = $lastUid ?: null;
+      $bit['synchronizing'] = $synchronizing;
+      $bit['last_sync_' . ($synchronizing ? 'start' : 'end')] = microtime(true);
       return (bool)$this->pref->updateBit($idFolder, $bit);
     }
 
@@ -2400,7 +2419,13 @@ class Email extends Basic
       'hash' => $folder['hash'] ?? null,
       'subscribed' => $folder['subscribed'] ?? false,
       'icon' => X::getField($types, ['id' => $folder['id_option']], 'icon'),
-      $this->localeField => $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']),
+      'synchronizing' => $folder['synchronizing'] ?? false,
+      'last_sync_start' => $folder['last_sync_start'] ?? null,
+      'last_sync_end' => $folder['last_sync_end'] ?? null,
+      $this->localeField => $this->pref->isLocale(
+        $folder['id'],
+        $this->pref->getClassCfg()['tables']['user_options_bits']
+      ),
     ];
   }
 
