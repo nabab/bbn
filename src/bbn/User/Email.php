@@ -2255,7 +2255,7 @@ class Email extends Basic
     }
 
     if (!empty($data['start'])) {
-      return $callback(['idle_start' => true]);
+      return $callback(['start' => true]);
     }
 
     if ($mailbox = $this->getMailbox($idAccount)) {
@@ -2265,12 +2265,23 @@ class Email extends Basic
         if (!empty($data['exists'])) {
           if (($folder = $this->getFolderByUid($idAccount, $inboxUid))
             && !empty($folder['last_sync_end'])
-            && $this->syncEmails($folder)
           ) {
-            $callback(['exists' => [
-              'email' => $data['exists'],
-              'folder' => $folder
-            ]]);
+            $sync = $this->syncEmails($folder);
+            $t = 0;
+            if (is_object($sync)) {
+              foreach ($sync as $s) {
+                $t++;
+              }
+            }
+            else {
+              $t = $sync;
+            }
+            if (!empty($t)) {
+              $callback(['exists' => [
+                //'email' => $data['exists'],
+                'folder' => $this->getFolder($folder['id'])
+              ]]);
+            }
           }
         }
 
@@ -2392,6 +2403,7 @@ class Email extends Basic
     if ($bit = $this->pref->getBit($idFolder)) {
       $bit['synchronizing'] = $synchronizing;
       $bit['last_sync_' . ($synchronizing ? 'start' : 'end')] = microtime(true);
+      $bit['id_parent'] = !empty($bit['id_parent']) ? $bit['id_parent'] :  null;
       return (bool)$this->pref->updateBit($idFolder, $bit);
     }
 

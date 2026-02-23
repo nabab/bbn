@@ -101,7 +101,7 @@ trait Idle
 
     try {
       $this->sendCommand("LOGIN {$this->login} {$this->pass}");
-      $this->sendCommand("SELECT {$folder}");
+      $this->sendCommand("SELECT $folder");
       $this->sendCommand("CAPABILITY", false);
       $capabilityResponse = $this->readCommandResponseLine();
       $canIdle = !empty($capabilityResponse)
@@ -114,7 +114,7 @@ trait Idle
 
       $this->sendCommand("IDLE", false);
       $this->idleRunning = true;
-      $this->idleCallback(['start' => true]);
+      ($this->idleCallback)(['start' => true]);
       while ($this->isIdleRunning()) {
         try {
           $response = $this->readCommandResponseLine();
@@ -154,7 +154,7 @@ trait Idle
             $this->idleLastTime = time();
             $msgn = (int)Str::sub($response, 2, $pos - 2);
             $this->selectFolder($folder);
-            $this->idleCallback([$m => $this->getMsg($msgn)]);
+            ($this->idleCallback)([$m => $this->getMsg($msgn)]);
           }
         }
 
@@ -177,7 +177,7 @@ trait Idle
           // Establish a new connection
           $this->connect();
           // Run IDLE again
-          return $this->idle($folder, $callback, $this->idleTimeout);
+          return $this->idle($folder, $callback, $timeout);
         }
       }
     }
@@ -193,7 +193,6 @@ trait Idle
   public function stopIdle()
   {
     $this->idleRunning = false;
-    $this->idleCallback = null;
     if (!empty($this->imapStreamResource)) {
       fwrite($this->imapStreamResource, "DONE\r\n");
       fclose($this->imapStreamResource);
@@ -210,9 +209,7 @@ trait Idle
 
   public function isIdleRunning(): bool
   {
-    return (bool)$this->idleRunning
-      && !empty($this->idleCallback)
-      && !empty($this->imapStreamResource);
+    return (bool)$this->idleRunning;
   }
 
 
@@ -269,14 +266,12 @@ trait Idle
   {
     stream_set_blocking($this->imapStreamResource, false);
     $line = '';
-    while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL])
-      && $this->isIdleRunning()
-    ) {
+    while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL])) {
       if (($this->idleCallbackLastPing + $this->idleCallbackFrequency) <= time()) {
         $this->pingIdleCallback();
       }
 
-      $this->idleCallback(['sync' => true]);
+      ($this->idleCallback)(['sync' => true]);
 
       if (!$this->_is_connected()
         || (($this->idleLastTime + $this->idleTimeout) < time())
@@ -318,7 +313,7 @@ trait Idle
       return false;
     }
 
-    $ping = $this->idleCallback(['ping' => true]);
+    $ping = ($this->idleCallback)(['ping' => true]);
     if (empty($ping)) {
       throw new Exception(_("User connection lost"), 4);
     }
