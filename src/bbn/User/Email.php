@@ -228,6 +228,7 @@ class Email extends Basic
       if ($a = $this->pref->get($id_account)) {
         $this->mboxes[$id_account] = [
           'id' => $a['id'],
+          'text' => $a['text'],
           'host' => $a['host'],
           'email' => $a['email'],
           'login' => $a['login'],
@@ -279,7 +280,7 @@ class Email extends Basic
       throw new \Exception(_("The account type is not valid"));
     }
 
-    if (!X::hasProps($cfg, ['login', 'pass', 'type', 'email'], true)
+    if (!X::hasProps($cfg, ['text', 'login', 'pass', 'type', 'email'], true)
       || !X::hasProps($cfg, ['host', 'port', 'encryption', 'validatecert', 'smtp'])
       || (in_array($cfg['type'], ['imap', 'local'])
         && !X::hasProps($cfg, ['host', 'port'], true))
@@ -291,6 +292,8 @@ class Email extends Basic
       throw new \Exception("The account doesn't exist");
     }
 
+    $text = $cfg['text'];
+    unset($cfg['text']);
     $d = X::mergeArrays($this->pref->getCfg($id_account) ?: [], [
       'host' => $cfg['host'] ?: null,
       'email' => $cfg['email'],
@@ -319,7 +322,9 @@ class Email extends Basic
       $this->syncFolders($id_account, $cfg['folders'], $cfg['rules'] ?? []);
     }
 
-    return (bool)$this->pref->setCfg($id_account, $d);
+    $ok1 = (bool)$this->pref->setText($id_account, $text);
+    $ok2 = (bool)$this->pref->setCfg($id_account, $d);
+    return !empty($ok1) || !empty($ok2);
   }
 
 
@@ -338,7 +343,7 @@ class Email extends Basic
       throw new \Exception(_("The account type is not valid"));
     }
 
-    if (!X::hasProps($cfg, ['login', 'pass', 'type', 'email'], true)
+    if (!X::hasProps($cfg, ['text', 'login', 'pass', 'type', 'email'], true)
       || !X::hasProps($cfg, ['host', 'port', 'encryption', 'validatecert', 'smtp'])
       || (in_array($cfg['type'], ['imap', 'local'])
         && !X::hasProps($cfg, ['host', 'port'], true))
@@ -355,6 +360,7 @@ class Email extends Basic
       $id_accounts,
       [
         'id_user' => $this->user->getId(),
+        'text' => $cfg['text'],
         'email' => $cfg['email'],
         'login' => $cfg['login'],
         'type' => Str::isUid($cfg['type']) ? self::getOptionsObject()->code($cfg['type']) : $cfg['type'],
@@ -852,7 +858,7 @@ class Email extends Basic
   }
 
 
-  public function syncEmails(string|array $folder, int $limit = 0, bool $generator = false): int|null|Generator
+  public function syncEmails(string|array $folder, int $limit = 0, bool $generator = true): int|null|Generator
   {
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
@@ -995,7 +1001,7 @@ class Email extends Basic
           throw new \Exception($err);
         }
 
-        if ($info->Nmsgs > ($added + $folder['num_msg'])) {
+        if ($info->Nmsgs < ($added + $folder['num_msg'])) {
           $emailsFields = $this->class_cfg['arch']['users_emails'];
           $emailsTable = $this->class_cfg['tables']['users_emails'];
           $num = $added + $folder['num_msg'];
@@ -1003,9 +1009,16 @@ class Email extends Basic
           while ($info->Nmsgs < $num) {
             $msg = $db->rselect(
               $emailsTable,
-              [$emailsFields['id'], $emailsFields['msg_uid']],
-              [$emailsFields['id_folder'] => $folder['id']],
-              [$emailsFields['msg_uid'] => 'DESC'],
+              [
+                $emailsFields['id'],
+                $emailsFields['msg_uid']
+              ],
+              [
+                $emailsFields['id_folder'] => $folder['id']
+              ],
+              [
+                $emailsFields['msg_uid'] => 'DESC'
+              ],
               $s2
             );
             if (!$mb->getMsgNo($msg['msg_uid'])
@@ -1013,6 +1026,9 @@ class Email extends Basic
             ) {
               $num--;
               $s2--;
+              if ($s2 < 0) {
+                $s2 = 0;
+              }
             }
 
             $s2++;
@@ -1030,6 +1046,7 @@ class Email extends Basic
 
     return null;
   }
+
 
   public function getLastUid($folder)
   {
@@ -2222,6 +2239,7 @@ class Email extends Basic
     if (($mailbox = $this->getMailbox($idAccount))
       && ($inboxUid = $this->getInboxUid($idAccount))
     ) {
+      $this->idleLastSync = 0;
       $mailbox->idle(
         $inboxUid,
         fn($d) => $this->idleCallback($idAccount, $callback, $d, $ctrl),
@@ -2266,16 +2284,17 @@ class Email extends Basic
           if (($folder = $this->getFolderByUid($idAccount, $inboxUid))
             && !empty($folder['last_sync_end'])
           ) {
-            $sync = $this->syncEmails($folder);
             $t = 0;
-            if (is_object($sync)) {
-              foreach ($sync as $s) {
-                $t++;
+            $sync = $this->syncEmails($folder);
+              if ($sync instanceof Generator) {
+                foreach ($sync as $s) {
+                  $t++;
+                }
               }
-            }
-            else {
-              $t = $sync;
-            }
+              else {
+                $t = $sync;
+              }
+
             if (!empty($t)) {
               $callback(['exists' => [
                 //'email' => $data['exists'],
@@ -2286,18 +2305,23 @@ class Email extends Basic
         }
 
         if (!empty($data['expunge'])) {
-
+          $callback(['expunge' => [
+            'email' => $data['expunge'],
+            //'folder' => $this->getFolder($folder['id'])
+          ]]);
         }
 
         if (!empty($data['flags'])) {
-
+          $callback(['flags' => [
+            'email' => $data['flags'],
+            //'folder' => $this->getFolder($folder['id'])
+          ]]);
         }
       }
 
       if (!empty($data['sync'])
         && (($this->idleLastSync + $this->idleSyncFrequency) <= time())
       ) {
-        $this->idleLastSync = time();
         $mbParams = $mailbox->getParams();
         if ($subscribed = array_map(
           fn($f) => Str::sub($f, Str::len($mbParams)),
@@ -2306,9 +2330,21 @@ class Email extends Basic
           foreach ($subscribed as $folderUid) {
             if (($folder = $this->getFolderByUid($idAccount, $folderUid))
               && !empty($folder['last_sync_end'])
-              && $this->syncEmails($folder)
             ) {
-              $callback(['sync_folder' => $folder]);
+              $t = 0;
+              $sync = $this->syncEmails($folder);
+              if ($sync instanceof Generator) {
+                foreach ($sync as $s) {
+                  $t++;
+                }
+              }
+              else {
+                $t = $sync;
+              }
+
+              if (!empty($t)) {
+                $callback(['sync_folder' => $folder]);
+              }
             }
           }
         }
