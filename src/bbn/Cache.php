@@ -558,7 +558,10 @@ class Cache implements CacheInterface
       if ($t['expire'] < $time) {
         $this->delete($key);
       }
-      elseif (!$ttl || ($ttl <= $t['ttl']) || (($diff > 0) && ($diff <= $ttl))) {
+      elseif (($ttl ?: self::$max_ttl) < $diff) {
+        $this->delete($key);
+      }
+      else {
         return $t;
       }
     }
