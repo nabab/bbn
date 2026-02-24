@@ -140,7 +140,7 @@ class Search extends Basic
 
     if (empty($models)) {
       try {
-        $ctrl->getCustomModelGroup('', 'appui-search');
+        $ctrl->getCustomModelGroup('', 'appui-search', $ctrl->data);
       }
       catch (Exception $e) {}
 

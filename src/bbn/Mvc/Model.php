@@ -281,7 +281,7 @@ class Model extends DbClass
   }
 
 
-  public function getCustomModelGroup(string $path, string $plugin, array|null $data = null)
+  public function getCustomModelGroup(string $path, string $plugin, array $data = [])
   {
     return $this->_ctrl->getCustomModelGroup(...\func_get_args());
   }
