@@ -863,7 +863,6 @@ trait DbActions
   {
     if (!defined('BBN_DBACTIONS_CACHE_INIT')) {
       define('BBN_DBACTIONS_CACHE_INIT', true);
-      return;
       $cache = Cache::getEngine();
       $arr = self::dbTraitCacheGetTableClasses($mvc);
       $db->setTrigger(function($cfg) use ($cache, $db, $arr) {
