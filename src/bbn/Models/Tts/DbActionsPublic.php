@@ -5,6 +5,12 @@ namespace bbn\Models\Tts;
 trait DbActionsPublic
 {
   use DbActions;
+
+  public function exists(string|array $filter): bool
+  {
+    return $this->dbTraitExists($filter);
+  }
+
   public function insert(array $data): ?string
   {
     return $this->dbTraitInsert($data);

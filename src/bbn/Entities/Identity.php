@@ -204,6 +204,11 @@ class Identity extends DbCls
     return $res;
   }
 
+  public function exists(array|string $filter): bool
+  {
+    return $this->dbTraitExists($filter);
+  }
+
   /**
    * Adds or updates a person record in the database.
    *

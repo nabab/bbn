@@ -288,6 +288,11 @@ class Address extends DbCls
     return $r;
   }
 
+  public function exists(array|string $filter): bool
+  {
+    return $this->dbTraitExists($filter);
+  }
+
 
   public function getCity($cp, $ville = '')
   {

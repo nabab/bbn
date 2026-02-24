@@ -10,9 +10,14 @@ namespace bbn\Models\Tts;
 
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\Mvc\Controller;
+use bbn\Mvc\Model;
 use bbn\Cache;
 use stdClass;
 use Exception;
+use ReflectionProperty;
 use function array_key_exists;
 use function is_array;
 use function is_string;
@@ -82,13 +87,29 @@ trait DbActions
    *                       - ['alias1' => 'col1', 'alias2' => 'col2']
    * @return array|null The cached row (possibly projected), or null if missing.
    */
-  private function dbTraitCacheGet(string $id, array $fields = []): ?array
+  private function dbTraitCacheGet(string $id, array $fields = [], bool $autoExclude = false): ?array
   {
     static::dbTraitCacheInit();
     $res = null;
-
-    X::log($this->dbTraitRowCacheKey($id), 'cache');
     if ($res = static::$dbTraitCache->get($this->dbTraitRowCacheKey($id))) {
+      $cfg = $this->getClassCfg();
+      $todo = [];
+      if ($excluded = !$autoExclude && is_array($cfg['cache']) && isset($cfg['cache']['excluded']) ? $cfg['cache']['excluded'] : []) {
+        if (empty($fields)) {
+          $fields = $cfg['arch'][$this->class_table_index];
+        }
+
+        foreach ($fields as $alias => $field) {
+          if (in_array($field, $excluded)) {
+            $todo[$alias] = $field;
+          }
+        }
+
+        if (!empty($todo)) {
+          $res = X::mergeArrays($res, $this->dbTraitSingleSelection($id, [], 'array', $todo));
+        }
+      }
+
       if (count($fields)) {
         $arr = [];
         foreach ($fields as $alias => $field) {
@@ -100,10 +121,9 @@ trait DbActions
         return $arr;
       }
 
-      return $res;
     }
-
-    return null;
+    
+    return $res ?: null;
   }
 
   /**
@@ -119,23 +139,19 @@ trait DbActions
   {
     static::dbTraitCacheInit();
     $cfg = $this->getClassCfg();
-    $f = $cfg['arch'][$this->class_table_index];
-
-    if ($data = $this->dbTraitSingleSelection([$f['id'] => $id], [], 'array', [])) {
-      static::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
-
-      if ($fields) {
-        $arr = [];
-        foreach ($fields as $alias => $field) {
-          if (array_key_exists($field, $data)) {
-            $arr[is_int($alias) ? $field : $alias] = $data[$field];
-          }
+    $f = array_values($cfg['arch'][$this->class_table_index]);
+    if (is_array($cfg['cache']) && isset($cfg['cache']['excluded'])) {
+      $excluded = $cfg['cache']['excluded'];
+      foreach ($excluded as $col) {
+        if (in_array($col, $f)) {
+          unset($f[array_search($col, $f)]);
         }
-
-        return $arr;
       }
+    }
 
-      return $data;
+    if ($data = $this->dbTraitSingleSelection(['id' => $id], [], 'array', array_values($f))) {
+      static::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
+      return $this->dbTraitCacheGet($id, $fields);
     }
 
     return null;
@@ -174,16 +190,16 @@ trait DbActions
     }
 
     $cfg = $this->getClassCfg();
-    $filter = $this->dbTraitGetFilterCfg($filter);
     $f = $cfg['arch'][$this->class_table_index];
-
     // If the filter is exactly "id = X", return it directly without a DB call.
     if (isset($filter[$f['id']]) && (count($filter) === 1)) {
       return [$filter[$f['id']]];
     }
 
+    $filter = $this->dbTraitGetFilterCfg($filter);
     // Cached ids list by query signature.
-    if ($cfg['cache'] ?? false) {
+    //if ($cfg['cache'] ?? false) {
+    if (false) {
       static::dbTraitCacheInit();
       $cacheKey = $this->dbTraitIdsCacheKey($filter, $order);
 
@@ -196,7 +212,8 @@ trait DbActions
     /** @var array $res */
     $res = $this->db->getColumnValues($this->class_table, $f['id'], $filter, $order);
 
-    if ($cfg['cache'] ?? false) {
+    //if ($cfg['cache'] ?? false) {
+    if (false) {
       static::$dbTraitCache->set($cacheKey, $res);
     }
 
@@ -219,9 +236,12 @@ trait DbActions
     }
 
     $f = $this->class_cfg['arch'][$this->class_table_index];
+    if (isset($filter['id']) && (count($filter) === 1)) {
+      $filter = $filter['id'];
+    }
+
     if (is_string($filter)) {
       if ($this->class_cfg['cache'] ?? false) {
-
         if ($this->dbTraitCacheGet($filter)) {
           return true;
         }
@@ -778,5 +798,89 @@ trait DbActions
     }
 
     return null;
+  }
+
+  public function dbTraitCacheGetHash(string $id): ?string
+  {
+    $res = $this->dbTraitCacheGetSetFull($id);
+    return $res['hash'] ?? null;
+  }
+
+  public function dbTraitCacheGetSetFull(string $id): ?array
+  {
+    static::dbTraitCacheInit();
+    $res = null;
+    $cn = $this->dbTraitRowCacheKey($id);
+    if (!($res = static::$dbTraitCache->getFull($cn))) {
+      $this->dbTraitCacheSet($id);
+      $res = static::$dbTraitCache->getFull($cn);
+    }
+
+    return $res;
+  }
+
+  public static function dbTraitCacheGetTableClasses(Mvc|Controller|Model $mvc): array
+  {
+    $cache = Cache::getEngine();
+    if (!($arr = $cache->get('bbn_dbactions_cache_init'))) {
+      $res = include_once($mvc->libPath().'composer/autoload_classmap.php');
+      if (!$res) {
+        exec("cd " . dirname($mvc->libPath()) . " &&  composer dump-autoload -o && cd -");
+        $res = include_once($mvc->libPath().'composer/autoload_classmap.php');
+      }
+
+      if (!$res) {
+        throw new Exception("No way to get classes from composer");
+      }
+
+      $property = 'default_class_cfg';
+      $num = 0;
+      $arr = [];
+      foreach ($res as $cls => $file) {
+        if ((strpos($cls, 'bbn\\') === 0) || (strpos($cls, constant('BBN_APP_PREFIX') . '\\') === 0)) {
+          $num++;
+          if (class_exists($cls) && property_exists($cls, $property) && method_exists($cls, 'initClassCfg')) {
+            $ref = new ReflectionProperty($cls, $property);
+            if ($ref->isStatic()) {
+              $value = $ref->getValue();
+              if (!empty($value['table'])) {
+                if (!empty($value['cache']) && !array_key_exists($value['table'], $arr)) {
+                  $arr[$value['table']] = $cls;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      $cache->set('bbn_dbactions_cache_init', $arr, 3600);
+    }
+
+    return $arr;
+  }
+
+  public static function dbTraitCacheInitTrigger(Db $db, Mvc|Controller|Model $mvc): void
+  {
+    if (!defined('BBN_DBACTIONS_CACHE_INIT')) {
+      define('BBN_DBACTIONS_CACHE_INIT', true);
+      $cache = Cache::getEngine();
+      $arr = self::dbTraitCacheGetTableClasses($mvc);
+      $db->setTrigger(function($cfg) use ($cache, $db, $arr) {
+        if (!empty($cfg['write']) && ($cfg['moment'] === 'after')) {
+          $table = $db->tsn(array_values($cfg['tables'])[0]);
+          if (isset($arr[$table])) {
+            if ($cfg['kind'] === 'INSERT') {
+
+            }
+            else {
+              $cache->delete('table/' . $table . '/ids/');
+            }
+          }
+
+        }
+
+        return $cfg;
+      });
+    }
   }
 }
