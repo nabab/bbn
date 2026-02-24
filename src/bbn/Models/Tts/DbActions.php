@@ -865,6 +865,7 @@ trait DbActions
       define('BBN_DBACTIONS_CACHE_INIT', true);
       $cache = Cache::getEngine();
       $arr = self::dbTraitCacheGetTableClasses($mvc);
+      X::ddump($arr);
       $db->setTrigger(function($cfg) use ($cache, $db, $arr) {
         if (!empty($cfg['write']) && ($cfg['moment'] === 'after')) {
           $table = $db->tsn(array_values($cfg['tables'])[0]);
