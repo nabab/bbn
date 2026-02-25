@@ -312,7 +312,7 @@ class Session
 
   protected function open()
   {
-    if (!$this->was_opened && !$this->isOpened() && !X::isCli()) {
+    if (!$this->was_opened && !$this->isOpened() && !headers_sent()) {
       $t1 = microtime(true);
       if (!$this->once_opened) {
         $this->once_opened = true;
