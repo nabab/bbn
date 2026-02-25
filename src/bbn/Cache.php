@@ -190,7 +190,7 @@ class Cache implements CacheInterface
       if ($this->obj->connect($this->host, $this->port, 2.5)) {
         $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
         $this->obj->select($dbIndex);
-        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_NAME') . '/';
+        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX') . '/';
         if ($this->prefix) {
           $this->obj->setOption(\Redis::OPT_PREFIX, $this->prefix);
         }
