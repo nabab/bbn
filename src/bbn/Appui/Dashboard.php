@@ -15,6 +15,8 @@ use bbn\Mvc;
 use bbn\User;
 use bbn\User\Permissions;
 use bbn\User\Preferences;
+use bbn\Mvc\Controller;
+use bbn\Mvc\Model;
 use bbn\Appui\Option;
 use bbn\Models\Cls\Basic;
 
@@ -911,6 +913,76 @@ class Dashboard extends Basic
     return $res;
   }
 
+  public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): ?array
+  {
+    $res = null;
+    $mvc->timer->start('global');
+    $mvc->timer->start('widgetPref');
+    $o = $this->opt;
+    $info = $o->option($idWidget);
+    // Fetches the permission's alias: widget in dashboard options
+    if (!$perm) {
+      $code = $info['code'] ?? null;
+      $id_perm = $mvc->inc->perm->optionToPermission($idWidget);
+      //X::ddump("jkkkk", $code, $id_perm, $info);
+      if ($pref = $mvc->inc->pref->getByOption($idWidget)) {
+        $info = X::mergeArrays($info, $pref);
+      }
+    }
+    elseif ($info) {
+      $id_perm = $perm->optionToPermission($idWidget);
+      $code    = $info['code'];
+      if ($pref = $mvc->inc->pref->getByOption($idWidget)) {
+        $info = X::mergeArrays($info, $pref);
+      }
+    }
+    // Otherwise checking if the key is a preference
+    elseif ($info = $mvc->inc->pref->get($idWidget)) {
+      $id_perm = $info['id_option'];
+      $code    = $info['widget']['code'];
+    }
+    // User's private widget
+    elseif ($info = $this->getPvtWidget($idWidget)) {
+      $code = !empty($info['code']) ? $info['code'] : false;
+    }
+
+    $mvc->timer->stop('widgetPref');
+    if (!empty($code)
+      && ($perm && $this->isPvtWidget($idWidget)
+        || (!empty($id_perm)
+          && (!$perm || $perm->has($id_perm))))
+    ) {
+      $mvc->timer->start('lastPart');
+      if (!empty($id_perm)
+        && ($id_plugin = $o->getParentPlugin($id_perm))
+      ) {
+        $plugin = $o->getPluginName($id_plugin);
+        if ($plugin === 'appui-dashboard') {
+          $mvc->timer->start('model');
+          $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
+          $mvc->timer->stop('model');
+        }
+        else {
+          $mvc->timer->start('model');
+          $res = $mvc->getSubpluginModel($code, $data, $plugin, 'appui-dashboard', $info['cache'] ?? 0);
+          $mvc->timer->stop('model');
+        }
+        /*
+        if (X::indexOf($plugin, 'appui-') === 0) {
+          $plugin = Str::sub($plugin, 6);
+        }
+        */
+      }
+      else {
+        $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
+      }
+
+      $mvc->timer->stop('lastPart');
+    }
+
+    $mvc->timer->stop('global');
+    return $res;
+  }
 
   /**
    * Checks if the id property is set
