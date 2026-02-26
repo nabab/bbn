@@ -819,6 +819,13 @@ trait DbActions
     return $res;
   }
 
+  public function dbTraitCacheGetFull(string $id): ?array
+  {
+    static::dbTraitCacheInit();
+    $cn = $this->dbTraitRowCacheKey($id);
+    return static::$dbTraitCache->getFull($cn);
+  }
+
   public static function dbTraitCacheGetTableClasses(Mvc|Controller|Model $mvc): array
   {
     $cache = Cache::getEngine();
