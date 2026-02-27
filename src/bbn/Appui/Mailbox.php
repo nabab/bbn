@@ -7,6 +7,7 @@ use Exception;
 use bbn\Mail;
 use bbn\X;
 use bbn\Str;
+use bbn\Appui\Mailbox\Idle;
 use HTMLPurifier_Config;
 use HTMLPurifier_URIScheme;
 use HTMLPurifier;
@@ -34,8 +35,6 @@ use DOMNode;
 
 class Mailbox extends Basic
 {
-
-  use Mailbox\Internal\Idle;
 
   /**
    * @var int The default delay between each ping
@@ -133,6 +132,11 @@ class Mailbox extends Basic
    * @var array The mail folders
    */
   protected $folders = [];
+
+  /**
+   * @var array The folders that are currently in IDLE
+   */
+  protected $foldersIdle = [];
 
   protected $mailer;
 
@@ -273,6 +277,12 @@ class Mailbox extends Basic
   }
 
 
+  public function getEncription(): bool
+  {
+    return $this->encryption;
+  }
+
+
   public function setPingInterval(int $val): self
   {
     $this->_ping_interval = $val;
@@ -308,7 +318,6 @@ class Mailbox extends Basic
   {
     return $this->login;
   }
-
 
   public function getPort(): int
   {
@@ -744,7 +753,7 @@ class Mailbox extends Basic
     return $obj;
   }
 
-  public function getEmailsList(array $folder, int $start, int $end, bool $generator = false)
+  public function getEmailsList(array $folder, int $start, int $end)
   {
     if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
@@ -774,21 +783,50 @@ class Mailbox extends Basic
             }
           }
 
-          // to fetch the message priority
-          $msg_header = $this->getMsgHeader($start);
-          preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
-          $priority = $matches[1] ?? 3;
-
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
             $start--;
             continue;
           }
 
+          // to fetch the message priority
+          $msgHeader = $this->getMsgHeader($start);
+          $priority = null;
+          // X-Priority
+          if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
+            $priority = (int)$m[1];
+          }
+
+          // Importance
+          if (is_null($priority) &&
+            preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
+          ) {
+            $map = ['high' => 1, 'normal' => 3, 'low' => 5];
+            $priority = $map[strtolower($m[1])] ?? null;
+          }
+
+          // Priority
+          if (is_null($priority)
+            && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
+          ) {
+            $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
+            $priority = $map[strtolower($m[1])] ?? null;
+          }
+
+          $tmp['priority'] = $priority ?? 3;
+
+          // Flags
+          $flags = null;
+          if (($overview = $this->getMsgOverview($start))
+            && !empty($overview[0]->flags)
+          ) {
+            $flags = preg_split('/\s+/', trim($overview[0]->flags)) ?: null;
+          }
+
+          $tmp['flags'] = $flags;
           $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
           $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
           $tmp['uid'] = $this->getMsgUid($start);
-          $tmp['priority'] = $priority;
           unset(
             $tmp['Date'],
             $tmp['MailDate'],
@@ -856,9 +894,7 @@ class Mailbox extends Basic
 
           $res[] = $tmp;
           $start--;
-          if (!empty($generator)) {
-            yield $tmp;
-          }
+          yield $tmp;
         } catch (Exception $e) {
           X::log([
             'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
@@ -1172,21 +1208,20 @@ class Mailbox extends Basic
    * @param int|bool $uid    Set true f the msgnum is a UID
    * @return bool|string
    */
-  public function getMsgHeader($msgnum, $uid = false)
+  public function getMsgHeader(int $msgnum, bool $uid = false): ?string
   {
     if ($this->_is_connected()) {
-      try {
-        if ($uid) {
-          $res = imap_fetchheader($this->stream, $msgnum, FT_UID);
-        }
+      return imap_fetchheader($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
+    }
 
-        $res = imap_fetchheader($this->stream, $msgnum);
-      }
-      catch (Exception $e) {
-        $this->log($e->getMessage().' '.(string)$msgnum);
-      }
+    return null;
+  }
 
-      return $res ?: null;
+
+  public function getMsgOverview(int $msgnum, bool $uid = false): ?array
+  {
+    if ($this->_is_connected()) {
+      return imap_fetch_overview($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
     }
 
     return null;
@@ -1378,6 +1413,58 @@ class Mailbox extends Basic
     }
 
     return null;
+  }
+
+
+  /**
+   * Starts an IDLE connection to the mailbox for a specific folder.
+   * @param string $folderUid The UID of the folder to monitor
+   * @param callable $callback The callback function to execute when new messages arrive
+   * @param int|null $timeout The timeout in seconds for the IDLE connection
+   * @return void
+   */
+  public function idle(string $folderUid, callable $callback, ?int $timeout = null)
+  {
+    $this->stopIdle($folderUid);
+    $this->foldersIdle[$folderUid] = new Idle(
+      $this,
+      $this->login,
+      $this->pass,
+      $folderUid,
+      $callback,
+      $timeout ?: 0
+    );
+    $this->foldersIdle[$folderUid]->idle();
+  }
+
+
+  /**
+   * Stops the IDLE connection for a specific folder.
+   * @param string $folderUid The UID of the folder to stop monitoring
+   * @return bool True if the IDLE connection was stopped, false if it was not running
+   */
+  public function stopIdle(string $folderUid): bool
+  {
+    if (!empty($this->foldersIdle[$folderUid])) {
+      return $this->foldersIdle[$folderUid]->stopIdle();
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Checks if the IDLE connection is running for a specific folder.
+   * @param string $folderUid The UID of the folder to check
+   * @return bool True if the IDLE connection is running, false otherwise
+   */
+  public function isIdleRunning(string $folderUid): bool
+  {
+    if (!empty($this->foldersIdle[$folderUid])) {
+      return $this->foldersIdle[$folderUid]->isRunning();
+    }
+
+    return false;
   }
 
 
