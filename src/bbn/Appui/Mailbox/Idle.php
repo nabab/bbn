@@ -168,6 +168,7 @@ class Idle
         }
 
         if (!empty($response)) {
+          X::log("IDLE response: " . $response, 'webmail_idle');
           $action = null;
           $msgn = null;
           $re = '/^\*\s+(?<msgn>\d+)\s+(?<action>EXISTS|EXPUNGE|FETCH)(?:\s+\((?:.*?\s)?FLAGS\s+\((?<flags>[^)]*)\).*?\))?\s*$/i';
@@ -179,6 +180,7 @@ class Idle
               'fetch' => 'mailFlagged',
               default => null
             };
+            X::log(['action' => $action, 'msgn' => $msgn], 'webmail_idle');
 
             if (!empty($action) && !empty($msgn)) {
               $this->lastTime = time();

@@ -545,6 +545,13 @@ TEMPLATE;
         $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
       }
 
+      if (!empty($cfg['priority'])
+        && ($cfg['priority'] >= 1)
+        && ($cfg['priority'] <= 5)
+      ) {
+        $this->mailer->Priority = $cfg['priority'];
+      }
+
       $ar  = [
         'title' => $cfg['subject'] ?? ($cfg['title'] ?? '')
       ];

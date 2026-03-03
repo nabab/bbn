@@ -49,8 +49,8 @@ class Email extends Basic
         'excerpt' => 'excerpt',
         'size' => 'size',
         'attachments' => 'attachments',
+        'priority' => 'priority',
         'flags' => 'flags',
-        //'priority' => 'priority',
         'is_read' => 'is_read',
         'is_draft' => 'is_draft',
         'id_parent' => 'id_parent',
@@ -1314,6 +1314,22 @@ class Email extends Basic
   }
 
 
+  public function getEmailIdByUID(string $uid, string $idFolder): ?string
+  {
+    $isLocale = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']);
+    $db = $isLocale ? $this->getLocaleDb() : $this->db;
+    $where = [
+      $this->fields['msg_uid'] => $uid,
+      $this->fields['id_folder'] => $idFolder,
+    ];
+    if (!$isLocale) {
+      $where[$this->fields['id_user']] = $this->user->getId();
+    }
+
+    return $db->selectOne($this->class_table, $this->fields['id'], $where);
+  }
+
+
   public function getEmailIdByUniqueId(string $uid, string $idFolder): ?string
   {
     if (str_starts_with($uid, '<') && str_ends_with($uid, '>')) {
@@ -1408,7 +1424,7 @@ class Email extends Basic
   }
 
 
-  public function setSeen($id, bool $seen = true)
+  public function setSeen(string $id, bool $seen = true)
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
@@ -1417,12 +1433,28 @@ class Email extends Basic
   }
 
 
-  public function setDraft($id, bool $draft = true)
+  public function setDraft(string $id, bool $draft = true)
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
     $db = $this->getRightDb($id, $table);
     $db->update($table, [$cfg['is_draft'] => $draft ? 1 : 0], [$cfg['id'] => $id]);
+  }
+
+
+  public function setFlags(string $id, string|array $flags = [])
+  {
+    $cfg = $this->class_cfg['arch']['users_emails'];
+    $table = $this->class_cfg['tables']['users_emails'];
+    $db = $this->getRightDb($id, $table);
+    if (empty($flags)) {
+      $flags = null;
+    }
+    else if (is_array($flags)) {
+      $flags = implode(' ', $flags);
+    }
+
+    $db->update($table, [$cfg['flags'] => $flags], [$cfg['id'] => $id]);
   }
 
 
@@ -1548,7 +1580,7 @@ class Email extends Basic
           $cfg['flags'] => !empty($email['flags']) ? (is_array($email['flags']) ? implode(' ', $email['flags']) : $email['flags']) : null,
           $cfg['is_read'] => empty($email['Unseen']) && (empty($email['Recent']) || ($email['Recent'] === 'R')) ? 1 : 0,
           $cfg['is_draft'] => !empty($email['Draft']) ? 1 : 0,
-          //$cfg['priority'] => $email['priority'] ?? 3,
+          $cfg['priority'] => $email['priority'] ?? 3,
           $cfg['id_parent'] => $id_parent,
           $cfg['id_thread'] => $id_thread,
           $cfg['external_uids'] => $external ? json_encode($external) : null,
@@ -2225,14 +2257,16 @@ class Email extends Basic
   )
   {
     if (!empty($data['action'])) {
-      if ($data['action'] === 'ping') {
+      $action = $data['action'];
+      $subdata = $data['data'] ?? [];
+      if ($action === 'ping') {
         return !empty($ctrl) ? $ctrl->pingStream() : true;
       }
-      else if ($data['action'] === 'idleStarted') {
-        return $callback(['action' => $data['action']]);
+      else if ($action === 'idleStarted') {
+        return $callback(['action' => $action]);
       }
       else if ($mb = $this->getMailbox($idAccount)) {
-        switch ($data['action']) {
+        switch ($action) {
           case 'newMail':
           case 'mailDeleted':
           case 'mailFlagged':
@@ -2240,9 +2274,9 @@ class Email extends Basic
               && ($folder = $this->getFolderByUid($idAccount, $inboxUid))
               && !empty($folder['last_sync_end'])
             ) {
-              $msgn = !empty($data['data']['msgn']) ? $data['data']['msgn'] : null;
+              $msgn = !empty($subdata['msgn']) ? $subdata['msgn'] : null;
               $toCallback = [];
-              switch ($data['action']) {
+              switch ($action) {
                 case 'newMail':
                   $t = 0;
                   if ($this->checkFolder($folder)
@@ -2262,22 +2296,34 @@ class Email extends Basic
                   break;
                 case 'mailDeleted':
                   if ($this->checkAndDeleteEmails($folder['id'])) {
-                    $toCallback = ['folder' => $folder];
+                    $toCallback = ['folder' => $this->getFolder($folder['id'])];
                   }
 
                   break;
                 case 'mailFlagged':
-                  if (isset($data['data']['flags'])) {
-
+                  if (isset($subdata['flags'])
+                    && !empty($msgn)
+                    && ($emailUid = $mb->getMsgUid($msgn))
+                    && ($emailId = $this->getEmailIdByUid($emailUid, $folder['id']))
+                  ) {
+                    $this->setSeen($emailId, in_array('\\Seen', $subdata['flags']));
+                    $this->setDraft($emailId, in_array('\\Draft', $subdata['flags']));
+                    $flags = array_values(
+                      array_filter(
+                        $subdata['flags'],
+                        fn($flag) => !in_array($flag, ['\\Seen', '\\Deleted', '\\Draft', '\\Recent'])
+                      )
+                    );
+                    $this->setFlags($emailId, $flags);
                   }
 
-                  $toCallback = ['folder' => $folder];
+                  $toCallback = ['folder' => $this->getFolder($folder['id'])];
                   break;
               }
 
               if (!empty($toCallback)) {
                 $callback([
-                  'action' => $data['action'],
+                  'action' => $action,
                   'data' => $toCallback
                 ]);
               }
@@ -2310,7 +2356,7 @@ class Email extends Basic
 
                     if (!empty($t)) {
                       $callback([
-                        'action' => $data['action'],
+                        'action' => $action,
                         'data' => [
                           'folder' => $folder
                         ]
@@ -2491,6 +2537,7 @@ class Email extends Basic
       'db_uid_max' => $this->getDbUidMax($folder['id']),
       'db_uid_min' => $this->getDbUidMin($folder['id']),
       'db_num_msg' => $this->getNumMsg($folder['id']),
+      'db_num_unseen_msg' => $this->getNumUnseenMsg($folder['id']),
       'num_msg' => $folder['num_msg'] ?? 0,
       'last_uid' => $folder['last_uid'] ?? null,
       'last_check' => $folder['last_check'] ?? null,
@@ -2658,6 +2705,22 @@ class Email extends Basic
       [
         $this->fields['id_folder'] => $idFolder,
         $this->fields['id_user'] => $this->user->getId()
+      ]
+    );
+  }
+
+
+  private function getNumUnseenMsg(string $idFolder): int
+  {
+    $db = $this->pref->isLocale($idFolder, $this->pref->getClassCfg()['tables']['user_options_bits']) ?
+      $this->getLocaleDb() :
+      $this->db;
+    return $db->count(
+      $this->class_table,
+      [
+        $this->fields['id_folder'] => $idFolder,
+        $this->fields['id_user'] => $this->user->getId(),
+        $this->fields['is_read'] => 0
       ]
     );
   }
