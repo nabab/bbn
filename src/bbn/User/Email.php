@@ -910,7 +910,7 @@ class Email extends Basic
             && ($folder['db_uid_max'] == $last_uid)
           ) {
             if ($info->Nmsgs != $folder['db_num_msg']) {
-              yield $this->checkAndDeleteEmails($folder['id']);
+              yield count($this->checkAndDeleteEmails($folder['id']));
             }
 
             return 0;
@@ -975,7 +975,7 @@ class Email extends Basic
 
         if (!$start || !$real_end) {
           if ($info->Nmsgs != $folder['db_num_msg']) {
-            yield $this->checkAndDeleteEmails($folder['id']);
+            yield count($this->checkAndDeleteEmails($folder['id']));
           }
 
           return 0;
@@ -1424,25 +1424,25 @@ class Email extends Basic
   }
 
 
-  public function setSeen(string $id, bool $seen = true)
+  public function setSeen(string $id, bool $seen = true): bool
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
     $db = $this->getRightDb($id, $table);
-    $db->update($table, [$cfg['is_read'] => $seen ? 1 : 0], [$cfg['id'] => $id]);
+    return (bool)$db->update($table, [$cfg['is_read'] => $seen ? 1 : 0], [$cfg['id'] => $id]);
   }
 
 
-  public function setDraft(string $id, bool $draft = true)
+  public function setDraft(string $id, bool $draft = true): bool
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
     $db = $this->getRightDb($id, $table);
-    $db->update($table, [$cfg['is_draft'] => $draft ? 1 : 0], [$cfg['id'] => $id]);
+    return (bool)$db->update($table, [$cfg['is_draft'] => $draft ? 1 : 0], [$cfg['id'] => $id]);
   }
 
 
-  public function setFlags(string $id, string|array $flags = [])
+  public function setFlags(string $id, string|array $flags = []): bool
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
@@ -1454,7 +1454,7 @@ class Email extends Basic
       $flags = implode(' ', $flags);
     }
 
-    $db->update($table, [$cfg['flags'] => $flags], [$cfg['id'] => $id]);
+    return (bool)$db->update($table, [$cfg['flags'] => $flags], [$cfg['id'] => $id]);
   }
 
 
@@ -2275,28 +2275,34 @@ class Email extends Basic
               && !empty($folder['last_sync_end'])
             ) {
               $msgn = !empty($subdata['msgn']) ? $subdata['msgn'] : null;
-              $toCallback = [];
+              $toCallbackData = [];
               switch ($action) {
                 case 'newMail':
-                  $t = 0;
+                  $t = null;
                   if ($this->checkFolder($folder)
                     && !empty($msgn)
                   ) {
                     foreach ($mb->getEmailsList($folder, $msgn, $msgn) as $e) {
-                      if ($this->insertEmail($folder, $e)) {
-                        $t++;
+                      if ($newId = $this->insertEmail($folder, $e)) {
+                        $t = $newId;
                       }
                     }
                   }
 
                   if (!empty($t)) {
-                    $toCallback = ['folder' => $this->getFolder($folder['id'])];
+                    $toCallbackData = [
+                      'id' => $t,
+                      'folder' => $this->getFolder($folder['id'])
+                    ];
                   }
 
                   break;
                 case 'mailDeleted':
-                  if ($this->checkAndDeleteEmails($folder['id'])) {
-                    $toCallback = ['folder' => $this->getFolder($folder['id'])];
+                  if ($deleted = $this->checkAndDeleteEmails($folder['id'])) {
+                    $toCallbackData = [
+                      'ids' => $deleted,
+                      'folder' => $this->getFolder($folder['id'])
+                    ];
                   }
 
                   break;
@@ -2306,25 +2312,35 @@ class Email extends Basic
                     && ($emailUid = $mb->getMsgUid($msgn))
                     && ($emailId = $this->getEmailIdByUid($emailUid, $folder['id']))
                   ) {
-                    $this->setSeen($emailId, in_array('\\Seen', $subdata['flags']));
-                    $this->setDraft($emailId, in_array('\\Draft', $subdata['flags']));
+                    if ($this->setSeen($emailId, in_array('\\Seen', $subdata['flags']))) {
+                      $toCallbackData['id'] = $emailId;
+                      $toCallbackData[in_array('\\Seen', $subdata['flags']) ? 'seen' : 'unseen'] = true;
+                    }
+
+                    if ($this->setDraft($emailId, in_array('\\Draft', $subdata['flags']))) {
+                      $toCallbackData['id'] = $emailId;
+                      $toCallbackData[in_array('\\Draft', $subdata['flags']) ? 'draft' : 'undraft'] = true;
+                    }
                     $flags = array_values(
                       array_filter(
                         $subdata['flags'],
                         fn($flag) => !in_array($flag, ['\\Seen', '\\Deleted', '\\Draft', '\\Recent'])
                       )
                     );
-                    $this->setFlags($emailId, $flags);
+                    if ($this->setFlags($emailId, $flags)) {
+                      $toCallbackData['id'] = $emailId;
+                      $toCallbackData['flags'] = $flags;
+                    }
                   }
 
-                  $toCallback = ['folder' => $this->getFolder($folder['id'])];
+                  $toCallbackData['folder'] = $this->getFolder($folder['id']);
                   break;
               }
 
-              if (!empty($toCallback)) {
+              if (!empty($toCallbackData)) {
                 $callback([
                   'action' => $action,
-                  'data' => $toCallback
+                  'data' => $toCallbackData
                 ]);
               }
             }
@@ -2469,17 +2485,17 @@ class Email extends Basic
   }
 
 
-  protected function checkAndDeleteEmails(string $idFolder): int
+  protected function checkAndDeleteEmails(string $idFolder): array
   {
-    $deleted = 0;
+    $deleted = [];
     if (($folder = $this->getFolder($idFolder))
       && ($mb = $this->getMailbox($folder['id_account']))
       && ($info = $this->checkFolder($folder))
       && ($info['Nmsgs'] < $folder['db_num_msg'])
     ) {
       $db = $this->pref->isLocale($folder['id'], $this->pref->getClassCfg()['tables']['user_options_bits']) ?
-          $this->getLocaleDb() :
-          $this->db;
+        $this->getLocaleDb() :
+        $this->db;
       $emailsFields = $this->class_cfg['arch']['users_emails'];
       $emailsTable = $this->class_cfg['tables']['users_emails'];
       $num = $folder['db_num_msg'];
@@ -2506,6 +2522,7 @@ class Email extends Basic
           && !$mb->getMsgNo($msg[$emailsFields['msg_uid']])
           && ($db->delete($emailsTable, [$emailsFields['id'] => $msg[$emailsFields['id']]]))
         ) {
+          $deleted[] = $msg[$emailsFields['id']];
           $num--;
           $s2--;
           if ($s2 < 0) {
