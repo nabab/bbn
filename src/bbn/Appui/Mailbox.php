@@ -8,6 +8,7 @@ use bbn\Mail;
 use bbn\X;
 use bbn\Str;
 use bbn\Appui\Mailbox\Idle;
+use bbn\Appui\Mailbox\RawClient;
 use HTMLPurifier_Config;
 use HTMLPurifier_URIScheme;
 use HTMLPurifier;
@@ -149,6 +150,11 @@ class Mailbox extends Basic
    * @var bool Whether to validate the certificate
    */
   protected $validateCertificate = false;
+
+  /**
+   * @var RawClient|null The raw IMAP client
+   */
+  protected RawClient|null $rawClient = null;
 
 
   public static function setDefaultPingInterval(int $val): void
@@ -687,72 +693,6 @@ class Mailbox extends Basic
     return false;
   }
 
-  private function transformString($string) {
-    // Use the md5 hash function to generate a 32-character hexadecimal string
-    $hash = md5($string);
-
-    // Initialize an empty result variable
-    $result = '';
-
-    // Loop through the characters of the hash string
-    for ($i = 0; $i < strlen($hash); $i++) {
-      // Get the current character
-      $char = $hash[$i];
-
-      // Append the current character to the result string
-      $result .= $char;
-
-      // If the current position is a multiple of 4, append a dash
-      if (($i + 1) % 4 == 0 && $i != 31) {
-        $result .= '-';
-      }
-    }
-
-    // Return the final result
-    return $result;
-  }
-
-
-  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
-  private function decode_encoded_words($string) {
-
-    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
-    if (!empty($matches)) {
-      for ($i = 0; $i < count($matches[0]); $i++) {
-        $encoding = $matches[2][$i];
-        $encoded_text = $matches[3][$i];
-        if (strtolower($encoding) == "q") {
-          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
-        } else {
-          $decoded_text = base64_decode($encoded_text);
-        }
-        $string = Str::replace($matches[0][$i], $decoded_text, $string);
-      }
-    }
-
-    return $string;
-  }
-
-  private function decode_encoded_words_array(array $array) {
-    for($i = 0; $i < count($array); $i++) {
-      $array[$i] = $this->decode_encoded_words($array[$i]);
-    }
-    return $array;
-  }
-
-  private function decode_encoded_words_deep($obj) {
-    if (is_string($obj)) {
-      $obj = $this->decode_encoded_words($obj);
-    }
-    elseif (is_object($obj)) {
-      foreach ($obj as $idx => $val) {
-        $obj->$idx = $this->decode_encoded_words_deep($val);
-      }
-    }
-
-    return $obj;
-  }
-
   public function getEmailsList(array $folder, int $start, int $end)
   {
     if (isset($this->folders[$folder['uid']])
@@ -789,41 +729,8 @@ class Mailbox extends Basic
             continue;
           }
 
-          // to fetch the message priority
-          $msgHeader = $this->getMsgHeader($start);
-          $priority = null;
-          // X-Priority
-          if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
-            $priority = (int)$m[1];
-          }
-
-          // Importance
-          if (is_null($priority) &&
-            preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
-          ) {
-            $map = ['high' => 1, 'normal' => 3, 'low' => 5];
-            $priority = $map[strtolower($m[1])] ?? null;
-          }
-
-          // Priority
-          if (is_null($priority)
-            && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
-          ) {
-            $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
-            $priority = $map[strtolower($m[1])] ?? null;
-          }
-
-          $tmp['priority'] = $priority ?? 3;
-
-          // Flags
-          $flags = null;
-          if (($overview = $this->getMsgOverview($start))
-            && !empty($overview[0]->flags)
-          ) {
-            $flags = preg_split('/\s+/', trim($overview[0]->flags)) ?: null;
-          }
-
-          $tmp['flags'] = $flags;
+          $tmp['priority'] = $this->getMsgPriority($start) ?: 3;
+          $tmp['flags'] = $this->getMsgFlags($start);
           $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
           $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
           $tmp['uid'] = $this->getMsgUid($start);
@@ -1298,6 +1205,37 @@ class Mailbox extends Basic
 
 
   /**
+   * Gets the flags of the message.
+   * @param int $msgno No of the message
+   * @return array|null
+   */
+  public function getMsgFlags(int $msgno): ?array
+  {
+    $flags = null;
+    if ($overview = $this->getMsgOverview($msgno)) {
+      $flags = [];
+      $toCheck = ['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'];
+      foreach ($toCheck as $flag) {
+        if (!empty($overview[0]->$flag)) {
+          $flags[] = '\\' . ucfirst($flag);
+        }
+      }
+
+      if (!empty($overview[0]->flags)) {
+        $keywords = preg_split('/\s+/', trim($overview[0]->flags)) ?: [];
+        foreach ($keywords as $kw) {
+          if (!in_array($kw, $toCheck)) {
+            $flags[] = $kw;
+          }
+        }
+      }
+    }
+
+    return $flags ?: null;
+  }
+
+
+  /**
    * Sets or removes flag/s on message/s. (Test: ok)
    * The flags which you can set are \\Seen, \\Answered, \\Flagged, \\Deleted, and \\Draft. (Test: ok)
    *
@@ -1313,6 +1251,36 @@ class Mailbox extends Basic
     }
 
     return false;
+  }
+
+
+  public function getMsgPriority(int $msgno): ?int
+  {
+    $priority = null;
+    if ($msgHeader = $this->getMsgHeader($msgno)) {
+      // X-Priority
+      if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
+        $priority = (int)$m[1];
+      }
+
+      // Importance
+      if (is_null($priority) &&
+        preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
+      ) {
+        $map = ['high' => 1, 'normal' => 3, 'low' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+
+      // Priority
+      if (is_null($priority)
+        && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
+      ) {
+        $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+    }
+
+    return $priority;
   }
 
 
@@ -1427,7 +1395,9 @@ class Mailbox extends Basic
   {
     $this->stopIdle($folderUid);
     $this->foldersIdle[$folderUid] = new Idle(
-      $this,
+      $this->getHost(),
+      $this->getPort(),
+      $this->encryption,
       $this->login,
       $this->pass,
       $folderUid,
@@ -1468,7 +1438,7 @@ class Mailbox extends Basic
   }
 
 
-  protected function connect(): bool
+  public function connect(): bool
   {
     if (isset($this->mbParam)) {
       $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
@@ -1485,140 +1455,6 @@ class Mailbox extends Basic
         $this->status = imap_last_error();
         return false;
       }
-    }
-
-    return false;
-  }
-
-
-  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
-    if (!empty($part->ifdisposition)
-      && !empty($part->disposition)
-      && !empty($part->ifparameters)
-      && ((strtolower($part->disposition) === 'attachment')
-        || (strtolower($part->disposition) === 'inline'))
-      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-      && (empty($filename) || ($filename === $nameParam->value))
-    ) {
-      if ($data = $this->getMsgBody($msgNum, $partNum)) {
-        $attachments[] = [
-          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
-          'name' => $nameParam->value,
-          'size' => $part->bytes,
-          'data' => $this->_get_decode_value($data, $part->encoding)
-        ];
-      }
-    }
-
-    if (!empty($part->parts)
-      && (empty($filename) || !count($attachments))
-    ) {
-      foreach ($part->parts as $np2 => $p) {
-        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
-        if (!empty($filename) && count($attachments)) {
-          break;
-        }
-      }
-    }
-  }
-
-
-  /**
-   * Checks if we are connected  (Test: ok)
-   *
-   * @return bool
-   */
-  private function _is_connected()
-  {
-    if ($this->stream) {
-      $now = microtime(true);
-      if ($now - $this->_last_ping < $this->_ping_interval) {
-        return true;
-      }
-
-      if (imap_ping($this->stream)) {
-        $this->_last_ping = $now;
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array containing the names of the mailboxes that you have subscribed. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return bool|array
-   */
-  private function _list_subscribed($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_lsub($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array containing the full names of the mailboxes.  (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return bool|array
-   */
-  private function _list_folders($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_list($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array of objects containing detailed mailboxes information. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return array|bool
-   */
-  private function _get_folders($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_getmailboxes($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns a sorted array containing the simple names of the mailboxes. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return array
-   */
-  private function _get_names_folders($dir)
-  {
-    if ($folders = $this->_get_folders($dir)) {
-      $i   = 0;
-      $ret = [];
-      foreach($folders as $val) {
-        $name      = imap_utf7_decode($val->name);
-        $name_arr  = explode('}', $name);
-        $j         = \count($name_arr) - 1;
-        $mbox_name = $name_arr[$j];
-        if($mbox_name == "") {
-          continue; // the folder itself
-        }
-
-        $ret[$i++] = $mbox_name;
-      }
-
-      sort($ret);
-      return $ret;
     }
 
     return false;
@@ -1793,6 +1629,302 @@ class Mailbox extends Basic
       'quote' => '',
       'method' => 'no_quote_detected',
     ];
+  }
+
+
+  /**
+   * Returns a RawClient instance for executing raw IMAP commands.
+   * @return RawClient
+   */
+  public function getRawClient(): RawClient
+  {
+    if (!$this->rawClient) {
+      $this->rawClient = new RawClient(
+        $this->getHost(),
+        $this->getPort(),
+        $this->encryption,
+        $this->login,
+        $this->pass
+      );
+    }
+
+    if (!$this->rawClient->isConnected()) {
+      $this->rawClient->connect();
+    }
+
+    return $this->rawClient;
+  }
+
+
+  /**
+   * Executes a raw IMAP command and returns the response as a string.
+   * @param string $command The raw IMAP command to execute
+   * @param bool $disconnectAfter Whether to disconnect the client after executing the command (default: true)
+   * @return string|null The response from the IMAP server
+   */
+  public function rawCommand(string $command, bool $disconnectAfter = true): ?string
+  {
+    if ($client = $this->getRawClient()) {
+      $res = $client->sendCommand($command, true);
+      if ($disconnectAfter) {
+        $client->disconnect();
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the HIGHESTMODSEQ of the folder, or null if not supported by the server.
+   * @param string $folderUid The UID of the folder
+   * @return int|null The HIGHESTMODSEQ value or null if not supported
+   */
+  public function getFolderHighestmodseq(string $folderUid): ?int
+  {
+    if (($client = $this->getRawClient())
+      && $client->hasCapability('CONDSTORE')
+    ) {
+      $res = $this->rawCommand('STATUS ' . $folderUid . ' (HIGHESTMODSEQ)');
+      if (preg_match('/HIGHESTMODSEQ\s+(\d+)/i', $res, $m)) {
+        return (int)$m[1];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the messsages UIDs changed since lastModseq.
+   * @param string $folderUid The UID of the folder
+   * @param int $lastModseq The last known MODSEQ value
+   * @return array An array of UIDs that have changed since lastModseq
+   * @note This method requires the server to support CONDSTORE and may not work on
+   */
+  public function getMsgUidsChangedSinceModseq(string $folderUid, int $lastModseq): array
+  {
+    if (($client = $this->getRawClient())
+      && $client->hasCapability('CONDSTORE')
+    ) {
+      $this->rawCommand('SELECT ' . $folderUid . ' (CONDSTORE)', false);
+      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq + 1));
+      if (preg_match('/^\*\s+SEARCH\s*(.*)$/i', $res, $m)) {
+        $list = trim($m[1]);
+        if ($list === '') {
+          return [];
+        }
+
+        $uids = preg_split('/\s+/', $list) ?: [];
+        $uids = array_values(array_unique(array_map('intval', $uids)));
+        sort($uids);
+        return $uids;
+      }
+    }
+
+    return [];
+  }
+
+
+  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
+    if (!empty($part->ifdisposition)
+      && !empty($part->disposition)
+      && !empty($part->ifparameters)
+      && ((strtolower($part->disposition) === 'attachment')
+        || (strtolower($part->disposition) === 'inline'))
+      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+      && (empty($filename) || ($filename === $nameParam->value))
+    ) {
+      if ($data = $this->getMsgBody($msgNum, $partNum)) {
+        $attachments[] = [
+          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
+          'name' => $nameParam->value,
+          'size' => $part->bytes,
+          'data' => $this->_get_decode_value($data, $part->encoding)
+        ];
+      }
+    }
+
+    if (!empty($part->parts)
+      && (empty($filename) || !count($attachments))
+    ) {
+      foreach ($part->parts as $np2 => $p) {
+        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
+        if (!empty($filename) && count($attachments)) {
+          break;
+        }
+      }
+    }
+  }
+
+
+  private function transformString($string) {
+    // Use the md5 hash function to generate a 32-character hexadecimal string
+    $hash = md5($string);
+
+    // Initialize an empty result variable
+    $result = '';
+
+    // Loop through the characters of the hash string
+    for ($i = 0; $i < strlen($hash); $i++) {
+      // Get the current character
+      $char = $hash[$i];
+
+      // Append the current character to the result string
+      $result .= $char;
+
+      // If the current position is a multiple of 4, append a dash
+      if (($i + 1) % 4 == 0 && $i != 31) {
+        $result .= '-';
+      }
+    }
+
+    // Return the final result
+    return $result;
+  }
+
+
+  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
+  private function decode_encoded_words($string) {
+
+    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
+    if (!empty($matches)) {
+      for ($i = 0; $i < count($matches[0]); $i++) {
+        $encoding = $matches[2][$i];
+        $encoded_text = $matches[3][$i];
+        if (strtolower($encoding) == "q") {
+          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
+        } else {
+          $decoded_text = base64_decode($encoded_text);
+        }
+        $string = Str::replace($matches[0][$i], $decoded_text, $string);
+      }
+    }
+
+    return $string;
+  }
+
+  private function decode_encoded_words_array(array $array) {
+    for($i = 0; $i < count($array); $i++) {
+      $array[$i] = $this->decode_encoded_words($array[$i]);
+    }
+    return $array;
+  }
+
+  private function decode_encoded_words_deep($obj) {
+    if (is_string($obj)) {
+      $obj = $this->decode_encoded_words($obj);
+    }
+    elseif (is_object($obj)) {
+      foreach ($obj as $idx => $val) {
+        $obj->$idx = $this->decode_encoded_words_deep($val);
+      }
+    }
+
+    return $obj;
+  }
+
+
+  /**
+   * Checks if we are connected  (Test: ok)
+   *
+   * @return bool
+   */
+  private function _is_connected()
+  {
+    if ($this->stream) {
+      $now = microtime(true);
+      if ($now - $this->_last_ping < $this->_ping_interval) {
+        return true;
+      }
+
+      if (imap_ping($this->stream)) {
+        $this->_last_ping = $now;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array containing the names of the mailboxes that you have subscribed. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return bool|array
+   */
+  private function _list_subscribed($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_lsub($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array containing the full names of the mailboxes.  (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return bool|array
+   */
+  private function _list_folders($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_list($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array of objects containing detailed mailboxes information. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return array|bool
+   */
+  private function _get_folders($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_getmailboxes($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns a sorted array containing the simple names of the mailboxes. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return array
+   */
+  private function _get_names_folders($dir)
+  {
+    if ($folders = $this->_get_folders($dir)) {
+      $i   = 0;
+      $ret = [];
+      foreach($folders as $val) {
+        $name      = imap_utf7_decode($val->name);
+        $name_arr  = explode('}', $name);
+        $j         = \count($name_arr) - 1;
+        $mbox_name = $name_arr[$j];
+        if($mbox_name == "") {
+          continue; // the folder itself
+        }
+
+        $ret[$i++] = $mbox_name;
+      }
+
+      sort($ret);
+      return $ret;
+    }
+
+    return false;
   }
 
 

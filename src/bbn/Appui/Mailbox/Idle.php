@@ -2,61 +2,21 @@
 
 namespace bbn\Appui\Mailbox;
 
-use bbn\Appui\Mailbox;
+use bbn\Appui\Mailbox\RawClient;
 use Exception;
 use bbn\X;
 use bbn\Str;
 
 
 /**
- * Trait providing functionality for IMAP IDLE.
+ * Class providing functionality for IMAP IDLE.
  */
-class Idle
+class Idle extends RawClient
 {
-  /**
-   * @var Mailbox The mailbox instance
-   */
-  protected $mailbox;
-
-  /**
-   * @var string The login of the mailbox
-   */
-  protected $login;
-
-  /**
-   * @var string The password of the mailbox
-   */
-  protected $pass;
-
   /**
    * @var string The folder UID
    */
   protected $folder;
-
-  /**
-   * @var resource|false|null IMAP stream resource
-   */
-  protected $streamResource;
-
-  /**
-   * @var float Last time an IDLE command was sent
-   */
-  protected $lastTime = 0;
-
-  /**
-   * @var string The last IDLE command sent
-   */
-  protected $lastCommand;
-
-  /**
-   * @var string The IDLE tag
-   */
-  protected $tag;
-
-  /**
-   * @var string The IDLE tag prefix
-   */
-  protected $tagPrefix = 'BBN_';
 
   /**
    * @var bool Whether the IDLE is running
@@ -77,15 +37,12 @@ class Idle
    */
   protected $callbackFrequency = 10;
 
-  /**
-   * @var int The timeout for the IDLE command
-   */
-  protected $timeout = 300;
-
 
   /**
    * Idle constructor.
-   * @param Mailbox $mailbox The mailbox instance
+   * @param string $host The host of the IMAP server
+   * @param int $port The port of the IMAP server
+   * @param bool $encryption Whether to use encryption for the connection
    * @param string $login The login of the mailbox
    * @param string $pass The password of the mailbox
    * @param string $folder The folder UID
@@ -93,7 +50,9 @@ class Idle
    * @param int|null $timeout The timeout in seconds for the IDLE connection
    */
   public function __construct(
-    Mailbox $mailbox,
+    string $host,
+    int $port,
+    bool $encryption,
     string $login,
     string $pass,
     string $folder,
@@ -101,14 +60,9 @@ class Idle
     ?int $timeout = null
   )
   {
-    $this->mailbox = $mailbox;
-    $this->login = $login;
-    $this->pass = $pass;
+    parent::__construct($host, $port, $encryption, $login, $pass, $timeout);
     $this->folder = $folder;
     $this->callback = $callback;
-    if (!empty($timeout)) {
-      $this->timeout = $timeout;
-    }
   }
 
 
@@ -119,6 +73,7 @@ class Idle
   public function __destruct()
   {
     $this->stopIdle();
+    parent::__destruct();
   }
 
 
@@ -131,17 +86,13 @@ class Idle
     ignore_user_abort(true);
     $this->running = false;
     $this->tag = 0;
-    $this->connect();
+    if (!$this->isConnected()) {
+      $this->connect();
+    }
 
     try {
-      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
       $this->sendCommand("SELECT {$this->folder}");
-      $this->sendCommand("CAPABILITY", false);
-      $capabilityResponse = $this->readCommandResponseLine();
-      $canIdle = !empty($capabilityResponse)
-        && str_contains($capabilityResponse, "CAPABILITY")
-        && in_array("IDLE", explode(" ", $capabilityResponse));
-      if (empty($canIdle)) {
+      if (!$this->hasCapability('IDLE')) {
         $this->stopIdle();
         throw new Exception(X::_("IDLE not supported by the server"));
       }
@@ -210,18 +161,9 @@ class Idle
         }
 
         // Check if the stream is still alive or should be considered stale
-        if (!$this->mailbox->check()
-          || (($this->lastTime + $this->timeout) < time())
-        ) {
+        if (($this->lastTime + $this->timeout) < time()) {
           // Stop current IDLE connection
           $this->stopIdle();
-          // Close the main stream
-          if (!empty($this->mailbox->getStream())) {
-            imap_close($this->mailbox->getStream());
-          }
-
-          // Establish a new connection
-          $this->mailbox->connect();
           // Run IDLE again
           return $this->idle();
         }
@@ -244,20 +186,10 @@ class Idle
     $this->running = false;
     if (!empty($this->streamResource)) {
       fwrite($this->streamResource, "DONE\r\n");
-      fclose($this->streamResource);
-      $this->streamResource = null;
+      $this->disconnect();
     }
   }
 
-
-  /**
-   * Returns the current stream resource used for the IDLE connection.
-   * @return resource|null The stream resource for the IDLE connection, or null if not connected
-   */
-  public function getStreamResource()
-  {
-    return $this->streamResource;
-  }
 
   /**
    * Checks if the IDLE connection is currently running.
@@ -266,102 +198,6 @@ class Idle
   public function isRunning(): bool
   {
     return (bool)$this->running;
-  }
-
-
-  /**
-   * Establishes a connection to the IMAP server using the mailbox credentials. Sets up the stream resource for the IDLE connection. Throws an exception if the connection fails.
-    * @return void
-   */
-  protected function connect()
-  {
-    $context = [];
-    if ($this->mailbox->getEncription()) {
-      $context['ssl'] = [
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-      ];
-    }
-
-    // Establish the connection
-    $this->streamResource = stream_socket_client(
-      ($this->mailbox->getEncription() ? "ssl" : "tls") . "://{$this->mailbox->getHost()}:{$this->mailbox->getPort()}",
-      $errno,
-      $errstr,
-      $this->timeout,
-      STREAM_CLIENT_CONNECT,
-      stream_context_create($context)
-    );
-    if (!$this->streamResource) {
-      throw new Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
-    }
-  }
-
-
-  /**
-   * Generates the current IDLE command tag based on the tag prefix and the current tag number.
-   * @return string The current IDLE command tag
-   */
-  protected function getCurrentTagPrefix(): string
-  {
-    return $this->tagPrefix . $this->tag . ' ';
-  }
-
-
-  /**
-   * Sends a command to the IMAP server through the stream resource. Increments the tag number for each command sent. Optionally waits for a response from the server and returns it as a string or an array of lines.
-   * @param string $command The command to send to the IMAP server
-   * @param bool $response Whether to wait for a response from the server after sending the command
-   * @param bool $responseAsArray Whether to return the response as an array of lines instead of a single string (only applicable if $response is true)
-   * @return string|array The response from the server as a string or an array of lines, depending on the $responseAsArray parameter. Returns an empty string or array if $response is false.
-   * @throws Exception If there is an error response from the server or if the response is empty when a response is expected
-   */
-  protected function sendCommand(
-    string $command,
-    bool $response = true,
-    bool $responseAsArray = false
-  ): string|array
-  {
-    $this->tag++;
-    $this->lastCommand = $this->getCurrentTagPrefix() . $command;
-    fwrite($this->streamResource, $this->lastCommand . "\r\n");
-    $this->lastTime = time();
-    return empty($response) ? (empty($responseAsArray) ? '' : []) : $this->readCommandResponse($responseAsArray);
-  }
-
-
-  /**
-   * Reads the response from the IMAP server after sending a command. Collects lines of response until it detects the end of the response based on the command tag. Checks for error responses and throws exceptions if an error is detected. Returns the response as a string or an array of lines, depending on the $asArray parameter.
-   * @param bool $asArray Whether to return the response as an array of lines instead of a single string
-   * @return string|array The response from the server as a string or an array of lines, depending on the $asArray parameter
-   * @throws Exception If there is an error response from the server or if the response is empty when a response is expected
-   */
-  protected function readCommandResponse(bool $asArray = false): string|array
-  {
-    $response = [];
-    try {
-      while ($line = trim($this->readCommandResponseLine())) {
-        $response[] = $line;
-        $prefix = $this->getCurrentTagPrefix();
-        if (str_starts_with($line, $prefix)) {
-          if (str_starts_with($line, $prefix . 'BAD ')
-            || str_starts_with($line, $prefix . 'NO ')
-          ) {
-            throw new Exception(X::_('Error response (command: %s): %s', $this->lastCommand, $line), 2);
-          }
-
-          if (empty($asArray)) {
-            return $line;
-          }
-        }
-      }
-    }
-    catch(Exception $e) {
-      throw $e;
-    }
-
-    $this->lastTime = time();
-    return !empty($asArray) ? $response : (!empty($response) ? $response[count($response) - 1] : '');
   }
 
 
@@ -385,9 +221,7 @@ class Idle
         ($this->callback)(['action' => 'syncSubscribedFolders']);
       }
 
-      if (!$this->mailbox->check()
-        || (($this->lastTime + $this->timeout) < time())
-      ) {
+      if (($this->lastTime + $this->timeout) < time()) {
         throw new Exception(X::_('IDLE Connection lost'), 3);
       }
 
@@ -436,26 +270,5 @@ class Idle
     }
 
     return true;
-  }
-
-
-  /**
-   * Checks if the IDLE connection is currently established and the stream resource is valid. Sends a NOOP command to the server to verify the connection is still alive. Returns true if the connection is valid, false otherwise.
-   * @return bool True if the IDLE connection is established and valid, false otherwise
-    * @throws Exception If there is an error response from the server when sending the NOOP
-   */
-  protected function isConnected(): bool
-  {
-    if (!empty($this->streamResource)) {
-      try {
-        $this->sendCommand("NOOP");
-        return true;
-      }
-      catch (Exception $e) {
-        return false;
-      }
-    }
-
-    return false;
   }
 }

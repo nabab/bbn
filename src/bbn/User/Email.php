@@ -102,7 +102,7 @@ class Email extends Basic
   protected $cachePrefix = 'emails/';
 
   /** @var int The frequency for idle synchronization */
-  protected $idleSyncFrequency = 300;
+  protected $idleSyncFrequency = 180;
 
   /** @var int The timestamp of the last idle synchronization */
   protected $idleLastSync = 0;
@@ -909,11 +909,13 @@ class Email extends Basic
           if (($folder['db_uid_min'] == $first_uid)
             && ($folder['db_uid_max'] == $last_uid)
           ) {
+            $n = 0;
             if ($info->Nmsgs != $folder['db_num_msg']) {
-              yield count($this->checkAndDeleteEmails($folder['id']));
+              $n += count($this->checkAndDeleteEmails($folder['id'])) ?: 0;
             }
 
-            return 0;
+            $n += $this->syncFlags($folder['id']);
+            return $n;
           }
 
           if ($folder['db_uid_max'] != $last_uid) {
@@ -974,11 +976,13 @@ class Email extends Basic
         }
 
         if (!$start || !$real_end) {
+          $n = 0;
           if ($info->Nmsgs != $folder['db_num_msg']) {
-            yield count($this->checkAndDeleteEmails($folder['id']));
+            $n += count($this->checkAndDeleteEmails($folder['id'])) ?: 0;
           }
 
-          return 0;
+          $n += $this->syncFlags($folder['id']);
+          return $n;
         }
 
         $end = $start;
@@ -1009,6 +1013,7 @@ class Email extends Basic
         }
 
         $this->checkAndDeleteEmails($folder['id']);
+        $this->syncFlags($folder['id']);
         $this->setFolderSync($folder['id'], false);
         if ($added) {
           $this->syncThreads();
@@ -2469,10 +2474,7 @@ class Email extends Basic
   }
 
 
-  protected function setFolderSync(
-    string $idFolder,
-    bool $synchronizing = true
-  ): bool
+  protected function setFolderSync(string $idFolder, bool $synchronizing = true): bool
   {
     if ($bit = $this->pref->getBit($idFolder)) {
       $bit['synchronizing'] = $synchronizing;
@@ -2485,10 +2487,34 @@ class Email extends Basic
   }
 
 
+  protected function setFlagsHighestmodseq(string $idFolder, int $highestmodseq): bool
+  {
+    if ($bit = $this->pref->getBit($idFolder)) {
+      $bit['flags_highestmodseq'] = $highestmodseq;
+      $bit['id_parent'] = !empty($bit['id_parent']) ? $bit['id_parent'] :  null;
+      return (bool)$this->pref->updateBit($idFolder, $bit);
+    }
+
+    return false;
+  }
+
+
+  protected function getFlagsHighestmodseq(string $idFolder): ?int
+  {
+    if ($bitCfg = $this->pref->getBitCfg($idFolder)) {
+      return $bitCfg['flags_highestmodseq'] ?? null;
+    }
+
+    return null;
+  }
+
+
   protected function checkAndDeleteEmails(string $idFolder): array
   {
     $deleted = [];
     if (($folder = $this->getFolder($idFolder))
+      && !empty($folder['id_account'])
+      && isset($folder['db_num_msg'])
       && ($mb = $this->getMailbox($folder['id_account']))
       && ($info = $this->checkFolder($folder))
       && ($info['Nmsgs'] < $folder['db_num_msg'])
@@ -2540,6 +2566,46 @@ class Email extends Basic
   }
 
 
+  protected function syncFlags(string $idFolder): int
+  {
+    $synced = 0;
+    if (($folder = $this->getFolder($idFolder))
+      && !empty($folder['id_account'])
+      && !empty($folder['uid'])
+      && ($mb = $this->getMailbox($folder['id_account']))
+      && ($hms = $mb->getFolderHighestmodseq($folder['uid']))
+    ) {
+      $last = $folder['flags_highestmodseq'] ?? null;
+      if (is_null($last) || ($hms > $last)) {
+        if ($uids = $mb->getMsgUidsChangedSinceModseq($folder['uid'], $last ?: 0)) {
+          foreach ($uids as $uid) {
+            if (($emailId = $this->getEmailIdByUid($uid, $folder['id']))
+              && ($msgn = $mb->getMsgNo($uid))
+            ) {
+              $changed = 0;
+              $flags = $mb->getMsgFlags($msgn) ?: [];
+              $changed += (int)$this->setSeen($emailId, in_array('\\Seen', $flags));
+              $changed += (int)$this->setDraft($emailId, in_array('\\Draft', $flags));
+              $flags = array_values(
+                array_filter(
+                  $flags,
+                  fn($flag) => !in_array($flag, ['\\Seen', '\\Deleted', '\\Draft', '\\Recent'])
+                )
+              );
+              $changed += (int)$this->setFlags($emailId, $flags);
+              $synced += !empty($changed) ? 1 : 0;
+            }
+          }
+        }
+
+        $this->setFlagsHighestmodseq($idFolder, $hms);
+      }
+    }
+
+    return $synced;
+  }
+
+
   protected function normalizeFolder(array $folder): array
   {
     $types = self::getFolderTypes();
@@ -2564,6 +2630,7 @@ class Email extends Basic
       'synchronizing' => $folder['synchronizing'] ?? false,
       'last_sync_start' => $folder['last_sync_start'] ?? null,
       'last_sync_end' => $folder['last_sync_end'] ?? null,
+      'flags_highestmodseq' => $folder['flags_highestmodseq'] ?? null,
       $this->localeField => $this->pref->isLocale(
         $folder['id'],
         $this->pref->getClassCfg()['tables']['user_options_bits']
