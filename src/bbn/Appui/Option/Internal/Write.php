@@ -365,9 +365,12 @@ trait Write
         && ($id !== $this->root)
     ) {
       $res = 0;
-      $this->deleteCache($id);
+      $this->deleteCache($id, true);
       // All ids below including the one given
       $all = $this->treeIds($id);
+      if (!is_array($all)) {
+        X::ddump($all, $id, $this->db->rselect('bbn_options', [], ['id' => $id]), "All ids to delete");
+      }
       $has_history = History::isEnabled() && History::isLinked($this->class_cfg['table']);
       foreach (array_reverse($all) as $a) {
         $this->db->delete(

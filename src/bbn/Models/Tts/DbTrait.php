@@ -4,6 +4,8 @@ namespace bbn\Models\Tts;
 
 use bbn\X;
 use Exception;
+use stdClass;
+
 use function array_key_exists;
 use function in_array;
 use function count;
@@ -44,10 +46,7 @@ trait DbTrait
   protected function dbTraitPrepare(array $data): array
   {
     // Ensure that the class configuration is initialized
-    if (!$this->isInitClassCfg()) {
-      throw new Exception(X::_("Impossible to prepare an item if the class config has not been initialized"));
-    }
-
+    $this->dbConfigCheck();
     $ccfg = $this->getClassCfg();
     // Get the table index from the class configuration
     $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
@@ -100,10 +99,7 @@ trait DbTrait
   protected function dbTraitTreat(array ...$rows): array
   {
     // Ensure that the class configuration is initialized
-    if (!$this->isInitClassCfg()) {
-      throw new Exception(X::_("Impossible to prepare an item if the class config has not been initialized"));
-    }
-
+    $this->dbConfigCheck();
     $ccfg = $this->getClassCfg();
     // Get the table index from the class configuration
     $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
@@ -278,19 +274,45 @@ trait DbTrait
   ): array
   {
     $returnObject = $mode === 'object';
-    $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);
-    $f = $this->class_cfg['arch'][$this->class_table_index];
-    $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');
-    $res = $this->db->$method($req);
-    if ($res) {
-      if (!empty($f['cfg'])) {
-        foreach ($res as &$r) {
-          if ($returnObject && !empty($r->{$f['cfg']})) {
-            $cfg = json_decode($r->{$f['cfg']});
-            $r = X::mergeObjects($cfg, $r);
-            unset($r->{$f['cfg']});
+    $go = true;
+    if (isset($filter['id']) && (count($filter) === 1)) {
+      $o = $this->emit('beforeselect', $filter);
+      if ($res = $o->response()) {
+        if (!empty($fields)) {
+          foreach ($res as $k => $v) {
+            if (!in_array($k, $fields)) {
+              unset($res[$k]);
+            }
           }
-          elseif (!$returnObject && !empty($r[$f['cfg']])) {
+        }
+
+        $go = !$o->isDefaultPrevented();
+        if ($returnObject) {
+          $res = (object)$res;
+        }
+      }
+    }
+
+    if ($go) {
+      $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);
+      $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');
+      $res = $this->db->$method($req);
+    }
+
+    if ($res) {
+      return $this->dbTraitTransformData($res);
+    }
+
+    return [];
+  }
+
+  private function dbTraitTransformData(array|stdClass $res): array | stdClass
+  {
+    $f = $this->class_cfg['arch'][$this->class_table_index];
+    if (!empty($f['cfg'])) {
+      if (is_array($res)) {
+        foreach ($res as &$r) {
+          if (!empty($r[$f['cfg']])) {
             $cfg = json_decode($r[$f['cfg']], true);
             $r = array_merge($cfg, $r);
             unset($r[$f['cfg']]);
@@ -299,11 +321,14 @@ trait DbTrait
 
         unset($r);
       }
-
-      return $res;
+      elseif (!empty($res->{$f['cfg']})) {
+        $cfg = json_decode($res->{$f['cfg']});
+        $res = X::mergeObjects($cfg, $res);
+        unset($res->{$f['cfg']});
+      }
     }
 
-    return [];
+    return $res;
   }
 
   /**

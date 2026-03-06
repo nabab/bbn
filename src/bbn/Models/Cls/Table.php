@@ -3,27 +3,27 @@ namespace bbn\Models\Cls;
 
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\References;
 
 abstract class Table extends DbCls
 {
   use References;
-  use DbActions;
+  use DbOps;
 
   /** @var array */
   protected static $default_class_cfg = [
-    'table' => null,
-    'arch' => []
+    "table" => null,
+    "arch" => [],
   ];
 
   /** @var array */
   protected $class_cfg;
 
-  public function __construct(Db $db, array $cfg = [])
+  public function __construct(Db $db)
   {
+    $this->initClassCfg();
     parent::__construct($db);
-    $this->initClassCfg($cfg ?: static::$default_class_cfg);
   }
 
   public function cfg(): array

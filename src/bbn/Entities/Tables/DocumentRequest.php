@@ -8,18 +8,24 @@ use bbn\Db;
 use bbn\User;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
+use bbn\Entities\Junctions\DocumentRequestTypes;
 use bbn\Entities\Models\EntityTable;
 use bbn\Models\Tts\DbConfig;
+
+use function is_string;
+use function is_array;
+use function count;
 
 abstract class DocumentRequest extends EntityTable
 {
   use DbConfig;
 
+  protected ?DocumentRequestTypes $docTypesRequest = null;
+
   protected static $default_class_cfg = [
     'table' => 'bbn_documents_requests',
     'tables' => [
       'requests' => 'bbn_documents_requests',
-      'documents' => 'bbn_documents_requests_documents',
     ],
     'arch' => [
       "requests" => [
@@ -28,18 +34,26 @@ abstract class DocumentRequest extends EntityTable
         "sent" => "sent",
         "message" => "message",
         "last_call" => "last_call",
-        "num_calls" => "num_calls",
-        "days_last_send" => "days_last_send",
-      ],
-      "documents" => [
-        "id" => "id",
-        "id_request" => "id_request",
-        "doc_type" => "doc_type"
+        "num_calls" => "num_calls"
+      ]
+    ],
+    'junctions' => [
+      [
+        'table' => 'bbn_documents_requests_types',
+        'class' => DocumentRequestTypes::class,
       ]
     ]
   ];
 
 
+  public function getDocTypes(): DocumentRequestTypes
+  {
+    if (!isset($this->docTypesRequest)) {
+      $this->docTypesRequest = new $this->class_cfg['junctions'][0]['class']($this->db, $this->entities, $this->entity);
+    }
+
+    return $this->docTypesRequest;
+  }
   /**
    * @param int $limit
    * @param string|null $docType
@@ -54,8 +68,11 @@ abstract class DocumentRequest extends EntityTable
       $optTable = $optCfg['table'];
       $optFields = $opt->getFields();
       $fields = $this->class_cfg['arch']['requests'];
-      $docFields = $this->class_cfg['arch']['documents'];
-      $docTable = $this->class_cfg['tables']['documents'];
+      $docRequestTypes = $this->getDocTypes();
+      $tcfg = $docRequestTypes->getClassCfg();
+      $docFields = $tcfg['arch'][$tcfg['table_index']];
+      $fields['days_last_sent'] = "to_days(current_timestamp()) - to_days(ifnull(`$fields[last_call]`,`$fields[sent]`))";
+      $docTable = $tcfg['table'];
       if (!empty($docType) && !Str::isUid($docType)) {
         $docType = $opt->fromCode($docType, 'documents');
       }
@@ -126,6 +143,8 @@ abstract class DocumentRequest extends EntityTable
   public function count(array $filter = []): int
   {
     if ($this->entity->check()) {
+      $docRequestTypes = $this->getDocTypes();
+      $tcfg = $docRequestTypes->getClassCfg();
       return $this->db->selectOne([
         'table' => $this->class_table,
         'fields' => ['COUNT(DISTINCT '.$this->db->cfn($this->fields['id'], $this->class_table).')'],
@@ -133,10 +152,10 @@ abstract class DocumentRequest extends EntityTable
           $this->db->cfn($this->fields['id_entity'], $this->class_table) => $this->entity->getId()
         ],
         'join' => [[
-          'table' => $this->class_cfg['tables']['documents'],
+          'table' => $tcfg['table'],
           'on' => [[
             'field' => $this->db->cfn($this->fields['id'], $this->class_table),
-            'exp' => $this->db->cfn($this->class_cfg['arch']['documents']['id_request'], $this->class_cfg['tables']['documents'])
+            'exp' => $this->db->cfn($tcfg['arch'][$tcfg['table_index']]['id_request'], $tcfg['table'])
           ]]
         ]]
       ]) ?: 0;
@@ -154,7 +173,6 @@ abstract class DocumentRequest extends EntityTable
   {
     if ($this->entity->check()) {
       $numCalls = $this->db->selectOne($this->class_table, $this->fields['num_calls'], [$this->fields['id'] => $id]) ?: 0;
-
       return $this->db->update($this->class_table, [
         $this->fields['last_call'] => date('Y-m-d H:i:s'),
         $this->fields['num_calls'] => $numCalls + 1
@@ -174,18 +192,21 @@ abstract class DocumentRequest extends EntityTable
   public function has(string $docType): bool
   {
     if ($this->entity->check()) {
+      $docRequestTypes = $this->getDocTypes();
+      $tcfg = $docRequestTypes->getClassCfg();
+      $tfields = $tcfg['arch'][$tcfg['table_index']];
       return $this->db->count([
-          'table' => $this->class_cfg['tables']['documents'],
+          'table' => $tcfg['table'],
           'join' => [[
             'table' => $this->class_table,
             'on' => [[
-              'field' => $this->db->cfn($this->class_cfg['arch']['documents']['id_request'], $this->class_cfg['tables']['documents']),
+              'field' => $this->db->cfn($tfields['id_request'], $tcfg['table']),
               'exp' => $this->db->cfn($this->fields['id'], $this->class_table)
             ]]
           ]],
           'where' => [
             $this->db->cfn($this->fields['id_entity'], $this->class_table) => $this->entity->getId(),
-            $this->db->cfn($this->class_cfg['arch']['documents']['doc_type'], $this->class_cfg['tables']['documents']) => $docType
+            $this->db->cfn($tfields['doc_type'], $tcfg['table']) => $docType
           ]
         ]) > 0;
     }
@@ -206,7 +227,8 @@ abstract class DocumentRequest extends EntityTable
   public function add($docType, string $message = ''): ?array
   {
     if ($this->entity->check()) {
-      $dFields = $this->class_cfg['arch']['documents'];
+      $docRequestTypes = $this->getDocTypes();
+      $dFields = $docRequestTypes->getFields();
       // Un ou plusieurs types de documents
       if (!is_array($docType)) {
         $docType = [[
@@ -242,7 +264,7 @@ abstract class DocumentRequest extends EntityTable
           $data[$dFields['doc_type']] = [];
 
           foreach ($types as $i => $t) {
-            if ($this->db->insert($this->class_cfg['tables']['documents'], [
+            if ($docRequestTypes->insert([
               $dFields['id_request'] => $data[$this->fields['id']],
               $dFields['doc_type'] => $t[$dFields['doc_type']]
             ])) {
@@ -271,7 +293,8 @@ abstract class DocumentRequest extends EntityTable
   public function get(string $docType, ?string $idCloture = null): ?array
   {
     $request = null;
-    $dFields = $this->class_cfg['arch']['documents'];
+    $docRequestTypes = $this->getDocTypes();
+    $dFields = $docRequestTypes->getFields();
     if ($this->has($docType)
       && ($requests = $this->all())
     ) {
@@ -298,21 +321,24 @@ abstract class DocumentRequest extends EntityTable
   public function deleteByType(string $docType, ?string $idCloture = null)
   {
     $res = false;
+    $docRequestTypes = $this->getDocTypes();
+    $dFields = $docRequestTypes->getFields();
     $dTable = $this->class_cfg['tables']['documents'];
     $dFields = $this->class_cfg['arch']['documents'];
     if ($this->entity->check()
       && ($request = $this->get($docType, $idCloture))
-      && ($id = $this->db->selectOne($dTable, 'id', [
+      && ($id = $docRequestTypes->selectOne('id', [
         $dFields['id_request'] => $request[$this->fields['id']],
         $dFields['doc_type'] => $docType
       ]))
-      && $this->db->delete($dTable, [$dFields['id'] => $id])
+      && $docRequestTypes->delete($id)
     ) {
-      if (!$this->db->count($dTable, [
+      if (!$docRequestTypes->count([
         $dFields['id_request'] => $request[$this->fields['id']],
       ])) {
-        $this->dbTraitDelete($request[$this->fields['id']]);
+        $this->delete($request[$this->fields['id']]);
       }
+
       $res = $docType;
     }
 

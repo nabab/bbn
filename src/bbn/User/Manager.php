@@ -8,6 +8,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
+use bbn\Cache;
 use bbn\Mail;
 use bbn\User;
 use bbn\User\Preferences;
@@ -31,6 +32,8 @@ class Manager
   protected static $admin_group;
 
   protected static $dev_group;
+
+  protected static array $_groups;
 
   protected $messages = [
     'creation' => [
@@ -171,35 +174,49 @@ You can click the following link to access directly your account:<br>
    */
   public function groups(): array
   {
-    $cfg = $this->getClassCfg();
-    $a             =& $cfg['arch'];
-    $t             =& $cfg['tables'];
-    $id            = $this->db->cfn($a['groups']['id'], $t['groups']);
-    $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);
-    $db            =& $this->db;
-    $fields        = \array_map(
-      function ($g) use ($db, $t) {
-        return $db->cfn($g, $t['groups']);
-      }, \array_values($a['groups'])
-    );
-    $fields['num'] = "COUNT($users_id)";
-    return $this->db->rselectAll(
-      [
-      'table' => $t['groups'],
-      'fields' => $fields,
-      'join' => [[
-        'table' => $t['users'],
-        'type' => 'left',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($a['users']['id_group'], $t['users']),
-            'exp' => $id
-          ]]
-        ]
-      ]],
-      'group_by' => [$id]
-      ]
-    );
+    if (!isset(self::$_groups)) {
+      $cache = Cache::getEngine();
+      $key = Str::replace('\\', '/', __CLASS__) . '_groups';
+      if (!($cached = $cache->get($key))) {
+        $cfg = $this->class_cfg;
+        $a             =& $cfg['arch'];
+        $t             =& $cfg['tables'];
+        $id            = $this->db->cfn($a['groups']['id'], $t['groups']);
+        $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);
+        $db            =& $this->db;
+        $fields        = \array_map(
+          function ($g) use ($db, $t) {
+            return $db->cfn($g, $t['groups']);
+          }, \array_values($a['groups'])
+        );
+        $fields['num'] = "COUNT($users_id)";
+        $cached = $this->db->rselectAll(
+          [
+          'table' => $t['groups'],
+          'fields' => $fields,
+          'join' => [[
+            'table' => $t['users'],
+            'type' => 'left',
+            'on' => [
+              'conditions' => [[
+                'field' => $this->db->cfn($a['users']['id_group'], $t['users']),
+                'exp' => $id
+              ]]
+            ]
+          ]],
+          'group_by' => [$id]
+          ]
+        );
+        foreach ($cached as &$c) {
+          $c[$a['groups']['cfg']] = $c[$a['groups']['cfg']] ? json_decode($c[$a['groups']['cfg']], true) : [];
+        }
+        unset($c);
+        $cache->set($key, $cached, 1440);
+      }
+      self::setGroups($cached);
+    }
+
+    return self::$_groups;
   }
 
 
@@ -322,13 +339,8 @@ You can click the following link to access directly your account:<br>
 
   public function getGroup(string $id): ?array
   {
-    $g = $this->class_cfg['arch']['groups'];
-    if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'],
-      $this->class_cfg['arch']['groups'],
-      [$g['id'] => $id]
-    )) {
-      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
+    $groups = $this->groups();
+    if ($group = X::getRow($groups, ['id' => $id])) {
       return $group;
     }
 
@@ -338,13 +350,8 @@ You can click the following link to access directly your account:<br>
 
   public function getGroupByCode(string $code): ?array
   {
-    $g = $this->class_cfg['arch']['groups'];
-    if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'],
-      $this->class_cfg['arch']['groups'],
-      [$g['code'] => $code]
-    )) {
-      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
+    $groups = $this->groups();
+    if ($group = X::getRow($groups, ['code' => $code])) {
       return $group;
     }
 
@@ -1216,6 +1223,11 @@ You can click the following link to access directly your account:<br>
     self::$dev_group = $id;
   }
 
+
+  protected static function setGroups(array $groups): void
+  {
+    self::$_groups = $groups;
+  }
 
   /**
   * Use the configured hash function to encrypt a password string.

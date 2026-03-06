@@ -1,7 +1,9 @@
 <?php
+
 namespace bbn;
 
 use Exception;
+use InvalidArgumentException;
 use Throwable;
 use stdClass;
 use bbn\File\System;
@@ -116,7 +118,7 @@ class X
   {
     if (!self::$_textdomain) {
       $td = 'bbn';
-      $f = self::dirname(__DIR__).'/version.txt';
+      $f = self::dirname(__DIR__) . '/version.txt';
       if (is_file($f)) {
         $td .= file_get_contents($f);
       }
@@ -189,29 +191,29 @@ class X
     if (!defined('BBN_X_MAX_LOG_FILE')) {
       define('BBN_X_MAX_LOG_FILE', 1048576);
     }
-    if (defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH').'logs')) {
+    if (defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH') . 'logs')) {
       $log_file  = constant('BBN_DATA_PATH') . 'logs/' . $file . '.log';
       $backtrace = array_filter(
-        debug_backtrace(), function ($a) {
+        debug_backtrace(),
+        function ($a) {
           return $a['function'] === 'log';
         }
       );
       $i         = end($backtrace);
-      $r         = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
-        self::getDump($st).PHP_EOL;
+      $r         = "[" . date('d/m/Y H:i:s') . "]\t" . $i['file'] . " - line " . $i['line'] .
+        self::getDump($st) . PHP_EOL;
 
       if (php_sapi_name() === 'cli') {
         global $argv;
         if (isset($argv[2]) && ($argv[2] === 'log')) {
-          echo self::getDump($st).PHP_EOL;
+          echo self::getDump($st) . PHP_EOL;
         }
       }
 
       if (file_exists($log_file) && filesize($log_file) > BBN_X_MAX_LOG_FILE) {
-        file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
+        file_put_contents($log_file . '.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
-      }
-      else{
+      } else {
         file_put_contents($log_file, $r, FILE_APPEND);
       }
     }
@@ -229,8 +231,8 @@ class X
    */
   public static function logError($errno, $errstr, $errfile, $errline): void
   {
-    if (is_dir(Mvc::getTmpPath().'logs')) {
-      $file      = Mvc::getTmpPath().'logs/_php_error.json';
+    if (is_dir(Mvc::getTmpPath() . 'logs')) {
+      $file      = Mvc::getTmpPath() . 'logs/_php_error.json';
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {
@@ -250,20 +252,20 @@ class X
       $t = date('Y-m-d H:i:s');
       $errfile = str_replace(constant('BBN_APP_PATH'), '', $errfile);
       $idx     = self::search(
-        $r, [
-        'type' => $errno,
-        'error' => $errstr,
-        'file' => $errfile,
-        'line' => $errline,
-        'request' => ''
+        $r,
+        [
+          'type' => $errno,
+          'error' => $errstr,
+          'file' => $errfile,
+          'line' => $errline,
+          'request' => ''
         ]
       );
       if ($idx !== null) {
         $r[$idx]['count']++;
         $r[$idx]['last_date'] = $t;
         $r[$idx]['backtrace'] = $backtrace;
-      }
-      else{
+      } else {
         $r[] = [
           'first_date' => $t,
           'last_date' => $t,
@@ -280,9 +282,8 @@ class X
 
       self::sortBy($r, 'last_date', 'DESC');
       file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
-    }
-    else {
-      die(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath().'logs'));
+    } else {
+      die(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
     }
   }
 
@@ -353,8 +354,7 @@ class X
   {
     if (is_array($obj)) {
       return array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
-    }
-    elseif (is_object($obj)) {
+    } elseif (is_object($obj)) {
       return property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));
     }
 
@@ -393,8 +393,7 @@ class X
       $test = self::hasProp($obj, $p, $check_empty);
       if ($test === null) {
         return null;
-      }
-      elseif (!$test) {
+      } elseif (!$test) {
         return false;
       }
     }
@@ -451,12 +450,11 @@ class X
    * @return boolean|null
    */
   public static function hasDeepProp(
-      $obj,
-      array $prop_path,
-      bool $check_empty = false
-  ): ?bool
-  {
-    $o =& $obj;
+    $obj,
+    array $prop_path,
+    bool $check_empty = false
+  ): ?bool {
+    $o = &$obj;
     foreach ($prop_path as $p) {
       if (is_array($o)) {
         if (!array_key_exists($p, $o)) {
@@ -467,9 +465,8 @@ class X
           return false;
         }
 
-        $o =& $o[$p];
-      }
-      elseif (is_object($o)) {
+        $o = &$o[$p];
+      } elseif (is_object($o)) {
         if (!property_exists($o, $p)) {
           return false;
         }
@@ -478,9 +475,8 @@ class X
           return false;
         }
 
-        $o =& $o->$p;
-      }
-      else {
+        $o = &$o->$p;
+      } else {
         return false;
       }
     }
@@ -510,12 +506,11 @@ class X
    * @return string|null
    */
   public static function makeStoragePath(
-      string $path,
-      $format = 'Y/m/d',
-      $max = 100,
-      ?System $fs = null
-  ): ?string
-  {
+    string $path,
+    $format = 'Y/m/d',
+    $max = 100,
+    ?System $fs = null
+  ): ?string {
     if (empty($format)) {
       $format = 'Y/m/d';
     }
@@ -531,7 +526,7 @@ class X
     // One dir per $format
     $spath = date($format);
     if ($spath) {
-      $path = $fs->createPath($path.(Str::sub($path, -1) === '/' ? '' : '/').$spath);
+      $path = $fs->createPath($path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath);
       if ($path && $fs->isDir($path)) {
         $num = count($fs->getDirs($path));
         if ($num) {
@@ -542,8 +537,7 @@ class X
               $num++;
             }
           }
-        }
-        else {
+        } else {
           $num = 1;
         }
 
@@ -566,11 +560,10 @@ class X
    * @return int|null
    */
   public static function cleanStoragePath(
-      string $path,
-      $format = 'Y/m/d',
-      ?System $fs = null
-  ): ?int
-  {
+    string $path,
+    $format = 'Y/m/d',
+    ?System $fs = null
+  ): ?int {
     if (empty($format)) {
       $format = 'Y/m/d';
     }
@@ -590,8 +583,7 @@ class X
         $limit--;
         $res++;
         $path = self::dirname($path);
-      }
-      else{
+      } else {
         break;
       }
     }
@@ -669,8 +661,7 @@ class X
           }
         }
       }
-    }
-    else if (is_array($obj)) {
+    } else if (is_array($obj)) {
       foreach ($others as $o) {
         if (!is_array($o)) {
           throw new Exception('The provided argument must be an array, ' . gettype($o) . ' given.');
@@ -682,12 +673,26 @@ class X
           }
         }
       }
-    }
-    else {
+    } else {
       throw new Exception('The provided argument must be an object or an array, ' . gettype($obj) . ' given.');
     }
 
     return $obj;
+  }
+
+  public static function getColumnValues(array $arr, string $column, array $filter = []): array
+  {
+    $res = [];
+    if (!empty($filter)) {
+      $arr = self::filter($arr, $filter);
+    }
+    foreach ($arr as $a) {
+      if (is_array($a) && array_key_exists($column, $a)) {
+        $res[] = $a[$column];
+      }
+    }
+
+    return $res;
   }
 
 
@@ -787,7 +792,7 @@ class X
     if (count($args) > 2) {
       for ($i = count($args) - 1; $i > 1; $i--) {
         if (!is_array($args[$i])) {
-          throw new Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.' );
+          throw new Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.');
         }
         $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);
       }
@@ -801,19 +806,15 @@ class X
       foreach ($keys as $k) {
         if (!array_key_exists($k, $a1) && !array_key_exists($k, $a2)) {
           continue;
-        }
-        elseif (!array_key_exists($k, $a2)) {
+        } elseif (!array_key_exists($k, $a2)) {
           $r[$k] = $a1[$k];
-        }
-        elseif (!array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
+        } elseif (!array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
           $r[$k] = $a2[$k];
-        }
-        else{
+        } else {
           $r[$k] = self::mergeArrays($a1[$k], $a2[$k]);
         }
       }
-    }
-    else{
+    } else {
       $r = array_merge($a1, $a2);
     }
 
@@ -836,8 +837,7 @@ class X
   {
     if (is_string($ar)) {
       $ar = json_decode($ar);
-    }
-    elseif (is_array($ar)) {
+    } elseif (is_array($ar)) {
       $ar = json_decode(json_encode($ar));
     }
 
@@ -902,21 +902,21 @@ class X
 
     //$obj = X::convertUids($obj);
     $transform = function ($o, $idx = 0) use (&$transform, &$value_arr, &$replace_keys) {
-      foreach($o as $key => &$value) {
+      foreach ($o as $key => &$value) {
         $idx++;
         if (is_array($value) || is_object($value)) {
           $value = $transform($value, $idx);
-        }
-        elseif (is_string($value)
-            // Look for values starting with 'function('
-            && (Str::pos(trim($value), 'function(') === 0)
+        } elseif (
+          is_string($value)
+          // Look for values starting with 'function('
+          && (Str::pos(trim($value), 'function(') === 0)
         ) {
           // Store function string.
           $value_arr[] = $value;
           // Replace function string in $foo with a ‘unique’ special key.
           $value = "%bbn%$key%bbn%$idx%bbn%";
           // Later on, we’ll look for the value, and replace it.
-          $replace_keys[] = '"'.$value.'"';
+          $replace_keys[] = '"' . $value . '"';
         }
       }
 
@@ -975,9 +975,9 @@ class X
 
         // If this character is the end of an element,
         // output a new line and indent the next line.
-      } elseif(($char == '}' || $char == ']') && $outOfQuotes) {
+      } elseif (($char == '}' || $char == ']') && $outOfQuotes) {
         $result .= $newLine;
-        $pos --;
+        $pos--;
         for ($j = 0; $j < $pos; $j++) {
           $result .= $indentStr;
         }
@@ -991,7 +991,7 @@ class X
       if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
         $result .= $newLine;
         if ($char == '{' || $char == '[') {
-          $pos ++;
+          $pos++;
         }
 
         for ($j = 0; $j < $pos; $j++) {
@@ -1029,23 +1029,19 @@ class X
       if (is_object($arr)) {
         if (is_array($v) || is_object($v)) {
           $arr->$k = self::removeEmpty($v, $remove_space);
-        }
-        else {
+        } else {
           if (empty($v)) {
             if (isset($arr->$k)) {
               unset($arr->$k);
             }
-          }
-          else {
+          } else {
             $arr->$k = $v;
           }
         }
-      }
-      else{
+      } else {
         if (is_array($v) || is_object($v)) {
           $arr[$k] = self::removeEmpty($v, $remove_space);
-        }
-        elseif ($remove_space && is_string($v)) {
+        } elseif ($remove_space && is_string($v)) {
           $arr[$k] = trim($arr[$k]);
         }
 
@@ -1122,14 +1118,14 @@ class X
   /**
    * @return bool
    */
-    public static function isCli(): bool
-    {
-      if (!isset(self::$_cli)) {
-        self::$_cli = (php_sapi_name() === 'cli');
-      }
-
-      return self::$_cli;
+  public static function isCli(): bool
+  {
+    if (!isset(self::$_cli)) {
+      self::$_cli = (php_sapi_name() === 'cli');
     }
+
+    return self::$_cli;
+  }
 
 
   /**
@@ -1144,51 +1140,39 @@ class X
     $r = $a;
     if (is_null($a)) {
       $r = 'null';
-    }
-    elseif ($a === false) {
+    } elseif ($a === false) {
       $r = 'false';
-    }
-    elseif ($a === true) {
+    } elseif ($a === true) {
       $r = 'true';
-    }
-    elseif ($a === 0) {
+    } elseif ($a === 0) {
       $r = '0';
-    }
-    elseif ($a === '') {
+    } elseif ($a === '') {
       $r = '""';
-    }
-    elseif ($a === []) {
+    } elseif ($a === []) {
       $r = '[]';
-    }
-    elseif (!$a) {
+    } elseif (!$a) {
       $r = '0';
-    }
-    elseif (!is_string($a) && is_callable($a)) {
+    } elseif (!is_string($a) && is_callable($a)) {
       $r = 'Function';
-    }
-    elseif (is_object($a)) {
+    } elseif (is_object($a)) {
       $n = get_class($a);
       if ($n === 'stdClass') {
         $r = Str::export($a, false, $maxDepth, $maxLength);
-      }
-      else{
+      } else {
         $r = "$n Object";
       }
-    }
-    elseif (is_array($a)) {
+    } elseif (is_array($a)) {
       $r = Str::export($a, false, $maxDepth, $maxLength);
-    }
-    elseif (is_resource($a)) {
-      $r = 'Resource '.get_resource_type($a);
-    }
-    elseif (Str::isBuid($a)) {
+    } elseif (is_resource($a)) {
+      $r = 'Resource ' . get_resource_type($a);
+    } elseif (Str::isBuid($a)) {
       $tmp = bin2hex($a);
       if (Str::len($tmp) === 32) {
-        $r = '0x'.bin2hex($a);
+        $r = '0x' . bin2hex($a);
       }
     }
 
-    return $r.PHP_EOL;
+    return $r . PHP_EOL;
   }
 
 
@@ -1276,7 +1260,8 @@ class X
     $res = null;
     foreach ($arr as $fn) {
       $backtrace = array_filter(
-        debug_backtrace(), function ($a) use ($fn) {
+        debug_backtrace(),
+        function ($a) use ($fn) {
           return $a['function'] === $fn;
         }
       );
@@ -1376,8 +1361,7 @@ class X
       [$protocol, $remain] = X::split($path, '://');
       $bits = X::split($remain, '/');
       array_shift($bits);
-    }
-    else {
+    } else {
       $bits = self::split($path, '/');
       $isAbsolute = Str::sub($path, 0, 1) === '/';
     }
@@ -1400,12 +1384,11 @@ class X
       if (count($fbits) > 1) {
         $ret['extension'] = array_pop($fbits);
         $ret['basename'] = X::join($fbits, '/');
-      }
-      else {
+      } else {
         $ret['basename'] = $ret['filename'];
       }
     }
-    
+
     switch ($options) {
       case PATHINFO_DIRNAME:
       case 'dirname':
@@ -1435,8 +1418,8 @@ class X
   public static function basename(string $path, string $suffix = ''): string
   {
     $res = self::pathinfo($path, 'filename');
-    if ($res && $suffix && (Str::sub($res, - Str::len($suffix)) === $suffix)) {
-      return Str::sub($res, 0, - Str::len($suffix));
+    if ($res && $suffix && (Str::sub($res, -Str::len($suffix)) === $suffix)) {
+      return Str::sub($res, 0, -Str::len($suffix));
     }
 
     return $res;
@@ -1502,35 +1485,32 @@ class X
    * @param boolean $empty_label A label for empty value
    * @return string The HTML code.
    */
-  public static function buildOptions(array $values, $selected='', $empty_label=false): string
+  public static function buildOptions(array $values, $selected = '', $empty_label = false): string
   {
     $r = '';
     if ($empty_label !== false) {
-      $r .= '<option value="">'.$empty_label.'</option>';
+      $r .= '<option value="">' . $empty_label . '</option>';
     }
 
     $is_assoc = self::isAssoc($values);
-    foreach ($values as $k => $v)
-    {
+    foreach ($values as $k => $v) {
       if (is_array($v) && count($v) == 2) {
         $value = $v[0];
         $title = $v[1];
-      }
-      elseif (!isset($values[0]) && $is_assoc) {
+      } elseif (!isset($values[0]) && $is_assoc) {
         $value = $k;
         $title = $v;
-      }
-      else {
+      } else {
         $value = $title = $v;
       }
 
-      if (isset($value,$title)) {
-        $r .= '<option value="'.$value.'"'.
-          ($value == $selected ? ' selected="selected"' : '').
-          '>'.$title.'</option>';
+      if (isset($value, $title)) {
+        $r .= '<option value="' . $value . '"' .
+          ($value == $selected ? ' selected="selected"' : '') .
+          '>' . $title . '</option>';
       }
 
-      unset($value,$title);
+      unset($value, $title);
     }
 
     return $r;
@@ -1605,8 +1585,7 @@ class X
         if (self::compareFloats($a[$key], $max, '>')) {
           $max = $a[$key];
         }
-      }
-      elseif ($a[$key] > $max) {
+      } elseif ($a[$key] > $max) {
         $max = $a[$key];
       }
     }
@@ -1645,8 +1624,8 @@ class X
       return null;
     }
 
-    foreach($array as $a) {
-      if($a[$key] < $min) {
+    foreach ($array as $a) {
+      if ($a[$key] < $min) {
         $min = $a[$key];
       }
     }
@@ -1664,7 +1643,7 @@ class X
    * @param string $file The file to debug
    * @return void
    */
-  public static function debug($file='')
+  public static function debug($file = '')
   {
     $debug = array_map(
       function ($a) {
@@ -1673,12 +1652,12 @@ class X
         }
 
         return $a;
-      }, debug_backtrace()
+      },
+      debug_backtrace()
     );
     if (empty($file)) {
       self::hdump($debug);
-    }
-    else{
+    } else {
       self::log($debug, $file);
     }
   }
@@ -1764,8 +1743,7 @@ class X
       $r        = $fn($a, $key);
       if ($is_false) {
         $res[] = $r;
-      }
-      elseif ($r !== false) {
+      } elseif ($r !== false) {
         if (is_array($r) && $items && isset($r[$items]) && is_array($r[$items])) {
           $r[$items] = self::map($fn, $r[$items], $items);
         }
@@ -1863,8 +1841,7 @@ class X
       $r        = $fn($a, $key);
       if ($is_false) {
         $res[] = $r;
-      }
-      elseif ($r !== false) {
+      } elseif ($r !== false) {
         $res[] = $r;
       }
     }
@@ -1895,13 +1872,13 @@ class X
       ];
       foreach ($where['conditions'] as $key => $f) {
         $is_array = is_array($f);
-        if ($is_array
+        if (
+          $is_array
           && array_key_exists('conditions', $f)
           && is_array($f['conditions'])
         ) {
           $res['conditions'][] = self::treatConditions($f);
-        }
-        else {
+        } else {
           if (is_string($key)) {
             // 'id_user' => [1, 2] Will do OR
             if (!$is_array) {
@@ -1910,28 +1887,25 @@ class X
                   'field' => $key,
                   'operator' => 'isnull'
                 ];
-              }
-              else{
+              } else {
                 $f = [
                   'field' => $key,
                   'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
                   'value' => $f
                 ];
               }
-            }
-            elseif (isset($f[0])) {
+            } elseif (isset($f[0])) {
               $tmp = [
                 'conditions' => [],
                 'logic' => 'OR'
               ];
-              foreach ($f as $v){
+              foreach ($f as $v) {
                 if (null === $v) {
                   $tmp['conditions'][] = [
                     'field' => $key,
                     'operator' => 'isnull'
                   ];
-                }
-                else{
+                } else {
                   $tmp['conditions'][] = [
                     'field' => $key,
                     'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
@@ -1942,29 +1916,26 @@ class X
 
               $res['conditions'][] = $tmp;
             }
-          }
-          elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
+          } elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
             $tmp = [
               'field' => $f[0],
               'operator' => $f[1]
             ];
             if (isset($f[3])) {
               $tmp['exp'] = $f[3];
-            }
-            elseif (array_key_exists(2, $f)) {
+            } elseif (array_key_exists(2, $f)) {
               if (is_array($f[2])) {
                 $tmp = [
                   'conditions' => [],
                   'logic' => 'AND'
                 ];
-                foreach ($f[2] as $v){
+                foreach ($f[2] as $v) {
                   if (null === $v) {
                     $tmp['conditions'][] = [
                       'field' => $f[0],
                       'operator' => 'isnotnull'
                     ];
-                  }
-                  else{
+                  } else {
                     $tmp['conditions'][] = [
                       'field' => $f[0],
                       'operator' => $f[1],
@@ -1974,11 +1945,9 @@ class X
                 }
 
                 $res['conditions'][] = $tmp;
-              }
-              elseif ($f[2] === null) {
+              } elseif ($f[2] === null) {
                 $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
-              }
-              else{
+              } else {
                 $tmp['value'] = $f[2];
               }
             }
@@ -2003,7 +1972,8 @@ class X
   }
 
 
-  public static function compare($v1, $v2, $operator){
+  public static function compare($v1, $v2, $operator)
+  {
     switch ($operator) {
       case "===":
       case "=":
@@ -2122,7 +2092,8 @@ class X
   }
 
 
-  public static function compareConditions($data, $filter){
+  public static function compareConditions($data, $filter)
+  {
     if (!isset($filter['conditions']) || empty($filter['logic']) || !is_array($filter['conditions'])) {
       throw new Exception(X::_("Error in compareConditions: the filter should an abject with conditions and logic properties and conditions should be an array of arrays"));
     }
@@ -2140,9 +2111,8 @@ class X
       $compare = null;
       if (isset($a['conditions']) && is_array($a['conditions'])) {
         $compare = self::compareConditions($data, $a);
-      }
-      else {
-        $compare = self::compare($data[$a['field']] ?? null, $a['value'] ?? null, $a['operator']);
+      } else {
+        $compare = self::compare($data[$a['field']] ?? null, $a['value'] ?? null, $a['operator'] ?? '=');
       }
 
       if ($compare) {
@@ -2150,8 +2120,7 @@ class X
           $ok = true;
           break;
         }
-      }
-      elseif ($filter['logic'] === 'AND') {
+      } elseif ($filter['logic'] === 'AND') {
         $ok = false;
         break;
       }
@@ -2210,6 +2179,10 @@ class X
    */
   public static function search(array $ar, $where, int $from = 0)
   {
+    if (self::isAssoc($ar)) {
+      //throw new Exception(self::_("The first parameter of search function should be an indexed array"));
+    }
+
     if (!empty($where)) {
       if (is_array($where)) {
         $where = self::treatConditions($where);
@@ -2221,11 +2194,9 @@ class X
           $ok = 1;
           if ($callable) {
             $ok = (bool)$where($v);
-          }
-          elseif (!is_array($where)) {
+          } elseif (!is_array($where)) {
             $ok = $v === $where;
-          }
-          else {
+          } else {
             $v = (array)$v;
             $ok = self::compareConditions($v, $where);
           }
@@ -2289,8 +2260,7 @@ class X
       $idx = self::search($ar, $where, $i);
       if ($idx === null) {
         break;
-      }
-      else{
+      } else {
         $res[] = $ar[$idx];
         $i     = $idx + 1;
       }
@@ -2538,8 +2508,7 @@ class X
 
         if ($a > $b) {
           return $backward ? -1 : 1;
-        }
-        elseif ($a == $b) {
+        } elseif ($a == $b) {
           return 0;
         }
 
@@ -2571,7 +2540,8 @@ class X
    * @param array            $ar  The array of data to sort
    * @param string|int|array $key The key to sort by
    * @param string           $dir The direction of the sort ('asc'|'desc')
-   * @return void
+   * @return array The sorted array
+   * @throws Exception
    */
   public static function sortBy(array &$ar, $key, $dir = ''): array
   {
@@ -2588,10 +2558,18 @@ class X
     if (is_array($key)) {
       $args = $key;
       if (X::isAssoc($args)) {
-        $args = [$args];
+        $tmp = [];
+        foreach ($args as $k => $v) {
+          if (!is_array($v)) {
+            $tmp[] = [
+              'key' => $k,
+              'dir' => $v
+            ];
+          }
+        }
+        $args = $tmp;
       }
-    }
-    elseif (is_string($key)) {
+    } elseif (is_string($key)) {
       $args = [[
         'key' => $key,
         'dir' => $dir
@@ -2622,41 +2600,33 @@ class X
             if ($v2) {
               $v1 = -1;
               $v2 = 1;
-            }
-            else {
+            } else {
               $v1 = array_search($v1, $blackOrder);
               $v2 = array_search($v2, $blackOrder);
             }
-          }
-          elseif (!$v2) {
+          } elseif (!$v2) {
             $v1 = 1;
             $v2 = -1;
-          }
-          elseif (is_array($v1)) {
+          } elseif (is_array($v1)) {
             if (!is_array($v2)) {
               $v1 = 1;
               $v2 = -1;
-            }
-            else {
+            } else {
               $v1 = json_encode($v1);
               $v2 = json_encode($v2);
             }
-          }
-          elseif (is_array($v2)) {
+          } elseif (is_array($v2)) {
             $v1 = -1;
             $v2 = 1;
-          }
-          elseif (is_object($v1)) {
+          } elseif (is_object($v1)) {
             if (!is_object($v2)) {
               $v1 = 1;
               $v2 = -1;
-            }
-            else {
+            } else {
               $v1 = json_encode($v1);
               $v2 = json_encode($v2);
             }
-          }
-          elseif (is_object($v2)) {
+          } elseif (is_object($v2)) {
             $v1 = -1;
             $v2 = 1;
           }
@@ -2674,8 +2644,7 @@ class X
 
           if ($a1 > $a2) {
             return 1;
-          }
-          elseif ($a1 < $a2) {
+          } elseif ($a1 < $a2) {
             return -1;
           }
         }
@@ -2735,7 +2704,7 @@ class X
     $ch               = curl_init();
     self::$_last_curl = $ch;
     $defined          = array_map('strtolower', array_keys($options));
-   
+
     if (!in_array('returntransfer', $defined)) {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     }
@@ -2758,8 +2727,8 @@ class X
 
     $options = array_change_key_case($options, CASE_UPPER);
     foreach ($options as $opt => $val) {
-      if (defined('CURLOPT_'.$opt)) {
-        curl_setopt($ch, constant('CURLOPT_'.$opt), $val);
+      if (defined('CURLOPT_' . $opt)) {
+        curl_setopt($ch, constant('CURLOPT_' . $opt), $val);
       }
     }
 
@@ -2772,22 +2741,19 @@ class X
         if (!in_array('postfields', $defined)) {
           curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
         }
-      }
-      elseif (!empty($options['DELETE'])) {
+      } elseif (!empty($options['DELETE'])) {
         //die($url.'?'.http_build_query($param));
         if (!in_array('url', $defined)) {
-          curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
+          curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($param));
         }
 
         if (!in_array('customrequest', $defined)) {
           curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
+      } elseif (!in_array('url', $defined)) {
+        curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($param));
       }
-      elseif (!in_array('url', $defined)) {
-        curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
-      }
-    }
-    else{
+    } else {
       if (!in_array('url', $defined)) {
         curl_setopt($ch, CURLOPT_URL, $url);
       }
@@ -2862,18 +2828,14 @@ class X
 
       if (is_array($a)) {
         $r['items'] = self::getTree($a);
-      }
-      elseif (is_null($a)) {
+      } elseif (is_null($a)) {
         $r['text'] .= ': null';
-      }
-      elseif ($a === false) {
+      } elseif ($a === false) {
         $r['text'] .= ': false';
-      }
-      elseif ($a === true) {
+      } elseif ($a === true) {
         $r['text'] .= ': true';
-      }
-      else {
-        $r['text'] .= ': '.(string)$a;
+      } else {
+        $r['text'] .= ': ' . (string)$a;
       }
 
       array_push($res, $r);
@@ -3027,9 +2989,8 @@ class X
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
         if ($encloseAll || preg_match("/(?:$delimiter_esc|$enclosure_esc|\s)/", $field)) {
-          $output[] = $enclosure.str_replace($enclosure, '\\'.$enclosure, $field) . $enclosure;
-        }
-        else {
+          $output[] = $enclosure . str_replace($enclosure, '\\' . $enclosure, $field) . $enclosure;
+        } else {
           $output[] = $field;
         }
       }
@@ -3091,9 +3052,8 @@ class X
     $cur = &$ar;
     foreach ($props as $p) {
       if (is_array($cur) && array_key_exists($p, $cur)) {
-        $cur =& $cur[$p];
-      }
-      else{
+        $cur = &$cur[$p];
+      } else {
         throw new Exception("Impossible to find the value in the array");
       }
     }
@@ -3129,8 +3089,7 @@ class X
     foreach ($props as $p) {
       if (is_object($cur) && property_exists($cur, $p)) {
         $cur = $cur->{$p};
-      }
-      else{
+      } else {
         throw new Exception("Impossible to find the value in the object");
       }
     }
@@ -3139,7 +3098,7 @@ class X
   }
 
 
-   /**
+  /**
    * Counts the properties of an object.
    *
    * ```php
@@ -3224,10 +3183,10 @@ class X
         $excel->getDefaultStyle()->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
         $can_save = true;
       }
-    }
-    else {
-      if (isset($cfg['map'], $cfg['map']['callable'])
-          && is_callable($cfg['map']['callable'])
+    } else {
+      if (
+        isset($cfg['map'], $cfg['map']['callable'])
+        && is_callable($cfg['map']['callable'])
       ) {
         array_walk($data, $cfg['map']['callable'], !empty($cfg['map']['params']) && is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
@@ -3244,7 +3203,8 @@ class X
 
       array_walk($data, function (&$item) use ($cfg, $dates): void {
         foreach ($cfg['fields'] as $field) {
-          if (!isset($field['field'])
+          if (
+            !isset($field['field'])
             || !isset($item[$field['field']])
           ) {
             continue;
@@ -3252,14 +3212,13 @@ class X
 
           if (!empty($field['hidden'])) {
             unset($item[$field['field']]);
-          }
-          else if (X::search($dates, ['field' => $field['field']]) !== null) {
+          } else if (X::search($dates, ['field' => $field['field']]) !== null) {
             $item[$field['field']] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($item[$field['field']]);
           }
         }
       });
       $end = count($data) + ($with_titles ? 1 : 0);
-      $visible = array_values(array_filter($cfg['fields'], fn ($field) => empty($field['hidden'])));
+      $visible = array_values(array_filter($cfg['fields'], fn($field) => empty($field['hidden'])));
       foreach ($visible as $i => $field) {
         // Get cell object
         $cell = $sheet->getCell([$i + 1, $with_titles ? 2 : 1]);
@@ -3268,7 +3227,7 @@ class X
         // Set auto width to the column
         $sheet->getColumnDimension($column)->setAutoSize(true);
         // Cell style object
-        $style = $sheet->getStyle($column.($with_titles ? '2' : '1').':'.$column.$end);
+        $style = $sheet->getStyle($column . ($with_titles ? '2' : '1') . ':' . $column . $end);
         // Get number format object
         $format = $style->getNumberFormat();
         // Set the vertical alignment to center
@@ -3341,8 +3300,9 @@ class X
       $can_save = true;
     }
 
-    if ($can_save
-        && Dir::createPath(self::dirname($file))
+    if (
+      $can_save
+      && Dir::createPath(self::dirname($file))
     ) {
       $ow->save($file);
       return is_file($file);
@@ -3353,18 +3313,69 @@ class X
 
 
   /**
-  * Makes a UID.
-  *
-  * @param bool $binary Set it to true if you want a binary UID
-  * @param bool $hypens Set it to true if you want hypens to seperate the UID
-  * @return string|bynary
-  */
+   * Generate a random number between $min and $max using a given step.
+   *
+   * Examples:
+   *  randomNum(4, 8, 0.01) → 6.87
+   *  randomNum(1, 10, 1)   → 7
+   *
+   * @param int|float $min
+   * @param int|float $max
+   * @param int|float $step
+   * @return int|float
+   */
+  public static function randomNum(int|float $min, int|float $max, int|float $step = 1): int|float
+  {
+    if ($step <= 0) {
+      throw new InvalidArgumentException('Step must be greater than 0.');
+    }
+
+    if ($min > $max) {
+      throw new InvalidArgumentException('Min must be less than or equal to max.');
+    }
+
+    // Determine decimal precision from step
+    $decimals = 0;
+    if (is_float($step)) {
+      $stepStr = rtrim(rtrim(sprintf('%.14F', $step), '0'), '.');
+      if (str_contains($stepStr, '.')) {
+        $decimals = strlen(substr(strrchr($stepStr, '.'), 1));
+      }
+    }
+
+    $factor = 10 ** $decimals;
+
+    $minInt  = (int) round($min * $factor);
+    $maxInt  = (int) round($max * $factor);
+    $stepInt = (int) round($step * $factor);
+
+    $stepsCount = intdiv($maxInt - $minInt, $stepInt);
+
+    $randomStep = random_int(0, $stepsCount);
+
+    $result = $minInt + ($randomStep * $stepInt);
+
+    $final = $result / $factor;
+
+    // Return int if no decimals
+    return $decimals === 0 ? (int) $final : $final;
+  }
+
+
+  /**
+   * Makes a UID.
+   *
+   * @param bool $binary Set it to true if you want a binary UID
+   * @param bool $hypens Set it to true if you want hypens to seperate the UID
+   * @return string|bynary
+   */
   public static function makeUid($binary = false, $hyphens = false): string
   {
     $tmp = sprintf(
       $hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
       // 32 bits for "time_low"
-      mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
       // 16 bits for "time_mid"
       mt_rand(0, 0xffff),
       // 16 bits for "time_hi_and_version",
@@ -3375,39 +3386,40 @@ class X
       // two most significant bits holds zero and one for variant DCE1.1
       mt_rand(0, 0x3fff) | 0x8000,
       // 48 bits for "node"
-      mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff)
     );
     return $binary ? hex2bin($tmp) : $tmp;
   }
 
 
   /**
-  * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
-  *
-  * ```php
-  *
-  * X::convertUids('b39e594c261e4bba85f4994bc08657dc');
-  * // (string) b"³žYL&\x1EKº…ô™KÀ†WÜ"
-  *
-  * X::convertUids(['b39e594c261e4bba85f4994bc08657dc, 'b39e594c261e4bba85f4994bc08657dc]);
-  * // (array) [b"³žYL&\x1EKº…ô™KÀ†WÜ", b"³žYL&\x1EKº…ô™KÀ†WÜ"]
-  *
-  * X::convertUids((object)['uid' => 'b39e594c261e4bba85f4994bc08657dc, 'uid2' => 'b39e594c261e4bba85f4994bc08657dc]);
-  * // (object) {'uid': b"³žYL&\x1EKº…ô™KÀ†WÜ", 'uid2': b"³žYL&\x1EKº…ô™KÀ†WÜ"}
-  *
-  * ```
-  *
-  * @param string|array|object $st
-  * @return string
-  */
+   * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
+   *
+   * ```php
+   *
+   * X::convertUids('b39e594c261e4bba85f4994bc08657dc');
+   * // (string) b"³žYL&\x1EKº…ô™KÀ†WÜ"
+   *
+   * X::convertUids(['b39e594c261e4bba85f4994bc08657dc, 'b39e594c261e4bba85f4994bc08657dc]);
+   * // (array) [b"³žYL&\x1EKº…ô™KÀ†WÜ", b"³žYL&\x1EKº…ô™KÀ†WÜ"]
+   *
+   * X::convertUids((object)['uid' => 'b39e594c261e4bba85f4994bc08657dc, 'uid2' => 'b39e594c261e4bba85f4994bc08657dc]);
+   * // (object) {'uid': b"³žYL&\x1EKº…ô™KÀ†WÜ", 'uid2': b"³žYL&\x1EKº…ô™KÀ†WÜ"}
+   *
+   * ```
+   *
+   * @param string|array|object $st
+   * @return string
+   */
   public static function convertUids($st)
   {
     if (is_array($st) || is_object($st)) {
       foreach ($st as &$s) {
         $s = self::convertUids($s);
       }
-    }
-    elseif (Str::isUid($st)) {
+    } elseif (Str::isUid($st)) {
       $st = hex2bin($st);
     }
 
@@ -3416,25 +3428,25 @@ class X
 
 
   /**
-  * Compares two float numbers with the given operator.
-  *
-  * ```php
-  * X::compareFloats(2.0, 4.0, '<');
-  * // (bool) true
-  *
-  *  X::compareFloats(2.56222223, 2.56222223, '<=')
-  * // (bool) true
-  *
-  * X::compareFloats(2.5623, 2.5623, '<')
-  * // (bool) false
-  * ```
-  *
-  * @param float  $v1 Value 1
-  * @param float  $v2 Value 2
-  * @param string $op Operator
-  * @param int    $pr Precision
-  * @return boolean
-  */
+   * Compares two float numbers with the given operator.
+   *
+   * ```php
+   * X::compareFloats(2.0, 4.0, '<');
+   * // (bool) true
+   *
+   *  X::compareFloats(2.56222223, 2.56222223, '<=')
+   * // (bool) true
+   *
+   * X::compareFloats(2.5623, 2.5623, '<')
+   * // (bool) false
+   * ```
+   *
+   * @param float  $v1 Value 1
+   * @param float  $v2 Value 2
+   * @param string $op Operator
+   * @param int    $pr Precision
+   * @return boolean
+   */
   public static function compareFloats($v1, $v2, string $op = '===', int $pr = 4): bool
   {
     $v1 = round((float)$v1 * pow(10, $pr));
@@ -3457,7 +3469,8 @@ class X
     return false;
   }
 
-  public static function fixJson($json) {
+  public static function fixJson($json)
+  {
     $newJSON = '';
 
     $jsonLength = Str::len($json);
@@ -3482,8 +3495,7 @@ class X
           if ($escaped) {
             $escaped = false;
             $unescaped = true;
-          }
-          else {
+          } else {
             $escaped = true;
           }
           break;
@@ -3555,41 +3567,34 @@ class X
       if ($end_prop) {
         if ($last_quotes === '"') {
           $add .= $current;
-        }
-        elseif ($last_quotes === "'") {
+        } elseif ($last_quotes === "'") {
           $current = trim($current);
-          $add .= '"'.Str::escapeDquote(Str::unescapeSquote(Str::sub($current, 1, -1))).'":';
-        }
-        else {
-          $add .= '"'.Str::escapeDquote($current).'":';
+          $add .= '"' . Str::escapeDquote(Str::unescapeSquote(Str::sub($current, 1, -1))) . '":';
+        } else {
+          $add .= '"' . Str::escapeDquote($current) . '":';
         }
 
         $end_prop = false;
-      }
-      elseif ($end_value) {
+      } elseif ($end_value) {
         if ($current) {
           if ($last_quotes) {
             $current = trim($current);
-            $add .= '"'.Str::escapeDquote(Str::sub($current, 1, -1)).'"';
-          }
-          else {
+            $add .= '"' . Str::escapeDquote(Str::sub($current, 1, -1)) . '"';
+          } else {
             $add .= Str::escapeDquote($current);
           }
 
           if ($a !== ' ') {
             $add .= $a;
           }
-        }
-        else {
+        } else {
           $current .= $a;
         }
         $last_quotes = "";
         $end_value = false;
-      }
-      elseif (!$dquotes && !$squotes && (($a === '[') || ($a === '{'))) {
+      } elseif (!$dquotes && !$squotes && (($a === '[') || ($a === '{'))) {
         $add .= $a;
-      }
-      elseif ($dquotes || $squotes || ($a !== ' ')) {
+      } elseif ($dquotes || $squotes || ($a !== ' ')) {
         $current .= $a;
       }
 
@@ -3612,7 +3617,7 @@ class X
 
 
   /**
-  * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
+   * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
    *
    * ```php
    *
@@ -3623,22 +3628,20 @@ class X
    * // (array) ['a' => 'SGVsbG8gV29ybGQh']
    *
    * ```
-  *
-  * @param array   $arr
-  * @param boolean $json
-  * @return string|array
-  */
+   *
+   * @param array   $arr
+   * @param boolean $json
+   * @return string|array
+   */
   public static function jsonBase64Encode(array $arr, $json = true)
   {
     $res = [];
     foreach ($arr as $i => $a) {
       if (is_array($a)) {
         $res[$i] = self::jsonBase64Encode($a, false);
-      }
-      elseif (is_string($a)) {
+      } elseif (is_string($a)) {
         $res[$i] = base64_encode($a);
-      }
-      else{
+      } else {
         $res[$i] = $a;
       }
     }
@@ -3648,7 +3651,7 @@ class X
 
 
   /**
-  * Decodes the base64 array's values. You can also give a JSON string of an array.
+   * Decodes the base64 array's values. You can also give a JSON string of an array.
    *
    * ```php
    *
@@ -3659,10 +3662,10 @@ class X
    * // (array) ['a' => 'Hello World!', 'b' => ['c' => 'Foo']]
    *
    * ```
-  *
-  * @param string|array $st
-  * @return array|null
-  */
+   *
+   * @param string|array $st
+   * @return array|null
+   */
   public static function jsonBase64Decode($st): ?array
   {
     $res = is_string($st) ? json_decode($st, true) : $st;
@@ -3670,11 +3673,9 @@ class X
       foreach ($res as $i => $a) {
         if (is_array($a)) {
           $res[$i] = self::jsonBase64Decode($a);
-        }
-        elseif (is_string($a)) {
+        } elseif (is_string($a)) {
           $res[$i] = base64_decode($a);
-        }
-        else{
+        } else {
           $res[$i] = $a;
         }
       }
@@ -3687,27 +3688,27 @@ class X
 
 
   /**
-  * Creates an associative array based on the first array's value.
-  *
-  * ```php
-  * $arr = [
-  *          [
-  *            'a' => 'foo',
-  *            'b' => 'bar'
-  *          ],
-  *          [
-  *            'a' => 'foo2',
-  *            'b' => 'bar2'
-  *          ]
-  *        ];
-  *
-  * X::indexByFirstVal($arr);
-  * // (array) ['foo' => 'bar', 'foo2' => 'bar2']
-  * ```
-  *
-  * @param array $ar
-  * @return array
-  */
+   * Creates an associative array based on the first array's value.
+   *
+   * ```php
+   * $arr = [
+   *          [
+   *            'a' => 'foo',
+   *            'b' => 'bar'
+   *          ],
+   *          [
+   *            'a' => 'foo2',
+   *            'b' => 'bar2'
+   *          ]
+   *        ];
+   *
+   * X::indexByFirstVal($arr);
+   * // (array) ['foo' => 'bar', 'foo2' => 'bar2']
+   * ```
+   *
+   * @param array $ar
+   * @return array
+   */
   public static function indexByFirstVal(array $ar): array
   {
     if (empty($ar) || !isset($ar[0]) || !count($ar[0])) {
@@ -3830,13 +3831,11 @@ class X
         if (($i >= $start) && ($s === $search)) {
           $res = $i;
           break;
-        }
-        else{
+        } else {
           $i++;
         }
       }
-    }
-    elseif (is_string($subject)) {
+    } elseif (is_string($subject)) {
       $res = Str::pos($subject, $search, $start);
     }
 
@@ -3879,8 +3878,7 @@ class X
           }
 
           $i = $start;
-        }
-        elseif ($start < 0) {
+        } elseif ($start < 0) {
           $i -= $start;
           if ($i < 0) {
             return -1;
@@ -3891,14 +3889,12 @@ class X
           if (($i <= $start) && ($s === $search)) {
             $res = $i;
             break;
-          }
-          else{
+          } else {
             $i--;
           }
         }
       }
-    }
-    elseif (is_string($subject)) {
+    } elseif (is_string($subject)) {
       if ($start > 0) {
         $start = Str::len($subject) - (Str::len($subject) - $start);
       }
@@ -3945,26 +3941,21 @@ class X
     foreach (func_get_args() as $a) {
       if ($a === null) {
         $st = 'null';
-      }
-      elseif ($a === true) {
+      } elseif ($a === true) {
         $st = 'true';
-      }
-      elseif ($a === false) {
+      } elseif ($a === false) {
         $st = 'false';
-      }
-      elseif (Str::isNumber($a)) {
+      } elseif (Str::isNumber($a)) {
         $st = $a;
-      }
-      elseif (!is_string($a)) {
+      } elseif (!is_string($a)) {
         $st = self::getDump($a);
-      }
-      else {
+      } else {
         $st = $a;
       }
 
       if ($st) {
         $wrote = true;
-        echo $st.PHP_EOL;
+        echo $st . PHP_EOL;
       }
     }
 
@@ -3987,7 +3978,7 @@ class X
   {
     $res = '';
     foreach ($arr as $a) {
-      $res .= json_encode($a).PHP_EOL;
+      $res .= json_encode($a) . PHP_EOL;
     }
 
     return $res;
@@ -4011,13 +4002,63 @@ class X
     foreach ($lines as $line) {
       $ar = json_decode($line, true);
       if ($ar === null && json_last_error() !== JSON_ERROR_NONE) {
-          throw new Exception("Error decoding JSON line");
+        throw new Exception("Error decoding JSON line");
       }
 
       $res[] = $ar;
     }
 
     return $res;
+  }
+
+  /**
+   * Generate a normalized MD5 hash of any variable.
+   *
+   * - Scalars → hashed directly
+   * - Arrays → associative keys sorted recursively
+   * - stdClass → converted to array and normalized
+   * - Other objects → returned unchanged
+   *
+   * @param mixed $value
+   * @return string
+   */
+  public static function makeHash($value): string
+  {
+    // If it's an object but NOT stdClass → return as-is
+    if (is_object($value) && !($value instanceof stdClass)) {
+      throw new Exception("Only stdClass objects can be hashed");
+    }
+
+    $normalized = self::normalizeData($value);
+
+    return md5(json_encode($normalized));
+  }
+
+  /**
+   * Recursively normalize arrays and stdClass objects.
+   */
+  public static function normalizeData($value)
+  {
+    // Convert stdClass to array
+    if ($value instanceof stdClass) {
+      $value = (array) $value;
+    }
+
+    if (is_array($value)) {
+
+      // Detect associative array
+      $isAssoc = array_keys($value) !== range(0, count($value) - 1);
+
+      if ($isAssoc) {
+        ksort($value); // normalize key order
+      }
+
+      foreach ($value as $k => $v) {
+        $value[$k] = self::normalizeData($v);
+      }
+    }
+
+    return $value;
   }
 
 
@@ -4044,6 +4085,4 @@ class X
       throw new Exception(self::_("Undefined Method $name"));
     }
   }
-
-
 }

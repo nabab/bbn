@@ -1514,7 +1514,7 @@ class Database extends bbn\Models\Cls\Cache
         && ($id_keys = $this->o->fromCode('keys', $id_table))
         && ($db = $this->o->code($id_db))
         && ($conn = $this->connection($host_id, $engine, $db))
-        && ($m = $conn->modelize($db.'.'.$table))
+        && ($m = $conn->modelize($db.'.'.$table, true))
         && !empty($m['fields'])
       ) {
         $num_cols     = 0;

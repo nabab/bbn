@@ -109,6 +109,8 @@ class Mvc implements Api
   private $default;
 
   private $is_controlled = false;
+
+  private Timer $timer;
   /**
    * The current controller
    * @var null|Controller
@@ -185,7 +187,6 @@ class Mvc implements Api
 
   public $checkerDone = false;
 
-  public Timer $timer;
   // These strings are forbidden to use in URL
   public static $reserved = ['_private', '_common', '_htaccess'];
 
@@ -476,6 +477,12 @@ class Mvc implements Api
 
     return false;
   }
+
+  public function getTimer(): Timer
+  {
+    return $this->timer;
+  }
+
 
 
   public function getCookie()

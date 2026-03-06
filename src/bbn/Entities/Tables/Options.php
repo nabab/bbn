@@ -36,8 +36,8 @@ class Options extends EntityTable
     protected Entity|Nullall $entity = new Nullall()
   )
   {
+    $this->initClassCfg();
     parent::__construct($db, $entities, $entity);
-    $this->initClassCfg(self::$default_class_cfg);
     self::optionalInit(['types', 'apst_adherent', 'entity', 'appui']);
   }
 

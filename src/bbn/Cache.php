@@ -695,6 +695,7 @@ class Cache implements CacheInterface
   public function items(?string $dir = null): array 
   {
     if (self::$type) {
+      $emptyDir = empty($dir);
       switch (self::$type){
         case 'apc':
           $all  = call_user_func('\\apcu_cache_info');
@@ -725,7 +726,7 @@ class Cache implements CacheInterface
           $list = [];
           $arr  = $this->getAllKeys();
           foreach ($arr as $key){
-            if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
+            if ($emptyDir || (mb_strpos($key, $dir) === 0)) {
               $list[] = $key;
             }
           }

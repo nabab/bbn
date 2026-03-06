@@ -8,21 +8,21 @@
 
 namespace bbn\Models\Tts;
 
-use bbn\X;
-use bbn\Str;
+use ReflectionProperty;
 use stdClass;
 use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
 
 trait DbJunction
 {
   use DbTrait;
 
+  private static array $_isInitJunction = [];
   protected $rootFilterCfg = [];
 
-  private $dbJunctionStructure = [];
-
-  private $dbTraitRelations = [];
-
+  private static array $dbJunctionCfg = [];
 
   /**
    * @param array|string $id
@@ -229,6 +229,68 @@ trait DbJunction
   public function dbTraitRselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);
+  }
+
+  protected static function dbJunctionSetup(array $linkedClasses = [])
+  {
+    if (!static::isDbConfigInit()) {
+      throw new Exception(X::_("The class %s should be configured before using it as a junction", static::class));
+    }
+
+    static::$dbJunctionCfg[static::class] = [];
+    foreach ($linkedClasses as $table => $cls) {
+      if (empty($table) || empty($cls)) {
+        throw new Exception(X::_("Each junction defined in the class %s configuration should have a table and a class defined", static::class));
+      }
+
+      if (!class_exists($cls)) {
+        throw new Exception(X::_("The class %s defined in the junction configuration of the class %s does not exist", $cls, static::class));
+      }
+
+      static::$dbJunctionCfg[static::class][$table] = $cls;
+    } 
+
+
+  }
+
+  protected function dbJunctionInit()
+  {
+    if (isset(self::$_isInitJunction[static::class])) {
+      return;
+    }
+
+    /*
+    $keys = $this->db->getKeys($this->class_cfg['table']);
+    $tcs = self::dbConfigGetTableClasses()['tables'];
+    $linkedClasses = [];
+    foreach ($keys["keys"] as $n => $v) {
+      if (
+        $n !== "PRIMARY" &&
+        count($v["columns"]) === 1 &&
+        !empty($v["ref_table"]) &&
+        isset($tcs[$v["ref_table"]])
+      ) {
+        $cls = $tcs[$v["ref_table"]];
+        $property = "default_class_cfg";
+        if (
+          property_exists($cls, $property) &&
+          method_exists($cls, "initClassCfg")
+        ) {
+          $cfg = $cls::getDefaultClassCfg();
+          if (!empty($cfg['junctions'])) {
+            foreach ($cfg['junctions'] as $j) {
+              if (isset($j['table']) && $j['table'] === $this->class_cfg['table']) {
+                $linkedClasses[$this->db->tsn($v['ref_table'])] = $cls;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    self::dbJunctionSetup($linkedClasses);
+    */
   }
 
   /**

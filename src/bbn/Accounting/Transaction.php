@@ -5,23 +5,22 @@ namespace bbn\Accounting;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Db;
-
 
 class Transaction extends DbCls
 {
-  use DbActions;
+  use DbOps;
   use Common;
 
   protected static $default_class_cfg = [
-    'errors' => [],
-    'table' => 'bbn_accounting_transactions',
-    'tables' => [
-      'transactions' => 'bbn_accounting_transactions'
+    "errors" => [],
+    "table" => "bbn_accounting_transactions",
+    "tables" => [
+      "transactions" => "bbn_accounting_transactions",
     ],
-    'arch' => [
-      'transactions' => [
+    "arch" => [
+      "transactions" => [
         "id" => "id",
         "id_entity" => "id_entity",
         "id_account" => "id_account",
@@ -34,16 +33,15 @@ class Transaction extends DbCls
         "currency_rate" => "currency_rate",
         "reference" => "reference",
         "description" => "description",
-        "reconciled" => "reconciled"
-      ]
+        "reconciled" => "reconciled",
+      ],
     ],
   ];
 
-  public function __construct(Db $db, array|null $cfg = null)
+  public function __construct(Db $db)
   {
-    // The database connection
-    $this->db = $db;
     // Setting up the class configuration
-    $this->initClassCfg($cfg);
+    $this->initClassCfg();
+    parent::__construct($db);
   }
 }

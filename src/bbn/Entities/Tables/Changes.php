@@ -68,11 +68,10 @@ class Changes extends EntityTable
 
   protected static $eaFields = [];
 
-  protected $tables = [];
+  protected static $tables = [];
 
   /** Compatibility with the old version */
-  protected $tablesOld = [
-  ];
+  protected static $tablesOld = [];
 
   protected $skipEmailVerfication = false;
 
@@ -80,7 +79,7 @@ class Changes extends EntityTable
   public function __construct(Db &$db, Entities $entities, Entity $entity)
   {
     parent::__construct($db, $entities, $entity);
-    $this->getTables();
+    self::setTables();
   }
 
 
@@ -470,7 +469,6 @@ class Changes extends EntityTable
       }
 
       // Data
-      $table  = $this->tables[$cfg['table']];
       $data   = [];
       foreach ($cfg['data'] as $d){
         $data[$d['field']] = $d['value'];
@@ -886,7 +884,7 @@ class Changes extends EntityTable
 
   protected static function getFieldsList()
   {
-    return static::getEAFields();
+    return [];
   }
 
 
@@ -899,21 +897,16 @@ class Changes extends EntityTable
   {
     if ($this->check()) {
       $t =& $this;
-      return array_map(
-        function ($e) use ($t, $withFiles) {
-          if ($withFiles) {
-            $cfg = json_decode($e[$t->fields['cfg']], true);
-            $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
-          }
-
+      $records = X::filter($this->getRecords(), $where);
+      X::sortBy($records, $this->fields['moment'], 'DESC');
+      return $withFiles ? array_map(
+        function ($e) use ($t) {
+          $cfg = json_decode($e[$t->fields['cfg']], true);
+          $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
           return $e;
-        }, $this->db->rselectAll([
-          'table' => $this->class_table,
-          'fields' => [],
-          'where' => $where,
-          'order' => [$this->fields['moment'] => 'DESC']
-        ])
-      );
+        },
+        $records
+      ) : $records;
     }
 
     return null;
@@ -1443,7 +1436,7 @@ class Changes extends EntityTable
    */
   protected function _identity(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $exists = $this->db->rselect($this->tables['identities'], [], ['id' => $id]);
+    $exists = $this->db->rselect(self::$tables['identities'], [], ['id' => $id]);
     if (!empty($exists)
       && ($action === 'insert')
       && !empty($is_sub)
@@ -1501,7 +1494,7 @@ class Changes extends EntityTable
    */
   protected function _address(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $exists = $this->db->rselect($this->tables['addresses'], [], ['id' => $id]);
+    $exists = $this->db->rselect(self::$tables['addresses'], [], ['id' => $id]);
     if (($action === 'update') && empty($exists)) {
       $action = 'insert';
     }
@@ -1532,23 +1525,22 @@ class Changes extends EntityTable
     return $ret ? $id : null;
   }
 
-
-  protected function getTables()
+  protected static function setTables()
   {
-    if (empty($this->tables)) {
-      $fields = static::getFieldsList();
+    if (empty(self::$tables)) {
+      $fields = self::getFieldsList();
       foreach ($fields as $field) {
         $cn =& $field['changes'];
         if (!empty($field['table'])
           && !empty($cn['table'])
-          && empty($this->tables[$cn['table']])
+          && empty(self::$tables[$cn['table']])
         ) {
-          $this->tables[$cn['table']] = $field['table'];
+          self::$tables[$cn['table']] = $field['table'];
         }
       }
     }
 
-    return X::mergeArrays($this->tablesOld, $this->tables);
+    return X::mergeArrays(self::$tablesOld, self::$tables);
   }
 
 }

@@ -11,43 +11,27 @@ namespace bbn\Entities\Junctions;
 use bbn\Db;
 use bbn\X;
 use bbn\Models\Cls\Nullall;
-use bbn\Models\Tts\DbJunction;
-use bbn\Entities\Models\Entities;
-use bbn\Entities\Models\EntityJunction;
+use bbn\Entities\Models\IdentityTable;
 use bbn\Entities\Entity;
 use bbn\Appui\Note;
 
 
-class UauthLink extends EntityJunction
+class UauthLink extends IdentityTable
 {
 
   protected static $default_class_cfg = [
-    'table' => 'bbn_entities_notes',
+    'table' => 'bbn_identities_uauth',
     'tables' => [
-      'entities_notes' => 'bbn_entities_notes'
+      'identities_uauth' => 'bbn_identities_uauth'
     ],
     'arch' => [
-      'entities_notes' => [
-        'id_entity' => 'id_entity',
-        'id_note' => 'id_note',
-        'type' => 'type',
-        'id_email' => 'id_email'
+      'identities_uauth' => [
+        'id' => 'id',
+        'id_identity' => 'id_identity',
+        'id_uauth' => 'id_uauth'
       ],
     ]
   ];
 
-  public function __construct(
-    Db $db,
-    protected Entities $entities,
-    protected Entity|Nullall $entity = new Nullall()
-  )
-  {
-    parent::__construct($db, $entities, $entity);
-    $this->initClassCfg(static::$default_class_cfg);
-    if ($entity) {
-      $this->id_entity = $entity->getId();
-      $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
-    }
-  }
 
 }

@@ -184,7 +184,9 @@ class Db implements Db\Actions
    */
   public function getCfg(): array
   {
-    return $this->language->getCfg();
+    $cfg = $this->language->getCfg();
+    unset($cfg['pass']);
+    return $cfg;
   }
 
   /**

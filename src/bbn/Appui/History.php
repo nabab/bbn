@@ -1230,7 +1230,6 @@ MYSQL;
       $ostructure = $database->modelize($table);
       if ($ostructure['id_option']) {
         $areTriggerEnabled = $db->isTriggerEnabled();
-        $db->disableTrigger();
         self::setUser($idUser);
         self::setDate($date);
         $dbId = $database->dbIdFromTable($ostructure['id_option']);
@@ -1278,24 +1277,35 @@ MYSQL;
         }
 
         if (empty($res['error'])) {
-          $data = $db->rselectAll($table, $fields);
+          if (!isset($primary)) {
+            $primary = 'id';
+          }
+
+          $db->disableTrigger();
+          $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) ? [$primary => null] : []);
           $res['total'] = count($data);
+          if ($areTriggerEnabled) {
+            $db->enableTrigger();
+          }
+
           if (!isset($structure['keys']['PRIMARY'])) {
-            $db->alter($table, [
-              [
-                'alter_type' => 'add',
-                'name' => 'id',
-                'type' => 'binary',
-                'maxlength' => 16,
-                'null' => true,
-                'defaultExp' => 'NULL',
-                'first' => true
-              ]
-            ]);
-            $structure = $db->modelize($table, true);
+            if (!isset($structure['fields']['id'])) {
+              $db->alter($table, [
+                [
+                  'alter_type' => 'add',
+                  'name' => 'id',
+                  'type' => 'binary',
+                  'maxlength' => 16,
+                  'null' => true,
+                  'defaultExp' => 'NULL',
+                  'first' => true
+                ]
+              ]);
+              $structure = $db->modelize($table, true);
+            }
             $database->importTable($table, $dbId);
             $ostructure = $database->modelize($table);
-            $primary = 'id';
+            $db->disableTrigger();
             foreach ($data as &$d) {
               $id = X::makeUid();
               while ($db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
@@ -1324,16 +1334,15 @@ MYSQL;
             catch (Exception $e) {
               $res['error'] = $e->getMessage();
             }
+
+            if ($areTriggerEnabled) {
+              $db->enableTrigger();
+            }
           }
         }
 
         if (empty($res['error']) && $structure['keys']['PRIMARY']['ref_table'] !== History::$table_uids) {
-          foreach ($data as $d) {
-            if (History::insertUid($table, $d['id'], true, $ostructure['fields'][$primary]['id_option'])) {
-              $res['inserted']++;
-            }
-          }
-  
+          $res['inserted'] += History::insertUid($table, array_map(fn($d) => $d['id'], $data), true, $ostructure['fields'][$primary]['id_option']);
           $structure = $db->modelize($table, true);
           $structure['keys'] = [
             'PRIMARY' => [
@@ -1362,14 +1371,9 @@ MYSQL;
 
             $res['error'] = $e->getMessage();
           }
-
         }
         else {
           $res['error'] = X::_("The table already has a primary key linked to the history table");
-        }
-
-        if ($areTriggerEnabled) {
-          $db->enableTrigger();
         }
       }
     }
@@ -1377,7 +1381,7 @@ MYSQL;
     return $res;
   }
 
-  public static function insertUid(string $table, string $id, bool $withInsert = true, ?string $idCol = null): int
+  public static function insertUid(string $table, array|string $id, bool $withInsert = true, ?string $idCol = null): int
   {
     $res = 0;
     if (($db = self::_get_db())
@@ -1386,19 +1390,27 @@ MYSQL;
       && ($primary = $db->getPrimary($table))
       && (count($primary) === 1)
     ) {
-      $res += $db->insertIgnore(self::$table_uids, [
-        'bbn_uid' => $id,
-        'bbn_table' => $id_table,
-        'bbn_active' => 1
-      ]);
-      if ($res && $withInsert) {
-        $res += $db->insert(self::$table, [
-          'uid' => $id,
-          'col' => $idCol ?: $dbc->columnId($primary[0], $table),
-          'opr' => 'INSERT',
-          'tst' => self::getDate(),
-          'usr' => self::getUser()
+      if (is_string($id)) {
+        $id = [$id];
+      }
+      foreach ($id as $i) {
+        $res += $db->insertIgnore(self::$table_uids, [
+          'bbn_uid' => $i,
+          'bbn_table' => $id_table,
+          'bbn_active' => 1
         ]);
+      }
+      if ($res && $withInsert) {
+        $col = $idCol ?: $dbc->columnId($primary[0], $table);
+        foreach ($id as $i) {
+          $res += $db->insert(self::$table, [
+            'uid' => $i,
+            'col' => $col,
+            'opr' => 'INSERT',
+            'tst' => self::getDate(),
+            'usr' => self::getUser()
+          ]);
+        }
       }
     }
 

@@ -84,6 +84,7 @@ class Controller implements Api
   private $_plugin_name;
 
   private $_stream = false;
+  private Timer $timer;
 
   /**
    * @var Db The db connection if accepted by the mvc class.
@@ -138,7 +139,6 @@ class Controller implements Api
    */
   public ?stdClass $inc;
 
-  public Timer $timer;
 
 
   /**
@@ -153,8 +153,12 @@ class Controller implements Api
   public function __construct(MvcCls $mvc, array $route, $data = false)
   {
     $this->_mvc = $mvc;
-    $this->timer = $mvc->timer;
     $this->reset($route, $data);
+  }
+
+  public function getTimer(): Timer
+  {
+    return $this->_mvc->getTimer();
   }
 
   public function setStream($type = ''): self

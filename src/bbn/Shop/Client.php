@@ -5,14 +5,13 @@ namespace bbn\Shop;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Appui\Option;
 use bbn\Db;
 
-
 class Client extends DbCls
 {
-  use DbActions;
+  use DbOps;
 
   /**
    * @var Option
@@ -33,54 +32,53 @@ class Client extends DbCls
    * @var array
    */
   protected static $default_class_cfg = [
-    'errors' => [
+    "errors" => [],
+    "table" => "bbn_shop_clients",
+    "tables" => [
+      "clients" => "bbn_shop_clients",
+      "clients_addresses" => "bbn_shop_clients_addresses",
     ],
-    'table' => 'bbn_shop_clients',
-    'tables' => [
-      'clients' => 'bbn_shop_clients',
-      'clients_addresses' => 'bbn_shop_clients_addresses'
-    ],
-    'arch' => [
-      'clients' => [
-        'id' => 'id',
-        'id_user' => 'id_user',
-        'first_name' => 'first_name',
-        'last_name' => 'last_name',
-        'email' => 'email',
-        'newsletter' => 'newsletter',
-        'active' => 'active'
+    "arch" => [
+      "clients" => [
+        "id" => "id",
+        "id_user" => "id_user",
+        "first_name" => "first_name",
+        "last_name" => "last_name",
+        "email" => "email",
+        "newsletter" => "newsletter",
+        "active" => "active",
       ],
-      'clients_addresses' => [
-        'id' => 'id',
-        'id_client' => 'id_client',
-        'id_address' => 'id_address',
-        'first_name' => 'first_name',
-        'last_name' => 'last_name',
-        'def' => 'def',
-        'last' => 'last',
-        'active' => 'active'
-      ]
+      "clients_addresses" => [
+        "id" => "id",
+        "id_client" => "id_client",
+        "id_address" => "id_address",
+        "first_name" => "first_name",
+        "last_name" => "last_name",
+        "def" => "def",
+        "last" => "last",
+        "active" => "active",
+      ],
     ],
   ];
 
   /**
    * Construct
    * @param \bbn\Db $db,
-   * @param array $cfg
    */
-  public function __construct(Db $db, array|null $cfg = null)
+  public function __construct(Db $db)
   {
-    // The database connection
-    $this->db = $db;
     // Setting up the class configuration
-    $this->initClassCfg($cfg);
+    $this->initClassCfg();
+    // The database connection
+    parent::__construct($db);
     $this->opt = Option::getInstance();
   }
 
   /**
    * Returns the current client ID
    */
-  public function getId(){
+  public function getId()
+  {
     return $this->id;
   }
 
@@ -91,10 +89,11 @@ class Client extends DbCls
    */
   public function getIdByUser(string $idUser): ?string
   {
-    return $this->db->selectOne($this->class_table, $this->fields['id'], [
-      $this->fields['id_user'] => $idUser,
-      $this->fields['active'] => 1
-    ]) ?: null;
+    return $this->db->selectOne($this->class_table, $this->fields["id"], [
+      $this->fields["id_user"] => $idUser,
+      $this->fields["active"] => 1,
+    ]) ?:
+      null;
   }
 
   /**
@@ -105,8 +104,8 @@ class Client extends DbCls
   public function get(string $id): ?array
   {
     return $this->dbTraitRselect([
-      $this->fields['id'] => $id,
-      $this->fields['active'] => 1
+      $this->fields["id"] => $id,
+      $this->fields["active"] => 1,
     ]);
   }
 
@@ -118,32 +117,46 @@ class Client extends DbCls
    * @param null|string $idUser The user ID
    * @return null|string The client ID
    */
-  public function add(string $firstName, string $lastName, string $email, bool $newsletter = false, $idUser = null): ?string
-  {
-		if (!$this->dbTraitSelectOne($this->fields['id'], [$this->fields['email'] => $email])
-      && $this->dbTraitInsert([
-        $this->fields['id_user'] => $idUser,
-        $this->fields['first_name'] => $firstName,
-        $this->fields['last_name'] => $lastName ?: '',
-        $this->fields['email'] => $email,
-        $this->fields['newsletter'] => empty($newsletter) ? 0 : 1
+  public function add(
+    string $firstName,
+    string $lastName,
+    string $email,
+    bool $newsletter = false,
+    $idUser = null,
+  ): ?string {
+    if (
+      !$this->dbTraitSelectOne($this->fields["id"], [
+        $this->fields["email"] => $email,
+      ]) &&
+      $this->dbTraitInsert([
+        $this->fields["id_user"] => $idUser,
+        $this->fields["first_name"] => $firstName,
+        $this->fields["last_name"] => $lastName ?: "",
+        $this->fields["email"] => $email,
+        $this->fields["newsletter"] => empty($newsletter) ? 0 : 1,
       ])
     ) {
       return $this->db->lastId();
     }
-		return null;
-	}
+    return null;
+  }
 
-	public function addClientName(string $idClient, string $name, string $lastName){
-		if ($this->dbTraitRselect([$this->fields['id'] => $idClient])) {
-			if ($this->dbTraitUpdate($idClient, [
-        $this->fields['first_name'] => $name,
-        $this->fields['last_name'] => $lastName
-      ])) {
-				return $name . ' ' . $lastName;
-			}
-		}
-	}
+  public function addClientName(
+    string $idClient,
+    string $name,
+    string $lastName,
+  ) {
+    if ($this->dbTraitRselect([$this->fields["id"] => $idClient])) {
+      if (
+        $this->dbTraitUpdate($idClient, [
+          $this->fields["first_name"] => $name,
+          $this->fields["last_name"] => $lastName,
+        ])
+      ) {
+        return $name . " " . $lastName;
+      }
+    }
+  }
 
   /**
    * Adds a client address
@@ -151,75 +164,124 @@ class Client extends DbCls
    * @param array $address
    * @return null|string
    */
-	public function addAddress(string $idClient, array $address): ?string
+  public function addAddress(string $idClient, array $address): ?string
   {
     $opt = Option::getInstance();
     $addressCls = new \bbn\Entities\Address($this->db);
     $addressCfg = $addressCls->getClassCfg();
-    if (empty($address[$addressCfg['arch']['addresses']['country']])) {
-      throw new \Exception(_('The address country is mandatory'));
+    if (empty($address[$addressCfg["arch"]["addresses"]["country"]])) {
+      throw new \Exception(_("The address country is mandatory"));
     }
-    if (!$opt->option($address[$addressCfg['arch']['addresses']['country']])) {
-      throw new \Exception(X::_('Country not found: %s', $address[$addressCfg['arch']['addresses']['country']]));
+    if (!$opt->option($address[$addressCfg["arch"]["addresses"]["country"]])) {
+      throw new \Exception(
+        X::_(
+          "Country not found: %s",
+          $address[$addressCfg["arch"]["addresses"]["country"]],
+        ),
+      );
     }
-    $idAddress = $address[$this->class_cfg['arch']['clients_addresses']['id_address']] ?? null;
-    if (isset($address['fulladdress'])) {
-      unset($address['fulladdress']);
+    $idAddress =
+      $address[$this->class_cfg["arch"]["clients_addresses"]["id_address"]] ??
+      null;
+    if (isset($address["fulladdress"])) {
+      unset($address["fulladdress"]);
     }
-    $toAddress = \array_filter($address, function($k) use($addressCfg){
-      return \in_array($k, \array_values($addressCfg['arch']['addresses']), true);
-    }, ARRAY_FILTER_USE_KEY);
-    if (!empty($address['region'])) {
-      $toAddress['region'] = $address['region'];
+    $toAddress = \array_filter(
+      $address,
+      function ($k) use ($addressCfg) {
+        return \in_array(
+          $k,
+          \array_values($addressCfg["arch"]["addresses"]),
+          true,
+        );
+      },
+      ARRAY_FILTER_USE_KEY,
+    );
+    if (!empty($address["region"])) {
+      $toAddress["region"] = $address["region"];
     }
-    if (empty($idAddress)
-      || (!($oldAddress = $addressCls->rselect($idAddress)))
+    if (
+      empty($idAddress) ||
+      !($oldAddress = $addressCls->rselect($idAddress))
     ) {
       $idAddress = $addressCls->insert($toAddress);
     }
     if (!empty($oldAddress)) {
-      if ($oldCfg = \json_decode($oldAddress[$addressCfg['arch']['addresses']['cfg']], true)) {
+      if (
+        $oldCfg = \json_decode(
+          $oldAddress[$addressCfg["arch"]["addresses"]["cfg"]],
+          true,
+        )
+      ) {
         $oldAddress = X::mergeArrays($oldAddress, $oldCfg);
       }
-      $oldAddress = \array_filter($oldAddress, function($k) use($toAddress){
-        return \array_key_exists($k, $toAddress);
-      }, ARRAY_FILTER_USE_KEY);
+      $oldAddress = \array_filter(
+        $oldAddress,
+        function ($k) use ($toAddress) {
+          return \array_key_exists($k, $toAddress);
+        },
+        ARRAY_FILTER_USE_KEY,
+      );
       if (\array_diff_assoc($toAddress, $oldAddress)) {
         $idAddress = $addressCls->insert($toAddress);
       }
     }
     if (!empty($idAddress)) {
-      if (!empty($address[$this->class_cfg['arch']['clients_addresses']['def']])) {
-        $this->db->update($this->class_cfg['tables']['clients_addresses'], [
-          'def' => 0
-        ], [
-          'id_client' => $idClient,
-          'def' => $address[$this->class_cfg['arch']['clients_addresses']['def']]
-        ]);
+      if (
+        !empty($address[$this->class_cfg["arch"]["clients_addresses"]["def"]])
+      ) {
+        $this->db->update(
+          $this->class_cfg["tables"]["clients_addresses"],
+          [
+            "def" => 0,
+          ],
+          [
+            "id_client" => $idClient,
+            "def" =>
+              $address[$this->class_cfg["arch"]["clients_addresses"]["def"]],
+          ],
+        );
       }
-      if ($this->db->insert($this->class_cfg['tables']['clients_addresses'], [
-        $this->class_cfg['arch']['clients_addresses']['id_client'] => $idClient,
-        $this->class_cfg['arch']['clients_addresses']['id_address'] => $idAddress,
-        $this->class_cfg['arch']['clients_addresses']['first_name'] => $address[$this->class_cfg['arch']['clients_addresses']['first_name']],
-        $this->class_cfg['arch']['clients_addresses']['last_name'] => $address[$this->class_cfg['arch']['clients_addresses']['last_name']],
-        $this->class_cfg['arch']['clients_addresses']['def'] => $address[$this->class_cfg['arch']['clients_addresses']['def']],
-        $this->class_cfg['arch']['clients_addresses']['last'] =>  date('Y-m-d H:i:s')
-      ])) {
+      if (
+        $this->db->insert($this->class_cfg["tables"]["clients_addresses"], [
+          $this->class_cfg["arch"]["clients_addresses"][
+            "id_client"
+          ] => $idClient,
+          $this->class_cfg["arch"]["clients_addresses"][
+            "id_address"
+          ] => $idAddress,
+          $this->class_cfg["arch"]["clients_addresses"]["first_name"] =>
+            $address[
+              $this->class_cfg["arch"]["clients_addresses"]["first_name"]
+            ],
+          $this->class_cfg["arch"]["clients_addresses"]["last_name"] =>
+            $address[
+              $this->class_cfg["arch"]["clients_addresses"]["last_name"]
+            ],
+          $this->class_cfg["arch"]["clients_addresses"]["def"] =>
+            $address[$this->class_cfg["arch"]["clients_addresses"]["def"]],
+          $this->class_cfg["arch"]["clients_addresses"]["last"] => date(
+            "Y-m-d H:i:s",
+          ),
+        ])
+      ) {
         return $this->db->lastId();
       }
     }
     return null;
-	}
+  }
 
   /**
    * Gets the client's email address
    * @param string $idClient
    * @return null|string
    */
-	public function getEmail(string $idClient): ?string
-	{
-		return $this->dbTraitSelectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
-	}
+  public function getEmail(string $idClient): ?string
+  {
+    return $this->dbTraitSelectOne($this->fields["email"], [
+      $this->fields["id"] => $idClient,
+    ]);
+  }
 
   /**
    * Gets the client's full name
@@ -229,7 +291,10 @@ class Client extends DbCls
   public function getFullName(string $idClient): ?string
   {
     if ($client = $this->get($idClient)) {
-      return $client[$this->fields['first_name']] . (!empty($client[$this->fields['last_name']]) ? ' ' . $client[$this->fields['last_name']] : '');
+      return $client[$this->fields["first_name"]] .
+        (!empty($client[$this->fields["last_name"]])
+          ? " " . $client[$this->fields["last_name"]]
+          : "");
     }
     return null;
   }
@@ -242,11 +307,20 @@ class Client extends DbCls
   public function getAddresses(string $idClient): array
   {
     $res = [];
-    if ($addresses = $this->db->getColumnValues($this->class_cfg['tables']['clients_addresses'], $this->class_cfg['arch']['clients_addresses']['id'], [
-      $this->class_cfg['arch']['clients_addresses']['id_client'] => $idClient
-    ], [
-      $this->class_cfg['arch']['clients_addresses']['id_client'] => 'desc'
-    ])) {
+    if (
+      $addresses = $this->db->getColumnValues(
+        $this->class_cfg["tables"]["clients_addresses"],
+        $this->class_cfg["arch"]["clients_addresses"]["id"],
+        [
+          $this->class_cfg["arch"]["clients_addresses"][
+            "id_client"
+          ] => $idClient,
+        ],
+        [
+          $this->class_cfg["arch"]["clients_addresses"]["id_client"] => "desc",
+        ],
+      )
+    ) {
       foreach ($addresses as $a) {
         if ($ad = $this->getAddress($a)) {
           $res[] = $ad;
@@ -261,33 +335,53 @@ class Client extends DbCls
    * @param string $idClientAddress
    * @return null|array
    */
-	public function getAddress(string $idClientAddress): ?array
-	{
-    if ($clientAddress = $this->db->rselect($this->class_cfg['tables']['clients_addresses'], [], [
-      $this->class_cfg['arch']['clients_addresses']['id'] => $idClientAddress
-    ])) {
+  public function getAddress(string $idClientAddress): ?array
+  {
+    if (
+      $clientAddress = $this->db->rselect(
+        $this->class_cfg["tables"]["clients_addresses"],
+        [],
+        [
+          $this->class_cfg["arch"]["clients_addresses"][
+            "id"
+          ] => $idClientAddress,
+        ],
+      )
+    ) {
       $addressCls = new \bbn\Entities\Address($this->db);
       $addressCfg = $addressCls->getClassCfg();
-      $addressFields = $addressCfg['arch']['addresses'];
-      if ($addr = $addressCls->rselect($clientAddress[$this->class_cfg['arch']['clients_addresses']['id_address']])) {
-        $ad = explode("\n", $addr[$addressFields['address']]);
+      $addressFields = $addressCfg["arch"]["addresses"];
+      if (
+        $addr = $addressCls->rselect(
+          $clientAddress[
+            $this->class_cfg["arch"]["clients_addresses"]["id_address"]
+          ],
+        )
+      ) {
+        $ad = explode("\n", $addr[$addressFields["address"]]);
         $clientAddress = X::mergeArrays($clientAddress, [
-          'address1' => $ad[0],
-          'address2' => $ad[1] ?? '',
-          'postcode' => $addr[$addressFields['postcode']],
-          'city' => $addr[$addressFields['city']],
-          'country' => $addr[$addressFields['country']],
-          'phone' => $addr[$addressFields['phone']],
-          'region' => !empty($addr['region']) ? $addr['region'] : '',
-          'fulladdress'=> $addr[$addressFields['fulladdress']]
+          "address1" => $ad[0],
+          "address2" => $ad[1] ?? "",
+          "postcode" => $addr[$addressFields["postcode"]],
+          "city" => $addr[$addressFields["city"]],
+          "country" => $addr[$addressFields["country"]],
+          "phone" => $addr[$addressFields["phone"]],
+          "region" => !empty($addr["region"]) ? $addr["region"] : "",
+          "fulladdress" => $addr[$addressFields["fulladdress"]],
         ]);
-      }
-      else {
-        throw new \Exception(X::_('Address not found: %s', $clientAddress[$this->class_cfg['arch']['clients_addresses']['id_address']]));
+      } else {
+        throw new \Exception(
+          X::_(
+            "Address not found: %s",
+            $clientAddress[
+              $this->class_cfg["arch"]["clients_addresses"]["id_address"]
+            ],
+          ),
+        );
       }
     }
     return $clientAddress;
-	}
+  }
 
   /**
    * Gets the default shipping address of the give client ID
@@ -296,18 +390,22 @@ class Client extends DbCls
    */
   public function getDefaultShippingAddress(string $id): ?array
   {
-    $table = $this->class_cfg['tables']['clients_addresses'];
-    $fields = $this->class_cfg['arch']['clients_addresses'];
-    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
-      $fields['id_client'] => $id,
-      $fields['def'] => 1
-    ])) {
+    $table = $this->class_cfg["tables"]["clients_addresses"];
+    $fields = $this->class_cfg["arch"]["clients_addresses"];
+    if (
+      $idClientAddress = $this->db->selectOne($table, $fields["id"], [
+        $fields["id_client"] => $id,
+        $fields["def"] => 1,
+      ])
+    ) {
       return $this->getAddress($idClientAddress);
     }
-    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
-      $fields['id_client'] => $id,
-      $fields['def'] => 2
-    ])) {
+    if (
+      $idClientAddress = $this->db->selectOne($table, $fields["id"], [
+        $fields["id_client"] => $id,
+        $fields["def"] => 2,
+      ])
+    ) {
       return $this->getAddress($idClientAddress);
     }
     return null;
@@ -320,12 +418,14 @@ class Client extends DbCls
    */
   public function getDefaultBillingAddress(string $id): ?array
   {
-    $table = $this->class_cfg['tables']['clients_addresses'];
-    $fields = $this->class_cfg['arch']['clients_addresses'];
-    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
-      $fields['id_client'] => $id,
-      $fields['def'] => 2
-    ])) {
+    $table = $this->class_cfg["tables"]["clients_addresses"];
+    $fields = $this->class_cfg["arch"]["clients_addresses"];
+    if (
+      $idClientAddress = $this->db->selectOne($table, $fields["id"], [
+        $fields["id_client"] => $id,
+        $fields["def"] => 2,
+      ])
+    ) {
       return $this->getAddress($idClientAddress);
     }
     return null;
@@ -336,12 +436,20 @@ class Client extends DbCls
    * @param string $idClientAddress
    * @return bool
    */
-  public function setLastUsedAddress(string $idClientAddress, string $moment = '')
-  {
-    $table = $this->class_cfg['tables']['clients_addresses'];
-    $fields = $this->class_cfg['arch']['clients_addresses'];
-    $moment = date('Y-m-d H:i:s', !empty($moment) ? strtotime($moment) : time());
-    return (bool)$this->db->update($table, [$fields['last'] => $moment], [$fields['id'] => $idClientAddress]);
+  public function setLastUsedAddress(
+    string $idClientAddress,
+    string $moment = "",
+  ) {
+    $table = $this->class_cfg["tables"]["clients_addresses"];
+    $fields = $this->class_cfg["arch"]["clients_addresses"];
+    $moment = date(
+      "Y-m-d H:i:s",
+      !empty($moment) ? strtotime($moment) : time(),
+    );
+    return (bool) $this->db->update(
+      $table,
+      [$fields["last"] => $moment],
+      [$fields["id"] => $idClientAddress],
+    );
   }
-
 }

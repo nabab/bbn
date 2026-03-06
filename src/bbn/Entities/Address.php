@@ -7,7 +7,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Appui\Option;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbCache;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Nullall;
@@ -15,7 +15,7 @@ use bbn\Models\Cls\Nullall;
 
 class Address extends DbCls
 {
-  use DbActions;
+  use DbCache;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -50,8 +50,8 @@ class Address extends DbCls
     protected ?Entities $entities = null,
     protected Entity|Nullall $entity = new Nullall()
   ) {
-    parent::__construct($db);
     $this->initClassCfg();
+    parent::__construct($db);
   }
 
 

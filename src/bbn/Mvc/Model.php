@@ -72,6 +72,8 @@ class Model extends DbClass
    */
   private $_plugin_name;
 
+  private Timer $timer;
+
   /**
    * The database connection instance
    * @var null|Db
@@ -88,8 +90,6 @@ class Model extends DbClass
    * @var stdClass
    */
   public ?stdClass $inc;
-
-  public Timer $timer;
 
   /**
    * Models are always recreated and reincluded, even if they have from the same path
@@ -111,7 +111,6 @@ class Model extends DbClass
       $this->cacheInit();
       $this->_ctrl = $ctrl;
       $this->_mvc  = $mvc;
-      $this->timer = &$mvc->timer;
       $this->inc = &$mvc->inc;
       if (is_file($info['file'])) {
         $this->_path        = $info['path'];
@@ -122,8 +121,13 @@ class Model extends DbClass
       }
     }
     else{
-        $this->error("The model ". ($info['path'] ?? null) ." doesn't exist");
+      $this->error("The model ". ($info['path'] ?? null) ." doesn't exist");
     }
+  }
+
+  public function getTimer(): Timer
+  {
+    return $this->_mvc->getTimer();
   }
 
   public function getController(): Controller

@@ -13,12 +13,12 @@ use bbn\X;
 use bbn\Models\Cls\Nullall;
 use bbn\Models\Tts\DbJunction;
 use bbn\Entities\Models\Entities;
-use bbn\Entities\Models\EntityJunction;
+use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Entity;
 use bbn\Appui\Note;
 
 
-class NoteLink extends EntityJunction
+class NoteLink extends EntityTable
 {
 
   protected static $default_class_cfg = [
@@ -28,6 +28,7 @@ class NoteLink extends EntityJunction
     ],
     'arch' => [
       'entities_notes' => [
+        'id' => 'id',
         'id_entity' => 'id_entity',
         'id_note' => 'id_note',
         'type' => 'type',
@@ -48,19 +49,14 @@ class NoteLink extends EntityJunction
     protected Entity|Nullall $entity = new Nullall()
   )
   {
+    $this->initClassCfg();
     parent::__construct($db, $entities, $entity);
-    $this->initClassCfg(static::$default_class_cfg);
     if (!isset(self::$_note)) {
       $this->note = new Note($db);
       self::noteLinkSetNote($this->note);
     }
     else {
       $this->note = self::$_note;
-    }
-
-    if ($entity) {
-      $this->id_entity = $entity->getId();
-      $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
     }
   }
 

@@ -916,8 +916,8 @@ class Dashboard extends Basic
   public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): ?array
   {
     $res = null;
-    $mvc->timer->start('global');
-    $mvc->timer->start('widgetPref');
+    $mvc->getTimer()->start('global');
+    $mvc->getTimer()->start('widgetPref');
     $o = $this->opt;
     $info = $o->option($idWidget);
     // Fetches the permission's alias: widget in dashboard options
@@ -946,26 +946,26 @@ class Dashboard extends Basic
       $code = !empty($info['code']) ? $info['code'] : false;
     }
 
-    $mvc->timer->stop('widgetPref');
+    $mvc->getTimer()->stop('widgetPref');
     if (!empty($code)
       && ($perm && $this->isPvtWidget($idWidget)
         || (!empty($id_perm)
           && (!$perm || $perm->has($id_perm))))
     ) {
-      $mvc->timer->start('lastPart');
+      $mvc->getTimer()->start('lastPart');
       if (!empty($id_perm)
         && ($id_plugin = $o->getParentPlugin($id_perm))
       ) {
         $plugin = $o->getPluginName($id_plugin);
         if ($plugin === 'appui-dashboard') {
-          $mvc->timer->start('model');
+          $mvc->getTimer()->start('model');
           $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
-          $mvc->timer->stop('model');
+          $mvc->getTimer()->stop('model');
         }
         else {
-          $mvc->timer->start('model');
+          $mvc->getTimer()->start('model');
           $res = $mvc->getSubpluginModel($code, $data, $plugin, 'appui-dashboard', $info['cache'] ?? 0);
-          $mvc->timer->stop('model');
+          $mvc->getTimer()->stop('model');
         }
         /*
         if (X::indexOf($plugin, 'appui-') === 0) {
@@ -977,10 +977,10 @@ class Dashboard extends Basic
         $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
       }
 
-      $mvc->timer->stop('lastPart');
+      $mvc->getTimer()->stop('lastPart');
     }
 
-    $mvc->timer->stop('global');
+    $mvc->getTimer()->stop('global');
     return $res;
   }
 

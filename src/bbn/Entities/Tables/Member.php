@@ -5,25 +5,32 @@ namespace bbn\Entities\Tables;
 use bbn\Db;
 use bbn\X;
 use bbn\Entities\Models\Entities;
-use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Models\EntityJunction;
 use bbn\Models\Cls\Nullall;
 use bbn\Entities\Entity;
 
-class Member extends EntityTable
+class Member extends EntityJunction
 {
   protected static $default_class_cfg = [
-    'table' => 'bbn_members_entities',
+    'table' => 'bbn_members',
     'tables' => [
-      'members_entities' => 'bbn_members_entities'
+      'members' => 'bbn_members'
     ],
     'arch' => [
-      'members_entities' => [
+      'members' => [
         'id' => 'id',
-        'id_entity' => 'id_entity',
-        'id_member' => 'id_member',
         'id_group' => 'id_group',
-        'id_option' => 'id_option',
-        'cfg' => 'cfg'
+        'id_identity' => 'id_identity',
+        'email' => 'email',
+        'login' => 'login',
+        'username' => 'username',
+        'cfg' => 'cfg',
+        'active' => 'active',
+        'phone' => 'phone',
+        'function' => 'fonction',
+        'admin' => 'admin',
+        'dev' => 'dev',
+        'theme' => 'theme'
       ]
     ]
   ];

@@ -4,7 +4,7 @@ namespace bbn\Appui;
 
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\Optional;
 
 /**
@@ -17,35 +17,35 @@ use bbn\Models\Tts\Optional;
  */
 class Hr extends DbCls
 {
-  use DbActions;
+  use DbOps;
   use Optional;
 
   protected static $default_class_cfg = [
-    'errors' => [],
-    'table' => 'bbn_hr_staff',
-    'tables' => [
-      'staff' => 'bbn_hr_staff',
-      'staff_planning' => 'bbn_hr_planning',
-      'staff_events' => 'bbn_hr_staff_events'
+    "errors" => [],
+    "table" => "bbn_hr_staff",
+    "tables" => [
+      "staff" => "bbn_hr_staff",
+      "staff_planning" => "bbn_hr_planning",
+      "staff_events" => "bbn_hr_staff_events",
     ],
-    'arch' => [
-      'staff' => [
-        'id' => 'id',
-        'id_user' => 'id_user'
+    "arch" => [
+      "staff" => [
+        "id" => "id",
+        "id_user" => "id_user",
       ],
-      'staff_planning' => [
-        'id' => 'id',
-        'id_staff' => 'id_staff',
-        'id_event' => 'id_event',
-        'id_alias' => 'id_alias',
-        'alias' => 'alias'
+      "staff_planning" => [
+        "id" => "id",
+        "id_staff" => "id_staff",
+        "id_event" => "id_event",
+        "id_alias" => "id_alias",
+        "alias" => "alias",
       ],
-      'staff_events' => [
-        'id_staff' => 'id_staff',
-        'id_event' => 'id_event',
-        'note' => 'note',
-        'status' => 'status'
-      ]
+      "staff_events" => [
+        "id_staff" => "id_staff",
+        "id_event" => "id_event",
+        "note" => "note",
+        "status" => "status",
+      ],
     ],
   ];
 
@@ -54,53 +54,60 @@ class Hr extends DbCls
    * @param \bbn\Db $db
    * @param array $cfg
    */
-  public function __construct(Db $db, array|null $cfg = null)
+  public function __construct(Db $db)
   {
+    $this->initClassCfg();
     parent::__construct($db);
-    $this->initClassCfg($cfg);
     self::optionalInit();
   }
 
-
   public function getStaff(bool $onlyActive = false): ?array
   {
-    $join =[[
-      'table' => 'bbn_identities',
-      'on' => [
-        'conditions' => [[
-          'field' => $this->db->cfn($this->fields['id'], $this->class_table),
-          'exp' => 'bbn_identities.id'
-        ]]
-      ]
-    ]];
+    $join = [
+      [
+        "table" => "bbn_identities",
+        "on" => [
+          "conditions" => [
+            [
+              "field" => $this->db->cfn(
+                $this->fields["id"],
+                $this->class_table,
+              ),
+              "exp" => "bbn_identities.id",
+            ],
+          ],
+        ],
+      ],
+    ];
 
     if (!$onlyActive) {
       $join[] = [
-        'table' => 'bbn_history_uids',
-        'on' => [
-          'conditions' => [[
-            'field' => 'bbn_identities.id',
-            'exp' => 'bbn_history_uids.bbn_uid'
-          ]]
-        ]
+        "table" => "bbn_history_uids",
+        "on" => [
+          "conditions" => [
+            [
+              "field" => "bbn_identities.id",
+              "exp" => "bbn_history_uids.bbn_uid",
+            ],
+          ],
+        ],
       ];
     }
 
     return $this->db->rselectAll([
-      'table' => $this->class_table,
-      'fields' => [
-        'value' => 'bbn_identities.id',
-        'text' => 'bbn_identities.fullname',
-        $this->fields['id_user']
+      "table" => $this->class_table,
+      "fields" => [
+        "value" => "bbn_identities.id",
+        "text" => "bbn_identities.fullname",
+        $this->fields["id_user"],
       ],
-      'join' => $join,
-      'order' => [
-        'text' => 'ASC',
-        $this->fields['id'] => 'ASC'
-      ]
+      "join" => $join,
+      "order" => [
+        "text" => "ASC",
+        $this->fields["id"] => "ASC",
+      ],
     ]);
   }
-
 
   public function getActiveStaff(): ?array
   {

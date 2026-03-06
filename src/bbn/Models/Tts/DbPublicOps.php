@@ -2,10 +2,8 @@
 
 namespace bbn\Models\Tts;
 
-trait DbActionsPublic
+trait DbPublicOps
 {
-  use DbActions;
-
   public function exists(string|array $filter): bool
   {
     return $this->dbTraitExists($filter);
@@ -31,33 +29,57 @@ trait DbActionsPublic
     return $this->dbTraitDelete($filter);
   }
 
-  public function rselect(string|array $filter = [], array $order = [], array $fields = []): ?array
-  {
+  public function rselect(
+    string|array $filter = [],
+    array $order = [],
+    array $fields = [],
+  ): ?array {
     return $this->dbTraitRselect($filter, $order, $fields);
   }
 
-  public function select(string|array $filter = [], array $order = [], array $fields = []): ?\stdClass
-  {
+  public function select(
+    string|array $filter = [],
+    array $order = [],
+    array $fields = [],
+  ): ?\stdClass {
     return $this->dbTraitSelect($filter, $order, $fields);
   }
 
-  public function selectOne(string $field, string|array $filter = [], array $order = []): mixed
-  {
+  public function selectOne(
+    string $field,
+    string|array $filter = [],
+    array $order = [],
+  ): mixed {
     return $this->dbTraitSelectOne($field, $filter, $order);
   }
 
-  public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
-  {
+  public function selectValues(
+    string $field,
+    array $filter = [],
+    array $order = [],
+    int $limit = 0,
+    int $start = 0,
+  ): array {
     return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
   }
 
-  public function selectAll(string|array $filter = [], array $order = [], $limit = 0, $start = 0, array $fields = []): array
-  {
+  public function selectAll(
+    string|array $filter = [],
+    array $order = [],
+    $limit = 0,
+    $start = 0,
+    array $fields = [],
+  ): array {
     return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
   }
 
-  public function rselectAll(string|array $filter = [], array $order = [], $limit = 0, $start = 0, array $fields = []): array
-  {
+  public function rselectAll(
+    string|array $filter = [],
+    array $order = [],
+    $limit = 0,
+    $start = 0,
+    array $fields = [],
+  ): array {
     return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
   }
 }

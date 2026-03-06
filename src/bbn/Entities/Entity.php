@@ -1,7 +1,9 @@
 <?php
 namespace bbn\Entities;
 
+use bbn\Appui\History;
 use Exception;
+use BadMethodCallException;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
@@ -26,6 +28,8 @@ class Entity
 
   protected array $where;
 
+  protected array $records;
+
   /** @var null|bool Adherent verification status. */
   private $checked = null;
 
@@ -34,6 +38,21 @@ class Entity
   protected ?Link $links;
 
   protected $easyId = null;
+
+  protected array $objects = [];
+
+  public function __call($method, $args)
+  {
+    if ($this->objects[$method] ?? null) {
+      return $this->objects[$method];
+    }
+    
+    $res = $this->entities->$method($this);
+    if ($res) {
+      $this->objects[$method] = $res;
+      return $res;
+    }
+  }
 
   /**
    * Constructor.
@@ -269,11 +288,6 @@ class Entity
     return $this->entities->options();
   }
   
-  public function entityOptions(): EntityOptions
-  {
-    return $this->entities->entityOptions($this);
-  }
-
   public function getParent(): ?Entity
   {
     if ($this->check()
@@ -345,4 +359,246 @@ class Entity
     return $res;
   }
 
+
+
+  public function getAllRelatedIds(array $excluded = [], ?callable $filter = null): array
+  {
+    $res = [$this->table => [$this->getId()]];
+    $checked = [$this->table];
+    $ocfg = $this->options()->getClassCfg();
+    $excluded[] = History::$table_uids;
+    $excluded[] = $ocfg['table'];
+    $tableCfgs = Entities::dbConfigGetTableClasses();
+    foreach ($this->db->getForeignKeys(array_values($this->fields)[0], $this->table) as $tfn => $col) {
+      $table = $this->db->tsn($tfn);
+      if ($filter && !in_array($table, $checked)) {
+        $checked[] = $table;
+        if (!$filter($table)) {
+          $excluded[] = $table;
+          continue;
+        }
+      }
+
+      if (in_array($table, $excluded)) {
+        continue;
+      }
+
+      $dbModel = $this->db->modelize($tfn);
+      if ($dbModel['primary'] && (count($dbModel['primary']) === 1)) {
+        $tableUids = $this->db->getColumnValues($tfn, 'DISTINCT '.$dbModel['primary'][0], [
+          $col[0] => $this->getId(),
+          [$dbModel['primary'][0], 'isnotnull'],
+          [$dbModel['primary'][0] => 'ASC']
+        ]);
+        if (!isset($res[$table])) {
+          $res[$table] = [];
+        }
+
+        array_push($res[$table], ...$tableUids);
+      }
+    }
+
+    foreach ($tableCfgs as $table => $cfg) {
+      if (!empty($cfg['deps'])) {
+        foreach ($cfg['deps'] as $dep) {
+          if (isset($res[$dep], $tableCfgs[$dep]['junctions'])) {
+            $junction = X::getRow($tableCfgs[$dep]['junctions'], ['table' => $table]);
+            if (!$junction) {
+              throw new Exception(X::_("The table %s is linked to %s through a junction but the junction configuration is missing", $table, $dep)); 
+            }
+
+            $rels = $this->db->getColumnValues($dep, $junction['field'], [
+              'id' => $res[$dep]
+            ], ['id' => 'ASC']);
+            if (!isset($res[$table])) {
+              $res[$table] = [];
+            }
+            array_push($res[$table], ...$rels);
+          }
+        }
+      }
+    }
+
+    foreach ($res as $table => $ids) {
+      $res[$table] = array_unique($ids);
+    }
+
+    if (!empty($res['bbn_entities_links']) && !in_array('bbn_entities_links', $excluded)) {
+      $identities = null;
+      if (!in_array('bbn_identities', $excluded)) {
+        $res['bbn_identities'] = [];
+        if ($idAdmin = $this->db->selectOne($this->table, 'id_admin', ['id' => $this->getId()])) {
+          $res['bbn_identities'][] = $idAdmin;
+        }
+
+        $identities =& $res['bbn_identities'];
+      }
+
+      $addresses = null;
+      if (!in_array('bbn_addresses', $excluded)) {
+        $res['bbn_addresses'] = [];
+        $addresses =& $res['bbn_addresses'];
+      }
+
+      foreach ($res['bbn_entities_links'] as $linkId) {
+        if ($link = $this->db->rselect('bbn_entities_links', ['id_identity', 'id_address'], [
+          'id' => $linkId
+        ])) {
+          if ($link['id_identity'] && isset($identities) && !in_array($link['id_identity'], $identities)) {
+            $identities[] = $link['id_identity'];
+          }
+
+          if ($link['id_address'] && isset($addresses) && !in_array($link['id_address'], $addresses)) {
+            $addresses[] = $link['id_address'];
+          }
+        }
+      }
+
+      if (!empty($identities)) {
+        foreach ($identities as $idIdentity) {
+          if (!in_array('bbn_identities_links', $excluded)) {
+            if ($links = $this->db->getColumnValues('bbn_identities_links', 'id', [
+              'id_parent' => $idIdentity
+            ], [
+              'id_identity' => 'ASC'
+            ])) {
+              if (!isset($res['bbn_identities_links'])) {
+                $res['bbn_identities_links'] = [];
+              }
+
+              array_push($res['bbn_identities_links'], ...$links);
+            }
+
+            if ($links = $this->db->getColumnValues('bbn_identities_links', 'id', [
+              'id_child' => $idIdentity
+            ], [
+              'id_identity' => 'ASC'
+            ])) {
+              if (!isset($res['bbn_identities_links'])) {
+                $res['bbn_identities_links'] = [];
+              }
+
+              array_push($res['bbn_identities_links'], ...$links);
+            }
+          }
+
+          if (!in_array('bbn_identities_uauth', $excluded)) {
+            if ($iuauths = $this->db->getColumnValues('bbn_identities_uauth', 'id', [
+              'id_identity' => $idIdentity,
+            ], ['id' => 'ASC'])) {
+              if (!isset($res['bbn_identities_uauth'])) {
+                $res['bbn_identities_uauth'] = [];
+              }
+
+              array_push($res['bbn_identities_uauth'], ...$iuauths);
+            }
+
+            if ($uauths = $this->db->getColumnValues('bbn_identities_uauth', 'DISTINCT id_uauth', [
+              'id_identity' => $idIdentity,
+              ['id_uauth', 'isnotnull'],
+              ['id_uauth' => 'ASC']
+            ])) {
+              if (!isset($res['bbn_uauth'])) {
+                $res['bbn_uauth'] = [];
+              }
+
+              array_push($res['bbn_uauth'], ...$uauths);
+            }
+          }
+        }
+      }
+    }
+
+    foreach ($res as $table => $ids) {
+      $res[$table] = array_values(array_unique(array_filter($ids, fn ($v) => (bool)$v)));
+    }
+
+    ksort($res);
+    return $res;
+  }
+
+  public function getAllRelatedRecords(array $excluded = []): array
+  {
+    $res = $this->getAllRelatedIds($excluded);
+    $final = [];
+    $cfg = Entities::dbConfigGetTableClasses();
+    $getObject = function($cfg, $db, $entities, $entity = null) {
+      if (empty($cfg['cache'])) {
+        return new $cfg['class']($db);
+      }
+      else {
+        return new $cfg['class']($db, $entities, $entity);
+      }
+    };
+    foreach ($res as $table => $ids) {
+      if (isset($cfg[$table])) {
+        $final[$table] = [];
+        $obj = match(true) {
+          $table === $this->table => $this->entities,
+          $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $this->identity()),
+          true => $getObject($cfg[$table], $this->db, $this->entities, $this)
+        };
+        if (method_exists($obj, 'dbTraitCacheGetSetFull')) {
+          foreach ($ids as $i => $id) {
+            if ($tmp = $obj->dbTraitCacheGetSetFull($id)) {
+              $final[$table][$id] = [
+                'state' => $tmp ? $tmp['hash'] : null,
+                'data' => $tmp ? $tmp['value'] : null
+              ];
+            }
+            else {
+              X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+              //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            }
+          }
+        }
+      }
+    }
+
+    /*
+    foreach ($junc as $table => $cfgs) {
+      foreach ($cfgs as $cfg) {
+        X::ddump($cfg);
+        if (isset($res[$table]) && isset($final[$cfg['table']])) {
+          $obj = new $cfg['class']($this->db, Option::getInstance());
+          $ids = $res[$table];
+          if (!isset($final[$cfg['table']])) {
+            $final[$cfg['table']] = [];
+          }
+
+          X::ddump($cfg['table'], $ids);
+          foreach ($ids as $id) {
+            if (!X::getRow($final[$cfg['table']], fn ($a) => $a['data']['id'] === $id)) {
+              $final[$cfg['table']][] = $obj->rselect($id);
+            }
+          }
+        }
+      }
+    }*/
+
+    return $final;
+  }
+
+  public function getRecords(?string $idx = null): array
+  {
+    if (empty($this->records)) {
+      $this->records = $this->getAllRelatedRecords();
+    }
+
+    if ($idx) {
+      if (!is_array($this->records[$idx] ?? null)) {
+        return [];
+        X::ddump($idx, $this->records[$idx], array_keys($this->records));
+        throw new Exception(X::_("The table %s is not related to the entity", $idx));
+      }
+
+      return array_values(array_map(fn($a) => $a['data'], $this->records[$idx] ?? []));
+    }
+
+    return array_map(
+      fn($a) => array_values(array_map(
+        fn($b) => $b['data'],
+        $a ?: []
+      )), $this->records);
+  }
 }

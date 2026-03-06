@@ -8,7 +8,7 @@ use bbn\X;
 use bbn\User;
 use bbn\Appui\Option;
 use bbn\Util\Enc;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\LocaleDatabase;
 use bbn\User\Preferences;
 use Exception;
@@ -18,7 +18,7 @@ use Exception;
  */
 class Passwords extends DbModel
 {
-  use DbActions;
+  use DbOps;
   use LocaleDatabase;
 
   /** @var Option An options object */
@@ -26,20 +26,19 @@ class Passwords extends DbModel
 
   /** @var array Database architecture schema */
   protected static $default_class_cfg = [
-    'table' => 'bbn_passwords',
-    'tables' => [
-      'passwords' => 'bbn_passwords'
+    "table" => "bbn_passwords",
+    "tables" => [
+      "passwords" => "bbn_passwords",
     ],
-    'arch' => [
-      'passwords' => [
-        'id' => 'id',
-        'id_option' => 'id_option',
-        'id_user_option' => 'id_user_option',
-        'password' => 'password'
-      ]
-    ]
+    "arch" => [
+      "passwords" => [
+        "id" => "id",
+        "id_option" => "id_option",
+        "id_user_option" => "id_user_option",
+        "password" => "password",
+      ],
+    ],
   ];
-
 
   /**
    * Contructor.
@@ -48,11 +47,10 @@ class Passwords extends DbModel
    */
   public function __construct(Db $db)
   {
-    parent::__construct($db);
     $this->initClassCfg();
+    parent::__construct($db);
     $this->_o = Option::getInstance();
   }
-
 
   /**
    * Stores a password in the database.
@@ -64,17 +62,15 @@ class Passwords extends DbModel
    */
   public function store(string $password, string $id_option): bool
   {
-    if ($password && defined('BBN_ENCRYPTION_KEY')) {
-      $arch     = &$this->class_cfg['arch']['passwords'];
+    if ($password && defined("BBN_ENCRYPTION_KEY")) {
+      $arch = &$this->class_cfg["arch"]["passwords"];
       $to_store = Enc::crypt64($password, BBN_ENCRYPTION_KEY);
       //var_dump(base64_encode($to_store));
-      if ($this->db->insertUpdate(
-        $this->class_cfg['table'],
-        [
-          $arch['id_option'] => $id_option,
-          $arch['password'] => $to_store
-        ]
-      )
+      if (
+        $this->db->insertUpdate($this->class_cfg["table"], [
+          $arch["id_option"] => $id_option,
+          $arch["password"] => $to_store,
+        ])
       ) {
         return true;
       }
@@ -82,9 +78,10 @@ class Passwords extends DbModel
       return false;
     }
 
-    throw new Exception(X::_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
+    throw new Exception(
+      X::_("No passwod given or BBN_ENCRYPTION_KEY not defined"),
+    );
   }
-
 
   /**
    * Stores a password in the database for a user.
@@ -115,7 +112,7 @@ class Passwords extends DbModel
       $pref->setUser($user);
     }
 
-    if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+    if ($pref->isLocale($id_pref, $pref->getClassCfg()["table"])) {
       $db = $this->getLocaleDb($userId);
     }
 
@@ -123,16 +120,11 @@ class Passwords extends DbModel
       $pref->setUser($currentPrefUser);
     }
 
-    return (bool)$db->insertUpdate(
-      $this->class_cfg['table'],
-      [
-        $this->fields['id_user_option'] => $id_pref,
-        $this->fields['password'] => base64_encode($to_store)
-      ]
-    );
-
+    return (bool) $db->insertUpdate($this->class_cfg["table"], [
+      $this->fields["id_user_option"] => $id_pref,
+      $this->fields["password"] => base64_encode($to_store),
+    ]);
   }
-
 
   /**
    * Returns a password for the given option.
@@ -143,20 +135,20 @@ class Passwords extends DbModel
    */
   public function get(string $id_option): ?string
   {
-    if (defined('BBN_ENCRYPTION_KEY')) {
-      $arch =& $this->class_cfg['arch']['passwords'];
-      if ($password = $this->db->selectOne(
-        $this->class_cfg['table'],
-        $arch['password'],
-        [$arch['id_option'] => $id_option]
-      )
+    if (defined("BBN_ENCRYPTION_KEY")) {
+      $arch = &$this->class_cfg["arch"]["passwords"];
+      if (
+        $password = $this->db->selectOne(
+          $this->class_cfg["table"],
+          $arch["password"],
+          [$arch["id_option"] => $id_option],
+        )
       ) {
         return Enc::decrypt64($password, BBN_ENCRYPTION_KEY);
       }
     }
     return null;
   }
-
 
   /**
    * Returns a password for the given user's option.
@@ -179,7 +171,7 @@ class Passwords extends DbModel
         $pref->setUser($user);
       }
 
-      if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+      if ($pref->isLocale($id_pref, $pref->getClassCfg()["table"])) {
         $this->setLocaleDb($userId);
         $db = $this->getLocaleDb();
       }
@@ -188,17 +180,18 @@ class Passwords extends DbModel
         $pref->setUser($currentPrefUser);
       }
 
-      if ($password = $db->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['password'],
-        [$this->fields['id_user_option'] => $id_pref]
-      )) {
+      if (
+        $password = $db->selectOne(
+          $this->class_cfg["table"],
+          $this->fields["password"],
+          [$this->fields["id_user_option"] => $id_pref],
+        )
+      ) {
         return $user->decrypt(base64_decode($password));
       }
     }
     return null;
   }
-
 
   /**
    * Deletes the password for the given option.
@@ -209,11 +202,10 @@ class Passwords extends DbModel
    */
   public function delete(string $id_option): bool
   {
-    $arch =& $this->class_cfg['arch']['passwords'];
-    return (bool)$this->db->delete(
-      $this->class_cfg['table'],
-      [$arch['id_option'] => $id_option]
-    );
+    $arch = &$this->class_cfg["arch"]["passwords"];
+    return (bool) $this->db->delete($this->class_cfg["table"], [
+      $arch["id_option"] => $id_option,
+    ]);
   }
 
   public function userDelete(string $id_pref, User $user)
@@ -231,21 +223,19 @@ class Passwords extends DbModel
       }
 
       if ($pref->isAuthorized($id_pref)) {
-        if ($pref->isLocale($id_pref, $pref->getClassCfg()['table'])) {
+        if ($pref->isLocale($id_pref, $pref->getClassCfg()["table"])) {
           $this->setLocaleDb($userId);
           $db = $this->getLocaleDb();
         }
 
-        $res =  $db->delete(
-          $this->class_cfg['table'],
-          [$this->fields['id_user_option'] => $id_pref]
-        );
+        $res = $db->delete($this->class_cfg["table"], [
+          $this->fields["id_user_option"] => $id_pref,
+        ]);
       }
 
       if ($userChanged) {
         $pref->setUser($currentPrefUser);
       }
-
     }
 
     return $res;

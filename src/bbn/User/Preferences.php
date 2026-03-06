@@ -14,7 +14,7 @@ use Exception;
 use bbn\User;
 use bbn\Appui\Option;
 use bbn\Models\Tts\Retriever;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\Current;
 use bbn\Models\Cls\Db as DbCls;
@@ -44,41 +44,41 @@ use bbn\Models\Tts\LocaleDatabase;
 class Preferences extends DbCls
 {
   use Retriever;
-  use DbActions;
+  use DbOps;
   use Optional;
   use Current;
   use LocaleDatabase;
 
   /** @var array */
   protected static $default_class_cfg = [
-    'table' => 'bbn_users_options',
-    'tables' => [
-      'user_options' => 'bbn_users_options',
-      'user_options_bits' => 'bbn_users_options_bits'
+    "table" => "bbn_users_options",
+    "tables" => [
+      "user_options" => "bbn_users_options",
+      "user_options_bits" => "bbn_users_options_bits",
     ],
-    'arch' => [
-      'user_options' => [
-        'id' => 'id',
-        'id_option' => 'id_option',
-        'num' => 'num',
-        'id_user' => 'id_user',
-        'id_group' => 'id_group',
-        'id_alias' => 'id_alias',
-        'public' => 'public',
-        'id_link' => 'id_link',
-        'text' => 'text',
-        'cfg' => 'cfg'
+    "arch" => [
+      "user_options" => [
+        "id" => "id",
+        "id_option" => "id_option",
+        "num" => "num",
+        "id_user" => "id_user",
+        "id_group" => "id_group",
+        "id_alias" => "id_alias",
+        "public" => "public",
+        "id_link" => "id_link",
+        "text" => "text",
+        "cfg" => "cfg",
       ],
-      'user_options_bits' => [
-        'id' => 'id',
-        'id_user_option' => 'id_user_option',
-        'id_parent' => 'id_parent',
-        'id_option' => 'id_option',
-        'num' => 'num',
-        'text' => 'text',
-        'cfg' => 'cfg'
-      ]
-    ]
+      "user_options_bits" => [
+        "id" => "id",
+        "id_user_option" => "id_user_option",
+        "id_parent" => "id_parent",
+        "id_option" => "id_option",
+        "num" => "num",
+        "text" => "text",
+        "cfg" => "cfg",
+      ],
+    ],
   ];
 
   /** @var Option */
@@ -93,7 +93,6 @@ class Preferences extends DbCls
   /** @var int */
   protected $id_group;
 
-
   /**
    * @return preferences|null
    */
@@ -102,18 +101,16 @@ class Preferences extends DbCls
     return self::getInstance();
   }
 
-
   /**
    * Preferences constructor.
    *
    * @param Db $db The database connection object
-   * @param array $cfg A configuration array for tha tables' structure
    * @throws Exception
    */
-  public function __construct(Db $db, array $cfg = [])
+  public function __construct(Db $db)
   {
-      parent::__construct($db);
-    $this->initClassCfg($cfg);
+    $this->initClassCfg();
+    parent::__construct($db);
     if ($user = User::getInstance()) {
       $this->_initUser($user);
     }
@@ -128,7 +125,6 @@ class Preferences extends DbCls
   {
     return $this->user ? $this->user->getId() : null;
   }
-
 
   /**
    * Returns an array describing the structures of the tables for the class.
@@ -175,7 +171,6 @@ class Preferences extends DbCls
     return $this->class_cfg;
   }
 
-
   /**
    * Returns all preferences' IDs from the option's ID.
    *
@@ -208,7 +203,6 @@ class Preferences extends DbCls
     return $this->_retrieveIds($id_option, $this->id_user, $this->id_group);
   }
 
-
   /**
    * Returns preferences' IDs from the option's ID and the given user ID.
    *
@@ -237,15 +231,16 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function retrieveUserIds(string|null $id_option = null, string|null $id_user = null): ?array
-  {
+  public function retrieveUserIds(
+    string|null $id_option = null,
+    string|null $id_user = null,
+  ): ?array {
     if (!$id_user) {
       $id_user = $this->id_user;
     }
 
     return $this->_retrieveIds($id_option, $id_user);
   }
-
 
   /**
    * Returns preferences' IDs from the option's ID and the given group ID.
@@ -259,15 +254,16 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function retrieveGroupIds(string|null $id_option = null, string|null $id_group = null): ?array
-  {
+  public function retrieveGroupIds(
+    string|null $id_option = null,
+    string|null $id_group = null,
+  ): ?array {
     if (!$id_group) {
       $id_group = $this->id_group;
     }
 
     return $this->_retrieveIds($id_option, null, $id_group);
   }
-
 
   /**
    * Checks if the given user or the current user is authorized to access a user_option.
@@ -288,9 +284,8 @@ class Preferences extends DbCls
    */
   public function isAuthorized(string $id_user_option): bool
   {
-    return (bool)$this->get($id_user_option, false);
+    return (bool) $this->get($id_user_option, false);
   }
-
 
   /**
    * Returns true if the current user can access a preference, false otherwise.
@@ -312,9 +307,8 @@ class Preferences extends DbCls
       return true;
     }
 
-    return (bool)$this->retrieveIds($id_option);
+    return (bool) $this->retrieveIds($id_option);
   }
-
 
   /**
    * Checks if a user has the given preference.
@@ -332,9 +326,8 @@ class Preferences extends DbCls
    */
   public function userHas(string $id_option, string|null $id_user = null): bool
   {
-    return (bool)$this->_retrieveIds($id_option, $id_user);
+    return (bool) $this->_retrieveIds($id_option, $id_user);
   }
-
 
   /**
    * Checks if a group has the given preference.
@@ -351,9 +344,8 @@ class Preferences extends DbCls
    */
   public function groupHas(string $id_option, string $id_group): bool
   {
-    return (bool)$this->_retrieveIds($id_option, null, $id_group);
+    return (bool) $this->_retrieveIds($id_option, null, $id_group);
   }
-
 
   /**
    * Returns the Id of the current user.
@@ -371,7 +363,6 @@ class Preferences extends DbCls
     return $this->id_user;
   }
 
-
   /**
    * Returns the current user instance.
    *
@@ -388,7 +379,6 @@ class Preferences extends DbCls
     return $this->user;
   }
 
-
   /**
    * Returns the Id of the current group.
    *
@@ -404,7 +394,6 @@ class Preferences extends DbCls
   {
     return $this->id_group;
   }
-
 
   /**
    * Changes the current user and return the changed preferences class.
@@ -424,7 +413,6 @@ class Preferences extends DbCls
     $this->_initUser($user);
     return $this;
   }
-
 
   /**
    * Changes the current group and return the changed preferences class.
@@ -447,7 +435,6 @@ class Preferences extends DbCls
     return $this;
   }
 
-
   /**
    * Gets the cfg array, normalized either from the DB or from the $cfg argument.
    *
@@ -458,8 +445,10 @@ class Preferences extends DbCls
   public function getCfg(?string $id = null, ?array $cfg = null): ?array
   {
     if (is_null($cfg) && !empty($id)) {
-      $db = $this->getRightDb($id, $this->class_cfg['table']);
-      $cfg = $db->selectOne($this->class_cfg['table'], $this->fields['cfg'], [$this->fields['id'] => $id]);
+      $db = $this->getRightDb($id, $this->class_cfg["table"]);
+      $cfg = $db->selectOne($this->class_cfg["table"], $this->fields["cfg"], [
+        $this->fields["id"] => $id,
+      ]);
     }
 
     if (!is_null($cfg)) {
@@ -484,7 +473,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Gets the cfg array, normalized either from the DB or from the $cfg argument.
    *
@@ -498,28 +486,30 @@ class Preferences extends DbCls
    * @param string|null $id_user
    * @return null|array
    */
-  public function getCfgByOption(string $id_option, ?string $id_user = null): ?array
-  {
+  public function getCfgByOption(
+    string $id_option,
+    ?string $id_user = null,
+  ): ?array {
     $id_user = $id_user ?: $this->id_user;
     $cfg = null;
-    $hasLocaleDb = ($id_user === $this->id_user)
-      && $this->hasLocaleDb();
-    if (!$hasLocaleDb
-      || !($cfg = $this->getLocaleDb()->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['cfg'],
+    $hasLocaleDb = $id_user === $this->id_user && $this->hasLocaleDb();
+    if (
+      !$hasLocaleDb ||
+      !($cfg = $this->getLocaleDb()->selectOne(
+        $this->class_cfg["table"],
+        $this->fields["cfg"],
         [
-          $this->fields['id_option'] => $this->opt->toPath($id_option)
-        ]
+          $this->fields["id_option"] => $this->opt->toPath($id_option),
+        ],
       ))
     ) {
       $cfg = $this->db->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['cfg'],
+        $this->class_cfg["table"],
+        $this->fields["cfg"],
         [
-          $this->fields['id_option'] => $id_option,
-          $this->fields['id_user'] => $id_user,
-        ]
+          $this->fields["id_option"] => $id_option,
+          $this->fields["id_user"] => $id_user,
+        ],
       );
     }
 
@@ -533,7 +523,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Gets the preferences which have the option's $id as id_link.
@@ -553,7 +542,6 @@ class Preferences extends DbCls
     return $this->_getLinks($id, $this->id_user, $this->id_group);
   }
 
-
   /**
    * Returns the current user's preference based on the given id, his own profile and his group.
    *
@@ -565,67 +553,74 @@ class Preferences extends DbCls
   public function get(string $id, bool $with_config = true): ?array
   {
     if (Str::isUid($id)) {
-      $isLocale = $this->isLocale($id, $this->class_cfg['table']);
+      $isLocale = $this->isLocale($id, $this->class_cfg["table"]);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      $conditions = [[
-        'field' => $this->fields['id'],
-        'value' => $id
-      ]];
+      $conditions = [
+        [
+          "field" => $this->fields["id"],
+          "value" => $id,
+        ],
+      ];
       if (!$isLocale) {
         $conditions[] = [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $this->fields['id_user'],
-            'value' => $this->id_user
-          ], [
-            'field' => $this->fields['id_group'],
-            'value' => $this->id_group
-          ], [
-            'field' => $this->fields['public'],
-            'value' => 1
-          ]]
+          "logic" => "OR",
+          "conditions" => [
+            [
+              "field" => $this->fields["id_user"],
+              "value" => $this->id_user,
+            ],
+            [
+              "field" => $this->fields["id_group"],
+              "value" => $this->id_group,
+            ],
+            [
+              "field" => $this->fields["public"],
+              "value" => 1,
+            ],
+          ],
         ];
       }
 
-      if ($row = $db->rselect([
-        'table' => $this->class_cfg['table'],
-        'fields' => $this->fields,
-        'where' => [
-          'conditions' => $conditions
-        ]
-      ])) {
+      if (
+        $row = $db->rselect([
+          "table" => $this->class_cfg["table"],
+          "fields" => $this->fields,
+          "where" => [
+            "conditions" => $conditions,
+          ],
+        ])
+      ) {
         if ($isLocale) {
-          $row = $this->normalizeFromLocale($row, $this->class_cfg['table']);
+          $row = $this->normalizeFromLocale($row, $this->class_cfg["table"]);
         }
 
         if ($with_config) {
-          if (empty($row[$this->fields['cfg']])
-            && !empty($row[$this->fields['id_alias']])
+          if (
+            empty($row[$this->fields["cfg"]]) &&
+            !empty($row[$this->fields["id_alias"]])
           ) {
             //if it's the case of a shared list takes the $cfg and the text from the alias
             $alias = $db->rselect([
-              'table' => $this->class_cfg['table'],
-              'fields' => [
-                $this->fields['cfg'],
-                $this->fields['text']
+              "table" => $this->class_cfg["table"],
+              "fields" => [$this->fields["cfg"], $this->fields["text"]],
+              "where" => [
+                "conditions" => [
+                  [
+                    "field" => $this->fields["id"],
+                    "value" => $row[$this->fields["id_alias"]],
+                  ],
+                ],
               ],
-              'where' => [
-                'conditions' => [[
-                  'field' => $this->fields['id'],
-                  'value' => $row[$this->fields['id_alias']]
-                ]]
-              ]
             ]);
-            $row[$this->fields['cfg']]  = $alias[$this->fields['cfg']];
-            $row[$this->fields['text']] = $alias[$this->fields['text']];
+            $row[$this->fields["cfg"]] = $alias[$this->fields["cfg"]];
+            $row[$this->fields["text"]] = $alias[$this->fields["text"]];
           }
 
-          $cfg = $row[$this->fields['cfg']];
-          unset($row[$this->fields['cfg']]);
+          $cfg = $row[$this->fields["cfg"]];
+          unset($row[$this->fields["cfg"]]);
           if ($cfg && ($cfg = json_decode($cfg, true))) {
             $row = X::mergeArrays($cfg, $row);
           }
-
         }
 
         return $row;
@@ -635,7 +630,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Returns an array of the current user's preferences based on the given id_option, his own profile and his group's.
    *
@@ -644,103 +638,119 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function getAll(string|null $id_option = null, bool $with_config = true): ?array
-  {
+  public function getAll(
+    string|null $id_option = null,
+    bool $with_config = true,
+  ): ?array {
     if ($id_option = $this->_getIdOption($id_option)) {
-      $farch  = $this->fields;
+      $farch = $this->fields;
       $fields = [];
       foreach ($farch as $k => $f) {
-        $field = $this->class_table . '.' . $f;
-        if ($k === 'cfg') {
-          $fields[$farch['cfg']] = "IFNULL($field, aliases.$farch[cfg])";
-        }
-        elseif ($k === 'text') {
-          $fields[$farch['text']] = "IFNULL($field, aliases.$farch[text])";
-        }
-        else {
+        $field = $this->class_table . "." . $f;
+        if ($k === "cfg") {
+          $fields[$farch["cfg"]] = "IFNULL($field, aliases.$farch[cfg])";
+        } elseif ($k === "text") {
+          $fields[$farch["text"]] = "IFNULL($field, aliases.$farch[text])";
+        } else {
           $fields[] = $field;
         }
       }
 
-      $rows = $this->db->rselectAll([
-        'table' => $this->class_table,
-        'fields' => $fields,
-        'join' => [[
-          'table' => $this->class_table,
-          'type' => 'left',
-          'alias' => 'aliases',
-          'on' => [
-            'conditions' => [[
-              'field' => $farch['id_alias'],
-              'exp' => 'aliases.id'
-            ]]
-          ]
-        ]],
-        'where' => [
-          'conditions' => [[
-            'field' => $farch['id_option'],
-            'value' => $id_option
-          ], [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => $farch['id_user'],
-              'value' => $this->id_user
-            ], [
-              'field' => $farch['id_group'],
-              'value' => $this->id_group
-            ], [
-              'field' => $farch['public'],
-              'value' => 1
-            ]]
-          ]]
-        ]
-      ]) ?: [];
-      if ($this->hasLocaleDb()
-        && ($optPath = $this->opt->toPath($id_option))
-      ) {
+      $rows =
+        $this->db->rselectAll([
+          "table" => $this->class_table,
+          "fields" => $fields,
+          "join" => [
+            [
+              "table" => $this->class_table,
+              "type" => "left",
+              "alias" => "aliases",
+              "on" => [
+                "conditions" => [
+                  [
+                    "field" => $farch["id_alias"],
+                    "exp" => "aliases.id",
+                  ],
+                ],
+              ],
+            ],
+          ],
+          "where" => [
+            "conditions" => [
+              [
+                "field" => $farch["id_option"],
+                "value" => $id_option,
+              ],
+              [
+                "logic" => "OR",
+                "conditions" => [
+                  [
+                    "field" => $farch["id_user"],
+                    "value" => $this->id_user,
+                  ],
+                  [
+                    "field" => $farch["id_group"],
+                    "value" => $this->id_group,
+                  ],
+                  [
+                    "field" => $farch["public"],
+                    "value" => 1,
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ]) ?:
+        [];
+      if ($this->hasLocaleDb() && ($optPath = $this->opt->toPath($id_option))) {
         array_push(
           $rows,
           ...array_map(
             fn($r) => $this->normalizeFromLocale($r, $this->class_table),
             $this->getLocaleDb()->rselectAll([
-              'table' => $this->class_table,
-              'fields' => $fields,
-              'join' => [[
-                'table' => $this->class_table,
-                'type' => 'left',
-                'alias' => 'aliases',
-                'on' => [
-                  'conditions' => [[
-                    'field' => $farch['id_alias'],
-                    'exp' => 'aliases.id'
-                  ]]
-                ]
-              ]],
-              'where' => [
-                'conditions' => [[
-                  'field' => $farch['id_option'],
-                  'value' => $optPath
-                ]]
-              ]
-            ]) ?: []
-          )
+              "table" => $this->class_table,
+              "fields" => $fields,
+              "join" => [
+                [
+                  "table" => $this->class_table,
+                  "type" => "left",
+                  "alias" => "aliases",
+                  "on" => [
+                    "conditions" => [
+                      [
+                        "field" => $farch["id_alias"],
+                        "exp" => "aliases.id",
+                      ],
+                    ],
+                  ],
+                ],
+              ],
+              "where" => [
+                "conditions" => [
+                  [
+                    "field" => $farch["id_option"],
+                    "value" => $optPath,
+                  ],
+                ],
+              ],
+            ]) ?:
+            [],
+          ),
         );
       }
 
       if (!empty($rows)) {
-        return $with_config ? array_map(
-          function ($a) use ($farch) {
-            $cfg = $a[$farch['cfg']];
-            unset($a[$farch['cfg']]);
+        return $with_config
+          ? array_map(function ($a) use ($farch) {
+            $cfg = $a[$farch["cfg"]];
+            unset($a[$farch["cfg"]]);
             if ($cfg && ($cfg = json_decode($cfg, true))) {
               $a = X::mergeArrays($cfg, $a);
             }
 
-
             return $a;
-          },
-          $rows
-        ) : $rows;
+          }, $rows)
+          : $rows;
       }
 
       return [];
@@ -748,7 +758,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option.
@@ -764,70 +773,88 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function getAllNotMine(string|null $id_option = null, bool $with_config = true): ?array
-  {
+  public function getAllNotMine(
+    string|null $id_option = null,
+    bool $with_config = true,
+  ): ?array {
     if ($id_option = $this->_getIdOption($id_option)) {
       $fields = $this->fields;
       if (!$with_config) {
-        unset($fields['cfg']);
+        unset($fields["cfg"]);
       }
 
-      if ($rows = $this->db->rselectAll([
-        'table' => $this->class_table,
-        'fields' => $fields,
-        'join' => [[
-          'table' => $this->class_table,
-          'type' => 'left',
-          'alias' => 'aliases',
-          'on' => [
-            'conditions' => [[
-            'field' => $this->fields['id_alias'],
-            'exp' => 'aliases.id'
-          ]]
-          ]
-        ]],
-        'where' => [
-          'conditions' => [[
-            'field' => $this->fields['id_option'],
-            'value' => $id_option
-          ], [
-            'field' => $this->fields['public'],
-            'value' => 0
-          ], [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => $this->fields['id_user'],
-              'operator' => '!=',
-              'value' => $this->id_user
-            ], [
-              'field' => $this->fields['id_user'],
-              'operator' => 'isnull'
-            ]]
-          ], [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => $this->fields['id_group'],
-              'operator' => 'neq',
-              'value' => $this->id_group
-            ], [
-              'field' => $this->fields['id_group'],
-              'operator' => 'isnull'
-            ]]
-          ]]
-        ]
-      ])) {
-        return $with_config ? array_map(
-          function ($a) {
-            $cfg = $a['cfg'];
-            unset($a['cfg']);
-            if (($cfg = json_decode($cfg, true))) {
+      if (
+        $rows = $this->db->rselectAll([
+          "table" => $this->class_table,
+          "fields" => $fields,
+          "join" => [
+            [
+              "table" => $this->class_table,
+              "type" => "left",
+              "alias" => "aliases",
+              "on" => [
+                "conditions" => [
+                  [
+                    "field" => $this->fields["id_alias"],
+                    "exp" => "aliases.id",
+                  ],
+                ],
+              ],
+            ],
+          ],
+          "where" => [
+            "conditions" => [
+              [
+                "field" => $this->fields["id_option"],
+                "value" => $id_option,
+              ],
+              [
+                "field" => $this->fields["public"],
+                "value" => 0,
+              ],
+              [
+                "logic" => "OR",
+                "conditions" => [
+                  [
+                    "field" => $this->fields["id_user"],
+                    "operator" => "!=",
+                    "value" => $this->id_user,
+                  ],
+                  [
+                    "field" => $this->fields["id_user"],
+                    "operator" => "isnull",
+                  ],
+                ],
+              ],
+              [
+                "logic" => "OR",
+                "conditions" => [
+                  [
+                    "field" => $this->fields["id_group"],
+                    "operator" => "neq",
+                    "value" => $this->id_group,
+                  ],
+                  [
+                    "field" => $this->fields["id_group"],
+                    "operator" => "isnull",
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ])
+      ) {
+        return $with_config
+          ? array_map(function ($a) {
+            $cfg = $a["cfg"];
+            unset($a["cfg"]);
+            if ($cfg = json_decode($cfg, true)) {
               $a = X::mergeArrays($cfg, $a);
             }
 
             return $a;
-          },
-          $rows
-        ) : $rows;
+          }, $rows)
+          : $rows;
       }
 
       return [];
@@ -835,7 +862,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Returns the current user's preference and the config if second parameter set to true, based on the given option id, his own profile and his group.
@@ -880,8 +906,10 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function getByOption(string $id_option, bool $with_config = true): ?array
-  {
+  public function getByOption(
+    string $id_option,
+    bool $with_config = true,
+  ): ?array {
     if ($id = $this->retrieveUserIds($id_option, $this->id_user)) {
       return $this->get($id[0], $with_config);
     }
@@ -890,13 +918,16 @@ class Preferences extends DbCls
   }
 
   /**
-     * @return array|null
-     * @throws Exception
-     */
+   * @return array|null
+   * @throws Exception
+   */
   public function option(): ?array
   {
     if ($o = $this->opt->option(\func_get_args())) {
-      if (($ids = $this->retrieveIds($o['id'])) && ($cfg = $this->get($ids[0]))) {
+      if (
+        ($ids = $this->retrieveIds($o["id"])) &&
+        ($cfg = $this->get($ids[0]))
+      ) {
         $o = X::mergeArrays($o, $cfg);
       }
 
@@ -1021,7 +1052,7 @@ class Preferences extends DbCls
   {
     if ($ops = $this->opt->fullOptions(\func_get_args())) {
       foreach ($ops as &$o) {
-        $o['items'] = $this->getAll($o['id']);
+        $o["items"] = $this->getAll($o["id"]);
       }
 
       return $ops;
@@ -1031,14 +1062,14 @@ class Preferences extends DbCls
   }
 
   /**
-     * @param string $id_option
-     * @return string|null
-     * @throws Exception
-     */
+   * @param string $id_option
+   * @return string|null
+   * @throws Exception
+   */
   public function text(string $id_option): ?string
   {
     if ($p = $this->getByOption($id_option)) {
-      return $p[$this->fields['text']];
+      return $p[$this->fields["text"]];
     }
 
     return null;
@@ -1071,27 +1102,23 @@ class Preferences extends DbCls
       $res = [];
       // Replacing regular num values by user's values if any
       foreach ($items as $i => $it) {
-        $res[] = ['id' => $it, 'num' => $i + 1];
+        $res[] = ["id" => $it, "num" => $i + 1];
         if ($tmp = $this->getByOption($it)) {
-          if (isset($tmp['num'])) {
-            $res[$i]['num'] = $tmp['num'];
+          if (isset($tmp["num"])) {
+            $res[$i]["num"] = $tmp["num"];
           }
         }
       }
       // Reordering the array based on num
-      X::sortBy($res, 'num');
+      X::sortBy($res, "num");
       // Returns a simple array with only the IDs
-      return array_map(
-        function ($a) {
-          return $a['id'];
-        },
-        $res
-      );
+      return array_map(function ($a) {
+        return $a["id"];
+      }, $res);
     }
 
     return $items;
   }
-
 
   /**
    * Returns all children of the given code with they own attributes.
@@ -1178,8 +1205,8 @@ class Preferences extends DbCls
     if ($list = $this->items(\func_get_args())) {
       $res = [];
       foreach ($list as $i => $li) {
-        $res[$i]          = $this->opt->option($li);
-        $res[$i]['items'] = $this->get($li);
+        $res[$i] = $this->opt->option($li);
+        $res[$i]["items"] = $this->get($li);
       }
 
       return $res;
@@ -1187,7 +1214,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Changes the position of the given option among its sortable list.
@@ -1203,16 +1229,16 @@ class Preferences extends DbCls
     // What matters are the info from the parent
     $id_parent = $this->opt->getIdParent($id_option);
     // Only usable on sortable options
-    if (($id_parent !== false) && $this->opt->isSortable($id_parent)) {
+    if ($id_parent !== false && $this->opt->isSortable($id_parent)) {
       // List of options IDs with personalized order
       $items = $this->items($id_parent);
       // Creating a new array of arrays with ID and NUM indexes
-      $res     = [];
+      $res = [];
       $o_index = false;
       foreach ($items as $i => $it) {
         $res[] = [
-          $this->fields['id_option'] => $it,
-          $this->fields['num'] => $i + 1
+          $this->fields["id_option"] => $it,
+          $this->fields["num"] => $i + 1,
         ];
         // If user has preference on that option, NUM will be set to the user's value
         if ($cfg = $this->getByOption($it)) {
@@ -1226,37 +1252,34 @@ class Preferences extends DbCls
       }
 
       if ($o_index === false) {
-        throw new Exception(X::_('Impossible to find this option'));
+        throw new Exception(X::_("Impossible to find this option"));
       }
 
       // Changing the position of all the affected options
       if ($o_index > $index) {
         for ($i = $index; $i < $o_index; $i++) {
-          $res[$i][$this->fields['num']]++;
+          $res[$i][$this->fields["num"]]++;
         }
-      }
-      elseif ($o_index < $index) {
+      } elseif ($o_index < $index) {
         for ($i = $o_index + 1; $i <= $index; $i++) {
-          $res[$i][$this->fields['num']]--;
+          $res[$i][$this->fields["num"]]--;
         }
       }
 
       // Changing the given option's NUM
-      $res[$o_index][$this->fields['num']] = $index + 1;
+      $res[$o_index][$this->fields["num"]] = $index + 1;
       foreach ($res as $r) {
         if ($upd) {
-          $this->updateByOption($r[$this->fields['id_option']], $r);
-        }
-        else {
-          $this->add($r[$this->fields['id_option']], $r);
+          $this->updateByOption($r[$this->fields["id_option"]], $r);
+        } else {
+          $this->add($r[$this->fields["id_option"]], $r);
         }
       }
 
-      X::sortBy($res, $this->fields['num']);
+      X::sortBy($res, $this->fields["num"]);
       return $res;
     }
   }
-
 
   /**
    * Sets the preference row for the current user by the option's ID
@@ -1278,7 +1301,6 @@ class Preferences extends DbCls
     return $this->_insert($id_option, $cfg);
   }
 
-
   /**
    * Sets the preference config for the current user by the preference's ID and returns the number of rows change.
    *
@@ -1294,18 +1316,19 @@ class Preferences extends DbCls
    */
   public function set(string $id, ?array $cfg = null): int
   {
-    $db = $this->getRightDb($id, $this->class_cfg['table']);
+    $db = $this->getRightDb($id, $this->class_cfg["table"]);
     return $db->update(
-      $this->class_cfg['table'],
+      $this->class_cfg["table"],
       [
-        $this->fields['cfg'] => $cfg ? json_encode($this->getCfg(false, $cfg)) : null
+        $this->fields["cfg"] => $cfg
+          ? json_encode($this->getCfg(false, $cfg))
+          : null,
       ],
       [
-        $this->fields['id'] => $id
-      ]
+        $this->fields["id"] => $id,
+      ],
     );
   }
-
 
   /**
    * Sets the preference row for the current user by the preference's ID and returns the number of rows change.
@@ -1331,18 +1354,20 @@ class Preferences extends DbCls
     $isLocale = $this->isLocale($id, $this->class_table);
     $db = $isLocale ? $this->getLocaleDb() : $this->db;
     $data = [
-      $this->fields['text'] => $cfg[$this->fields['text']] ?? null,
-      $this->fields['num'] => $cfg[$this->fields['num']] ?? null,
-      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? null,
-      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? null,
-      $this->fields['id_user'] => $this->id_user,
-      $this->fields['cfg'] => ($tmp = $this->getCfg(false, $cfg)) ? json_encode($tmp) : null
+      $this->fields["text"] => $cfg[$this->fields["text"]] ?? null,
+      $this->fields["num"] => $cfg[$this->fields["num"]] ?? null,
+      $this->fields["id_link"] => $cfg[$this->fields["id_link"]] ?? null,
+      $this->fields["id_alias"] => $cfg[$this->fields["id_alias"]] ?? null,
+      $this->fields["id_user"] => $this->id_user,
+      $this->fields["cfg"] => ($tmp = $this->getCfg(false, $cfg))
+        ? json_encode($tmp)
+        : null,
     ];
     if ($isLocale) {
       $data = $this->normalizeToLocale($data, $this->class_table);
     }
 
-    return $db->update($this->class_table, $data,[$this->fields['id'] => $id]);
+    return $db->update($this->class_table, $data, [$this->fields["id"] => $id]);
   }
 
   /**
@@ -1359,7 +1384,6 @@ class Preferences extends DbCls
 
     return $this->_insert($id_option, $cfg);
   }
-
 
   /**
    * Adds a new preference for the given option for the current user and returns the new preference ID.
@@ -1385,18 +1409,18 @@ class Preferences extends DbCls
    */
   public function add(string $id_option, array $cfg): ?string
   {
-    if (($id_option = $this->_getIdOption($id_option))
-      && !$this->retrieveUserIds($id_option)
-      && $this->_insert($id_option, $cfg)
+    if (
+      ($id_option = $this->_getIdOption($id_option)) &&
+      !$this->retrieveUserIds($id_option) &&
+      $this->_insert($id_option, $cfg)
     ) {
-      return !empty($cfg[$this->localeField]) ?
-        $this->getLocaleDb()->lastId() :
-        $this->db->lastId();
+      return !empty($cfg[$this->localeField])
+        ? $this->getLocaleDb()->lastId()
+        : $this->db->lastId();
     }
 
     return null;
   }
-
 
   /**
    * Adds a new preference for the given option for the current user.
@@ -1408,17 +1432,17 @@ class Preferences extends DbCls
    */
   public function addToGroup(string $id_option, array $cfg): ?string
   {
-    if (($id_option = $this->_getIdOption($id_option))
-      && $this->_insert($id_option, $cfg)
+    if (
+      ($id_option = $this->_getIdOption($id_option)) &&
+      $this->_insert($id_option, $cfg)
     ) {
-      return !empty($cfg[$this->localeField]) ?
-        $this->getLocaleDb()->lastId() :
-        $this->db->lastId();
+      return !empty($cfg[$this->localeField])
+        ? $this->getLocaleDb()->lastId()
+        : $this->db->lastId();
     }
 
     return null;
   }
-
 
   /**
    * Deletes the given preference.
@@ -1434,39 +1458,43 @@ class Preferences extends DbCls
    */
   public function delete($id): ?int
   {
-    $conditions = [[
-      'field' => $this->fields['id'],
-      'value' => $id
-    ]];
+    $conditions = [
+      [
+        "field" => $this->fields["id"],
+        "value" => $id,
+      ],
+    ];
 
     $db = $this->db;
-    if ($this->isLocale($id, $this->class_cfg['table'])) {
+    if ($this->isLocale($id, $this->class_cfg["table"])) {
       $db = $this->getLocaleDb();
-    }
-    else {
+    } else {
       $conditions[] = [
-        'logic' => 'OR',
-        'conditions' => [[
-          'field' => $this->fields['id_user'],
-          'value' => $this->id_user
-        ], [
-          'field' => $this->fields['id_group'],
-          'value' => $this->id_group
-        ], [
-          'field' => $this->fields['public'],
-          'value' => 1
-        ]]
+        "logic" => "OR",
+        "conditions" => [
+          [
+            "field" => $this->fields["id_user"],
+            "value" => $this->id_user,
+          ],
+          [
+            "field" => $this->fields["id_group"],
+            "value" => $this->id_group,
+          ],
+          [
+            "field" => $this->fields["public"],
+            "value" => 1,
+          ],
+        ],
       ];
     }
 
     return $db->delete([
-      'table' => $this->class_cfg['table'],
-      'where' => [
-        'conditions' => $conditions
-      ]
+      "table" => $this->class_cfg["table"],
+      "where" => [
+        "conditions" => $conditions,
+      ],
     ]);
   }
-
 
   /**
    * Deletes all the given or current user's preferences for the given option
@@ -1476,27 +1504,23 @@ class Preferences extends DbCls
    * @return null|int
    * @throws Exception
    */
-  public function deleteUserOption(string $id_option, ?string $id_user = null): ?int
-  {
+  public function deleteUserOption(
+    string $id_option,
+    ?string $id_user = null,
+  ): ?int {
     if ($id_option = $this->_getIdOption($id_option)) {
-      $d1 = $this->db->delete(
-        $this->class_cfg['table'],
-        [
-          $this->fields['id_option'] => $id_option,
-          $this->fields['id_user'] => $id_user ?: $this->id_user
-        ]
-      );
+      $d1 = $this->db->delete($this->class_cfg["table"], [
+        $this->fields["id_option"] => $id_option,
+        $this->fields["id_user"] => $id_user ?: $this->id_user,
+      ]);
       $d2 = 0;
-      if ((empty($id_user)
-          || ($id_user === $this->id_user))
-        && $this->hasLocaleDb()
+      if (
+        (empty($id_user) || $id_user === $this->id_user) &&
+        $this->hasLocaleDb()
       ) {
-        $d2 = $this->getLocaleDb()->delete(
-          $this->class_cfg['table'],
-          [
-            $this->fields['id_option'] => $this->opt->toPath($id_option)
-          ]
-        );
+        $d2 = $this->getLocaleDb()->delete($this->class_cfg["table"], [
+          $this->fields["id_option"] => $this->opt->toPath($id_option),
+        ]);
       }
 
       return $d1 + $d2;
@@ -1504,7 +1528,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Deletes all the given group's preferences for the given option
@@ -1517,18 +1540,14 @@ class Preferences extends DbCls
   public function deleteGroupOption(string $id_option, string $id_group): ?int
   {
     if ($id_option = $this->_getIdOption($id_option)) {
-      return $this->db->delete(
-        $this->class_cfg['table'],
-        [
-          $this->fields['id_option'] => $id_option,
-          $this->fields['id_group'] => $id_group
-        ]
-      );
+      return $this->db->delete($this->class_cfg["table"], [
+        $this->fields["id_option"] => $id_option,
+        $this->fields["id_group"] => $id_group,
+      ]);
     }
 
     return null;
   }
-
 
   /**
    * Sets (or unsets) the cfg field of a given preference based on its ID
@@ -1540,24 +1559,22 @@ class Preferences extends DbCls
   public function setCfg(?string $id = null, ?array $cfg = null): int
   {
     if (null !== $cfg) {
-      $cfg    = $this->getCfg(null, $cfg);
+      $cfg = $this->getCfg(null, $cfg);
       $config = json_encode($cfg);
-    }
-    else {
+    } else {
       $config = null;
     }
 
-    return $this->getRightDb($id, $this->class_cfg['table'])->update(
-      $this->class_cfg['table'],
+    return $this->getRightDb($id, $this->class_cfg["table"])->update(
+      $this->class_cfg["table"],
       [
-        $this->fields['cfg'] => $config
+        $this->fields["cfg"] => $config,
       ],
       [
-        $this->fields['id'] => $id
-      ]
+        $this->fields["id"] => $id,
+      ],
     );
   }
-
 
   /**
    * Sets (or unsets) the text field of the given preference and returns the result of the executed query
@@ -1571,14 +1588,13 @@ class Preferences extends DbCls
     return $this->getRightDb($id, $this->class_table)->update(
       $this->class_table,
       [
-        $this->fields['text'] => $text
+        $this->fields["text"] => $text,
       ],
       [
-        $this->fields['id'] => $id
-      ]
+        $this->fields["id"] => $id,
+      ],
     );
   }
-
 
   /**
    * Sets (or unsets) the id_link field of the given preference and returns the result of the executed query
@@ -1594,14 +1610,15 @@ class Preferences extends DbCls
     return $db->update(
       $this->class_table,
       [
-        $this->fields['id_link'] => $isLocale ? $this->opt->toPath($id_link) : $id_link
+        $this->fields["id_link"] => $isLocale
+          ? $this->opt->toPath($id_link)
+          : $id_link,
       ],
       [
-        $this->fields['id'] => $id
-      ]
+        $this->fields["id"] => $id,
+      ],
     );
   }
-
 
   /**
    * Sets (or unsets) the id_link field of the given preference and returns the result of the executed query
@@ -1614,55 +1631,56 @@ class Preferences extends DbCls
   {
     $isLocale = false;
     $hasLocaleDb = $this->hasLocaleDb();
-    if ($hasLocaleDb
-      && ($id = $this->getLocaleDb()->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['id'],
+    if (
+      $hasLocaleDb &&
+      ($id = $this->getLocaleDb()->selectOne(
+        $this->class_cfg["table"],
+        $this->fields["id"],
         [
-          $this->fields['id_option'] => $this->opt->toPath($id_option)
-        ]
+          $this->fields["id_option"] => $this->opt->toPath($id_option),
+        ],
       ))
     ) {
       $isLocale = true;
-    }
-    else {
+    } else {
       $id = $this->db->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['id'],
+        $this->class_cfg["table"],
+        $this->fields["id"],
         [
-          $this->fields['id_user'] => $this->id_user,
-          $this->fields['id_option'] => $id_option
-        ]
+          $this->fields["id_user"] => $this->id_user,
+          $this->fields["id_option"] => $id_option,
+        ],
       );
     }
 
     if ($id) {
-      if ($this->{$isLocale ? 'localeDb' : 'db'}->update(
-        $this->class_cfg['table'],
-        [
-         $this->fields['id_link'] => $isLocale ? $this->opt->toPath($id_link) : $id_link
-        ],
-        [
-          $this->fields['id'] => $id
-        ]
-      )) {
+      if (
+        $this->{$isLocale ? "localeDb" : "db"}->update(
+          $this->class_cfg["table"],
+          [
+            $this->fields["id_link"] => $isLocale
+              ? $this->opt->toPath($id_link)
+              : $id_link,
+          ],
+          [
+            $this->fields["id"] => $id,
+          ],
+        )
+      ) {
         return $id;
       }
-    }
-    elseif ($this->db->insert(
-      $this->class_cfg['table'],
-      [
-        $this->fields['id_user'] => $this->id_user,
-        $this->fields['id_option'] => $id_option,
-        $this->fields['id_link'] => $id_link
-      ]
-    )) {
+    } elseif (
+      $this->db->insert($this->class_cfg["table"], [
+        $this->fields["id_user"] => $this->id_user,
+        $this->fields["id_option"] => $id_option,
+        $this->fields["id_link"] => $id_link,
+      ])
+    ) {
       return $this->db->lastId();
     }
 
     return null;
   }
-
 
   /**
    * Returns an array
@@ -1676,19 +1694,18 @@ class Preferences extends DbCls
       return $this->db->rselectAll(
         $this->class_table,
         [
-          $this->fields['id'],
-          $this->fields['id_user'],
-          $this->fields['id_group']
+          $this->fields["id"],
+          $this->fields["id_user"],
+          $this->fields["id_group"],
         ],
         [
-          $this->fields['id_alias'] => $id
-        ]
+          $this->fields["id_alias"] => $id,
+        ],
       );
     }
 
     return null;
   }
-
 
   /**
    * Makes (or unmakes) the given preference public.
@@ -1704,17 +1721,16 @@ class Preferences extends DbCls
       return $this->db->update(
         $this->class_table,
         [
-          $this->fields['public'] => $cancel ? 0 : 1
+          $this->fields["public"] => $cancel ? 0 : 1,
         ],
         [
-          $this->fields['id'] => $id
-        ]
+          $this->fields["id"] => $id,
+        ],
       );
     }
 
     return null;
   }
-
 
   /**
    * Shares (or unshares) the given preference to the given group.
@@ -1725,29 +1741,30 @@ class Preferences extends DbCls
    * @return int|null
    * @throws Exception
    */
-  public function shareWithGroup(string $id, string $id_group, bool $cancel = false): ?int
-  {
+  public function shareWithGroup(
+    string $id,
+    string $id_group,
+    bool $cancel = false,
+  ): ?int {
     if ($cfg = $this->get($id)) {
       $id_share = $this->db->selectOne(
         $this->class_table,
-        $this->fields['id'],
+        $this->fields["id"],
         [
-          'id_alias' => $id,
-          'id_group' => $id_group
-        ]
+          "id_alias" => $id,
+          "id_group" => $id_group,
+        ],
       );
       if ($cancel && $id_share) {
-        return $this->db->delete($this->class_table, [$this->fields['id'] => $id_share]);
-      }
-      elseif (!$cancel && !$id_share) {
-        return $this->db->insert(
-          $this->class_table,
-          [
-            'id_option' => $cfg['id_option'],
-            'id_alias' => $id,
-            'id_group' => $id_group
-          ]
-        );
+        return $this->db->delete($this->class_table, [
+          $this->fields["id"] => $id_share,
+        ]);
+      } elseif (!$cancel && !$id_share) {
+        return $this->db->insert($this->class_table, [
+          "id_option" => $cfg["id_option"],
+          "id_alias" => $id,
+          "id_group" => $id_group,
+        ]);
       }
 
       return 0;
@@ -1755,7 +1772,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Shares (or unshares) the given preference to the given user
@@ -1766,29 +1782,30 @@ class Preferences extends DbCls
    * @return int|null
    * @throws Exception
    */
-  public function shareWithUser(string $id, string $id_user, bool $cancel = false): ?int
-  {
+  public function shareWithUser(
+    string $id,
+    string $id_user,
+    bool $cancel = false,
+  ): ?int {
     if ($cfg = $this->get($id)) {
       $id_share = $this->db->selectOne(
         $this->class_table,
-        $this->fields['id'],
+        $this->fields["id"],
         [
-          'id_alias' => $id,
-          'id_user' => $id_user
-        ]
+          "id_alias" => $id,
+          "id_user" => $id_user,
+        ],
       );
       if ($cancel && $id_share) {
-        return $this->db->delete($this->class_table, [$this->fields['id'] => $id_share]);
-      }
-      elseif (!$cancel && !$id_share) {
-        return $this->db->insert(
-          $this->class_table,
-          [
-            'id_option' => $cfg['id_option'],
-            'id_alias' => $id,
-            'id_user' => $id_user
-          ]
-        );
+        return $this->db->delete($this->class_table, [
+          $this->fields["id"] => $id_share,
+        ]);
+      } elseif (!$cancel && !$id_share) {
+        return $this->db->insert($this->class_table, [
+          "id_option" => $cfg["id_option"],
+          "id_alias" => $id,
+          "id_user" => $id_user,
+        ]);
       }
 
       return 0;
@@ -1796,7 +1813,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Adds a bit to a preference
@@ -1808,58 +1824,59 @@ class Preferences extends DbCls
    */
   public function addBit(string $id_user_option, array $cfg): ?string
   {
-    if (($id_user_option = $this->_getIdOption($id_user_option))
-      && $this->isAuthorized($id_user_option)
+    if (
+      ($id_user_option = $this->_getIdOption($id_user_option)) &&
+      $this->isAuthorized($id_user_option)
     ) {
-      $isLocale = $this->isLocale($id_user_option, $this->class_cfg['table']);
+      $isLocale = $this->isLocale($id_user_option, $this->class_cfg["table"]);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      $fields = $this->class_cfg['arch']['user_options_bits'];
+      $fields = $this->class_cfg["arch"]["user_options_bits"];
       $to_cfg = $this->getBitCfg(null, $cfg);
-      if (isset($to_cfg['items'])) {
-        unset($to_cfg['items']);
+      if (isset($to_cfg["items"])) {
+        unset($to_cfg["items"]);
       }
 
       if (!empty($to_cfg)) {
-        if (!empty($cfg[$fields['cfg']])) {
-          if (Str::isJson($cfg[$fields['cfg']])) {
-            $cfg[$fields['cfg']] = json_decode($cfg[$fields['cfg']], true);
+        if (!empty($cfg[$fields["cfg"]])) {
+          if (Str::isJson($cfg[$fields["cfg"]])) {
+            $cfg[$fields["cfg"]] = json_decode($cfg[$fields["cfg"]], true);
           }
 
-          if (\is_array($cfg[$fields['cfg']])) {
-            $cfg[$fields['cfg']] = array_merge($cfg[$fields['cfg']], $to_cfg);
+          if (\is_array($cfg[$fields["cfg"]])) {
+            $cfg[$fields["cfg"]] = array_merge($cfg[$fields["cfg"]], $to_cfg);
+          } else {
+            $cfg[$fields["cfg"]] = $to_cfg;
           }
-          else {
-            $cfg[$fields['cfg']] = $to_cfg;
-          }
-        }
-        else {
-          $cfg[$fields['cfg']] = $to_cfg;
+        } else {
+          $cfg[$fields["cfg"]] = $to_cfg;
         }
 
-        $cfg[$fields['cfg']] = json_encode($cfg[$fields['cfg']]);
+        $cfg[$fields["cfg"]] = json_encode($cfg[$fields["cfg"]]);
       }
 
       $data = [
-        $fields['id_user_option'] => $id_user_option,
-        $fields['id_parent'] => $cfg[$fields['id_parent']] ?? null,
-        $fields['id_option'] => $cfg[$fields['id_option']] ?? null,
-        $fields['num'] => $cfg[$fields['num']] ?? null,
-        $fields['text'] => $cfg[$fields['text']] ?? '',
-        $fields['cfg'] => $cfg[$fields['cfg']] ?? null,
+        $fields["id_user_option"] => $id_user_option,
+        $fields["id_parent"] => $cfg[$fields["id_parent"]] ?? null,
+        $fields["id_option"] => $cfg[$fields["id_option"]] ?? null,
+        $fields["num"] => $cfg[$fields["num"]] ?? null,
+        $fields["text"] => $cfg[$fields["text"]] ?? "",
+        $fields["cfg"] => $cfg[$fields["cfg"]] ?? null,
       ];
 
       if ($isLocale) {
-        $data = $this->normalizeToLocale($data, $this->class_cfg['tables']['user_options_bits']);
+        $data = $this->normalizeToLocale(
+          $data,
+          $this->class_cfg["tables"]["user_options_bits"],
+        );
       }
 
-      if ($db->insert($this->class_cfg['tables']['user_options_bits'], $data)) {
+      if ($db->insert($this->class_cfg["tables"]["user_options_bits"], $data)) {
         return $db->lastId();
       }
     }
 
     return null;
   }
-
 
   /**
    * Deletes a preference's bit
@@ -1870,38 +1887,37 @@ class Preferences extends DbCls
   public function deleteBit(string $id): ?int
   {
     if (Str::isUid($id)) {
-      $db = $this->getRightDb($id, $this->class_cfg['tables']['user_options_bits']);
+      $db = $this->getRightDb(
+        $id,
+        $this->class_cfg["tables"]["user_options_bits"],
+      );
       return $db->deleteIgnore(
-        $this->class_cfg['tables']['user_options_bits'],
+        $this->class_cfg["tables"]["user_options_bits"],
         [
-          $this->class_cfg['arch']['user_options_bits']['id'] => $id
-        ]
+          $this->class_cfg["arch"]["user_options_bits"]["id"] => $id,
+        ],
       );
     }
 
     return null;
   }
 
-
   protected function deleteSubBits(array $bits, string $id_user_option): int
   {
-    if (Str::isUid($id_user_option)
-      && $this->isAuthorized($id_user_option)
-    ) {
+    if (Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
       $i = 0;
       foreach ($bits as $b) {
-        if ($b['items']) {
-          $i += $this->deleteSubBits($b['items'], $id_user_option);
+        if ($b["items"]) {
+          $i += $this->deleteSubBits($b["items"], $id_user_option);
         }
 
-        $i += (int)$this->deleteBit($b['id']);
+        $i += (int) $this->deleteBit($b["id"]);
       }
       return $i;
     }
 
     throw new Exception(X::_("Impossible to get the user optin"));
   }
-
 
   /**
    * Deletes all bits from a preference
@@ -1912,14 +1928,12 @@ class Preferences extends DbCls
    */
   public function deleteBits(string $id_user_option): ?int
   {
-    if (Str::isUid($id_user_option)
-      && $this->isAuthorized($id_user_option)
-    ) {
+    if (Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
       $tree = $this->getTree($id_user_option);
       $i = 0;
-      if ($tree && !empty($tree['items'])) {
-        $this->deleteSubBits($tree['items'], $id_user_option);
-        $i += (int)$this->deleteBit($tree['id']);
+      if ($tree && !empty($tree["items"])) {
+        $this->deleteSubBits($tree["items"], $id_user_option);
+        $i += (int) $this->deleteBit($tree["id"]);
       }
 
       return $i;
@@ -1927,7 +1941,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Updates a preference's bit
@@ -1937,66 +1950,68 @@ class Preferences extends DbCls
    * @param bool $merge_config
    * @return int|null
    */
-  public function updateBit(string $id, array $cfg, bool $merge_config = true): ?int
-  {
+  public function updateBit(
+    string $id,
+    array $cfg,
+    bool $merge_config = true,
+  ): ?int {
     if (Str::isUid($id)) {
-      $table = $this->class_cfg['tables']['user_options_bits'];
-      $fields = $this->class_cfg['arch']['user_options_bits'];
+      $table = $this->class_cfg["tables"]["user_options_bits"];
+      $fields = $this->class_cfg["arch"]["user_options_bits"];
       $isLocale = $this->isLocale($id, $table);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      if (\array_key_exists($fields['id'], $cfg)) {
-        unset($cfg[$fields['id']]);
+      if (\array_key_exists($fields["id"], $cfg)) {
+        unset($cfg[$fields["id"]]);
       }
 
-      if (!empty($cfg[$fields['cfg']]) && Str::isJson($cfg[$fields['cfg']])) {
-        $cfg[$fields['cfg']] = json_decode($cfg[$fields['cfg']], true);
+      if (!empty($cfg[$fields["cfg"]]) && Str::isJson($cfg[$fields["cfg"]])) {
+        $cfg[$fields["cfg"]] = json_decode($cfg[$fields["cfg"]], true);
       }
 
-      $to_cfg = $this->getBitCfg(null, $cfg[$fields['cfg']] ?? $cfg);
-      if (isset($to_cfg['items'])) {
-        unset($to_cfg['items']);
+      $to_cfg = $this->getBitCfg(null, $cfg[$fields["cfg"]] ?? $cfg);
+      if (isset($to_cfg["items"])) {
+        unset($to_cfg["items"]);
       }
 
-      $update   = [];
+      $update = [];
       $from_cfg = $this->getBitCfg($id);
       if (!empty($to_cfg)) {
         if ($merge_config && !empty($from_cfg)) {
-          $update['cfg'] = json_encode(array_merge($from_cfg, $to_cfg));
+          $update["cfg"] = json_encode(array_merge($from_cfg, $to_cfg));
+        } else {
+          $update["cfg"] = json_encode($to_cfg);
         }
-        else {
-          $update['cfg'] = json_encode($to_cfg);
-        }
-      }
-      elseif (!$merge_config) {
-        $update['cfg'] = null;
+      } elseif (!$merge_config) {
+        $update["cfg"] = null;
       }
 
-      if (isset($cfg[$fields['id_parent']])) {
-        $update[$fields['id_parent']] = $cfg[$fields['id_parent']];
+      if (isset($cfg[$fields["id_parent"]])) {
+        $update[$fields["id_parent"]] = $cfg[$fields["id_parent"]];
       }
 
-      if (isset($cfg[$fields['id_option']])) {
-        $update[$fields['id_option']] = $cfg[$fields['id_option']];
+      if (isset($cfg[$fields["id_option"]])) {
+        $update[$fields["id_option"]] = $cfg[$fields["id_option"]];
       }
 
-      if (isset($cfg[$fields['num']])) {
-        $update[$fields['num']] = $cfg[$fields['num']];
+      if (isset($cfg[$fields["num"]])) {
+        $update[$fields["num"]] = $cfg[$fields["num"]];
       }
 
-      if (isset($cfg[$fields['text']])) {
-        $update[$fields['text']] = $cfg[$fields['text']];
+      if (isset($cfg[$fields["text"]])) {
+        $update[$fields["text"]] = $cfg[$fields["text"]];
       }
 
       if ($isLocale) {
         $update = $this->normalizeToLocale($update, $table);
       }
 
-      return count($update) ? $db->update($table, $update, [$fields['id'] => $id]) : 0;
+      return count($update)
+        ? $db->update($table, $update, [$fields["id"] => $id])
+        : 0;
     }
 
     return null;
   }
-
 
   /**
    * Returns a single preference's bit
@@ -2009,11 +2024,19 @@ class Preferences extends DbCls
   public function getBit(string $id, bool $with_config = true): array
   {
     if (Str::isUid($id)) {
-      $isLocale = $this->isLocale($id, $this->class_cfg['tables']['user_options_bits']);
+      $isLocale = $this->isLocale(
+        $id,
+        $this->class_cfg["tables"]["user_options_bits"],
+      );
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      $table = $this->class_cfg['tables']['user_options_bits'];
-      if (($bit = $db->rselect($table, [], [$this->class_cfg['arch']['user_options_bits']['id'] => $id]))
-        && $this->isAuthorized($bit['id_user_option'])
+      $table = $this->class_cfg["tables"]["user_options_bits"];
+      if (
+        ($bit = $db->rselect(
+          $table,
+          [],
+          [$this->class_cfg["arch"]["user_options_bits"]["id"] => $id],
+        )) &&
+        $this->isAuthorized($bit["id_user_option"])
       ) {
         if ($isLocale) {
           $bit = $this->normalizeFromLocale($bit, $table);
@@ -2030,7 +2053,6 @@ class Preferences extends DbCls
     return [];
   }
 
-
   /**
    * Returns the bits list of a preference
    *
@@ -2045,63 +2067,67 @@ class Preferences extends DbCls
     string $id_user_option,
     ?string $id_parent = null,
     bool $with_config = true,
-    bool $with_num = false
-  ): array
-  {
-    if (Str::isUid($id_user_option)
-      && $this->isAuthorized($id_user_option)
-    ) {
-      $isLocale = $this->isLocale($id_user_option, $this->class_cfg['table']);
+    bool $with_num = false,
+  ): array {
+    if (Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
+      $isLocale = $this->isLocale($id_user_option, $this->class_cfg["table"]);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      $table = $this->class_cfg['tables']['user_options_bits'];
-      $c = $this->class_cfg['arch']['user_options_bits'];
+      $table = $this->class_cfg["tables"]["user_options_bits"];
+      $c = $this->class_cfg["arch"]["user_options_bits"];
       $t = $this;
-      $where = [[
-        'field' => $c['id_user_option'],
-        'value' => $id_user_option
-      ]];
+      $where = [
+        [
+          "field" => $c["id_user_option"],
+          "value" => $id_user_option,
+        ],
+      ];
       if (\is_null($id_parent) || Str::isUid($id_parent)) {
         $where[] = [
-          'field' => $c['id_parent'],
-          empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+          "field" => $c["id_parent"],
+          empty($id_parent) ? "operator" : "value" => $id_parent ?: "isnull",
         ];
       }
 
-      if ($bits = $db->rselectAll([
-        'table' => $table,
-        'fields' => [],
-        'where' => [
-          'conditions' => $where
-        ],
-        'order' => [[
-          'field' => $c['num'],
-          'dir' => 'ASC'
-        ], [
-          'field' => $c['text'],
-          'dir' => 'ASC'
-        ]]
-      ])) {
+      if (
+        $bits = $db->rselectAll([
+          "table" => $table,
+          "fields" => [],
+          "where" => [
+            "conditions" => $where,
+          ],
+          "order" => [
+            [
+              "field" => $c["num"],
+              "dir" => "ASC",
+            ],
+            [
+              "field" => $c["text"],
+              "dir" => "ASC",
+            ],
+          ],
+        ])
+      ) {
         if ($with_num) {
           foreach ($bits as &$b) {
-            $b['numChildren'] = $db->count($table, [
-              $c['id_user_option'] => $id_user_option,
-              $c['id_parent'] => $b['id']
+            $b["numChildren"] = $db->count($table, [
+              $c["id_user_option"] => $id_user_option,
+              $c["id_parent"] => $b["id"],
             ]);
           }
           unset($b);
         }
 
         if ($isLocale) {
-          $bits = array_map(fn($b) => $this->normalizeFromLocale($b, $table), $bits);
+          $bits = array_map(
+            fn($b) => $this->normalizeFromLocale($b, $table),
+            $bits,
+          );
         }
 
         if (!empty($with_config)) {
-          return array_map(
-            function ($b) use ($t) {
-              return $t->explodeBitCfg($b);
-            },
-            $bits
-          );
+          return array_map(function ($b) use ($t) {
+            return $t->explodeBitCfg($b);
+          }, $bits);
         }
 
         return $bits;
@@ -2110,7 +2136,6 @@ class Preferences extends DbCls
 
     return [];
   }
-
 
   /**
    * Returns the bits list of an option's id
@@ -2121,32 +2146,40 @@ class Preferences extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getBitsByIdOption(string $id_opt, $id_parent = false, bool $with_config = true): ?array
-  {
+  public function getBitsByIdOption(
+    string $id_opt,
+    $id_parent = false,
+    bool $with_config = true,
+  ): ?array {
     $isLocale = $this->isLocale($id_opt, $this->class_table);
     $db = $isLocale ? $this->getLocaleDb() : $this->db;
-    $table = $this->class_cfg['tables']['user_options_bits'];
-    $c = $this->class_cfg['arch']['user_options_bits'];
-    $where = [[
-      'field' => $c['id_user_option'],
-      'value' => $id_opt
-    ]];
+    $table = $this->class_cfg["tables"]["user_options_bits"];
+    $c = $this->class_cfg["arch"]["user_options_bits"];
+    $where = [
+      [
+        "field" => $c["id_user_option"],
+        "value" => $id_opt,
+      ],
+    ];
     if (\is_null($id_parent) || Str::isUid($id_parent)) {
       $where[] = [
-        'field' => $c['id_parent'],
-        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+        "field" => $c["id_parent"],
+        empty($id_parent) ? "operator" : "value" => $id_parent ?: "isnull",
       ];
     }
 
-    if (Str::isUid($id_opt)
-      && ($bits = $db->rselectAll([
-        'table' => $table,
-        'fields' => [],
-        'where' => $where,
-        'order' => [[
-          'field' => $c['num'],
-          'dir' => 'ASC'
-        ]]
+    if (
+      Str::isUid($id_opt) &&
+      ($bits = $db->rselectAll([
+        "table" => $table,
+        "fields" => [],
+        "where" => $where,
+        "order" => [
+          [
+            "field" => $c["num"],
+            "dir" => "ASC",
+          ],
+        ],
       ]))
     ) {
       $res = [];
@@ -2155,7 +2188,7 @@ class Preferences extends DbCls
           $bit = $this->normalizeFromLocale($bit, $table);
         }
 
-        if ($this->isAuthorized($bit['id_user_option'])) {
+        if ($this->isAuthorized($bit["id_user_option"])) {
           $res[] = $with_config ? $this->explodeBitCfg($bit) : $bit;
         }
       }
@@ -2166,7 +2199,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Returns the hierarchical bits list of a preference
    *
@@ -2176,46 +2208,65 @@ class Preferences extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getFullBits(string $id_user_option, string|null $id_parent = null, bool $with_config = true): array
-  {
+  public function getFullBits(
+    string $id_user_option,
+    string|null $id_parent = null,
+    bool $with_config = true,
+  ): array {
     if ($this->isAuthorized($id_user_option)) {
-      $isLocale = $this->isLocale($id_user_option, $this->class_cfg['table']);
+      $isLocale = $this->isLocale($id_user_option, $this->class_cfg["table"]);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      $fields = $this->class_cfg['arch']['user_options_bits'];
+      $fields = $this->class_cfg["arch"]["user_options_bits"];
       $t = $this;
       return array_map(
-        function ($b) use ($t, $fields, $id_user_option, $with_config, $isLocale) {
+        function ($b) use (
+          $t,
+          $fields,
+          $id_user_option,
+          $with_config,
+          $isLocale,
+        ) {
           if ($isLocale) {
-            $b = $t->normalizeFromLocale($b, $t->class_cfg['tables']['user_options_bits']);
+            $b = $t->normalizeFromLocale(
+              $b,
+              $t->class_cfg["tables"]["user_options_bits"],
+            );
           }
 
           if (!empty($with_config)) {
             $b = $t->explodeBitCfg($b);
           }
 
-          $b['items'] = $t->getFullBits($id_user_option, $b[$fields['id']], $with_config);
+          $b["items"] = $t->getFullBits(
+            $id_user_option,
+            $b[$fields["id"]],
+            $with_config,
+          );
           return $b;
         },
         $db->rselectAll([
-          'table' => $this->class_cfg['tables']['user_options_bits'],
-          'fields' => [],
-          'where' => [
-            'conditions' => [[
-              'field' => $fields['id_user_option'],
-              'value' => $id_user_option
-            ], [
-              'field' => $fields['id_parent'],
-              empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
-            ]]
+          "table" => $this->class_cfg["tables"]["user_options_bits"],
+          "fields" => [],
+          "where" => [
+            "conditions" => [
+              [
+                "field" => $fields["id_user_option"],
+                "value" => $id_user_option,
+              ],
+              [
+                "field" => $fields["id_parent"],
+                empty($id_parent) ? "operator" : "value" =>
+                  $id_parent ?: "isnull",
+              ],
+            ],
           ],
-          'order' => [$fields['num'] => 'ASC']
-        ])
+          "order" => [$fields["num"] => "ASC"],
+        ]),
       );
     }
 
     return [];
   }
-
 
   /**
    * @param string $id_user_option
@@ -2225,15 +2276,22 @@ class Preferences extends DbCls
   public function getBitsOrder(string $id_user_option): ?array
   {
     if ($this->isAuthorized($id_user_option)) {
-      $tab1 = $this->class_cfg['tables']['user_options'];
-      $tab2 = $this->class_cfg['tables']['user_options_bits'];
-      $cfg  = $this->class_cfg['arch']['user_options'];
-      $cfg2 = $this->class_cfg['arch']['user_options_bits'];
+      $tab1 = $this->class_cfg["tables"]["user_options"];
+      $tab2 = $this->class_cfg["tables"]["user_options_bits"];
+      $cfg = $this->class_cfg["arch"]["user_options"];
+      $cfg2 = $this->class_cfg["arch"]["user_options_bits"];
       $isLocale = $this->isLocale($id_user_option, $this->class_table);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
-      if (($isLocale
-          || ($db->selectOne($tab1, $cfg['id_user'], ['id' => $id_user_option]) === $this->id_user))
-        && ($res = $db->getColumnValues($tab2, $cfg2['id_option'], [$cfg2['id_user_option'] => $id_user_option], [$cfg2['num'] => 'ASC']))
+      if (
+        ($isLocale ||
+          $db->selectOne($tab1, $cfg["id_user"], ["id" => $id_user_option]) ===
+            $this->id_user) &&
+        ($res = $db->getColumnValues(
+          $tab2,
+          $cfg2["id_option"],
+          [$cfg2["id_user_option"] => $id_user_option],
+          [$cfg2["num"] => "ASC"],
+        ))
       ) {
         if ($isLocale) {
           $res = array_map(fn($r) => $this->opt->fromPath($r), $res);
@@ -2246,7 +2304,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Returns a preference and its hierarchical bits list
    *
@@ -2256,16 +2313,13 @@ class Preferences extends DbCls
    */
   public function getTree(string $id, bool $with_config = true): array
   {
-    if (Str::isUid($id)
-      && ($p = $this->get($id, $with_config))
-    ) {
-      $p['items'] = $this->getFullBits($id, null, $with_config);
+    if (Str::isUid($id) && ($p = $this->get($id, $with_config))) {
+      $p["items"] = $this->getFullBits($id, null, $with_config);
       return $p;
     }
 
     return [];
   }
-
 
   /**
    * @param $bit
@@ -2273,9 +2327,10 @@ class Preferences extends DbCls
    */
   public function explodeBitCfg($bit): array
   {
-    $c = $this->class_cfg['arch']['user_options_bits'];
-    if (!empty($bit[$c['cfg']])
-      && ($cfg = json_decode($bit[$c['cfg']], true))
+    $c = $this->class_cfg["arch"]["user_options_bits"];
+    if (
+      !empty($bit[$c["cfg"]]) &&
+      ($cfg = json_decode($bit[$c["cfg"]], true))
     ) {
       foreach ($cfg as $i => $v) {
         if (!array_key_exists($i, $bit)) {
@@ -2284,10 +2339,9 @@ class Preferences extends DbCls
       }
     }
 
-    unset($bit[$c['cfg']]);
+    unset($bit[$c["cfg"]]);
     return $bit;
   }
-
 
   /**
    * @param string $id
@@ -2295,12 +2349,17 @@ class Preferences extends DbCls
    */
   public function nextBitNum(string $id): ?int
   {
-    $bitsTable = $this->class_cfg['tables']['user_options_bits'];
-    if (Str::isUid($id)
-      && ($max = $this->getRightDb($id, $bitsTable)->selectOne(
+    $bitsTable = $this->class_cfg["tables"]["user_options_bits"];
+    if (
+      Str::isUid($id) &&
+      ($max = $this->getRightDb($id, $bitsTable)->selectOne(
         $bitsTable,
-        'MAX(num)',
-        [$this->class_cfg['arch']['user_options_bits']['id_user_option'] => $id]
+        "MAX(num)",
+        [
+          $this->class_cfg["arch"]["user_options_bits"][
+            "id_user_option"
+          ] => $id,
+        ],
       ))
     ) {
       return $max + 1;
@@ -2308,7 +2367,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Gets the bit's cfg array, normalized either from the DB or from the $cfg argument
@@ -2319,11 +2377,11 @@ class Preferences extends DbCls
    */
   public function getBitCfg(?string $id = null, ?array $cfg = null): ?array
   {
-    $table = $this->class_cfg['tables']['user_options_bits'];
-    $fields = $this->class_cfg['arch']['user_options_bits'];
+    $table = $this->class_cfg["tables"]["user_options_bits"];
+    $fields = $this->class_cfg["arch"]["user_options_bits"];
     if (is_null($cfg) && !empty($id)) {
       $db = $this->getRightDb($id, $table);
-      $cfg = $db->selectOne($table, $fields['cfg'], [$fields['id'] => $id]);
+      $cfg = $db->selectOne($table, $fields["cfg"], [$fields["id"] => $id]);
     }
 
     if (!is_null($cfg)) {
@@ -2348,7 +2406,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Orders a bit.
    *
@@ -2359,42 +2416,46 @@ class Preferences extends DbCls
    */
   public function orderBit(string $id, int $pos): ?bool
   {
-    if (Str::isUid($id)
-      && ($fields = $this->class_cfg['arch']['user_options_bits'])
-      && ($bit = $this->getBit($id))
-      && ($old = (int)$bit[$fields['num']])
-      && !empty($pos)
-      && ($old !== $pos)
-      && ($bits = $this->getBits($bit[$fields['id_user_option']], $bit[$fields['id_parent']]))
+    if (
+      Str::isUid($id) &&
+      ($fields = $this->class_cfg["arch"]["user_options_bits"]) &&
+      ($bit = $this->getBit($id)) &&
+      ($old = (int) $bit[$fields["num"]]) &&
+      !empty($pos) &&
+      $old !== $pos &&
+      ($bits = $this->getBits(
+        $bit[$fields["id_user_option"]],
+        $bit[$fields["id_parent"]],
+      ))
     ) {
       $past_new = false;
       $past_old = false;
-      $p        = 1;
-      $changed  = 0;
+      $p = 1;
+      $changed = 0;
       foreach ($bits as $ele) {
         $upd = [];
         if ($past_old && !$past_new) {
-          $upd[$fields['num']] = $p - 1;
-        }
-        elseif (!$past_old && $past_new) {
-          $upd[$fields['num']] = $p + 1;
+          $upd[$fields["num"]] = $p - 1;
+        } elseif (!$past_old && $past_new) {
+          $upd[$fields["num"]] = $p + 1;
         }
 
-        if ($id === $ele['id']) {
-          $upd[$fields['num']] = $pos;
-          $past_old         = 1;
-        }
-        elseif ($p === $pos) {
-          $upd[$fields['num']] = $p + ($pos > $old ? -1 : 1);
-          $past_new         = 1;
+        if ($id === $ele["id"]) {
+          $upd[$fields["num"]] = $pos;
+          $past_old = 1;
+        } elseif ($p === $pos) {
+          $upd[$fields["num"]] = $p + ($pos > $old ? -1 : 1);
+          $past_new = 1;
         }
 
         if (!empty($upd)) {
-          $db = !empty($ele[$this->localeField]) ? $this->getLocaleDb() : $this->db;
+          $db = !empty($ele[$this->localeField])
+            ? $this->getLocaleDb()
+            : $this->db;
           $changed += $db->update(
-            $this->class_cfg['tables']['user_options_bits'],
+            $this->class_cfg["tables"]["user_options_bits"],
             $upd,
-            [$fields['id'] => $ele['id']]
+            [$fields["id"] => $ele["id"]],
           );
         }
 
@@ -2405,12 +2466,11 @@ class Preferences extends DbCls
         $p++;
       }
 
-      return (bool)$changed;
+      return (bool) $changed;
     }
 
     return null;
   }
-
 
   /**
    * @param string $id_user_option
@@ -2419,23 +2479,29 @@ class Preferences extends DbCls
    * @return int|null
    * @throws Exception
    */
-  public function fixBitsOrder(string $id_user_option, ?string $id_parent = null, $deep = false): ?int
-  {
-    if (Str::isUid($id_user_option)
-      && (Str::isUid($id_parent) || \is_null($id_parent))
+  public function fixBitsOrder(
+    string $id_user_option,
+    ?string $id_parent = null,
+    $deep = false,
+  ): ?int {
+    if (
+      Str::isUid($id_user_option) &&
+      (Str::isUid($id_parent) || \is_null($id_parent))
     ) {
-      $cfg   = $this->class_cfg['arch']['user_options_bits'];
+      $cfg = $this->class_cfg["arch"]["user_options_bits"];
       $fixed = 0;
       foreach ($this->getBits($id_user_option, $id_parent, false) as $i => $b) {
         if ($deep) {
-          $fixed += $this->fixBitsOrder($id_user_option, $b[$cfg['id']], $deep);
+          $fixed += $this->fixBitsOrder($id_user_option, $b[$cfg["id"]], $deep);
         }
 
-        if ($b[$cfg['num']] !== ($i + 1)) {
-          $fixed += $this->{!empty($b[$this->localeField]) ? 'localeDb' : 'db'}->update(
-            $this->class_cfg['tables']['user_options_bits'],
-            [$cfg['num'] => $i + 1],
-            [$cfg['id'] => $b[$cfg['id']]]
+        if ($b[$cfg["num"]] !== $i + 1) {
+          $fixed += $this->{!empty($b[$this->localeField])
+            ? "localeDb"
+            : "db"}->update(
+            $this->class_cfg["tables"]["user_options_bits"],
+            [$cfg["num"] => $i + 1],
+            [$cfg["id"] => $b[$cfg["id"]]],
           );
         }
       }
@@ -2445,7 +2511,6 @@ class Preferences extends DbCls
 
     return null;
   }
-
 
   /**
    * Moves a bit.
@@ -2457,27 +2522,30 @@ class Preferences extends DbCls
    */
   public function moveBit(string $id, ?string $id_parent = null): ?bool
   {
-    if (Str::isUid($id)
-      && ((Str::isUid($id_parent) && $this->getBit($id_parent))
-        || \is_null($id_parent))
-      && ($bit = $this->getBit($id))
-      && ($cf = $this->getClassCfg())
-      && ($cfg = $cf['arch']['user_options_bits'])
+    if (
+      Str::isUid($id) &&
+      ((Str::isUid($id_parent) && $this->getBit($id_parent)) ||
+        \is_null($id_parent)) &&
+      ($bit = $this->getBit($id)) &&
+      ($cf = $this->getClassCfg()) &&
+      ($cfg = $cf["arch"]["user_options_bits"])
     ) {
       $upd = [
-        $cfg['id_parent'] => $id_parent,
-        $cfg['num'] => $this->getMaxBitNum($bit[$cfg['id_user_option']], $id_parent, true)
+        $cfg["id_parent"] => $id_parent,
+        $cfg["num"] => $this->getMaxBitNum(
+          $bit[$cfg["id_user_option"]],
+          $id_parent,
+          true,
+        ),
       ];
-      return (bool)$this->getRightDb($id, $cf['tables']['user_options_bits'])->update(
-        $cf['tables']['user_options_bits'],
-        $upd,
-        [$cfg['id'] => $id]
-      );
+      return (bool) $this->getRightDb(
+        $id,
+        $cf["tables"]["user_options_bits"],
+      )->update($cf["tables"]["user_options_bits"], $upd, [$cfg["id"] => $id]);
     }
 
     return null;
   }
-
 
   /**
    * Gets the maximum num value of the user option's bits.
@@ -2487,34 +2555,46 @@ class Preferences extends DbCls
    * @param bool        $incr           Set it to true if you want the result increased by 1
    * @return int
    */
-  public function getMaxBitNum(string $id_user_option, ?string $id_parent = null, bool $incr = false): int
-  {
-    if (Str::isUid($id_user_option)
-      && (Str::isUid($id_parent) || is_null($id_parent))
-      && ($cf = $this->getClassCfg())
-      && ($cfg = $cf['arch']['user_options_bits'])
+  public function getMaxBitNum(
+    string $id_user_option,
+    ?string $id_parent = null,
+    bool $incr = false,
+  ): int {
+    if (
+      Str::isUid($id_user_option) &&
+      (Str::isUid($id_parent) || is_null($id_parent)) &&
+      ($cf = $this->getClassCfg()) &&
+      ($cfg = $cf["arch"]["user_options_bits"])
     ) {
-      if ($max = $this->getRightDb($id_user_option, $cf['tables']['user_options_bits'])->selectOne([
-        'table' => $cf['tables']['user_options_bits'],
-        'fields' => ["MAX($cfg[num])"],
-        'where' => [
-          'conditions' => [[
-            'field' => $cfg['id_user_option'],
-            'value' => $id_user_option
-          ], [
-            'field' => $cfg['id_parent'],
-            empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
-          ]]
-        ]
-      ])) {
-        $max = (int)$max;
+      if (
+        $max = $this->getRightDb(
+          $id_user_option,
+          $cf["tables"]["user_options_bits"],
+        )->selectOne([
+          "table" => $cf["tables"]["user_options_bits"],
+          "fields" => ["MAX($cfg[num])"],
+          "where" => [
+            "conditions" => [
+              [
+                "field" => $cfg["id_user_option"],
+                "value" => $id_user_option,
+              ],
+              [
+                "field" => $cfg["id_parent"],
+                empty($id_parent) ? "operator" : "value" =>
+                  $id_parent ?: "isnull",
+              ],
+            ],
+          ],
+        ])
+      ) {
+        $max = (int) $max;
         return $incr ? $max + 1 : $max;
       }
       return 0;
     }
     return 0;
   }
-
 
   /**
    *  Gets a preference row from a bit ID
@@ -2525,28 +2605,35 @@ class Preferences extends DbCls
   public function getByBit(string $id): ?array
   {
     if (Str::isUid($id)) {
-      $bitsTable = $this->class_cfg['tables']['user_options_bits'];
-      $bitsFields = $this->class_cfg['arch']['user_options_bits'];
+      $bitsTable = $this->class_cfg["tables"]["user_options_bits"];
+      $bitsFields = $this->class_cfg["arch"]["user_options_bits"];
       $isLocale = $this->isLocale($id, $bitsTable);
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
       $row = $db->rselect([
-        'table' => $this->class_table,
-        'fields' => array_map(
+        "table" => $this->class_table,
+        "fields" => array_map(
           fn($v) => $db->cfn($v, $this->class_table),
-          array_values($this->fields)
+          array_values($this->fields),
         ),
-        'join' => [[
-          'table' => $bitsTable,
-          'on' => [
-            'conditions' => [[
-              'field' => $db->cfn($bitsFields['id_user_option'], $bitsTable),
-              'exp' => $db->cfn($this->fields['id'], $this->class_table)
-            ]]
-          ]
-        ]],
-        'where' => [
-          $db->cfn($bitsFields['id'], $bitsTable) => $id
-        ]
+        "join" => [
+          [
+            "table" => $bitsTable,
+            "on" => [
+              "conditions" => [
+                [
+                  "field" => $db->cfn(
+                    $bitsFields["id_user_option"],
+                    $bitsTable,
+                  ),
+                  "exp" => $db->cfn($this->fields["id"], $this->class_table),
+                ],
+              ],
+            ],
+          ],
+        ],
+        "where" => [
+          $db->cfn($bitsFields["id"], $bitsTable) => $id,
+        ],
       ]);
       if ($row && $isLocale) {
         $row = $this->normalizeFromLocale($row, $this->class_table);
@@ -2557,7 +2644,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Gets the preference's ID from a bit ID
    *
@@ -2567,28 +2653,31 @@ class Preferences extends DbCls
   public function getIdByBit(string $id): ?string
   {
     if (Str::isUid($id) && ($p = $this->getByBit($id))) {
-      $bitsTable = $this->class_cfg['tables']['user_options_bits'];
-      $bitsFields = $this->class_cfg['arch']['user_options_bits'];
+      $bitsTable = $this->class_cfg["tables"]["user_options_bits"];
+      $bitsFields = $this->class_cfg["arch"]["user_options_bits"];
       $db = $this->getRightDb($id, $this->class_table);
       return $db->selectOne([
-        'table' => $this->class_table,
-        'field' => $db->cfn($this->fields['id'], $this->class_table),
-        'join' => [[
-          'table' => $bitsTable,
-          'on' => [[
-            'field' => $db->cfn($bitsFields['id_user_option'], $bitsTable),
-            'exp' => $db->cfn($this->fields['id'], $this->class_table)
-          ]]
-        ]],
-        'where' => [
-          $db->cfn($bitsFields['id'], $bitsTable) => $id
-        ]
+        "table" => $this->class_table,
+        "field" => $db->cfn($this->fields["id"], $this->class_table),
+        "join" => [
+          [
+            "table" => $bitsTable,
+            "on" => [
+              [
+                "field" => $db->cfn($bitsFields["id_user_option"], $bitsTable),
+                "exp" => $db->cfn($this->fields["id"], $this->class_table),
+              ],
+            ],
+          ],
+        ],
+        "where" => [
+          $db->cfn($bitsFields["id"], $bitsTable) => $id,
+        ],
       ]);
     }
 
     return null;
   }
-
 
   /**
    * @param string $id_option
@@ -2597,24 +2686,29 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function textValue(string $id_option, ?string $id_user = null, ?string $id_group = null): ?array
-  {
+  public function textValue(
+    string $id_option,
+    ?string $id_user = null,
+    ?string $id_group = null,
+  ): ?array {
     if (Str::isUid($id_option)) {
       $res = [];
       if ($ids = $this->_retrieveIds($id_option, $id_user, $id_group)) {
-        $hasLocaleDb = (empty($id_user)
-           || ($id_user === $this->id_user))
-          && $this->hasLocaleDb();
+        $hasLocaleDb =
+          (empty($id_user) || $id_user === $this->id_user) &&
+          $this->hasLocaleDb();
 
         foreach ($ids as $id) {
-          $db = $hasLocaleDb ? $this->getRightDb($id, $this->class_table) : $this->db;
+          $db = $hasLocaleDb
+            ? $this->getRightDb($id, $this->class_table)
+            : $this->db;
           $res[] = $db->rselect(
-            $this->class_cfg['table'],
+            $this->class_cfg["table"],
             [
-              'value' => $this->fields['id'],
-              'text' => $this->fields['text']
+              "value" => $this->fields["id"],
+              "text" => $this->fields["text"],
             ],
-            ['id' => $id]
+            ["id" => $id],
           );
         }
       }
@@ -2625,7 +2719,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Returns the bbn\Db instance
    * @return bbn\DB
@@ -2634,7 +2727,6 @@ class Preferences extends DbCls
   {
     return $this->db;
   }
-
 
   /**
    * Sets the user variables using a user object
@@ -2645,18 +2737,18 @@ class Preferences extends DbCls
   private function _initUser(User $user): preferences
   {
     $this->user = $user;
-    if (!empty($this->id_user)
-      && ($this->id_user !== $this->user->getId())
-      && !empty($this->localeDb)
+    if (
+      !empty($this->id_user) &&
+      $this->id_user !== $this->user->getId() &&
+      !empty($this->localeDb)
     ) {
       $this->localeDb = null;
     }
 
-    $this->id_user  = $this->user->getId();
+    $this->id_user = $this->user->getId();
     $this->id_group = $this->user->getIdGroup();
     return $this;
   }
-
 
   /**
    * Retrieves or confirm the ID of an option based on the same parameters as Option::from_path
@@ -2682,7 +2774,6 @@ class Preferences extends DbCls
     return null;
   }
 
-
   /**
    * Actually inserts a row into the preferences table
    *
@@ -2694,13 +2785,15 @@ class Preferences extends DbCls
   {
     $db = $this->db;
     $data = [
-      $this->fields['id_option'] => $id_option,
-      $this->fields['num'] => $cfg[$this->fields['num']] ?? null,
-      $this->fields['text'] => $cfg[$this->fields['text']] ?? null,
-      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? null,
-      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? null,
-      $this->fields['id_user'] => $this->id_user,
-      $this->fields['cfg'] => ($tmp = $this->getCfg(false, $cfg)) ? json_encode($tmp) : null
+      $this->fields["id_option"] => $id_option,
+      $this->fields["num"] => $cfg[$this->fields["num"]] ?? null,
+      $this->fields["text"] => $cfg[$this->fields["text"]] ?? null,
+      $this->fields["id_link"] => $cfg[$this->fields["id_link"]] ?? null,
+      $this->fields["id_alias"] => $cfg[$this->fields["id_alias"]] ?? null,
+      $this->fields["id_user"] => $this->id_user,
+      $this->fields["cfg"] => ($tmp = $this->getCfg(false, $cfg))
+        ? json_encode($tmp)
+        : null,
     ];
     if (!empty($cfg[$this->localeField])) {
       $db = $this->getLocaleDb();
@@ -2709,7 +2802,6 @@ class Preferences extends DbCls
 
     return $db->insert($this->class_table, $data);
   }
-
 
   /**
    * Returns preferences' IDs from the option's ID
@@ -2720,94 +2812,104 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  private function _retrieveIds(string $id_option, ?string $id_user = null, ?string $id_group = null): ?array
-  {
-    if (!$id_user
-      && !$id_group
-      && isset($this->id_user, $this->id_group)
-    ) {
-      $id_user  = $this->id_user;
+  private function _retrieveIds(
+    string $id_option,
+    ?string $id_user = null,
+    ?string $id_group = null,
+  ): ?array {
+    if (!$id_user && !$id_group && isset($this->id_user, $this->id_group)) {
+      $id_user = $this->id_user;
       $id_group = $this->id_group;
     }
 
-    if (($id_user || $id_group)
-      && ($id_option = $this->_getIdOption($id_option))
+    if (
+      ($id_user || $id_group) &&
+      ($id_option = $this->_getIdOption($id_option))
     ) {
       $cond = [
-        'logic' => 'OR',
-        'conditions' => []
+        "logic" => "OR",
+        "conditions" => [],
       ];
       if (null !== $id_user) {
-        $cond['conditions'][] = [
-          'field' => $this->fields['id_user'],
-          'value' => $id_user
+        $cond["conditions"][] = [
+          "field" => $this->fields["id_user"],
+          "value" => $id_user,
         ];
       }
 
       if (null !== $id_group) {
-        $cond['conditions'][] = [
-          'field' => $this->fields['id_group'],
-          'value' => $id_group
+        $cond["conditions"][] = [
+          "field" => $this->fields["id_group"],
+          "value" => $id_group,
         ];
       }
 
       // Not specific to just a group or a user, so adding the public i.e. all to which the user has right
       if ($id_user && $id_group) {
-        $cond['conditions'][] = [
-          'field' => $this->fields['public'],
-          'value' => 1
+        $cond["conditions"][] = [
+          "field" => $this->fields["public"],
+          "value" => 1,
         ];
       }
 
       $where = [
-        'logic' => 'AND',
-        'conditions' => [[
-          'field' => $this->fields['id_option'],
-          'value' => $id_option
-        ]]
+        "logic" => "AND",
+        "conditions" => [
+          [
+            "field" => $this->fields["id_option"],
+            "value" => $id_option,
+          ],
+        ],
       ];
-      if (count($cond['conditions'])) {
-        $where['conditions'][] = $cond;
+      if (count($cond["conditions"])) {
+        $where["conditions"][] = $cond;
       }
 
       $rows = $this->db->rselectAll([
-        'table' => $this->class_cfg['table'],
-        'fields' => [
-          $this->fields['id'],
-          $this->fields['num'],
-          $this->fields['text']
+        "table" => $this->class_cfg["table"],
+        "fields" => [
+          $this->fields["id"],
+          $this->fields["num"],
+          $this->fields["text"],
         ],
-        'where' => $where,
-        'order' => [[
-          'field' => $this->fields['num'],
-          'dir' => 'ASC'
-        ], [
-          'field' => $this->fields['text'],
-          'dir' => 'ASC'
-        ]]
+        "where" => $where,
+        "order" => [
+          [
+            "field" => $this->fields["num"],
+            "dir" => "ASC",
+          ],
+          [
+            "field" => $this->fields["text"],
+            "dir" => "ASC",
+          ],
+        ],
       ]);
 
-      if (!empty($id_user)
-        && ($id_user === $this->id_user)
-        && $this->hasLocaleDb()
-        && ($optPath = $this->opt->toPath($id_option))
-        && ($localeRows = $this->getLocaleDb()->rselectAll([
-          'table' => $this->class_cfg['table'],
-          'fields' => [
-            $this->fields['id'],
-            $this->fields['num'],
-            $this->fields['text']
+      if (
+        !empty($id_user) &&
+        $id_user === $this->id_user &&
+        $this->hasLocaleDb() &&
+        ($optPath = $this->opt->toPath($id_option)) &&
+        ($localeRows = $this->getLocaleDb()->rselectAll([
+          "table" => $this->class_cfg["table"],
+          "fields" => [
+            $this->fields["id"],
+            $this->fields["num"],
+            $this->fields["text"],
           ],
-          'where' => [
-            $this->fields['id_option'] => $optPath
+          "where" => [
+            $this->fields["id_option"] => $optPath,
           ],
-          'order' => [[
-            'field' => $this->fields['num'],
-            'dir' => 'ASC'
-          ], [
-            'field' => $this->fields['text'],
-            'dir' => 'ASC'
-          ]]
+          "order" => [
+            [
+              "field" => $this->fields["num"],
+              "dir" => "ASC",
+            ],
+            [
+              "field" => $this->fields["text"],
+              "dir" => "ASC",
+            ],
+          ],
         ]))
       ) {
         if (!is_array($rows)) {
@@ -2815,21 +2917,23 @@ class Preferences extends DbCls
         }
 
         array_push($rows, ...$localeRows);
-        X::sortBy($rows, [[
-          'key' => $this->fields['num'],
-          'dir' => 'asc'
-        ], [
-          'key' => $this->fields['text'],
-          'dir' => 'asc'
-        ]]);
+        X::sortBy($rows, [
+          [
+            "key" => $this->fields["num"],
+            "dir" => "asc",
+          ],
+          [
+            "key" => $this->fields["text"],
+            "dir" => "asc",
+          ],
+        ]);
       }
 
-      return array_map(fn($r) => $r[$this->fields['id']], $rows);
+      return array_map(fn($r) => $r[$this->fields["id"]], $rows);
     }
 
     return null;
   }
-
 
   /**
    * Gets the preferences which have the option's $id as id_link
@@ -2840,60 +2944,68 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  private function _getLinks(string $id_link, ?string $id_user = null, ?string $id_group = null): ?array
-  {
+  private function _getLinks(
+    string $id_link,
+    ?string $id_user = null,
+    ?string $id_group = null,
+  ): ?array {
     if ($id_link = $this->_getIdOption($id_link)) {
       $t = $this;
       $where = [
-        'conditions' => [[
-          'field' => $this->fields['id_link'],
-          'value' => $id_link
-        ]]
+        "conditions" => [
+          [
+            "field" => $this->fields["id_link"],
+            "value" => $id_link,
+          ],
+        ],
       ];
       if (null !== $id_user) {
-        $cond[$this->fields['id_user']] = $id_user;
+        $cond[$this->fields["id_user"]] = $id_user;
       }
 
       if (null !== $id_group) {
-        $cond[$this->fields['id_group']] = $id_group;
+        $cond[$this->fields["id_group"]] = $id_group;
       }
 
       // Not specific
-      if ((null === $id_user) && (null === $id_group)) {
-        $cond[$this->fields['public']] = 1;
+      if (null === $id_user && null === $id_group) {
+        $cond[$this->fields["public"]] = 1;
       }
 
-      $where['conditions'][] = [
-        'logic' => 'OR',
-        'conditions' => $cond
+      $where["conditions"][] = [
+        "logic" => "OR",
+        "conditions" => $cond,
       ];
       $rows = $this->db->rselectAll([
-        'table' => $this->class_cfg['table'],
-        'fields' => [
-          $this->fields['id'],
-          $this->fields['id_option'],
-          $this->fields['text']
+        "table" => $this->class_cfg["table"],
+        "fields" => [
+          $this->fields["id"],
+          $this->fields["id_option"],
+          $this->fields["text"],
         ],
-        'where' => $where,
-        'order' => [$this->fields['text']]
+        "where" => $where,
+        "order" => [$this->fields["text"]],
       ]);
-      if (!empty($id_user)
-        && ($id_user === $this->id_user)
-        && $this->hasLocaleDb()
-        && ($rows2 = $this->getLocaleDb()->rselectAll([
-          'table' => $this->class_cfg['table'],
-          'fields' => [
-            $this->fields['id'],
-            $this->fields['id_option'],
-            $this->fields['text']
+      if (
+        !empty($id_user) &&
+        $id_user === $this->id_user &&
+        $this->hasLocaleDb() &&
+        ($rows2 = $this->getLocaleDb()->rselectAll([
+          "table" => $this->class_cfg["table"],
+          "fields" => [
+            $this->fields["id"],
+            $this->fields["id_option"],
+            $this->fields["text"],
           ],
-          'where' => [
-            'conditions' => [[
-              'field' => $this->fields['id_link'],
-              'value' => $this->opt->toPath($id_link)
-            ]],
+          "where" => [
+            "conditions" => [
+              [
+                "field" => $this->fields["id_link"],
+                "value" => $this->opt->toPath($id_link),
+              ],
+            ],
           ],
-          'order' => [$this->fields['text']]
+          "order" => [$this->fields["text"]],
         ]))
       ) {
         if (!is_array($rows)) {
@@ -2903,20 +3015,19 @@ class Preferences extends DbCls
         array_push(
           $rows,
           ...array_map(
-            fn($r) => $this->normalizeFromLocale($r, $this->class_cfg['table']),
-            $rows2
-          )
+            fn($r) => $this->normalizeFromLocale($r, $this->class_cfg["table"]),
+            $rows2,
+          ),
         );
-        X::sortBy($rows, $this->fields['text']);
+        X::sortBy($rows, $this->fields["text"]);
       }
 
-      return array_map(function($r) use ($t) {
-        unset($r[$t->fields['text']]);
+      return array_map(function ($r) use ($t) {
+        unset($r[$t->fields["text"]]);
         return $r;
       }, $rows);
     }
 
     return null;
   }
-
 }

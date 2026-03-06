@@ -30,12 +30,11 @@ class Consultation extends DbCls
   ];
 
 
-  public function __construct(Db $db, array|null $cfg = null)
+  public function __construct(Db $db)
   {
-    // The database connection
-    $this->db = $db;
     // Setting up the class configuration
-    $this->initClassCfg($cfg);
+    $this->initClassCfg();
+    parent::__construct($db);
   }
 
 

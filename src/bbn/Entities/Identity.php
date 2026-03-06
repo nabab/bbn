@@ -8,7 +8,7 @@ use bbn\Str;
 use bbn\Db;
 use bbn\Appui\History;
 use bbn\Appui\Uauth;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbCache;
 use bbn\Models\Tts\DbUauth;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Tables\Link;
@@ -22,7 +22,7 @@ use bbn\Models\Cls\Nullall;
  */
 class Identity extends DbCls
 {
-  use DbActions;
+  use DbCache;
   use DbUauth;
   /**
    * The default configuration for database interaction, specifying the table and fields.
@@ -87,8 +87,8 @@ class Identity extends DbCls
     protected Entity|Nullall $entity = new Nullall()
   )
   {
-    parent::__construct($db);
     $this->initClassCfg();
+    parent::__construct($db);
     $this->dbUauthInit();
   }
 

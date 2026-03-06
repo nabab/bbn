@@ -2047,5 +2047,14 @@ class Str
     return mb_convert_encoding($s, 'UTF-8', mb_list_encodings());
   }
 
+  public static function startsWith(string $haystack, string $needle): bool
+  {
+    return strncmp($haystack, $needle, strlen($needle)) === 0;
+  }
+
+  public static function endsWith(string $haystack, string $needle): bool
+  {
+    return strncmp(strrev($haystack), strrev($needle), strlen($needle)) === 0;
+  }
 
 }

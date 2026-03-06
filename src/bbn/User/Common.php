@@ -45,12 +45,6 @@ trait Common
   /** @var mixed */
   protected $alert;
 
-  /** @var array */
-  protected $cfg;
-
-  /** @var Db */
-  protected $db;
-
   /** @var mixed */
   public $prev_time;
 
@@ -250,7 +244,6 @@ trait Common
   public function logout()
   {
     $this->auth = false;
-    $this->cfg  = [];
     $this->closeSession(true);
   }
 

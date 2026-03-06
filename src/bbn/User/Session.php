@@ -323,10 +323,6 @@ class Session
       }
 
       session_start();
-      $t2 = microtime(true);
-      if ($t2 - $t1 > 0.1) {
-        X::ddump("EEEEEEE");
-      }
     }
 
     return $this;
