@@ -122,7 +122,7 @@ trait DbOps
 
       $o = $this->emit("beforeinsert", $data);
       if (
-        $o->isDefaultPrevented() &&
+        !$o->isDefaultPrevented() &&
         $this->db->{$ignore ? "insertIgnore" : "insert"}(
           $this->class_table,
           $data,
@@ -163,7 +163,7 @@ trait DbOps
 
       $o = $this->emit("beforedelete", [$filter, $cascade]);
       if (
-        $o->isDefaultPrevented() &&
+        !$o->isDefaultPrevented() &&
         ($res = $this->db->delete(
           $this->class_table,
           $this->dbTraitGetFilterCfg($filter),
