@@ -176,7 +176,7 @@ You can click the following link to access directly your account:<br>
   {
     if (!isset(self::$_groups)) {
       $cache = Cache::getEngine();
-      $key = Str::replace('\\', '/', __CLASS__) . '_groups';
+      $key = Str::replace('\\', '/', get_class($this)) . '_groups';
       if (!($cached = $cache->get($key))) {
         $cfg = $this->class_cfg;
         $a             =& $cfg['arch'];
