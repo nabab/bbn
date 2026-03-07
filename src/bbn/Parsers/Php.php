@@ -6,10 +6,12 @@ use bbn;
 use bbn\X;
 use bbn\Str;
 use bbn\File\System;
+use bbn\Parsers\Doc;
 use Exception;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
+use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 
 class Php extends bbn\Models\Cls\Basic
@@ -17,7 +19,7 @@ class Php extends bbn\Models\Cls\Basic
 
   protected $docParser;
 
-  /** @var phpDocumentor\Reflexion\DocBlock */
+  /** @var DocBlock */
   protected $parser;
   
   /**
