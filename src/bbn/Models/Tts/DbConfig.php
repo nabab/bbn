@@ -1,16 +1,11 @@
 <?php
 namespace bbn\Models\Tts;
 
-use bbn\Cache;
-use bbn\Mvc;
-use bbn\Str;
-use bbn\X;
 use Exception;
-use ReflectionProperty;
+use bbn\X;
+use bbn\Models\Internal\DbConfigRegistryBuilder;
 
-use function array_key_exists;
 use function count;
-use function in_array;
 use function is_array;
 
 /**
@@ -318,111 +313,9 @@ trait DbConfig
       return self::$dbConfigTableClasses;
     }
 
-    $cache = Cache::getEngine();
+    $builder = new DbConfigRegistryBuilder();
+    self::$dbConfigTableClasses = $builder->getRegistry();
 
-    if (!($cached = $cache->get('bbn_dbconfig_cache_init'))) {
-      $res = include Mvc::getLibPath() . 'composer/autoload_classmap.php';
-
-      if (!$res) {
-        exec(
-          'cd ' .
-          dirname(Mvc::getLibPath()) .
-          ' && composer dump-autoload -o && cd -'
-        );
-        $res = include Mvc::getLibPath() . 'composer/autoload_classmap.php';
-      }
-
-      if (!$res) {
-        throw new Exception('No way to get classes from composer');
-      }
-
-      $property = 'default_class_cfg';
-      $corr = [];
-      $keys = array_keys($res);
-      $local = X::filter($keys, fn($a) => Str::startsWith($a, constant('BBN_APP_PREFIX')));
-      $bbn = X::filter($keys, fn($a) => Str::startsWith($a, 'bbn\\'));
-
-      foreach ([...$local, ...$bbn] as $cls) {
-        if (!class_exists($cls)) {
-          continue;
-        }
-
-        $cacheDone = false;
-        $hasCache = false;
-        $table = null;
-        $ccls = $cls;
-        $junctionDone = false;
-
-        while ($ccls && (!$cacheDone || !$table)) {
-          if (
-            property_exists($ccls, $property)
-            && method_exists($ccls, 'initClassCfg')
-          ) {
-            $ref = new ReflectionProperty($ccls, $property);
-            if ($ref && $ref->isStatic() && ($value = $ref->getValue())) {
-              if (!$cacheDone && array_key_exists('cache', $value)) {
-                $cacheDone = true;
-                $hasCache = (bool)$value['cache'];
-              }
-
-              if (!$table && isset($value['table'])) {
-                $table = $value['table'];
-                if (!array_key_exists($table, $corr)) {
-                  $corr[$table] = [
-                    'class' => $cls,
-                    'cache' => false,
-                    'junctions' => []
-                  ];
-                }
-              }
-
-              if ($hasCache && $table) {
-                $corr[$table]['cache'] = true;
-
-                if (!$junctionDone && isset($value['junctions']) && is_array($value['junctions'])) {
-                  $junctionDone = true;
-                  foreach ($value['junctions'] as $j) {
-                    if (isset($j['table'], $j['field'])) {
-                      $corr[$table]['junctions'][] = $j;
-                    }
-                  }
-                }
-
-                break;
-              }
-            }
-          }
-
-          $ccls = get_parent_class($ccls);
-        }
-      }
-
-      ksort($corr);
-
-      foreach ($corr as $table => $c) {
-        if (count($c['junctions'])) {
-          foreach ($c['junctions'] as $j) {
-            if (isset($corr[$j['table']])) {
-              if (!isset($corr[$j['table']]['deps'])) {
-                $corr[$j['table']]['deps'] = [];
-              }
-
-              if (!in_array($table, $corr[$j['table']]['deps'], true)) {
-                $corr[$j['table']]['deps'][] = $table;
-              }
-            }
-          }
-        }
-        else {
-          unset($corr[$table]['junctions']);
-        }
-      }
-
-      $cached = $corr;
-      $cache->set('bbn_dbconfig_cache_init', $cached, 3600);
-    }
-
-    self::$dbConfigTableClasses = $cached;
-    return $cached;
+    return self::$dbConfigTableClasses;
   }
 }
