@@ -3,7 +3,7 @@
 namespace bbn\tests;
 
 use bbn\X;
-use Illuminate\Support\Str;
+use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use bbn\tests\Files;
 use bbn\tests\Reflectable;
@@ -14,17 +14,18 @@ class XTest extends TestCase
 
   protected function setUp(): void
   {
+    parent::setUp();
     $this->setNonPublicPropertyValue('_counters', []);
     $this->setNonPublicPropertyValue('_last_curl', null);
     $this->setNonPublicPropertyValue('_cli', null);
     $this->setNonPublicPropertyValue('_textdomain', null);
 
-    $this->cleanTestingDir(BBN_DATA_PATH . 'logs');
+    $this->cleanTestingDir(constant('BBN_DATA_PATH') . 'logs');
   }
 
   protected function tearDown(): void
   {
-    $this->cleanTestingDir(BBN_DATA_PATH . 'logs');
+    $this->cleanTestingDir(constant('BBN_DATA_PATH') . 'logs');
     \Mockery::close();
   }
 
@@ -184,7 +185,7 @@ class XTest extends TestCase
   {
     $this->createDir('logs');
 
-    $log_file = BBN_DATA_PATH . 'logs/error_log.log';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/error_log.log';
 
     $this->assertFileDoesNotExist($log_file);
 
@@ -200,7 +201,7 @@ class XTest extends TestCase
   {
     $this->createDir('logs');
 
-    $log_file = BBN_DATA_PATH . 'logs/error_log.log';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/error_log.log';
 
     $fp = fopen($log_file, 'w');
     fputs($fp, $existing_file_content = Str::random(BBN_X_MAX_LOG_FILE), BBN_X_MAX_LOG_FILE);
@@ -219,7 +220,7 @@ class XTest extends TestCase
   {
     $this->createDir('logs');
 
-    $log_file = BBN_DATA_PATH . 'logs/error_log.log';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/error_log.log';
 
     $fp = fopen($log_file, 'w');
     fputs($fp, $old_log_content = Str::random(BBN_X_MAX_LOG_FILE + 1), BBN_X_MAX_LOG_FILE + 1);
@@ -229,7 +230,7 @@ class XTest extends TestCase
 
     X::log($message = 'This should be written to a new file', 'error_log');
 
-    $this->assertFileExists($old_file = BBN_DATA_PATH . 'logs/error_log.log.old');
+    $this->assertFileExists($old_file = constant('BBN_DATA_PATH') . 'logs/error_log.log.old');
     $this->assertStringContainsString($old_log_content, file_get_contents($old_file));
 
     $this->assertStringNotContainsString($old_log_content, file_get_contents($log_file));
@@ -248,7 +249,7 @@ class XTest extends TestCase
 
     X::log($message, 'error_log');
 
-    $this->assertFileExists($log_file = BBN_DATA_PATH . 'logs/error_log.log');
+    $this->assertFileExists($log_file = constant('BBN_DATA_PATH') . 'logs/error_log.log');
     $this->assertStringContainsString($message, file_get_contents($log_file));
   }
 
@@ -257,7 +258,7 @@ class XTest extends TestCase
   {
     $this->createDir('logs');
 
-    $log_file = BBN_DATA_PATH . 'logs/misc.log';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/misc.log';
 
     $this->assertFileDoesNotExist($log_file);
 
@@ -272,7 +273,7 @@ class XTest extends TestCase
   public function logError_method_creates_and_saves_the_error_in_to_a_json_file_when_file_does_not_exist()
   {
     $this->createDir('logs');
-    $log_file = BBN_DATA_PATH . 'logs/_php_error.json';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/_php_error.json';
 
     X::logError(
       $err_no = '123',
@@ -308,7 +309,7 @@ class XTest extends TestCase
   public function logError_method_and_saves_the_error_in_to_an_existing_json_file_with_incrementing_the_count_if_same_errors_exist_and_sorting_by_date()
   {
     $this->createDir('logs');
-    $log_file = BBN_DATA_PATH . 'logs/_php_error.json';
+    $log_file = constant('BBN_DATA_PATH') . 'logs/_php_error.json';
 
     $array_content[] = [
       "count"     => 1,
@@ -491,7 +492,7 @@ class XTest extends TestCase
   /** @test */
   public function makeStoragePath_method_creates_dirs_for_the_given_date_format()
   {
-    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'testing', 'd/m/y');
+    $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing', 'd/m/y');
 
     $this->assertSame(realpath($path) . '/' . date('d/m/y') . '/1/', $result);
     $this->assertTrue(is_dir($result));
@@ -502,7 +503,7 @@ class XTest extends TestCase
   /** @test */
   public function makeStoragePath_method_creates_dirs_with_default_date_format_if_not_provided()
   {
-    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'testing');
+    $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing');
 
     $this->assertSame(realpath($path) . '/' . date('Y/m/d') . '/1/', $result);
     $this->assertTrue(is_dir($result));
@@ -513,7 +514,7 @@ class XTest extends TestCase
   /** @test */
   public function makeStoragePath_method_creates_dirs_with_for_the_given_date_format()
   {
-    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'testing', 'm/d/Y');
+    $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing', 'm/d/Y');
 
     $this->assertSame(realpath($path) . '/' . date('m/d/Y') . '/1/', $result);
     $this->assertTrue(is_dir($result));
@@ -524,7 +525,7 @@ class XTest extends TestCase
   /** @test */
   public function makeStoragePath_method_creates_and_increments_dirs_number_if_dir_exists_and_contains_other_dirs_or_files()
   {
-    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+    $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
 
     for ($i = 1; $i <= 10; $i++) {
       mkdir("$dirpath/$i", 0777, true);
@@ -533,7 +534,7 @@ class XTest extends TestCase
     mkdir("$dirpath/10/1");
     touch("$dirpath/10/foo.text");
 
-    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'foo', 'Y/m/d', 2);
+    $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'foo', 'Y/m/d', 2);
 
     $this->assertSame(realpath($path) . '/' . date('Y/m/d') . '/11/', $result);
     $this->assertTrue(is_dir($result));
@@ -594,7 +595,7 @@ class XTest extends TestCase
   /** @test */
   public function cleanStoragePath_method_deletes_the_given_dir_with_default_date_format_if_dir_is_empty()
   {
-    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+    $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
     mkdir($dirpath, 0777, true);
 
     $result = X::cleanStoragePath($dirpath);
@@ -606,7 +607,7 @@ class XTest extends TestCase
   /** @test */
   public function cleanStoragePath_method_deletes_the_given_dir_and_date_format_if_dir_is_empty()
   {
-    $dirpath = BBN_DATA_PATH . 'foo/' . date('m/d');
+    $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('m/d');
     mkdir($dirpath, 0777, true);
 
     $result = X::cleanStoragePath($dirpath, 'm/d');
@@ -618,7 +619,7 @@ class XTest extends TestCase
   /** @test */
   public function cleanStoragePath_method_does_not_delete_the_given_dir_if_it_is_not_empty()
   {
-    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+    $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
 
     for ($i = 1; $i <= 5;$i++) {
       mkdir("$dirpath/$i", 0777, true);
