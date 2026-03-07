@@ -27,6 +27,7 @@ class XTest extends TestCase
   {
     $this->cleanTestingDir(constant('BBN_DATA_PATH') . 'logs');
     \Mockery::close();
+    parent::tearDown();
   }
 
 
