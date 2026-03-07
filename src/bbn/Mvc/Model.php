@@ -1,4 +1,5 @@
 <?php
+
 namespace bbn\Mvc;
 
 use Exception;
@@ -119,9 +120,8 @@ class Model extends DbClass
         $this->_plugin_name = $info['plugin_name'] ?? null;
         $this->_plugin      = $info['plugin'] ?? null;
       }
-    }
-    else{
-      $this->error("The model ". ($info['path'] ?? null) ." doesn't exist");
+    } else {
+      $this->error("The model " . ($info['path'] ?? null) . " doesn't exist");
     }
   }
 
@@ -241,8 +241,7 @@ class Model extends DbClass
         $oldTextDomain = textdomain(null);
         if ($textDomain !== $oldTextDomain) {
           textdomain($textDomain);
-        }
-        else {
+        } else {
           unset($oldTextDomain);
         }
       }
@@ -431,22 +430,22 @@ class Model extends DbClass
 
 
   /**
-     * Checks if data exists or if a specific index exists in the data
-     *
-     * @return bool
-     */
-    public function hasData($idx = null, $check_empty = false): bool
-    {
-      if (!\is_array($this->data)) {
-        return false;
-      }
-
-      if (\is_null($idx)) {
-        return !empty($this->data);
-      }
-
-      return X::hasProps($this->data, (array)$idx, $check_empty);
+   * Checks if data exists or if a specific index exists in the data
+   *
+   * @return bool
+   */
+  public function hasData($idx = null, $check_empty = false): bool
+  {
+    if (!\is_array($this->data)) {
+      return false;
     }
+
+    if (\is_null($idx)) {
+      return !empty($this->data);
+    }
+
+    return X::hasProps($this->data, (array)$idx, $check_empty);
+  }
 
 
   /**
@@ -455,11 +454,11 @@ class Model extends DbClass
    * @param array $data
    * @return self
    */
-    public function setData(array $data): static
-    {
-        $this->data = $data;
-        return $this;
-    }
+  public function setData(array $data): static
+  {
+    $this->data = $data;
+    return $this;
+  }
 
 
   /**
@@ -467,24 +466,24 @@ class Model extends DbClass
    *
    * @return self
    */
-    public function addData(array ...$data): static
-    {
-      $ar = \func_get_args();
-      foreach ($data as $d){
-        if (\is_array($d)) {
-          $this->data = $this->hasData() ? array_merge($this->data, $d) : $d;
-        }
+  public function addData(array ...$data): static
+  {
+    $ar = \func_get_args();
+    foreach ($data as $d) {
+      if (\is_array($d)) {
+        $this->data = $this->hasData() ? array_merge($this->data, $d) : $d;
       }
-
-        return $this;
     }
 
+    return $this;
+  }
 
-    public function setDefaultData(array $data): static
-    {
-      X::extendOut($this->data, $data);
-      return $this;
-    }
+
+  public function setDefaultData(array $data): static
+  {
+    X::extendOut($this->data, $data);
+    return $this;
+  }
 
 
   /**
@@ -494,28 +493,40 @@ class Model extends DbClass
    * @param string $spec
    * @return string|null
    */
-    protected function modelCacheName($data, string $spec = ''): ?string
-    {
-      if ($this->_path) {
-        $cn = 'models/'.$this->_path;
-        if ($spec) {
-          $cn .= '/'.$spec;
-        }
-
-        if ($data) {
-          if (is_array($data)) {
-            ksort($data);
-          }
-
-          $cn .= '/'.md5(serialize($data));
-        }
-
-        return $cn;
+  protected function modelCacheName($data, string $spec = ''): ?string
+  {
+    if ($this->_path) {
+      $cn = 'models/' . $this->_path;
+      if ($spec) {
+        $cn .= '/' . $spec;
       }
 
-      return null;
+      if ($data) {
+        if (is_array($data)) {
+          ksort($data);
+        }
+
+        $cn .= '/' . md5(serialize($data));
+      }
+
+      return $cn;
     }
 
+    return null;
+  }
+
+  public function getCacheName($path, $data, $plugin = null, $subplugin = null, string $spec = ''): ?string
+  {
+    if ($plugin) {
+      $path = $plugin . '/' . $path;
+    }
+
+    if ($subplugin) {
+      $path = $subplugin . '/' . $path;
+    }
+
+    return $this->modelCacheName($data, $spec ? $spec : str_replace('/', '-', $path));
+  }
 
   /**
    * Sets a cache from the given data.
@@ -542,7 +553,7 @@ class Model extends DbClass
   public function deleteCache(array|null $data = null, $spec = '', string $path = '')
   {
     if ($cn = $this->modelCacheName($data, $spec)) {
-      return $this->cache_engine->deleteAll($cn, '');
+      return $this->cache_engine->deleteAll($cn);
     }
   }
 
@@ -557,8 +568,8 @@ class Model extends DbClass
    */
   public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 0)
   {
-    $model =& $this;
-    return $this->getSetFromCache(fn () => $model->get($data), $data, 'auto-' . $spec, $ttl);
+    $model = &$this;
+    return $this->getSetFromCache(fn() => $model->get($data), $data, $spec ? "auto-$spec" : '', $ttl);
   }
 
 
@@ -579,5 +590,4 @@ class Model extends DbClass
 
     return null;
   }
-
 }

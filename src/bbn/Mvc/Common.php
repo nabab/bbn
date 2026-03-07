@@ -308,4 +308,23 @@ trait Common
     return Mvc::getUserDataPath($id_user, $plugin);
   }
 
+  public function deleteModelCache(string $path, array $data): bool
+  {
+    return $this->_mvc->deleteModelCache($path, $data);
+  }
+
+  public function deletepluginModelCache(string $path, array $data, string $plugin): bool
+  {
+    return $this->_mvc->deletePluginModelCache($path, $data, $plugin);
+  }
+
+  public function deleteSubpluginModelCache(string $path, array $data, string $plugin, string $subplugin): bool
+  {
+    return $this->_mvc->deleteSubpluginModelCache($path, $data, $plugin, $subplugin);
+  }
+
+
+
+
+
 }

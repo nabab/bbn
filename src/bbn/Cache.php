@@ -288,6 +288,10 @@ class Cache implements CacheInterface
         case 'apc':
           return call_user_func('\\apcu_delete', $key);
         case 'redis':
+          if ($this->prefix && mb_strpos($key, $this->prefix) !== 0) {
+            $key = $this->prefix . $key;
+          }
+
           return $this->obj->unlink($key);
         case 'memcache':
           return $this->obj->delete($key);

@@ -646,8 +646,16 @@ class X
     return self::toObject($res);
   }
 
+  public static function extend(iterable &$obj, iterable ...$others): array|stdClass
+  {
+    if (is_object($obj)) {
+      return self::mergeObjects($obj, ...$others);
+    }
 
-  public static function extendOut(&$obj, ...$others)
+    return self::mergeArrays($obj, ...$others);
+  }
+
+  public static function extendOut(array|stdClass &$obj, array|stdClass ...$others): array|stdClass
   {
     if (is_object($obj)) {
       foreach ($others as $o) {
@@ -661,7 +669,8 @@ class X
           }
         }
       }
-    } else if (is_array($obj)) {
+    }
+    else if (is_array($obj)) {
       foreach ($others as $o) {
         if (!is_array($o)) {
           throw new Exception('The provided argument must be an array, ' . gettype($o) . ' given.');

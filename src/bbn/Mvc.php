@@ -1138,7 +1138,7 @@ class Mvc implements Api
    */
   public function getView(string $path, string $mode = 'html', ?array $data = null)
   {
-    if (!router::isMode($mode) || !($path = Router::parse($path))) {
+    if (!Router::isMode($mode) || !($path = Router::parse($path))) {
       throw new Exception(
         X::_("Incorrect mode $path $mode")
       );
@@ -1169,7 +1169,7 @@ class Mvc implements Api
    */
   public function viewExists(string $path, string $mode = 'html'): bool
   {
-    if (!router::isMode($mode) || !($path = Router::parse($path))) {
+    if (!Router::isMode($mode) || !($path = Router::parse($path))) {
       return false;
     }
 
@@ -1223,7 +1223,7 @@ class Mvc implements Api
    */
   public function getExternalView(string $full_path, string $mode = 'html', ?array $data = null)
   {
-    if (!router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {
+    if (!Router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {
       throw new Exception(
         X::_("Incorrect mode $full_path $mode")
       );
@@ -1309,7 +1309,7 @@ class Mvc implements Api
    */
   public function hasCustomPluginModel(string $path, string $plugin): bool
   {
-    return (bool) $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin);
+    return (bool) $this->router->routeCustomPlugin(Router::parse($path), 'model', $plugin);
   }
 
 
@@ -1328,7 +1328,7 @@ class Mvc implements Api
   {
     if (
       $plugin
-      && ($route = $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin))
+      && ($route = $this->router->routeCustomPlugin(Router::parse($path), 'model', $plugin))
     ) {
       $model = new Model($this->db, $route, $ctrl, $this);
       if ($ttl) {
@@ -1362,7 +1362,7 @@ class Mvc implements Api
    */
   public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool) $this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(Router::parse($path), 'model', $plugin, $subplugin);
   }
 
   /**
@@ -1376,7 +1376,7 @@ class Mvc implements Api
    */
   public function hasSubpluginJs(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool) $this->router->routeSubplugin(router::parse($path), 'js', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(Router::parse($path), 'js', $plugin, $subplugin);
   }
 
 
@@ -1391,7 +1391,7 @@ class Mvc implements Api
    */
   public function hasSubpluginHtml(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool) $this->router->routeSubplugin(router::parse($path), 'html', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(Router::parse($path), 'html', $plugin, $subplugin);
   }
 
 
@@ -1406,7 +1406,7 @@ class Mvc implements Api
    */
   public function hasSubpluginCss(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool) $this->router->routeSubplugin(router::parse($path), 'css', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(Router::parse($path), 'css', $plugin, $subplugin);
   }
 
 
@@ -1427,7 +1427,7 @@ class Mvc implements Api
     if (
       $plugin
       && $subplugin
-      && ($route = $this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin))
+      && ($route = $this->router->routeSubplugin(Router::parse($path), 'model', $plugin, $subplugin))
     ) {
       $model = new Model($this->db, $route, $ctrl, $this);
       $res = $ttl ? $model->getFromCache($data, '', $ttl) : $model->get($data);
@@ -1439,6 +1439,81 @@ class Mvc implements Api
         "Impossible to find the model %s from subplugin %s in plugin %s",
         $path,
         $subplugin,
+        $plugin
+      )
+    );
+  }
+
+  public function deleteSubpluginModelCache(string $path, array $data, string $plugin, string $subplugin): bool
+  {
+    if (
+      $plugin
+      && $subplugin
+      && ($route = $this->router->routeSubplugin(Router::parse($path), 'model', $plugin, $subplugin))
+    ) {
+      $model = new Model($this->db, $route, $this->controller, $this);
+      return $model->deleteCache($data);
+    }
+
+    throw new Exception(
+      X::_(
+        "Impossible to find the model %s from subplugin %s in plugin %s",
+        $path,
+        $subplugin,
+        $plugin
+      )
+    );
+  }
+
+
+  public function deleteCustomPluginModelCache(string $path, array $data, string $plugin): bool
+  {
+    if (
+      $plugin
+      && ($route = $this->router->routeCustomPlugin(Router::parse($path), 'model', $plugin))
+    ) {
+      $model = new Model($this->db, $route, $this->controller, $this);
+      return (bool)$model->deleteCache($data);
+    }
+
+    throw new Exception(
+      X::_(
+        "Impossible to find the model %s in plugin %s",
+        $path,
+        $plugin
+      )
+    );
+  }
+
+  public function deleteModelCache(string $path, array $data): bool
+  {
+    if (($path = Router::parse($path)) && ($route = $this->router->route($path, 'model'))) {
+      $model = new Model($this->db, $route, $this->controller, $this);
+      return (bool)$model->deleteCache($data);
+    }
+
+    throw new Exception(
+      X::_(
+        "Impossible to find the model %s",
+        $path
+      )
+    );
+  }
+
+  public function deletePluginModelCache(string $path, array $data, string $plugin): bool
+  {
+    if (
+      $plugin
+      && ($route = $this->router->routeCustomPlugin(Router::parse($path), 'model', $plugin))
+    ) {
+      $model = new Model($this->db, $route, $this->controller, $this);
+      return (bool)$model->deleteCache($data);
+    }
+
+    throw new Exception(
+      X::_(
+        "Impossible to find the model %s in plugin %s",
+        $path,
         $plugin
       )
     );
@@ -1462,7 +1537,7 @@ class Mvc implements Api
     if (
       $plugin
       && $subplugin
-      && ($route = $this->router->routeSubplugin(router::parse($path), $mode, $plugin, $subplugin))
+      && ($route = $this->router->routeSubplugin(Router::parse($path), $mode, $plugin, $subplugin))
     ) {
       $view = new View($route);
       return $view->get($data);
@@ -1497,7 +1572,7 @@ class Mvc implements Api
    */
   public function getPluginView(string $path, string $mode, array $data, string $plugin)
   {
-    return $this->customPluginView(router::parse($path), $mode, $data, $this->pluginName($plugin));
+    return $this->customPluginView(Router::parse($path), $mode, $data, $this->pluginName($plugin));
   }
 
 
@@ -1580,7 +1655,7 @@ class Mvc implements Api
    */
   public function getPluginModel(string $path, array $data, Controller $ctrl, string $plugin, ?int $ttl = null)
   {
-    return $this->customPluginModel(router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
+    return $this->customPluginModel(Router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
   }
 
 
@@ -1614,7 +1689,7 @@ class Mvc implements Api
       $data = $this->data;
     }
 
-    if ($route = $this->router->route(router::parse($path), 'model')) {
+    if ($route = $this->router->route(Router::parse($path), 'model')) {
       $model = new Model($this->db, $route, $ctrl, $this);
       return $model->getFromCache($data, '', $ttl);
     }
@@ -1636,9 +1711,10 @@ class Mvc implements Api
       $data = $this->data;
     }
 
-    if ($route = $this->router->route(router::parse($path), 'model')) {
+    if ($route = $this->router->route(Router::parse($path), 'model')) {
       $model = new Model($this->db, $route, $ctrl, $this);
-      $model->setCache($data, '', $ttl);
+      $modelData = $model->get($data);
+      $model->setCache($modelData, $data, '', $ttl);
     }
   }
 
@@ -1656,7 +1732,7 @@ class Mvc implements Api
       $data = $this->data;
     }
 
-    if ($route = $this->router->route(router::parse($path), 'model')) {
+    if ($route = $this->router->route(Router::parse($path), 'model')) {
       $model = new Model($this->db, $route, $ctrl, $this);
       $model->deleteCache($data, '');
     }

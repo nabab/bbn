@@ -7,7 +7,7 @@
 namespace bbn\Appui;
 
 use Exception;
-use bbn;
+use StdClass;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
@@ -19,53 +19,62 @@ use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
 use bbn\Appui\Option;
 use bbn\Models\Cls\Basic;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\Timer;
+
+use function in_array;
+use function json_decode;
+use function array_values;
+use function array_filter;
+use function is_null;
 
 class Dashboard extends Basic
 {
 
-  use bbn\Models\Tts\Optional;
+  use Optional;
+  use Timer;
 
-  /** @var \bbn\Appui\Option */
-  protected $opt;
+  /** @var Option */
+  protected Option $opt;
 
-  /** @var \bbn\User */
-  protected $user;
+  /** @var User */
+  protected User $user;
 
-  /** @var \bbn\User\Permissions */
-  protected $perm;
+  /** @var Permissions */
+  protected Permissions $perm;
 
-  /** @var \bbn\User\Preferences */
-  protected $pref;
+  /** @var Preferences */
+  protected Preferences $pref;
 
-  /** @var \bbn\Db */
-  protected $db;
-
-  /** @var array */
-  protected $archOpt;
+  /** @var Db */
+  protected Db $db;
 
   /** @var array */
-  protected $archPref;
+  protected array $archOpt;
 
   /** @var array */
-  protected $cfgPref;
+  protected array $archPref;
 
   /** @var array */
-  protected $archBits;
+  protected array $cfgPref;
+
+  /** @var array */
+  protected array $archBits;
 
   /** @var string */
-  protected $id;
+  protected string $id;
 
   /** @var string */
-  protected $code;
+  protected string $code;
 
   /** @var string */
-  protected $idList;
+  protected string $idList;
 
   /** @var string */
   protected $idWidgets;
 
   /** @var array */
-  protected $nativeWidgetFields = [
+  protected static $nativeWidgetFields = [
     'component',
     'itemComponent',
     'icon',
@@ -79,8 +88,21 @@ class Dashboard extends Basic
   ];
 
   /** @var array */
-  protected $widgetFields = [];
+  protected static $optionWidgetFields = [
+    'component',
+    'itemComponent',
+    'closable',
+    'observe',
+    'buttonsRight',
+    'buttonsLeft',
+    'options',
+    'cache'
+  ];
 
+  protected $currentNativeWidgetFields;
+
+  /** @var array */
+  protected $widgetFields = [];
 
   /**
    * dashboard constructor.
@@ -97,8 +119,8 @@ class Dashboard extends Basic
     $this->archPref = $this->cfgPref['arch']['user_options'];
     $this->archBits = $this->cfgPref['arch']['user_options_bits'];
     self::optionalInit();
-    $this->widgetFields       = \array_merge($this->nativeWidgetFields, \array_values($this->archBits));
-    $this->nativeWidgetFields = \array_merge($this->nativeWidgetFields, \array_values($this->archOpt));
+    $this->widgetFields       = [...self::$nativeWidgetFields, ...array_values($this->archBits)];
+    $this->currentNativeWidgetFields = [...self::$nativeWidgetFields, ...array_values($this->archOpt)];
     $this->idList             = $this->getOptionId('list');
     if (!Str::isUid($this->idList)) {
       throw new Exception(_("Unable to load the option 'list'"));
@@ -120,9 +142,9 @@ class Dashboard extends Basic
    *
    * @param [type] $code
    *
-   * @return void
+   * @return bool
    */
-  public function exists(string $code)
+  public function exists(string $code): bool
   {
     return (bool)$this->getId($code);
   }
@@ -213,10 +235,10 @@ class Dashboard extends Basic
       }
 
       $t                            = &$this;
-      $data                         = \array_filter(
+      $data                         = array_filter(
         $d,
         function ($f) use ($t) {
-          return \in_array($f, \array_values($t->archPref), true);
+          return in_array($f, array_values($t->archPref), true);
         },
         ARRAY_FILTER_USE_KEY
       );
@@ -291,7 +313,7 @@ class Dashboard extends Basic
 
     $d1                              = $this->pref->getBitCfg(null, $this->_prepareWidget($widget));
     $d2                              = $this->pref->getBitCfg(null, $this->_prepareWidget($opt));
-    $toSave                          = \array_filter(
+    $toSave                          = array_filter(
       $d1,
       function ($v, $k) use ($d2) {
         return $d2[$k] != $v;
@@ -319,7 +341,7 @@ class Dashboard extends Basic
       $res = true;
       if ($alias = $this->db->selectAll($this->cfgPref['table'], [], [$this->archPref['id_alias'] => $this->id])) {
         foreach ($alias as $a) {
-          if (($cfg = \json_decode($a->{$this->archPref['cfg']}, true))
+          if (($cfg = json_decode($a->{$this->archPref['cfg']}, true))
             && isset($cfg['widget'], $cfg['widget'][$id])
           ) {
             unset($cfg['widget'][$id]);
@@ -451,7 +473,7 @@ class Dashboard extends Basic
     if (!Str::isUid($id)) {
       throw new Exception(_("The id must be a uuid"));
     }
-    return ($bit = $this->pref->getBit($id)) && \is_null($bit[$this->archBits['id_option']]);
+    return ($bit = $this->pref->getBit($id)) && is_null($bit[$this->archBits['id_option']]);
   }
 
 
@@ -493,11 +515,12 @@ class Dashboard extends Basic
    */
   public function getPvtWidget(string $id): ?array
   {
-    if ($this->isPvtWidget($id)
+    if (
+      $this->isPvtWidget($id)
       && ($w = $this->pref->getBit($id))
     ) {
       $o = !empty($w['widget']) ? $w['widget'] : [];
-      $o = X::mergeArrays($o, [
+      $o = $this->mergeWidgets($o, [
         $this->archBits['id'] => $w[$this->archBits['id']],
         'key' => $w[$this->archBits['id']],
         $this->archBits['text'] => $w[$this->archBits['text']],
@@ -505,13 +528,13 @@ class Dashboard extends Basic
       ]);
       // Parse JSON properties
       if (!empty($o['buttonsRight']) && Str::isJson($o['buttonsRight'])) {
-        $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+        $o['buttonsRight'] = json_decode($o['buttonsRight'], true);
       }
       if (!empty($o['buttonsLeft']) && Str::isJson($o['buttonsLeft'])) {
-        $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+        $o['buttonsLeft'] = json_decode($o['buttonsLeft'], true);
       }
       if (!empty($o['options']) && Str::isJson($o['options'])) {
-        $o['options'] = \json_decode($o['options'], true);
+        $o['options'] = json_decode($o['options'], true);
       }
       // "hidden" property
       if (!isset($o['hidden'])) {
@@ -661,14 +684,14 @@ class Dashboard extends Basic
   {
     $ret   = [];
     $toend = [];
-    if (bbn\X::isAssoc($widgets)) {
-      $widgets = \array_values($widgets);
+    if (X::isAssoc($widgets)) {
+      $widgets = array_values($widgets);
     }
 
     foreach ($widgets as $widget) {
       if (
         Str::isInteger($widget[$this->archOpt['num']])
-        && !\array_key_exists($widget[$this->archOpt['num']], $ret)
+        && !array_key_exists($widget[$this->archOpt['num']], $ret)
       ) {
         $ret[$widget[$this->archOpt['num']]] = $widget['key'];
       } else {
@@ -676,8 +699,8 @@ class Dashboard extends Basic
       }
     }
 
-    \ksort($ret);
-    return \array_values(\array_merge($ret, $toend));
+    ksort($ret);
+    return array_values(array_merge($ret, $toend));
   }
 
 
@@ -694,7 +717,7 @@ class Dashboard extends Basic
       $ret[$w[$this->archOpt['code']]] = $w;
     }
 
-    \ksort($ret);
+    ksort($ret);
     return $ret;
   }
 
@@ -771,21 +794,21 @@ class Dashboard extends Basic
     if (($id_opt = $this->getOptionId('default'))
       && ($all = $this->pref->getAll($id_opt))
     ) {
-      if ($by_id_user = \array_filter(
+      if ($by_id_user = array_filter(
         $all,
         function ($a) {
           return !empty($a['id_user']) && !empty($a['id_alias']);
         }
       )) {
         return $by_id_user[0]['id_alias'];
-      } elseif ($by_id_group = \array_filter(
+      } elseif ($by_id_group = array_filter(
         $all,
         function ($a) {
           return !empty($a['id_group']) && !empty($a['id_alias']);
         }
       )) {
         return $by_id_group[0]['id_alias'];
-      } elseif ($by_public = \array_filter(
+      } elseif ($by_public = array_filter(
         $all,
         function ($a) {
           return !empty($a['public']) && !empty($a['id_alias']);
@@ -890,7 +913,7 @@ class Dashboard extends Basic
             $o[$this->archBits['id']] = $w[$this->archBits['id']];
             // Set "cfg" properties coming from the bit
             if ($cfg = $this->pref->getBitCfg($w[$this->archBits['id']])) {
-              $o = X::mergeArrays($o, $cfg);
+              $o = $this->mergeWidgets($o, $cfg);
             }
 
             // Set the widget's url
@@ -913,11 +936,54 @@ class Dashboard extends Basic
     return $res;
   }
 
-  public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): ?array
+  /**
+   * Returns the dashboard's widgets
+   * @param string $url
+   * @return array
+   */
+  public function getPublicWidgets(string $url = ''): array
   {
-    $res = null;
-    $mvc->getTimer()->start('global');
-    $mvc->getTimer()->start('widgetPref');
+    /** @var array The final result */
+    $res = [];
+    if ($this->_check()) {
+      // Looking for the widgets
+      if ($widgets = $this->pref->getBits($this->id, false)) {
+        foreach ($widgets as $w) {
+          // Getting the option
+          if (
+            !empty($w[$this->archBits['id_option']])
+            && ($o = $this->opt->option($w[$this->archBits['id_option']]))
+          ) {
+            // Set "text" property coming from the bit
+            //$o[$this->archOpt['text']] = $w[$this->archBits['text']];
+            // Set "num" property coming from the bit
+            //$o[$this->archOpt['num']] = $w[$this->archBits['num']];
+            // Set "id_option" property coming from the option
+            $o[$this->archBits['id_option']] = $o[$this->archOpt['id']];
+            // Set the widget's url
+            if (!empty($o[$this->archOpt['code']])) {
+              $o['url'] = $url . $o[$this->archOpt['code']];
+            }
+
+            unset(
+              $o[$this->archOpt['id_alias']],
+              $o['num_children'],
+              $o[$this->archOpt['id_parent']]
+            );
+            $res[] = $o;
+          }
+        }
+      }
+    }
+
+    X::sortBy($res, $this->archOpt['num'], 'asc');
+    return $res;
+  }
+
+  protected function getWidgetPref(string $idWidget, Controller|Model $mvc, ?Permissions $perm = null): ?array
+  {
+    $timer = $this->getTimer();
+    $timer->start('widgetPref');
     $o = $this->opt;
     $info = $o->option($idWidget);
     // Fetches the permission's alias: widget in dashboard options
@@ -926,14 +992,14 @@ class Dashboard extends Basic
       $id_perm = $mvc->inc->perm->optionToPermission($idWidget);
       //X::ddump("jkkkk", $code, $id_perm, $info);
       if ($pref = $mvc->inc->pref->getByOption($idWidget)) {
-        $info = X::mergeArrays($info, $pref);
+
+        $info = $this->mergeWidgets($info, $pref);
       }
-    }
-    elseif ($info) {
+    } elseif ($info) {
       $id_perm = $perm->optionToPermission($idWidget);
       $code    = $info['code'];
       if ($pref = $mvc->inc->pref->getByOption($idWidget)) {
-        $info = X::mergeArrays($info, $pref);
+        $info = $this->mergeWidgets($info, $pref);
       }
     }
     // Otherwise checking if the key is a preference
@@ -946,41 +1012,95 @@ class Dashboard extends Basic
       $code = !empty($info['code']) ? $info['code'] : false;
     }
 
-    $mvc->getTimer()->stop('widgetPref');
-    if (!empty($code)
+    $timer->stop('widgetPref');
+    if (
+      !empty($code)
       && ($perm && $this->isPvtWidget($idWidget)
         || (!empty($id_perm)
           && (!$perm || $perm->has($id_perm))))
     ) {
-      $mvc->getTimer()->start('lastPart');
-      if (!empty($id_perm)
+      return [
+        'code' => $code,
+        'id_perm' => $id_perm,
+        'info' => $info
+      ];
+    }
+
+    return null;
+  }
+
+  public function deleteWidgetCache(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): void
+  {
+    if ($pref = $this->getWidgetPref($idWidget, $mvc, $perm)) {
+      $code = $pref['code'];
+      $id_perm = $pref['id_perm'];
+      $info = $pref['info'];
+      if (
+        !empty($id_perm)
+        && ($id_plugin = $this->opt->getParentPlugin($id_perm))
+      ) {
+        $plugin = $this->opt->getPluginName($id_plugin);
+        if ($plugin === 'appui-dashboard') {
+          $mvc->deletePluginModelCache($code, $data, 'appui-dashboard');
+        } else {
+          $mvc->deleteSubpluginModelCache($code, $data, $plugin, 'appui-dashboard');
+        }
+      } else {
+        $mvc->deletePluginModelCache($code, $data, 'appui-dashboard');
+      }
+    }
+  }
+
+  public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): ?array
+  {
+    $res = null;
+    $timer = $this->getTimer();
+    $timer->start('global');
+    $o = $this->opt;
+    if ($pref = $this->getWidgetPref($idWidget, $mvc, $perm)) {
+      $code = $pref['code'];
+      $id_perm = $pref['id_perm'];
+      $info = $pref['info'];
+      $timer->start('lastPart');
+      if (
+        !empty($id_perm)
         && ($id_plugin = $o->getParentPlugin($id_perm))
       ) {
         $plugin = $o->getPluginName($id_plugin);
         if ($plugin === 'appui-dashboard') {
-          $mvc->getTimer()->start('model');
+          $timer->start('model');
           $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
-          $mvc->getTimer()->stop('model');
-        }
-        else {
-          $mvc->getTimer()->start('model');
+          $timer->stop('model');
+        } else {
+          $timer->start('model');
           $res = $mvc->getSubpluginModel($code, $data, $plugin, 'appui-dashboard', $info['cache'] ?? 0);
-          $mvc->getTimer()->stop('model');
+          $timer->stop('model');
         }
         /*
         if (X::indexOf($plugin, 'appui-') === 0) {
           $plugin = Str::sub($plugin, 6);
         }
         */
-      }
-      else {
+      } else {
         $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
       }
 
-      $mvc->getTimer()->stop('lastPart');
+      $timer->stop('lastPart');
     }
 
-    $mvc->getTimer()->stop('global');
+    $timer->stop('global');
+    return $res;
+  }
+
+  protected function mergeWidgets(array $option, array $cfg): array
+  {
+    $res = $option;
+    foreach ($cfg as $k => $v) {
+      if (!in_array($k, self::$optionWidgetFields)) {
+        $res[$k] = $v;
+      }
+    }
+
     return $res;
   }
 
@@ -1028,10 +1148,10 @@ class Dashboard extends Basic
     $widget['limit']                    = $widget['limit'] ?? 5;
     $widget['buttonsRight']             = $widget['buttonsRight'] ?? [];
     $widget['buttonsLeft']              = $widget['buttonsLeft'] ?? [];
-    $widget['options']                  = $widget['options'] ?? new \stdClass();
+    $widget['options']                  = $widget['options'] ?? new stdClass();
     $widget['cache']                    = $widget['cache'] ?? 0;
     foreach ($widget as $field => $val) {
-      if (!\in_array($field, $this->nativeWidgetFields)) {
+      if (!in_array($field, $this->currentNativeWidgetFields)) {
         unset($widget[$field]);
       }
     }
@@ -1052,7 +1172,7 @@ class Dashboard extends Basic
     }
 
     foreach ($widget as $field => $val) {
-      if (!\in_array($field, $this->widgetFields)) {
+      if (!in_array($field, $this->widgetFields)) {
         unset($widget[$field]);
       }
     }
@@ -1077,7 +1197,8 @@ class Dashboard extends Basic
     if ($this->id) {
       // Looking for some preferences if he has some
       $uDash = $this->getUserDashboard($this->id);
-      if (!empty($uDash)
+      if (
+        !empty($uDash)
         && !empty($uDash[$this->archPref['cfg']])
         && Str::isJson($uDash[$this->archPref['cfg']])
         && ($uDashCfg = json_decode($uDash[$this->archPref['cfg']], true))
@@ -1113,7 +1234,7 @@ class Dashboard extends Basic
               $o[$this->archOpt['num']] = $w[$this->archBits['num']];
               // Set "cfg" properties coming from the bit
               if ($cfg = $this->pref->getBitCfg($w[$this->archBits['id']])) {
-                $o = X::mergeArrays($o, $cfg);
+                $o = $this->mergeWidgets($o, $cfg);
               }
 
               // Set the widget's key
@@ -1125,18 +1246,18 @@ class Dashboard extends Basic
 
               // Get the preferences of the single widget
               if (!empty($widgetPrefs[$o['key']])) {
-                $o = X::mergeArrays($o, $widgetPrefs[$o['key']]);
+                $o = $this->mergeWidgets($o, $widgetPrefs[$o['key']]);
               }
 
               // Parse JSON properties
               if (!empty($o['buttonsRight']) && Str::isJson($o['buttonsRight'])) {
-                $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+                $o['buttonsRight'] = json_decode($o['buttonsRight'], true);
               }
               if (!empty($o['buttonsLeft']) && Str::isJson($o['buttonsLeft'])) {
-                $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+                $o['buttonsLeft'] = json_decode($o['buttonsLeft'], true);
               }
               if (!empty($o['options']) && Str::isJson($o['options'])) {
-                $o['options'] = \json_decode($o['options'], true);
+                $o['options'] = json_decode($o['options'], true);
               }
 
               if (!isset($o['hidden'])) {
@@ -1160,13 +1281,14 @@ class Dashboard extends Basic
       }
 
       //X::ddump($res);
-      if (!empty($uDash)
+      if (
+        !empty($uDash)
         && ($pvtWidgets = $this->pref->getBits($uDash[$this->archPref['id']], false))
       ) {
         foreach ($pvtWidgets as $w) {
-          if (\is_null($w['id_option'])) {
+          if (is_null($w['id_option'])) {
             $o = !empty($w['widget']) ? $w['widget'] : [];
-            $o = X::mergeArrays($o, [
+            $o = $this->mergeWidgets($o, [
               $this->archBits['id'] => $w[$this->archBits['id']],
               'key' => $w[$this->archBits['id']],
               $this->archBits['text'] => $w[$this->archBits['text']],
@@ -1178,17 +1300,17 @@ class Dashboard extends Basic
             }
             // Get the preferences of the single widget
             if (!empty($widgetPrefs[$o['key']])) {
-              $o = X::mergeArrays($o, $widgetPrefs[$o['key']]);
+              $o = $this->mergeWidgets($o, $widgetPrefs[$o['key']]);
             }
             // Parse JSON properties
             if (!empty($o['buttonsRight']) && Str::isJson($o['buttonsRight'])) {
-              $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+              $o['buttonsRight'] = json_decode($o['buttonsRight'], true);
             }
             if (!empty($o['buttonsLeft']) && Str::isJson($o['buttonsLeft'])) {
-              $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+              $o['buttonsLeft'] = json_decode($o['buttonsLeft'], true);
             }
             if (!empty($o['options']) && Str::isJson($o['options'])) {
-              $o['options'] = \json_decode($o['options'], true);
+              $o['options'] = json_decode($o['options'], true);
             }
             // "hidden" property
             if (!isset($o['hidden'])) {
@@ -1219,8 +1341,8 @@ class Dashboard extends Basic
     $oa   = &$this->archOpt;
     $perm = &$this->perm;
     // Filter the widgets by user's permissions
-    return \array_values(
-      \array_filter(
+    return array_values(
+      array_filter(
         $widgets,
         function ($w) use (&$oa, &$perm) {
           // The alias is the widget itself on which the permission should be set
@@ -1247,9 +1369,9 @@ class Dashboard extends Basic
       }
 
       // Fix the widget structure
-      return \array_map(
+      return array_map(
         function ($p) use ($t) {
-          return \array_merge(
+          return array_merge(
             [
               $t->archPref['id'] => $p[$t->archPref['id']],
               $t->archPref['id_option'] => $p[$t->archPref['id_option']],
@@ -1260,8 +1382,8 @@ class Dashboard extends Basic
             $p['widget']
           );
         },
-        \array_values(
-          \array_filter(
+        array_values(
+          array_filter(
             $prefs,
             function ($p) {
               return !empty($p['widget']);
