@@ -78,21 +78,21 @@ class Service implements ServiceInterface
     return null;
   }
 
-  public function setSourceLang(string $lang): self
+  public function setSourceLang(string $lang): static
   {
     $this->sourceLang = $lang;
 
     return $this;
   }
 
-  public function setTargetLang(string $lang): self
+  public function setTargetLang(string $lang): static
   {
     $this->targetLang = $lang;
 
     return $this;
   }
 
-  public function setAlternatives(int $num): self
+  public function setAlternatives(int $num): static
   {
     $this->alternatives = $num;
 

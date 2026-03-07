@@ -126,7 +126,7 @@ class Note extends DbCls
   ];
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /**
    * Note constructor.
@@ -162,7 +162,7 @@ class Note extends DbCls
     return $this->userId;
   }
 
-  public function setLang($lang): self
+  public function setLang($lang): static
   {
     $this->lang = $lang;
     return $this;

@@ -934,7 +934,7 @@ class Mvc implements Api
    *
    * @return bool
    */
-  public function check()
+  public function check(): bool
   {
     return $this->info ? true : false;
   }

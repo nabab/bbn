@@ -322,7 +322,7 @@ class Mailbox extends Basic
   }
 
 
-  public function setPingInterval(int $val): self
+  public function setPingInterval(int $val): static
   {
     $this->_ping_interval = $val;
     return $this;

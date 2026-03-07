@@ -18,7 +18,7 @@ abstract class Table extends DbCls
   ];
 
   /** @var array */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   public function __construct(Db $db)
   {

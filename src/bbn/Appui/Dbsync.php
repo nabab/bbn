@@ -157,7 +157,8 @@ MYSQL
 	 * Checks if the initialization has been all right
 	 * @return bool
 	 */
-  public static function check(){
+  public static function check(): bool
+  {
     if (!isset(self::$_is_checked)) {
       self::$_is_checked = \is_object(self::$db) && \is_object(self::$dbs) && self::$db->check() && self::$dbs->check();
     }

@@ -161,7 +161,7 @@ class Controller implements Api
     return $this->_mvc->getTimer();
   }
 
-  public function setStream($type = ''): self
+  public function setStream($type = ''): static
   {
     $content = ob_get_contents();
     if ($this->_stream || $content) {
@@ -570,7 +570,7 @@ class Controller implements Api
    * @param $plugin_path
    * @return $this
    */
-  public function registerPluginClasses($plugin_path): self
+  public function registerPluginClasses($plugin_path): static
   {
     spl_autoload_register(
         function ($class_name) use ($plugin_path): void {
@@ -1440,7 +1440,7 @@ class Controller implements Api
       $data = null,
       int|null $ttl = null,
       string $path = ''
-  ): self
+  ): static
   {
     if (empty($path)) {
       $basename = X::basename($this->_file, '.php');
@@ -2016,7 +2016,7 @@ class Controller implements Api
    * @param bool $private
    * @return self
    */
-  public function addToObj(string $path, $data = [], $private = false): self
+  public function addToObj(string $path, $data = [], $private = false): static
   {
     if (Str::sub($path, 0, 2) === './') {
       $path = $this->getCurrentDir() . Str::sub($path, 1);

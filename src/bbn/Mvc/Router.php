@@ -200,7 +200,7 @@ class Router
    *
    * @return self
    */
-  public function reset(): self
+  public function reset(): static
   {
     $this->alt_root = false;
     return $this;

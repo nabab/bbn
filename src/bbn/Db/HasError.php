@@ -172,7 +172,7 @@ trait HasError
    * @param mixed $st
    * @return self
    */
-  public function log($st): self
+  public function log($st): static
   {
     $args = \func_get_args();
     foreach ($args as $a){

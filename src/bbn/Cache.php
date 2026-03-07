@@ -143,7 +143,7 @@ class Cache implements CacheInterface
    * @param string $engine
    * @return self
    */
-  public static function getCache(?string $engine = null): self
+  public static function getCache(?string $engine = null): static
   {
     self::_init($engine);
     return self::$engine;
@@ -156,7 +156,7 @@ class Cache implements CacheInterface
    * @param null|string $engine
    * @return self
    */
-  public static function getEngine(?string $engine = null): self
+  public static function getEngine(?string $engine = null): static
   {
     return self::getCache($engine);
   }

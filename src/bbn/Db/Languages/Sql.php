@@ -2668,7 +2668,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return self
    */
-  public function enableTrigger(): self
+  public function enableTrigger(): static
   {
     $this->_triggers_disabled = false;
     return $this;
@@ -2680,7 +2680,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return self
    */
-  public function disableTrigger(): self
+  public function disableTrigger(): static
   {
     $this->_triggers_disabled = true;
     return $this;
@@ -2708,7 +2708,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param null|string|array   $tables   database's table(s) name(s)
    * @return self
    */
-  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): static
   {
     $kinds   = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
     $moments = ['before', 'after'];
@@ -3707,7 +3707,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param $params
    * @return self
    */
-  protected function addStatement(string $statement, $params): self
+  protected function addStatement(string $statement, $params): static
   {
     $this->last_real_query  = $statement;
     $this->last_real_params = $params;
@@ -3773,7 +3773,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $id
    * @return $this
    */
-  public function setLastInsertId($id = ''): self
+  public function setLastInsertId($id = ''): static
   {
     if ($id === '') {
       if ($this->id_just_inserted) {
@@ -3908,7 +3908,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * ```
    * @return self
    */
-  public function startFancyStuff(): self
+  public function startFancyStuff(): static
   {
     $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [Query::class, [$this]]);
     $this->_fancy = 1;
@@ -3926,7 +3926,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    *
    * @return self
    */
-  public function stopFancyStuff(): self
+  public function stopFancyStuff(): static
   {
     $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
     $this->_fancy = false;

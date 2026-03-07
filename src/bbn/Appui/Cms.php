@@ -38,7 +38,7 @@ class Cms extends DbCls
   protected $media;
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /** @var string The option's ID of the type of notes for CMS (pages) */
   protected $noteType;

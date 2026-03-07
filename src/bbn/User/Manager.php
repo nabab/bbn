@@ -74,7 +74,7 @@ You can click the following link to access directly your account:<br>
   /** @var Db */
   protected $db;
 
-  protected $class_cfg;
+  protected array $class_cfg;
 
 
   public function getListFields()
@@ -787,7 +787,7 @@ You can click the following link to access directly your account:<br>
    * @param int    $exp     Timestamp of the expiration date
    * @return manager
    */
-  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, string|null $url = null): self
+  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, ?string $url = null): static
   {
     if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
       switch ($message)

@@ -103,7 +103,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self Chainable
    */
-  public function setData($index, $data = null): self
+  public function setData($index, $data = null): static
   {
     return $this;
   }
@@ -215,7 +215,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self
    */
-  public function setSession($attr): self
+  public function setSession($attr): static
   {
     return $this;
   }
@@ -225,7 +225,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self
    */
-  public function unsetSession(): self
+  public function unsetSession(): static
   {
     return $this;
   }
@@ -257,7 +257,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self
    */
-  public function setOsession(): self
+  public function setOsession(): static
   {
     return $this;
   }
@@ -277,7 +277,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self
    */
-  public function updateActivity(): self
+  public function updateActivity(): static
   {
     return $this;
   }
@@ -288,7 +288,7 @@ final class Fake extends Basic implements Implementor
    * @todo Use it only when needed!
    * @return self
    */
-  public function saveSession(bool $force = false): self
+  public function saveSession(bool $force = false): static
   {
     return $this;
   }
@@ -299,7 +299,7 @@ final class Fake extends Basic implements Implementor
    * @param bool $with_session If true deletes also the session information
    * @return self
    */
-  public function closeSession($with_session = false): self
+  public function closeSession($with_session = false): static
   {
     return $this;
   }
@@ -318,7 +318,7 @@ final class Fake extends Basic implements Implementor
    *
    * return self
    */
-  public function saveCfg(): self
+  public function saveCfg(): static
   {
     if ($this->check()) {
       $this->db->update(
@@ -336,7 +336,7 @@ final class Fake extends Basic implements Implementor
    *
    * return self
    */
-  public function setCfg($attr): self
+  public function setCfg($attr): static
   {
     return $this;
   }
@@ -347,7 +347,7 @@ final class Fake extends Basic implements Implementor
    * @param $attr
    * @return self
    */
-  public function unsetCfg($attr): self
+  public function unsetCfg($attr): static
   {
     return $this;
   }
@@ -357,7 +357,7 @@ final class Fake extends Basic implements Implementor
    *
    * @return self
    */
-  public function refreshInfo(): self
+  public function refreshInfo(): static
   {
     return $this;
   }

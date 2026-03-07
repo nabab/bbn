@@ -43,7 +43,7 @@ trait Engine
    * @param string $db The database's name
    * @return self
    */
-  public function change(string $db): self
+  public function change(string $db): static
   {
     $this->language->change($db);
 
@@ -191,7 +191,7 @@ trait Engine
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     $this->language->disableKeys();
     return $this;
@@ -208,7 +208,7 @@ trait Engine
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     $this->language->enableKeys();
     return $this;

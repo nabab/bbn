@@ -259,7 +259,7 @@ class Mysql extends Sql
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -272,7 +272,7 @@ class Mysql extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
 

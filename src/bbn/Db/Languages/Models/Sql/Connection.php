@@ -159,7 +159,7 @@ trait Connection
    * @method startFancyStuff
    * @return self
    */
-  public function startFancyStuff(): self
+  public function startFancyStuff(): static
   {
     $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [Query::class, [$this]]);
     $this->_fancy = 1;
@@ -173,7 +173,7 @@ trait Connection
    * @method stopFancyStuff
    * @return self
    */
-  public function stopFancyStuff(): self
+  public function stopFancyStuff(): static
   {
     $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
     $this->_fancy = 0;

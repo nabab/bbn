@@ -108,7 +108,7 @@ trait Internal
    * @param mixed $st
    * @return self
    */
-  public function log($st): self
+  public function log($st): static
   {
     $args = \func_get_args();
     foreach ($args as $a){
@@ -130,7 +130,7 @@ trait Internal
    * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
    * @return self
    */
-  public function setErrorMode(string $mode): self
+  public function setErrorMode(string $mode): static
   {
     $this->language->setErrorMode($mode);
     return $this;
@@ -165,7 +165,7 @@ trait Internal
    * @param string $mode 'columns','tables' or 'databases'
    * @return self
    */
-  public function clearCache(string $item, string $mode): self
+  public function clearCache(string $item, string $mode): static
   {
     if ($this->cacheHas($item, $mode)) {
       $this->cacheDelete($item, $mode);
@@ -185,7 +185,7 @@ trait Internal
    *
    * @return self
    */
-  public function clearAllCache(): self
+  public function clearAllCache(): static
   {
     $this->cacheDeleteAll();
     $this->language->initCache();
@@ -203,7 +203,7 @@ trait Internal
    *
    * @return self
    */
-  public function stopFancyStuff(): self
+  public function stopFancyStuff(): static
   {
     if ($this->language) {
       $this->language->stopFancyStuff();
@@ -223,7 +223,7 @@ trait Internal
    * 
    * @return self
    */
-  public function startFancyStuff(): self
+  public function startFancyStuff(): static
   {
     if ($this->language) {
       $this->language->startFancyStuff();

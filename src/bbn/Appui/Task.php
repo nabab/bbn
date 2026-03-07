@@ -109,7 +109,8 @@ class Task extends DbCls
     }
   }
 
-  public function check(){
+  public function check(): bool
+  {
     return isset($this->user);
   }
 

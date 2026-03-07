@@ -309,14 +309,14 @@ interface Engines
    *
    * @return $this
    */
-  public function startFancyStuff(): self;
+  public function startFancyStuff(): static;
 
   /**
    * Stops fancy stuff.
    *
    * @return $this
    */
-  public function stopFancyStuff(): self;
+  public function stopFancyStuff(): static;
 
   /**
    * @param array $args
@@ -337,7 +337,7 @@ interface Engines
    * @param string $id
    * @return $this
    */
-  public function setLastInsertId($id = ''): self;
+  public function setLastInsertId($id = ''): static;
 
   /**
    * Return the last inserted ID.
@@ -380,14 +380,14 @@ interface Engines
    *
    * @return self
    */
-  public function enableTrigger(): self;
+  public function enableTrigger(): static;
 
   /**
    * Disable the triggers' functions
    *
    * @return $this
    */
-  public function disableTrigger(): self;
+  public function disableTrigger(): static;
 
   /**
    * @return bool
@@ -406,7 +406,7 @@ interface Engines
    * @param null|string|array $tables
    * @return self
    */
-  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self;
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): static;
 
   /**
    * @return array

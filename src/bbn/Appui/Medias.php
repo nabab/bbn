@@ -95,7 +95,7 @@ class Medias extends DbCls
   protected $defaultUrlType;
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /** @var string $imageRoot */
   protected $imageRoot;

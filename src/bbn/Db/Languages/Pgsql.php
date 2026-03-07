@@ -315,7 +315,7 @@ class Pgsql extends Sql
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     // PostgreSQL does not provide any direct command or function to disable the Foreign key constraints.
 
@@ -328,7 +328,7 @@ class Pgsql extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     // PostgreSQL does not provide any direct command or function to enable the Foreign key constraints.
 
@@ -1706,7 +1706,7 @@ PGSQL
    * @return self
    * @throws \Exception
    */
-  private function newInstance(array $cfg): self
+  private function newInstance(array $cfg): static
   {
     $instance = new self($cfg);
 

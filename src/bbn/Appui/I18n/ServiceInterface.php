@@ -16,7 +16,7 @@ interface ServiceInterface {
     ?string $targetLang = null,
     ?int $alternatives = null
   ): ?array;
-  function setSourceLang(string $lang): self;
-  function setTargetLang(string $lang): self;
-  function setAlternatives(int $num): self;
+  function setSourceLang(string $lang): static;
+  function setTargetLang(string $lang): static;
+  function setAlternatives(int $num): static;
 }

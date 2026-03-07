@@ -48,9 +48,9 @@ class Ftp extends bbn\Models\Cls\Basic
 	private $cn;
 
 	/**
-	 * @var mixed
+	 * @var ?string
 	 */
-	public $error;
+	public ?string $error;
 
 
 	/**

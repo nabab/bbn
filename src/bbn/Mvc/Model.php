@@ -217,7 +217,7 @@ class Model extends DbClass
    * @param $plugin_path
    * @return self
    */
-  public function registerPluginClasses($plugin_path): self
+  public function registerPluginClasses($plugin_path): static
   {
     $this->_ctrl->registerPluginClasses($plugin_path);
     return $this;
@@ -423,7 +423,7 @@ class Model extends DbClass
    *
    * @return self
    */
-  public function addInc($name, $obj): self
+  public function addInc($name, $obj): static
   {
     $this->_mvc->addInc($name, $obj);
     return $this;
@@ -455,7 +455,7 @@ class Model extends DbClass
    * @param array $data
    * @return self
    */
-    public function setData(array $data): self
+    public function setData(array $data): static
     {
         $this->data = $data;
         return $this;
@@ -467,7 +467,7 @@ class Model extends DbClass
    *
    * @return self
    */
-    public function addData(array ...$data): self
+    public function addData(array ...$data): static
     {
       $ar = \func_get_args();
       foreach ($data as $d){
@@ -480,7 +480,7 @@ class Model extends DbClass
     }
 
 
-    public function setDefaultData(array $data): self
+    public function setDefaultData(array $data): static
     {
       X::extendOut($this->data, $data);
       return $this;

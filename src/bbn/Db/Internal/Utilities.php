@@ -47,7 +47,7 @@ trait Utilities
    * @param mixed $id The last inserted id
    * @return self
    */
-  public function setLastInsertId($id = ''): self
+  public function setLastInsertId($id = ''): static
   {
     $this->language->setLastInsertId($id);
 

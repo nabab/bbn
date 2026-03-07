@@ -30,7 +30,7 @@ trait Cache
    *
    * @return self
    */
-  public function setCache(string $id, string $method, $data, ?string $locale = null): self
+  public function setCache(string $id, string $method, $data, ?string $locale = null): static
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (($method !== 'findI18nById') && empty($locale)) {
@@ -80,7 +80,7 @@ trait Cache
    *
    * @return Option
    */
-  public function deleteCache(string|null $id = null, bool $deep = false, bool $subs = false): self
+  public function deleteCache(string|null $id = null, bool $deep = false, bool $subs = false): static
   {
     // Ensure the class is initialized and has a valid database connection before proceeding with cache deletion.
     if ($this->check()) {

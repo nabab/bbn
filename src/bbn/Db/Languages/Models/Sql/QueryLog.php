@@ -43,7 +43,7 @@ trait QueryLog
    * @param mixed $params
    * @return self
    */
-  protected function addStatement(string $statement, $params): self
+  protected function addStatement(string $statement, $params): static
   {
     $this->last_real_query  = $statement;
     $this->last_real_params = $params;

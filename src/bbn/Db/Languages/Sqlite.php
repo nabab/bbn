@@ -292,7 +292,7 @@ class Sqlite extends Sql
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     $this->rawQuery('PRAGMA foreign_keys = OFF;')->closeCursor();
 
@@ -305,7 +305,7 @@ class Sqlite extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     $this->rawQuery('PRAGMA foreign_keys = ON;')->closeCursor();
 

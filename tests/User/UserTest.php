@@ -324,7 +324,7 @@ class UserTest extends TestCase
   {
     $this->simpleLogin();
 
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertTrue($this->user->isAuth());
   }
 
@@ -373,7 +373,7 @@ class UserTest extends TestCase
 
     $this->assertTrue($this->user->isReset());
     $this->assertSame((string)$this->user_id, $this->user->getId());
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertFalse($this->user->isAuth());
   }
 
@@ -399,8 +399,8 @@ class UserTest extends TestCase
 
     $this->user = new User($this->db_mock, $this->reset_password_post);
 
-    $this->assertNotNull($this->user->getError());
-    $this->assertSame(7, $this->user->getError()['code']);
+    $this->assertNotNull($this->user->getFullError());
+    $this->assertSame(7, $this->user->getFullError()['code']);
     $this->assertTrue($this->user->isReset());
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
@@ -427,8 +427,8 @@ class UserTest extends TestCase
 
     $this->user = new User($this->db_mock, $this->reset_password_post);
 
-    $this->assertNotNull($this->user->getError());
-    $this->assertSame(18, $this->user->getError()['code']);
+    $this->assertNotNull($this->user->getFullError());
+    $this->assertSame(18, $this->user->getFullError()['code']);
     $this->assertFalse($this->user->isReset());
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
@@ -833,7 +833,7 @@ class UserTest extends TestCase
 
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
 
     // Now let's manually login as a user
     $expected_session_data = $this->loginAs($this->user_id, $sess_cfg);
@@ -845,7 +845,7 @@ class UserTest extends TestCase
     $this->assertSame($expected_session_data, $actual_session_data[$this->user_index]);
     $this->assertTrue($this->user->isAuth());
     $this->assertSame($this->user_id, $this->user->getId());
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
   }
 
 
@@ -1499,7 +1499,7 @@ class UserTest extends TestCase
       $this->getClassCgf()['max_attempts'] + 1,
       $this->getNonPublicProperty('cfg')['num_attempts']
     );
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
     $this->assertFalse($this->user->check());
     $this->assertFalse($this->user->checkAttempts());
   }
@@ -1529,7 +1529,7 @@ class UserTest extends TestCase
     $this->assertTrue(isset($cfg['num_attempts']));
     $this->assertTrue($cfg['num_attempts'] === 1);
 
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
     $this->assertFalse($this->user->check());
     $this->assertTrue($this->user->checkAttempts());
   }
@@ -2289,12 +2289,12 @@ class UserTest extends TestCase
 
     $class_cfg = $this->getClassCgf();
 
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
     $this->assertTrue(isset($class_cfg['errors']));
     $this->assertTrue(is_array($class_cfg['errors']));
     $this->assertTrue(!empty($class_cfg['errors']));
 
-    $result = $this->user->getError();
+    $result = $this->user->getFullError();
 
     $this->assertIsArray($result);
     $this->assertTrue(isset($result['code']));
@@ -2311,7 +2311,7 @@ class UserTest extends TestCase
   {
     $this->setNonPublicPropertyValue('error', null);
 
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
   }
 
 
@@ -2323,14 +2323,14 @@ class UserTest extends TestCase
 
     $this->user = new User($this->db_mock);
 
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
     $this->assertNull($this->user->getId());
     $this->assertFalse($this->user->isAuth());
 
     $login_method = $this->getNonPublicMethod('logIn');
     $result       = $login_method->invoke($this->user, $this->user_id);
 
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertSame($this->user_id ,$this->user->getId());
     $this->assertTrue($this->user->isAuth());
 
@@ -2446,14 +2446,14 @@ class UserTest extends TestCase
 
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
 
     $this->setNonPublicPropertyValue('error', null);
 
     $_login_method = $this->getNonPublicMethod('_login');
     $result        = $_login_method->invoke($this->user, $this->user_id);
 
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertSame($this->user_id ,$this->user->getId());
     $this->assertTrue($this->user->isAuth());
 
@@ -2472,7 +2472,7 @@ class UserTest extends TestCase
 
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
 
     $this->setNonPublicPropertyValue('error', 3);
 
@@ -2481,7 +2481,7 @@ class UserTest extends TestCase
 
     $this->assertFalse($this->user->isAuth());
     $this->assertNull($this->user->getId());
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
 
     $this->assertInstanceOf(User::class, $result);
   }
@@ -2624,7 +2624,7 @@ class UserTest extends TestCase
     $result           = $sess_info_method->invoke($this->user);
 
     $this->assertSame($session_before, $this->getSessionConfig());
-    $this->assertSame(14, $this->user->getError()['code']);
+    $this->assertSame(14, $this->user->getFullError()['code']);
     $this->assertInstanceOf(User::class, $result);
   }
 
@@ -2647,7 +2647,7 @@ class UserTest extends TestCase
     $result           = $sess_info_method->invoke($this->user);
 
     $this->assertSame($session_before, $this->getSessionConfig());
-    $this->assertSame(14, $this->user->getError()['code']);
+    $this->assertSame(14, $this->user->getFullError()['code']);
     $this->assertInstanceOf(User::class, $result);
   }
 
@@ -2679,7 +2679,7 @@ class UserTest extends TestCase
 
     $this->assertNotSame($session_before, $this->getSessionConfig());
     $this->assertSame(['foo' => 'bar'], $this->getSessionConfig());
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertInstanceOf(User::class, $result);
   }
 
@@ -3331,7 +3331,7 @@ class UserTest extends TestCase
     $result = $authenticate_method->invoke($this->user, $this->user_id);
 
     $this->assertTrue($this->user->isAuth());
-    $this->assertNull($this->user->getError());
+    $this->assertNull($this->user->getFullError());
     $this->assertInstanceOf(User::class, $result);
   }
 
@@ -3350,7 +3350,7 @@ class UserTest extends TestCase
     $result = $authenticate_method->invoke($this->user, $this->user_id);
 
     $this->assertFalse($this->user->isAuth());
-    $this->assertNotNull($this->user->getError());
+    $this->assertNotNull($this->user->getFullError());
     $this->assertInstanceOf(User::class, $result);
   }
 }

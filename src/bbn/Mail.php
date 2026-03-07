@@ -297,7 +297,7 @@ TEMPLATE;
    * @param array $cfg The configuration
    * @return self
    */
-  public function setImap(array $cfg): self
+  public function setImap(array $cfg): static
   {
     if (!isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass'])) {
       die("You need to provide user and password for IMAP connection");
@@ -334,7 +334,7 @@ TEMPLATE;
    *
    * @return self
    */
-  public function unsetImap(): self
+  public function unsetImap(): static
   {
     unset($this->imap_string, $this->imap_user, $this->imap_pass);
     return $this;
@@ -347,7 +347,7 @@ TEMPLATE;
    * @param string $name
    * @return self
    */
-  public function setFrom(string $email, string|null $name = null): self
+  public function setFrom(string $email, string|null $name = null): static
   {
     if (!PHPMailer::validateAddress($email)) {
       die("The From eMail address is not valid");
@@ -359,7 +359,7 @@ TEMPLATE;
     return $this;
   }
 
-  public function setTemplate(string $file): self
+  public function setTemplate(string $file): static
   {
     if (is_file($file)) {
       $this->template = file_get_contents($file);
@@ -372,8 +372,9 @@ TEMPLATE;
     return $this;
   }
 
-  public function getError(){
-    return $this->mailer->ErrorInfo;
+  public function getError(): ?string
+  {
+    return $this->mailer->ErrorInfo ?: null;
   }
 
   public function send($cfg){

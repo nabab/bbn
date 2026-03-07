@@ -21,7 +21,7 @@ enum Type: string
    *  - "poll" (any case) => Type::Poll
    *  - anything else     => Type::Cron
    */
-  public static function fromString(string $type): self
+  public static function fromString(string $type): static
   {
     return match (strtolower($type)) {
       'poll' => self::Poll,

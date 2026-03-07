@@ -86,14 +86,14 @@ class Option extends DbCls
   private $non_selected = ["cfg"];
 
   // Class configuration array
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /**
    * Returns the existing instance of the Option class.
    *
    * @return self
    */
-  public static function getOptions(): self
+  public static function getOptions(): static
   {
     return self::getInstance();
   }

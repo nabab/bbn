@@ -86,7 +86,7 @@ class Query extends PDOStatement implements Actions
    * @param array $values
    * @return self
    */
-  public function init(array $values = []): self
+  public function init(array $values = []): static
   {
     $this->values = $values;
     $this->res    = null;

@@ -167,7 +167,7 @@ class Config extends Basic
    * @param string $request The requested URL
    * @return self
    */
-  protected function setCfgFromRequest(string $request): self
+  protected function setCfgFromRequest(string $request): static
   {
     $parsed = parse_url($request);
     // URL without the root slash
@@ -227,7 +227,7 @@ class Config extends Basic
    * 
    * @return self
    */
-  protected function setFiles(): self
+  protected function setFiles(): static
   {
     // Shortcuts for files and dir
     if (X::hasProp($this->cfg['params'], 'f', true)) {

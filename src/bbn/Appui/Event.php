@@ -95,7 +95,7 @@ class Event extends modelDb
   ];
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   public function __construct(Db $db)
   {

@@ -67,7 +67,7 @@ trait Cache
    *
    * @return self
    */
-  protected function cacheDeleteAll(): self
+  protected function cacheDeleteAll(): static
   {
     $this->cacheCheck();
     $this->cache_engine->deleteAll($this->_cache_prefix);
@@ -82,7 +82,7 @@ trait Cache
    * @param string $method
    * @return self
    */
-  protected function cacheDelete(string $uid, string $method = ''): self
+  protected function cacheDelete(string $uid, string $method = ''): static
   {
     $this->cacheCheck();
     $this->cache_engine->deleteAll($this->_cache_name($uid, $method));
@@ -98,7 +98,7 @@ trait Cache
    * @param string $method
    * @return self
    */
-  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self
+  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): static
   {
     $this->cacheCheck();
     $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));
@@ -170,7 +170,7 @@ trait Cache
    * @param integer $ttl
    * @return self
    */
-  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self
+  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): static
   {
     $this->cacheCheck();
     $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);
@@ -188,7 +188,7 @@ trait Cache
    * @param integer $ttl
    * @return self
    */
-  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self
+  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): static
   {
     $this->cacheCheck();
     $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);

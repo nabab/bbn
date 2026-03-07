@@ -13,6 +13,10 @@ use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 
+use function func_get_args;
+use function count;
+use function get_class;
+
 trait Common
 {
   /**
@@ -35,7 +39,7 @@ trait Common
    */
   private function checkPath()
   {
-    $ar = \func_get_args();
+    $ar = func_get_args();
     foreach ($ar as $a){
       $b = Str::parsePath($a, true);
       if (empty($b) && !empty($a)) {
@@ -54,7 +58,7 @@ trait Common
    */
   private function error($msg)
   {
-    $msg = "Error from ".\get_class($this).": ".$msg;
+    $msg = "Error from ".get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
     throw new Exception(X::_($msg));
   }
@@ -63,10 +67,10 @@ trait Common
   /**
    * Log to a specific log with debug info
    */
-  public function log(...$args)
+  public function log(...$args): void
   {
     if (Mvc::getDebug()) {
-      X::log(\count($args) > 1 ? $args : $args[0], 'mvc');
+      X::log(count($args) > 1 ? $args : $args[0], 'mvc');
     }
   }
 

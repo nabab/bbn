@@ -528,7 +528,7 @@ SQL,
    * @param integer $has_dep Result will include or not dependencies if any
    * @return self
    */
-  public function add(string $library, $has_dep = 1): self
+  public function add(string $library, $has_dep = 1): static
   {
     if ($info = $this->info($library)) {
       if (!isset($this->libs[$info['name']][$info['internal']])) {

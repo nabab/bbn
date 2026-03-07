@@ -440,7 +440,7 @@ class Project extends DbCls
   }
 
 
-  public function check()
+  public function check(): bool
   {
     return parent::check() && !empty($this->id);
   }

@@ -88,7 +88,7 @@ trait Root
    * @return Option
    * @throws Exception
    */
-  public function setDefault($uid): self
+  public function setDefault($uid): static
   {
     if ($this->check() && $this->exists($uid)) {
       $this->default = $uid;

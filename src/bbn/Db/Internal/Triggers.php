@@ -22,7 +22,7 @@ trait Triggers
    * 
    * @return self
    */
-  public function enableTrigger(): self
+  public function enableTrigger(): static
   {
     $this->language->enableTrigger();
     return $this;
@@ -38,7 +38,7 @@ trait Triggers
    * 
    * @return self
    */
-  public function disableTrigger(): self
+  public function disableTrigger(): static
   {
     $this->language->disableTrigger();
     return $this;
@@ -82,7 +82,7 @@ trait Triggers
    * @param null|string|array   $tables   database's table(s) name(s)
    * @return self
    */
-  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): static
   {
     $this->language->setTrigger($function, $kind, $moment, $tables);
 

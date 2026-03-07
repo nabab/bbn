@@ -288,7 +288,7 @@ class User extends DbCls implements Implementor
   public $prev_time;
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /** @var string */
   protected $cache_path;
@@ -718,7 +718,7 @@ class User extends DbCls implements Implementor
    *
    * @return self Chainable
    */
-  public function setData($index, $data = null): self
+  public function setData($index, $data = null): static
   {
     if (!$this->auth) {
       throw new Exception(
@@ -811,7 +811,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  public function setSession($attr): self
+  public function setSession($attr): static
   {
     if ($this->session->has($this->userIndex)) {
       $args = \func_get_args();
@@ -836,7 +836,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  public function unsetSession(): self
+  public function unsetSession(): static
   {
     $args = \func_get_args();
     array_unshift($args, $this->userIndex);
@@ -880,7 +880,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  public function setOsession(): self
+  public function setOsession(): static
   {
     return $this->_set_session(...func_get_args());
   }
@@ -900,7 +900,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  public function updateActivity(): self
+  public function updateActivity(): static
   {
     if (X::isCli()) {
       return $this;
@@ -926,7 +926,7 @@ class User extends DbCls implements Implementor
    * @todo Use it only when needed!
    * @return self
    */
-  public function saveSession(bool $force = false): self
+  public function saveSession(bool $force = false): static
   {
     $id_session = $this->getSessionDbId();
     if ($this->check()) {
@@ -968,7 +968,7 @@ class User extends DbCls implements Implementor
    * @param bool $with_session If true deletes also the session information
    * @return self
    */
-  public function closeSession($with_session = false): self
+  public function closeSession($with_session = false): static
   {
     if ($this->id && !X::isCli()) {
       if ($this->session) {
@@ -1029,7 +1029,7 @@ class User extends DbCls implements Implementor
    *
    * return self
    */
-  public function saveCfg(): self
+  public function saveCfg(): static
   {
     if ($this->check()) {
       $this->db->update(
@@ -1047,7 +1047,7 @@ class User extends DbCls implements Implementor
    *
    * return self
    */
-  public function setCfg($attr): self
+  public function setCfg($attr): static
   {
     if (null !== $this->cfg) {
       $args = \func_get_args();
@@ -1076,7 +1076,7 @@ class User extends DbCls implements Implementor
    * @param $attr
    * @return self
    */
-  public function unsetCfg($attr): self
+  public function unsetCfg($attr): static
   {
     if (null !== $this->cfg) {
       if (\is_string($attr)) {
@@ -1103,7 +1103,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  public function refreshInfo(): self
+  public function refreshInfo(): static
   {
     if ($this->check()) {
       $this->_user_info();
@@ -1452,7 +1452,7 @@ class User extends DbCls implements Implementor
    * @param string $id
    * @return self
    */
-  protected function logIn($id): self
+  protected function logIn($id): static
   {
     $this->error = null;
     if ($this->check() && $id) {
@@ -1497,7 +1497,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  protected function recordAttempt(): self
+  protected function recordAttempt(): static
   {
     $this->cfg["num_attempts"] = isset($this->cfg["num_attempts"])
       ? $this->cfg["num_attempts"] + 1
@@ -1549,7 +1549,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  protected function _init_session($defaults = []): self
+  protected function _init_session($defaults = []): static
   {
     // Getting or creating the session is it doesn't exist yet
     /** @var User\Session */
@@ -1793,7 +1793,7 @@ class User extends DbCls implements Implementor
    * @param string $id The user's ID (as stored in the database).
    * @return self
    */
-  private function _login($id): self
+  private function _login($id): static
   {
     if ($this->check() && $id) {
       $this->_authenticate($id)->_user_info()->_init_dir(true)->saveSession();
@@ -1807,7 +1807,7 @@ class User extends DbCls implements Implementor
    *
    * @return self
    */
-  private function _user_info(bool $force = false): self
+  private function _user_info(bool $force = false): static
   {
     if ($this->getId()) {
       // Removing the encryption key to prevent it being saved in the session
@@ -1858,7 +1858,7 @@ class User extends DbCls implements Implementor
    * @param string $id_session The session's table data or its ID
    * @return self
    */
-  private function _sess_info(string|null $id_session = null): self
+  private function _sess_info(string|null $id_session = null): static
   {
     if (!Str::isUid($id_session)) {
       $id_session = $this->getSessionDbId();
@@ -1920,7 +1920,7 @@ class User extends DbCls implements Implementor
    * @param bool $force
    * @return self
    */
-  private function _retrieve_session(bool $force = false): self
+  private function _retrieve_session(bool $force = false): static
   {
     // $id mustn't be already defined
     if (!$this->id || $force) {
@@ -1952,7 +1952,7 @@ class User extends DbCls implements Implementor
    * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
    * @return self
    */
-  private function _set_session($attr): self
+  private function _set_session($attr): static
   {
     if ($this->session->has($this->sessIndex)) {
       $args = \func_get_args();
@@ -1978,7 +1978,7 @@ class User extends DbCls implements Implementor
    * @param string $id
    * @return self
    */
-  private function _authenticate(string $id, bool $fake = false): self
+  private function _authenticate(string $id, bool $fake = false): static
   {
     if ($this->check() && $id) {
       $this->id = $id;

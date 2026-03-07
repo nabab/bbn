@@ -585,7 +585,7 @@ class Image extends bbn\File
    * @param int|bool $max_h The maximum valure for new height.
    * @return Image
    */
-  public function resize($w = null, ?int $h = null, bool $crop = false, ?int $max_w = null, ?int $max_h = null): self
+  public function resize($w = null, ?int $h = null, bool $crop = false, ?int $max_w = null, ?int $max_h = null): static
   {
     if (!$this->test()) {
       throw new Exception(X::_("The image is not valid"));
@@ -745,7 +745,7 @@ class Image extends bbn\File
    * @param integer $y Y coordinate
    * @return image|false
      */
-  public function crop($w, $h, $x, $y): self
+  public function crop($w, $h, $x, $y): static
   {
     if ($this->test()) {
         $args = \func_get_args();

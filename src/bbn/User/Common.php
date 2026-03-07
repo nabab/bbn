@@ -49,7 +49,7 @@ trait Common
   public $prev_time;
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /**
    * An output string to be returned when in api requests.
@@ -230,9 +230,9 @@ trait Common
    *
    * @return bool
    */
-  public function check()
+  public function check(): bool
   {
-    return $this->getError() ? false : true;
+    return !$this->getError();
   }
 
 
@@ -420,7 +420,7 @@ trait Common
    * @param int $err error code
    * @return self
    */
-  protected function setError(string $err, $code = null): self
+  protected function setError(string $err, $code = null): static
   {
     $this->log([$err, $this->class_cfg['errors'][$err] ?? null], 'userError');
     if (!$this->error) {
@@ -436,7 +436,7 @@ trait Common
    *
    * @return null|array
    */
-  public function getError(): ?array
+  public function getFullError(): ?array
   {
     if ($this->error) {
       return [
@@ -817,7 +817,7 @@ trait Common
     * @param bool $create If true creates it and remove temp files if any
     * @return self
     */
-  private function _init_dir(bool $create = false): self
+  private function _init_dir(bool $create = false): static
   {
     if (\defined('BBN_DATA_PATH') && $this->getId()) {
       $this->path     = Mvc::getUserDataPath($this->getId());

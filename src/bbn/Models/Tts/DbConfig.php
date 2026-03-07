@@ -1,87 +1,169 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BBN
- * Date: 05/11/2016
- * Time: 02:47
- */
-
 namespace bbn\Models\Tts;
 
-use Exception;
-use bbn\X;
-use bbn\Str;
 use bbn\Cache;
 use bbn\Mvc;
-use bbn\Mvc\Controller;
-use bbn\Mvc\Model;
+use bbn\Str;
+use bbn\X;
+use Exception;
 use ReflectionProperty;
+
 use function array_key_exists;
 use function count;
+use function in_array;
 use function is_array;
 
+/**
+ * Provides declarative database configuration handling for table classes.
+ *
+ * Classes using this trait are expected to define a static
+ * `$default_class_cfg` property containing at least:
+ *
+ * - `table`  : main table name
+ * - `tables` : indexed list of tables
+ * - `arch`   : table structures indexed by table aliases
+ *
+ * The trait is responsible for:
+ * - building and caching the merged class configuration
+ * - exposing the main table and fields
+ * - building a cache of configured table classes and their dependencies
+ */
 trait DbConfig
 {
   use Event;
-  /** @var array */
-  protected static $_isInitClassCfg = [];
 
+  /**
+   * Tracks which classes have already had their DB config initialized.
+   *
+   * @var array<string, bool>
+   */
+  protected static array $_isInitClassCfg = [];
+
+  /**
+   * Cached map of table names to class metadata.
+   *
+   * Example:
+   * [
+   *   'bbn_members' => [
+   *     'class' => '...',
+   *     'cache' => true,
+   *     'deps' => ['bbn_members_entities']
+   *   ]
+   * ]
+   *
+   * @var array<string, array<string, mixed>>
+   */
   protected static array $dbConfigTableClasses;
 
-  /** @var array */
-  protected $fields;
+  /**
+   * Fields of the main table for the current class.
+   *
+   * @var array<string, string>
+   */
+  protected array $fields;
 
-  protected $class_cfg;
+  /**
+   * Fully resolved class configuration.
+   *
+   * @var array<string, mixed>
+   */
+  protected array $class_cfg;
 
-  /** @var string */
-  protected $class_table;
+  /**
+   * Main table name for the current class.
+   *
+   * @var string
+   */
+  protected string $class_table;
 
-  /** @var string */
-  protected $class_table_index;
+  /**
+   * Index of the main table in the `tables` / `arch` configuration.
+   *
+   * @var string
+   */
+  protected string $class_table_index;
 
+  /**
+   * Cached resolved configuration by class name.
+   *
+   * @var array<string, array<string, mixed>>
+   */
   protected static array $dbConfigCfg = [];
 
+  /**
+   * Indicates whether the DB config has already been initialized for the class.
+   *
+   * @return bool
+   */
   public static function isDbConfigInit(): bool
   {
     return !empty(self::$_isInitClassCfg[static::class]);
   }
 
+  /**
+   * Returns the raw default class configuration declared on the class.
+   *
+   * @return array<string, mixed>|null
+   */
   public static function getDefaultClassCfg(): ?array
   {
     return static::$default_class_cfg ?? [];
   }
 
   /**
-   * Returns the class configuration.
-   * 
-   * @return mixed
+   * Returns the resolved class configuration for the current instance.
+   *
+   * @return array<string, mixed>
    */
-  public function getClassCfg()
+  public function getClassCfg(): array
   {
     return $this->class_cfg;
   }
 
-
   /**
-   * Returns the fields of the main table.
+   * Returns the list of fields for the main table.
    *
-   * @return array
+   * @return array<string, string>
    */
-  public function getFields()
+  public function getFields(): array
   {
     return $this->fields;
   }
 
+  /**
+   * Returns the main table name for the current instance.
+   *
+   * @return string
+   */
   public function getClassTable(): string
   {
     return $this->class_table;
   }
 
+  /**
+   * Returns the main table index for the current instance.
+   *
+   * @return string
+   */
   public function getClassTableIndex(): string
   {
     return $this->class_table_index;
   }
 
+  /**
+   * Builds and caches the resolved class configuration for the current class.
+   *
+   * The configuration is built by traversing the class inheritance chain and
+   * merging every available `default_class_cfg`.
+   *
+   * Special handling:
+   * - `table_index` is automatically resolved from `tables` and `table`
+   * - array field definitions are normalized into `props`
+   *
+   * @param array<string, mixed>|null $cfg Optional external configuration.
+   * @return array<string, mixed>
+   * @throws Exception If the configuration is missing or invalid.
+   */
   private static function dbConfigInit(?array $cfg = null): array
   {
     if (static::isDbConfigInit()) {
@@ -90,6 +172,7 @@ trait DbConfig
 
     $arr = [];
     $parent = get_parent_class(static::class);
+
     while ($parent && method_exists($parent, 'getDefaultClassCfg')) {
       if ($tmp = $parent::getDefaultClassCfg()) {
         array_unshift($arr, $tmp);
@@ -101,25 +184,44 @@ trait DbConfig
     if (isset(static::$default_class_cfg)) {
       $arr[] = static::$default_class_cfg;
     }
-    
+
     if (!count($arr)) {
-      throw new Exception(X::_("The class %s is not configured properly to work with trait DbActions: no configuration available", static::class));
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: no configuration available",
+          static::class
+        )
+      );
     }
 
     $cfg = count($arr) === 1 ? $arr[0] : array_merge(...$arr);
+
     if (!isset($cfg['tables'])) {
-      throw new Exception(X::_("The class %s is not configured properly to work with trait DbActions: no tables", static::class));
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: no tables",
+          static::class
+        )
+      );
     }
 
-    $table_index = array_flip($cfg['tables'])[$cfg['table']];
-    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {
-      throw new Exception(X::_("The class %s is not configured properly to work with trait DbActions: invalid table configuration", static::class));
+    $table_index = array_flip($cfg['tables'])[$cfg['table']] ?? null;
+    if (
+      !$table_index
+      || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])
+    ) {
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: invalid table configuration",
+          static::class
+        )
+      );
     }
 
-    // We completely replace the table structure, no merge
+    // We completely replace the table structure, no merge.
     $props = [];
-    foreach ($cfg['arch'] as $t => &$fields){
-      if (empty($cfg['table_index']) && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {
+    foreach ($cfg['arch'] as $t => &$fields) {
+      if (empty($cfg['table_index']) && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table'])) {
         $cfg['table_index'] = $t;
       }
 
@@ -131,26 +233,33 @@ trait DbConfig
       }
     }
     unset($fields);
+
     if (!empty($props)) {
       $cfg['props'] = $props;
     }
 
     static::$dbConfigCfg[static::class] = $cfg;
     static::$_isInitClassCfg[static::class] = true;
+
     return $cfg;
   }
 
   /**
-   * Sets the class configuration as defined in self::default_class_cfg
-   * @return $this
+   * Initializes the instance configuration from the static class config.
+   *
+   * Sets:
+   * - `$this->class_cfg`
+   * - `$this->fields`
+   * - `$this->class_table_index`
+   * - `$this->class_table`
+   *
+   * @return static
    */
-  protected function initClassCfg()
+  protected function initClassCfg(): static
   {
     if (!isset($this->class_cfg)) {
       $this->class_cfg = static::dbConfigInit();
       $cfg = $this->class_cfg;
-      // The selection comprises the defined fields of the users table
-      // Plus a bunch of user-defined additional fields in the same table
       $this->fields = $cfg['arch'][$cfg['table_index']];
       $this->class_table_index = $cfg['table_index'];
       $this->class_table = $cfg['table'];
@@ -159,77 +268,105 @@ trait DbConfig
     return $this;
   }
 
-
+  /**
+   * Indicates whether the current class has already been initialized.
+   *
+   * @return bool
+   */
   public function isInitClassCfg(): bool
   {
     return static::$_isInitClassCfg[static::class] ?? false;
   }
 
+  /**
+   * Ensures that the current instance configuration has been initialized.
+   *
+   * @return void
+   * @throws Exception If the configuration has not been initialized.
+   */
   public function dbConfigCheck(): void
   {
     if (!$this->isInitClassCfg()) {
-      throw new Exception(X::_("The class %s is not configured properly has not been initiated for trait DbConfig", get_class($this))) ;
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly has not been initiated for trait DbConfig",
+          static::class
+        )
+      );
     }
   }
 
-  public static function dbConfigGetTableClasses(
-    null|Mvc|Controller|Model $mvc = null,
-  ): array {
+  /**
+   * Returns the map of configured table classes and their dependency metadata.
+   *
+   * The result is built by scanning the Composer class map and collecting all
+   * classes exposing a static `default_class_cfg` property and an
+   * `initClassCfg()` method.
+   *
+   * Returned metadata may contain:
+   * - `class`     : fully qualified class name
+   * - `cache`     : whether the table class has row cache enabled
+   * - `junctions` : declared table junctions
+   * - `deps`      : reverse dependencies computed from junctions
+   *
+   * @return array<string, array<string, mixed>>
+   * @throws Exception If the Composer class map cannot be loaded.
+   */
+  public static function dbConfigGetTableClasses(): array
+  {
     if (isset(self::$dbConfigTableClasses)) {
       return self::$dbConfigTableClasses;
     }
 
-    if (!$mvc) {
-      $mvc = Mvc::getInstance();
-    }
-
     $cache = Cache::getEngine();
-    if (true || !($cached = $cache->get("bbn_dbconfig_cache_init"))) {
-      $res = include $mvc->libPath() . "composer/autoload_classmap.php";
+
+    if (!($cached = $cache->get('bbn_dbconfig_cache_init'))) {
+      $res = include Mvc::getLibPath() . 'composer/autoload_classmap.php';
+
       if (!$res) {
         exec(
-          "cd " .
-            dirname($mvc->libPath()) .
-            " &&  composer dump-autoload -o && cd -",
+          'cd ' .
+          dirname(Mvc::getLibPath()) .
+          ' && composer dump-autoload -o && cd -'
         );
-        $res = include $mvc->libPath() . "composer/autoload_classmap.php";
+        $res = include Mvc::getLibPath() . 'composer/autoload_classmap.php';
       }
 
       if (!$res) {
-        throw new Exception("No way to get classes from composer");
+        throw new Exception('No way to get classes from composer');
       }
 
-      $property = "default_class_cfg";
-      $num = 0;
+      $property = 'default_class_cfg';
       $corr = [];
       $keys = array_keys($res);
-      $local = X::filter($keys, fn($a) => Str::startsWith($a, constant("BBN_APP_PREFIX")));
-      $bbn = X::filter($keys, fn($a) => Str::startsWith($a, "bbn\\"));
+      $local = X::filter($keys, fn($a) => Str::startsWith($a, constant('BBN_APP_PREFIX')));
+      $bbn = X::filter($keys, fn($a) => Str::startsWith($a, 'bbn\\'));
+
       foreach ([...$local, ...$bbn] as $cls) {
         if (!class_exists($cls)) {
           continue;
         }
 
-        $num++;
         $cacheDone = false;
         $hasCache = false;
         $table = null;
         $ccls = $cls;
         $junctionDone = false;
+
         while ($ccls && (!$cacheDone || !$table)) {
           if (
-            property_exists($ccls, $property) &&
-            method_exists($ccls, "initClassCfg")
+            property_exists($ccls, $property)
+            && method_exists($ccls, 'initClassCfg')
           ) {
             $ref = new ReflectionProperty($ccls, $property);
             if ($ref && $ref->isStatic() && ($value = $ref->getValue())) {
-              if (!$cacheDone && array_key_exists("cache", $value)) {
+              if (!$cacheDone && array_key_exists('cache', $value)) {
                 $cacheDone = true;
-                $hasCache = (bool) $value["cache"];
+                $hasCache = (bool)$value['cache'];
               }
 
-              if (!$table && isset($value["table"])) {
-                $table = $value["table"];
+              if (!$table && isset($value['table'])) {
+                $table = $value['table'];
                 if (!array_key_exists($table, $corr)) {
                   $corr[$table] = [
                     'class' => $cls,
@@ -241,6 +378,7 @@ trait DbConfig
 
               if ($hasCache && $table) {
                 $corr[$table]['cache'] = true;
+
                 if (!$junctionDone && isset($value['junctions']) && is_array($value['junctions'])) {
                   $junctionDone = true;
                   foreach ($value['junctions'] as $j) {
@@ -260,6 +398,7 @@ trait DbConfig
       }
 
       ksort($corr);
+
       foreach ($corr as $table => $c) {
         if (count($c['junctions'])) {
           foreach ($c['junctions'] as $j) {
@@ -267,7 +406,8 @@ trait DbConfig
               if (!isset($corr[$j['table']]['deps'])) {
                 $corr[$j['table']]['deps'] = [];
               }
-              if (!in_array($table, $corr[$j['table']]['deps'])) {
+
+              if (!in_array($table, $corr[$j['table']]['deps'], true)) {
                 $corr[$j['table']]['deps'][] = $table;
               }
             }
@@ -277,13 +417,12 @@ trait DbConfig
           unset($corr[$table]['junctions']);
         }
       }
+
       $cached = $corr;
-      $cache->set("bbn_dbconfig_cache_init", $cached, 3600);
+      $cache->set('bbn_dbconfig_cache_init', $cached, 3600);
     }
 
     self::$dbConfigTableClasses = $cached;
     return $cached;
   }
-
 }
-
