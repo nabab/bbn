@@ -22,7 +22,6 @@
     "mpdf/mpdf": "^8.2",
     "natxet/cssmin": "^3.0",
     "sunra/php-simple-html-dom-parser": "^1.5",
-    "scssphp/scssphp": "^2.0",
     "tedivm/jshrink": "^1.7",
     "phpmailer/phpmailer": "^6.9",
     "tijsverkoyen/css-to-inline-styles": "^2.3",
@@ -36,7 +35,6 @@
     "michelf/php-markdown": "^2.0",
     "sepia/po-parser": "^6.0",
     "tplaner/when": "^3.2",
-    "mck89/peast": "^1.17",
     "czproject/git-php": "^4.3",
     "firebase/php-jwt": "^6.11",
     "brick/phonenumber": "^0.8.0",
@@ -45,10 +43,10 @@
     "opis/closure": "^4.3",
     "xemlock/htmlpurifier-html5": "^0.1.11",
     "mollie/oauth2-mollie-php": "^2.8",
-    "ezyang/htmlpurifier": "^4.18"
+    "ezyang/htmlpurifier": "^4.18",
+    "phpdocumentor/shim": "^3.9"
   },
   "require-dev": {
-    "phpdocumentor/reflection-docblock": "^5.6",
     "squizlabs/php_codesniffer": "*",
     "phpunit/phpunit": "*",
     "pdepend/pdepend": "*",
@@ -68,7 +66,10 @@
     }
   },
   "config": {
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "phpdocumentor/shim": true
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable" : true
