@@ -44,6 +44,9 @@
     "xemlock/htmlpurifier-html5": "^0.1.11",
     "mollie/oauth2-mollie-php": "^2.8",
     "ezyang/htmlpurifier": "^4.18",
+    "openai-php/client": "^0.19",
+    "orhanerday/open-ai": "^5.3",
+    "gioni06/gpt3-tokenizer": "dev-main",
     "phpdocumentor/reflection-docblock": "^6.0"
   },
   "require-dev": {
