@@ -166,7 +166,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->setNonPublicPropertyValue('retriever_instance', null, Option::class);
     $this->setNonPublicPropertyValue('retriever_exists', false, Option::class);
@@ -225,7 +225,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function check_method_checks_if_cache_is_initialized_and_db_is_ready_to_be_queried()
+  public function testCheckMethodChecksIfCacheIsInitializedAndDbIsReadyToBeQueried()
   {
     $this->setNonPublicPropertyValue('is_init', true);
 
@@ -235,7 +235,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function init_method_initializes_the_cache_if_not_already_initialized()
+  public function testInitMethodInitializesTheCacheIfNotAlreadyInitialized()
   {
     $this->initCache();
 
@@ -251,7 +251,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function init_method_returns_false_when_root_could_not_retrieved()
+  public function testInitMethodReturnsFalseWhenRootCouldNotRetrieved()
   {
     $cache_prefix = $this->getCachePrefix();
 
@@ -278,7 +278,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function init_method_returns_true_when_it_is_already_initialized()
+  public function testInitMethodReturnsTrueWhenItIsAlreadyInitialized()
   {
     $this->db_mock->shouldNotReceive('selectOne');
     $this->cache_mock->shouldNotReceive('cacheGetSet');
@@ -289,7 +289,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function deleteCache_method_deletes_the_option_cache_for_the_given_id()
+  public function testDeletecacheMethodDeletesTheOptionCacheForTheGivenId()
   {
     $option = \Mockery::mock(Option::class)
       ->shouldAllowMockingProtectedMethods()
@@ -350,7 +350,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function deleteCache_method_deletes_the_option_cache_for_the_given_id_and_subs_is_true()
+  public function testDeletecacheMethodDeletesTheOptionCacheForTheGivenIdAndSubsIsTrue()
   {
     $option = \Mockery::mock(Option::class)
       ->shouldAllowMockingProtectedMethods()
@@ -372,7 +372,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function deleteCache_method_deletes_the_option_cache_for_the_given_id_and_deep_is_true()
+  public function testDeletecacheMethodDeletesTheOptionCacheForTheGivenIdAndDeepIsTrue()
   {
     $option = \Mockery::mock(Option::class)
       ->shouldAllowMockingProtectedMethods()
@@ -436,7 +436,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function deleteCache_method_deletes_the_option_cache_for_the_given_id_and_deep_is_true_and_subs_is_true()
+  public function testDeletecacheMethodDeletesTheOptionCacheForTheGivenIdAndDeepIsTrueAndSubsIsTrue()
   {
     $option = \Mockery::mock(Option::class)
       ->shouldAllowMockingProtectedMethods()
@@ -474,7 +474,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getClassCfg_method_returns_the_configuration_array()
+  public function testGetclasscfgMethodReturnsTheConfigurationArray()
   {
     $this->assertSame(
       $this->getNonPublicProperty('class_cfg'),
@@ -483,7 +483,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_given_codes()
+  public function testFromcodeMethodReturnsOptionIdFromGivenCodes()
   {
     $this->initCache();
     $this->dbCheckMock(3);
@@ -573,7 +573,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_given_codes_when_there_is_a_cache_set()
+  public function testFromcodeMethodReturnsOptionIdFromGivenCodesWhenThereIsACacheSet()
   {
     $this->initCache();
     $this->dbCheckMock(3);
@@ -618,7 +618,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_the_given_codes_and_a_parent_id_to_find_the_last_code()
+  public function testFromcodeMethodReturnsOptionIdFromTheGivenCodesAndAParentIdToFindTheLastCode()
   {
     $this->initCache();
     $this->dbCheckMock(2);
@@ -684,7 +684,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_the_given_codes_and_a_parent_id_to_find_the_last_code_when_there_is_a_cache_set()
+  public function testFromcodeMethodReturnsOptionIdFromTheGivenCodesAndAParentIdToFindTheLastCodeWhenThereIsACacheSet()
   {
     $this->initCache();
     $this->dbCheckMock(2);
@@ -718,7 +718,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_only_from_the_given_code_having_default_as_parent()
+  public function testFromcodeMethodReturnsOptionIdOnlyFromTheGivenCodeHavingDefaultAsParent()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -754,7 +754,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_only_from_the_given_code_and_there_is_a_cache_set()
+  public function testFromcodeMethodReturnsOptionIdOnlyFromTheGivenCodeAndThereIsACacheSet()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -773,7 +773,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_given_array_of_codes()
+  public function testFromcodeMethodReturnsOptionIdFromGivenArrayOfCodes()
   {
     $this->initCache();
     $this->dbCheckMock(3);
@@ -863,7 +863,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_option_id_from_given_array_of_codes_when_there_is_a_cache_set()
+  public function testFromcodeMethodReturnsOptionIdFromGivenArrayOfCodesWhenThereIsACacheSet()
   {
     $this->initCache();
     $this->dbCheckMock(3);
@@ -908,7 +908,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_the_id_when_it_s_given_as_param()
+  public function testFromcodeMethodReturnsTheIdWhenItSGivenAsParam()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -920,7 +920,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_null_when_no_arguments_are_provided()
+  public function testFromcodeMethodReturnsNullWhenNoArgumentsAreProvided()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -931,7 +931,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_null_when_no_null_is_provided()
+  public function testFromcodeMethodReturnsNullWhenNoNullIsProvided()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -942,7 +942,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_the_default_parent_when_false_is_provided()
+  public function testFromcodeMethodReturnsTheDefaultParentWhenFalseIsProvided()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -954,7 +954,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_the_given_id_if_it_is_uid_and_one_argument()
+  public function testFromcodeMethodReturnsTheGivenIdIfItIsUidAndOneArgument()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -966,7 +966,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_the_given_id_if_it_is_uid_and_its_corresponding_parent_id_is_provided()
+  public function testFromcodeMethodReturnsTheGivenIdIfItIsUidAndItsCorrespondingParentIdIsProvided()
   {
     $this->mockOptionClass();
 
@@ -984,7 +984,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_null_when_the_provided_argument_is_not_alpha_numeric()
+  public function testFromcodeMethodReturnsNullWhenTheProvidedArgumentIsNotAlphaNumeric()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -995,7 +995,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromCode_method_returns_null_when_check_method_returns_false()
+  public function testFromcodeMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1009,7 +1009,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromRootCode_method_returns_option_id_using_root_id_instead_of_default()
+  public function testFromrootcodeMethodReturnsOptionIdUsingRootIdInsteadOfDefault()
   {
     $this->option = \Mockery::mock(Option::class)->makePartial();
 
@@ -1042,7 +1042,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromRootCode_method_returns_null_when_check_method_returns_false()
+  public function testFromrootcodeMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1056,7 +1056,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setValue_method_sets_the_given_value_for_the_given_id()
+  public function testSetvalueMethodSetsTheGivenValueForTheGivenId()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1087,7 +1087,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setValue_method_returns_null_when_check_method_returns_false()
+  public function testSetvalueMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1101,7 +1101,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setValue_method_returns_null_when_the_given_id_does_not_exist()
+  public function testSetvalueMethodReturnsNullWhenTheGivenIdDoesNotExist()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1120,7 +1120,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRoot_method_returns_the_id_of_the_root_option()
+  public function testGetrootMethodReturnsTheIdOfTheRootOption()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1132,7 +1132,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRoot_method_returns_null_when_check_method_returns_false()
+  public function testGetrootMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1146,7 +1146,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getDefault_method_returns_the_id_of_the_default_option()
+  public function testGetdefaultMethodReturnsTheIdOfTheDefaultOption()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1158,7 +1158,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getDefault_method_returns_null_when_check_method_returns_false()
+  public function testGetdefaultMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1172,7 +1172,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setDefault_method_sets_the_default_id_from_the_given_one_if_exists()
+  public function testSetdefaultMethodSetsTheDefaultIdFromTheGivenOneIfExists()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1197,7 +1197,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setDefault_method_does_not_set_the_default_id_if_not_exists()
+  public function testSetdefaultMethodDoesNotSetTheDefaultIdIfNotExists()
   {
     $this->initCache();
     $this->dbCheckMock();
@@ -1222,7 +1222,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setDefault_method_does_not_set_the_default_id_if_check_method_returns_false()
+  public function testSetdefaultMethodDoesNotSetTheDefaultIdIfCheckMethodReturnsFalse()
   {
     $this->initCache();
 
@@ -1242,7 +1242,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_an_array_of_children_id_of_the_given_option_sorted_by_order()
+  public function testItemsMethodReturnsAnArrayOfChildrenIdOfTheGivenOptionSortedByOrder()
   {
     $this->mockOptionClass();
 
@@ -1293,7 +1293,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_an_array_of_children_id_of_the_given_option_sorted_by_text()
+  public function testItemsMethodReturnsAnArrayOfChildrenIdOfTheGivenOptionSortedByText()
   {
     $this->mockOptionClass();
 
@@ -1348,7 +1348,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_null_when_the_given_id_does_not_exist_and_does_not_have_any_config()
+  public function testItemsMethodReturnsNullWhenTheGivenIdDoesNotExistAndDoesNotHaveAnyConfig()
   {
     $this->mockOptionClass();
 
@@ -1378,7 +1378,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_null_when_retrieved_id_is_not_uid()
+  public function testItemsMethodReturnsNullWhenRetrievedIdIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -1393,7 +1393,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_null_when_given_code_does_not_exist()
+  public function testItemsMethodReturnsNullWhenGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1408,7 +1408,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function items_method_returns_an_array_of_children_id_of_the_given_option_from_the_cache()
+  public function testItemsMethodReturnsAnArrayOfChildrenIdOfTheGivenOptionFromTheCache()
   {
     $this->mockOptionClass();
 
@@ -1426,7 +1426,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOption_method_returns_an_option_row_in_its_original_form_in_database()
+  public function testNativeoptionMethodReturnsAnOptionRowInItsOriginalFormInDatabase()
   {
     $this->mockOptionClass();
 
@@ -1481,7 +1481,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOption_method_returns_an_option_row_in_its_original_form_in_database_from_cache()
+  public function testNativeoptionMethodReturnsAnOptionRowInItsOriginalFormInDatabaseFromCache()
   {
     $this->mockOptionClass();
 
@@ -1508,7 +1508,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOption_method_returns_null_when_fails_to_retrieve_option_row_from_database()
+  public function testNativeoptionMethodReturnsNullWhenFailsToRetrieveOptionRowFromDatabase()
   {
     $this->mockOptionClass();
 
@@ -1545,7 +1545,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOption_method_returns_null_when_the_given_code_does_not_exist()
+  public function testNativeoptionMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1560,7 +1560,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOptions_returns_option_rows_in_its_original_form_in_database_for_the_given_code_childs()
+  public function testNativeoptionsReturnsOptionRowsInItsOriginalFormInDatabaseForTheGivenCodeChilds()
   {
     $this->mockOptionClass();
 
@@ -1591,7 +1591,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOptions_method_returns_an_empty_array_when_the_given_code_has_no_items()
+  public function testNativeoptionsMethodReturnsAnEmptyArrayWhenTheGivenCodeHasNoItems()
   {
     $this->mockOptionClass();
 
@@ -1609,7 +1609,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testNativeoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1624,7 +1624,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawOption_method_returns_an_option_row_in_its_original_form_in_database_including_cfg()
+  public function testRawoptionMethodReturnsAnOptionRowInItsOriginalFormInDatabaseIncludingCfg()
   {
     $this->mockOptionClass();
 
@@ -1652,7 +1652,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawOption_method_returns_null_when_the_given_code_does_not_exist()
+  public function testRawoptionMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1667,7 +1667,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawOptions_method_returns_option_items_as_stored_in_database_in_its_original_form()
+  public function testRawoptionsMethodReturnsOptionItemsAsStoredInDatabaseInItsOriginalForm()
   {
     $this->mockOptionClass();
 
@@ -1703,7 +1703,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawOptions_method_returns_empty_array_when_the_given_code_does_not_have_items()
+  public function testRawoptionsMethodReturnsEmptyArrayWhenTheGivenCodeDoesNotHaveItems()
   {
     $this->mockOptionClass();
 
@@ -1721,7 +1721,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testRawoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1736,7 +1736,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawTree_method_returns_an_option_tree_structure_as_stored_in_database_with_its_items()
+  public function testRawtreeMethodReturnsAnOptionTreeStructureAsStoredInDatabaseWithItsItems()
   {
     $this->mockOptionClass();
 
@@ -1790,7 +1790,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawTree_method_returns_an_option_tree_structure_as_stored_in_database_with_no_items_if_it_does_not_have_any()
+  public function testRawtreeMethodReturnsAnOptionTreeStructureAsStoredInDatabaseWithNoItemsIfItDoesNotHaveAny()
   {
     $this->mockOptionClass();
 
@@ -1821,7 +1821,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawTree_method_returns_null_when_it_fails_to_get_the_raw_option_for_the_given_code()
+  public function testRawtreeMethodReturnsNullWhenItFailsToGetTheRawOptionForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -1841,7 +1841,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function rawTree_method_returns_null_when_the_given_code_does_not_exist()
+  public function testRawtreeMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1856,7 +1856,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionNoAlias_method_returns_an_option_full_content_as_array_without_its_values()
+  public function testOptionnoaliasMethodReturnsAnOptionFullContentAsArrayWithoutItsValues()
   {
     $this->mockOptionClass();
 
@@ -1892,7 +1892,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionNoAlias_method_returns_null_when_failed_to_retrieve_nativeOption()
+  public function testOptionnoaliasMethodReturnsNullWhenFailedToRetrieveNativeoption()
   {
     $this->mockOptionClass();
 
@@ -1912,7 +1912,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionNoAlias_method_returns_null_when_the_given_codes_does_not_exist()
+  public function testOptionnoaliasMethodReturnsNullWhenTheGivenCodesDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -1927,7 +1927,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getValue_method_returns_the_value_for_the_given_codes()
+  public function testGetvalueMethodReturnsTheValueForTheGivenCodes()
   {
     $this->mockOptionClass();
 
@@ -1960,7 +1960,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getValue_method_returns_null_when_the_value_is_not_json()
+  public function testGetvalueMethodReturnsNullWhenTheValueIsNotJson()
   {
     $this->mockOptionClass();
 
@@ -1985,7 +1985,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getValue_method_returns_null_when_the_value_is_empty()
+  public function testGetvalueMethodReturnsNullWhenTheValueIsEmpty()
   {
     $this->mockOptionClass();
 
@@ -2010,7 +2010,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getValue_method_returns_null_when_failed_to_retrieve_native_option()
+  public function testGetvalueMethodReturnsNullWhenFailedToRetrieveNativeOption()
   {
     $this->mockOptionClass();
 
@@ -2030,7 +2030,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getValue_method_returns_null_when_the_given_codes_dont_exist()
+  public function testGetvalueMethodReturnsNullWhenTheGivenCodesDontExist()
   {
     $this->mockOptionClass();
 
@@ -2045,7 +2045,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_returns_option_full_content_as_an_array()
+  public function testOptionMethodReturnsOptionFullContentAsAnArray()
   {
     $this->mockOptionClass();
 
@@ -2104,7 +2104,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_throws_an_exception_when_id_alias_is_same_as_id()
+  public function testOptionMethodThrowsAnExceptionWhenIdAliasIsSameAsId()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -2138,7 +2138,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_does_not_add_alias_key_when_failed_to_retrieve_alias_native_option()
+  public function testOptionMethodDoesNotAddAliasKeyWhenFailedToRetrieveAliasNativeOption()
   {
     $this->mockOptionClass();
 
@@ -2169,7 +2169,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_does_not_add_alias_key_when_id_alias_is_not_uid()
+  public function testOptionMethodDoesNotAddAliasKeyWhenIdAliasIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -2195,7 +2195,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_returns_null_when_failed_to_retrieve_native_option_for_the_given_code()
+  public function testOptionMethodReturnsNullWhenFailedToRetrieveNativeOptionForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -2215,7 +2215,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function option_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOptionMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2230,7 +2230,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_returns_the_merge_between_an_option_and_its_alias_as_an_array()
+  public function testOpaliasMethodReturnsTheMergeBetweenAnOptionAndItsAliasAsAnArray()
   {
     $this->mockOptionClass();
 
@@ -2284,7 +2284,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_throws_an_exception_when_id_alias_is_same_as_id()
+  public function testOpaliasMethodThrowsAnExceptionWhenIdAliasIsSameAsId()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -2317,7 +2317,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_does_not_merge_option_with_its_alias_if_failed_to_retrieve_alias_native_option()
+  public function testOpaliasMethodDoesNotMergeOptionWithItsAliasIfFailedToRetrieveAliasNativeOption()
   {
     $this->mockOptionClass();
 
@@ -2360,7 +2360,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_does_not_merge_option_with_its_alias_when_id_alias_is_not_uid()
+  public function testOpaliasMethodDoesNotMergeOptionWithItsAliasWhenIdAliasIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -2398,7 +2398,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_returns_null_when_failed_to_retrieve_native_option_for_the_given_code()
+  public function testOpaliasMethodReturnsNullWhenFailedToRetrieveNativeOptionForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -2418,7 +2418,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function opAlias_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOpaliasMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2433,7 +2433,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function options_method_returns_an_array_of_options_in_the_form_of_id_and_text()
+  public function testOptionsMethodReturnsAnArrayOfOptionsInTheFormOfIdAndText()
   {
     $this->mockOptionClass();
 
@@ -2502,7 +2502,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function options_method_returns_an_array_of_options_in_the_form_of_id_and_text_from_the_cache()
+  public function testOptionsMethodReturnsAnArrayOfOptionsInTheFormOfIdAndTextFromTheCache()
   {
     $this->mockOptionClass();
 
@@ -2528,7 +2528,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function options_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2543,7 +2543,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByCode_method_returns_an_array_of_children_options_in_the_form_of_code_text()
+  public function testOptionsbycodeMethodReturnsAnArrayOfChildrenOptionsInTheFormOfCodeText()
   {
     $this->mockOptionClass();
 
@@ -2588,7 +2588,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByCode_method_returns_an_array_of_children_options_in_the_form_of_code_text_from_cache()
+  public function testOptionsbycodeMethodReturnsAnArrayOfChildrenOptionsInTheFormOfCodeTextFromCache()
   {
     $this->mockOptionClass();
 
@@ -2614,7 +2614,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByCode_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOptionsbycodeMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2629,7 +2629,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function textValueOptions_method_returns_an_options_children_array_of_id_and_text_in_a_defined_indexed_array()
+  public function testTextvalueoptionsMethodReturnsAnOptionsChildrenArrayOfIdAndTextInADefinedIndexedArray()
   {
     $this->mockOptionClass();
 
@@ -2702,7 +2702,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function textValueOptions_method_returns_empty_result_array_when_it_has_empty_options()
+  public function testTextvalueoptionsMethodReturnsEmptyResultArrayWhenItHasEmptyOptions()
   {
     $this->mockOptionClass();
 
@@ -2722,7 +2722,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function siblings_method_returns_full_options_for_the_items_with_same_parent_from_the_given_code()
+  public function testSiblingsMethodReturnsFullOptionsForTheItemsWithSameParentFromTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -2756,7 +2756,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function siblings_method_returns_null_when_failed_to_get_the_parent_id_of_the_given_code()
+  public function testSiblingsMethodReturnsNullWhenFailedToGetTheParentIdOfTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -2776,7 +2776,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function siblings_method_returns_null_when_failed_to_get_full_options_of_the_parent()
+  public function testSiblingsMethodReturnsNullWhenFailedToGetFullOptionsOfTheParent()
   {
     $this->mockOptionClass();
 
@@ -2801,7 +2801,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function siblings_method_returns_null_when_the_given_code_does_not_exist()
+  public function testSiblingsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2816,7 +2816,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptions_method_returns_an_array_of_full_options_for_the_given_parent()
+  public function testFulloptionsMethodReturnsAnArrayOfFullOptionsForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -2849,7 +2849,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptions_method_throws_an_exception_when_of_the_items_has_no_option()
+  public function testFulloptionsMethodThrowsAnExceptionWhenOfTheItemsHasNoOption()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -2882,7 +2882,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptions_method_returns_empty_array_when_the_given_code_has_no_items()
+  public function testFulloptionsMethodReturnsEmptyArrayWhenTheGivenCodeHasNoItems()
   {
     $this->mockOptionClass();
 
@@ -2900,7 +2900,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptions_method_returns_null_when_failed_to_get_item_for_the_given_code()
+  public function testFulloptionsMethodReturnsNullWhenFailedToGetItemForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -2920,7 +2920,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFulloptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -2935,7 +2935,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsRef_method_returns_each_individual_full_option_plus_the_children_of_options_and_aliases()
+  public function testFulloptionsrefMethodReturnsEachIndividualFullOptionPlusTheChildrenOfOptionsAndAliases()
   {
     $this->mockOptionClass();
 
@@ -2980,7 +2980,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsRef_method_returns_only_aliases_options_if_failed_to_retrieve_the_give_code_full_options()
+  public function testFulloptionsrefMethodReturnsOnlyAliasesOptionsIfFailedToRetrieveTheGiveCodeFullOptions()
   {
     $this->mockOptionClass();
 
@@ -3015,7 +3015,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsRef_method_does_not_return_aliases_options_if_failed_to_retrieve_aliases_for_the_given_code()
+  public function testFulloptionsrefMethodDoesNotReturnAliasesOptionsIfFailedToRetrieveAliasesForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3043,7 +3043,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsRef_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFulloptionsrefMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3058,7 +3058,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsRef_method_individual_option_plus_the_children_of_options_and_aliases()
+  public function testOptionsrefMethodIndividualOptionPlusTheChildrenOfOptionsAndAliases()
   {
     $this->mockOptionClass();
 
@@ -3102,7 +3102,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsRef_method_returns_only_aliases_options_if_failed_to_retrieve_the_give_code_full_options()
+  public function testOptionsrefMethodReturnsOnlyAliasesOptionsIfFailedToRetrieveTheGiveCodeFullOptions()
   {
     $this->mockOptionClass();
 
@@ -3137,7 +3137,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsRef_method_does_not_return_aliases_options_if_failed_to_retrieve_aliases_for_the_given_code()
+  public function testOptionsrefMethodDoesNotReturnAliasesOptionsIfFailedToRetrieveAliasesForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3165,7 +3165,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsRef_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOptionsrefMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3180,7 +3180,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itemsRef_method_returns_each_individual_options_plus_the_children_of_options_and_aliases()
+  public function testItemsrefMethodReturnsEachIndividualOptionsPlusTheChildrenOfOptionsAndAliases()
   {
     $this->mockOptionClass();
 
@@ -3222,7 +3222,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itemsRef_method_returns_only_aliases_options_if_failed_to_retrieve_the_give_code_full_options()
+  public function testItemsrefMethodReturnsOnlyAliasesOptionsIfFailedToRetrieveTheGiveCodeFullOptions()
   {
     $this->mockOptionClass();
 
@@ -3257,7 +3257,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itemsRef_method_does_not_return_aliases_options_if_failed_to_retrieve_aliases_for_the_given_code()
+  public function testItemsrefMethodDoesNotReturnAliasesOptionsIfFailedToRetrieveAliasesForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3285,7 +3285,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itemsRef_method_returns_null_when_the_given_code_does_not_exist()
+  public function testItemsrefMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3300,7 +3300,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeOptions_method_returns_an_array_of_full_options_arrays_for_the_given_parent()
+  public function testCodeoptionsMethodReturnsAnArrayOfFullOptionsArraysForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -3333,7 +3333,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeOptions_method_returns_null_when_failed_to_retrieve_items()
+  public function testCodeoptionsMethodReturnsNullWhenFailedToRetrieveItems()
   {
     $this->mockOptionClass();
 
@@ -3353,7 +3353,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testCodeoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3368,7 +3368,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeIds_method_returns_an_array_of_id_arrays_for_the_given_parent()
+  public function testCodeidsMethodReturnsAnArrayOfIdArraysForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -3403,7 +3403,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeIds_method_returns_null_when_failed_to_retrieve_items()
+  public function testCodeidsMethodReturnsNullWhenFailedToRetrieveItems()
   {
     $this->mockOptionClass();
 
@@ -3423,7 +3423,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function codeIds_method_returns_null_when_the_given_code_does_not_exist()
+  public function testCodeidsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3438,7 +3438,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliases_method_returns_aliases_for_given_code()
+  public function testGetaliasesMethodReturnsAliasesForGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3478,7 +3478,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliases_method_returns_empty_array_when_failed_to_fetch_data_from_database()
+  public function testGetaliasesMethodReturnsEmptyArrayWhenFailedToFetchDataFromDatabase()
   {
     $this->mockOptionClass();
 
@@ -3503,7 +3503,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliases_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetaliasesMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3518,7 +3518,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasItems_method_returns_an_array_alias_items_id_for_the_given_code()
+  public function testGetaliasitemsMethodReturnsAnArrayAliasItemsIdForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3559,7 +3559,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasItems_method_returns_an_array_alias_items_id_for_the_given_code_from_the_cache()
+  public function testGetaliasitemsMethodReturnsAnArrayAliasItemsIdForTheGivenCodeFromTheCache()
   {
     $this->mockOptionClass();
 
@@ -3582,7 +3582,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasItems_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetaliasitemsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3597,7 +3597,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasOptions_method_returns_an_array_of_aliases_options_for_the_given_code()
+  public function testGetaliasoptionsMethodReturnsAnArrayOfAliasesOptionsForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -3642,7 +3642,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasOptions_method_returns_an_array_of_aliases_options_for_the_given_code_from_cache()
+  public function testGetaliasoptionsMethodReturnsAnArrayOfAliasesOptionsForTheGivenCodeFromCache()
   {
     $this->mockOptionClass();
 
@@ -3665,7 +3665,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasOptions_method_returns_empty_array_when_no_alias_items_found()
+  public function testGetaliasoptionsMethodReturnsEmptyArrayWhenNoAliasItemsFound()
   {
     $this->mockOptionClass();
 
@@ -3702,7 +3702,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetaliasoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3717,7 +3717,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasFullOptions_method_returns_alias_full_options_for_the_given_id()
+  public function testGetaliasfulloptionsMethodReturnsAliasFullOptionsForTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -3766,7 +3766,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasFullOptions_method_returns_alias_full_options_for_the_given_id_from_cache()
+  public function testGetaliasfulloptionsMethodReturnsAliasFullOptionsForTheGivenIdFromCache()
   {
     $this->mockOptionClass();
 
@@ -3793,7 +3793,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasFullOptions_method_returns_empty_array_when_fails_to_retrieve_alias_items()
+  public function testGetaliasfulloptionsMethodReturnsEmptyArrayWhenFailsToRetrieveAliasItems()
   {
     $this->mockOptionClass();
 
@@ -3830,7 +3830,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getAliasFullOptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetaliasfulloptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -3845,7 +3845,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsById_method_returns_an_id_indexed_array_of_full_options_for_a_given_parent()
+  public function testFulloptionsbyidMethodReturnsAnIdIndexedArrayOfFullOptionsForAGivenParent()
   {
     $this->mockOptionClass();
 
@@ -3875,7 +3875,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsById_method_returns_null_when_fails_to_retrieve_full_options()
+  public function testFulloptionsbyidMethodReturnsNullWhenFailsToRetrieveFullOptions()
   {
     $this->mockOptionClass();
 
@@ -3890,7 +3890,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsByCode_method_returns_a_code_indexed_array_of_full_options_for_the_given_parent()
+  public function testFulloptionsbycodeMethodReturnsACodeIndexedArrayOfFullOptionsForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -3920,7 +3920,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsByCode_method_returns_null_when_fails_to_retrieve_full_options()
+  public function testFulloptionsbycodeMethodReturnsNullWhenFailsToRetrieveFullOptions()
   {
     $this->mockOptionClass();
 
@@ -3936,7 +3936,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsCfg_method_returns_an_array_of_full_option_with_config_for_the_given_parent()
+  public function testFulloptionscfgMethodReturnsAnArrayOfFullOptionWithConfigForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -3995,7 +3995,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullOptionsCfg_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFulloptionscfgMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4010,7 +4010,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function soptions_method_returns_an_id_indexed_array_of_options_in_the_form_of_text_for_the_give_grandparent()
+  public function testSoptionsMethodReturnsAnIdIndexedArrayOfOptionsInTheFormOfTextForTheGiveGrandparent()
   {
     $this->mockOptionClass();
 
@@ -4052,7 +4052,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function soptions_method_returns_empty_array_when_no_items_found_for_the_given_code()
+  public function testSoptionsMethodReturnsEmptyArrayWhenNoItemsFoundForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -4073,7 +4073,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function soptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testSoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4088,7 +4088,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullSoptions_method_returns_an_array_of_full_options_for_the_given_grand_parent()
+  public function testFullsoptionsMethodReturnsAnArrayOfFullOptionsForTheGivenGrandParent()
   {
     $this->mockOptionClass();
 
@@ -4146,7 +4146,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullSoptions_method_returns_empty_array_when_no_items_found_for_the_given_code()
+  public function testFullsoptionsMethodReturnsEmptyArrayWhenNoItemsFoundForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -4167,7 +4167,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullSoptions_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFullsoptionsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4182,7 +4182,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function treeIds_method_an_array_of_all_ids_found_in_a_hierarchical_structure()
+  public function testTreeidsMethodAnArrayOfAllIdsFoundInAHierarchicalStructure()
   {
     $this->mockOptionClass();
 
@@ -4241,7 +4241,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function treeIds_method_returns_null_when_the_given_id_does_not_exist()
+  public function testTreeidsMethodReturnsNullWhenTheGivenIdDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4260,7 +4260,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function treeIds_method_returns_null_when_check_method_returns_false()
+  public function testTreeidsMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -4274,7 +4274,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeTree_method_returns_a_hierarchical_structure_as_stored_in_its_original_form_in_database()
+  public function testNativetreeMethodReturnsAHierarchicalStructureAsStoredInItsOriginalFormInDatabase()
   {
     $this->mockOptionClass();
 
@@ -4364,7 +4364,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeTree_method_returns_null_when_no_native_options_found()
+  public function testNativetreeMethodReturnsNullWhenNoNativeOptionsFound()
   {
     $this->mockOptionClass();
 
@@ -4384,7 +4384,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function nativeTree_method_returns_null_when_the_given_code_does_not_exist()
+  public function testNativetreeMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4399,7 +4399,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function tree_method_returns_a_simple_hierarchical_structure_with_just_text_and_id_and_items()
+  public function testTreeMethodReturnsASimpleHierarchicalStructureWithJustTextAndIdAndItems()
   {
     $this->mockOptionClass();
 
@@ -4494,7 +4494,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function tree_method_returns_null_when_fails_to_retrieve_text()
+  public function testTreeMethodReturnsNullWhenFailsToRetrieveText()
   {
     $this->mockOptionClass();
 
@@ -4514,7 +4514,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function tree_method_returns_null_when_the_given_code_does_not_exist()
+  public function testTreeMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4529,7 +4529,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTree_method_returns_a_full_hierarchical_structure_of_options_from_a_given_option()
+  public function testFulltreeMethodReturnsAFullHierarchicalStructureOfOptionsFromAGivenOption()
   {
     $this->mockOptionClass();
 
@@ -4623,7 +4623,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTree_method_returns_null_when_fails_to_retrive_option_content()
+  public function testFulltreeMethodReturnsNullWhenFailsToRetriveOptionContent()
   {
     $this->mockOptionClass();
 
@@ -4643,7 +4643,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTree_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFulltreeMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4658,7 +4658,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTreeRef_method_returns_a_full_hierarchical_of_options_plus_aliases_from_the_given_code()
+  public function testFulltreerefMethodReturnsAFullHierarchicalOfOptionsPlusAliasesFromTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -4753,7 +4753,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTreeRef_method_returns_null_when_fails_to_retrieve_full_option_content_for_the_given_code()
+  public function testFulltreerefMethodReturnsNullWhenFailsToRetrieveFullOptionContentForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -4773,7 +4773,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullTreeRef_method_returns_null_when_the_given_code_does_not_exist()
+  public function testFulltreerefMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -4788,7 +4788,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_first_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArrayFirstTest()
   {
     $this->mockOptionClass();
 
@@ -4872,7 +4872,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_second_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArraySecondTest()
   {
     $this->mockOptionClass();
 
@@ -4955,7 +4955,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_third_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArrayThirdTest()
   {
     $this->mockOptionClass();
 
@@ -5044,7 +5044,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_fourth_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArrayFourthTest()
   {
     $this->mockOptionClass();
 
@@ -5133,7 +5133,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_fifth_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArrayFifthTest()
   {
     $this->mockOptionClass();
 
@@ -5214,7 +5214,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_sixth_test()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArraySixthTest()
   {
     $this->mockOptionClass();
 
@@ -5298,7 +5298,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_from_cache()
+  public function testGetcfgMethodReturnsFormattedContentOfTheCfgColumnAsAnArrayFromCache()
   {
     $this->mockOptionClass();
 
@@ -5336,7 +5336,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetcfgMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5351,7 +5351,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRawCfg_method_returns_raw_config_column_of_the_given_option()
+  public function testGetrawcfgMethodReturnsRawConfigColumnOfTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -5376,7 +5376,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRawCfg_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetrawcfgMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5391,7 +5391,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getApplicableCfg_method_returns_a_formatted_content_of_the_config_column_as_array_from_the_given_option_parent()
+  public function testGetapplicablecfgMethodReturnsAFormattedContentOfTheConfigColumnAsArrayFromTheGivenOptionParent()
   {
     $this->mockOptionClass();
 
@@ -5420,7 +5420,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getApplicableCfg_method_returns_null_when_fails_to_retrieve_parent_id()
+  public function testGetapplicablecfgMethodReturnsNullWhenFailsToRetrieveParentId()
   {
     $this->mockOptionClass();
 
@@ -5440,7 +5440,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getApplicableCfg_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetapplicablecfgMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5455,7 +5455,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function parents_method_returns_an_array_of_id_parents_from_the_given_option_to_the_root()
+  public function testParentsMethodReturnsAnArrayOfIdParentsFromTheGivenOptionToTheRoot()
   {
     $this->mockOptionClass();
 
@@ -5491,7 +5491,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function parents_method_returns_null_when_the_given_code_does_not_exist()
+  public function testParentsMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5506,7 +5506,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function sequence_method_returns_an_array_of_id_parents_from_the_selected_root_to_the_given_id_option()
+  public function testSequenceMethodReturnsAnArrayOfIdParentsFromTheSelectedRootToTheGivenIdOption()
   {
     $this->mockOptionClass();
 
@@ -5527,7 +5527,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function sequence_method_returns_an_array_of_id_parents_from_the_selected_root_to_the_default_id_option_if_not_provided()
+  public function testSequenceMethodReturnsAnArrayOfIdParentsFromTheSelectedRootToTheDefaultIdOptionIfNotProvided()
   {
     $this->mockOptionClass();
 
@@ -5550,7 +5550,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function sequence_method_returns_null_when_the_given_id_option_does_not_have_parents()
+  public function testSequenceMethodReturnsNullWhenTheGivenIdOptionDoesNotHaveParents()
   {
     $this->mockOptionClass();
 
@@ -5570,7 +5570,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function sequence_method_returns_null_when_the_given_root_does_not_exist()
+  public function testSequenceMethodReturnsNullWhenTheGivenRootDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5585,7 +5585,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getIdParent_method_returns_the_parent_of_the_given_option()
+  public function testGetidparentMethodReturnsTheParentOfTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -5610,7 +5610,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getIdParent_method_returns_null_when_fails_to_retrieve_code_full_option()
+  public function testGetidparentMethodReturnsNullWhenFailsToRetrieveCodeFullOption()
   {
     $this->mockOptionClass();
 
@@ -5630,7 +5630,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getIdParent_method_returns_null_when_the_given_code_does_not_exist()
+  public function testGetidparentMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5645,7 +5645,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function parent_method_returns_the_parent_option()
+  public function testParentMethodReturnsTheParentOption()
   {
     $this->mockOptionClass();
 
@@ -5675,7 +5675,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function parent_method_returns_null_when_fails_to_retrieve_the_given_code_parent()
+  public function testParentMethodReturnsNullWhenFailsToRetrieveTheGivenCodeParent()
   {
     $this->mockOptionClass();
 
@@ -5695,7 +5695,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function parent_method_returns_null_when_the_given_code_does_not_exist()
+  public function testParentMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -5710,7 +5710,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isParent_method_returns_true_if_row_with_the_given_id_parent_is_parent_at_any_level_of_row_with_the_given_id()
+  public function testIsparentMethodReturnsTrueIfRowWithTheGivenIdParentIsParentAtAnyLevelOfRowWithTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -5738,7 +5738,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isParent_method_returns_false_if_row_with_the_given_id_parent_is_not_parent_at_any_level_of_row_with_the_given_id()
+  public function testIsparentMethodReturnsFalseIfRowWithTheGivenIdParentIsNotParentAtAnyLevelOfRowWithTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -5766,7 +5766,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isParent_method_returns_false_if_there_are_duplicate_paretns_returned()
+  public function testIsparentMethodReturnsFalseIfThereAreDuplicateParetnsReturned()
   {
     $this->mockOptionClass();
 
@@ -5794,7 +5794,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isParent_method_returns_false_when_the_given_id_is_not_uid()
+  public function testIsparentMethodReturnsFalseWhenTheGivenIdIsNotUid()
   {
     $this->assertFalse(
       $this->option->isParent('1122', $this->item)
@@ -5810,7 +5810,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodes_method_returns_an_array_of_options_if_the_form_of_id_and_code_sorted_by_num()
+  public function testGetcodesMethodReturnsAnArrayOfOptionsIfTheFormOfIdAndCodeSortedByNum()
   {
     $this->mockOptionClass();
 
@@ -5848,7 +5848,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodes_method_returns_an_array_of_options_if_the_form_of_id_and_code_sorted_by_code()
+  public function testGetcodesMethodReturnsAnArrayOfOptionsIfTheFormOfIdAndCodeSortedByCode()
   {
     $this->mockOptionClass();
 
@@ -5886,7 +5886,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodes_method_returns_empty_array_when_no_results_found_in_database()
+  public function testGetcodesMethodReturnsEmptyArrayWhenNoResultsFoundInDatabase()
   {
     $this->mockOptionClass();
 
@@ -5917,7 +5917,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodes_method_returns_empty_array_when_the_given_code_is_not_valid()
+  public function testGetcodesMethodReturnsEmptyArrayWhenTheGivenCodeIsNotValid()
   {
     $this->mockOptionClass();
 
@@ -5933,7 +5933,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function code_method_returns_option_code()
+  public function testCodeMethodReturnsOptionCode()
   {
     $this->mockOptionClass();
 
@@ -5958,7 +5958,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function code_method_returns_null_when_the_given_id_is_not_valid()
+  public function testCodeMethodReturnsNullWhenTheGivenIdIsNotValid()
   {
     $this->mockOptionClass();
 
@@ -5973,7 +5973,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function code_method_returns_null_when_check_method_returns_false()
+  public function testCodeMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -5988,7 +5988,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function text_method_returns_option_text()
+  public function testTextMethodReturnsOptionText()
   {
     $this->mockOptionClass();
 
@@ -6010,7 +6010,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function text_method_returns_null_when_the_given_code_does_not_exist()
+  public function testTextMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -6025,7 +6025,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function alias_method_returns_the_id_alias_relative_to_the_given_id_option()
+  public function testAliasMethodReturnsTheIdAliasRelativeToTheGivenIdOption()
   {
     $this->mockOptionClass();
 
@@ -6050,7 +6050,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function alias_method_returns_null_when_the_given_id_is_not_valid()
+  public function testAliasMethodReturnsNullWhenTheGivenIdIsNotValid()
   {
     $this->mockOptionClass();
 
@@ -6065,7 +6065,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function alias_method_returns_null_when_check_method_returns_false()
+  public function testAliasMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -6080,7 +6080,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itext_method_returns_translation_of_an_options_text()
+  public function testItextMethodReturnsTranslationOfAnOptionsText()
   {
     $this->mockOptionClass();
 
@@ -6102,7 +6102,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function itext_method_returns_null_when_the_given_code_does_not_exist()
+  public function testItextMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -6117,7 +6117,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_the_number_of_children_for_a_given_option()
+  public function testCountMethodReturnsTheNumberOfChildrenForAGivenOption()
   {
     $this->mockOptionClass();
 
@@ -6138,7 +6138,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_null_when_the_given_code_does_not_exist()
+  public function testCountMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -6151,7 +6151,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByAlias_method_returns_an_array_of_options_based_on_their_id_alias()
+  public function testOptionsbyaliasMethodReturnsAnArrayOfOptionsBasedOnTheirIdAlias()
   {
     $this->mockOptionClass();
 
@@ -6184,7 +6184,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByAlias_method_returns_null_when_no_records_found_for_the_given_code()
+  public function testOptionsbyaliasMethodReturnsNullWhenNoRecordsFoundForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -6206,7 +6206,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function optionsByAlias_method_returns_null_when_the_given_code_does_not_exist()
+  public function testOptionsbyaliasMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -6221,7 +6221,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isSortable_method_checks_if_the_given_option_is_sortable_from_its_config()
+  public function testIssortableMethodChecksIfTheGivenOptionIsSortableFromItsConfig()
   {
     $this->mockOptionClass();
 
@@ -6261,7 +6261,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function isSortable_method_returns_null_when_the_given_code_does_not_exist_or_not_valid()
+  public function testIssortableMethodReturnsNullWhenTheGivenCodeDoesNotExistOrNotValid()
   {
     $this->mockOptionClass();
 
@@ -6286,7 +6286,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getPathArray_method_returns_an_array_of_codes_for_each_option_between_id_and_root_without_root_code()
+  public function testGetpatharrayMethodReturnsAnArrayOfCodesForEachOptionBetweenIdAndRootWithoutRootCode()
   {
     $this->mockOptionClass();
 
@@ -6324,7 +6324,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getPathArray_method_returns_an_array_of_codes_for_each_option_between_id_and_root_without_root_code_using_default_root()
+  public function testGetpatharrayMethodReturnsAnArrayOfCodesForEachOptionBetweenIdAndRootWithoutRootCodeUsingDefaultRoot()
   {
     $this->mockOptionClass();
 
@@ -6368,7 +6368,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getPathArray_method_returns_null_when_fails_to_retrieve_id_parent_at_any_point_during_the_loop()
+  public function testGetpatharrayMethodReturnsNullWhenFailsToRetrieveIdParentAtAnyPointDuringTheLoop()
   {
     $this->mockOptionClass();
 
@@ -6400,7 +6400,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getPathArray_method_returns_empty_array_when_the_given_id_is_same_as_the_root()
+  public function testGetpatharrayMethodReturnsEmptyArrayWhenTheGivenIdIsSameAsTheRoot()
   {
     $this->mockOptionClass();
 
@@ -6422,7 +6422,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromPath_method_returns_the_closest_id_option_from_a_path_of_codes()
+  public function testFrompathMethodReturnsTheClosestIdOptionFromAPathOfCodes()
   {
     $this->mockOptionClass();
 
@@ -6449,7 +6449,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromPath_method_returns_the_closest_id_option_from_a_path_of_codes_using_default_as_parent()
+  public function testFrompathMethodReturnsTheClosestIdOptionFromAPathOfCodesUsingDefaultAsParent()
   {
     $this->mockOptionClass();
 
@@ -6478,7 +6478,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromPath_method_returns_null_when_fails_to_retrieve_option_from_code_at_any_point_during_the_loop()
+  public function testFrompathMethodReturnsNullWhenFailsToRetrieveOptionFromCodeAtAnyPointDuringTheLoop()
   {
     $this->mockOptionClass();
 
@@ -6504,7 +6504,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fromPath_method_returns_null_when_check_method_returns_false()
+  public function testFrompathMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -6518,7 +6518,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function toPath_method_concatenates_the_codes_and_separator()
+  public function testTopathMethodConcatenatesTheCodesAndSeparator()
   {
     $this->mockOptionClass();
 
@@ -6538,7 +6538,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function toPath_method_returns_null_when_no_path_results_found()
+  public function testTopathMethodReturnsNullWhenNoPathResultsFound()
   {
     $this->mockOptionClass();
 
@@ -6565,7 +6565,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function toPath_method_returns_null_when_check_method_returns_false()
+  public function testTopathMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -6579,7 +6579,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function add_method_creates_a_new_option_by_adding_rows_in_options_table()
+  public function testAddMethodCreatesANewOptionByAddingRowsInOptionsTable()
   {
     $this->mockOptionClass();
 
@@ -6718,7 +6718,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function add_method_creates_a_new_option_by_adding_rows_in_options_table_and_updating_it_when_exist_and_force_is_enabled()
+  public function testAddMethodCreatesANewOptionByAddingRowsInOptionsTableAndUpdatingItWhenExistAndForceIsEnabled()
   {
     $this->mockOptionClass();
 
@@ -6908,7 +6908,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function add_method_inserts_a_new_option_row_with_the_given_id_when_with_id_is_enabled()
+  public function testAddMethodInsertsANewOptionRowWithTheGivenIdWhenWithIdIsEnabled()
   {
     $this->mockOptionClass();
 
@@ -6984,7 +6984,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function add_method_throws_an_exception_given_options_is_empty()
+  public function testAddMethodThrowsAnExceptionGivenOptionsIsEmpty()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -6998,7 +6998,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function add_method_returns_null_when_check_method_returns_false()
+  public function testAddMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7011,7 +7011,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function set_method_updates_an_option_row_without_changing_the_config_and_returns_number_of_affected_rows()
+  public function testSetMethodUpdatesAnOptionRowWithoutChangingTheConfigAndReturnsNumberOfAffectedRows()
   {
     $this->mockOptionClass();
 
@@ -7071,7 +7071,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function set_method_returns_zero_when_fails_to_update_in_database()
+  public function testSetMethodReturnsZeroWhenFailsToUpdateInDatabase()
   {
     $this->mockOptionClass();
 
@@ -7129,7 +7129,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function set_method_returns_null_when_check_method_returns_false()
+  public function testSetMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7143,7 +7143,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function merge_method_updates_an_option_row_by_merging_data_and_config()
+  public function testMergeMethodUpdatesAnOptionRowByMergingDataAndConfig()
   {
     $this->mockOptionClass();
 
@@ -7229,7 +7229,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function merge_method_returns_zero_when_fails_to_update_the_database()
+  public function testMergeMethodReturnsZeroWhenFailsToUpdateTheDatabase()
   {
     $this->mockOptionClass();
 
@@ -7268,7 +7268,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function merge_method_returns_null_when_fails_to_retrieve_option_content_for_the_given_id()
+  public function testMergeMethodReturnsNullWhenFailsToRetrieveOptionContentForTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -7287,7 +7287,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function merge_method_returns_null_when_check_method_returns_false()
+  public function testMergeMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7301,7 +7301,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_deletes_a_row_from_the_option_table_and_cache_and_fixes_order()
+  public function testRemoveMethodDeletesARowFromTheOptionTableAndCacheAndFixesOrder()
   {
     $this->mockOptionClass();
 
@@ -7453,7 +7453,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_returns_false_when_id_parent_of_the_give_code_cannot_be_retrieved()
+  public function testRemoveMethodReturnsFalseWhenIdParentOfTheGiveCodeCannotBeRetrieved()
   {
     $this->mockOptionClass();
 
@@ -7473,7 +7473,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_returns_null_when_the_given_code_is_same_as_root()
+  public function testRemoveMethodReturnsNullWhenTheGivenCodeIsSameAsRoot()
   {
     $this->mockOptionClass();
 
@@ -7488,7 +7488,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_returns_null_when_the_given_code_is_same_as_the_default()
+  public function testRemoveMethodReturnsNullWhenTheGivenCodeIsSameAsTheDefault()
   {
     $this->mockOptionClass();
 
@@ -7503,7 +7503,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_returns_null_when_the_given_code_does_not_exist()
+  public function testRemoveMethodReturnsNullWhenTheGivenCodeDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -7518,7 +7518,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_returns_null_when_the_given_code_has_an_id_that_is_not_uid()
+  public function testRemoveMethodReturnsNullWhenTheGivenCodeHasAnIdThatIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -7533,7 +7533,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_removes_option_row_from_options_table_and_all_its_hierarchical_structure_and_deletes_the_cache()
+  public function testRemovefullMethodRemovesOptionRowFromOptionsTableAndAllItsHierarchicalStructureAndDeletesTheCache()
   {
     $this->mockOptionClass();
 
@@ -7569,7 +7569,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_removes_option_row_and_all_its_hierarchical_structure_from_history_table_and_deletes_the_cache()
+  public function testRemovefullMethodRemovesOptionRowAndAllItsHierarchicalStructureFromHistoryTableAndDeletesTheCache()
   {
     $this->mockOptionClass();
 
@@ -7634,7 +7634,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_returns_null_when_the_given_option_is_same_as_root()
+  public function testRemovefullMethodReturnsNullWhenTheGivenOptionIsSameAsRoot()
   {
     $this->mockOptionClass();
 
@@ -7649,7 +7649,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_returns_null_when_the_given_option_is_same_as_default()
+  public function testRemovefullMethodReturnsNullWhenTheGivenOptionIsSameAsDefault()
   {
     $this->mockOptionClass();
 
@@ -7664,7 +7664,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_returns_null_when_the_given_option_does_not_exist()
+  public function testRemovefullMethodReturnsNullWhenTheGivenOptionDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -7679,7 +7679,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function removeFull_method_returns_null_when_the_given_option_has_an_id_that_is_not_uid()
+  public function testRemovefullMethodReturnsNullWhenTheGivenOptionHasAnIdThatIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -7694,7 +7694,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setAlias_method_sets_the_given_alias_to_the_given_option()
+  public function testSetaliasMethodSetsTheGivenAliasToTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -7723,7 +7723,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setAlias_method_sets_the_alias_to_null_for_the_given_option()
+  public function testSetaliasMethodSetsTheAliasToNullForTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -7752,7 +7752,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setAlias_method_does_not_delete_cache_if_failed_to_update_the_alias()
+  public function testSetaliasMethodDoesNotDeleteCacheIfFailedToUpdateTheAlias()
   {
     $this->mockOptionClass();
 
@@ -7778,7 +7778,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setAlias_method_returns_null_when_check_method_returns_false()
+  public function testSetaliasMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7792,7 +7792,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setText_method_sets_given_text_to_the_given_option()
+  public function testSettextMethodSetsGivenTextToTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -7821,7 +7821,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setText_method_does_not_delete_the_cache_when_fails_to_update_the_text()
+  public function testSettextMethodDoesNotDeleteTheCacheWhenFailsToUpdateTheText()
   {
     $this->mockOptionClass();
 
@@ -7847,7 +7847,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setText_method_returns_null_when_check_method_returns_false()
+  public function testSettextMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7861,7 +7861,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCode_method_sets_the_given_code_to_the_given_option()
+  public function testSetcodeMethodSetsTheGivenCodeToTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -7885,7 +7885,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCode_method_returns_null_when_check_method_returns_false()
+  public function testSetcodeMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -7899,7 +7899,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_the_order_of_the_given_option_and_updates_its_position()
+  public function testOrderMethodReturnsTheOrderOfTheGivenOptionAndUpdatesItsPosition()
   {
     $this->mockOptionClass();
 
@@ -7968,7 +7968,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_the_old_order_when_the_provided_position_is_the_same()
+  public function testOrderMethodReturnsTheOldOrderWhenTheProvidedPositionIsTheSame()
   {
     {
       $this->mockOptionClass();
@@ -8004,7 +8004,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_the_old_order_when_no_position_is_provided()
+  public function testOrderMethodReturnsTheOldOrderWhenNoPositionIsProvided()
   {
     $this->mockOptionClass();
 
@@ -8038,7 +8038,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_null_when_parent_is_not_sortable()
+  public function testOrderMethodReturnsNullWhenParentIsNotSortable()
   {
     $this->mockOptionClass();
 
@@ -8062,7 +8062,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_null_when_fails_to_retrieve_id_paren_for_the_given_id()
+  public function testOrderMethodReturnsNullWhenFailsToRetrieveIdParenForTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -8083,7 +8083,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function order_method_returns_null_when_check_method_returns_false()
+  public function testOrderMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -8097,7 +8097,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_updates_the_given_option_properties_derived_from_the_value_columns()
+  public function testSetpropMethodUpdatesTheGivenOptionPropertiesDerivedFromTheValueColumns()
   {
     $this->mockOptionClass();
 
@@ -8125,7 +8125,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_updates_the_given_option_properties_derived_from_the_value_columns_when_prop_value_provided_as_string()
+  public function testSetpropMethodUpdatesTheGivenOptionPropertiesDerivedFromTheValueColumnsWhenPropValueProvidedAsString()
   {
     $this->mockOptionClass();
 
@@ -8152,7 +8152,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_returns_zero_when_the_provided_property_is_not_an_array()
+  public function testSetpropMethodReturnsZeroWhenTheProvidedPropertyIsNotAnArray()
   {
     $this->mockOptionClass();
 
@@ -8171,7 +8171,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_returns_zero_when_no_values_are_changed()
+  public function testSetpropMethodReturnsZeroWhenNoValuesAreChanged()
   {
     $this->mockOptionClass();
 
@@ -8190,7 +8190,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_returns_null_when_fails_to_retrieve_full_option_for_the_given_id()
+  public function testSetpropMethodReturnsNullWhenFailsToRetrieveFullOptionForTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -8205,7 +8205,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setProp_method_returns_null_when_the_give_prop_or_id_are_empty()
+  public function testSetpropMethodReturnsNullWhenTheGivePropOrIdAreEmpty()
   {
     $this->assertNull(
       $this->option->setProp($this->item, [])
@@ -8221,7 +8221,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getProp_method_returns_an_option_single_property()
+  public function testGetpropMethodReturnsAnOptionSingleProperty()
   {
     $this->mockOptionClass();
 
@@ -8240,7 +8240,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getProp_method_returns_null_when_the_given_property_does_not_exist()
+  public function testGetpropMethodReturnsNullWhenTheGivenPropertyDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -8258,7 +8258,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getProp_method_returns_null_when_fails_to_get_full_option_content_for_the_given_id()
+  public function testGetpropMethodReturnsNullWhenFailsToGetFullOptionContentForTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -8273,7 +8273,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getProp_method_returns_null_when_given_id_or_prop_are_empty()
+  public function testGetpropMethodReturnsNullWhenGivenIdOrPropAreEmpty()
   {
     $this->assertNull(
       $this->option->getProp($this->item, '')
@@ -8285,7 +8285,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetProp_method_unsets_the_given_property_for_the_given_option_id()
+  public function testUnsetpropMethodUnsetsTheGivenPropertyForTheGivenOptionId()
   {
     $this->mockOptionClass();
 
@@ -8318,7 +8318,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetProp_method_does_not_unset_the_prop_and_returns_null_if_the_given_one_is_one_of_the_fields_or_does_not_exist()
+  public function testUnsetpropMethodDoesNotUnsetThePropAndReturnsNullIfTheGivenOneIsOneOfTheFieldsOrDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -8339,7 +8339,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetProp_method_returns_null_when_fails_to_retreive_option_content()
+  public function testUnsetpropMethodReturnsNullWhenFailsToRetreiveOptionContent()
   {
     $this->mockOptionClass();
 
@@ -8354,7 +8354,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetProp_method_returns_null_when_the_given_id_is_not_uid_or_the_given_prop_is_empty()
+  public function testUnsetpropMethodReturnsNullWhenTheGivenIdIsNotUidOrTheGivenPropIsEmpty()
   {
     $this->assertNull(
       $this->option->unsetProp('123aa', 'prop')
@@ -8374,7 +8374,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCfg_method_sets_the_cfg_column_of_the_given_option_in_the_table_through_an_array_and_merge_is_enabled()
+  public function testSetcfgMethodSetsTheCfgColumnOfTheGivenOptionInTheTableThroughAnArrayAndMergeIsEnabled()
   {
     $this->mockOptionClass();
 
@@ -8432,7 +8432,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCfg_method_sets_the_cfg_column_of_the_given_option_in_the_table_through_an_array_and_merge_is_disabled()
+  public function testSetcfgMethodSetsTheCfgColumnOfTheGivenOptionInTheTableThroughAnArrayAndMergeIsDisabled()
   {
     $this->mockOptionClass();
 
@@ -8480,7 +8480,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCfg_method_returns_null_when_the_given_id_option_does_not_exist()
+  public function testSetcfgMethodReturnsNullWhenTheGivenIdOptionDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -8499,7 +8499,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function setCfg_method_returns_null_when_check_method_returns_false()
+  public function testSetcfgMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -8513,7 +8513,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetCfg_method_sets_the_config_column_to_null_for_the_given_option_id()
+  public function testUnsetcfgMethodSetsTheConfigColumnToNullForTheGivenOptionId()
   {
     $this->mockOptionClass();
 
@@ -8547,7 +8547,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetCfg_method_does_not_delete_cache_when_fails_to_update_the_config_column()
+  public function testUnsetcfgMethodDoesNotDeleteCacheWhenFailsToUpdateTheConfigColumn()
   {
     $this->mockOptionClass();
 
@@ -8578,7 +8578,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetCfg_method_returns_false_when_the_given_id_option_does_not_exist()
+  public function testUnsetcfgMethodReturnsFalseWhenTheGivenIdOptionDoesNotExist()
   {
     $this->mockOptionClass();
 
@@ -8597,7 +8597,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function unsetCfg_method_returns_false_when_check_method_returns_false()
+  public function testUnsetcfgMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -8611,7 +8611,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_merges_source_option_into_existing_option()
+  public function testFusionMethodMergesSourceOptionIntoExistingOption()
   {
     $this->mockOptionClass();
 
@@ -8718,7 +8718,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_merges_source_option_into_existing_option_when_source_does_not_have_childrens_and_both_are_not_sortable()
+  public function testFusionMethodMergesSourceOptionIntoExistingOptionWhenSourceDoesNotHaveChildrensAndBothAreNotSortable()
   {
     $this->mockOptionClass();
 
@@ -8796,7 +8796,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_returns_zero_when_fails_to_retrieve_source_id_option_content()
+  public function testFusionMethodReturnsZeroWhenFailsToRetrieveSourceIdOptionContent()
   {
     $this->mockOptionClass();
 
@@ -8821,7 +8821,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_returns_zero_when_fails_to_retrieve_destination_id_option_content()
+  public function testFusionMethodReturnsZeroWhenFailsToRetrieveDestinationIdOptionContent()
   {
     $this->mockOptionClass();
 
@@ -8846,7 +8846,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_returns_zero_when_fails_to_retrieve_both_source_and_destination_id_option_content()
+  public function testFusionMethodReturnsZeroWhenFailsToRetrieveBothSourceAndDestinationIdOptionContent()
   {
     $this->mockOptionClass();
 
@@ -8871,7 +8871,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fusion_method_returns_null_when_check_method_returns_false()
+  public function testFusionMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -8885,7 +8885,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function move_method_changes_the_id_parent_of_the_given_option()
+  public function testMoveMethodChangesTheIdParentOfTheGivenOption()
   {
     $this->mockOptionClass();
 
@@ -8944,7 +8944,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function move_method_changes_the_id_parent_of_the_given_option_when_parent_is_sortable_but_no_children_number_exist()
+  public function testMoveMethodChangesTheIdParentOfTheGivenOptionWhenParentIsSortableButNoChildrenNumberExist()
   {
     $this->mockOptionClass();
 
@@ -9002,7 +9002,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function move_method_changes_the_id_parent_of_the_given_option_when_parent_is_not_sortable()
+  public function testMoveMethodChangesTheIdParentOfTheGivenOptionWhenParentIsNotSortable()
   {
     $this->mockOptionClass();
 
@@ -9060,7 +9060,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function move_method_returns_null_when_fails_to_retrieve_parent_option_content()
+  public function testMoveMethodReturnsNullWhenFailsToRetrieveParentOptionContent()
   {
     $this->mockOptionClass();
 
@@ -9083,7 +9083,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function move_method_returns_null_when_fails_to_retrieve_id_option_content()
+  public function testMoveMethodReturnsNullWhenFailsToRetrieveIdOptionContent()
   {
     $this->mockOptionClass();
 
@@ -9098,7 +9098,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fixOrder_method_sets_the_order_configuration_for_each_option_of_a_sortable_given_parent()
+  public function testFixorderMethodSetsTheOrderConfigurationForEachOptionOfASortableGivenParent()
   {
     $this->mockOptionClass();
 
@@ -9188,7 +9188,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fixOrder_method_does_not_fix_the_order_if_fails_to_retrive_full_options_for_the_given_parent()
+  public function testFixorderMethodDoesNotFixTheOrderIfFailsToRetriveFullOptionsForTheGivenParent()
   {
     $this->mockOptionClass();
 
@@ -9213,7 +9213,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fixOrder_method_does_not_fix_the_order_if_the_given_option_is_not_sortable()
+  public function testFixorderMethodDoesNotFixTheOrderIfTheGivenOptionIsNotSortable()
   {
     $this->mockOptionClass();
 
@@ -9233,7 +9233,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fixOrder_method_does_not_fix_the_order_when_check_method_returns_false()
+  public function testFixorderMethodDoesNotFixTheOrderWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -9248,7 +9248,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodePath_method_returns_an_array_of_codes_for_the_given_option_and_up_to_the_tree_of_parents()
+  public function testGetcodepathMethodReturnsAnArrayOfCodesForTheGivenOptionAndUpToTheTreeOfParents()
   {
     $this->mockOptionClass();
 
@@ -9298,7 +9298,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodePath_method_returns_null_when_fails_to_retrieve_native_option_content_for_the_given_code()
+  public function testGetcodepathMethodReturnsNullWhenFailsToRetrieveNativeOptionContentForTheGivenCode()
   {
     $this->mockOptionClass();
 
@@ -9313,7 +9313,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getCodePath_method_returns_null_when_one_of_codes_is_null()
+  public function testGetcodepathMethodReturnsNullWhenOneOfCodesIsNull()
   {
     $this->mockOptionClass();
 
@@ -9352,7 +9352,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function analyzeOut_method_test()
+  public function testAnalyzeoutMethodTest()
   {
     $this->mockOptionClass();
 
@@ -9423,7 +9423,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function analyzeOut_method_test_when_the_given_options_is_a_multi_dimension_array()
+  public function testAnalyzeoutMethodTestWhenTheGivenOptionsIsAMultiDimensionArray()
   {
     $this->mockOptionClass();
 
@@ -9491,7 +9491,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function analyzeOut_method_returns_null_when_check_method_returns_false()
+  public function testAnalyzeoutMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -9505,7 +9505,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_single_mode()
+  public function testExportMethodTestInSingleMode()
   {
     $this->mockOptionClass();
 
@@ -9525,7 +9525,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_simple_mode()
+  public function testExportMethodTestInSimpleMode()
   {
     $this->mockOptionClass();
 
@@ -9578,7 +9578,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_schildren_mode()
+  public function testExportMethodTestInSchildrenMode()
   {
     $this->mockOptionClass();
 
@@ -9647,7 +9647,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_children_mode()
+  public function testExportMethodTestInChildrenMode()
   {
     $this->mockOptionClass();
 
@@ -9666,7 +9666,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_full_mode()
+  public function testExportMethodTestInFullMode()
   {
     $this->mockOptionClass();
 
@@ -9687,7 +9687,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_test_in_sfull_mode()
+  public function testExportMethodTestInSfullMode()
   {
     $this->mockOptionClass();
 
@@ -9789,7 +9789,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_returns_null_when_fails_to_retrieve_options_content()
+  public function testExportMethodReturnsNullWhenFailsToRetrieveOptionsContent()
   {
     $this->mockOptionClass();
 
@@ -9855,7 +9855,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function export_method_throws_an_exception_when_the_wrong_mode_is_provided()
+  public function testExportMethodThrowsAnExceptionWhenTheWrongModeIsProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -9863,7 +9863,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function exportDb_method_converts_an_option_to_a_multi_level_array_with_json_values()
+  public function testExportdbMethodConvertsAnOptionToAMultiLevelArrayWithJsonValues()
   {
     $this->mockOptionClass();
 
@@ -9937,7 +9937,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function exportDb_method_converts_a_hierarchy_to_a_multi_level_array_with_json_values()
+  public function testExportdbMethodConvertsAHierarchyToAMultiLevelArrayWithJsonValues()
   {
     $this->mockOptionClass();
 
@@ -10016,7 +10016,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function import_method_inserts_into_the_option_table_an_exported_array_of_options()
+  public function testImportMethodInsertsIntoTheOptionTableAnExportedArrayOfOptions()
   {
     $this->mockOptionClass();
 
@@ -10140,7 +10140,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function import_method_inserts_into_the_option_table_an_exported_array_of_options_using_default_as_parent()
+  public function testImportMethodInsertsIntoTheOptionTableAnExportedArrayOfOptionsUsingDefaultAsParent()
   {
     $this->mockOptionClass();
 
@@ -10171,7 +10171,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function import_method_inserts_into_the_option_table_an_exported_array_of_options_with_is_parent_provided_as_array_of_codes()
+  public function testImportMethodInsertsIntoTheOptionTableAnExportedArrayOfOptionsWithIsParentProvidedAsArrayOfCodes()
   {
     $this->mockOptionClass();
 
@@ -10207,7 +10207,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function import_method_throws_an_exception_when_fails_to_add_an_option()
+  public function testImportMethodThrowsAnExceptionWhenFailsToAddAnOption()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -10236,7 +10236,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function import_method_throws_an_exception_when_fails_to_set_an_alias()
+  public function testImportMethodThrowsAnExceptionWhenFailsToSetAnAlias()
   {
     $this->expectException(\Exception::class);
     $this->mockOptionClass();
@@ -10271,7 +10271,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function duplicate_method_copies_and_insert_a_single_option_into_a_target_option()
+  public function testDuplicateMethodCopiesAndInsertASingleOptionIntoATargetOption()
   {
     $this->mockOptionClass();
 
@@ -10312,7 +10312,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function duplicate_method_copies_and_insert_an_option_with_children_into_a_target_option()
+  public function testDuplicateMethodCopiesAndInsertAnOptionWithChildrenIntoATargetOption()
   {
     $this->mockOptionClass();
 
@@ -10370,7 +10370,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function duplicate_method_returns_null_when_the_given_code_does_not_exist_or_its_id_not_uid()
+  public function testDuplicateMethodReturnsNullWhenTheGivenCodeDoesNotExistOrItsIdNotUid()
   {
     $this->mockOptionClass();
 
@@ -10394,7 +10394,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function apply_method_applies_a_function_to_children_of_an_option_and_updates_the_database()
+  public function testApplyMethodAppliesAFunctionToChildrenOfAnOptionAndUpdatesTheDatabase()
   {
     $this->mockOptionClass();
 
@@ -10473,7 +10473,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function apply_method_applies_a_function_to_children_of_an_option_and_updates_the_database_in_deep_mode()
+  public function testApplyMethodAppliesAFunctionToChildrenOfAnOptionAndUpdatesTheDatabaseInDeepMode()
   {
     $this->mockOptionClass();
 
@@ -10598,7 +10598,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function apply_method_returns_zero_when_the_result_from_the_call_back_is_an_empty_array()
+  public function testApplyMethodReturnsZeroWhenTheResultFromTheCallBackIsAnEmptyArray()
   {
     $this->mockOptionClass();
 
@@ -10613,7 +10613,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function apply_method_returns_null_when_the_check_method_returns_false()
+  public function testApplyMethodReturnsNullWhenTheCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -10627,7 +10627,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function map_method_applies_the_given_callback_to_the_children_of_an_option()
+  public function testMapMethodAppliesTheGivenCallbackToTheChildrenOfAnOption()
   {
     $this->mockOptionClass();
 
@@ -10666,7 +10666,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function map_method_applies_the_given_callback_to_the_children_of_an_option_in_deep_mode()
+  public function testMapMethodAppliesTheGivenCallbackToTheChildrenOfAnOptionInDeepMode()
   {
     $this->mockOptionClass();
 
@@ -10734,7 +10734,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function map_method_returns_empty_array_when_the_given_call_back_does_not_return_an_array()
+  public function testMapMethodReturnsEmptyArrayWhenTheGivenCallBackDoesNotReturnAnArray()
   {
     $this->mockOptionClass();
 
@@ -10745,7 +10745,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function mapCfg_method_applies_a_function_to_a_children_of_an_option_with_cfg_array_included()
+  public function testMapcfgMethodAppliesAFunctionToAChildrenOfAnOptionWithCfgArrayIncluded()
   {
     $this->mockOptionClass();
 
@@ -10802,7 +10802,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function mapCfg_method_applies_a_function_to_a_children_of_an_option_with_cfg_array_included_in_deep_mode()
+  public function testMapcfgMethodAppliesAFunctionToAChildrenOfAnOptionWithCfgArrayIncludedInDeepMode()
   {
     $this->mockOptionClass();
 
@@ -10904,7 +10904,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function mapCfg_method_returns_an_empty_array_if_the_given_call_back_does_not_return_an_array()
+  public function testMapcfgMethodReturnsAnEmptyArrayIfTheGivenCallBackDoesNotReturnAnArray()
   {
     $this->mockOptionClass();
 
@@ -10919,7 +10919,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function mapCfg_method_returns_an_empty_array_if_the_given_data_is_not_an_array()
+  public function testMapcfgMethodReturnsAnEmptyArrayIfTheGivenDataIsNotAnArray()
   {
     $this->mockOptionClass();
 
@@ -10930,7 +10930,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function categories_method_returns_the_default_item()
+  public function testCategoriesMethodReturnsTheDefaultItem()
   {
     $this->mockOptionClass();
 
@@ -10945,7 +10945,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function textValueCategories_method_returns_an_array_of_options_as_a_multi_dimension_array_of_text_and_values_keys()
+  public function testTextvaluecategoriesMethodReturnsAnArrayOfOptionsAsAMultiDimensionArrayOfTextAndValuesKeys()
   {
     $this->mockOptionClass();
 
@@ -10973,7 +10973,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function textValueCategories_method_returns_null_when_no_results_found()
+  public function testTextvaluecategoriesMethodReturnsNullWhenNoResultsFound()
   {
     $this->mockOptionClass();
 
@@ -10997,7 +10997,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullCategories_method_test()
+  public function testFullcategoriesMethodTest()
   {
     $this->mockOptionClass();
 
@@ -11024,7 +11024,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function fullCategories_method_returns_empty_array_when_no_results_found()
+  public function testFullcategoriesMethodReturnsEmptyArrayWhenNoResultsFound()
   {
     $this->mockOptionClass();
 
@@ -11050,7 +11050,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function jsCategories_method_test()
+  public function testJscategoriesMethodTest()
   {
     $this->mockOptionClass();
 
@@ -11099,7 +11099,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function jsCategories_method_returns_empty_results_when_no_options_found()
+  public function testJscategoriesMethodReturnsEmptyResultsWhenNoOptionsFound()
   {
     $this->mockOptionClass();
 
@@ -11125,7 +11125,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function hasPermission_method_checks_if_an_option_has_permission_in_its_parent_config()
+  public function testHaspermissionMethodChecksIfAnOptionHasPermissionInItsParentConfig()
   {
     $this->mockOptionClass();
 
@@ -11175,7 +11175,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function hasPermission_method_returns_null_when_fails_to_retrieve_the_given_option_parent()
+  public function testHaspermissionMethodReturnsNullWhenFailsToRetrieveTheGivenOptionParent()
   {
     $this->mockOptionClass();
 
@@ -11190,7 +11190,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function hasPermission_method_returns_null_when_the_given_option_parent_id_is_not_uid()
+  public function testHaspermissionMethodReturnsNullWhenTheGivenOptionParentIdIsNotUid()
   {
     $this->mockOptionClass();
 
@@ -11205,7 +11205,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findPermissions_method_returns_an_array_of_permissions_from_origin_id()
+  public function testFindpermissionsMethodReturnsAnArrayOfPermissionsFromOriginId()
   {
     $this->mockOptionClass();
 
@@ -11323,7 +11323,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findPermissions_method_returns_an_array_of_permissions_from_origin_id_having_default_id_when_not_provided()
+  public function testFindpermissionsMethodReturnsAnArrayOfPermissionsFromOriginIdHavingDefaultIdWhenNotProvided()
   {
     $this->mockOptionClass();
 
@@ -11375,7 +11375,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findPermissions_method_returns_empty_array_when_failed_to_retrieve_full_options_cfg()
+  public function testFindpermissionsMethodReturnsEmptyArrayWhenFailedToRetrieveFullOptionsCfg()
   {
     $this->mockOptionClass();
 
@@ -11413,7 +11413,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findPermissions_method_returns_null_when_permissions_is_empty_in_the_given_option_config()
+  public function testFindpermissionsMethodReturnsNullWhenPermissionsIsEmptyInTheGivenOptionConfig()
   {
     $this->mockOptionClass();
 
@@ -11442,7 +11442,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findPermissions_method_returns_null_when_check_method_returns_false()
+  public function testFindpermissionsMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -11456,7 +11456,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_test()
+  public function testUpdatepluginsMethodTest()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI' , 'appui');
@@ -11584,7 +11584,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_returns_zero_when_failed_to_retrieve_items_for_root_plugins()
+  public function testUpdatepluginsMethodReturnsZeroWhenFailedToRetrieveItemsForRootPlugins()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11625,7 +11625,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_returns_zero_when_fails_to_retrieve_full_options_of_appui()
+  public function testUpdatepluginsMethodReturnsZeroWhenFailsToRetrieveFullOptionsOfAppui()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11664,7 +11664,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_returns_zero_when_fails_to_export()
+  public function testUpdatepluginsMethodReturnsZeroWhenFailsToExport()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11698,7 +11698,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_returns_null_when_fails_to_retrieve_items_for_plugins_with_appui_root()
+  public function testUpdatepluginsMethodReturnsNullWhenFailsToRetrieveItemsForPluginsWithAppuiRoot()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11727,7 +11727,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updatePlugins_method_returns_null_when_appui_constant_is_not_defined()
+  public function testUpdatepluginsMethodReturnsNullWhenAppuiConstantIsNotDefined()
   {
     if (defined('BBN_APPUI')) {
       $this->assertTrue(true);
@@ -11740,7 +11740,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_test()
+  public function testUpdatetemplateMethodTest()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11798,7 +11798,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_returns_zero_when_fails_to_retrieve_aliases()
+  public function testUpdatetemplateMethodReturnsZeroWhenFailsToRetrieveAliases()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11834,7 +11834,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_returns_zero_when_fails_to_export()
+  public function testUpdatetemplateMethodReturnsZeroWhenFailsToExport()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11877,7 +11877,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_returns_zero_when_export_has_no_items()
+  public function testUpdatetemplateMethodReturnsZeroWhenExportHasNoItems()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11925,7 +11925,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_returns_null_when_the_given_option_id_does_not_exist()
+  public function testUpdatetemplateMethodReturnsNullWhenTheGivenOptionIdDoesNotExist()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11944,7 +11944,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateTemplate_method_returns_null_when_bbn_appui_constant_is_not_defined()
+  public function testUpdatetemplateMethodReturnsNullWhenBbnAppuiConstantIsNotDefined()
   {
     if (defined('BBN_APPUI')) {
       $this->assertTrue(true);
@@ -11957,7 +11957,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateAllTemplates_method_test()
+  public function testUpdatealltemplatesMethodTest()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -11989,7 +11989,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateAllTemplates_method_returns_zero_when_fails_to_retrieve_items_ref()
+  public function testUpdatealltemplatesMethodReturnsZeroWhenFailsToRetrieveItemsRef()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -12025,7 +12025,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateAllTemplates_method_returns_null_when_fails_to_retrieve_list_from_code()
+  public function testUpdatealltemplatesMethodReturnsNullWhenFailsToRetrieveListFromCode()
   {
     if (!defined('BBN_APPUI')) {
       define('BBN_APPUI', 'app');
@@ -12044,7 +12044,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function updateAllTemplates_method_returns_null_when_bbn_appui_constant_is_no_defined()
+  public function testUpdatealltemplatesMethodReturnsNullWhenBbnAppuiConstantIsNoDefined()
   {
     if (defined('BBN_APPUI')) {
       $this->assertTrue(true);
@@ -12057,7 +12057,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18n_method_returns_an_array_containing_all_options_with_property_i18n_is_set()
+  public function testFindi18nMethodReturnsAnArrayContainingAllOptionsWithPropertyI18nIsSet()
   {
     $this->mockOptionClass();
 
@@ -12153,7 +12153,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18n_method_returns_empty_array_when_fails_to_get_results_from_db()
+  public function testFindi18nMethodReturnsEmptyArrayWhenFailsToGetResultsFromDb()
   {
     $this->mockOptionClass();
 
@@ -12172,7 +12172,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18n_method_returns_empty_array_when_check_method_returns_false()
+  public function testFindi18nMethodReturnsEmptyArrayWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -12187,7 +12187,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18nOption_method_returns_an_array_containing_the_option_with_property_i18n_set_corresponding_to_the_given_id()
+  public function testFindi18noptionMethodReturnsAnArrayContainingTheOptionWithPropertyI18nSetCorrespondingToTheGivenId()
   {
     $this->mockOptionClass();
 
@@ -12320,7 +12320,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18nOption_method_returns_empty_array_for_items_when_fails_to_retrieve_full_options()
+  public function testFindi18noptionMethodReturnsEmptyArrayForItemsWhenFailsToRetrieveFullOptions()
   {
     $this->mockOptionClass();
 
@@ -12386,7 +12386,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18nOption_method_returns_empty_array_when_fails_to_select_from_db()
+  public function testFindi18noptionMethodReturnsEmptyArrayWhenFailsToSelectFromDb()
   {
     $this->mockOptionClass();
 
@@ -12405,7 +12405,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function findI18nOption_method_returns_empty_array_when_check_method_returns_false()
+  public function testFindi18noptionMethodReturnsEmptyArrayWhenCheckMethodReturnsFalse()
   {
     $this->mockOptionClass();
 
@@ -12420,7 +12420,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRow_method_returns_the_first_row_from_a_result()
+  public function testGetrowMethodReturnsTheFirstRowFromAResult()
   {
     $this->mockOptionClass();
 
@@ -12445,7 +12445,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRow_method_returns_null_when_fails_to_get_results()
+  public function testGetrowMethodReturnsNullWhenFailsToGetResults()
   {
     $this->mockOptionClass();
 
@@ -12470,7 +12470,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getRows_method_executes_a_query_from_the_given_where_conditions_and_returns_its_result()
+  public function testGetrowsMethodExecutesAQueryFromTheGivenWhereConditionsAndReturnsItsResult()
   {
     $execluded_fields = $this->getNonPublicProperty('non_selected');
 
@@ -12555,7 +12555,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function set_local_cache_method_test()
+  public function testSetLocalCacheMethodTest()
   {
     $this->getNonPublicMethod('_set_local_cache')
       ->invoke($this->option, 'foo', 'bar');
@@ -12572,7 +12572,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function get_local_cache_method_test()
+  public function testGetLocalCacheMethodTest()
   {
     $this->setNonPublicPropertyValue('_local_cache', ['foo' => 'bar']);
 
@@ -12589,7 +12589,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_transforms_an_array_of_parameters_into_a_valid_array()
+  public function testPrepareMethodTransformsAnArrayOfParametersIntoAValidArray()
   {
     $method = $this->getNonPublicMethod('_prepare');
 
@@ -12657,7 +12657,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_transforms_an_array_of_parameters_into_a_valid_array_another_test()
+  public function testPrepareMethodTransformsAnArrayOfParametersIntoAValidArrayAnotherTest()
   {
     $method = $this->getNonPublicMethod('_prepare');
 
@@ -12723,7 +12723,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_transforms_an_array_of_parameters_into_a_valid_array_one_more_test()
+  public function testPrepareMethodTransformsAnArrayOfParametersIntoAValidArrayOneMoreTest()
   {
     $method = $this->getNonPublicMethod('_prepare');
 
@@ -12765,7 +12765,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_fails_to_retrieve_id_parent_option()
+  public function testPrepareMethodThrowsAnExceptionWhenFailsToRetrieveIdParentOption()
   {
     $this->expectException(\Exception::class);
 
@@ -12787,7 +12787,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_no_code_or_text_or_id_alias_is_provided()
+  public function testPrepareMethodThrowsAnExceptionWhenNoCodeOrTextOrIdAliasIsProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -12808,7 +12808,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_fails_to_find_id_root_alias_codes()
+  public function testPrepareMethodThrowsAnExceptionWhenFailsToFindIdRootAliasCodes()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12829,7 +12829,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_the_provided_id_root_alias_is_string_and_does_not_exist()
+  public function testPrepareMethodThrowsAnExceptionWhenTheProvidedIdRootAliasIsStringAndDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12850,7 +12850,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_fails_to_retrieve_id_alias_codes()
+  public function testPrepareMethodThrowsAnExceptionWhenFailsToRetrieveIdAliasCodes()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12871,7 +12871,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_the_given_id_alias_is_string_but_does_not_exist()
+  public function testPrepareMethodThrowsAnExceptionWhenTheGivenIdAliasIsStringButDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12892,7 +12892,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_fails_to_retrieve_id_parent_codes()
+  public function testPrepareMethodThrowsAnExceptionWhenFailsToRetrieveIdParentCodes()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12913,7 +12913,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_throws_an_exception_when_the_given_id_parent_is_string_but_does_not_exist()
+  public function testPrepareMethodThrowsAnExceptionWhenTheGivenIdParentIsStringButDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $method = $this->getNonPublicMethod('_prepare');
@@ -12934,7 +12934,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function set_value_method_sets_the_values_from_the_given_value_index_to_main_array_keys()
+  public function testSetValueMethodSetsTheValuesFromTheGivenValueIndexToMainArrayKeys()
   {
     $method = $this->getNonPublicMethod('_set_value');
 
@@ -12974,7 +12974,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_does_not_set_value_when_the_provided_value_is_not_json()
+  public function testPrepareMethodDoesNotSetValueWhenTheProvidedValueIsNotJson()
   {
     $method = $this->getNonPublicMethod('_set_value');
 
@@ -12989,7 +12989,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function prepare_method_does_not_set_value_when_the_provided_array_does_not_have_value_as_key()
+  public function testPrepareMethodDoesNotSetValueWhenTheProvidedArrayDoesNotHaveValueAsKey()
   {
     $method = $this->getNonPublicMethod('_set_value');
 

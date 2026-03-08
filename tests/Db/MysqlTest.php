@@ -169,7 +169,7 @@ class MysqlTest extends TestCase
   }
 
     /** @test */
-  public function isAggregateFunction_method_returns_true_if_the_given_name_is_aggregate_function()
+  public function testIsaggregatefunctionMethodReturnsTrueIfTheGivenNameIsAggregateFunction()
   {
     $this->assertTrue(Mysql::isAggregateFunction('count(*)'));
     $this->assertTrue(Mysql::isAggregateFunction('COUNT(*)'));
@@ -194,7 +194,7 @@ class MysqlTest extends TestCase
   }
 
  /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertInstanceOf(\PDO::class, $this->getNonPublicProperty('pdo'));
 
@@ -229,7 +229,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_when_fails_to_connect_to_database()
+  public function testConstructorThrowsAnExceptionWhenFailsToConnectToDatabase()
   {
     $this->expectException(\Exception::class);
 
@@ -241,7 +241,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_when_host_is_not_provided_and_BBN_DB_HOST_is_not_defined()
+  public function testConstructorThrowsAnExceptionWhenHostIsNotProvidedAndBbnDbHostIsNotDefined()
   {
     $this->expectException(\Exception::class);
 
@@ -253,7 +253,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_when_user_is_not_provided_and_BBN_DB_HOST_is_not_defined()
+  public function testConstructorThrowsAnExceptionWhenUserIsNotProvidedAndBbnDbHostIsNotDefined()
   {
     $this->expectException(\Exception::class);
 
@@ -265,13 +265,13 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function getHost_method_returns_the_host()
+  public function testGethostMethodReturnsTheHost()
   {
     $this->assertSame(self::getDbConfig()['host'], self::$mysql->getHost());
   }
 
   /** @test */
-  public function getConnectionCode_method_returns_connection_code()
+  public function testGetconnectioncodeMethodReturnsConnectionCode()
   {
     $cfg = self::getDbConfig();
 
@@ -282,7 +282,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_the_config()
+  public function testGetcfgMethodReturnsTheConfig()
   {
     $db_cfg = self::getDbConfig();
 
@@ -302,7 +302,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function disableKeys_method_disables_foreign_keys_check()
+  public function testDisablekeysMethodDisablesForeignKeysCheck()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -314,7 +314,7 @@ class MysqlTest extends TestCase
   }
 
   /** @test */
-  public function enableKeys_method_enables_foreign_keys_check()
+  public function testEnablekeysMethodEnablesForeignKeysCheck()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -326,7 +326,7 @@ class MysqlTest extends TestCase
   }
   
   /** @test */
-  public function getConditions_method_returns_a_string_with_conditions_for_the_where_or_on_or_having_clauses()
+  public function testGetconditionsMethodReturnsAStringWithConditionsForTheWhereOrOnOrHavingClauses()
   {
     $conditions = [
       'conditions' => [
@@ -394,7 +394,7 @@ RESULT;
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_from_the_given_arguments()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementFromTheGivenArguments()
   {
     $cfg = [
       'tables' => [
@@ -451,7 +451,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACount()
   {
     $cfg = [
       'tables' => ['users' => 'users'],
@@ -473,7 +473,7 @@ FROM `$db_name`.`users`
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count_and_group_by()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACountAndGroupBy()
   {
     $cfg = [
       'tables' => ['users' => 'users', 'roles' => 'roles'],
@@ -500,7 +500,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count_and_group_by_and_having()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACountAndGroupByAndHaving()
   {
     $cfg = [
       'tables' => ['users' => 'users', 'roles' => 'roles'],
@@ -533,7 +533,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
   
   /** @test */
-  public function getSelect_method_sets_an_error_when_available_fields_missing_a_field()
+  public function testGetselectMethodSetsAnErrorWhenAvailableFieldsMissingAField()
   {
     $this->expectException(\Exception::class);
     self::$mysql->setErrorMode(Errors::E_DIE);
@@ -550,7 +550,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getInsert_method_generates_a_string_for_insert_statement_from_the_given_arguments()
+  public function testGetinsertMethodGeneratesAStringForInsertStatementFromTheGivenArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -593,7 +593,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getInsert_method_generates_a_string_for_insert_statement_from_the_given_arguments_and_ignore_exists()
+  public function testGetinsertMethodGeneratesAStringForInsertStatementFromTheGivenArgumentsAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -637,7 +637,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getInsert_method_returns_an_empty_string_when_tables_config_has_more_than_one_table()
+  public function testGetinsertMethodReturnsAnEmptyStringWhenTablesConfigHasMoreThanOneTable()
   {
     $cfg = [
       'tables' => ['users', 'roles'],
@@ -673,7 +673,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getInsert_method_sets_an_error_when_a_field_does_not_exist_in_available_fields()
+  public function testGetinsertMethodSetsAnErrorWhenAFieldDoesNotExistInAvailableFields()
   {
     self::$mysql->setErrorMode(Errors::E_DIE);
 
@@ -708,7 +708,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getInsert_method_sets_an_error_when_available_table_does_not_exist_in_models()
+  public function testGetinsertMethodSetsAnErrorWhenAvailableTableDoesNotExistInModels()
   {
     self::$mysql->setErrorMode(Errors::E_DIE);
 
@@ -730,7 +730,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getUpdate_method_returns_string_for_update_statement_from_the_give_arguments()
+  public function testGetupdateMethodReturnsStringForUpdateStatementFromTheGiveArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -772,7 +772,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getUpdate_method_returns_string_for_update_statement_from_the_give_arguments_and_ignore_exists()
+  public function testGetupdateMethodReturnsStringForUpdateStatementFromTheGiveArgumentsAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -815,7 +815,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getUpdate_method_returns_an_empty_string_when_tables_config_has_more_than_one_table()
+  public function testGetupdateMethodReturnsAnEmptyStringWhenTablesConfigHasMoreThanOneTable()
   {
     $cfg = [
       'tables' => ['users', 'roles'],
@@ -851,7 +851,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getUpdate_method_sets_an_error_when_a_field_does_not_exist_in_available_fields()
+  public function testGetupdateMethodSetsAnErrorWhenAFieldDoesNotExistInAvailableFields()
   {
     self::$mysql->setErrorMode(Errors::E_DIE);
 
@@ -886,7 +886,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getUpdate_method_sets_an_error_when_available_table_does_not_exist_in_models()
+  public function testGetupdateMethodSetsAnErrorWhenAvailableTableDoesNotExistInModels()
   {
     self::$mysql->setErrorMode(Errors::E_DIE);
 
@@ -908,7 +908,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement()
+  public function testGetdeleteMethodReturnsStringForDeleteStatement()
   {
     $cfg = [
       'tables' => ['users']
@@ -924,7 +924,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement_and_ignore_exists()
+  public function testGetdeleteMethodReturnsStringForDeleteStatementAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -942,7 +942,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement_and_join_exists()
+  public function testGetdeleteMethodReturnsStringForDeleteStatementAndJoinExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -959,7 +959,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getDelete_method_returns_empty_string_when_tables_provided_are_more_than_one()
+  public function testGetdeleteMethodReturnsEmptyStringWhenTablesProvidedAreMoreThanOne()
   {
     $cfg = [
       'tables' => ['users', 'roles']
@@ -969,7 +969,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getJoin_method_returns_string_for_the_join_clause_in_the_query()
+  public function testGetjoinMethodReturnsStringForTheJoinClauseInTheQuery()
   {
     $cfg = [
       'join' => [
@@ -1010,7 +1010,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getJoin_method_returns_string_for_the_join_clause_in_the_query_and_type_and_alias_exists()
+  public function testGetjoinMethodReturnsStringForTheJoinClauseInTheQueryAndTypeAndAliasExists()
   {
     $cfg = [
       'join' => [
@@ -1039,7 +1039,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getJoin_method_returns_empty_string_when_configurations_are_missing()
+  public function testGetjoinMethodReturnsEmptyStringWhenConfigurationsAreMissing()
   {
     $this->assertSame('', self::$mysql->getJoin([]));
 
@@ -1096,7 +1096,7 @@ FROM `$db_name`.`users`, `$db_name`.`roles`
   }
 
   /** @test */
-  public function getWhere_method_returns_a_string_with_the_where_part_of_the_query()
+  public function testGetwhereMethodReturnsAStringWithTheWherePartOfTheQuery()
   {
     $cfg = [
       'filters' => [
@@ -1120,7 +1120,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getWhere_method_returns_empty_string_when_some_of_configurations_are_missing()
+  public function testGetwhereMethodReturnsEmptyStringWhenSomeOfConfigurationsAreMissing()
   {
     $this->assertSame('', self::$mysql->getWhere([]));
 
@@ -1149,7 +1149,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_method_returns_a_string_with_group_by_clause_of_the_query()
+  public function testGetgroupbyMethodReturnsAStringWithGroupByClauseOfTheQuery()
   {
     $cfg = [
       'group_by' => [
@@ -1168,7 +1168,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_returns_empty_string_when_configurations_are_missing()
+  public function testGetgroupbyReturnsEmptyStringWhenConfigurationsAreMissing()
   {
     $this->assertSame('', self::$mysql->getGroupBy(['group' => ['id']]));
     $this->assertSame('', self::$mysql->getGroupBy([
@@ -1184,7 +1184,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_method_sets_an_error_when_available_fields_config_missing_one_of_the_fields()
+  public function testGetgroupbyMethodSetsAnErrorWhenAvailableFieldsConfigMissingOneOfTheFields()
   {
     self::$mysql->setErrorMode(Errors::E_DIE);
 
@@ -1199,7 +1199,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_a_string_for_the_having_clause_in_a_query()
+  public function testGethavingMethodReturnsAStringForTheHavingClauseInAQuery()
   {
     $cfg = [
       'group_by' => ['id'],
@@ -1221,7 +1221,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_a_string_for_the_having_clause_in_a_query_and_count_exists()
+  public function testGethavingMethodReturnsAStringForTheHavingClauseInAQueryAndCountExists()
   {
     $cfg = [
       'group_by' => ['id'],
@@ -1244,7 +1244,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_empty_string_when_configuration_missing_some_items()
+  public function testGethavingMethodReturnsEmptyStringWhenConfigurationMissingSomeItems()
   {
     $this->assertSame('', self::$mysql->getHaving([]));
     $this->assertSame('', self::$mysql->getHaving([
@@ -1283,7 +1283,7 @@ AND roles.email LIKE ?";
   }
   
   /** @test */
-  public function getOrder_method_returns_a_string_for_the_order_clause_in_a_query()
+  public function testGetorderMethodReturnsAStringForTheOrderClauseInAQuery()
   {
     $cfg = [
       'order' => [
@@ -1315,7 +1315,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getOrder_method_returns_empty_string_when_configurations_missing_some_items()
+  public function testGetorderMethodReturnsEmptyStringWhenConfigurationsMissingSomeItems()
   {
     $this->assertSame('', self::$mysql->getOrder([]));
     $this->assertSame('', self::$mysql->getOrder([
@@ -1329,7 +1329,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getLimit_method_returns_a_string_wit_the_limit_clause_in_a_query()
+  public function testGetlimitMethodReturnsAStringWitTheLimitClauseInAQuery()
   {
     $result   = self::$mysql->getLimit(['limit' => 2]);
     $expected = 'LIMIT 0, 2';
@@ -1343,19 +1343,19 @@ first_name ASC';
   }
 
   /** @test */
-  public function getLimit_method_returns_empty_string_when_configurations_missing_the_limit_param()
+  public function testGetlimitMethodReturnsEmptyStringWhenConfigurationsMissingTheLimitParam()
   {
     $this->assertSame('', self::$mysql->getLimit([]));
   }
 
   /** @test */
-  public function getLimit_method_returns_empty_string_when_the_provided_limit_is_not_an_integer()
+  public function testGetlimitMethodReturnsEmptyStringWhenTheProvidedLimitIsNotAnInteger()
   {
     $this->assertSame('', self::$mysql->getLimit(['limit' => 'foo']));
   }
 
   /** @test */
-  public function getRawCreate_method_returns_a_string_with_create_table_statement_by_querying_database_by_table_name()
+  public function testGetrawcreateMethodReturnsAStringWithCreateTableStatementByQueryingDatabaseByTableName()
   {
     self::$connection->query($expected = 'CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -1368,7 +1368,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getRawCreate_method_returns_empty_string_if_failed_to_get_table_full_name()
+  public function testGetrawcreateMethodReturnsEmptyStringIfFailedToGetTableFullName()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1381,7 +1381,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getRawCreate_method_returns_empty_string_if_raw_query_failed()
+  public function testGetrawcreateMethodReturnsEmptyStringIfRawQueryFailed()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1398,7 +1398,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateTable_method_returns_a_string_with_create_table_statement()
+  public function testGetcreatetableMethodReturnsAStringWithCreateTableStatement()
   {
     $cfg = [
       'fields' => [
@@ -1459,7 +1459,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateTable_method_throws_an_exception_when_a_field_type_is_not_valid()
+  public function testGetcreatetableMethodThrowsAnExceptionWhenAFieldTypeIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -1475,7 +1475,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateTable_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  public function testGetcreatetableThrowsAnExceptionWhenAProvidedFieldIsEnumOrSetAndTheExtraFieldIsNotProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -1495,7 +1495,7 @@ first_name ASC';
    * @test
    * @depends getCreateTable_method_returns_a_string_with_create_table_statement
    */
-  public function getCreateTable_method_returns_a_string_with_create_table_statement_when_model_is_not_provided($query)
+  public function testGetcreatetableMethodReturnsAStringWithCreateTableStatementWhenModelIsNotProvided($query)
   {
     // Create the table from the query from the other test that this one depends on
     // So that the modelize method can get table structure
@@ -1510,7 +1510,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_string_with_create_keys_statement()
+  public function testGetcreatekeysMethodReturnsStringWithCreateKeysStatement()
   {
     $cfg = [
       'keys' => [
@@ -1548,7 +1548,7 @@ first_name ASC';
    * @test
    * @depends getCreateKeys_method_returns_string_with_create_keys_statement
    */
-  public function getCreateKeys_method_returns_string_with_create_keys_statement_when_model_is_null($query)
+  public function testGetcreatekeysMethodReturnsStringWithCreateKeysStatementWhenModelIsNull($query)
   {
     $this->clearCache();
 
@@ -1577,7 +1577,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_empty_string_when_configurations_missing_items()
+  public function testGetcreatekeysMethodReturnsEmptyStringWhenConfigurationsMissingItems()
   {
     $this->assertSame('', self::$mysql->getCreateKeys('users', [
       'fields' => [
@@ -1587,7 +1587,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_empty_string_when_model_cannot_be_retrieved_from_database()
+  public function testGetcreatekeysMethodReturnsEmptyStringWhenModelCannotBeRetrievedFromDatabase()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1600,7 +1600,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateConstraints_method_returns_string_with_create_constraints_statement()
+  public function testGetcreateconstraintsMethodReturnsStringWithCreateConstraintsStatement()
   {
     $cfg = [
       'keys' => [
@@ -1636,7 +1636,7 @@ first_name ASC';
    * @test
    * @depends getCreateConstraints_method_returns_string_with_create_constraints_statement
    */
-  public function getCreateConstraints_method_returns_string_with_create_constraints_statement_when_model_not_provided($query)
+  public function testGetcreateconstraintsMethodReturnsStringWithCreateConstraintsStatementWhenModelNotProvided($query)
   {
     $this->createTable('users', function () {
       return "`id` int(11) NOT NULL PRIMARY KEY,
@@ -1674,7 +1674,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateConstraints_method_returns_empty_string_when_configuration_missing_items()
+  public function testGetcreateconstraintsMethodReturnsEmptyStringWhenConfigurationMissingItems()
   {
     $this->assertSame('', self::$mysql->getCreateConstraints('roles', [
       'keys' => [
@@ -1715,7 +1715,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreateConstraints_method_returns_empty_string_when_model_failed_to_retrieve_table_data()
+  public function testGetcreateconstraintsMethodReturnsEmptyStringWhenModelFailedToRetrieveTableData()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1730,7 +1730,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_table_statement_considering_fields_keys()
+  public function testGetcreateMethodReturnsAStringWithCreateTableStatementConsideringFieldsKeys()
   {
     $cfg = [
       'fields' => [
@@ -1778,7 +1778,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_table_statement_considering_constraints()
+  public function testGetcreateMethodReturnsAStringWithCreateTableStatementConsideringConstraints()
   {
     $cfg = [
       'fields' => [
@@ -1804,7 +1804,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_statement_as_is_from_getCreateTable_when_keys_index_does_not_exist()
+  public function testGetcreateMethodReturnsAStringWithCreateStatementAsIsFromGetcreatetableWhenKeysIndexDoesNotExist()
   {
     $cfg = [
       'fields' => [
@@ -1824,7 +1824,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getCreate_method_returns_empty_string_when_getCreateTable_returns_empty_string()
+  public function testGetcreateMethodReturnsEmptyStringWhenGetcreatetableReturnsEmptyString()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1838,7 +1838,7 @@ first_name ASC';
 
 
   /** @test */
-  public function createIndex_method_creates_index_for_the_givens_table_and_columns()
+  public function testCreateindexMethodCreatesIndexForTheGivensTableAndColumns()
   {
     $this->createTable('users', function () {
       return "`email` varchar(255) NOT NULL";
@@ -1867,7 +1867,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function createIndex_method_throws_an_exception_when_column_has_a_not_valid_name_and_mode_is_die()
+  public function testCreateindexMethodThrowsAnExceptionWhenColumnHasANotValidNameAndModeIsDie()
   {
     $this->expectException(\Exception::class);
 
@@ -1879,7 +1879,7 @@ first_name ASC';
    * @test
    * @depends createIndex_method_creates_index_for_the_givens_table_and_columns
    */
-  public function deleteIndex_method_deletes_the_given_index()
+  public function testDeleteindexMethodDeletesTheGivenIndex()
   {
     $this->createTable('users', function () {
       return "`email` varchar(255) NOT NULL";
@@ -1897,7 +1897,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function deleteIndex_method_returns_false_when_table_full_name_cannot_be_retrieved()
+  public function testDeleteindexMethodReturnsFalseWhenTableFullNameCannotBeRetrieved()
   {
     $this->assertFalse(
       self::$mysql->deleteIndex('users', 'ema*ail')
@@ -1908,7 +1908,7 @@ first_name ASC';
    * @test
    * @depends getDatabases_method_returns_database_names_as_array
    */
-  public function createMysqlDatabase_method_creates_a_database()
+  public function testCreatemysqldatabaseMethodCreatesADatabase()
   {
     $this->dropDatabaseIfExists('bbn_create_test');
 
@@ -1926,7 +1926,7 @@ first_name ASC';
    * @test
    * @depends getDatabases_method_returns_database_names_as_array
    */
-  public function createDatabase_method_creates_a_database()
+  public function testCreatedatabaseMethodCreatesADatabase()
   {
     $this->dropDatabaseIfExists('bbn_create_test');
 
@@ -1946,7 +1946,7 @@ first_name ASC';
    * @depends getDatabases_method_returns_database_names_as_array
    *
    */
-  public function dropDatabase_method_drops_the_given_database()
+  public function testDropdatabaseMethodDropsTheGivenDatabase()
   {
     self::$mysql->createDatabase('bbn_create_test');
 
@@ -1958,7 +1958,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function createUser_method_creates_a_database_user()
+  public function testCreateuserMethodCreatesADatabaseUser()
   {
     $db_config = self::getDbConfig();
 
@@ -1979,7 +1979,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function createUser_returns_false_when_the_given_user_is_not_a_valid_name()
+  public function testCreateuserReturnsFalseWhenTheGivenUserIsNotAValidName()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -1991,7 +1991,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function createUser_returns_throws_an_exception_when_the_given_db_is_not_a_valid_name()
+  public function testCreateuserReturnsThrowsAnExceptionWhenTheGivenDbIsNotAValidName()
   {
     $this->expectException(\Exception::class);
 
@@ -2005,7 +2005,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function deleteUser_method_deletes_the_given_user()
+  public function testDeleteuserMethodDeletesTheGivenUser()
   {
     self::$mysql->createUser('testing_user', '1-239876@#pqtaA');
 
@@ -2019,7 +2019,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function deleteUser_returns_false_when_the_given_user_is_not_valid()
+  public function testDeleteuserReturnsFalseWhenTheGivenUserIsNotValid()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -2034,14 +2034,14 @@ first_name ASC';
    * @test
    * @depends createUser_method_creates_a_database_user
    */
-  public function getUsers_method_returns_the_current_db_user_for_the_given_name()
+  public function testGetusersMethodReturnsTheCurrentDbUserForTheGivenName()
   {
     // Tested in the dependable test method
     $this->assertTrue(true);
   }
 
   /** @test */
-  public function getUsers_method_returns_all_db_users_when_no_name_is_given()
+  public function testGetusersMethodReturnsAllDbUsersWhenNoNameIsGiven()
   {
     $result = self::$mysql->getUsers();
 
@@ -2050,7 +2050,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function dbSize_method_returns_the_size_of_the_current_or_given_database()
+  public function testDbsizeMethodReturnsTheSizeOfTheCurrentOrGivenDatabase()
   {
     // Database is empty
     $this->assertSame(0, self::$mysql->dbSize());
@@ -2079,7 +2079,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function tableSize_method_returns_size_for_the_given_table()
+  public function testTablesizeMethodReturnsSizeForTheGivenTable()
   {
     $this->createTable('comments', function () {
       return 'description text NOT NULL';
@@ -2094,7 +2094,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function tableSize_method_throws_an_exception_when_table_not_found()
+  public function testTablesizeMethodThrowsAnExceptionWhenTableNotFound()
   {
     $this->expectException(\Exception::class);
 
@@ -2102,7 +2102,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function status_method_returns_the_status_of_the_given_table()
+  public function testStatusMethodReturnsTheStatusOfTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY, text text NOT NULL';
@@ -2121,7 +2121,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function status_method_returns_the_status_of_the_given_table_for_a_different_database()
+  public function testStatusMethodReturnsTheStatusOfTheGivenTableForADifferentDatabase()
   {
     $this->dropDatabaseIfExists('testing_db');
     self::$connection->query("CREATE DATABASE testing_db");
@@ -2147,14 +2147,14 @@ first_name ASC';
   }
 
   /** @test */
-  public function status_method_returns_null_when_table_does_not_exist()
+  public function testStatusMethodReturnsNullWhenTableDoesNotExist()
   {
     $this->assertNull(self::$mysql->status('unknown_table'));
   }
 
 
   /** @test */
-  public function status_method_throws_an_exception_when_database_does_not_exist()
+  public function testStatusMethodThrowsAnExceptionWhenDatabaseDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -2162,7 +2162,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function getUid_method_generates_a_uuid()
+  public function testGetuidMethodGeneratesAUuid()
   {
     $result = self::$mysql->getUid();
 
@@ -2171,7 +2171,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function createTable_method_returns_a_string_of_create_table_statement_from_given_arguments()
+  public function testCreatetableMethodReturnsAStringOfCreateTableStatementFromGivenArguments()
   {
     $columns = [
       'email' => [
@@ -2210,7 +2210,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function escape_method_returns_an_escaped_db_expression_from_the_given_item()
+  public function testEscapeMethodReturnsAnEscapedDbExpressionFromTheGivenItem()
   {
     $this->assertSame('`users`', self::$mysql->escape('users'));
     $this->assertSame('`db_test`.`users`', self::$mysql->escape('db_test.users'));
@@ -2219,7 +2219,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function escape_method_throws_an_exception_when_the_given_item_is_not_valid()
+  public function testEscapeMethodThrowsAnExceptionWhenTheGivenItemIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -2227,7 +2227,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function tableFullName_method_returns_table_full_name()
+  public function testTablefullnameMethodReturnsTableFullName()
   {
     $db = self::getDbConfig()['db'];
 
@@ -2273,14 +2273,14 @@ first_name ASC';
   }
 
   /** @test */
-  public function tableFullName_method_returns_null_when_the_given_name_is_not_valid()
+  public function testTablefullnameMethodReturnsNullWhenTheGivenNameIsNotValid()
   {
     $this->assertNull(self::$mysql->tableFullName('test_db*.users'));
     $this->assertNull(self::$mysql->tableFullName('test_db.users**'));
   }
 
   /** @test */
-  public function tableSimpleName_method_returns_table_simple_name()
+  public function testTablesimplenameMethodReturnsTableSimpleName()
   {
     $this->assertSame(
       'users',
@@ -2319,7 +2319,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function tableSimpleName_method_returns_null_when_the_given_table_name_is_not_valid()
+  public function testTablesimplenameMethodReturnsNullWhenTheGivenTableNameIsNotValid()
   {
     $this->assertNull(
       self::$mysql->tableSimpleName('db_test.users**')
@@ -2331,7 +2331,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function colFullName_method_returns_column_full_name()
+  public function testColfullnameMethodReturnsColumnFullName()
   {
     $this->assertSame(
       'users.email',
@@ -2360,7 +2360,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function colFullName_method_returns_null_when_the_given_col_or_table_names_is_not_valid()
+  public function testColfullnameMethodReturnsNullWhenTheGivenColOrTableNamesIsNotValid()
   {
     $this->assertNull(
       self::$mysql->colFullName('')
@@ -2384,7 +2384,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function colSimpleName_method_returns_column_simple_name()
+  public function testColsimplenameMethodReturnsColumnSimpleName()
   {
     $this->assertSame(
       'email',
@@ -2418,7 +2418,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function colSimpleName_method_returns_null_when_the_given_column_name_is_not_valid()
+  public function testColsimplenameMethodReturnsNullWhenTheGivenColumnNameIsNotValid()
   {
     $this->assertNull(
       self::$mysql->colSimpleName('users.email**')
@@ -2434,7 +2434,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function isTableFullName_method_checks_if_the_given_table_name_is_full_name()
+  public function testIstablefullnameMethodChecksIfTheGivenTableNameIsFullName()
   {
     $this->assertTrue(
       self::$mysql->isTableFullName('db.users')
@@ -2446,7 +2446,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function isColFullName_method_checks_if_the_given_col_name_is_a_full_name()
+  public function testIscolfullnameMethodChecksIfTheGivenColNameIsAFullName()
   {
     $this->assertTrue(
       self::$mysql->isColFullName('users.email')
@@ -2458,7 +2458,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function rawQuery_method_executes_the_given_query_using_original_pdo_function()
+  public function testRawqueryMethodExecutesTheGivenQueryUsingOriginalPdoFunction()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -2474,7 +2474,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function startFancyStuff_method_sets_the_query_class_as_pdo_derived_statement_class()
+  public function testStartfancystuffMethodSetsTheQueryClassAsPdoDerivedStatementClass()
   {
     self::$mysql->startFancyStuff();
 
@@ -2486,7 +2486,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function stopFancyStuff_method_sets_statement_class_to_pdo_statement()
+  public function testStopfancystuffMethodSetsStatementClassToPdoStatement()
   {
     self::$mysql->stopFancyStuff();
 
@@ -2499,7 +2499,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_insert_configurations()
+  public function testProcesscfgMethodProcessesTheGivenInsertConfigurations()
   {
     $this->setCacheExpectations();
 
@@ -2535,7 +2535,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_update_configurations()
+  public function testProcesscfgMethodProcessesTheGivenUpdateConfigurations()
   {
     $db_config = self::getDbConfig();
 
@@ -2604,7 +2604,7 @@ first_name ASC';
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_select_configurations()
+  public function testProcesscfgMethodProcessesTheGivenSelectConfigurations()
   {
     $db_config = self::getDbConfig();
 
@@ -2718,7 +2718,7 @@ LIMIT 2, 25";
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_aggregate_select_configurations()
+  public function testProcesscfgMethodProcessesTheGivenAggregateSelectConfigurations()
   {
     $db = self::getDbConfig()['db'];
 
@@ -2750,7 +2750,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function processCfg_returns_null_when_the_given_configurations_has_same_tables()
+  public function testProcesscfgReturnsNullWhenTheGivenConfigurationsHasSameTables()
   {
     $this->setCacheExpectations();
 
@@ -2765,7 +2765,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function processCfg_returns_null_and_sets_an_error_when_no_hash_found()
+  public function testProcesscfgReturnsNullAndSetsAnErrorWhenNoHashFound()
   {
     $mysql = \Mockery::mock(Mysql::class)
       ->shouldAllowMockingProtectedMethods()
@@ -2785,7 +2785,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function processCfg_method_returns_previously_saved_cfg_using_hash()
+  public function testProcesscfgMethodReturnsPreviouslySavedCfgUsingHash()
   {
     $mysql = \Mockery::mock(Mysql::class)
       ->shouldAllowMockingProtectedMethods()
@@ -2809,7 +2809,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function processCfg_method_returns_null_when_a_given_field_does_not_exists()
+  public function testProcesscfgMethodReturnsNullWhenAGivenFieldDoesNotExists()
   {
     $this->setCacheExpectations();
 
@@ -2828,7 +2828,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function reprocessCfg_method_test()
+  public function testReprocesscfgMethodTest()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -2868,7 +2868,7 @@ GROUP BY `id`
 
 
   /** @test */
-  public function parseQuery_method_parses_an_sql_and_return_an_array()
+  public function testParsequeryMethodParsesAnSqlAndReturnAnArray()
   {
     $result = self::$mysql->parseQuery(
       "SELECT * FROM users WHERE created_at > now()"
@@ -2886,7 +2886,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function parseQuery_method_returns_null_when_the_given_arg_is_not_a_query()
+  public function testParsequeryMethodReturnsNullWhenTheGivenArgIsNotAQuery()
   {
     $this->assertNull(
       self::$mysql->parseQuery('foo')
@@ -2894,7 +2894,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getRealLastParams_method_returns_the_last_real_params()
+  public function testGetreallastparamsMethodReturnsTheLastRealParams()
   {
     $this->setNonPublicPropertyValue('last_real_params', ['foo' => 'bar']);
 
@@ -2905,7 +2905,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function realLast_method_returns_the_real_last_query()
+  public function testReallastMethodReturnsTheRealLastQuery()
   {
     $this->setNonPublicPropertyValue('last_real_query', 'SELECT * FROM users');
 
@@ -2916,7 +2916,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getLastValues_method_returns_the_last_params_values()
+  public function testGetlastvaluesMethodReturnsTheLastParamsValues()
   {
     $this->setNonPublicPropertyValue('last_params', [
       'values' => ['foo' => 'bar']
@@ -2933,7 +2933,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getLastParams_method_returns_the_last_params()
+  public function testGetlastparamsMethodReturnsTheLastParams()
   {
     $this->setNonPublicPropertyValue('last_params', [
       'values' => ['foo' => 'bar']
@@ -2946,7 +2946,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getQueryValues_method_returns_query_values()
+  public function testGetqueryvaluesMethodReturnsQueryValues()
   {
     $cfg = [
       'values' => [
@@ -3009,14 +3009,14 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getQueryValues_method_returns_empty_array_when_the_given_configuration_has_empty_values_key()
+  public function testGetqueryvaluesMethodReturnsEmptyArrayWhenTheGivenConfigurationHasEmptyValuesKey()
   {
     $this->assertSame([], self::$mysql->getQueryValues([]));
     $this->assertSame([], self::$mysql->getQueryValues(['values' => []]));
   }
 
   /** @test */
-  public function remove_conditions_value_removes_values_from_the_given_conditions_array()
+  public function testRemoveConditionsValueRemovesValuesFromTheGivenConditionsArray()
   {
     $method = $this->getNonPublicMethod('_remove_conditions_value');
 
@@ -3072,7 +3072,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function enableTrigger_method_enables_trigger_function()
+  public function testEnabletriggerMethodEnablesTriggerFunction()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -3086,7 +3086,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function disableTrigger_method_disables_trigger_functions()
+  public function testDisabletriggerMethodDisablesTriggerFunctions()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', false);
 
@@ -3100,7 +3100,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function isTriggerEnabled_method_checks_if_trigger_function_is_enabled()
+  public function testIstriggerenabledMethodChecksIfTriggerFunctionIsEnabled()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', false);
 
@@ -3110,7 +3110,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function isTriggerDisabled_method_checks_if_trigger_functions_is_disabled()
+  public function testIstriggerdisabledMethodChecksIfTriggerFunctionsIsDisabled()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -3120,7 +3120,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setTrigger_method_register_a_callback_to_be_applied_every_time_the_methods_kind_are_used()
+  public function testSettriggerMethodRegisterACallbackToBeAppliedEveryTimeTheMethodsKindAreUsed()
   {
     $db = self::getDbConfig()['db'];
 
@@ -3261,7 +3261,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTriggers_method_returns_the_current_triggers()
+  public function testGettriggersMethodReturnsTheCurrentTriggers()
   {
     $this->assertSame(
       $this->getNonPublicProperty('_triggers'),
@@ -3270,7 +3270,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getDatabases_method_returns_database_names_as_array()
+  public function testGetdatabasesMethodReturnsDatabaseNamesAsArray()
   {
     self::$connection->query('CREATE DATABASE get_database_test');
 
@@ -3290,7 +3290,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getDatabases_returns_null_if_current_database_is_not_ready_to_process_a_query()
+  public function testGetdatabasesReturnsNullIfCurrentDatabaseIsNotReadyToProcessAQuery()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3302,7 +3302,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTables_method_returns_tables_names_of_current_database_as_array()
+  public function testGettablesMethodReturnsTablesNamesOfCurrentDatabaseAsArray()
   {
     $this->assertEmpty(self::$mysql->getTables());
 
@@ -3328,7 +3328,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTables_method_returns_tables_names_of_the_given_database_as_array()
+  public function testGettablesMethodReturnsTablesNamesOfTheGivenDatabaseAsArray()
   {
     self::$connection->query("CREATE DATABASE bbn_testing");
     self::$connection->query("USE bbn_testing");
@@ -3356,7 +3356,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTables_method_returns_null_if_the_database_is_not_ready_to_process_a_query()
+  public function testGettablesMethodReturnsNullIfTheDatabaseIsNotReadyToProcessAQuery()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3370,7 +3370,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumns_method_returns_column_config_of_the_given_table()
+  public function testGetcolumnsMethodReturnsColumnConfigOfTheGivenTable()
   {
     $this->assertEmpty(
       self::$mysql->getColumns('users')
@@ -3448,7 +3448,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumns_method_returns_null_if_the_database_is_not_ready_to_process_the_query()
+  public function testGetcolumnsMethodReturnsNullIfTheDatabaseIsNotReadyToProcessTheQuery()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3462,7 +3462,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getRows_method_returns_an_array_of_indexed_arrays_for_every_row_as_a_query_result()
+  public function testGetrowsMethodReturnsAnArrayOfIndexedArraysForEveryRowAsAQueryResult()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3484,7 +3484,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getRows_method_returns_null_when_query_method_returns_false()
+  public function testGetrowsMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3496,7 +3496,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getRow_method_returns_the_first_row_resulting_from_a_query_as_array_indexed_with_field_name()
+  public function testGetrowMethodReturnsTheFirstRowResultingFromAQueryAsArrayIndexedWithFieldName()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3516,7 +3516,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getRow_method_returns_null_when_query_method_returns_false()
+  public function testGetrowMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3530,7 +3530,7 @@ GROUP BY `id`
   }
   
   /** @test */
-  public function getIrow_method_returns_the_first_raw_resulting_from_a_query_as_numeric_indexed_array()
+  public function testGetirowMethodReturnsTheFirstRawResultingFromAQueryAsNumericIndexedArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3550,7 +3550,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getIrow_method_returns_null_when_query_method_returns_false()
+  public function testGetirowMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3564,7 +3564,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getIrows_method_returns_all_rows_resulting_from_a_query_as_numeric_indexed_array()
+  public function testGetirowsMethodReturnsAllRowsResultingFromAQueryAsNumericIndexedArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3586,7 +3586,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getIrows_method_returns_null_when_query_method_returns_false()
+  public function testGetirowsMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3600,7 +3600,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getByColumns_method_returns_an_indexed_array_by_the_searched_field()
+  public function testGetbycolumnsMethodReturnsAnIndexedArrayByTheSearchedField()
   {
     $this->createTable('users', function () {
       return 'email VARCHAR(255), username VARCHAR(255), name VARCHAR(255)';
@@ -3630,7 +3630,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getObject_method_returns_the_first_row_resulting_from_a_query_as_object()
+  public function testGetobjectMethodReturnsTheFirstRowResultingFromAQueryAsObject()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3649,7 +3649,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getObjects_method_returns_an_array_of_objects_resulting_from_a_query()
+  public function testGetobjectsMethodReturnsAnArrayOfObjectsResultingFromAQuery()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -3671,7 +3671,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getKeys_method_returns_the_keys_of_the_given_table()
+  public function testGetkeysMethodReturnsTheKeysOfTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255)';
@@ -3744,7 +3744,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getKeys_method_returns_null_if_the_database_is_not_ready_to_process_a_query()
+  public function testGetkeysMethodReturnsNullIfTheDatabaseIsNotReadyToProcessAQuery()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3758,7 +3758,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getFieldsList_method_returns_fields_list_for_the_given_tables()
+  public function testGetfieldslistMethodReturnsFieldsListForTheGivenTables()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255), name VARCHAR(255)';
@@ -3780,7 +3780,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getFieldsList_method_throws_an_exception_when_table_not_found()
+  public function testGetfieldslistMethodThrowsAnExceptionWhenTableNotFound()
   {
     $this->expectException(\Exception::class);
 
@@ -3788,7 +3788,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getForeignKeys_method_returns_an_array_of_tables_and_fields_related_to_the_given_foreign_key()
+  public function testGetforeignkeysMethodReturnsAnArrayOfTablesAndFieldsRelatedToTheGivenForeignKey()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -3825,7 +3825,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function hasIdIncrement_method_returns_true_if_the_given_table_has_auto_increment_fields()
+  public function testHasidincrementMethodReturnsTrueIfTheGivenTableHasAutoIncrementFields()
   {
     $this->setCacheExpectations();
 
@@ -3847,7 +3847,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fmodelize_method_returns_fields_structure_for_the_given_table()
+  public function testFmodelizeMethodReturnsFieldsStructureForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -3913,7 +3913,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fmodelize_method_returns_null_when_modelize_returns_null()
+  public function testFmodelizeMethodReturnsNullWhenModelizeReturnsNull()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -3927,7 +3927,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findReferences_method_returns_an_array_with_foreign_key_references_for_the_given_column()
+  public function testFindreferencesMethodReturnsAnArrayWithForeignKeyReferencesForTheGivenColumn()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -3961,7 +3961,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findReferences_method_returns_Null_if_the_provided_column_name_does_not_have_table_name()
+  public function testFindreferencesMethodReturnsNullIfTheProvidedColumnNameDoesNotHaveTableName()
   {
     $this->assertNull(
       self::$mysql->findReferences('role_id')
@@ -3969,7 +3969,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findReferences_method_returns_an_array_with_foreign_key_references_for_a_different_database()
+  public function testFindreferencesMethodReturnsAnArrayWithForeignKeyReferencesForADifferentDatabase()
   {
     self::$connection->query('CREATE DATABASE IF NOT EXISTS testing_db');
     self::$connection->query('use testing_db');
@@ -4005,7 +4005,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findRelations_method_returns_an_array_of_a_table_that_has_relations_to_more_than_one_tables()
+  public function testFindrelationsMethodReturnsAnArrayOfATableThatHasRelationsToMoreThanOneTables()
   {
     $this->setCacheExpectations();
 
@@ -4051,7 +4051,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findRelations_method_returns_an_array_of_a_table_that_has_relations_to_more_than_one_tables_for_different_database()
+  public function testFindrelationsMethodReturnsAnArrayOfATableThatHasRelationsToMoreThanOneTablesForDifferentDatabase()
   {
     self::$connection->query('CREATE DATABASE IF NOT EXISTS db_testing');
     self::$connection->query('use db_testing');
@@ -4107,7 +4107,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findRelations_method_returns_null_when_the_given_name_does_not_has_column_name()
+  public function testFindrelationsMethodReturnsNullWhenTheGivenNameDoesNotHasColumnName()
   {
     $this->assertNull(
       self::$mysql->findRelations('id')
@@ -4115,7 +4115,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getPrimary_method_returns_primary_keys_of_the_given_table_as_an_array()
+  public function testGetprimaryMethodReturnsPrimaryKeysOfTheGivenTableAsAnArray()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255)';
@@ -4137,7 +4137,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getUniquePrimary_method_returns_the_unique_primary_key_of_the_given_table_as_string()
+  public function testGetuniqueprimaryMethodReturnsTheUniquePrimaryKeyOfTheGivenTableAsString()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255)';
@@ -4158,7 +4158,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getUniqueKeys_method_returns_the_unique_keys_of_the_given_table_as_an_array()
+  public function testGetuniquekeysMethodReturnsTheUniqueKeysOfTheGivenTableAsAnArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(22) NOT NULL, 
@@ -4186,7 +4186,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_for_the_given_id()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdForTheGivenId()
   {
     $this->setNonPublicPropertyValue('id_just_inserted', 22);
     $this->setNonPublicPropertyValue('last_insert_id', 22);
@@ -4207,7 +4207,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setLastInsertId_method_does_not_change_the_value_of_last_inserted_id_if_no_insert_query_performed()
+  public function testSetlastinsertidMethodDoesNotChangeTheValueOfLastInsertedIdIfNoInsertQueryPerformed()
   {
     self::$mysql->setLastInsertId();
 
@@ -4222,7 +4222,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_last_insert_query()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdFromLastInsertQuery()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, email VARCHAR(25)';
@@ -4244,7 +4244,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_id_just_inserted_property_when_not_null_ignoring_last_query()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdFromIdJustInsertedPropertyWhenNotNullIgnoringLastQuery()
   {
     $this->setNonPublicPropertyValue('id_just_inserted', 333);
 
@@ -4263,7 +4263,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function lastId_method_returns_the_last_inserted_id()
+  public function testLastidMethodReturnsTheLastInsertedId()
   {
     $this->setNonPublicPropertyValue('last_insert_id', 234);
 
@@ -4285,7 +4285,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function last_method_returns_the_last_for_the_current_connection()
+  public function testLastMethodReturnsTheLastForTheCurrentConnection()
   {
     $this->setNonPublicPropertyValue(
       'last_query',
@@ -4299,7 +4299,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function countQueries_method_returns_the_count_of_queries()
+  public function testCountqueriesMethodReturnsTheCountOfQueries()
   {
     $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
 
@@ -4307,7 +4307,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function flush_method_deletes_all_the_recorded_queries_and_returns_their_count()
+  public function testFlushMethodDeletesAllTheRecordedQueriesAndReturnsTheirCount()
   {
     $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
 
@@ -4320,7 +4320,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getOne_method_executes_the_given_query_and_extracts_the_first_column_result()
+  public function testGetoneMethodExecutesTheGivenQueryAndExtractsTheFirstColumnResult()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
@@ -4339,7 +4339,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getOne_method_returns_false_when_query_returns_false()
+  public function testGetoneMethodReturnsFalseWhenQueryReturnsFalse()
   {
     $this->assertFalse(
       self::$mysql->getOne('SELECT username FROM users WHERE id = ?', 1)
@@ -4347,7 +4347,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getKeyVal_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  public function testGetkeyvalMethodReturnsAnArrayIndexedWithTheFirstFieldOfTheRequest()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
@@ -4416,7 +4416,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getKeyVal_method_returns_null_when_query_returns_false()
+  public function testGetkeyvalMethodReturnsNullWhenQueryReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -4430,7 +4430,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColArray_method_returns_an_array_of_the_values_of_single_field_as_result_from_query()
+  public function testGetcolarrayMethodReturnsAnArrayOfTheValuesOfSingleFieldAsResultFromQuery()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
@@ -4473,7 +4473,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function select_method_returns_the_first_row_resulting_from_query_as_an_object()
+  public function testSelectMethodReturnsTheFirstRowResultingFromQueryAsAnObject()
   {
     $this->setCacheExpectations();
 
@@ -4528,7 +4528,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function selectAll_method_returns_table_rows_resulting_from_query_as_an_array_of_objects()
+  public function testSelectallMethodReturnsTableRowsResultingFromQueryAsAnArrayOfObjects()
   {
     $this->setCacheExpectations();
 
@@ -4593,7 +4593,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function selectAll_method_returns_null_when_exec_method_returns_false()
+  public function testSelectallMethodReturnsNullWhenExecMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)
       ->shouldAllowMockingProtectedMethods()
@@ -4609,7 +4609,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function iselect_method_returns_the_first_row_resulting_from_query_as_numeric_array()
+  public function testIselectMethodReturnsTheFirstRowResultingFromQueryAsNumericArray()
   {
     $this->setCacheExpectations();
 
@@ -4655,7 +4655,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function iselectAll_method_returns_all_results_from_query_as_an_array_of_numeric_arrays()
+  public function testIselectallMethodReturnsAllResultsFromQueryAsAnArrayOfNumericArrays()
   {
     $this->setCacheExpectations();
 
@@ -4722,7 +4722,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function iselectAll_method_returns_null_when_exec_function_returns_false()
+  public function testIselectallMethodReturnsNullWhenExecFunctionReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)
       ->shouldAllowMockingProtectedMethods()
@@ -4738,7 +4738,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function rselect_method_returns_the_first_row_resulting_from_the_query_as_indexed_array()
+  public function testRselectMethodReturnsTheFirstRowResultingFromTheQueryAsIndexedArray()
   {
     $this->setCacheExpectations();
 
@@ -4783,7 +4783,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function rselectAll_method_returns_query_results_as_an_array_of_indexed_arrays()
+  public function testRselectallMethodReturnsQueryResultsAsAnArrayOfIndexedArrays()
   {
     $this->setCacheExpectations();
 
@@ -4893,7 +4893,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function selectOne_method_returns_a_single_value_from_the_given_field_name()
+  public function testSelectoneMethodReturnsASingleValueFromTheGivenFieldName()
   {
     $this->setCacheExpectations();
 
@@ -4943,7 +4943,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function count_method_returns_the_number_of_records_in_the_table_for_the_given_arguments()
+  public function testCountMethodReturnsTheNumberOfRecordsInTheTableForTheGivenArguments()
   {
     $this->setCacheExpectations();
 
@@ -5020,7 +5020,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function count_method_returns_null_when_exec_returns_non_object()
+  public function testCountMethodReturnsNullWhenExecReturnsNonObject()
   {
     $mysql = \Mockery::mock(Mysql::class)
       ->makePartial()
@@ -5036,7 +5036,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function selectAllByKeys_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  public function testSelectallbykeysMethodReturnsAnArrayIndexedWithTheFirstFieldOfTheRequest()
   {
     $this->setCacheExpectations();
 
@@ -5121,7 +5121,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function selectAllByKeys_method_returns_null_when_no_results_found_and_check_returns_false()
+  public function testSelectallbykeysMethodReturnsNullWhenNoResultsFoundAndCheckReturnsFalse()
   {
     $this->setCacheExpectations();
 
@@ -5137,7 +5137,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function stat_method_returns_an_array_with_the_count_of_values_resulting_from_the_query()
+  public function testStatMethodReturnsAnArrayWithTheCountOfValuesResultingFromTheQuery()
   {
     $this->setCacheExpectations();
 
@@ -5179,7 +5179,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function stat_method_returns_null_when_check_method_returns_null()
+  public function testStatMethodReturnsNullWhenCheckMethodReturnsNull()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -5187,7 +5187,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function countFieldValues_method_returns_count_of_identical_values_in_a_field_as_array()
+  public function testCountfieldvaluesMethodReturnsCountOfIdenticalValuesInAFieldAsArray()
   {
     $this->setCacheExpectations();
 
@@ -5243,7 +5243,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnValues_method_numeric_indexed_array_with_values_of_unique_column()
+  public function testGetcolumnvaluesMethodNumericIndexedArrayWithValuesOfUniqueColumn()
   {
     $this->setCacheExpectations();
 
@@ -5304,7 +5304,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnValues_returns_null_when_check_method_returns_false()
+  public function testGetcolumnvaluesReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -5312,7 +5312,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function insert_method_inserts_values_in_the_given_table_and_returns_affected_rows()
+  public function testInsertMethodInsertsValuesInTheGivenTableAndReturnsAffectedRows()
   {
     $this->setCacheExpectations();
 
@@ -5355,7 +5355,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function insert_method_throws_an_exception_when_table_name_is_empty()
+  public function testInsertMethodThrowsAnExceptionWhenTableNameIsEmpty()
   {
     $this->expectException(\Exception::class);
 
@@ -5364,7 +5364,7 @@ GROUP BY `id`
 
 
   /** @test */
-  public function insertUpdate_method_inserts_rows_in_the_given_table_if_not_exists_otherwise_update()
+  public function testInsertupdateMethodInsertsRowsInTheGivenTableIfNotExistsOtherwiseUpdate()
   {
     $this->setCacheExpectations();
 
@@ -5406,7 +5406,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function update_method_updates_rows_in_the_given_table()
+  public function testUpdateMethodUpdatesRowsInTheGivenTable()
   {
     $this->setCacheExpectations();
 
@@ -5457,7 +5457,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function delete_method_deletes_rows_from_the_given_table()
+  public function testDeleteMethodDeletesRowsFromTheGivenTable()
   {
     $this->setCacheExpectations();
 
@@ -5493,7 +5493,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
+  public function testFetchMethodReturnsTheFirstResultOfTheQueryAsIndexedArrayAndFalseIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -5520,7 +5520,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
+  public function testFetchallMethodReturnsAnArrayOfIndexedArraysForAllQueryResultAndEmptyArrayIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -5553,7 +5553,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fetchAll_method_returns_false_when_query_method_returns_false()
+  public function testFetchallMethodReturnsFalseWhenQueryMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -5567,7 +5567,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
+  public function testFetchcolumnMethodReturnsASingleColumnFromTheNextRowOfResultSet()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -5599,7 +5599,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
+  public function testFetchobjectMethodReturnsTheFirstResultFromQueryAsObjectAndFalseIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -5632,7 +5632,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_launches_a_function_before_or_after_if_registered_and_callable()
+  public function testTriggerMethodLaunchesAFunctionBeforeOrAfterIfRegisteredAndCallable()
   {
     $cfg = [
       'tables' => ['users'],
@@ -5666,7 +5666,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_the_callback_return_falsy_result()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfTheCallbackReturnFalsyResult()
   {
     $cfg = [
       'tables' => ['users'],
@@ -5695,7 +5695,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_table_is_not_registered()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfTableIsNotRegistered()
   {
     $cfg = [
       'tables' => ['users'],
@@ -5724,7 +5724,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_the_given_trigger_does_not_exist()
+  public function testTriggerMethodDoesNotLaunchTheFunctionTheGivenTriggerDoesNotExist()
   {
     $cfg = [
       'tables' => ['users'],
@@ -5754,7 +5754,7 @@ GROUP BY `id`
 
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_no_table_name_is_given()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfNoTableNameIsGiven()
   {
     $cfg = [
       'kind'   => 'UPDATE',
@@ -5770,7 +5770,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_returns_the_config_array_as_is_if_triggers_is_disabled_and_moment_is_after()
+  public function testTriggerMethodReturnsTheConfigArrayAsIsIfTriggersIsDisabledAndMomentIsAfter()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -5783,7 +5783,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function trigger_method_returns_the_config_array_adding_trig_and_run_when_triggers_is_disabled_and_moment_is_before()
+  public function testTriggerMethodReturnsTheConfigArrayAddingTrigAndRunWhenTriggersIsDisabledAndMomentIsBefore()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -5796,7 +5796,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function add_kind_method_adds_the_given_type_to_the_given_args()
+  public function testAddKindMethodAddsTheGivenTypeToTheGivenArgs()
   {
     $method = $this->getNonPublicMethod('_add_kind');
 
@@ -5816,7 +5816,7 @@ GROUP BY `id`
   }
 
  /** @test */
-  public function add_primary_method_adds_a_random_primary_value_when_missing_from_the_given_arguments()
+  public function testAddPrimaryMethodAddsARandomPrimaryValueWhenMissingFromTheGivenArguments()
   {
     $method = $this->getNonPublicMethod('_add_primary');
 
@@ -5871,7 +5871,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function add_primary_method_does_not_adda_a_random_primary_value_if_given_arguments_does_not_match_conditions()
+  public function testAddPrimaryMethodDoesNotAddaARandomPrimaryValueIfGivenArgumentsDoesNotMatchConditions()
   {
     $method = $this->getNonPublicMethod('_add_primary');
 
@@ -5936,7 +5936,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_insert_test()
+  public function testExecMethodInsertTest()
   {
     $this->setCacheExpectations();
 
@@ -5971,7 +5971,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_update_test()
+  public function testExecMethodUpdateTest()
   {
     $this->setCacheExpectations();
 
@@ -6010,7 +6010,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_delete_test()
+  public function testExecMethodDeleteTest()
   {
     $this->setCacheExpectations();
 
@@ -6047,7 +6047,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_throws_an_exception_when_the_given_fields_has_no_values()
+  public function testExecMethodThrowsAnExceptionWhenTheGivenFieldsHasNoValues()
   {
     $this->getActualOutputForAssertion();
     $this->expectException(\Exception::class);
@@ -6072,7 +6072,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_select_test()
+  public function testExecMethodSelectTest()
   {
     $this->setCacheExpectations();
 
@@ -6111,7 +6111,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_test_the_after_trigger_is_running()
+  public function testExecMethodTestTheAfterTriggerIsRunning()
   {
     $this->setCacheExpectations();
 
@@ -6148,7 +6148,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_test_when_trigger_returns_empty_run()
+  public function testExecMethodTestWhenTriggerReturnsEmptyRun()
   {
     $this->setCacheExpectations();
 
@@ -6194,7 +6194,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_test_when_trigger_returns_empty_run_but_force_is_enabled()
+  public function testExecMethodTestWhenTriggerReturnsEmptyRunButForceIsEnabled()
   {
     $this->setCacheExpectations();
 
@@ -6242,7 +6242,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_returns_null_when_sql_has_falsy_value_from_the_returned_config_from_processCfg_method()
+  public function testExecMethodReturnsNullWhenSqlHasFalsyValueFromTheReturnedConfigFromProcesscfgMethod()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -6261,7 +6261,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_returns_null_when_processCfg_method_returns_nul()
+  public function testExecMethodReturnsNullWhenProcesscfgMethodReturnsNul()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -6280,7 +6280,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function exec_method_returns_null_when_check_method_returns_false()
+  public function testExecMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -6295,7 +6295,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_normalizes_arguments_by_making_it_a_uniform_array()
+  public function testTreatArgumentsMethodNormalizesArgumentsByMakingItAUniformArray()
   {
     $cfg = [
       'kind'   => 'SELECT',
@@ -6404,7 +6404,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_sets_default_cfg_when_not_provided()
+  public function testTreatArgumentsMethodSetsDefaultCfgWhenNotProvided()
   {
     $result = $this->getNonPublicMethod('_treat_arguments')
       ->invoke(self::$mysql, ['tables' => ['users']]);
@@ -6444,7 +6444,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_handle_arguments_when_the_given_config_is_a_numeric_array()
+  public function testTreatArgumentsMethodHandleArgumentsWhenTheGivenConfigIsANumericArray()
   {
     $cfg = [
       [[
@@ -6503,7 +6503,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_test_different_conditional_logic()
+  public function testTreatArgumentsMethodTestDifferentConditionalLogic()
   {
     $cfg = [
       'tables' => 'users', // should be converted to array
@@ -6552,7 +6552,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_testing_handling_join_arguments()
+  public function testTreatArgumentsMethodTestingHandlingJoinArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -6659,7 +6659,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_testing_having()
+  public function testTreatArgumentsMethodTestingHaving()
   {
     $cfg = [
       'tables' => 'payments',
@@ -6736,7 +6736,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_throws_an_exceptions_if_table_is_not_provided()
+  public function testTreatArgumentsThrowsAnExceptionsIfTableIsNotProvided()
   {
     $this->expectException(\Error::class);
 
@@ -6745,7 +6745,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function treat_arguments_method_returns_the_given_cfg_as_is_if_bbn_db_treated_exists()
+  public function testTreatArgumentsMethodReturnsTheGivenCfgAsIsIfBbnDbTreatedExists()
   {
     $cfg = [
       'bbn_db_treated' => true,
@@ -6760,7 +6760,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function adapt_filters_method_test()
+  public function testAdaptFiltersMethodTest()
   {
     $cfg = [
       'filters' => [
@@ -6831,7 +6831,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function adapt_bit_method_test_when_there_is_an_aggregate_function()
+  public function testAdaptBitMethodTestWhenThereIsAnAggregateFunction()
   {
     $cfg = [
       'fields' => ['sum' => 'SUM(*)', 'max' => 'MAX(*)'],
@@ -6923,7 +6923,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function adapt_bit_method_test_when_there_is_no_an_aggregate_function()
+  public function testAdaptBitMethodTestWhenThereIsNoAnAggregateFunction()
   {
     $cfg = [
       'fields' => ['user_full_name' => 'name'],
@@ -6966,7 +6966,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_the_given_argument_is_an_array_of_array()
+  public function testSetLimit1MethodTestWhenTheGivenArgumentIsAnArrayOfArray()
   {
     $cfg = [[
       'table' => 'users',
@@ -6986,7 +6986,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  public function testSetLimit1MethodTestWhenGivenArgsIsANumericArrayWithOnlyTableName()
   {
     $cfg      = ['users'];
     $expected = [
@@ -7006,7 +7006,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_the_given_argument_is_a_numeric_array()
+  public function testSetLimit1MethodTestWhenTheGivenArgumentIsANumericArray()
   {
     $cfg      = [
       'users',
@@ -7034,7 +7034,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_true()
+  public function testAddstatementMethodAddsQueryStatementAndParametersWhenLastEnabledIsTrue()
   {
     $this->assertNull(
       $this->getNonPublicProperty('last_real_query')
@@ -7086,7 +7086,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_false()
+  public function testAddstatementMethodAddsQueryStatementAndParametersWhenLastEnabledIsFalse()
   {
     $this->assertNull(
       $this->getNonPublicProperty('last_real_query')
@@ -7134,7 +7134,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_start_method_test_when_the_given_argument_is_an_array_of_array()
+  public function testSetStartMethodTestWhenTheGivenArgumentIsAnArrayOfArray()
   {
     $cfg = [[
       'table' => 'users'
@@ -7153,7 +7153,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_start_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  public function testSetStartMethodTestWhenGivenArgsIsANumericArrayWithOnlyTableName()
   {
     $cfg      = ['users'];
     $expected = [
@@ -7173,7 +7173,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_start_method_test_when_the_given_argument_is_a_numeric_array()
+  public function testSetStartMethodTestWhenTheGivenArgumentIsANumericArray()
   {
     $cfg      = [
       'users',
@@ -7201,7 +7201,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function retrieveQuery_method_retrieves_a_query_from_the_given_hash()
+  public function testRetrievequeryMethodRetrievesAQueryFromTheGivenHash()
   {
     $this->setNonPublicPropertyValue('queries', [
       '12345' => ['foo' => 'bar'],
@@ -7214,7 +7214,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function extractFields_method_test()
+  public function testExtractfieldsMethodTest()
   {
     $cfg = [
       'available_fields' => [
@@ -7268,7 +7268,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function filterFilters_method_returns_an_array_of_specific_filters_added_to_the_existing_ones()
+  public function testFilterfiltersMethodReturnsAnArrayOfSpecificFiltersAddedToTheExistingOnes()
   {
     $cfg = [
       'filters' => [
@@ -7326,7 +7326,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request()
+  public function testMakehashMethodMakesAHashStringThatWillBeTheIdOfTheRequest()
   {
     $hash_contour    = $this->getNonPublicProperty('hash_contour');
     $expected_string = "{$hash_contour}%s{$hash_contour}";
@@ -7356,7 +7356,7 @@ GROUP BY `id`
    * @test
    * @depends makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request
    */
-  public function setHash_method_makes_and_sets_hash()
+  public function testSethashMethodMakesAndSetsHash()
   {
     $set_hash_method = $this->getNonPublicMethod('setHash');
     $make_hash_method = $this->getNonPublicMethod('makeHash');
@@ -7389,7 +7389,7 @@ GROUP BY `id`
    * @test
    * @depends setHash_method_makes_and_sets_hash
    */
-  public function getHash_method_returns_the_created_hash()
+  public function testGethashMethodReturnsTheCreatedHash()
   {
     $set_hash_method = $this->getNonPublicMethod('setHash');
     $make_hash_method = $this->getNonPublicMethod('makeHash');
@@ -7403,7 +7403,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_is_string()
+  public function testErrorMethodSetsAnErrorAndActsBasedOnTheErrorModeWhenTheGivenErrorIsString()
   {
     $this->assertFalse($this->getNonPublicProperty('_has_error'));
     $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
@@ -7421,7 +7421,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_an_exception()
+  public function testErrorMethodSetsAnErrorAndActsBasedOnTheErrorModeWhenTheGivenErrorAnException()
   {
     $this->assertFalse($this->getNonPublicProperty('_has_error'));
     $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
@@ -7453,7 +7453,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function error_method_should_throw_an_exception_when_mode_is_to_die()
+  public function testErrorMethodShouldThrowAnExceptionWhenModeIsToDie()
   {
     $this->expectException(\Exception::class);
     $this->setNonPublicPropertyValue('on_error', 'die');
@@ -7462,13 +7462,13 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_checks_if_the_database_is_ready_to_process_a_query()
+  public function testCheckMethodChecksIfTheDatabaseIsReadyToProcessAQuery()
   {
     $this->assertTrue(self::$mysql->check());
   }
 
   /** @test */
-  public function check_method_returns_true_if_there_is_an_error_the_error_mode_is_continue()
+  public function testCheckMethodReturnsTrueIfThereIsAnErrorTheErrorModeIsContinue()
   {
     $this->setNonPublicPropertyValue('on_error', 'continue');
     $this->setNonPublicPropertyValue('_has_error', true);
@@ -7478,7 +7478,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_are_error_for_all_connection_and_mode_is_stop_all()
+  public function testCheckMethodReturnsFalseIfThereIsAreErrorForAllConnectionAndModeIsStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error_all', true);
     $this->setNonPublicPropertyValue('on_error', 'stop_all');
@@ -7487,7 +7487,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_returns_true_if_there_is_are_error_for_all_connection_and_mode_is_not_stop_all()
+  public function testCheckMethodReturnsTrueIfThereIsAreErrorForAllConnectionAndModeIsNotStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error_all', true);
     $this->setNonPublicPropertyValue('on_error', 'stop');
@@ -7496,7 +7496,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop()
+  public function testCheckMethodReturnsFalseIfThereIsErrorForTheCurrentConnectionAndModeIsStop()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
     $this->setNonPublicPropertyValue('on_error', 'stop');
@@ -7505,7 +7505,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop_all()
+  public function testCheckMethodReturnsFalseIfThereIsErrorForTheCurrentConnectionAndModeIsStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
     $this->setNonPublicPropertyValue('on_error', 'stop_all');
@@ -7514,7 +7514,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function check_method_returns_false_when_the_current_connection_is_null()
+  public function testCheckMethodReturnsFalseWhenTheCurrentConnectionIsNull()
   {
     $old_current = $this->getNonPublicProperty('current');
 
@@ -7526,7 +7526,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function setErrorMode_method_sets_the_error_mode()
+  public function testSeterrormodeMethodSetsTheErrorMode()
   {
     $result = self::$mysql->setErrorMode('stop_all');
 
@@ -7539,7 +7539,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getErrorMode_method_returns_the_current_error_mode()
+  public function testGeterrormodeMethodReturnsTheCurrentErrorMode()
   {
     $this->setNonPublicPropertyValue('on_error', 'stop');
 
@@ -7547,7 +7547,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getLogLine_method_returns_a_string_with_given_text_in_the_middle_of_a_line_of_logs()
+  public function testGetloglineMethodReturnsAStringWithGivenTextInTheMiddleOfALineOfLogs()
   {
     $this->assertSame(
       '-------------------------------------- foo --------------------------------------',
@@ -7561,19 +7561,19 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getHost_method_returns_the_host_of_the_current_connection()
+  public function testGethostMethodReturnsTheHostOfTheCurrentConnection()
   {
     $this->assertSame(self::getDbConfig()['host'], self::$mysql->getHost());
   }
 
   /** @test */
-  public function getCurrent_method_returns_the_current_database_of_the_current_connection()
+  public function testGetcurrentMethodReturnsTheCurrentDatabaseOfTheCurrentConnection()
   {
     $this->assertSame(self::getDbConfig()['db'], self::$mysql->getCurrent());
   }
 
   /** @test */
-  public function getLastError_method_returns_the_last_error()
+  public function testGetlasterrorMethodReturnsTheLastError()
   {
     $this->assertNull(self::$mysql->getLastError());
 
@@ -7583,7 +7583,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function change_method_changes_the_database_to_the_given_one()
+  public function testChangeMethodChangesTheDatabaseToTheGivenOne()
   {
     $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
@@ -7600,7 +7600,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function change_method_does_not_change_the_database_if_language_object_fails_to_change()
+  public function testChangeMethodDoesNotChangeTheDatabaseIfLanguageObjectFailsToChange()
   {
     $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
@@ -7614,7 +7614,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function set_has_error_all_sets_errors_on_all_connections_to_true()
+  public function testSetHasErrorAllSetsErrorsOnAllConnectionsToTrue()
   {
     $this->setNonPublicPropertyValue('_has_error_all', false);
 
@@ -7625,13 +7625,13 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getEngine_method_returns_engines_name()
+  public function testGetengineMethodReturnsEnginesName()
   {
     $this->assertSame('mysql', self::$mysql->getEngine());
   }
 
   /** @test */
-  public function getColArray_method_return_an_array_with_the_values_of_single_field_resulting_from_the_query()
+  public function testGetcolarrayMethodReturnAnArrayWithTheValuesOfSingleFieldResultingFromTheQuery()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -7648,7 +7648,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColArray_method_returns_an_empty_array_when_getByColumns_returns_null()
+  public function testGetcolarrayMethodReturnsAnEmptyArrayWhenGetbycolumnsReturnsNull()
   {
     $mysql = \Mockery::mock(Mysql::class)->makePartial();
 
@@ -7661,7 +7661,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_executes_a_statement_and_returns_the_affected_rows_for_writing_statements()
+  public function testQueryMethodExecutesAStatementAndReturnsTheAffectedRowsForWritingStatements()
   {
     $this->setCacheExpectations();
 
@@ -7691,7 +7691,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_executes_a_statement_and_returns_query_object_for_reading_statements()
+  public function testQueryMethodExecutesAStatementAndReturnsQueryObjectForReadingStatements()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -7723,7 +7723,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_uses_the_saved_query()
+  public function testQueryMethodUsesTheSavedQuery()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(20), username VARCHAR(20)';
@@ -7761,7 +7761,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_throws_an_exception_if_the_given_query_is_not_valid()
+  public function testQueryMethodThrowsAnExceptionIfTheGivenQueryIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -7769,7 +7769,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_sets_an_error_if_the_given_arguments_are_greater_than_query_placeholders()
+  public function testQueryMethodSetsAnErrorIfTheGivenArgumentsAreGreaterThanQueryPlaceholders()
   {
     $this->expectException(\Exception::class);
 
@@ -7779,7 +7779,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function query_method_fills_the_missing_values_with_the_last_given_one_when_number_of_values_are_smaller_than_query_placeholders()
+  public function testQueryMethodFillsTheMissingValuesWithTheLastGivenOneWhenNumberOfValuesAreSmallerThanQueryPlaceholders()
   {
     $this->createTable('users', function() {
       return 'name VARCHAR(255), username VARCHAR(255)';
@@ -7792,7 +7792,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function add_query_method_adds_to_queries_list_form_the_given_hash_and_arguments()
+  public function testAddQueryMethodAddsToQueriesListFormTheGivenHashAndArguments()
   {
     $method = $this->getNonPublicMethod('_add_query');
 
@@ -7838,7 +7838,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function add_query_methods_removes_from_the_beginning_of_queries_list_if_max_queries_numbers_exceeded()
+  public function testAddQueryMethodsRemovesFromTheBeginningOfQueriesListIfMaxQueriesNumbersExceeded()
   {
     $method = $this->getNonPublicMethod('_add_query');
 
@@ -7878,7 +7878,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function _remove_query_method_removes_from_the_beginning_of_queries_with_the_given_hash()
+  public function testRemoveQueryMethodRemovesFromTheBeginningOfQueriesWithTheGivenHash()
   {
     $method = $this->getNonPublicMethod('_remove_query');
 
@@ -7898,7 +7898,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function update_query_updates_a_query_in_query_list_by_the_given_hash()
+  public function testUpdateQueryUpdatesAQueryInQueryListByTheGivenHash()
   {
     $this->setNonPublicPropertyValue('list_queries', [
       ['hash' => '1234', 'last' => time()],
@@ -7957,7 +7957,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function update_query_removes_all_hashes_from_list_queries_and_queries_if_expired()
+  public function testUpdateQueryRemovesAllHashesFromListQueriesAndQueriesIfExpired()
   {
     $length_queries = $this->getNonPublicProperty('length_queries') * 2;
 
@@ -7993,7 +7993,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist_in_list_queries()
+  public function testUpdateQueryThrowsAnExceptionWhenTheGivenHashDoesNotExistInListQueries()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Impossible to find the corresponding hash');
@@ -8014,7 +8014,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist()
+  public function testUpdateQueryThrowsAnExceptionWhenTheGivenHashDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Impossible to find the query corresponding to this hash');
@@ -8031,7 +8031,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsTableStructureFromDatabaseWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -8103,7 +8103,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_all_tables_names_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsAllTablesNamesFromDatabaseWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -8127,7 +8127,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_all_databases_names_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsAllDatabasesNamesWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->setCacheExpectations();
 
@@ -8142,7 +8142,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_cache_property_when_exists()
+  public function testGetCacheMethodReturnsTableStructureFromCachePropertyWhenExists()
   {
     $db_config = self::getDbConfig();
 
@@ -8162,7 +8162,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_cache_class_when_exists_and_does_not_exist_in_cache_property()
+  public function testGetCacheMethodReturnsTableStructureFromCacheClassWhenExistsAndDoesNotExistInCacheProperty()
   {
     $cache_name = $this->getNonPublicMethod('_db_cache_name')
       ->invoke(self::$mysql, 'users', 'columns');
@@ -8186,7 +8186,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_database_when_cache_exists_but_force_is_true()
+  public function testGetCacheMethodReturnsTableStructureFromDatabaseWhenCacheExistsButForceIsTrue()
   {
     $this->setCacheExpectations();
 
@@ -8210,7 +8210,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_table_structure()
+  public function testGetCacheMethodThrowsAnExceptionWhenItFailsToRetrieveTableStructure()
   {
     $this->expectException(\Exception::class);
 
@@ -8221,7 +8221,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_tables_names()
+  public function testGetCacheMethodThrowsAnExceptionWhenItFailsToRetrieveTablesNames()
   {
     $this->expectException(\Exception::class);
 
@@ -8234,7 +8234,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_databases_names()
+  public function testGetCacheMethodThrowsAnExceptionWhenItFailsToRetrieveDatabasesNames()
   {
     $this->expectException(\Exception::class);
 
@@ -8247,7 +8247,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function db_cache_name_returns_cache_name_of_database_structure()
+  public function testDbCacheNameReturnsCacheNameOfDatabaseStructure()
   {
     $method    = $this->getNonPublicMethod('_db_cache_name');
     $db_config = self::getDbConfig();
@@ -8275,7 +8275,7 @@ GROUP BY `id`
 
 
   /** @test */
-  public function modelize_method_returns_table_structure_as_an_indexed_array_for_the_given_table_name()
+  public function testModelizeMethodReturnsTableStructureAsAnIndexedArrayForTheGivenTableName()
   {
     $this->setCacheExpectations();
 
@@ -8451,7 +8451,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function modelize_method_does_not_get_from_cache_if_the_given_force_parameter_is_true()
+  public function testModelizeMethodDoesNotGetFromCacheIfTheGivenForceParameterIsTrue()
   {
     $db_config = self::getDbConfig();
 
@@ -8494,7 +8494,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getEngine_method_returns_the_mysql_class_name()
+  public function testGetengineMethodReturnsTheMysqlClassName()
   {
     $this->assertSame(
       'mysql',
@@ -8503,7 +8503,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function arrangeConditions_method_test()
+  public function testArrangeconditionsMethodTest()
   {
     $cfg = [
       'available_fields' => [
@@ -8544,7 +8544,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function removeVirtual_method_test()
+  public function testRemovevirtualMethodTest()
   {
     $cfg = [
       'fields' => [
@@ -8595,7 +8595,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  public function testGetlastcfgMethodReturnsTheLastConfigForTheConnection()
   {
     $this->assertSame(
       $this->getNonPublicProperty('last_cfg'),
@@ -8604,7 +8604,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function renameTable_method_renames_the_given_table_to_the_new_given_name()
+  public function testRenametableMethodRenamesTheGivenTableToTheNewGivenName()
   {
     $this->createTable('users', function () {
       return 'id INT';
@@ -8621,7 +8621,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function renameTable_method_returns_false_when_check_method_returns_false()
+  public function testRenametableMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -8631,7 +8631,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function renameTable_method_returns_false_when_the_given_table_names_are_not_valid()
+  public function testRenametableMethodReturnsFalseWhenTheGivenTableNamesAreNotValid()
   {
     $this->assertFalse(
       self::$mysql->renameTable('users**', 'users2')
@@ -8647,7 +8647,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTableComment_method_returns_the_comment_for_the_given_table()
+  public function testGettablecommentMethodReturnsTheCommentForTheGivenTable()
   {
     self::$mysql->rawQuery("CREATE TABLE users (id INT) COMMENT 'Hello word!'");
 
@@ -8658,7 +8658,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getTableComment_method_returns_empty_string_if_the_given_table_has_no_comment()
+  public function testGettablecommentMethodReturnsEmptyStringIfTheGivenTableHasNoComment()
   {
     $this->createTable('users', function () {
       return 'id INT';
@@ -8671,7 +8671,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function createColumn_method_creates_the_given_column_for_the_given_table()
+  public function testCreatecolumnMethodCreatesTheGivenColumnForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT';
@@ -8753,7 +8753,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function createColumn_method_returns_false_when_the_given_column_is_not_a_valid_name()
+  public function testCreatecolumnMethodReturnsFalseWhenTheGivenColumnIsNotAValidName()
   {
     $this->assertFalse(
       self::$mysql->createColumn('users', 'username**', [])
@@ -8761,7 +8761,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function createColumn_method_throws_an_exception_when_a_field_type_is_not_valid()
+  public function testCreatecolumnMethodThrowsAnExceptionWhenAFieldTypeIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -8769,7 +8769,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function createColumn_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  public function testCreatecolumnThrowsAnExceptionWhenAProvidedFieldIsEnumOrSetAndTheExtraFieldIsNotProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -8779,7 +8779,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function dropColumn_method_drops_the_given_column_for_the_given_table()
+  public function testDropcolumnMethodDropsTheGivenColumnForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT, username VARCHAR(20), name VARCHAR(2)';
@@ -8800,7 +8800,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function dropColumn_method_returns_false_when_the_given_column_is_a_not_valid_name()
+  public function testDropcolumnMethodReturnsFalseWhenTheGivenColumnIsANotValidName()
   {
     $this->assertFalse(
       self::$mysql->dropColumn('users', 'id**')
@@ -8808,7 +8808,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnDefinitionStatement_method_returns_sql_statement_of_column_definition()
+  public function testGetcolumndefinitionstatementMethodReturnsSqlStatementOfColumnDefinition()
   {
     $method = $this->getNonPublicMethod('getColumnDefinitionStatement');
 
@@ -8870,7 +8870,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnDefinitionStatement_method_throws_an_exception_when_column_type_is_not_provided()
+  public function testGetcolumndefinitionstatementMethodThrowsAnExceptionWhenColumnTypeIsNotProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -8879,7 +8879,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnDefinitionStatement_method_throws_an_exception_when_a_field_type_is_not_valid()
+  public function testGetcolumndefinitionstatementMethodThrowsAnExceptionWhenAFieldTypeIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -8888,7 +8888,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getColumnDefinitionStatement_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  public function testGetcolumndefinitionstatementThrowsAnExceptionWhenAProvidedFieldIsEnumOrSetAndTheExtraFieldIsNotProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -8900,7 +8900,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  public function testGetaltertableMethodReturnsSqlStringForAlterStatement()
   {
     $cfg = [
       'fields' => [
@@ -8970,13 +8970,13 @@ SQL;
   }
 
   /** @test */
-  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  public function testGetaltertableMethodReturnsEmptyStringWhenTheGivenTableNameIsNotValid()
   {
     $this->assertSame('', self::$mysql->getAlterTable('user**', ['fields' => ['a' => 'b']]));
   }
 
   /** @test */
-  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  public function testGetaltertableMethodReturnsEmptyStringWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -8984,14 +8984,14 @@ SQL;
   }
 
   /** @test */
-  public function getAlterTable_method_throws_an_exception_if_the_fields_property_is_missing()
+  public function testGetaltertableMethodThrowsAnExceptionIfTheFieldsPropertyIsMissing()
   {
     $this->expectException(\Exception::class);
     self::$mysql->getAlterTable('users', ['a' => 'b']);
   }
 
   /** @test */
-  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  public function testAlterMethodAltersTheGivenCfgForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'balance int(11) SIGNED NOT NULL,
@@ -9105,7 +9105,7 @@ SQL;
   }
 
   /** @test */
-  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  public function testGetaltercolumnMethodReturnsSqlStringForAlterColumn()
   {
     $this->assertSame(
       'ALTER TABLE `users`
@@ -9181,7 +9181,7 @@ DROP COLUMN `name`',
   }
 
   /** @test */
-  public function getAlterKey_returns_string_of_alter_key_statement()
+  public function testGetalterkeyReturnsStringOfAlterKeyStatement()
   {
     $cfg = [
       'keys' => [

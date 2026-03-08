@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 class DateTest extends TestCase
 {
   /** @test */
-  public function monthName_method_returns_month_name_from_the_given_month_and_locale()
+  public function testMonthnameMethodReturnsMonthNameFromTheGivenMonthAndLocale()
   {
     $this->assertSame('janvier', Date::monthName('01', 'fr_FR'));
 
@@ -16,7 +16,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function monthName_method_returns_month_name_from_the_given_month_and_no_locale_provided()
+  public function testMonthnameMethodReturnsMonthNameFromTheGivenMonthAndNoLocaleProvided()
   {
     $this->assertSame('January', Date::monthName('01'));
     $this->assertSame('August', Date::monthName('08'));
@@ -24,7 +24,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_date_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithDateMode()
   {
     // EN Locale
     $this->assertSame(
@@ -40,7 +40,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_idate_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithIdateMode()
   {
     $this->assertSame(
       strtotime('8 December 2021'),
@@ -49,7 +49,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_dbdate_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithDbdateMode()
   {
     $this->assertSame(
       '2021-12-08 00:00:00',
@@ -58,7 +58,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_m_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithMMode()
   {
     // EN locale
     $this->assertSame(
@@ -74,7 +74,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_my_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithMyMode()
   {
     // EN locale
     $this->assertSame(
@@ -90,7 +90,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_wsdate_or_s_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithWsdateOrSMode()
   {
     foreach (['wsdate', 's'] as $mode) {
       // EN Locale
@@ -158,7 +158,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_r_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithRMode()
   {
     // EN Locale
 
@@ -214,7 +214,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_js_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithJsMode()
   {
     $this->assertSame(
       'Wed Dec 08 2021 14:12:12 +0000',
@@ -223,7 +223,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_wdate_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithWdateMode()
   {
     // EN Locale
 
@@ -256,7 +256,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_notime_mode()
+  public function testFormatMethodFormatsTheGivenTimeWithNotimeMode()
   {
     // EN Locale
 
@@ -289,7 +289,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_no_mode_provided()
+  public function testFormatMethodFormatsTheGivenTimeWithNoModeProvided()
   {
     // EN Locale
 
@@ -322,7 +322,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function monthName_method_returns_month_name_from_the_given_month_and_no_locale_provided_and_bbn_locale_is_defined()
+  public function testMonthnameMethodReturnsMonthNameFromTheGivenMonthAndNoLocaleProvidedAndBbnLocaleIsDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -336,7 +336,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_date_mode_and_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithDateModeAndBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -354,7 +354,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_m_mode_and_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithMModeAndBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -372,7 +372,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_my_mode_and_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithMyModeAndBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -390,7 +390,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_wsdate_or_s_mode_and_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithWsdateOrSModeAndBbnLocaleDefined()
   {
     foreach (['wsdate', 's'] as $mode) {
       if (!defined('BBN_LOCALE')) {
@@ -434,7 +434,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_r_mode_and_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithRModeAndBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -472,7 +472,7 @@ class DateTest extends TestCase
 
 
   /** @test */
-  public function format_method_formats_the_given_time_with_wdate_mode_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithWdateModeBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -497,7 +497,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_notime_mode_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithNotimeModeBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');
@@ -522,7 +522,7 @@ class DateTest extends TestCase
   }
 
   /** @test */
-  public function format_method_formats_the_given_time_with_no_mode_provided_bbn_locale_defined()
+  public function testFormatMethodFormatsTheGivenTimeWithNoModeProvidedBbnLocaleDefined()
   {
     if (!defined('BBN_LOCALE')) {
       define('BBN_LOCALE', 'fr_FR');

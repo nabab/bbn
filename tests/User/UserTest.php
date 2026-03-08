@@ -320,7 +320,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_can_login()
+  public function testUserCanLogin()
   {
     $this->simpleLogin();
 
@@ -330,7 +330,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isReset_method_returns_false_if_the_request_is_not_a_password_reset()
+  public function testIsresetMethodReturnsFalseIfTheRequestIsNotAPasswordReset()
   {
     $this->simpleLogin();
 
@@ -339,7 +339,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_can_reset_password_when_new_password_and_magic_string_are_valid()
+  public function testUserCanResetPasswordWhenNewPasswordAndMagicStringAreValid()
   {
     $this->initSessionFingerPrint();
     $this->db_mock->shouldReceive('rselect')->ordered()->once()->andReturn(
@@ -379,7 +379,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_cannot_reset_password_when_new_password_and_confirmation_does_not_match()
+  public function testUserCannotResetPasswordWhenNewPasswordAndConfirmationDoesNotMatch()
   {
     $this->initSessionFingerPrint();
     $this->db_mock->shouldReceive('rselect')->ordered()->once()->andReturn(
@@ -408,7 +408,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_cannot_reset_password_when_magic_string_is_not_valid()
+  public function testUserCannotResetPasswordWhenMagicStringIsNotValid()
   {
     $this->initSessionFingerPrint();
     $this->db_mock->shouldReceive('rselect')->ordered()->once()->andReturn(
@@ -435,7 +435,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function api_user_can_request_sending_verification_code_to_his_phone_number()
+  public function testApiUserCanRequestSendingVerificationCodeToHisPhoneNumber()
   {
     $this->tokenRequest([
       'phone_number' => $phone_number = '12345',
@@ -471,7 +471,7 @@ class UserTest extends TestCase
   }
   
   /** @test */
-  public function sending_verification_code_request_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  public function testSendingVerificationCodeRequestWillThrowAnExceptionWhenTheReceivedTokenDoesNotMatchDeviceUid()
   {
     $this->expectException(\Exception::class);
 
@@ -487,7 +487,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function sending_verification_code_request_will_throw_an_exception_when_phone_number_does_not_exist_in_db()
+  public function testSendingVerificationCodeRequestWillThrowAnExceptionWhenPhoneNumberDoesNotExistInDb()
   {
     $this->expectException(\Exception::class);
 
@@ -518,7 +518,7 @@ class UserTest extends TestCase
   }
   
   /** @test */
-  public function api_user_can_request_to_verify_phone_number_by_verification_code_and_get_a_new_token_as_a_result()
+  public function testApiUserCanRequestToVerifyPhoneNumberByVerificationCodeAndGetANewTokenAsAResult()
   {
     $this->tokenRequest([
       'phone_number'            => $phone_number = '12345',
@@ -572,7 +572,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_phone_number_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  public function testVerifyingPhoneNumberWillThrowAnExceptionWhenTheReceivedTokenDoesNotMatchDeviceUid()
   {
     $this->expectException(\Exception::class);
 
@@ -590,7 +590,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_phone_number_will_throw_an_exception_when_phone_number_does_not_exist_in_db()
+  public function testVerifyingPhoneNumberWillThrowAnExceptionWhenPhoneNumberDoesNotExistInDb()
   {
     $this->expectException(\Exception::class);
 
@@ -623,7 +623,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_phone_number_will_throw_an_exception_when_the_returned_cfg_is_not_valid_json()
+  public function testVerifyingPhoneNumberWillThrowAnExceptionWhenTheReturnedCfgIsNotValidJson()
   {
     $this->expectException(\Exception::class);
 
@@ -660,7 +660,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_phone_number_will_throw_an_exception_when_the_returned_cfg_json_has_no_phone_verification_code()
+  public function testVerifyingPhoneNumberWillThrowAnExceptionWhenTheReturnedCfgJsonHasNoPhoneVerificationCode()
   {
     $this->expectException(\Exception::class);
 
@@ -697,7 +697,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_phone_number_will_throw_an_exception_when_phone_verification_code_does_not_match()
+  public function testVerifyingPhoneNumberWillThrowAnExceptionWhenPhoneVerificationCodeDoesNotMatch()
   {
     $this->expectException(\Exception::class);
 
@@ -734,7 +734,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function api_user_can_send_a_token_login_request()
+  public function testApiUserCanSendATokenLoginRequest()
   {
     $this->tokenRequest([], function ($db_mock) {
       $class_cfg = $this->getClassCgf();
@@ -766,7 +766,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_token_login_request_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  public function testVerifyingTokenLoginRequestWillThrowAnExceptionWhenTheReceivedTokenDoesNotMatchDeviceUid()
   {
     $this->expectException(\Exception::class);
 
@@ -779,7 +779,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_token_login_request_will_throw_an_exception_when_the_token_saved_id_db_has_a_null_id_user()
+  public function testVerifyingTokenLoginRequestWillThrowAnExceptionWhenTheTokenSavedIdDbHasANullIdUser()
   {
     $this->expectException(\Exception::class);
 
@@ -796,7 +796,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function verifying_token_login_request_will_throw_an_exception_when_user_not_found_in_db()
+  public function testVerifyingTokenLoginRequestWillThrowAnExceptionWhenUserNotFoundInDb()
   {
     $this->expectException(\Exception::class);
 
@@ -825,7 +825,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function it_should_check_for_session_if_it_is_not_a_login_nor_password_reset_request()
+  public function testItShouldCheckForSessionIfItIsNotALoginNorPasswordResetRequest()
   {
     $sess_cfg = $this->initSessionFingerPrint();
     // Initiate a new User as non logged in user first
@@ -850,7 +850,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getSalt_method_returns_the_salt_saved_in_session()
+  public function testGetsaltMethodReturnsTheSaltSavedInSession()
   {
     $this->assertTrue(isset($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
     $this->assertSame($_SESSION[BBN_APP_NAME][$this->session_index]['salt'], $this->user->getSalt());
@@ -858,7 +858,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function checkSalt_method_checks_the_actual_salt_against_a_given_string()
+  public function testChecksaltMethodChecksTheActualSaltAgainstAGivenString()
   {
     $this->assertTrue(isset($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
     $this->assertTrue($this->user->checkSalt($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
@@ -866,7 +866,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getCfg_method_returns_the_user_current_configuration()
+  public function testGetcfgMethodReturnsTheUserCurrentConfiguration()
   {
     $this->assertNull($this->user->getCfg());
 
@@ -881,14 +881,14 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getClassCfg_method_returns_the_current_class_configuration()
+  public function testGetclasscfgMethodReturnsTheCurrentClassConfiguration()
   {
     $this->assertSame($this->getClassCgf(), $this->user->getClassCfg());
   }
 
 
   /** @test */
-  public function getPath_method_returns_the_dir_path_for_the_user()
+  public function testGetpathMethodReturnsTheDirPathForTheUser()
   {
     $this->simpleLogin();
 
@@ -897,7 +897,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getTmpDir_method_returns_the_tmp_dir_path_for_the_user()
+  public function testGettmpdirMethodReturnsTheTmpDirPathForTheUser()
   {
     $this->simpleLogin();
 
@@ -906,7 +906,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getTables_method_returns_the_list_of_tables_used_by_the_current_class_or_null_if_not_found()
+  public function testGettablesMethodReturnsTheListOfTablesUsedByTheCurrentClassOrNullIfNotFound()
   {
     $this->assertSame($expected_tables = $this->getClassCgf()['tables'], $this->user->getTables());
 
@@ -922,7 +922,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getFields_method_returns_list_of_fields_of_given_table_or_all_tables_and_null_if_not_found()
+  public function testGetfieldsMethodReturnsListOfFieldsOfGivenTableOrAllTablesAndNullIfNotFound()
   {
     $this->assertSame($this->getClassCgf()['arch']['users'], $this->user->getFields('users'));
     $this->assertSame($this->getClassCgf()['arch']['groups'], $this->user->getFields('groups'));
@@ -949,7 +949,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function updateInfo_method_changes_data_in_users_table_if_data_is_valid()
+  public function testUpdateinfoMethodChangesDataInUsersTableIfDataIsValid()
   {
     $expected_session_data = $this->getExpectedSession();
 
@@ -987,7 +987,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function updateInfo_method_does_not_changes_data_in_users_table_if_data_is_invalid()
+  public function testUpdateinfoMethodDoesNotChangesDataInUsersTableIfDataIsInvalid()
   {
     $this->simpleLogin();
 
@@ -1000,7 +1000,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getPassword_method_encrypts_the_given_string()
+  public function testGetpasswordMethodEncryptsTheGivenString()
   {
     $this->assertSame(
       $this->getNonPublicMethod('_hash')->invoke($this->user, 'foo'),
@@ -1010,7 +1010,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isJustLogin_method_checks_if_the_user_is_logged_in()
+  public function testIsjustloginMethodChecksIfTheUserIsLoggedIn()
   {
     $this->assertFalse($this->user->isJustLogin());
 
@@ -1021,7 +1021,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function setSession_sets_the_given_attributes_in_the_session()
+  public function testSetsessionSetsTheGivenAttributesInTheSession()
   {
     $session_data = $this->loginWithSessionData();
 
@@ -1065,7 +1065,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function unsetSession_method_unsets_the_given_attributes_from_session_if_exists()
+  public function testUnsetsessionMethodUnsetsTheGivenAttributesFromSessionIfExists()
   {
     $session_data = $this->loginWithSessionData();
 
@@ -1088,7 +1088,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getSession_method_returns_session_property_from_session_user_info()
+  public function testGetsessionMethodReturnsSessionPropertyFromSessionUserInfo()
   {
     $session_data = $this->loginWithSessionData();
 
@@ -1104,7 +1104,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getOsession_method_returns_an_attribute_or_whole_session_from_session_session()
+  public function testGetosessionMethodReturnsAnAttributeOrWholeSessionFromSessionSession()
   {
     $this->loginWithSessionData();
 
@@ -1121,7 +1121,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function method_setOsession_sets_an_attribute_in_the_sessIndex_part_of_the_session()
+  public function testMethodSetosessionSetsAnAttributeInTheSessindexPartOfTheSession()
   {
     $this->user->setOsession('foo', 'bar');
     $this->user->setOsession('baz', ['key' => 'value']);
@@ -1143,7 +1143,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function hasSession_method_checks_if_the_given_attribute_exists_in_user_session()
+  public function testHassessionMethodChecksIfTheGivenAttributeExistsInUserSession()
   {
     $this->loginWithSessionData();
 
@@ -1156,7 +1156,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function updateActivity_updates_last_activity_for_the_session_in_database_if_logged_in()
+  public function testUpdateactivityUpdatesLastActivityForTheSessionInDatabaseIfLoggedIn()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1187,7 +1187,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function updateActivity_does_not_update_last_activity_if_not_logged_in()
+  public function testUpdateactivityDoesNotUpdateLastActivityIfNotLoggedIn()
   {
     $this->db_mock->shouldNotReceive('update');
 
@@ -1197,7 +1197,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_saves_the_session_config_in_database_if_the_current_time_exceends_last_renew_by_two_seconds_or_more()
+  public function testSavesessionMethodSavesTheSessionConfigInDatabaseIfTheCurrentTimeExceendsLastRenewByTwoSecondsOrMore()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1229,7 +1229,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_does_not_exists()
+  public function testSavesessionMethodSavesTheSessionConfigInDatabaseIfTheLastRenewDoesNotExists()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1260,7 +1260,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_does_not_save_the_session_in_database_if_current_time_does_not_exceed_last_renew()
+  public function testSavesessionMethodDoesNotSaveTheSessionInDatabaseIfCurrentTimeDoesNotExceedLastRenew()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1292,7 +1292,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_is_empty()
+  public function testSavesessionMethodSavesTheSessionConfigInDatabaseIfTheLastRenewIsEmpty()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1324,7 +1324,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_is_forced_to_save_the_session_config_in_database_without_considering_last_renew()
+  public function testSavesessionMethodIsForcedToSaveTheSessionConfigInDatabaseWithoutConsideringLastRenew()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1356,7 +1356,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveSession_method_does_not_save_the_session_in_database_if_not_logged_in()
+  public function testSavesessionMethodDoesNotSaveTheSessionInDatabaseIfNotLoggedIn()
   {
     $this->db_mock->shouldNotReceive('update');
 
@@ -1366,7 +1366,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function closeSession_method_closes_the_session_in_the_database()
+  public function testClosesessionMethodClosesTheSessionInTheDatabase()
   {
     $expected_session_data = $this->getExpectedSession();
 
@@ -1409,7 +1409,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function closeSession_method_closes_the_session_in_the_database_and_unsets_data_from_session()
+  public function testClosesessionMethodClosesTheSessionInTheDatabaseAndUnsetsDataFromSession()
   {
     $expected_session_data = $this->getExpectedSession();
 
@@ -1453,7 +1453,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function checkAttempts_method_returns_true_if_no_number_of_attempts_is_recorded()
+  public function testCheckattemptsMethodReturnsTrueIfNoNumberOfAttemptsIsRecorded()
   {
     // Before logging in
     $this->assertTrue($this->user->checkAttempts());
@@ -1466,7 +1466,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function checkAttempts_method_returns_false_if_the_max_number_of_connection_attempts_is_reached()
+  public function testCheckattemptsMethodReturnsFalseIfTheMaxNumberOfConnectionAttemptsIsReached()
   {
     // Let's make a failed login
     $this->sessionLogin(
@@ -1506,7 +1506,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function checkAttempts_method_returns_true_if_the_max_number_of_connection_attempts_is_not_reached()
+  public function testCheckattemptsMethodReturnsTrueIfTheMaxNumberOfConnectionAttemptsIsNotReached()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1536,7 +1536,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveCfg_method_saves_user_config_in_the_cfg_field_of_users_table()
+  public function testSavecfgMethodSavesUserConfigInTheCfgFieldOfUsersTable()
   {
     $this->sessionLogin(
       function ($db_mock) {
@@ -1564,7 +1564,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function saveCfg_method_does_nothing_if_not_logged_in()
+  public function testSavecfgMethodDoesNothingIfNotLoggedIn()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1578,7 +1578,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function setCfg_method_saves_the_provided_attributes_values_in_session_config()
+  public function testSetcfgMethodSavesTheProvidedAttributesValuesInSessionConfig()
   {
     $this->loginWithSessionData();
 
@@ -1597,7 +1597,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function unsetCfg_method_unsets_the_provided_attributes_in_session_config()
+  public function testUnsetcfgMethodUnsetsTheProvidedAttributesInSessionConfig()
   {
     $this->loginWithSessionData();
 
@@ -1612,7 +1612,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function refreshInfo_method_Regathers_info_from_database()
+  public function testRefreshinfoMethodRegathersInfoFromDatabase()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1642,7 +1642,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isAuth_method_checks_if_user_is_authenticated()
+  public function testIsauthMethodChecksIfUserIsAuthenticated()
   {
     $this->assertFalse($this->user->isAuth());
 
@@ -1653,7 +1653,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function checkSession_method_retrieves_user_info_from_session_if_authenticated()
+  public function testChecksessionMethodRetrievesUserInfoFromSessionIfAuthenticated()
   {
     $this->assertFalse($this->user->checkSession());
 
@@ -1689,7 +1689,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getId_method_returns_user_id_if_there_is_no_error_and_null_otherwise()
+  public function testGetidMethodReturnsUserIdIfThereIsNoErrorAndNullOtherwise()
   {
     $this->assertNull($this->user->getId());
 
@@ -1700,7 +1700,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getGroup_method_returns_the_group_id_if_there_is_no_error_and_null_otherwise()
+  public function testGetgroupMethodReturnsTheGroupIdIfThereIsNoErrorAndNullOtherwise()
   {
     $this->assertNull($this->user->getIdGroup());
 
@@ -1711,7 +1711,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function expireHotlink_method_sets_hotlink_as_expired_if_there_is_no_error()
+  public function testExpirehotlinkMethodSetsHotlinkAsExpiredIfThereIsNoError()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1728,7 +1728,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function expireHotlink_method_does_not_set_hotline_as_expired_if_there_is_an_error()
+  public function testExpirehotlinkMethodDoesNotSetHotlineAsExpiredIfThereIsAnError()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1743,7 +1743,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getIdFromMagicString_retrieves_user_id_from_hotlink_magic_string()
+  public function testGetidfrommagicstringRetrievesUserIdFromHotlinkMagicString()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1763,7 +1763,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getIdFromMagicString_returns_null_if_id_is_invalid()
+  public function testGetidfrommagicstringReturnsNullIfIdIsInvalid()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1778,7 +1778,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getIdFromMagicString_returns_null_if_the_ket_does_not_match()
+  public function testGetidfrommagicstringReturnsNullIfTheKetDoesNotMatch()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
@@ -1798,7 +1798,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isAdmin_method_returns_true_if_the_user_is_admin()
+  public function testIsadminMethodReturnsTrueIfTheUserIsAdmin()
   {
     $expected_session_data          = $this->getExpectedSession();
     $expected_session_data['admin'] = 1;
@@ -1810,7 +1810,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isAdmin_method_returns_false_if_the_user_is_not_admin()
+  public function testIsadminMethodReturnsFalseIfTheUserIsNotAdmin()
   {
     $expected_session_data          = $this->getExpectedSession();
     $expected_session_data['admin'] = 0;
@@ -1822,7 +1822,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isDev_method_returns_true_if_user_is_admin_but_not_a_developer()
+  public function testIsdevMethodReturnsTrueIfUserIsAdminButNotADeveloper()
   {
     $expected_session_data          = $this->getExpectedSession();
     $expected_session_data['admin'] = 1;
@@ -1835,7 +1835,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isDev_method_returns_true_if_user_is_a_developer_but_not_admin()
+  public function testIsdevMethodReturnsTrueIfUserIsADeveloperButNotAdmin()
   {
     $expected_session_data          = $this->getExpectedSession();
     $expected_session_data['admin'] = 0;
@@ -1848,7 +1848,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isDev_method_returns_false_if_user_is_not_a_developer_nor_an_admin()
+  public function testIsdevMethodReturnsFalseIfUserIsNotADeveloperNorAnAdmin()
   {
     $expected_session_data          = $this->getExpectedSession();
     $expected_session_data['admin'] = 0;
@@ -1861,14 +1861,14 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getManager_method_returns_a_manager_instance()
+  public function testGetmanagerMethodReturnsAManagerInstance()
   {
     $this->assertInstanceOf(User\Manager::class, $this->user->getManager());
   }
 
 
   /** @test */
-  public function check_method_checks_if_an_error_has_been_thrown_or_not()
+  public function testCheckMethodChecksIfAnErrorHasBeenThrownOrNot()
   {
     $this->assertFalse($this->user->check());
 
@@ -1879,7 +1879,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function logout_method_un_authenticate_reset_the_config_and_destroys_the_session()
+  public function testLogoutMethodUnAuthenticateResetTheConfigAndDestroysTheSession()
   {
     $session_data = $this->getExpectedSession();
 
@@ -1926,7 +1926,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getMailer_method_returns_an_instance_of_the_mailer_class()
+  public function testGetmailerMethodReturnsAnInstanceOfTheMailerClass()
   {
     if (!defined('BBN_IS_DEV')) {
       define('BBN_IS_DEV', true);
@@ -1939,7 +1939,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getMailer_method_throws_exception_if_the_mailer_class_does_not_exist()
+  public function testGetmailerMethodThrowsExceptionIfTheMailerClassDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -1953,7 +1953,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getMailer_method_returns_the_current_mailer_if_it_exists()
+  public function testGetmailerMethodReturnsTheCurrentMailerIfItExists()
   {
     $mailer             = $this->getClassCgf()['mailer'];
     $this->user->mailer = new $mailer();
@@ -1963,7 +1963,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function setPassword_method_returns_false_if_old_password_does_not_match_or_not_logged_in()
+  public function testSetpasswordMethodReturnsFalseIfOldPasswordDoesNotMatchOrNotLoggedIn()
   {
     $this->assertFalse($this->user->setPassword('foo', 'bar'));
 
@@ -1987,7 +1987,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function setPassword_method_changes_the_password_after_verification_and_returns_true()
+  public function testSetpasswordMethodChangesThePasswordAfterVerificationAndReturnsTrue()
   {
     $hash_method = $this->getNonPublicMethod('_hash');
 
@@ -2009,7 +2009,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function forcePassword_method_changes_the_password_in_database_and_returns_true()
+  public function testForcepasswordMethodChangesThePasswordInDatabaseAndReturnsTrue()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->twice()->andReturnTrue();
@@ -2023,14 +2023,14 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function forcePassword_method_returns_false_if_not_authenticated()
+  public function testForcepasswordMethodReturnsFalseIfNotAuthenticated()
   {
     $this->assertFalse($this->user->forcePassword('new_password'));
   }
 
 
   /** @test */
-  public function getName_method_returns_the_full_name_of_the_current_user()
+  public function testGetnameMethodReturnsTheFullNameOfTheCurrentUser()
   {
     $data      = $this->loginWithSessionData();
     $class_cfg = $this->getClassCgf();
@@ -2042,7 +2042,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getName_method_returns_the_full_name_of_the_given_user_if_exists()
+  public function testGetnameMethodReturnsTheFullNameOfTheGivenUserIfExists()
   {
     $manager_mock = \Mockery::mock(User\Manager::class);
     $manager_mock->shouldReceive('getUser')->andReturn(['name' => 'foo']);
@@ -2059,7 +2059,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getName_method_returns_null_when_not_authenticated()
+  public function testGetnameMethodReturnsNullWhenNotAuthenticated()
   {
     $this->assertNull($this->user->getName());
     $this->assertNull($this->user->getName('foo'));
@@ -2067,7 +2067,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getName_method_returns_null_when_show_key_does_not_exist_in_class_cfg_property()
+  public function testGetnameMethodReturnsNullWhenShowKeyDoesNotExistInClassCfgProperty()
   {
     $this->loginWithSessionData();
 
@@ -2082,7 +2082,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function addToken_method_generates_and_adds_a_token_in_database()
+  public function testAddtokenMethodGeneratesAndAddsATokenInDatabase()
   {
     $this->assertNull($this->user->addToken());
 
@@ -2100,7 +2100,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getEmail_method_returns_the_email_of_the_current_user()
+  public function testGetemailMethodReturnsTheEmailOfTheCurrentUser()
   {
     $data   = $this->loginWithSessionData();
     $fields = $this->getfields();
@@ -2112,7 +2112,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getEmail_method_returns_the_email_of_the_given_user()
+  public function testGetemailMethodReturnsTheEmailOfTheGivenUser()
   {
     $manager_mock = \Mockery::mock(User\Manager::class);
     $manager_mock->shouldReceive('getUser')->andReturn(['email' => 'foo@mail.com']);
@@ -2129,7 +2129,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getEmail_method_returns_null_if_not_authenticated()
+  public function testGetemailMethodReturnsNullIfNotAuthenticated()
   {
     $this->assertNull($this->user->getEmail());
     $this->assertNull($this->user->getEmail($this->user_id));
@@ -2137,7 +2137,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getEmail_method_returns_null_if_email_key_does_not_exist_in_field_property()
+  public function testGetemailMethodReturnsNullIfEmailKeyDoesNotExistInFieldProperty()
   {
     $this->loginWithSessionData();
     $fields = $this->getfields();
@@ -2149,7 +2149,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function crypt_method_encrypts_the_given_string_when_encryption_key_is_not_defined()
+  public function testCryptMethodEncryptsTheGivenStringWhenEncryptionKeyIsNotDefined()
   {
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
     $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
@@ -2164,7 +2164,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function crypt_method_encrypts_the_given_string_when_encryption_key_is_defined()
+  public function testCryptMethodEncryptsTheGivenStringWhenEncryptionKeyIsDefined()
   {
     $this->setNonPublicPropertyValue('auth', true);
     $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
@@ -2174,14 +2174,14 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function crypt_method_returns_null_when_not_authenticated_and_encryption_key_is_no_defined()
+  public function testCryptMethodReturnsNullWhenNotAuthenticatedAndEncryptionKeyIsNoDefined()
   {
     $this->assertNull($this->user->crypt('foo'));
   }
 
 
   /** @test */
-  public function decrypt_method_decrypts_the_given_string_when_encryption_key_is_not_defined()
+  public function testDecryptMethodDecryptsTheGivenStringWhenEncryptionKeyIsNotDefined()
   {
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
     $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
@@ -2201,7 +2201,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function decrypt_method_decrypts_the_given_string_when_encryption_key_is_defined()
+  public function testDecryptMethodDecryptsTheGivenStringWhenEncryptionKeyIsDefined()
   {
     $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
 
@@ -2215,21 +2215,21 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function decrypt_method_returns_null_when_not_authenticated_and_encryption_key_is_not_defined()
+  public function testDecryptMethodReturnsNullWhenNotAuthenticatedAndEncryptionKeyIsNotDefined()
   {
     $this->assertNull($this->user->decrypt('foo'));
   }
 
 
   /** @test */
-  public function getUser_method_returns_the_current_instance()
+  public function testGetuserMethodReturnsTheCurrentInstance()
   {
     $this->assertInstanceOf(User::class, $this->user->getUser());
   }
 
 
   /** @test */
-  public function makeFingerprint_method_generates_a_random_string_between_16_and_32_characters()
+  public function testMakefingerprintMethodGeneratesARandomStringBetween16And32Characters()
   {
     for ($i = 0; $i < 3; $i++) {
       $result = $this->user->makeFingerprint();
@@ -2241,7 +2241,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function makeMagicString_method_returns_an_array_with_a_key_and_a_magic_string()
+  public function testMakemagicstringMethodReturnsAnArrayWithAKeyAndAMagicString()
   {
     $this->assertIsArray($result = $this->user->makeMagicString());
     $this->assertTrue(isset($result['key']));
@@ -2253,7 +2253,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function isMagicString_method_checks_if_the_given_string_to_the_given_hash()
+  public function testIsmagicstringMethodChecksIfTheGivenStringToTheGivenHash()
   {
     $this->assertFalse(
       $this->user->isMagicString('foo', 'foo')
@@ -2266,7 +2266,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function setError_method_sets_the_error_property_if_it_is_not_set_already()
+  public function testSeterrorMethodSetsTheErrorPropertyIfItIsNotSetAlready()
   {
     $this->setNonPublicPropertyValue('error', null);
 
@@ -2283,7 +2283,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getError_method_returns_the_error_if_there_is_one()
+  public function testGeterrorMethodReturnsTheErrorIfThereIsOne()
   {
     $this->setNonPublicPropertyValue('error', 6);
 
@@ -2307,7 +2307,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getError_method_returns_null_if_there_is_no_error()
+  public function testGeterrorMethodReturnsNullIfThereIsNoError()
   {
     $this->setNonPublicPropertyValue('error', null);
 
@@ -2316,7 +2316,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function logIn_method_login_a_user_from_the_provided_id()
+  public function testLoginMethodLoginAUserFromTheProvidedId()
   {
     $this->db_mock->shouldReceive('update')->once()->andReturn(1);
     $this->db_mock->shouldReceive('rselect')->once()->andReturn($this->getExpectedSession());
@@ -2339,7 +2339,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getPrint_method_returns_a_hash_from_user_agent_and_fingerprint()
+  public function testGetprintMethodReturnsAHashFromUserAgentAndFingerprint()
   {
     $this->setNonPublicPropertyValue('user_agent', 'Safari macosX');
     $this->setNonPublicPropertyValue('accept_lang', 'en');
@@ -2363,7 +2363,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getPrint_method_returns_null_if_fingerprint_is_not_defined()
+  public function testGetprintMethodReturnsNullIfFingerprintIsNotDefined()
   {
     $session_data = $this->getNonPublicProperty('data', $this->getSession());
 
@@ -2380,7 +2380,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getSessionDbId_method_returns_the_database_id_for_the_session_row_if_exists()
+  public function testGetsessiondbidMethodReturnsTheDatabaseIdForTheSessionRowIfExists()
   {
     $get_id_session_method = $this->getNonPublicMethod('getSessionDbId');
 
@@ -2396,7 +2396,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function getSessionDbId_method_returns_null_if_session_row_does_not_exists()
+  public function testGetsessiondbidMethodReturnsNullIfSessionRowDoesNotExists()
   {
     $get_id_session_method = $this->getNonPublicMethod('getSessionDbId');
 
@@ -2415,7 +2415,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function recordAttempt_method_increments_the_num_attempt_variable()
+  public function testRecordattemptMethodIncrementsTheNumAttemptVariable()
   {
     $record_attempt_method = $this->getNonPublicMethod('recordAttempt');
 
@@ -2437,7 +2437,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function login_method_initialize_and_saves_the_session_after_authentication()
+  public function testLoginMethodInitializeAndSavesTheSessionAfterAuthentication()
   {
     $this->db_mock->shouldReceive('update')->once()->andReturn(1);
     $this->db_mock->shouldReceive('rselect')->once()->andReturn($this->getExpectedSession());
@@ -2462,7 +2462,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function login_method_does_not_authenticate_if_there_is_an_error()
+  public function testLoginMethodDoesNotAuthenticateIfThereIsAnError()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturn(null);
     $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
@@ -2488,7 +2488,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_info_method_fetches_user_data_from_database_and_save_it_in_session()
+  public function testUserInfoMethodFetchesUserDataFromDatabaseAndSaveItInSession()
   {
     $this->setNonPublicPropertyValue('id', $this->user_id);
     $this->setNonPublicPropertyValue('error', null);
@@ -2524,7 +2524,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function user_info_method_does_not_fetch_user_data_from_database_if_the_session_has_config()
+  public function testUserInfoMethodDoesNotFetchUserDataFromDatabaseIfTheSessionHasConfig()
   {
     $this->setNonPublicPropertyValue('id', $this->user_id);
     $this->setNonPublicPropertyValue('error', null);
@@ -2554,7 +2554,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function get_encryption_key_method_retrieves_and_saves_the_ecnryption_key_from_db_if_not_defined()
+  public function testGetEncryptionKeyMethodRetrievesAndSavesTheEcnryptionKeyFromDbIfNotDefined()
   {
     $this->setNonPublicPropertyValue('auth', true);
     $this->replaceDbWithMockedVersion();
@@ -2572,7 +2572,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function get_encryption_key_method_does_not_retrieve_encryption_key_if_it_is_already_defined()
+  public function testGetEncryptionKeyMethodDoesNotRetrieveEncryptionKeyIfItIsAlreadyDefined()
   {
     $this->setNonPublicPropertyValue('auth', true);
     $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
@@ -2589,7 +2589,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function sess_info_method_fetches_all_information_about_user_session_if_session_id_exists_and_id_exists_and_session_exists_in_db()
+  public function testSessInfoMethodFetchesAllInformationAboutUserSessionIfSessionIdExistsAndIdExistsAndSessionExistsInDb()
   {
     $session = $this->getSession();
     $session->set($this->user_id, $this->user_index, 'id');
@@ -2611,7 +2611,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function sess_info_sets_an_error_if_session_id_exists_but_id_not_exists()
+  public function testSessInfoSetsAnErrorIfSessionIdExistsButIdNotExists()
   {
     $this->replaceDbWithMockedVersion();
     $this->setNonPublicPropertyValue('error', null);
@@ -2630,7 +2630,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function sess_info_sets_an_error_if_session_id_not_exists_but_id_exists()
+  public function testSessInfoSetsAnErrorIfSessionIdNotExistsButIdExists()
   {
     $session = $this->getSession();
     $session->set($this->user_id, $this->user_index, 'id');
@@ -2653,7 +2653,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function sess_info_method_initialize_a_new_session_then_fetches_it_if_session_id_exists_but_session_not_exists_in_db_and_new_session_id_is_differrent()
+  public function testSessInfoMethodInitializeANewSessionThenFetchesItIfSessionIdExistsButSessionNotExistsInDbAndNewSessionIdIsDifferrent()
   {
     $session = $this->getSession();
     $session->set($this->user_id, $this->user_index, 'id');
@@ -2685,7 +2685,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_password_method_compares_a_string_with_the_hash()
+  public function testCheckPasswordMethodComparesAStringWithTheHash()
   {
     $hash_method = $this->getNonPublicMethod('_hash');
     $hash        = $hash_method->invoke($this->user, 'foo');
@@ -2703,7 +2703,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function hash_method_encypts_a_string_based_on_configured_hash_function()
+  public function testHashMethodEncyptsAStringBasedOnConfiguredHashFunction()
   {
     $hash_method = $this->getNonPublicMethod('_hash');
 
@@ -2735,7 +2735,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function retrieve_session_method_fetches_user_info_from_session_if_authenticated()
+  public function testRetrieveSessionMethodFetchesUserInfoFromSessionIfAuthenticated()
   {
     $this->assertFalse($this->user->isAuth());
 
@@ -2778,7 +2778,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function init_session_method_creates_user_session_if_not_already_exists_in_session()
+  public function testInitSessionMethodCreatesUserSessionIfNotAlreadyExistsInSession()
   {
     $this->setNonPublicPropertyValue('sess_cfg', null);
     $this->setNonPublicPropertyValue('error', null);
@@ -2809,7 +2809,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function init_session_method_creates_user_session_if_not_already_exists_in_database_but_exists_in_session()
+  public function testInitSessionMethodCreatesUserSessionIfNotAlreadyExistsInDatabaseButExistsInSession()
   {
     $this->setNonPublicPropertyValue('sess_cfg', null);
     $this->setNonPublicPropertyValue('error', null);
@@ -2843,7 +2843,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function init_session_method_get_user_session_when_already_exists_in_both_database_and_session()
+  public function testInitSessionMethodGetUserSessionWhenAlreadyExistsInBothDatabaseAndSession()
   {
     $this->setNonPublicPropertyValue('sess_cfg', null);
     $this->setNonPublicPropertyValue('error', null);
@@ -2877,7 +2877,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function init_session_method_sets_an_error_when_cannot_insert_a_new_session_in_database()
+  public function testInitSessionMethodSetsAnErrorWhenCannotInsertANewSessionInDatabase()
   {
     $this->setNonPublicPropertyValue('sess_cfg', null);
     $this->setNonPublicPropertyValue('error', null);
@@ -2912,7 +2912,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function set_session_method_sets_an_attribute_in_the_session_index()
+  public function testSetSessionMethodSetsAnAttributeInTheSessionIndex()
   {
     $session = $this->getSession();
     $session->set([], $this->session_index);
@@ -2936,7 +2936,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function set_session_method_does_not_set_an_attribute_if_session_index_does_not_exist()
+  public function testSetSessionMethodDoesNotSetAnAttributeIfSessionIndexDoesNotExist()
   {
     $session = $this->getSession();
     $session->set(null, $this->session_index);
@@ -2951,7 +2951,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function set_session_method_does_not_set_an_attribute_if_argumnet_is_non_assoc_array()
+  public function testSetSessionMethodDoesNotSetAnAttributeIfArgumnetIsNonAssocArray()
   {
     $session = $this->getSession();
     $session->set(null, $this->session_index);
@@ -2966,7 +2966,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function get_session_method_gets_and_attribute_or_the_whole_sessiom_part_from_session_index()
+  public function testGetSessionMethodGetsAndAttributeOrTheWholeSessiomPartFromSessionIndex()
   {
     $session = $this->getSession();
     $session->set(null, $this->session_index);
@@ -2995,7 +2995,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function get_session_method_returns_null_if_session_index_does_not_exist()
+  public function testGetSessionMethodReturnsNullIfSessionIndexDoesNotExist()
   {
     $session = $this->getSession();
     $session->set(null, $this->session_index);
@@ -3007,7 +3007,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_checks_the_credential_of_the_user()
+  public function testCheckCredentialsMethodChecksTheCredentialOfTheUser()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('id', null);
@@ -3052,7 +3052,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_sets_an_error_if_salt_not_provided()
+  public function testCheckCredentialsMethodSetsAnErrorIfSaltNotProvided()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('auth', false);
@@ -3075,7 +3075,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_sets_an_error_and_destroy_session_if_salt_is_not_valid()
+  public function testCheckCredentialsMethodSetsAnErrorAndDestroySessionIfSaltIsNotValid()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('auth', false);
@@ -3101,7 +3101,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_sets_an_error_if_password_does_not_match()
+  public function testCheckCredentialsMethodSetsAnErrorIfPasswordDoesNotMatch()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('id', null);
@@ -3157,7 +3157,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_sets_an_error_if_user_not_found_in_database()
+  public function testCheckCredentialsMethodSetsAnErrorIfUserNotFoundInDatabase()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('id', null);
@@ -3184,7 +3184,7 @@ class UserTest extends TestCase
 
 
   /** @test */
-  public function check_credentials_method_sets_an_error_if_user_and_password_params_dont_exist()
+  public function testCheckCredentialsMethodSetsAnErrorIfUserAndPasswordParamsDontExist()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('id', null);
@@ -3205,7 +3205,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function check_credentials_method_does_not_check_credentials_if_there_is_an_error()
+  public function testCheckCredentialsMethodDoesNotCheckCredentialsIfThereIsAnError()
   {
     $this->setNonPublicPropertyValue('error', 2);
     $this->setNonPublicPropertyValue('auth', false);
@@ -3219,7 +3219,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function init_dir_method_defines_directory_path_for_the_user()
+  public function testInitDirMethodDefinesDirectoryPathForTheUser()
   {
     \bbn\File\Dir::delete(Mvc::getUserDataPath($this->user_id), true);
     \bbn\File\Dir::delete(Mvc::getUserTmpPath($this->user_id), true);
@@ -3249,7 +3249,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function init_dir_method_defines_directory_path_for_the_user_and_created_it()
+  public function testInitDirMethodDefinesDirectoryPathForTheUserAndCreatedIt()
   {
     \bbn\File\Dir::delete(Mvc::getUserDataPath($this->user_id), true);
     \bbn\File\Dir::delete(Mvc::getUserTmpPath($this->user_id), true);
@@ -3287,7 +3287,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function init_dir_method_does_not_define_a_path_for_the_user_if_no_id_saved()
+  public function testInitDirMethodDoesNotDefineAPathForTheUserIfNoIdSaved()
   {
     $this->setNonPublicPropertyValue('id', null);
     $this->setNonPublicPropertyValue('error', null);
@@ -3302,7 +3302,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function init_dir_method_does_not_define_a_path_for_the_user_if_id_saved_but_there_is_an_error()
+  public function testInitDirMethodDoesNotDefineAPathForTheUserIfIdSavedButThereIsAnError()
   {
     $this->setNonPublicPropertyValue('id', $this->user_id);
     $this->setNonPublicPropertyValue('error', 3);
@@ -3317,7 +3317,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function authenticate_method_sets_the_user_as_authenticated()
+  public function testAuthenticateMethodSetsTheUserAsAuthenticated()
   {
     $this->setNonPublicPropertyValue('error', null);
     $this->setNonPublicPropertyValue('id', null);
@@ -3336,7 +3336,7 @@ class UserTest extends TestCase
   }
 
   /** @test */
-  public function authenticate_method_does_not_set_the_user_as_authenticated_if_there_is_an_error()
+  public function testAuthenticateMethodDoesNotSetTheUserAsAuthenticatedIfThereIsAnError()
   {
     $this->setNonPublicPropertyValue('error', 2);
     $this->setNonPublicPropertyValue('id', null);

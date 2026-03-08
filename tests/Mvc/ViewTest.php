@@ -43,7 +43,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->init();
 
@@ -104,7 +104,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_mode_does_not_exist_in_available_modes()
+  public function testConstructorTestWhenModeDoesNotExistInAvailableModes()
   {
     $this->init(array_replace($this->info, ['mode' => 'foo']));
 
@@ -138,7 +138,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_mode_is_not_provided()
+  public function testConstructorTestWhenModeIsNotProvided()
   {
     unset($this->info['mode']);
     $this->init();
@@ -173,7 +173,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function check_method_checks_whether_the_file_property_is_empty_or_not()
+  public function testCheckMethodChecksWhetherTheFilePropertyIsEmptyOrNot()
   {
     $this->init();
     $this->assertTrue($this->view->check());
@@ -184,14 +184,14 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_empty_string_when_file_does_not_exist()
+  public function testGetMethodReturnsEmptyStringWhenFileDoesNotExist()
   {
     $this->init();
     $this->assertSame('', $this->view->get());
   }
 
   /** @test */
-  public function get_method_returns_empty_string_when_file_has_empty_content()
+  public function testGetMethodReturnsEmptyStringWhenFileHasEmptyContent()
   {
     $this->init();
 
@@ -204,7 +204,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_does_not_set_the_content_from_checkers_files_if_not_exist()
+  public function testGetMethodDoesNotSetTheContentFromCheckersFilesIfNotExist()
   {
     $this->init();
 
@@ -219,7 +219,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_sets_the_content_from_checkers_files_when_exists()
+  public function testGetMethodSetsTheContentFromCheckersFilesWhenExists()
   {
     $this->info['checkers'] = [$this->getTestingDirName() . $this->info['checkers'][0]];
     $this->init();
@@ -238,7 +238,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_false_when_file_property_is_empty()
+  public function testGetMethodReturnsFalseWhenFilePropertyIsEmpty()
   {
     unset($this->info['mode']);
     $this->init();
@@ -247,7 +247,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_extension_is_js_and_lang_file_is_empty()
+  public function testGetMethodReturnsTheContentOfTheFileWhenExtensionIsJsAndLangFileIsEmpty()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -270,7 +270,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_extension_is_js_ignoring_lang_file_when_the_file_does_not_exist()
+  public function testGetMethodReturnsTheContentOfTheFileWhenExtensionIsJsIgnoringLangFileWhenTheFileDoesNotExist()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -294,7 +294,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_extension_is_js_and_lang_file_content()
+  public function testGetMethodReturnsTheContentOfTheFileWhenExtensionIsJsAndLangFileContent()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -324,7 +324,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_extension_is_js_and_lang_file_content_index_not_found()
+  public function testGetMethodReturnsTheContentOfTheFileWhenExtensionIsJsAndLangFileContentIndexNotFound()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -354,7 +354,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_extension_in_css()
+  public function testGetMethodReturnsTheContentOfTheFileWhenExtensionInCss()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -377,7 +377,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_the_extension_is_less()
+  public function testGetMethodReturnsTheContentOfTheFileWhenTheExtensionIsLess()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -403,7 +403,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_the_extension_is_scss()
+  public function testGetMethodReturnsTheContentOfTheFileWhenTheExtensionIsScss()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -431,7 +431,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_the_extension_is_html()
+  public function testGetMethodReturnsTheContentOfTheFileWhenTheExtensionIsHtml()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -454,7 +454,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_the_extension_is_php()
+  public function testGetMethodReturnsTheContentOfTheFileWhenTheExtensionIsPhp()
   {
     $testing_dir = $this->getTestingDirName();
 
@@ -477,7 +477,7 @@ class ViewTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_content_of_the_file_when_the_extension_is_php_when_plugin_exists()
+  public function testGetMethodReturnsTheContentOfTheFileWhenTheExtensionIsPhpWhenPluginExists()
   {
     $testing_dir = $this->getTestingDirName();
 

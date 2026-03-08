@@ -40,7 +40,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_as_cli()
+  public function testConstructorTestAsCli()
   {
     global $argv;
     $argv = ['foo', 'path/to', 'post_1', 'post_2'];
@@ -54,7 +54,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_as_not_cli_and_public_mode()
+  public function testConstructorTestAsNotCliAndPublicMode()
   {
     $_POST = ['foo' => 'bar', 'foo2' => 'bar2'];
     $_SERVER['REQUEST_URI'] = 'localhost/foo';
@@ -69,7 +69,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_as_not_cli_and_dom_mode()
+  public function testConstructorTestAsNotCliAndDomMode()
   {
     $_POST = [];
     $_SERVER['REQUEST_URI'] = 'localhost/foo';
@@ -83,14 +83,14 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getLocale_method_returns_the_current_locale()
+  public function testGetlocaleMethodReturnsTheCurrentLocale()
   {
     $this->initAsNotCli();
     $this->assertSame($this->getNonPublicProperty('_locale'), $this->env->getLocale());
   }
 
   /** @test */
-  public function setLocale_method_sets_the_current_locale_when_arguments_are_provided()
+  public function testSetlocaleMethodSetsTheCurrentLocaleWhenArgumentsAreProvided()
   {
     $this->initAsNotCli();
 
@@ -101,7 +101,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setLocale_method_sets_the_current_locale_when_no_arguments_are_provided()
+  public function testSetlocaleMethodSetsTheCurrentLocaleWhenNoArgumentsAreProvided()
   {
     // The method in this case cannot be tested probably
     // Since it uses constants and it's being called in the constructor
@@ -110,7 +110,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setLocale_method_throws_an_exception_when_the_given_locale_not_found()
+  public function testSetlocaleMethodThrowsAnExceptionWhenTheGivenLocaleNotFound()
   {
     $this->expectException(\Exception::class);
 
@@ -120,7 +120,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_test()
+  public function testSetprepathMethodTest()
   {
     $_SERVER['REQUEST_URI'] = 'localhost/foo/bar';
     $this->initAsNotCli();
@@ -134,7 +134,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_test_throws_and_exception_if_one_or_more_of_the_path_does_not_correspond_to_the_current_url()
+  public function testSetprepathMethodTestThrowsAndExceptionIfOneOrMoreOfThePathDoesNotCorrespondToTheCurrentUrl()
   {
     $this->expectException(\Exception::class);
 
@@ -147,7 +147,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function isCli_method_returns_true_if_called_from_cli()
+  public function testIscliMethodReturnsTrueIfCalledFromCli()
   {
     $this->initAsCli();
 
@@ -155,7 +155,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function icCli_method_returns_false_if_not_called_from_cli()
+  public function testIccliMethodReturnsFalseIfNotCalledFromCli()
   {
     $this->initAsNotCli();
 
@@ -163,7 +163,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getUrl_method_returns_the_request_url()
+  public function testGeturlMethodReturnsTheRequestUrl()
   {
     $_SERVER['REQUEST_URI'] = 'localhost/foo';
     $this->initAsNotCli();
@@ -172,7 +172,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function simulate_method_test()
+  public function testSimulateMethodTest()
   {
     $_POST = ['foo' => 'bar'];
     $_SERVER['REQUEST_URI'] = 'localhost/foo';
@@ -203,7 +203,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getMode_method_returns_the_current_mode()
+  public function testGetmodeMethodReturnsTheCurrentMode()
   {
     $this->initAsNotCli();
 
@@ -214,7 +214,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getCli_method_parses_arguments_in_to_the_post_property_and_returns_it()
+  public function testGetcliMethodParsesArgumentsInToThePostPropertyAndReturnsIt()
   {
     global $argv;
 
@@ -248,7 +248,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getCli_method_returns_null_when_not_called_from_cli()
+  public function testGetcliMethodReturnsNullWhenNotCalledFromCli()
   {
     $this->initAsNotCli();
 
@@ -256,7 +256,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getGet_method_parses_all_get_parameters_in_the_get_property_if_not_already_set_and_returns_it()
+  public function testGetgetMethodParsesAllGetParametersInTheGetPropertyIfNotAlreadySetAndReturnsIt()
   {
     $this->initAsNotCli();
 
@@ -283,7 +283,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getGet_method_does_not_parse_all_get_parameters_if_already_set()
+  public function testGetgetMethodDoesNotParseAllGetParametersIfAlreadySet()
   {
     $this->initAsNotCli();
     $this->setNonPublicPropertyValue('_get', ['foo' => 'bar']);
@@ -297,7 +297,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getPost_method_parses_all_post_parameters_in_to_the_post_property_if_not_already_exists_and_returns_it()
+  public function testGetpostMethodParsesAllPostParametersInToThePostPropertyIfNotAlreadyExistsAndReturnsIt()
   {
     $this->initAsNotCli();
 
@@ -329,7 +329,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getPost_method_parses_parameters_from_the_input_property_if_is_set_and_is_json()
+  public function testGetpostMethodParsesParametersFromTheInputPropertyIfIsSetAndIsJson()
   {
     $this->initAsNotCli();
 
@@ -352,7 +352,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getPost_method_does_not_parse_parameters_from_the_input_property_if_it_is_not_json()
+  public function testGetpostMethodDoesNotParseParametersFromTheInputPropertyIfItIsNotJson()
   {
     $this->initAsNotCli();
 
@@ -370,7 +370,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getPost_method_does_not_parse_any_parameters_from_post_if_post_property_already_set()
+  public function testGetpostMethodDoesNotParseAnyParametersFromPostIfPostPropertyAlreadySet()
   {
     $this->initAsNotCli();
 
@@ -385,7 +385,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getPost_method_does_not_parse_any_parameters_from_input_property_if_post_property_already_set()
+  public function testGetpostMethodDoesNotParseAnyParametersFromInputPropertyIfPostPropertyAlreadySet()
   {
     $this->initAsNotCli();
 
@@ -399,7 +399,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getFiles_method_parses_the_uploaded_files_in_to_the_files_property_if_not_already_set_and_returns_it()
+  public function testGetfilesMethodParsesTheUploadedFilesInToTheFilesPropertyIfNotAlreadySetAndReturnsIt()
   {
     $this->initAsNotCli();
 
@@ -513,7 +513,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getFiles_method_does_not_parse_the_uploaded_files_if_files_property_already_exists()
+  public function testGetfilesMethodDoesNotParseTheUploadedFilesIfFilesPropertyAlreadyExists()
   {
     $this->initAsNotCli();
 
@@ -536,7 +536,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getParams_method_returns_the_params_property()
+  public function testGetparamsMethodReturnsTheParamsProperty()
   {
     $this->initAsNotCli();
 
@@ -546,7 +546,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getRequest_returns_the_url_property_if_initiated_and_null_otherwise()
+  public function testGetrequestReturnsTheUrlPropertyIfInitiatedAndNullOtherwise()
   {
     $this->initAsNotCli();
 
@@ -558,7 +558,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function _getHttpAcceptLanguageHeader_method_returns_the_http_accept_language_header_if_exists_and_null_otherwise()
+  public function testGethttpacceptlanguageheaderMethodReturnsTheHttpAcceptLanguageHeaderIfExistsAndNullOtherwise()
   {
     $this->initAsNotCli();
 
@@ -578,7 +578,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function getWeightedLocales_method_parses_the_accept_language_header_in_to_an_array_of_locals_with_weights()
+  public function testGetweightedlocalesMethodParsesTheAcceptLanguageHeaderInToAnArrayOfLocalsWithWeights()
   {
     $this->initAsNotCli();
 
@@ -599,7 +599,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function sortLocalesByWeight_method_sorts_locale_weights_frm_high_to_low()
+  public function testSortlocalesbyweightMethodSortsLocaleWeightsFrmHighToLow()
   {
     $this->initAsNotCli();
 
@@ -627,7 +627,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function initialize_method_sets_the_initiated_property_to_true_and_parses_php_input_stream()
+  public function testInitializeMethodSetsTheInitiatedPropertyToTrueAndParsesPhpInputStream()
   {
     $this->initAsNotCli();
 
@@ -642,7 +642,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setParams_method_sets_the_params_property_from_the_given_path_if_not_already_set()
+  public function testSetparamsMethodSetsTheParamsPropertyFromTheGivenPathIfNotAlreadySet()
   {
     $this->initAsNotCli();
 
@@ -656,7 +656,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setParams_method_does_not_set_the_params_property_from_the_given_path_if_path_is_empty()
+  public function testSetparamsMethodDoesNotSetTheParamsPropertyFromTheGivenPathIfPathIsEmpty()
   {
     $this->initAsNotCli();
 
@@ -672,7 +672,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setParams_method_does_not_set_the_params_property_from_the_given_path_if_already_set()
+  public function testSetparamsMethodDoesNotSetTheParamsPropertyFromTheGivenPathIfAlreadySet()
   {
     $this->initAsNotCli();
 
@@ -684,7 +684,7 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
-  public function setParams_method_throws_an_exception_if_the_given_path_is_a_reserved_value()
+  public function testSetparamsMethodThrowsAnExceptionIfTheGivenPathIsAReservedValue()
   {
     $this->expectException(\Exception::class);
 

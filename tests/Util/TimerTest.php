@@ -23,7 +23,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function start_method_starts_a_timer_for_the_given_key()
+  public function testStartMethodStartsATimerForTheGivenKey()
   {
     $this->assertTrue(
       $this->timer->start()
@@ -66,7 +66,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function hasStarted_method_returns_true_if_the_timer_has_started_for_the_given_key()
+  public function testHasstartedMethodReturnsTrueIfTheTimerHasStartedForTheGivenKey()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -87,7 +87,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function reset_method_resets_the_timer_for_the_given_key_if_already_started()
+  public function testResetMethodResetsTheTimerForTheGivenKeyIfAlreadyStarted()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -119,7 +119,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function stop_method_stops_the_timer_for_the_given_key()
+  public function testStopMethodStopsTheTimerForTheGivenKey()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -151,7 +151,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function stop_method_throws_an_exception_when_the_given_timer_has_zero_start_time()
+  public function testStopMethodThrowsAnExceptionWhenTheGivenTimerHasZeroStartTime()
   {
     $this->expectException(\Exception::class);
 
@@ -167,7 +167,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function stop_method_throws_an_exception_when_the_given_timer_does_not_has_a_start_time()
+  public function testStopMethodThrowsAnExceptionWhenTheGivenTimerDoesNotHasAStartTime()
   {
     $this->expectException(\Exception::class);
 
@@ -182,7 +182,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function stop_method_throws_an_exception_when_the_given_timer_does_not_exist()
+  public function testStopMethodThrowsAnExceptionWhenTheGivenTimerDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -198,7 +198,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function measure_method_measures_the_difference_between_current_time_and_given_key()
+  public function testMeasureMethodMeasuresTheDifferenceBetweenCurrentTimeAndGivenKey()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -237,7 +237,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function current_method_adds_the_measure_differences_to_the_given_timer_and_return_it_as_a_new_array()
+  public function testCurrentMethodAddsTheMeasureDifferencesToTheGivenTimerAndReturnItAsANewArray()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -282,7 +282,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function currents_method_adds_measure_differences_to_all_existing_timers()
+  public function testCurrentsMethodAddsMeasureDifferencesToAllExistingTimers()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -333,7 +333,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function result_method_returns_statistics_for_the_given_timer()
+  public function testResultMethodReturnsStatisticsForTheGivenTimer()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -385,7 +385,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function result_method_returns_statistics_for_every_existing_timer()
+  public function testResultMethodReturnsStatisticsForEveryExistingTimer()
   {
     $this->setNonPublicPropertyValue('_measures', [
       'default' => [
@@ -431,7 +431,7 @@ class TimerTest extends TestCase
   }
 
   /** @test */
-  public function remove_method_removes_the_given_timer()
+  public function testRemoveMethodRemovesTheGivenTimer()
   {
     $this->setNonPublicPropertyValue('_measures', $measures = [
       'default' => [

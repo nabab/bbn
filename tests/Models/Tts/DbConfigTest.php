@@ -18,7 +18,7 @@ if (!class_exists('bbn\X')) {
   eval('
     namespace bbn;
     class X {
-      public static function _(...$args): string {
+      public static function test(...$args): string {
         return vsprintf(array_shift($args), $args);
       }
       public static function filter(array $arr, callable $fn): array {

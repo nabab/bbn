@@ -139,7 +139,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_the_given_db_is_not_a_file_and_db_dir_exists()
+  public function testConstructorTestWhenTheGivenDbIsNotAFileAndDbDirExists()
   {
     $this->createDir($this->db_dir);
 
@@ -169,7 +169,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_the_given_db_is_a_file()
+  public function testConstructorTestWhenTheGivenDbIsAFile()
   {
     $this->createFile('db_test.sqlite', '', $this->db_dir);
 
@@ -198,7 +198,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_the_given_db_is_not_a_file_and_db_dir_does_not_exist()
+  public function testConstructorTestWhenTheGivenDbIsNotAFileAndDbDirDoesNotExist()
   {
     $this->createDir('db2');
 
@@ -227,7 +227,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_when_cannot_locate_db_file()
+  public function testConstructorThrowsAnExceptionWhenCannotLocateDbFile()
   {
     $this->expectException(\Exception::class);
 
@@ -237,7 +237,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function postCreation_method_enables_foreign_keys_when_the_object_is_created()
+  public function testPostcreationMethodEnablesForeignKeysWhenTheObjectIsCreated()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -252,7 +252,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function change_method_changes_the_current_database_to_the_given_one()
+  public function testChangeMethodChangesTheCurrentDatabaseToTheGivenOne()
   {
     $this->createFile('new_db.sqlite', '', $this->db_dir);
     $this->createFile('new_db2.sqlite', '', $this->db_dir);
@@ -288,7 +288,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function change_method_returns_false_when_the_given_db_is_the_same_as_the_current_one()
+  public function testChangeMethodReturnsFalseWhenTheGivenDbIsTheSameAsTheCurrentOne()
   {
     $result = $this->sqlite->change('main');
 
@@ -301,7 +301,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function change_method_returns_false_when_the_given_db_file_does_not_exist()
+  public function testChangeMethodReturnsFalseWhenTheGivenDbFileDoesNotExist()
   {
     $result = $this->sqlite->change('db_testing');
 
@@ -314,7 +314,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function change_method_returns_false_when_the_given_db_name_has_quotes()
+  public function testChangeMethodReturnsFalseWhenTheGivenDbNameHasQuotes()
   {
     $this->createFile('"new_db".sqlite', '', $this->db_dir);
 
@@ -329,7 +329,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function escape_method_returns_escaped_database_expressions()
+  public function testEscapeMethodReturnsEscapedDatabaseExpressions()
   {
     $this->assertSame(
       '"users"',
@@ -343,7 +343,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function escape_method_throws_an_exception_when_the_given_name_is_not_valid()
+  public function testEscapeMethodThrowsAnExceptionWhenTheGivenNameIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -351,7 +351,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function tableFullName_method_returns_table_full_name()
+  public function testTablefullnameMethodReturnsTableFullName()
   {
     $this->assertSame(
       'users',
@@ -377,7 +377,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function tableFullName_returns_null_when_the_given_name_is_not_valid()
+  public function testTablefullnameReturnsNullWhenTheGivenNameIsNotValid()
   {
     $this->assertNull(
       $this->sqlite->tableFullName('users**')
@@ -393,7 +393,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function tableSimpleName_method_returns_table_simple_name()
+  public function testTablesimplenameMethodReturnsTableSimpleName()
   {
     $this->assertSame(
       'users',
@@ -417,7 +417,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function colFullName_method_returns_column_full_name()
+  public function testColfullnameMethodReturnsColumnFullName()
   {
     $this->assertSame(
       'users.email',
@@ -445,7 +445,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function colSimpleName_method_returns_column_simple_name()
+  public function testColsimplenameMethodReturnsColumnSimpleName()
   {
     $this->assertSame(
       'email',
@@ -464,7 +464,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function isTableFullName_method_checks_whether_the_given_table_name_is_full_name()
+  public function testIstablefullnameMethodChecksWhetherTheGivenTableNameIsFullName()
   {
     $this->assertTrue(
       $this->sqlite->isTableFullName('db.users')
@@ -476,7 +476,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function isColFullName_method_checks_whether_the_given_column_name_is_full_name()
+  public function testIscolfullnameMethodChecksWhetherTheGivenColumnNameIsFullName()
   {
     $this->assertTrue(
       $this->sqlite->isColFullName('users.email')
@@ -488,7 +488,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function disableKeys_method_disables_foreign_keys_check()
+  public function testDisablekeysMethodDisablesForeignKeysCheck()
   {
     $this->sqlite->disableKeys();
 
@@ -500,7 +500,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function enableKeys_method_enables_foreign_keys_check()
+  public function testEnablekeysMethodEnablesForeignKeysCheck()
   {
     $this->sqlite->enableKeys();
 
@@ -512,7 +512,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getDatabases_method_returns_databases_as_an_array()
+  public function testGetdatabasesMethodReturnsDatabasesAsAnArray()
   {
     $this->assertSame(
       ['testing'],
@@ -532,7 +532,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getDatabases_method_returns_null_when_no_current_db()
+  public function testGetdatabasesMethodReturnsNullWhenNoCurrentDb()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -540,7 +540,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getDatabases_method_returns_null_when_there_is_an_error()
+  public function testGetdatabasesMethodReturnsNullWhenThereIsAnError()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
 
@@ -548,7 +548,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getTables_method_returns_tables_of_database_as_an_array()
+  public function testGettablesMethodReturnsTablesOfDatabaseAsAnArray()
   {
     $this->createTable('users', function () {
       return 'id INT(11) PRIMARY KEY';
@@ -587,7 +587,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getTables_method_returns_null_when_no_current_connection()
+  public function testGettablesMethodReturnsNullWhenNoCurrentConnection()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -597,7 +597,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getTables_method_returns_null_when_there_is_an_error_in_the_current_connection()
+  public function testGettablesMethodReturnsNullWhenThereIsAnErrorInTheCurrentConnection()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
 
@@ -607,7 +607,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_the_columns_configuration_for_the_given_table()
+  public function testGetcolumnsMethodReturnsTheColumnsConfigurationForTheGivenTable()
   {
     $this->createTable('users', function () {
       return "id UNSIGNED BIGINT PRIMARY KEY,
@@ -705,7 +705,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_the_columns_configuration_for_the_given_table_when_there_is_an_auto_increment_column()
+  public function testGetcolumnsMethodReturnsTheColumnsConfigurationForTheGivenTableWhenThereIsAnAutoIncrementColumn()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY,
@@ -743,7 +743,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_null_when_the_current_connection_is_null()
+  public function testGetcolumnsMethodReturnsNullWhenTheCurrentConnectionIsNull()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -753,7 +753,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_null_when_there_is_an_error_in_the_current_connection()
+  public function testGetcolumnsMethodReturnsNullWhenThereIsAnErrorInTheCurrentConnection()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
 
@@ -763,7 +763,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_empty_array_if_table_does_not_exist()
+  public function testGetcolumnsMethodReturnsEmptyArrayIfTableDoesNotExist()
   {
     $this->assertEmpty(
       $this->sqlite->getColumns('users')
@@ -771,7 +771,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_empty_array_when_the_given_table_name_is_not_valid()
+  public function testGetcolumnsMethodReturnsEmptyArrayWhenTheGivenTableNameIsNotValid()
   {
     $this->assertEmpty(
       $this->sqlite->getColumns('users**')
@@ -779,7 +779,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_the_keys_of_the_given_table()
+  public function testGetkeysMethodReturnsTheKeysOfTheGivenTable()
   {
     $this->createTable('roles', function () {
       return 'id BLOB(32) PRIMARY KEY,
@@ -871,7 +871,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_the_keys_of_the_given_table_constraints_exist_but_no_indexes()
+  public function testGetkeysMethodReturnsTheKeysOfTheGivenTableConstraintsExistButNoIndexes()
   {
     $this->createTable('roles', function () {
       return 'id BLOB(32) PRIMARY KEY,
@@ -914,7 +914,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_the_keys_of_the_given_table_when_indexes_exist_but_no_constraints()
+  public function testGetkeysMethodReturnsTheKeysOfTheGivenTableWhenIndexesExistButNoConstraints()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY,
@@ -963,7 +963,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_null_when_current_connection_is_null()
+  public function testGetkeysMethodReturnsNullWhenCurrentConnectionIsNull()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -973,7 +973,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_null_when_there_is_an_error_in_the_current_conection()
+  public function testGetkeysMethodReturnsNullWhenThereIsAnErrorInTheCurrentConection()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
 
@@ -983,7 +983,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_empty_array_when_the_given_table_name_is_not_valid()
+  public function testGetkeysMethodReturnsEmptyArrayWhenTheGivenTableNameIsNotValid()
   {
     $this->assertEmpty(
       $this->sqlite->getKeys('users***')
@@ -991,7 +991,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_empty_results_when_the_given_table_does_not_exist()
+  public function testGetkeysMethodReturnsEmptyResultsWhenTheGivenTableDoesNotExist()
   {
     $this->assertSame(
       ['keys' => [], 'cols' => []],
@@ -1000,7 +1000,7 @@ class SqliteTest extends TestCase
   }
 
   /** @test */
-  public function getConditions_method_returns_a_string_with_conditions_for_the_where_or_on_or_having_clauses()
+  public function testGetconditionsMethodReturnsAStringWithConditionsForTheWhereOrOnOrHavingClauses()
   {
     $conditions = [
       'conditions' => [
@@ -1068,7 +1068,7 @@ RESULT;
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_from_the_given_arguments()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementFromTheGivenArguments()
   {
     $cfg = [
       'tables' => [
@@ -1105,7 +1105,7 @@ FROM "users", "roles" AS "r"
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACount()
   {
     $cfg = [
       'tables' => ['users' => 'users'],
@@ -1126,7 +1126,7 @@ FROM "users"
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count_and_group_by()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACountAndGroupBy()
   {
     $cfg = [
       'tables' => ['users' => 'users', 'roles' => 'roles'],
@@ -1152,7 +1152,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getSelect_method_generates_a_string_with_select_statement_when_there_is_a_count_and_group_by_and_having()
+  public function testGetselectMethodGeneratesAStringWithSelectStatementWhenThereIsACountAndGroupByAndHaving()
   {
     $cfg = [
       'tables' => ['users' => 'users', 'roles' => 'roles'],
@@ -1183,7 +1183,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getSelect_method_sets_an_error_when_available_fields_missing_a_field()
+  public function testGetselectMethodSetsAnErrorWhenAvailableFieldsMissingAField()
   {
     $this->expectException(\Exception::class);
     $this->sqlite->setErrorMode(Errors::E_DIE);
@@ -1200,7 +1200,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getInsert_method_generates_a_string_for_insert_statement_from_the_given_arguments()
+  public function testGetinsertMethodGeneratesAStringForInsertStatementFromTheGivenArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1241,7 +1241,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getInsert_method_generates_a_string_for_insert_statement_from_the_given_arguments_and_ignore_exists()
+  public function testGetinsertMethodGeneratesAStringForInsertStatementFromTheGivenArgumentsAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1283,7 +1283,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getInsert_method_returns_an_empty_string_when_tables_config_has_more_than_one_table()
+  public function testGetinsertMethodReturnsAnEmptyStringWhenTablesConfigHasMoreThanOneTable()
   {
     $cfg = [
       'tables' => ['users', 'roles'],
@@ -1319,7 +1319,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getInsert_method_sets_an_error_when_a_field_does_not_exist_in_available_fields()
+  public function testGetinsertMethodSetsAnErrorWhenAFieldDoesNotExistInAvailableFields()
   {
     $this->sqlite->setErrorMode(Errors::E_DIE);
 
@@ -1354,7 +1354,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getInsert_method_sets_an_error_when_available_table_does_not_exist_in_models()
+  public function testGetinsertMethodSetsAnErrorWhenAvailableTableDoesNotExistInModels()
   {
     $this->sqlite->setErrorMode(Errors::E_DIE);
 
@@ -1376,7 +1376,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getUpdate_method_returns_string_for_update_statement_from_the_give_arguments()
+  public function testGetupdateMethodReturnsStringForUpdateStatementFromTheGiveArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1416,7 +1416,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getUpdate_method_returns_string_for_update_statement_from_the_give_arguments_and_ignore_exists()
+  public function testGetupdateMethodReturnsStringForUpdateStatementFromTheGiveArgumentsAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1457,7 +1457,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getUpdate_method_returns_an_empty_string_when_tables_config_has_more_than_one_table()
+  public function testGetupdateMethodReturnsAnEmptyStringWhenTablesConfigHasMoreThanOneTable()
   {
     $cfg = [
       'tables' => ['users', 'roles'],
@@ -1493,7 +1493,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getUpdate_method_sets_an_error_when_a_field_does_not_exist_in_available_fields()
+  public function testGetupdateMethodSetsAnErrorWhenAFieldDoesNotExistInAvailableFields()
   {
     $this->sqlite->setErrorMode(Errors::E_DIE);
 
@@ -1528,7 +1528,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getUpdate_method_sets_an_error_when_available_table_does_not_exist_in_models()
+  public function testGetupdateMethodSetsAnErrorWhenAvailableTableDoesNotExistInModels()
   {
     $this->sqlite->setErrorMode(Errors::E_DIE);
 
@@ -1550,7 +1550,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement()
+  public function testGetdeleteMethodReturnsStringForDeleteStatement()
   {
     $cfg = [
       'tables' => ['users']
@@ -1564,7 +1564,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement_and_ignore_exists()
+  public function testGetdeleteMethodReturnsStringForDeleteStatementAndIgnoreExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1580,7 +1580,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getDelete_method_returns_string_for_delete_statement_and_join_exists()
+  public function testGetdeleteMethodReturnsStringForDeleteStatementAndJoinExists()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1595,7 +1595,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getDelete_method_returns_empty_string_when_tables_provided_are_more_than_one()
+  public function testGetdeleteMethodReturnsEmptyStringWhenTablesProvidedAreMoreThanOne()
   {
     $cfg = [
       'tables' => ['users', 'roles']
@@ -1605,7 +1605,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getJoin_method_returns_string_for_the_join_clause_in_the_query()
+  public function testGetjoinMethodReturnsStringForTheJoinClauseInTheQuery()
   {
     $cfg = [
       'join' => [
@@ -1645,7 +1645,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getJoin_method_returns_string_for_the_join_clause_in_the_query_and_type_and_alias_exists()
+  public function testGetjoinMethodReturnsStringForTheJoinClauseInTheQueryAndTypeAndAliasExists()
   {
     $cfg = [
       'join' => [
@@ -1673,7 +1673,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getJoin_method_returns_empty_string_when_configurations_are_missing()
+  public function testGetjoinMethodReturnsEmptyStringWhenConfigurationsAreMissing()
   {
     $this->assertSame('', $this->sqlite->getJoin([]));
 
@@ -1730,7 +1730,7 @@ FROM "users", "roles"
   }
 
   /** @test */
-  public function getWhere_method_returns_a_string_with_the_where_part_of_the_query()
+  public function testGetwhereMethodReturnsAStringWithTheWherePartOfTheQuery()
   {
     $cfg = [
       'filters' => [
@@ -1754,7 +1754,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getWhere_method_returns_empty_string_when_some_of_configurations_are_missing()
+  public function testGetwhereMethodReturnsEmptyStringWhenSomeOfConfigurationsAreMissing()
   {
     $this->assertSame('', $this->sqlite->getWhere([]));
 
@@ -1783,7 +1783,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_method_returns_a_string_with_group_by_clause_of_the_query()
+  public function testGetgroupbyMethodReturnsAStringWithGroupByClauseOfTheQuery()
   {
     $cfg = [
       'group_by' => [
@@ -1802,7 +1802,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_returns_empty_string_when_configurations_are_missing()
+  public function testGetgroupbyReturnsEmptyStringWhenConfigurationsAreMissing()
   {
     $this->assertSame('', $this->sqlite->getGroupBy(['group' => ['id']]));
     $this->assertSame('', $this->sqlite->getGroupBy([
@@ -1818,7 +1818,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getGroupBy_method_sets_an_error_when_available_fields_config_missing_one_of_the_fields()
+  public function testGetgroupbyMethodSetsAnErrorWhenAvailableFieldsConfigMissingOneOfTheFields()
   {
     $this->sqlite->setErrorMode(Errors::E_DIE);
 
@@ -1833,7 +1833,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_a_string_for_the_having_clause_in_a_query()
+  public function testGethavingMethodReturnsAStringForTheHavingClauseInAQuery()
   {
     $cfg = [
       'group_by' => ['id'],
@@ -1855,7 +1855,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_a_string_for_the_having_clause_in_a_query_and_count_exists()
+  public function testGethavingMethodReturnsAStringForTheHavingClauseInAQueryAndCountExists()
   {
     $cfg = [
       'group_by' => ['id'],
@@ -1878,7 +1878,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getHaving_method_returns_empty_string_when_configuration_missing_some_items()
+  public function testGethavingMethodReturnsEmptyStringWhenConfigurationMissingSomeItems()
   {
     $this->assertSame('', $this->sqlite->getHaving([]));
     $this->assertSame('', $this->sqlite->getHaving([
@@ -1917,7 +1917,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getOrder_method_returns_a_string_for_the_order_clause_in_a_query()
+  public function testGetorderMethodReturnsAStringForTheOrderClauseInAQuery()
   {
     $cfg = [
       'order' => [
@@ -1949,7 +1949,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getOrder_method_returns_empty_string_when_configurations_missing_some_items()
+  public function testGetorderMethodReturnsEmptyStringWhenConfigurationsMissingSomeItems()
   {
     $this->assertSame('', $this->sqlite->getOrder([]));
     $this->assertSame('', $this->sqlite->getOrder([
@@ -1963,7 +1963,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getLimit_method_returns_a_string_wit_the_limit_clause_in_a_query()
+  public function testGetlimitMethodReturnsAStringWitTheLimitClauseInAQuery()
   {
     $result   = $this->sqlite->getLimit(['limit' => 2]);
     $expected = 'LIMIT 0, 2';
@@ -1977,19 +1977,19 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getLimit_method_returns_empty_string_when_configurations_missing_the_limit_param()
+  public function testGetlimitMethodReturnsEmptyStringWhenConfigurationsMissingTheLimitParam()
   {
     $this->assertSame('', $this->sqlite->getLimit([]));
   }
 
   /** @test */
-  public function getLimit_method_returns_empty_string_when_the_provided_limit_is_not_an_integer()
+  public function testGetlimitMethodReturnsEmptyStringWhenTheProvidedLimitIsNotAnInteger()
   {
     $this->assertSame('', $this->sqlite->getLimit(['limit' => 'foo']));
   }
 
   /** @test */
-  public function getRawCreate_method_returns_a_string_with_create_table_statement_by_querying_database_by_table_name()
+  public function testGetrawcreateMethodReturnsAStringWithCreateTableStatementByQueryingDatabaseByTableName()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY AUTOINCREMENT';
@@ -2004,7 +2004,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getRawCreate_method_returns_empty_string_if_the_given_table_name_is_not_valid()
+  public function testGetrawcreateMethodReturnsEmptyStringIfTheGivenTableNameIsNotValid()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY AUTOINCREMENT';
@@ -2014,7 +2014,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getRawCreate_method_returns_empty_string_if_raw_query_failed()
+  public function testGetrawcreateMethodReturnsEmptyStringIfRawQueryFailed()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -2031,7 +2031,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getCreateTable_method_returns_a_string_with_create_table_statement()
+  public function testGetcreatetableMethodReturnsAStringWithCreateTableStatement()
   {
     $cfg = [
       'fields' => [
@@ -2102,7 +2102,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getCreateTable_method_returns_a_string_with_create_table_statement_when_model_is_not_provided()
+  public function testGetcreatetableMethodReturnsAStringWithCreateTableStatementWhenModelIsNotProvided()
   {
     $query = '
   CREATE TABLE "users" (
@@ -2125,7 +2125,7 @@ AND roles.email LIKE ?";
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_string_with_create_keys_statement()
+  public function testGetcreatekeysMethodReturnsStringWithCreateKeysStatement()
   {
     $cfg = [
       'keys' => [
@@ -2162,7 +2162,7 @@ CREATE INDEX \'username_key\' ON "users" ("username");';
    * @test
    * @depends getCreateKeys_method_returns_string_with_create_keys_statement
    */
-  public function getCreateKeys_method_returns_string_with_create_keys_statement_when_model_is_null($query)
+  public function testGetcreatekeysMethodReturnsStringWithCreateKeysStatementWhenModelIsNull($query)
   {
     $this->clearCache();
 
@@ -2199,7 +2199,7 @@ CREATE UNIQUE INDEX \'id_unique\' ON "users" ("id");';
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_empty_string_when_configurations_missing_items()
+  public function testGetcreatekeysMethodReturnsEmptyStringWhenConfigurationsMissingItems()
   {
     $this->assertSame('', $this->sqlite->getCreateKeys('users', [
       'fields' => [
@@ -2209,7 +2209,7 @@ CREATE UNIQUE INDEX \'id_unique\' ON "users" ("id");';
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_empty_string_when_model_cannot_be_retrieved_from_database()
+  public function testGetcreatekeysMethodReturnsEmptyStringWhenModelCannotBeRetrievedFromDatabase()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -2222,7 +2222,7 @@ CREATE UNIQUE INDEX \'id_unique\' ON "users" ("id");';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_table_statement_considering_fields_keys()
+  public function testGetcreateMethodReturnsAStringWithCreateTableStatementConsideringFieldsKeys()
   {
     $cfg = [
       'fields' => [
@@ -2269,7 +2269,7 @@ CREATE INDEX \'key\' ON "users" ("username");';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_statement_as_is_from_getCreateTable_when_keys_index_does_not_exist()
+  public function testGetcreateMethodReturnsAStringWithCreateStatementAsIsFromGetcreatetableWhenKeysIndexDoesNotExist()
   {
     $cfg = [
       'fields' => [
@@ -2289,7 +2289,7 @@ CREATE INDEX \'key\' ON "users" ("username");';
   }
 
   /** @test */
-  public function getCreate_method_returns_empty_string_when_getCreateTable_returns_empty_string()
+  public function testGetcreateMethodReturnsEmptyStringWhenGetcreatetableReturnsEmptyString()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -2302,7 +2302,7 @@ CREATE INDEX \'key\' ON "users" ("username");';
   }
 
   /** @test */
-  public function getCreate_method_returns_a_string_with_create_table_statement_from_table_structure_in_db()
+  public function testGetcreateMethodReturnsAStringWithCreateTableStatementFromTableStructureInDb()
   {
     $this->setCacheExpectations();
 
@@ -2328,7 +2328,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function createIndex_method_creates_index_for_the_givens_table_and_columns()
+  public function testCreateindexMethodCreatesIndexForTheGivensTableAndColumns()
   {
     $this->createTable('users', function () {
       return "`email` varchar(255) NOT NULL";
@@ -2358,7 +2358,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function createIndex_method_sets_an_error_when_the_given_column_name_is_not_valid()
+  public function testCreateindexMethodSetsAnErrorWhenTheGivenColumnNameIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -2368,7 +2368,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function deleteIndex_method_deletes_the_given_index()
+  public function testDeleteindexMethodDeletesTheGivenIndex()
   {
     $this->createTable('users', function () {
       return "`email` varchar(255) NOT NULL";
@@ -2386,7 +2386,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function deleteIndex_method_returns_false_when_the_given_key_is_not_a_valid_name()
+  public function testDeleteindexMethodReturnsFalseWhenTheGivenKeyIsNotAValidName()
   {
     $this->assertFalse(
       $this->sqlite->deleteIndex('users', 'key***')
@@ -2394,7 +2394,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function createDatabase_method_creates_the_given_database()
+  public function testCreatedatabaseMethodCreatesTheGivenDatabase()
   {
     $result = $this->sqlite->createDatabase('test_db');
 
@@ -2408,7 +2408,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function createDatabase_method_returns_false_when_the_given_database_name_is_not_valid()
+  public function testCreatedatabaseMethodReturnsFalseWhenTheGivenDatabaseNameIsNotValid()
   {
     $this->assertFalse(
       $this->sqlite->createDatabase('test_db/')
@@ -2420,7 +2420,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function dropDatabase_method_drops_the_given_database()
+  public function testDropdatabaseMethodDropsTheGivenDatabase()
   {
     $this->createFile('db_testing.sqlite', '', 'db');
     $result = $this->sqlite->dropDatabase('db_testing');
@@ -2434,7 +2434,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function dropDatabase_method_returns_false_when_the_given_database_name_is_not_valid()
+  public function testDropdatabaseMethodReturnsFalseWhenTheGivenDatabaseNameIsNotValid()
   {
     $this->assertFalse(
       $this->sqlite->dropDatabase('db_testing/')
@@ -2446,7 +2446,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function dbSize_method_returns_db_file_size()
+  public function testDbsizeMethodReturnsDbFileSize()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL';
@@ -2470,7 +2470,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function createTable_method_returns_a_string_of_create_table_statement_from_given_arguments()
+  public function testCreatetableMethodReturnsAStringOfCreateTableStatementFromGivenArguments()
   {
     $columns = [
       'email' => [
@@ -2509,7 +2509,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getCreateConstraints_method_returns_a_string_of_create_constraints_statement()
+  public function testGetcreateconstraintsMethodReturnsAStringOfCreateConstraintsStatement()
   {
     $model = [[
       'constraint' => 'user_role',
@@ -2548,7 +2548,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getQueryValues_method_returns_query_values()
+  public function testGetqueryvaluesMethodReturnsQueryValues()
   {
     $cfg = [
       'values' => [
@@ -2611,14 +2611,14 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getQueryValues_method_returns_empty_array_when_the_given_configuration_has_empty_values_key()
+  public function testGetqueryvaluesMethodReturnsEmptyArrayWhenTheGivenConfigurationHasEmptyValuesKey()
   {
     $this->assertSame([], $this->sqlite->getQueryValues([]));
     $this->assertSame([], $this->sqlite->getQueryValues(['values' => []]));
   }
 
   /** @test */
-  public function getFieldsList_method_returns_fields_list_for_the_given_tables()
+  public function testGetfieldslistMethodReturnsFieldsListForTheGivenTables()
   {
     $this->createTable('users', function () {
       return 'username TEXT, name TEXT';
@@ -2640,7 +2640,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getFieldsList_method_throws_an_exception_when_table_not_found()
+  public function testGetfieldslistMethodThrowsAnExceptionWhenTableNotFound()
   {
     $this->expectException(\Exception::class);
 
@@ -2648,7 +2648,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getPrimary_method_returns_primary_keys_of_the_given_table_as_an_array()
+  public function testGetprimaryMethodReturnsPrimaryKeysOfTheGivenTableAsAnArray()
   {
     $this->createTable('users', function () {
       return 'id BIGINT PRIMARY KEY, username TEXT UNIQUE';
@@ -2670,7 +2670,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getUniquePrimary_method_returns_the_unique_primary_key_of_the_given_table_as_string()
+  public function testGetuniqueprimaryMethodReturnsTheUniquePrimaryKeyOfTheGivenTableAsString()
   {
     $this->createTable('users', function () {
       return 'id BIGINT PRIMARY KEY, username TEXT';
@@ -2691,7 +2691,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getUniqueKeys_method_returns_the_unique_keys_of_the_given_table_as_an_array()
+  public function testGetuniquekeysMethodReturnsTheUniqueKeysOfTheGivenTableAsAnArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(22) NOT NULL, 
@@ -2719,7 +2719,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getCfg_method_returns_the_config()
+  public function testGetcfgMethodReturnsTheConfig()
   {
     $this->assertSame(
       $this->getNonPublicProperty('cfg'),
@@ -2728,7 +2728,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getHost_method_returns_the_host()
+  public function testGethostMethodReturnsTheHost()
   {
     $this->assertSame(
       $this->getNonPublicProperty('host'),
@@ -2737,7 +2737,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getConnectionCode_method_returns_connection_code()
+  public function testGetconnectioncodeMethodReturnsConnectionCode()
   {
     $this->assertSame(
       $this->getNonPublicProperty('connection_code'),
@@ -2746,7 +2746,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function isAggregateFunction_method_returns_true_if_the_given_name_is_aggregate_function()
+  public function testIsaggregatefunctionMethodReturnsTrueIfTheGivenNameIsAggregateFunction()
   {
     $this->assertTrue(Sqlite::isAggregateFunction('count(*)'));
     $this->assertTrue(Sqlite::isAggregateFunction('COUNT(*)'));
@@ -2771,19 +2771,19 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getEngine_method_returns_engines_name()
+  public function testGetengineMethodReturnsEnginesName()
   {
     $this->assertSame('sqlite', $this->sqlite->getEngine());
   }
 
   /** @test */
-  public function getCurrent_method_returns_the_current_database_of_the_current_connection()
+  public function testGetcurrentMethodReturnsTheCurrentDatabaseOfTheCurrentConnection()
   {
     $this->assertSame('main', $this->sqlite->getCurrent());
   }
 
   /** @test */
-  public function rawQuery_method_executes_the_given_query_using_original_pdo_function()
+  public function testRawqueryMethodExecutesTheGivenQueryUsingOriginalPdoFunction()
   {
     $this->createTable('users', function () {
       return 'id BIGINT PRIMARY KEY,
@@ -2799,7 +2799,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function parseQuery_method_parses_an_sql_and_return_an_array()
+  public function testParsequeryMethodParsesAnSqlAndReturnAnArray()
   {
     $result = $this->sqlite->parseQuery(
       "SELECT * FROM users WHERE created_at > now()"
@@ -2817,7 +2817,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function parseQuery_method_returns_null_when_the_given_arg_is_not_a_query()
+  public function testParsequeryMethodReturnsNullWhenTheGivenArgIsNotAQuery()
   {
     $this->assertNull(
       $this->sqlite->parseQuery('foo')
@@ -2825,7 +2825,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
  /** @test */
-  public function arrangeConditions_method_test()
+  public function testArrangeconditionsMethodTest()
   {
     $cfg = [
       'available_fields' => [
@@ -2866,7 +2866,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function removeVirtual_method_test()
+  public function testRemovevirtualMethodTest()
   {
     $cfg = [
       'fields' => [
@@ -2917,7 +2917,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function findReferences_method_returns_an_array_with_foreign_key_references_for_the_given_column()
+  public function testFindreferencesMethodReturnsAnArrayWithForeignKeyReferencesForTheGivenColumn()
   {
     $this->createTable('roles', function () {
       return 'id BIGINT PRIMARY KEY,
@@ -2946,7 +2946,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function findReferences_method_returns_Null_if_the_provided_column_name_does_not_have_table_name()
+  public function testFindreferencesMethodReturnsNullIfTheProvidedColumnNameDoesNotHaveTableName()
   {
     $this->assertNull(
       $this->sqlite->findReferences('role_id')
@@ -2954,7 +2954,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function findRelations_method_returns_an_array_of_a_table_that_has_relations_to_more_than_one_tables()
+  public function testFindrelationsMethodReturnsAnArrayOfATableThatHasRelationsToMoreThanOneTables()
   {
     $this->setCacheExpectations();
 
@@ -2991,7 +2991,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function findRelations_method_returns_null_when_the_given_name_does_not_has_table_name()
+  public function testFindrelationsMethodReturnsNullWhenTheGivenNameDoesNotHasTableName()
   {
     $this->assertNull(
       $this->sqlite->findRelations('id')
@@ -2999,7 +2999,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function add_query_methods_removes_from_the_beginning_of_queries_list_if_max_queries_numbers_exceeded()
+  public function testAddQueryMethodsRemovesFromTheBeginningOfQueriesListIfMaxQueriesNumbersExceeded()
   {
     $method = $this->getNonPublicMethod('_add_query');
 
@@ -3039,7 +3039,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function _remove_query_method_removes_from_the_beginning_of_queries_with_the_given_hash()
+  public function testRemoveQueryMethodRemovesFromTheBeginningOfQueriesWithTheGivenHash()
   {
     $method = $this->getNonPublicMethod('_remove_query');
 
@@ -3059,7 +3059,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function update_query_updates_a_query_in_query_list_by_the_given_hash()
+  public function testUpdateQueryUpdatesAQueryInQueryListByTheGivenHash()
   {
     $this->setNonPublicPropertyValue('list_queries', [
       ['hash' => '1234', 'last' => time()],
@@ -3118,7 +3118,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function update_query_removes_all_hashes_from_list_queries_and_queries_if_expired()
+  public function testUpdateQueryRemovesAllHashesFromListQueriesAndQueriesIfExpired()
   {
     $length_queries = $this->getNonPublicProperty('length_queries') * 2;
 
@@ -3154,7 +3154,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist_in_list_queries()
+  public function testUpdateQueryThrowsAnExceptionWhenTheGivenHashDoesNotExistInListQueries()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Impossible to find the corresponding hash');
@@ -3175,7 +3175,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist()
+  public function testUpdateQueryThrowsAnExceptionWhenTheGivenHashDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Impossible to find the query corresponding to this hash');
@@ -3192,7 +3192,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsTableStructureFromDatabaseWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->createTable('users', function () {
       return 'id BIGINT NOT NULL PRIMARY KEY,
@@ -3267,7 +3267,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_all_tables_names_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsAllTablesNamesFromDatabaseWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->createTable('users', function () {
       return 'id BIGINT PRIMARY KEY,
@@ -3291,7 +3291,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_all_databases_names_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  public function testGetCacheMethodReturnsAllDatabasesNamesWhenCacheDoesNotExistAndSavesItInCacheProperty()
   {
     $this->setCacheExpectations();
 
@@ -3306,7 +3306,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_cache_property_when_exists()
+  public function testGetCacheMethodReturnsTableStructureFromCachePropertyWhenExists()
   {
     $this->setNonPublicPropertyValue('cache', [
       'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/users'
@@ -3324,7 +3324,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_cache_class_when_exists_and_does_not_exist_in_cache_property()
+  public function testGetCacheMethodReturnsTableStructureFromCacheClassWhenExistsAndDoesNotExistInCacheProperty()
   {
     $cache_name = $this->getNonPublicMethod('_db_cache_name')
       ->invoke($this->sqlite, 'users', 'columns');
@@ -3349,7 +3349,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_returns_table_structure_from_database_when_cache_exists_but_force_is_true()
+  public function testGetCacheMethodReturnsTableStructureFromDatabaseWhenCacheExistsButForceIsTrue()
   {
     $this->setCacheExpectations();
 
@@ -3371,7 +3371,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_throws_returns_empty_results_when_it_fails_to_retrieve_table_structure()
+  public function testGetCacheMethodThrowsReturnsEmptyResultsWhenItFailsToRetrieveTableStructure()
   {
     $this->setCacheExpectations();
 
@@ -3385,7 +3385,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_tables_names()
+  public function testGetCacheMethodThrowsAnExceptionWhenItFailsToRetrieveTablesNames()
   {
     $this->expectException(\Exception::class);
 
@@ -3398,7 +3398,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_databases_names()
+  public function testGetCacheMethodThrowsAnExceptionWhenItFailsToRetrieveDatabasesNames()
   {
     $this->expectException(\Exception::class);
 
@@ -3411,7 +3411,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function db_cache_name_returns_cache_name_of_database_structure()
+  public function testDbCacheNameReturnsCacheNameOfDatabaseStructure()
   {
     $method = $this->getNonPublicMethod('_db_cache_name');
 
@@ -3437,7 +3437,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function modelize_method_returns_table_structure_as_an_indexed_array_for_the_given_table_name()
+  public function testModelizeMethodReturnsTableStructureAsAnIndexedArrayForTheGivenTableName()
   {
     $this->setCacheExpectations();
 
@@ -3612,7 +3612,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function modelize_method_does_not_get_from_cache_if_the_given_force_parameter_is_true()
+  public function testModelizeMethodDoesNotGetFromCacheIfTheGivenForceParameterIsTrue()
   {
     $this->createTable('users', function () {
       return 'id INT(11)';
@@ -3652,7 +3652,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function enableTrigger_method_enables_trigger_function()
+  public function testEnabletriggerMethodEnablesTriggerFunction()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -3666,7 +3666,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function disableTrigger_method_disables_trigger_functions()
+  public function testDisabletriggerMethodDisablesTriggerFunctions()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', false);
 
@@ -3680,7 +3680,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function isTriggerEnabled_method_checks_if_trigger_function_is_enabled()
+  public function testIstriggerenabledMethodChecksIfTriggerFunctionIsEnabled()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', false);
 
@@ -3690,7 +3690,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function isTriggerDisabled_method_checks_if_trigger_functions_is_disabled()
+  public function testIstriggerdisabledMethodChecksIfTriggerFunctionsIsDisabled()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -3700,7 +3700,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function setTrigger_method_register_a_callback_to_be_applied_every_time_the_methods_kind_are_used()
+  public function testSettriggerMethodRegisterACallbackToBeAppliedEveryTimeTheMethodsKindAreUsed()
   {
     $default_triggers = $this->getNonPublicProperty('_triggers');
 
@@ -3839,7 +3839,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function getTriggers_method_returns_the_current_triggers()
+  public function testGettriggersMethodReturnsTheCurrentTriggers()
   {
     $this->assertSame(
       $this->getNonPublicProperty('_triggers'),
@@ -3848,7 +3848,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function add_kind_method_adds_the_given_type_to_the_given_args()
+  public function testAddKindMethodAddsTheGivenTypeToTheGivenArgs()
   {
     $method = $this->getNonPublicMethod('_add_kind');
 
@@ -3868,7 +3868,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_launches_a_function_before_or_after_if_registered_and_callable()
+  public function testTriggerMethodLaunchesAFunctionBeforeOrAfterIfRegisteredAndCallable()
   {
     $cfg = [
       'tables' => ['users'],
@@ -3902,7 +3902,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_the_callback_return_falsy_result()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfTheCallbackReturnFalsyResult()
   {
     $cfg = [
       'tables' => ['users'],
@@ -3931,7 +3931,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_table_is_not_registered()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfTableIsNotRegistered()
   {
     $cfg = [
       'tables' => ['users'],
@@ -3960,7 +3960,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_the_given_trigger_does_not_exist()
+  public function testTriggerMethodDoesNotLaunchTheFunctionTheGivenTriggerDoesNotExist()
   {
     $cfg = [
       'tables' => ['users'],
@@ -3990,7 +3990,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
 
 
   /** @test */
-  public function trigger_method_does_not_launch_the_function_if_no_table_name_is_given()
+  public function testTriggerMethodDoesNotLaunchTheFunctionIfNoTableNameIsGiven()
   {
     $cfg = [
       'kind'   => 'UPDATE',
@@ -4006,7 +4006,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_returns_the_config_array_as_is_if_triggers_is_disabled_and_moment_is_after()
+  public function testTriggerMethodReturnsTheConfigArrayAsIsIfTriggersIsDisabledAndMomentIsAfter()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -4019,7 +4019,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function trigger_method_returns_the_config_array_adding_trig_and_run_when_triggers_is_disabled_and_moment_is_before()
+  public function testTriggerMethodReturnsTheConfigArrayAddingTrigAndRunWhenTriggersIsDisabledAndMomentIsBefore()
   {
     $this->setNonPublicPropertyValue('_triggers_disabled', true);
 
@@ -4032,7 +4032,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function add_primary_method_adds_a_random_primary_value_when_missing_from_the_given_arguments()
+  public function testAddPrimaryMethodAddsARandomPrimaryValueWhenMissingFromTheGivenArguments()
   {
     $method = $this->getNonPublicMethod('_add_primary');
 
@@ -4087,7 +4087,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function add_primary_method_does_not_adda_a_random_primary_value_if_given_arguments_does_not_match_conditions()
+  public function testAddPrimaryMethodDoesNotAddaARandomPrimaryValueIfGivenArgumentsDoesNotMatchConditions()
   {
     $method = $this->getNonPublicMethod('_add_primary');
 
@@ -4152,7 +4152,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_insert_test()
+  public function testExecMethodInsertTest()
   {
     $this->setCacheExpectations();
 
@@ -4186,7 +4186,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_update_test()
+  public function testExecMethodUpdateTest()
   {
     $this->setCacheExpectations();
 
@@ -4225,7 +4225,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_delete_test()
+  public function testExecMethodDeleteTest()
   {
     $this->setCacheExpectations();
 
@@ -4261,7 +4261,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_throws_an_exception_when_the_given_fields_has_no_values()
+  public function testExecMethodThrowsAnExceptionWhenTheGivenFieldsHasNoValues()
   {
     $this->getActualOutputForAssertion();
     $this->expectException(\Exception::class);
@@ -4286,7 +4286,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_select_test()
+  public function testExecMethodSelectTest()
   {
     $this->setCacheExpectations();
 
@@ -4325,7 +4325,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_test_the_after_trigger_is_running()
+  public function testExecMethodTestTheAfterTriggerIsRunning()
   {
     $this->setCacheExpectations();
 
@@ -4362,7 +4362,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_test_when_trigger_returns_empty_run()
+  public function testExecMethodTestWhenTriggerReturnsEmptyRun()
   {
     $this->setCacheExpectations();
 
@@ -4408,7 +4408,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_test_when_trigger_returns_empty_run_but_force_is_enabled()
+  public function testExecMethodTestWhenTriggerReturnsEmptyRunButForceIsEnabled()
   {
     $this->setCacheExpectations();
 
@@ -4456,7 +4456,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_returns_null_when_sql_has_falsy_value_from_the_returned_config_from_processCfg_method()
+  public function testExecMethodReturnsNullWhenSqlHasFalsyValueFromTheReturnedConfigFromProcesscfgMethod()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -4475,7 +4475,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_returns_null_when_processCfg_method_returns_nul()
+  public function testExecMethodReturnsNullWhenProcesscfgMethodReturnsNul()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -4494,7 +4494,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function exec_method_returns_null_when_check_method_returns_false()
+  public function testExecMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -4509,7 +4509,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_insert_configurations()
+  public function testProcesscfgMethodProcessesTheGivenInsertConfigurations()
   {
     $this->setCacheExpectations();
 
@@ -4543,7 +4543,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_update_configurations()
+  public function testProcesscfgMethodProcessesTheGivenUpdateConfigurations()
   {
     $this->setCacheExpectations();
 
@@ -4610,7 +4610,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_select_configurations()
+  public function testProcesscfgMethodProcessesTheGivenSelectConfigurations()
   {
     $this->setCacheExpectations();
 
@@ -4722,7 +4722,7 @@ LIMIT 2, 25';
   }
 
   /** @test */
-  public function processCfg_method_processes_the_given_aggregate_select_configurations()
+  public function testProcesscfgMethodProcessesTheGivenAggregateSelectConfigurations()
   {
     $this->setCacheExpectations();
 
@@ -4752,7 +4752,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function processCfg_returns_null_when_the_given_configurations_has_same_tables()
+  public function testProcesscfgReturnsNullWhenTheGivenConfigurationsHasSameTables()
   {
     $this->setCacheExpectations();
 
@@ -4767,7 +4767,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function processCfg_returns_null_and_sets_an_error_when_no_hash_found()
+  public function testProcesscfgReturnsNullAndSetsAnErrorWhenNoHashFound()
   {
     $sqlite = \Mockery::mock(Sqlite::class)
       ->shouldAllowMockingProtectedMethods()
@@ -4787,7 +4787,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function processCfg_method_returns_previously_saved_cfg_using_hash()
+  public function testProcesscfgMethodReturnsPreviouslySavedCfgUsingHash()
   {
     $sqlite = \Mockery::mock(Sqlite::class)
       ->shouldAllowMockingProtectedMethods()
@@ -4811,7 +4811,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function processCfg_method_returns_null_when_a_given_field_does_not_exists()
+  public function testProcesscfgMethodReturnsNullWhenAGivenFieldDoesNotExists()
   {
     $this->setCacheExpectations();
 
@@ -4830,7 +4830,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function reprocessCfg_method_test()
+  public function testReprocesscfgMethodTest()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -4869,7 +4869,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_normalizes_arguments_by_making_it_a_uniform_array()
+  public function testTreatArgumentsMethodNormalizesArgumentsByMakingItAUniformArray()
   {
     $cfg = [
       'kind'   => 'SELECT',
@@ -4978,7 +4978,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_sets_default_cfg_when_not_provided()
+  public function testTreatArgumentsMethodSetsDefaultCfgWhenNotProvided()
   {
     $result = $this->getNonPublicMethod('_treat_arguments')
       ->invoke($this->sqlite, ['tables' => ['users']]);
@@ -5018,7 +5018,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_handle_arguments_when_the_given_config_is_a_numeric_array()
+  public function testTreatArgumentsMethodHandleArgumentsWhenTheGivenConfigIsANumericArray()
   {
     $cfg = [
       [[
@@ -5077,7 +5077,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_test_different_conditional_logic()
+  public function testTreatArgumentsMethodTestDifferentConditionalLogic()
   {
     $cfg = [
       'tables' => 'users', // should be converted to array
@@ -5126,7 +5126,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_testing_handling_join_arguments()
+  public function testTreatArgumentsMethodTestingHandlingJoinArguments()
   {
     $cfg = [
       'tables' => ['users'],
@@ -5233,7 +5233,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_testing_having()
+  public function testTreatArgumentsMethodTestingHaving()
   {
     $cfg = [
       'tables' => 'payments',
@@ -5310,7 +5310,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_throws_an_exceptions_if_table_is_not_provided()
+  public function testTreatArgumentsThrowsAnExceptionsIfTableIsNotProvided()
   {
     $this->expectException(\Error::class);
 
@@ -5319,7 +5319,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function treat_arguments_method_returns_the_given_cfg_as_is_if_bbn_db_treated_exists()
+  public function testTreatArgumentsMethodReturnsTheGivenCfgAsIsIfBbnDbTreatedExists()
   {
     $cfg = [
       'bbn_db_treated' => true,
@@ -5334,7 +5334,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function adapt_filters_method_test()
+  public function testAdaptFiltersMethodTest()
   {
     $cfg = [
       'filters' => [
@@ -5405,7 +5405,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function adapt_bit_method_test_when_there_is_an_aggregate_function()
+  public function testAdaptBitMethodTestWhenThereIsAnAggregateFunction()
   {
     $cfg = [
       'fields' => ['sum' => 'SUM(*)', 'max' => 'MAX(*)'],
@@ -5497,7 +5497,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function adapt_bit_method_test_when_there_is_no_an_aggregate_function()
+  public function testAdaptBitMethodTestWhenThereIsNoAnAggregateFunction()
   {
     $cfg = [
       'fields' => ['user_full_name' => 'name'],
@@ -5540,7 +5540,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_the_given_argument_is_an_array_of_array()
+  public function testSetLimit1MethodTestWhenTheGivenArgumentIsAnArrayOfArray()
   {
     $cfg = [[
       'table' => 'users',
@@ -5560,7 +5560,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  public function testSetLimit1MethodTestWhenGivenArgsIsANumericArrayWithOnlyTableName()
   {
     $cfg      = ['users'];
     $expected = [
@@ -5580,7 +5580,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_limit_1_method_test_when_the_given_argument_is_a_numeric_array()
+  public function testSetLimit1MethodTestWhenTheGivenArgumentIsANumericArray()
   {
     $cfg      = [
       'users',
@@ -5608,7 +5608,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_true()
+  public function testAddstatementMethodAddsQueryStatementAndParametersWhenLastEnabledIsTrue()
   {
     $this->assertNull(
       $this->getNonPublicProperty('last_real_query')
@@ -5660,7 +5660,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_false()
+  public function testAddstatementMethodAddsQueryStatementAndParametersWhenLastEnabledIsFalse()
   {
     $this->assertNull(
       $this->getNonPublicProperty('last_real_query')
@@ -5708,7 +5708,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getRealLastParams_method_returns_the_last_real_params()
+  public function testGetreallastparamsMethodReturnsTheLastRealParams()
   {
     $this->setNonPublicPropertyValue('last_real_params', ['foo' => 'bar']);
 
@@ -5719,7 +5719,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function realLast_method_returns_the_real_last_query()
+  public function testReallastMethodReturnsTheRealLastQuery()
   {
     $this->setNonPublicPropertyValue('last_real_query', 'SELECT * FROM users');
 
@@ -5730,7 +5730,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getLastValues_method_returns_the_last_params_values()
+  public function testGetlastvaluesMethodReturnsTheLastParamsValues()
   {
     $this->setNonPublicPropertyValue('last_params', [
       'values' => ['foo' => 'bar']
@@ -5747,7 +5747,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getLastParams_method_returns_the_last_params()
+  public function testGetlastparamsMethodReturnsTheLastParams()
   {
     $this->setNonPublicPropertyValue('last_params', [
       'values' => ['foo' => 'bar']
@@ -5760,7 +5760,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_for_the_given_id()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdForTheGivenId()
   {
     $this->setNonPublicPropertyValue('id_just_inserted', 22);
     $this->setNonPublicPropertyValue('last_insert_id', 22);
@@ -5781,7 +5781,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function setLastInsertId_method_does_not_change_the_value_of_last_inserted_id_if_no_insert_query_performed()
+  public function testSetlastinsertidMethodDoesNotChangeTheValueOfLastInsertedIdIfNoInsertQueryPerformed()
   {
     $this->sqlite->setLastInsertId();
 
@@ -5796,7 +5796,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_last_insert_query()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdFromLastInsertQuery()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY, email VARCHAR(25)';
@@ -5817,7 +5817,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_id_just_inserted_property_when_not_null_ignoring_last_query()
+  public function testSetlastinsertidMethodChangesTheValueOfLastInsertedIdFromIdJustInsertedPropertyWhenNotNullIgnoringLastQuery()
   {
     $this->setNonPublicPropertyValue('id_just_inserted', 333);
 
@@ -5836,7 +5836,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function lastId_method_returns_the_last_inserted_id()
+  public function testLastidMethodReturnsTheLastInsertedId()
   {
     $this->setNonPublicPropertyValue('last_insert_id', 234);
 
@@ -5858,7 +5858,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function last_method_returns_the_last_for_the_current_connection()
+  public function testLastMethodReturnsTheLastForTheCurrentConnection()
   {
     $this->setNonPublicPropertyValue(
       'last_query',
@@ -5872,7 +5872,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function countQueries_method_returns_the_count_of_queries()
+  public function testCountqueriesMethodReturnsTheCountOfQueries()
   {
     $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
 
@@ -5880,7 +5880,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function flush_method_deletes_all_the_recorded_queries_and_returns_their_count()
+  public function testFlushMethodDeletesAllTheRecordedQueriesAndReturnsTheirCount()
   {
     $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
 
@@ -5893,7 +5893,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request()
+  public function testMakehashMethodMakesAHashStringThatWillBeTheIdOfTheRequest()
   {
     $hash_contour    = $this->getNonPublicProperty('hash_contour');
     $expected_string = "{$hash_contour}%s{$hash_contour}";
@@ -5923,7 +5923,7 @@ GROUP BY "id"
    * @test
    * @depends makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request
    */
-  public function setHash_method_makes_and_sets_hash()
+  public function testSethashMethodMakesAndSetsHash()
   {
     $set_hash_method = $this->getNonPublicMethod('setHash');
     $make_hash_method = $this->getNonPublicMethod('makeHash');
@@ -5956,7 +5956,7 @@ GROUP BY "id"
    * @test
    * @depends setHash_method_makes_and_sets_hash
    */
-  public function getHash_method_returns_the_created_hash()
+  public function testGethashMethodReturnsTheCreatedHash()
   {
     $set_hash_method = $this->getNonPublicMethod('setHash');
     $make_hash_method = $this->getNonPublicMethod('makeHash');
@@ -5970,7 +5970,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function startFancyStuff_method_sets_the_query_class_as_pdo_derived_statement_class()
+  public function testStartfancystuffMethodSetsTheQueryClassAsPdoDerivedStatementClass()
   {
     $this->sqlite->startFancyStuff();
 
@@ -5982,7 +5982,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function stopFancyStuff_method_sets_statement_class_to_pdo_statement()
+  public function testStopfancystuffMethodSetsStatementClassToPdoStatement()
   {
     $this->sqlite->stopFancyStuff();
 
@@ -5995,7 +5995,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_start_method_test_when_the_given_argument_is_an_array_of_array()
+  public function testSetStartMethodTestWhenTheGivenArgumentIsAnArrayOfArray()
   {
     $cfg = [[
       'table' => 'users'
@@ -6014,7 +6014,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_start_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  public function testSetStartMethodTestWhenGivenArgsIsANumericArrayWithOnlyTableName()
   {
     $cfg      = ['users'];
     $expected = [
@@ -6034,7 +6034,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_start_method_test_when_the_given_argument_is_a_numeric_array()
+  public function testSetStartMethodTestWhenTheGivenArgumentIsANumericArray()
   {
     $cfg      = [
       'users',
@@ -6062,7 +6062,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function retrieveQuery_method_retrieves_a_query_from_the_given_hash()
+  public function testRetrievequeryMethodRetrievesAQueryFromTheGivenHash()
   {
     $this->setNonPublicPropertyValue('queries', [
       '12345' => ['foo' => 'bar'],
@@ -6075,7 +6075,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function extractFields_method_test()
+  public function testExtractfieldsMethodTest()
   {
     $cfg = [
       'available_fields' => [
@@ -6129,7 +6129,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function filterFilters_method_returns_an_array_of_specific_filters_added_to_the_existing_ones()
+  public function testFilterfiltersMethodReturnsAnArrayOfSpecificFiltersAddedToTheExistingOnes()
   {
     $cfg = [
       'filters' => [
@@ -6187,7 +6187,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getOne_method_executes_the_given_query_and_extracts_the_first_column_result()
+  public function testGetoneMethodExecutesTheGivenQueryAndExtractsTheFirstColumnResult()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY, 
@@ -6206,7 +6206,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getOne_method_returns_false_when_query_returns_false()
+  public function testGetoneMethodReturnsFalseWhenQueryReturnsFalse()
   {
     $this->assertFalse(
       $this->sqlite->getOne('SELECT username FROM users WHERE id = ?', 1)
@@ -6214,7 +6214,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getKeyVal_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  public function testGetkeyvalMethodReturnsAnArrayIndexedWithTheFirstFieldOfTheRequest()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY, 
@@ -6283,7 +6283,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getKeyVal_method_returns_null_when_query_returns_false()
+  public function testGetkeyvalMethodReturnsNullWhenQueryReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -6297,7 +6297,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getColArray_method_returns_an_array_of_the_values_of_single_field_as_result_from_query()
+  public function testGetcolarrayMethodReturnsAnArrayOfTheValuesOfSingleFieldAsResultFromQuery()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY, 
@@ -6340,7 +6340,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function select_method_returns_the_first_row_resulting_from_query_as_an_object()
+  public function testSelectMethodReturnsTheFirstRowResultingFromQueryAsAnObject()
   {
     $this->setCacheExpectations();
 
@@ -6395,7 +6395,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function selectAll_method_returns_table_rows_resulting_from_query_as_an_array_of_objects()
+  public function testSelectallMethodReturnsTableRowsResultingFromQueryAsAnArrayOfObjects()
   {
     $this->setCacheExpectations();
 
@@ -6460,7 +6460,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function selectAll_method_returns_null_when_exec_method_returns_false()
+  public function testSelectallMethodReturnsNullWhenExecMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)
       ->shouldAllowMockingProtectedMethods()
@@ -6476,7 +6476,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function iselect_method_returns_the_first_row_resulting_from_query_as_numeric_array()
+  public function testIselectMethodReturnsTheFirstRowResultingFromQueryAsNumericArray()
   {
     $this->setCacheExpectations();
 
@@ -6522,7 +6522,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function iselectAll_method_returns_all_results_from_query_as_an_array_of_numeric_arrays()
+  public function testIselectallMethodReturnsAllResultsFromQueryAsAnArrayOfNumericArrays()
   {
     $this->setCacheExpectations();
 
@@ -6589,7 +6589,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function iselectAll_method_returns_null_when_exec_function_returns_false()
+  public function testIselectallMethodReturnsNullWhenExecFunctionReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)
       ->shouldAllowMockingProtectedMethods()
@@ -6605,7 +6605,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function rselect_method_returns_the_first_row_resulting_from_the_query_as_indexed_array()
+  public function testRselectMethodReturnsTheFirstRowResultingFromTheQueryAsIndexedArray()
   {
     $this->setCacheExpectations();
 
@@ -6650,7 +6650,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function rselectAll_method_returns_query_results_as_an_array_of_indexed_arrays()
+  public function testRselectallMethodReturnsQueryResultsAsAnArrayOfIndexedArrays()
   {
     $this->setCacheExpectations();
 
@@ -6723,7 +6723,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function selectOne_method_returns_a_single_value_from_the_given_field_name()
+  public function testSelectoneMethodReturnsASingleValueFromTheGivenFieldName()
   {
     $this->setCacheExpectations();
 
@@ -6773,7 +6773,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function count_method_returns_the_number_of_records_in_the_table_for_the_given_arguments()
+  public function testCountMethodReturnsTheNumberOfRecordsInTheTableForTheGivenArguments()
   {
     $this->setCacheExpectations();
 
@@ -6806,7 +6806,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function count_method_returns_null_when_exec_returns_non_object()
+  public function testCountMethodReturnsNullWhenExecReturnsNonObject()
   {
     $sqlite = \Mockery::mock(Sqlite::class)
       ->makePartial()
@@ -6822,7 +6822,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function selectAllByKeys_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  public function testSelectallbykeysMethodReturnsAnArrayIndexedWithTheFirstFieldOfTheRequest()
   {
     $this->setCacheExpectations();
 
@@ -6885,7 +6885,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function selectAllByKeys_method_returns_null_when_no_results_found_and_check_returns_false()
+  public function testSelectallbykeysMethodReturnsNullWhenNoResultsFoundAndCheckReturnsFalse()
   {
     $this->setCacheExpectations();
 
@@ -6901,7 +6901,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function stat_method_returns_an_array_with_the_count_of_values_resulting_from_the_query()
+  public function testStatMethodReturnsAnArrayWithTheCountOfValuesResultingFromTheQuery()
   {
     $this->setCacheExpectations();
 
@@ -6943,7 +6943,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function stat_method_returns_null_when_check_method_returns_null()
+  public function testStatMethodReturnsNullWhenCheckMethodReturnsNull()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -6951,7 +6951,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function countFieldValues_method_returns_count_of_identical_values_in_a_field_as_array()
+  public function testCountfieldvaluesMethodReturnsCountOfIdenticalValuesInAFieldAsArray()
   {
     $this->setCacheExpectations();
 
@@ -7007,7 +7007,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getColumnValues_method_numeric_indexed_array_with_values_of_unique_column()
+  public function testGetcolumnvaluesMethodNumericIndexedArrayWithValuesOfUniqueColumn()
   {
     $this->setCacheExpectations();
 
@@ -7068,7 +7068,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getColumnValues_returns_null_when_check_method_returns_false()
+  public function testGetcolumnvaluesReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -7076,7 +7076,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function insert_method_inserts_values_in_the_given_table_and_returns_affected_rows()
+  public function testInsertMethodInsertsValuesInTheGivenTableAndReturnsAffectedRows()
   {
     $this->setCacheExpectations();
 
@@ -7118,7 +7118,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function insert_method_throws_an_exception_when_table_name_is_empty()
+  public function testInsertMethodThrowsAnExceptionWhenTableNameIsEmpty()
   {
     $this->expectException(\Exception::class);
 
@@ -7126,7 +7126,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function insertUpdate_method_inserts_rows_in_the_given_table_if_not_exists_otherwise_update()
+  public function testInsertupdateMethodInsertsRowsInTheGivenTableIfNotExistsOtherwiseUpdate()
   {
     $this->setCacheExpectations();
 
@@ -7168,7 +7168,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function update_method_updates_rows_in_the_given_table()
+  public function testUpdateMethodUpdatesRowsInTheGivenTable()
   {
     $this->setCacheExpectations();
 
@@ -7221,7 +7221,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function delete_method_deletes_rows_from_the_given_table()
+  public function testDeleteMethodDeletesRowsFromTheGivenTable()
   {
     $this->setCacheExpectations();
 
@@ -7257,7 +7257,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
+  public function testFetchMethodReturnsTheFirstResultOfTheQueryAsIndexedArrayAndFalseIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -7284,7 +7284,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
+  public function testFetchallMethodReturnsAnArrayOfIndexedArraysForAllQueryResultAndEmptyArrayIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -7317,7 +7317,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fetchAll_method_returns_false_when_query_method_returns_false()
+  public function testFetchallMethodReturnsFalseWhenQueryMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7331,7 +7331,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
+  public function testFetchcolumnMethodReturnsASingleColumnFromTheNextRowOfResultSet()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -7363,7 +7363,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
+  public function testFetchobjectMethodReturnsTheFirstResultFromQueryAsObjectAndFalseIfNoResults()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
@@ -7396,7 +7396,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getRows_method_returns_an_array_of_indexed_arrays_for_every_row_as_a_query_result()
+  public function testGetrowsMethodReturnsAnArrayOfIndexedArraysForEveryRowAsAQueryResult()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7418,7 +7418,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getRows_method_returns_null_when_query_method_returns_false()
+  public function testGetrowsMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7430,7 +7430,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getRow_method_returns_the_first_row_resulting_from_a_query_as_array_indexed_with_field_name()
+  public function testGetrowMethodReturnsTheFirstRowResultingFromAQueryAsArrayIndexedWithFieldName()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7450,7 +7450,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getRow_method_returns_null_when_query_method_returns_false()
+  public function testGetrowMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7464,7 +7464,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getIrow_method_returns_the_first_raw_resulting_from_a_query_as_numeric_indexed_array()
+  public function testGetirowMethodReturnsTheFirstRawResultingFromAQueryAsNumericIndexedArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7484,7 +7484,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getIrow_method_returns_null_when_query_method_returns_false()
+  public function testGetirowMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7498,7 +7498,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getIrows_method_returns_all_rows_resulting_from_a_query_as_numeric_indexed_array()
+  public function testGetirowsMethodReturnsAllRowsResultingFromAQueryAsNumericIndexedArray()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7520,7 +7520,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getIrows_method_returns_null_when_query_method_returns_false()
+  public function testGetirowsMethodReturnsNullWhenQueryMethodReturnsFalse()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7534,7 +7534,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getByColumns_method_returns_an_indexed_array_by_the_searched_field()
+  public function testGetbycolumnsMethodReturnsAnIndexedArrayByTheSearchedField()
   {
     $this->createTable('users', function () {
       return 'email VARCHAR(255), username VARCHAR(255), name VARCHAR(255)';
@@ -7564,7 +7564,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getObject_method_returns_the_first_row_resulting_from_a_query_as_object()
+  public function testGetobjectMethodReturnsTheFirstRowResultingFromAQueryAsObject()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7583,7 +7583,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getObjects_method_returns_an_array_of_objects_resulting_from_a_query()
+  public function testGetobjectsMethodReturnsAnArrayOfObjectsResultingFromAQuery()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -7605,7 +7605,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getForeignKeys_method_returns_an_array_of_tables_and_fields_related_to_the_given_foreign_key()
+  public function testGetforeignkeysMethodReturnsAnArrayOfTablesAndFieldsRelatedToTheGivenForeignKey()
   {
     $this->setCacheExpectations();
 
@@ -7639,7 +7639,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function hasIdIncrement_method_returns_true_if_the_given_table_has_auto_increment_fields()
+  public function testHasidincrementMethodReturnsTrueIfTheGivenTableHasAutoIncrementFields()
   {
     $this->setCacheExpectations();
 
@@ -7653,7 +7653,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function hasIdIncrement_method_returns_false_if_the_given_table_has_auto_increment_fields()
+  public function testHasidincrementMethodReturnsFalseIfTheGivenTableHasAutoIncrementFields()
   {
     $this->setCacheExpectations();
 
@@ -7667,7 +7667,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fmodelize_method_returns_fields_structure_for_the_given_table()
+  public function testFmodelizeMethodReturnsFieldsStructureForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY,
@@ -7734,7 +7734,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function fmodelize_method_returns_null_when_modelize_returns_null()
+  public function testFmodelizeMethodReturnsNullWhenModelizeReturnsNull()
   {
     $sqlite = \Mockery::mock(Sqlite::class)->makePartial();
 
@@ -7748,7 +7748,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_is_string()
+  public function testErrorMethodSetsAnErrorAndActsBasedOnTheErrorModeWhenTheGivenErrorIsString()
   {
     $this->assertFalse($this->getNonPublicProperty('_has_error'));
     $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
@@ -7766,7 +7766,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_an_exception()
+  public function testErrorMethodSetsAnErrorAndActsBasedOnTheErrorModeWhenTheGivenErrorAnException()
   {
     $this->assertFalse($this->getNonPublicProperty('_has_error'));
     $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
@@ -7798,7 +7798,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function error_method_should_throw_an_exception_when_mode_is_to_die()
+  public function testErrorMethodShouldThrowAnExceptionWhenModeIsToDie()
   {
     $this->expectException(\Exception::class);
     $this->setNonPublicPropertyValue('on_error', 'die');
@@ -7807,13 +7807,13 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_checks_if_the_database_is_ready_to_process_a_query()
+  public function testCheckMethodChecksIfTheDatabaseIsReadyToProcessAQuery()
   {
     $this->assertTrue($this->sqlite->check());
   }
 
   /** @test */
-  public function check_method_returns_true_if_there_is_an_error_the_error_mode_is_continue()
+  public function testCheckMethodReturnsTrueIfThereIsAnErrorTheErrorModeIsContinue()
   {
     $this->setNonPublicPropertyValue('on_error', 'continue');
     $this->setNonPublicPropertyValue('_has_error', true);
@@ -7823,7 +7823,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_are_error_for_all_connection_and_mode_is_stop_all()
+  public function testCheckMethodReturnsFalseIfThereIsAreErrorForAllConnectionAndModeIsStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error_all', true);
     $this->setNonPublicPropertyValue('on_error', 'stop_all');
@@ -7832,7 +7832,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_returns_true_if_there_is_are_error_for_all_connection_and_mode_is_not_stop_all()
+  public function testCheckMethodReturnsTrueIfThereIsAreErrorForAllConnectionAndModeIsNotStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error_all', true);
     $this->setNonPublicPropertyValue('on_error', 'stop');
@@ -7841,7 +7841,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop()
+  public function testCheckMethodReturnsFalseIfThereIsErrorForTheCurrentConnectionAndModeIsStop()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
     $this->setNonPublicPropertyValue('on_error', 'stop');
@@ -7850,7 +7850,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop_all()
+  public function testCheckMethodReturnsFalseIfThereIsErrorForTheCurrentConnectionAndModeIsStopAll()
   {
     $this->setNonPublicPropertyValue('_has_error', true);
     $this->setNonPublicPropertyValue('on_error', 'stop_all');
@@ -7859,7 +7859,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function check_method_returns_false_when_the_current_connection_is_null()
+  public function testCheckMethodReturnsFalseWhenTheCurrentConnectionIsNull()
   {
     $old_current = $this->getNonPublicProperty('current');
 
@@ -7871,7 +7871,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function setErrorMode_method_sets_the_error_mode()
+  public function testSeterrormodeMethodSetsTheErrorMode()
   {
     $result = $this->sqlite->setErrorMode('stop_all');
 
@@ -7884,7 +7884,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getErrorMode_method_returns_the_current_error_mode()
+  public function testGeterrormodeMethodReturnsTheCurrentErrorMode()
   {
     $this->setNonPublicPropertyValue('on_error', 'stop');
 
@@ -7892,7 +7892,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getLogLine_method_returns_a_string_with_given_text_in_the_middle_of_a_line_of_logs()
+  public function testGetloglineMethodReturnsAStringWithGivenTextInTheMiddleOfALineOfLogs()
   {
     $this->assertSame(
       '-------------------------------------- foo --------------------------------------',
@@ -7906,7 +7906,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getLastError_method_returns_the_last_error()
+  public function testGetlasterrorMethodReturnsTheLastError()
   {
     $this->assertNull($this->sqlite->getLastError());
 
@@ -7916,7 +7916,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function set_has_error_all_sets_errors_on_all_connections_to_true()
+  public function testSetHasErrorAllSetsErrorsOnAllConnectionsToTrue()
   {
     $this->setNonPublicPropertyValue('_has_error_all', false);
 
@@ -7928,7 +7928,7 @@ GROUP BY "id"
 
 
   /** @test */
-  public function query_method_executes_a_statement_and_returns_query_object_for_reading_statements()
+  public function testQueryMethodExecutesAStatementAndReturnsQueryObjectForReadingStatements()
   {
     $this->createTable('users', function () {
       return 'id INTEGER PRIMARY KEY,
@@ -7960,7 +7960,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function query_method_uses_the_saved_query()
+  public function testQueryMethodUsesTheSavedQuery()
   {
     $this->createTable('users', function () {
       return 'name VARCHAR(20), username VARCHAR(20)';
@@ -7999,7 +7999,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function query_method_throws_an_exception_if_the_given_query_is_not_valid()
+  public function testQueryMethodThrowsAnExceptionIfTheGivenQueryIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -8007,7 +8007,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function query_method_sets_an_error_if_the_given_arguments_are_greater_than_query_placeholders()
+  public function testQueryMethodSetsAnErrorIfTheGivenArgumentsAreGreaterThanQueryPlaceholders()
   {
     $this->expectException(\Exception::class);
 
@@ -8017,7 +8017,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function query_method_fills_the_missing_values_with_the_last_given_one_when_number_of_values_are_smaller_than_query_placeholders()
+  public function testQueryMethodFillsTheMissingValuesWithTheLastGivenOneWhenNumberOfValuesAreSmallerThanQueryPlaceholders()
   {
     $this->createTable('users', function() {
       return 'name VARCHAR(255), username VARCHAR(255)';
@@ -8030,7 +8030,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  public function testGetlastcfgMethodReturnsTheLastConfigForTheConnection()
   {
     $this->assertSame(
       $this->getNonPublicProperty('last_cfg'),
@@ -8039,7 +8039,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function renameTable_method_renames_the_given_table_to_the_new_given_name()
+  public function testRenametableMethodRenamesTheGivenTableToTheNewGivenName()
   {
     $this->createTable('users', function () {
       return 'id INT';
@@ -8056,7 +8056,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function renameTable_method_returns_false_when_check_method_returns_false()
+  public function testRenametableMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -8066,7 +8066,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function renameTable_method_returns_false_when_the_given_table_names_are_not_valid()
+  public function testRenametableMethodReturnsFalseWhenTheGivenTableNamesAreNotValid()
   {
     $this->assertFalse(
       $this->sqlite->renameTable('users**', 'users2')
@@ -8082,7 +8082,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function createColumn_method_creates_the_given_column_for_the_given_table()
+  public function testCreatecolumnMethodCreatesTheGivenColumnForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT';
@@ -8161,7 +8161,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function createColumn_method_returns_false_when_the_given_column_is_not_a_valid_name()
+  public function testCreatecolumnMethodReturnsFalseWhenTheGivenColumnIsNotAValidName()
   {
     $this->assertFalse(
       $this->sqlite->createColumn('users', 'username**', [])
@@ -8169,7 +8169,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function dropColumn_method_drops_the_given_column_for_the_given_table()
+  public function testDropcolumnMethodDropsTheGivenColumnForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'id INT, username VARCHAR(20), name VARCHAR(2)';
@@ -8190,7 +8190,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function dropColumn_method_returns_false_when_the_given_column_is_a_not_valid_name()
+  public function testDropcolumnMethodReturnsFalseWhenTheGivenColumnIsANotValidName()
   {
     $this->assertFalse(
       $this->sqlite->dropColumn('users', 'id**')
@@ -8198,7 +8198,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getColumnDefinitionStatement_method_returns_sql_statement_of_column_definition()
+  public function testGetcolumndefinitionstatementMethodReturnsSqlStatementOfColumnDefinition()
   {
     $method = $this->getNonPublicMethod('getColumnDefinitionStatement');
 
@@ -8269,7 +8269,7 @@ GROUP BY "id"
   }
 
   /** @test */
-  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  public function testGetaltertableMethodReturnsSqlStringForAlterStatement()
   {
     $cfg = [
       'fields' => [
@@ -8321,13 +8321,13 @@ SQL;
   }
 
   /** @test */
-  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  public function testGetaltertableMethodReturnsEmptyStringWhenTheGivenTableNameIsNotValid()
   {
     $this->assertSame('', $this->sqlite->getAlterTable('user**', ['fields' => ['a' => 'b']]));
   }
 
   /** @test */
-  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  public function testGetaltertableMethodReturnsEmptyStringWhenCheckMethodReturnsFalse()
   {
     $this->setNonPublicPropertyValue('current', null);
 
@@ -8335,14 +8335,14 @@ SQL;
   }
 
   /** @test */
-  public function getAlterTable_method_throws_an_exception_if_the_fields_property_is_missing()
+  public function testGetaltertableMethodThrowsAnExceptionIfTheFieldsPropertyIsMissing()
   {
     $this->expectException(\Exception::class);
     $this->sqlite->getAlterTable('users', ['a' => 'b']);
   }
 
   /** @test */
-  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  public function testAlterMethodAltersTheGivenCfgForTheGivenTable()
   {
     $this->createTable('users', function () {
       return 'balance int(11) NOT NULL,
@@ -8429,7 +8429,7 @@ SQL;
   }
 
   /** @test */
-  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  public function testGetaltercolumnMethodReturnsSqlStringForAlterColumn()
   {
     $this->assertSame(
       'ALTER TABLE "users"

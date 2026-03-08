@@ -126,7 +126,7 @@ class RunnerTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->init();
 
@@ -172,7 +172,7 @@ class RunnerTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_check_method_returns_false()
+  public function testConstructorTestWhenCheckMethodReturnsFalse()
   {
     $this->cron_mock->shouldReceive('check')
       ->once()
@@ -210,7 +210,7 @@ class RunnerTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_no_type_provided()
+  public function testConstructorTestWhenNoTypeProvided()
   {
     $this->runner = new Runner($this->cron_mock, ['a' => 'b']);
 
@@ -244,7 +244,7 @@ class RunnerTest extends TestCase
   }
 
   /** @test */
-  public function output_method_test_when_log_is_boolean()
+  public function testOutputMethodTestWhenLogIsBoolean()
   {
     $this->init();
 
@@ -258,7 +258,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_test_when_log_is_number()
+  public function testOutputMethodTestWhenLogIsNumber()
   {
     $this->init();
 
@@ -272,7 +272,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_test_when_log_is_string()
+  public function testOutputMethodTestWhenLogIsString()
   {
     $this->init();
 
@@ -286,7 +286,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_test_when_log_is_array()
+  public function testOutputMethodTestWhenLogIsArray()
   {
     $this->init();
 
@@ -304,7 +304,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_test_when_log_is_object()
+  public function testOutputMethodTestWhenLogIsObject()
   {
     $this->init();
 
@@ -322,7 +322,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_test_when_name_is_false()
+  public function testOutputMethodTestWhenNameIsFalse()
   {
     $this->init();
 
@@ -335,7 +335,7 @@ OUTPUT
     $this->runner->output(false);
   }
 
-  public function output_method_test_when_name_is_true()
+  public function testOutputMethodTestWhenNameIsTrue()
   {
     $this->init();
 
@@ -349,7 +349,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_multiple_tests()
+  public function testOutputMethodMultipleTests()
   {
     $this->init();
 
@@ -371,7 +371,7 @@ OUTPUT
   }
 
   /** @test */
-  public function output_method_does_not_produce_output_when_name_is_empty()
+  public function testOutputMethodDoesNotProduceOutputWhenNameIsEmpty()
   {
     $this->expectOutputString('');
 
@@ -380,7 +380,7 @@ OUTPUT
   }
 
   /** @test */
-  public function shutdown_method_test_when_file_exists_and_type_is_cron_and_id_exists()
+  public function testShutdownMethodTestWhenFileExistsAndTypeIsCronAndIdExists()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', 'test');
@@ -408,7 +408,7 @@ OUTPUT
   }
 
   /** @test */
-  public function shutdown_method_test_when_file_exists_and_content_does_not_match_bbn_pid_constant()
+  public function testShutdownMethodTestWhenFileExistsAndContentDoesNotMatchBbnPidConstant()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', 'test');
@@ -432,7 +432,7 @@ OUTPUT
   }
 
   /** @test */
-  public function shutdown_method_test_when_type_is_poll()
+  public function testShutdownMethodTestWhenTypeIsPoll()
   {
     $this->init();
 
@@ -450,7 +450,7 @@ OUTPUT
   }
 
   /** @test */
-  public function shutdown_method_test_when_type_is_cron_and_id_is_not_uid()
+  public function testShutdownMethodTestWhenTypeIsCronAndIdIsNotUid()
   {
     $this->init();
 
@@ -469,7 +469,7 @@ OUTPUT
   }
 
   /** @test */
-  public function shutdown_method_test_when_type_is_cron_and_id_key_does_not_exist()
+  public function testShutdownMethodTestWhenTypeIsCronAndIdKeyDoesNotExist()
   {
     $this->init();
 
@@ -483,7 +483,7 @@ OUTPUT
   }
 
   /** @test */
-  public function getData_method_returns_the_data()
+  public function testGetdataMethodReturnsTheData()
   {
     $this->init();
 
@@ -494,7 +494,7 @@ OUTPUT
   }
 
   /** @test */
-  public function check_method_checks_whether_the_cron_type_is_set_or_not()
+  public function testCheckMethodChecksWhetherTheCronTypeIsSetOrNot()
   {
     $this->init();
 
@@ -510,7 +510,7 @@ OUTPUT
   }
 
   /** @test */
-  public function poll_method_test()
+  public function testPollMethodTest()
   {
     $this->mockRunnerClass();
     $user_cfg = $this->mockUserClassAndGetConfig();
@@ -653,7 +653,7 @@ OUTPUT
   }
 
   /** @test */
-  public function poll_method_does_not_process_when_check_method_returns_false()
+  public function testPollMethodDoesNotProcessWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -665,7 +665,7 @@ OUTPUT
   }
 
   /** @test */
-  /*public function runTaskSystem_method_test_when_isActive_returns_false()
+  /*public function testRuntasksystemMethodTestWhenIsactiveReturnsFalse()
   {
     $this->mockRunnerClass();
 
@@ -710,7 +710,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function runTaskSystem_method_test_when_isCronActive_returns_false()
+  /*public function testRuntasksystemMethodTestWhenIscronactiveReturnsFalse()
   {
     $this->mockRunnerClass();
 
@@ -757,7 +757,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function runTaskSystem_method_test_when_isActive_and_isCronActive_returns_true()
+  /*public function testRuntasksystemMethodTestWhenIsactiveAndIscronactiveReturnsTrue()
   {
     $this->mockRunnerClass();
 
@@ -840,7 +840,7 @@ OUTPUT
   }*/
 
   /** @test */
-  public function runTaskSystem_method_does_not_run_the_tas_if_check_method_returns_false()
+  public function testRuntasksystemMethodDoesNotRunTheTasIfCheckMethodReturnsFalse()
   {
     $this->mockRunnerClass();
 
@@ -856,7 +856,7 @@ OUTPUT
   }
 
   /** @test */
-  /*public function runTask_method_test()
+  /*public function testRuntaskMethodTest()
   {
     $this->init();
 
@@ -981,7 +981,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function runTask_method_test_when_none_of_the_json_files_exist_and_log_file_is_empty()
+  /*public function testRuntaskMethodTestWhenNoneOfTheJsonFilesExistAndLogFileIsEmpty()
   {
     $this->init();
 
@@ -1068,7 +1068,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function runTask_method_when_the_log_and_json_files_exists_but_none_of_them_are_json()
+  /*public function testRuntaskMethodWhenTheLogAndJsonFilesExistsButNoneOfThemAreJson()
   {
     $this->init();
 
@@ -1165,7 +1165,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function run_method_test_when_type_is_cron_and_id_does_not_exist()
+  /*public function testRunMethodTestWhenTypeIsCronAndIdDoesNotExist()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1196,7 +1196,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function run_method_test_when_type_is_cron_and_id_exists()
+  /*public function testRunMethodTestWhenTypeIsCronAndIdExists()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1231,7 +1231,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function run_method_test_when_type_is_poll()
+  /*public function testRunMethodTestWhenTypeIsPoll()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1264,7 +1264,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function run_method_test_when_the_pid_file_exists()
+  /*public function testRunMethodTestWhenThePidFileExists()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1305,7 +1305,7 @@ OUTPUT
   }*/
 
   /** @test */
-  public function run_method_throws_an_exception_when_active_file_does_not_exist()
+  public function testRunMethodThrowsAnExceptionWhenActiveFileDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $this->mockRunnerClass();
@@ -1322,7 +1322,7 @@ OUTPUT
   }
 
   /** @test */
-  public function run_method_throws_an_exception_when_type_is_cron_and_active_cron_file_does_not_exist()
+  public function testRunMethodThrowsAnExceptionWhenTypeIsCronAndActiveCronFileDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $this->mockRunnerClass();
@@ -1343,7 +1343,7 @@ OUTPUT
   }
 
   /** @test */
-  public function run_method_throws_an_exception_when_type_is_poll_and_active_poll_file_does_not_exist()
+  public function testRunMethodThrowsAnExceptionWhenTypeIsPollAndActivePollFileDoesNotExist()
   {
     $this->expectException(\Exception::class);
     $this->mockRunnerClass([
@@ -1366,7 +1366,7 @@ OUTPUT
   }
 
   /** @test */
-  /*public function run_method_does_not_process_when_type_is_not_defined()
+  /*public function testRunMethodDoesNotProcessWhenTypeIsNotDefined()
   {
     $this->mockRunnerClass();
 
@@ -1385,7 +1385,7 @@ OUTPUT
   }*/
 
   /** @test */
-  /*public function run_method_does_not_process_when_check_method_returns_false()
+  /*public function testRunMethodDoesNotProcessWhenCheckMethodReturnsFalse()
   {
     $this->mockRunnerClass();
 

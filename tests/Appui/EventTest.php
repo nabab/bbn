@@ -77,7 +77,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('opt'));
     $this->assertInstanceOf(User::class, $this->getNonPublicProperty('usr'));
@@ -88,7 +88,7 @@ class EventTest extends TestCase
   }
   
   /** @test */
-  public function filterRecurrencesByMonthWeek_method_filters_the_recurrences_of_an_event_by_months_week()
+  public function testFilterrecurrencesbymonthweekMethodFiltersTheRecurrencesOfAnEventByMonthsWeek()
   {
     $method = $this->getNonPublicMethod('filterRecurrencesByMonthWeek');
     $cf     = $this->getClassCfg();
@@ -147,7 +147,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_inserts_the_given_data_into_events_table()
+  public function testInsertMethodInsertsTheGivenDataIntoEventsTable()
   {
     $cf = $this->getClassCfg();
 
@@ -185,7 +185,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_inserts_the_given_data_into_events_table_when_recurring_is_provided_and_true()
+  public function testInsertMethodInsertsTheGivenDataIntoEventsTableWhenRecurringIsProvidedAndTrue()
   {
     $this->partiallyMockEventClass();
     $cf = $this->getClassCfg();
@@ -249,7 +249,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_inserting_to_events_tables_fails()
+  public function testInsertMethodReturnsNullWhenInsertingToEventsTablesFails()
   {
     $cf = $this->getClassCfg();
 
@@ -282,7 +282,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_retrieving_last_inserted_id_fails()
+  public function testInsertMethodReturnsNullWhenRetrievingLastInsertedIdFails()
   {
     $cf = $this->getClassCfg();
 
@@ -320,7 +320,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_the_given_start_field_is_missing()
+  public function testInsertMethodReturnsNullWhenTheGivenStartFieldIsMissing()
   {
     $cf = $this->getClassCfg();
 
@@ -338,7 +338,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_the_given_id_type_is_missing()
+  public function testInsertMethodReturnsNullWhenTheGivenIdTypeIsMissing()
   {
     $cf = $this->getClassCfg();
 
@@ -356,7 +356,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_the_given_id_type_is_empty()
+  public function testInsertMethodReturnsNullWhenTheGivenIdTypeIsEmpty()
   {
     $cf = $this->getClassCfg();
 
@@ -375,7 +375,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_updates_an_event_from_the_given_data()
+  public function testEditMethodUpdatesAnEventFromTheGivenData()
   {
     $this->partiallyMockEventClass();
     $cf = $this->getClassCfg();
@@ -423,7 +423,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_updates_the_given_event_when_recurring_is_provided_and_true()
+  public function testEditMethodUpdatesTheGivenEventWhenRecurringIsProvidedAndTrue()
   {
     $cf = $this->getClassCfg();
 
@@ -484,7 +484,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_returns_null_when_the_given_event_id_is_not_valid()
+  public function testEditMethodReturnsNullWhenTheGivenEventIdIsNotValid()
   {
     $this->assertNull(
       $this->event->edit('1234aff', [])
@@ -492,7 +492,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_deletes_the_given_event()
+  public function testDeleteMethodDeletesTheGivenEvent()
   {
     $cf = $this->getClassCfg();
 
@@ -510,7 +510,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_when_the_given_id_is_not_valid()
+  public function testDeleteMethodReturnsFalseWhenTheGivenIdIsNotValid()
   {
     $this->assertFalse(
       $this->event->delete('123aff')
@@ -518,7 +518,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function get_method_fetches_the_event_from_the_given_id()
+  public function testGetMethodFetchesTheEventFromTheGivenId()
   {
     $cf     = $this->getClassCfg();
     $fields = $this->getNonPublicProperty('fields');
@@ -575,7 +575,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_null_when_the_given_id_is_not_valid()
+  public function testGetMethodReturnsNullWhenTheGivenIdIsNotValid()
   {
     $this->assertNull(
       $this->event->get('1123aff')
@@ -583,7 +583,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getFull_method_get_an_event_with_the_recurring_details()
+  public function testGetfullMethodGetAnEventWithTheRecurringDetails()
   {
     $cf = $this->getClassCfg();
 
@@ -682,7 +682,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getFull_method_returns_null_when_the_given_id_is_not_valid()
+  public function testGetfullMethodReturnsNullWhenTheGivenIdIsNotValid()
   {
     $this->assertNull(
       $this->event->getFull('1234aaff')
@@ -690,7 +690,7 @@ class EventTest extends TestCase
   }
   
   /** @test */
-  public function getRecurrences_method_returns_an_array_of_all_events_recurrences_in_a_period()
+  public function testGetrecurrencesMethodReturnsAnArrayOfAllEventsRecurrencesInAPeriod()
   {
     $this->partiallyMockEventClass();
 
@@ -747,7 +747,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getRecurrences_method_returns_an_array_of_all_events_recurrences_in_a_period_when_mw_is_provided()
+  public function testGetrecurrencesMethodReturnsAnArrayOfAllEventsRecurrencesInAPeriodWhenMwIsProvided()
   {
     $this->partiallyMockEventClass();
 
@@ -815,7 +815,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function makeRecurrencesFields_method_makes_fields_structure_on_the_given_event_recurrences()
+  public function testMakerecurrencesfieldsMethodMakesFieldsStructureOnTheGivenEventRecurrences()
   {
     $cf = $this->getClassCfg();
 
@@ -897,7 +897,7 @@ class EventTest extends TestCase
   }
   
   /** @test */
-  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date()
+  public function testGetfirstrecurrenceMethodReturnsTheDateForTheFirstRecurrenceOfARecurringDate()
   {
     $cf = $this->getClassCfg();
     $this->partiallyMockEventClass();
@@ -945,7 +945,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date_when_getExceptions_returns_null()
+  public function testGetfirstrecurrenceMethodReturnsTheDateForTheFirstRecurrenceOfARecurringDateWhenGetexceptionsReturnsNull()
   {
     $cf = $this->getClassCfg();
     $this->partiallyMockEventClass();
@@ -980,7 +980,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date_when_exceptions_is_false()
+  public function testGetfirstrecurrenceMethodReturnsTheDateForTheFirstRecurrenceOfARecurringDateWhenExceptionsIsFalse()
   {
     $cf = $this->getClassCfg();
     $this->partiallyMockEventClass();
@@ -1010,7 +1010,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function getFirstRecurrence_method_returns_null_when_getNextOccurrence_retunrs_false()
+  public function testGetfirstrecurrenceMethodReturnsNullWhenGetnextoccurrenceRetunrsFalse()
   {
     $cf = $this->getClassCfg();
     $this->partiallyMockEventClass();
@@ -1039,7 +1039,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function deleteRecurrences_method_deletes_the_recurrences_of_the_given_event_and_returns_true_when_count_equals_the_deleted()
+  public function testDeleterecurrencesMethodDeletesTheRecurrencesOfTheGivenEventAndReturnsTrueWhenCountEqualsTheDeleted()
   {
     $cf = $this->getClassCfg();
 
@@ -1065,7 +1065,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function deleteRecurrences_method_deletes_the_recurrences_of_the_given_event_and_returns_false_when_count_not_equal_the_deleted()
+  public function testDeleterecurrencesMethodDeletesTheRecurrencesOfTheGivenEventAndReturnsFalseWhenCountNotEqualTheDeleted()
   {
     $cf = $this->getClassCfg();
 
@@ -1090,7 +1090,7 @@ class EventTest extends TestCase
   }
 
   /** @test */
-  public function deleteRecurrences_method_returns_false_when_the_given_id_event_is_not_valid()
+  public function testDeleterecurrencesMethodReturnsFalseWhenTheGivenIdEventIsNotValid()
   {
     $this->assertFalse(
       $this->event->deleteRecurrences('123aff')

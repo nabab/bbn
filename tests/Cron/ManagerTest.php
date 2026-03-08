@@ -53,7 +53,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->init();
 
@@ -74,7 +74,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_db_check_method_returns_false()
+  public function testConstructorTestWhenDbCheckMethodReturnsFalse()
   {
     $this->db_mock->shouldReceive('check')
       ->once()
@@ -96,7 +96,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function check_method_returns_true_when_db_check_method_returns_true()
+  public function testCheckMethodReturnsTrueWhenDbCheckMethodReturnsTrue()
   {
     $this->init();
 
@@ -108,7 +108,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function check_method_returns_false_when_db_check_method_returns_false()
+  public function testCheckMethodReturnsFalseWhenDbCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -120,7 +120,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function check_method_returns_false_when_db_instance_is_not_set()
+  public function testCheckMethodReturnsFalseWhenDbInstanceIsNotSet()
   {
     $this->db_mock->shouldReceive('check')
       ->once()
@@ -132,7 +132,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getCron_method_returns_full_row_as_an_indexed_array_for_the_given_cron_id()
+  public function testGetcronMethodReturnsFullRowAsAnIndexedArrayForTheGivenCronId()
   {
     $this->init();
 
@@ -158,7 +158,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getCron_method_returns_null_when_the_given_id_does_not_exist()
+  public function testGetcronMethodReturnsNullWhenTheGivenIdDoesNotExist()
   {
     $this->init();
 
@@ -181,7 +181,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getCron_method_returns_null_when_check_method_returns_false()
+  public function testGetcronMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -195,7 +195,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_true_of_the_given_cron_id_is_timed_out()
+  public function testIstimeoutMethodReturnsTrueOfTheGivenCronIdIsTimedOut()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -225,7 +225,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_false_id_the_given_cron_id_is_not_timed_out()
+  public function testIstimeoutMethodReturnsFalseIdTheGivenCronIdIsNotTimedOut()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -255,7 +255,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_null_when_the_log_file_cannot_be_found()
+  public function testIstimeoutMethodReturnsNullWhenTheLogFileCannotBeFound()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -285,7 +285,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_false_when_fails_to_get_log_path()
+  public function testIstimeoutMethodReturnsFalseWhenFailsToGetLogPath()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -312,7 +312,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_false_when_fails_to_get_cron_from_the_given_id()
+  public function testIstimeoutMethodReturnsFalseWhenFailsToGetCronFromTheGivenId()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -331,7 +331,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isTimeout_method_returns_false_when_check_method_returns_false()
+  public function testIstimeoutMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->manager = \Mockery::mock(Manager::class)->makePartial();
 
@@ -345,7 +345,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function start_method_updates_start_time_and_running_status_for_the_given_cron()
+  public function testStartMethodUpdatesStartTimeAndRunningStatusForTheGivenCron()
   {
     $this->mockManagerClass();
 
@@ -395,7 +395,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function start_method_returns_false_when_fails_to_update_the_given_cron()
+  public function testStartMethodReturnsFalseWhenFailsToUpdateTheGivenCron()
   {
     $this->mockManagerClass();
 
@@ -436,7 +436,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function start_method_returns_false_when_check_method_returns_false()
+  public function testStartMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->mockManagerClass();
 
@@ -450,7 +450,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function finish_method_updates_the_duration_and_new_finished_status()
+  public function testFinishMethodUpdatesTheDurationAndNewFinishedStatus()
   {
     $this->mockManagerClass();
 
@@ -516,7 +516,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function finish_method_updates_the_duration_and_new_finished_status_when_frequency_does_not_exist_in_cron_cfg()
+  public function testFinishMethodUpdatesTheDurationAndNewFinishedStatusWhenFrequencyDoesNotExistInCronCfg()
   {
     $this->mockManagerClass();
 
@@ -564,7 +564,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function finish_method_updates_the_duration_and_new_finished_status_when_the_given_cron_has_no_next_time()
+  public function testFinishMethodUpdatesTheDurationAndNewFinishedStatusWhenTheGivenCronHasNoNextTime()
   {
     $this->mockManagerClass();
 
@@ -617,7 +617,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function finish_method_returns_false_when_fails_to_update_the_given_cron()
+  public function testFinishMethodReturnsFalseWhenFailsToUpdateTheGivenCron()
   {
     $this->mockManagerClass();
 
@@ -665,7 +665,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function finish_method_returns_false_when_the_given_cron_does_not_exist()
+  public function testFinishMethodReturnsFalseWhenTheGivenCronDoesNotExist()
   {
     $this->mockManagerClass();
 
@@ -680,7 +680,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNextDate_method_returns_date_for_the_next_event_given_frequency_and_a_time()
+  public function testGetnextdateMethodReturnsDateForTheNextEventGivenFrequencyAndATime()
   {
     $this->init();
 
@@ -726,7 +726,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNextDate_method_returns_null_when_the_given_frequency_is_not_valid()
+  public function testGetnextdateMethodReturnsNullWhenTheGivenFrequencyIsNotValid()
   {
     $this->init();
 
@@ -748,7 +748,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNext_method_returns_the_whole_row_for_the_next_cron_to_be_executed_from_now_if_there_is_any_from_the_given_uid()
+  public function testGetnextMethodReturnsTheWholeRowForTheNextCronToBeExecutedFromNowIfThereIsAnyFromTheGivenUid()
   {
     $this->init();
 
@@ -797,7 +797,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNext_method_returns_the_whole_row_for_the_next_cron_to_be_executed_from_now_if_there_is_any_from_when_no_id_provided()
+  public function testGetnextMethodReturnsTheWholeRowForTheNextCronToBeExecutedFromNowIfThereIsAnyFromWhenNoIdProvided()
   {
     $this->init();
 
@@ -843,7 +843,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNext_method_returns_null_when_no_results_found()
+  public function testGetnextMethodReturnsNullWhenNoResultsFound()
   {
     $this->init();
 
@@ -869,7 +869,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNext_method_returns_null_when_check_method_returns_false()
+  public function testGetnextMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -883,7 +883,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getRunningRows_method_returns_all_rows_for_running_cron()
+  public function testGetrunningrowsMethodReturnsAllRowsForRunningCron()
   {
     $this->init();
 
@@ -929,7 +929,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getRunningRows_method_returns_null_when_check_method_returns_false()
+  public function testGetrunningrowsMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -943,7 +943,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNextRows_method_return_rows_for_scheduled_cron_that_should_run()
+  public function testGetnextrowsMethodReturnRowsForScheduledCronThatShouldRun()
   {
     $this->init();
 
@@ -1044,7 +1044,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getNextRows_method_returns_null_when_check_method_returns_false()
+  public function testGetnextrowsMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -1058,7 +1058,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getFailed_method_returns_all_rows_for_failed_cron()
+  public function testGetfailedMethodReturnsAllRowsForFailedCron()
   {
     $this->init();
 
@@ -1112,7 +1112,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function getFailed_method_returns_null_when_check_method_returns_false()
+  public function testGetfailedMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -1126,7 +1126,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function notifyFailed_method_inserts_into_notification_table_and_update_cron_notification_field_when_failed()
+  public function testNotifyfailedMethodInsertsIntoNotificationTableAndUpdateCronNotificationFieldWhenFailed()
   {
     $this->mockManagerClass();
 
@@ -1160,7 +1160,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function notifyFailed_method_does_not_the_notification_field_of_fails_to_insert_to_notification_table()
+  public function testNotifyfailedMethodDoesNotTheNotificationFieldOfFailsToInsertToNotificationTable()
   {
     $this->mockManagerClass();
 
@@ -1191,7 +1191,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isRunning_method_checks_whether_the_given_cron_id_is_running_or_not()
+  public function testIsrunningMethodChecksWhetherTheGivenCronIdIsRunningOrNot()
   {
     $this->init();
 
@@ -1226,7 +1226,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function isRunning_method_returns_false_when_check_method_returns_false()
+  public function testIsrunningMethodReturnsFalseWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -1240,7 +1240,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function activate_method_sets_the_active_field_to_one_for_the_given_cron_id()
+  public function testActivateMethodSetsTheActiveFieldToOneForTheGivenCronId()
   {
     $this->init();
 
@@ -1257,7 +1257,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function deactivate_method_sets_the_active_field_to_zero_for_the_given_cron_id()
+  public function testDeactivateMethodSetsTheActiveFieldToZeroForTheGivenCronId()
   {
     $this->init();
 
@@ -1274,7 +1274,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function setPid_method_sets_the_pid_field_to_the_given_value_for_the_given_cron_id()
+  public function testSetpidMethodSetsThePidFieldToTheGivenValueForTheGivenCronId()
   {
     $this->init();
 
@@ -1291,7 +1291,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function unsetPid_method_sets_the_pid_and_notification_fields_to_null_for_the_given_cron_id()
+  public function testUnsetpidMethodSetsThePidAndNotificationFieldsToNullForTheGivenCronId()
   {
     $this->init();
 
@@ -1308,7 +1308,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function add_method_adds_a_new_row_to_cron_tables_from_given_data()
+  public function testAddMethodAddsANewRowToCronTablesFromGivenData()
   {
     $this->init();
 
@@ -1351,7 +1351,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function add_method_returns_null_when_fails_to_insert_a_new_cron()
+  public function testAddMethodReturnsNullWhenFailsToInsertANewCron()
   {
     $this->init();
 
@@ -1393,7 +1393,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function add_method_returns_null_the_given_data_misses_some_parameters()
+  public function testAddMethodReturnsNullTheGivenDataMissesSomeParameters()
   {
     $this->init();
 
@@ -1431,7 +1431,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function add_method_returs_null_when_check_method_returns_false()
+  public function testAddMethodRetursNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -1450,7 +1450,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_updates_the_given_cron_id_with_the_given_values()
+  public function testEditMethodUpdatesTheGivenCronIdWithTheGivenValues()
   {
     $this->mockManagerClass();
 
@@ -1504,7 +1504,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_returns_null_when_fails_to_update_the_given_cron_id()
+  public function testEditMethodReturnsNullWhenFailsToUpdateTheGivenCronId()
   {
     $this->mockManagerClass();
 
@@ -1549,7 +1549,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_returns_null_when_the_given_id_does_not_exist()
+  public function testEditMethodReturnsNullWhenTheGivenIdDoesNotExist()
   {
     $this->mockManagerClass();
 
@@ -1568,7 +1568,7 @@ class ManagerTest extends TestCase
   }
 
   /** @test */
-  public function edit_method_returns_null_when_check_method_returns_false()
+  public function testEditMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 

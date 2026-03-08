@@ -93,7 +93,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('opt'));
     $this->assertInstanceOf(User::class, $this->getNonPublicProperty('usr'));
@@ -105,7 +105,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getPath_method_returns_the_path_of_the_given_media_argument()
+  public function testGetpathMethodReturnsThePathOfTheGivenMediaArgument()
   {
     $this->setNonPublicPropertyValue('path', null);
 
@@ -128,7 +128,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getPath_method_returns_the_path_when_no_media_argument_provided()
+  public function testGetpathMethodReturnsThePathWhenNoMediaArgumentProvided()
   {
     $this->setNonPublicPropertyValue('path', null);
 
@@ -143,7 +143,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getPath_method_returns_the_path_when_the_provided_media_has_missing_values()
+  public function testGetpathMethodReturnsThePathWhenTheProvidedMediaHasMissingValues()
   {
     $this->setNonPublicPropertyValue('path', null);
 
@@ -164,7 +164,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function browse_method_returns_an_array_of_medias()
+  public function testBrowseMethodReturnsAnArrayOfMedias()
   {
     // The method initializes a concrete Grid object inside
     // So it's not possible to mock it and test
@@ -173,7 +173,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function browse_function_returns_null_when_user_instance_is_null()
+  public function testBrowseFunctionReturnsNullWhenUserInstanceIsNull()
   {
     $this->setNonPublicPropertyValue('retriever_instance', null, User::class);
 
@@ -181,7 +181,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_count_of_medias_from_the_given_filters()
+  public function testCountMethodReturnsCountOfMediasFromTheGivenFilters()
   {
     $cf = $this->getClassCfg();
 
@@ -206,7 +206,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_count_of_medias_when_no_filter_is_provided()
+  public function testCountMethodReturnsCountOfMediasWhenNoFilterIsProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -222,7 +222,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_null_when_user_instance_is_null()
+  public function testCountMethodReturnsNullWhenUserInstanceIsNull()
   {
     $this->setNonPublicPropertyValue('retriever_instance', null, User::class);
 
@@ -230,7 +230,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_new_media_from_the_provided_arguments_and_private_is_true()
+  public function testInsertMethodAddsANewMediaFromTheProvidedArgumentsAndPrivateIsTrue()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -282,7 +282,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_new_media_when_private_is_false_()
+  public function testInsertMethodAddsANewMediaWhenPrivateIsFalse()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -329,7 +329,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_private_is_true_and_user_is_not_logged_in()
+  public function testInsertMethodReturnsNullWhenPrivateIsTrueAndUserIsNotLoggedIn()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -349,7 +349,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_throws_an_exception_when_fails_to_insert_into_db()
+  public function testInsertMethodThrowsAnExceptionWhenFailsToInsertIntoDb()
   {
     $this->expectException(\Exception::class);
 
@@ -387,7 +387,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_throws_an_exception_when_the_provided_file_does_not_exist()
+  public function testInsertMethodThrowsAnExceptionWhenTheProvidedFileDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -400,7 +400,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_the_provided_file_name_is_empty()
+  public function testInsertMethodReturnsNullWhenTheProvidedFileNameIsEmpty()
   {
     $this->assertNull(
       $this->medias->insert('')
@@ -408,7 +408,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_id_type_is_null()
+  public function testInsertMethodReturnsNullWhenIdTypeIsNull()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -421,7 +421,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_null_when_the_provided_file_name_has_not_extension()
+  public function testInsertMethodReturnsNullWhenTheProvidedFileNameHasNotExtension()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -434,7 +434,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function setUrl_method_inserts_url_to_the_provided_media_id()
+  public function testSeturlMethodInsertsUrlToTheProvidedMediaId()
   {
     $cf = $this->getClassCfg();
 
@@ -466,7 +466,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function setUrl_method_does_not_insert_url_if_media_id_does_not_exists_and_returns_null()
+  public function testSeturlMethodDoesNotInsertUrlIfMediaIdDoesNotExistsAndReturnsNull()
   {
     $cf = $this->getClassCfg();
 
@@ -485,7 +485,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_sorted_thumb_widths_for_the_given_id()
+  public function testGetthumbssizesMethodReturnsSortedThumbWidthsForTheGivenId()
   {
     $this->partiallyMockMediasClass();
 
@@ -509,7 +509,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_empty_array_when_no_thumbs_matches_is_found()
+  public function testGetthumbssizesMethodReturnsEmptyArrayWhenNoThumbsMatchesIsFound()
   {
     $this->partiallyMockMediasClass();
 
@@ -528,13 +528,13 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_empty_array_when_the_provided_id_is_not_valid_uid()
+  public function testGetthumbssizesMethodReturnsEmptyArrayWhenTheProvidedIdIsNotValidUid()
   {
     $this->assertSame([], $this->medias->getThumbsSizes('123a'));
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_empty_array_when_no_path_found_for_the_given_id()
+  public function testGetthumbssizesMethodReturnsEmptyArrayWhenNoPathFoundForTheGivenId()
   {
     $this->partiallyMockMediasClass();
 
@@ -547,7 +547,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_empty_array_when_dir_does_not_exists()
+  public function testGetthumbssizesMethodReturnsEmptyArrayWhenDirDoesNotExists()
   {
     $this->partiallyMockMediasClass();
 
@@ -562,7 +562,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsSizes_method_returns_empty_array_when_the_dir_has_only_one_file()
+  public function testGetthumbssizesMethodReturnsEmptyArrayWhenTheDirHasOnlyOneFile()
   {
     $this->partiallyMockMediasClass();
 
@@ -580,7 +580,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbs_method_returns_the_path_to_the_image_for_the_given_path_and_size_and_file_exists()
+  public function testGetthumbsMethodReturnsThePathToTheImageForTheGivenPathAndSizeAndFileExists()
   {
     $this->createDir('media');
     $this->createFile('foo_w60_h60.jpg', '', 'media');
@@ -592,7 +592,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbs_method_returns_the_path_to_the_image_for_the_given_path_and_size_and_file_does_not_exist()
+  public function testGetthumbsMethodReturnsThePathToTheImageForTheGivenPathAndSizeAndFileDoesNotExist()
   {
     $this->assertSame(
       $this->getTestingDirName() . 'media/foo_w60_h60.jpg',
@@ -601,7 +601,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbs_method_return_null_when_the_given_path_does_not_exist_and_if_exist_argument_is_true()
+  public function testGetthumbsMethodReturnNullWhenTheGivenPathDoesNotExistAndIfExistArgumentIsTrue()
   {
     $this->assertNull(
       $this->medias->getThumbs($this->getTestingDirName() . 'media/foo.jpg', [60, 60], true)
@@ -609,7 +609,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbs_method_returns_null_when_the_provided_sizes_are_not_valid()
+  public function testGetthumbsMethodReturnsNullWhenTheProvidedSizesAreNotValid()
   {
     $this->assertNull(
       $this->medias->getThumbs('foo.jpg', [], false)
@@ -625,7 +625,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbs_method_does_not_return_the_given_size_if_not_is_integer()
+  public function testGetthumbsMethodDoesNotReturnTheGivenSizeIfNotIsInteger()
   {
     $this->assertSame(
       'foo_h1.jpg',
@@ -639,7 +639,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsPath_method_returns_an_array_of_thumbs_files_names_with_different_sizes_from_the_given_file_path_if_exists_and_is_an_image()
+  public function testGetthumbspathMethodReturnsAnArrayOfThumbsFilesNamesWithDifferentSizesFromTheGivenFilePathIfExistsAndIsAnImage()
   {
     $this->partiallyMockMediasClass();
 
@@ -679,7 +679,7 @@ class MediasTest extends TestCase
   }
   
   /** @test */
-  public function getThumbsPath_method_returns_empty_array_when_the_files_with_sizes_does_not_exist()
+  public function testGetthumbspathMethodReturnsEmptyArrayWhenTheFilesWithSizesDoesNotExist()
   {
     $this->partiallyMockMediasClass();
 
@@ -695,13 +695,13 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsPath_method_returns_empty_array_when_the_given_image_does_not_exist()
+  public function testGetthumbspathMethodReturnsEmptyArrayWhenTheGivenImageDoesNotExist()
   {
     $this->assertSame([], $this->medias->getThumbsPath('foo.jpg'));
   }
 
   /** @test */
-  public function getThumbsPath_method_returns_empty_array_when_the_given_file_is_not_an_image()
+  public function testGetthumbspathMethodReturnsEmptyArrayWhenTheGivenFileIsNotAnImage()
   {
     $this->createDir('media');
     // Image has empty content so it won't have an image/jpg mime
@@ -711,7 +711,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function removeThumbs_method_removes_thumbs_files_for_the_provided_path()
+  public function testRemovethumbsMethodRemovesThumbsFilesForTheProvidedPath()
   {
     $this->partiallyMockMediasClass();
 
@@ -753,7 +753,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsName_method_returns_the_name_of_the_thumb_file_corresponding_to_the_given_name_and_size()
+  public function testGetthumbsnameMethodReturnsTheNameOfTheThumbFileCorrespondingToTheGivenNameAndSize()
   {
     $this->assertSame(
       'foo_w80h100.jpg',
@@ -762,7 +762,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getThumbsName_method_returns_null_when_the_given_name_has_no_extension()
+  public function testGetthumbsnameMethodReturnsNullWhenTheGivenNameHasNoExtension()
   {
     $this->assertNull(
       $this->medias->getThumbsName('foo')
@@ -770,7 +770,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_deletes_media_from_the_given_id()
+  public function testDeleteMethodDeletesMediaFromTheGivenId()
   {
     $this->partiallyMockMediasClass();
 
@@ -799,7 +799,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_and_does_not_delete_the_given_media_if_it_fails_to_delete_from_db()
+  public function testDeleteMethodReturnsFalseAndDoesNotDeleteTheGivenMediaIfItFailsToDeleteFromDb()
   {
     $this->partiallyMockMediasClass();
 
@@ -825,7 +825,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_and_does_not_delete_media_dir_if_media_file_does_not_exist()
+  public function testDeleteMethodReturnsFalseAndDoesNotDeleteMediaDirIfMediaFileDoesNotExist()
   {
     $this->partiallyMockMediasClass();
 
@@ -845,7 +845,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_when_media_does_not_exist_in_db()
+  public function testDeleteMethodReturnsFalseWhenMediaDoesNotExistInDb()
   {
     $this->partiallyMockMediasClass();
 
@@ -858,7 +858,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_when_the_given_id_is_not_valid_uid()
+  public function testDeleteMethodReturnsFalseWhenTheGivenIdIsNotValidUid()
   {
     $this->assertFalse(
       $this->medias->delete('123a')
@@ -866,7 +866,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function isImage_method_returns_true_when_the_given_path_is_an_image()
+  public function testIsimageMethodReturnsTrueWhenTheGivenPathIsAnImage()
   {
     $this->createDir('medias');
 
@@ -876,14 +876,14 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function isImage_method_returns_false_when_the_given_path_does_not_exists()
+  public function testIsimageMethodReturnsFalseWhenTheGivenPathDoesNotExists()
   {
     $this->assertFalse($this->medias->isImage('image.jpg'));
     $this->assertFalse($this->medias->isImage(''));
   }
 
   /** @test */
-  public function isImage_method_returns_false_when_the_given_path_is_not_an_image()
+  public function testIsimageMethodReturnsFalseWhenTheGivenPathIsNotAnImage()
   {
     $this->createDir('medias');
 
@@ -893,7 +893,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_string_of_the_file_when_the_details_argument_is_false()
+  public function testGetmediaMethodReturnsStringOfTheFileWhenTheDetailsArgumentIsFalse()
   {
     $cf = $this->getClassCfg();
 
@@ -938,7 +938,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_the_object_of_the_media_when_the_details_argument_is_true()
+  public function testGetmediaMethodReturnsTheObjectOfTheMediaWhenTheDetailsArgumentIsTrue()
   {
     $cf = $this->getClassCfg();
 
@@ -988,7 +988,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_file_path_when_media_is_private()
+  public function testGetmediaMethodReturnsFilePathWhenMediaIsPrivate()
   {
     $cf = $this->getClassCfg();
     $this->setNonPublicPropertyValue('_app_name', 'bbn medias', Mvc::class);
@@ -1022,7 +1022,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_false_when_link_types_matches()
+  public function testGetmediaMethodReturnsFalseWhenLinkTypesMatches()
   {
     $cf = $this->getClassCfg();
 
@@ -1044,7 +1044,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_false_when_media_id_does_not_exist_in_db()
+  public function testGetmediaMethodReturnsFalseWhenMediaIdDoesNotExistInDb()
   {
     $cf = $this->getClassCfg();
 
@@ -1064,7 +1064,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_false_when_retrieved_link_type_is_null()
+  public function testGetmediaMethodReturnsFalseWhenRetrievedLinkTypeIsNull()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -1075,13 +1075,13 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMedia_method_returns_false_when_the_provided_id_is_not_valid_uid()
+  public function testGetmediaMethodReturnsFalseWhenTheProvidedIdIsNotValidUid()
   {
     $this->assertFalse($this->medias->getMedia('1234a'));
   }
 
   /** @test */
-  public function zip_method_adds_media_file_to_zip_archive_for_the_given_medias_array()
+  public function testZipMethodAddsMediaFileToZipArchiveForTheGivenMediasArray()
   {
     $this->partiallyMockMediasClass();
 
@@ -1119,7 +1119,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function zip_method_adds_media_file_to_zip_archive_for_the_given_media_string()
+  public function testZipMethodAddsMediaFileToZipArchiveForTheGivenMediaString()
   {
     $this->partiallyMockMediasClass();
 
@@ -1147,14 +1147,14 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function zip_method_returns_false_when_failed_when_the_provided_media_is_not_string_nor_array()
+  public function testZipMethodReturnsFalseWhenFailedWhenTheProvidedMediaIsNotStringNorArray()
   {
     $this->assertFalse($this->medias->zip((object)['foo'], 'medias.zip'));
     $this->assertFalse($this->medias->zip(22, 'medias.zip'));
   }
 
   /** @test */
-  public function updateDb_method_updates_media_in_database()
+  public function testUpdatedbMethodUpdatesMediaInDatabase()
   {
     $cf = $this->getClassCfg();
 
@@ -1211,7 +1211,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function update_method_updates_the_title_or_the_name_of_the_given_media_in_database_and_rename_the_files()
+  public function testUpdateMethodUpdatesTheTitleOrTheNameOfTheGivenMediaInDatabaseAndRenameTheFiles()
   {
     $this->partiallyMockMediasClass();
 
@@ -1278,7 +1278,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function update_method_returns_an_empty_array_without_updating_db_and_files_when_the_given_media_does_not_exist()
+  public function testUpdateMethodReturnsAnEmptyArrayWithoutUpdatingDbAndFilesWhenTheGivenMediaDoesNotExist()
   {
     $this->partiallyMockMediasClass();
 
@@ -1291,7 +1291,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function update_method_an_empty_array_without_updating_db_and_files_when_old_name_and_title_are_the_same()
+  public function testUpdateMethodAnEmptyArrayWithoutUpdatingDbAndFilesWhenOldNameAndTitleAreTheSame()
   {
     $this->partiallyMockMediasClass();
 
@@ -1313,7 +1313,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function updateContent_method_updates_the_content_of_the_media_when_deleted_and_replaced_in_the_upload()
+  public function testUpdatecontentMethodUpdatesTheContentOfTheMediaWhenDeletedAndReplacedInTheUpload()
   {
     $this->partiallyMockMediasClass();
 
@@ -1399,7 +1399,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function updateContent_method_updates_does_not_update_the_content_when_new_file_does_not_exists()
+  public function testUpdatecontentMethodUpdatesDoesNotUpdateTheContentWhenNewFileDoesNotExists()
   {
     $this->user_mock->shouldReceive('getId')
       ->once()
@@ -1415,7 +1415,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function updateContent_method_updates_does_not_update_the_content_when_media_id_does_not_exist()
+  public function testUpdatecontentMethodUpdatesDoesNotUpdateTheContentWhenMediaIdDoesNotExist()
   {
     $this->partiallyMockMediasClass();
 
@@ -1441,7 +1441,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMediaPath_method_returns_the_path_for_the_given_media_id()
+  public function testGetmediapathMethodReturnsThePathForTheGivenMediaId()
   {
     $this->partiallyMockMediasClass();
 
@@ -1467,7 +1467,7 @@ class MediasTest extends TestCase
   }
 
   /** @test */
-  public function getMediaPath_method_returns_null_when_the_given_media_id_does_not_exist()
+  public function testGetmediapathMethodReturnsNullWhenTheGivenMediaIdDoesNotExist()
   {
     $this->partiallyMockMediasClass();
 

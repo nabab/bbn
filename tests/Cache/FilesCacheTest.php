@@ -43,7 +43,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_the_given_key_if_stored()
+    public function testItReturnsTheGivenKeyIfStored()
     {
         $this->cache->set('foo', 'bar');
 
@@ -52,14 +52,14 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_false_if_the_given_key_not_stored()
+    public function testItReturnsFalseIfTheGivenKeyNotStored()
     {
         $this->assertFalse($this->cache->get('foobar'));
     }
 
 
     /** @test */
-    public function it_returns_false_if_the_given_key_is_stored_but_expired()
+    public function testItReturnsFalseIfTheGivenKeyIsStoredButExpired()
     {
         $this->cache->set('foo', 'bar', 15);
 
@@ -68,7 +68,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_deletes_the_given_key()
+    public function testItDeletesTheGivenKey()
     {
         $this->cache->set('foo', 'bar');
         $this->cache->delete('foo');
@@ -82,7 +82,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_sets_the_given_key_with_the_new_value_if_stored_but_expired()
+    public function testItSetsTheGivenKeyWithTheNewValueIfStoredButExpired()
     {
         $this->cache->set('foo', 'bar', 15);
 
@@ -97,7 +97,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_does_not_set_the_given_key_with_the_new_value_if_stored_and_valid()
+    public function testItDoesNotSetTheGivenKeyWithTheNewValueIfStoredAndValid()
     {
         $this->cache->set('foo', 'bar', 15);
 
@@ -112,7 +112,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_clears_all_cache_if_no_path_is_provided()
+    public function testItClearsAllCacheIfNoPathIsProvided()
     {
         $this->cache->set('foo', 'bar');
         $this->cache->set(
@@ -131,7 +131,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_deletes_cache_only_for_the_provided_path()
+    public function testItDeletesCacheOnlyForTheProvidedPath()
     {
         $cache_name1 = $this->generateCacheName('Foo/Bar/');
         $cache_name2 = $this->generateCacheName('Foo/Baz/');
@@ -147,7 +147,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_true_if_cache_key_exists_and_valid()
+    public function testItReturnsTrueIfCacheKeyExistsAndValid()
     {
         $this->cache->set('foo', 'bar', 20);
         $this->assertTrue($this->cache->has('foo'));
@@ -155,7 +155,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_false_if_cache_key_does_not_exit()
+    public function testItReturnsFalseIfCacheKeyDoesNotExit()
     {
         $this->cache->set('foo', 'bar', 20);
         $this->assertFalse($this->cache->has('baz'));
@@ -163,7 +163,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_false_if_cache_key_exits_but_not_valid()
+    public function testItReturnsFalseIfCacheKeyExitsButNotValid()
     {
         $this->cache->set('foo', 'bar', 20);
         $this->assertFalse($this->cache->has('foo', 21));
@@ -171,7 +171,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_items_in_cache()
+    public function testItReturnsItemsInCache()
     {
         $this->cache->set('foo', 'bar');
         $this->cache->set('foobar', 'baz');
@@ -182,7 +182,7 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function it_returns_info_of_the_file()
+    public function testItReturnsInfoOfTheFile()
     {
         $this->cache->set('foo', 'bar');
         $this->cache->set('foobar', 'baz');

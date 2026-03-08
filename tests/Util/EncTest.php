@@ -23,7 +23,7 @@ class EncTest extends TestCase
 
 
   /** @test */
-  public function get_key_method_returns_encryption_key_for_the_given_key()
+  public function testGetKeyMethodReturnsEncryptionKeyForTheGivenKey()
   {
     $method = ReflectionHelpers::getNonPublicMethod('_get_key', Enc::class);
 
@@ -48,7 +48,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function encryptOpenssl_method_encrypts_the_given_string_using_openssl()
+  public function testEncryptopensslMethodEncryptsTheGivenStringUsingOpenssl()
   {
     $this->assertIsString(
       Enc::encryptOpenssl('foo', 'bar', null,  \bbn\Str::genpwd(500, 500))
@@ -75,7 +75,7 @@ class EncTest extends TestCase
    * @test
    * @depends encryptOpenssl_method_encrypts_the_given_string_using_openssl
    */
-  public function decryptOpenssl_method_decrypts_the_given_string_using_openssl()
+  public function testDecryptopensslMethodDecryptsTheGivenStringUsingOpenssl()
   {
     $pass = Enc::encryptOpenssl('foo', 'bar', 'aes-256-cbc-hmac-sha256', 'pass');
 
@@ -107,7 +107,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function crypt_method_encrypts_the_given_string_with_an_optional_encryption_key()
+  public function testCryptMethodEncryptsTheGivenStringWithAnOptionalEncryptionKey()
   {
     $this->assertIsString(Enc::crypt('foo'));
     $this->assertIsString(Enc::crypt('foo', 'bar'));
@@ -117,7 +117,7 @@ class EncTest extends TestCase
    * @test
    * @depends crypt_method_encrypts_the_given_string_with_an_optional_encryption_key
    */
-  public function decrypt_method_decrypts_the_given_string_with_an_optional_encryption_key()
+  public function testDecryptMethodDecryptsTheGivenStringWithAnOptionalEncryptionKey()
   {
     $pass = Enc::crypt('foo', 'bar');
 
@@ -129,7 +129,7 @@ class EncTest extends TestCase
    * @test
    * @depends crypt_method_encrypts_the_given_string_with_an_optional_encryption_key
    */
-  public function crypt64_method_encrypts_the_given_string_and_returns_a_base64_of_the_result_with_an_optional_encryption_key()
+  public function testCrypt64MethodEncryptsTheGivenStringAndReturnsABase64OfTheResultWithAnOptionalEncryptionKey()
   {
     $crypt = Enc::crypt('foo', 'bar');
 
@@ -148,7 +148,7 @@ class EncTest extends TestCase
    * @test
    * @depends crypt64_method_encrypts_the_given_string_and_returns_a_base64_of_the_result_with_an_optional_encryption_key
    */
-  public function decrypt64_method_decrypts_the_given_base64_string_with_an_optional_encryption_key()
+  public function testDecrypt64MethodDecryptsTheGivenBase64StringWithAnOptionalEncryptionKey()
   {
     $result = Enc::crypt64('foo', 'bar');
 
@@ -164,7 +164,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function generateCert_method_generates_private_and_public_ssl_certificates_strings_and_return_it_as_an_array()
+  public function testGeneratecertMethodGeneratesPrivateAndPublicSslCertificatesStringsAndReturnItAsAnArray()
   {
     $result = Enc::generateCert();
 
@@ -176,7 +176,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function generateCertFiles_method_generates_private_and_public_ssl_certificates_files()
+  public function testGeneratecertfilesMethodGeneratesPrivateAndPublicSslCertificatesFiles()
   {
     $this->createDir('cert');
 
@@ -194,7 +194,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function generateCertFiles_method_returns_false_if_the_given_algo_does_not_exist()
+  public function testGeneratecertfilesMethodReturnsFalseIfTheGivenAlgoDoesNotExist()
   {
     $this->createDir('cert');
 
@@ -204,7 +204,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function generateCertFiles_method_returns_false_if_the_given_path_has_an_existing_private_key()
+  public function testGeneratecertfilesMethodReturnsFalseIfTheGivenPathHasAnExistingPrivateKey()
   {
     $this->createDir('cert');
 
@@ -216,7 +216,7 @@ class EncTest extends TestCase
   }
 
   /** @test */
-  public function sshEncodePublicKey_method_test()
+  public function testSshencodepublickeyMethodTest()
   {
     $rsaKey = openssl_pkey_new([
       'digest_alg' => 'sha256',
