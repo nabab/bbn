@@ -1891,11 +1891,11 @@ class Str
    */
   public static function toCamel(string $st, string $sep = '_', bool $first = false): string
   {
-    $st = strtolower($st);
-
-    $res = str_replace(' ', '', ucwords(str_replace($sep, ' ', $st)));
-    if (!$first) {
-        $res[0] = strtolower($res[0]);
+    $st = self::changeCase($st, 'lower');
+    $res = self::replace(' ', '', ucwords(self::replace($sep, ' ', $st)));
+    if (!$first && $res) {
+      $firstLetter = self::sub($res, 0, 1);
+      $res = self::changeCase($firstLetter, 'lower').self::sub($res, 1);
     }
 
     return $res;
