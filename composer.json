@@ -69,10 +69,7 @@
     }
   },
   "config": {
-    "optimize-autoloader": true,
-    "allow-plugins": {
-      "phpdocumentor/shim": true
-    }
+    "optimize-autoloader": true
   },
   "minimum-stability": "dev",
   "prefer-stable" : true
