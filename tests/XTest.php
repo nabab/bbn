@@ -37,7 +37,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function init_count_method_init_the_counters_for_the_given_name_if_not_exists()
+  public function testInitCountMethodInitTheCountersForTheGivenNameIfNotExists()
   {
     $method = $this->getNonPublicMethod('_init_count');
 
@@ -49,7 +49,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function init_count_method_init_the_counters_when_no_name_is_given()
+  public function testInitCountMethodInitTheCountersWhenNoNameIsGiven()
   {
     $method = $this->getNonPublicMethod('_init_count');
 
@@ -61,7 +61,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function increment_method_increments_the_counters_for_given_optional_name_if_exists_or_init_it()
+  public function testIncrementMethodIncrementsTheCountersForGivenOptionalNameIfExistsOrInitIt()
   {
     $this->assertArrayNotHasKey('foo', $this->getNonPublicProperty('_counters'));
 
@@ -83,7 +83,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function decrement_method_decrements_the_counters_for_the_given_optional_name_if_exists_or_init_it()
+  public function testDecrementMethodDecrementsTheCountersForTheGivenOptionalNameIfExistsOrInitIt()
   {
     $this->assertArrayNotHasKey('foo', $this->getNonPublicProperty('_counters'));
 
@@ -105,7 +105,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_the_counter_for_the_given_name_if_exists_or_init_it_and_deletes_it_if_specified()
+  public function testCountMethodReturnsTheCounterForTheGivenNameIfExistsOrInitItAndDeletesItIfSpecified()
   {
     $this->assertArrayNotHasKey('foo', $this->getNonPublicProperty('_counters'));
 
@@ -127,7 +127,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function countAll_method_returns_the_array_counters_and_deletes_it_if_specified()
+  public function testCountallMethodReturnsTheArrayCountersAndDeletesItIfSpecified()
   {
     $this->setNonPublicPropertyValue('_counters', $counters = ['foo' => 12, 'num' => 13]);
 
@@ -137,7 +137,7 @@ class XTest extends TestCase
   }
   
   /** @test */
-  public function tDom_method_sets_the_current_text_domain_with_version_number_and_returns_it_when_version_txt_file_exists()
+  public function testTdomMethodSetsTheCurrentTextDomainWithVersionNumberAndReturnsItWhenVersionTxtFileExists()
   {
     $this->setNonPublicPropertyValue('_textdomain', null);
 
@@ -155,7 +155,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function tDom_method_sets_the_current_text_domain_without_version_number_and_returns_it_when_version_txt_file_does_not_exist()
+  public function testTdomMethodSetsTheCurrentTextDomainWithoutVersionNumberAndReturnsItWhenVersionTxtFileDoesNotExist()
   {
     $this->setNonPublicPropertyValue('_textdomain', null);
 
@@ -166,7 +166,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function tDom_method_returns_the_current_text_domain_if_already_exists()
+  public function testTdomMethodReturnsTheCurrentTextDomainIfAlreadyExists()
   {
     $this->setNonPublicPropertyValue('_textdomain', 'foo');
 
@@ -175,14 +175,14 @@ class XTest extends TestCase
   }
   
   /** @test */
-  public function the_translation_method_returns_a_string_from_a_single_message_lookup_after_overriding_the_current_text_domain()
+  public function testTheTranslationMethodReturnsAStringFromASingleMessageLookupAfterOverridingTheCurrentTextDomain()
   {
     $this->assertSame('foo', X::_('foo'));
     $this->assertSame('foo bar', X::_('foo %s', 'bar'));
   }
 
   /** @test */
-  public function log_method_creates_and_saves_a_log_to_a_file_if_log_file_does_not_exist()
+  public function testLogMethodCreatesAndSavesALogToAFileIfLogFileDoesNotExist()
   {
     $this->createDir('logs');
 
@@ -198,7 +198,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function log_method_appends_a_log_to_the_existing_log_file_when_it_does_not_exceeds_the_max_log_size_file_constant()
+  public function testLogMethodAppendsALogToTheExistingLogFileWhenItDoesNotExceedsTheMaxLogSizeFileConstant()
   {
     $this->createDir('logs');
 
@@ -217,7 +217,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function log_method_backups_the_existing_log_file_then_creates_and_new_one_when_it_exceeds_the_max_log_size_file_constant()
+  public function testLogMethodBackupsTheExistingLogFileThenCreatesAndNewOneWhenItExceedsTheMaxLogSizeFileConstant()
   {
     $this->createDir('logs');
 
@@ -239,7 +239,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function log_method_echoes_out_the_message_when_called_from_cli_and_log_argument_provided_and_saves_to_a_log_file()
+  public function testLogMethodEchoesOutTheMessageWhenCalledFromCliAndLogArgumentProvidedAndSavesToALogFile()
   {
     global $argv;
     $argv[2] = 'log';
@@ -255,7 +255,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function log_method_uses_misc_as_default_name_for_the_log_file_if_not_provided()
+  public function testLogMethodUsesMiscAsDefaultNameForTheLogFileIfNotProvided()
   {
     $this->createDir('logs');
 
@@ -271,7 +271,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function logError_method_creates_and_saves_the_error_in_to_a_json_file_when_file_does_not_exist()
+  public function testLogerrorMethodCreatesAndSavesTheErrorInToAJsonFileWhenFileDoesNotExist()
   {
     $this->createDir('logs');
     $log_file = constant('BBN_DATA_PATH') . 'logs/_php_error.json';
@@ -307,7 +307,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function logError_method_and_saves_the_error_in_to_an_existing_json_file_with_incrementing_the_count_if_same_errors_exist_and_sorting_by_date()
+  public function testLogerrorMethodAndSavesTheErrorInToAnExistingJsonFileWithIncrementingTheCountIfSameErrorsExistAndSortingByDate()
   {
     $this->createDir('logs');
     $log_file = constant('BBN_DATA_PATH') . 'logs/_php_error.json';
@@ -380,7 +380,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function hasProp_method_checks_if_an_array_or_object_has_the_given_key_or_property_and_checks_if_empty_if_specified()
+  public function testHaspropMethodChecksIfAnArrayOrObjectHasTheGivenKeyOrPropertyAndChecksIfEmptyIfSpecified()
   {
     $arr = [
       'foo' => 'bar',
@@ -406,7 +406,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function hasProps_method_checks_if_an_array_or_object_has_the_given_all_keys_or_properties()
+  public function testHaspropsMethodChecksIfAnArrayOrObjectHasTheGivenAllKeysOrProperties()
   {
     $arr = [
       'foo' => 'bar',
@@ -440,7 +440,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function hasDeepProp_method_checks_if_an_array_or_object_has_the_given_deep_keys_or_properties()
+  public function testHasdeeppropMethodChecksIfAnArrayOrObjectHasTheGivenDeepKeysOrProperties()
   {
     $arr = [
       'foo' => [
@@ -491,7 +491,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_creates_dirs_for_the_given_date_format()
+  public function testMakestoragepathMethodCreatesDirsForTheGivenDateFormat()
   {
     $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing', 'd/m/y');
 
@@ -502,7 +502,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_creates_dirs_with_default_date_format_if_not_provided()
+  public function testMakestoragepathMethodCreatesDirsWithDefaultDateFormatIfNotProvided()
   {
     $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing');
 
@@ -513,7 +513,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_creates_dirs_with_for_the_given_date_format()
+  public function testMakestoragepathMethodCreatesDirsWithForTheGivenDateFormat()
   {
     $result = X::makeStoragePath($path = constant('BBN_DATA_PATH') . 'testing', 'm/d/Y');
 
@@ -524,7 +524,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_creates_and_increments_dirs_number_if_dir_exists_and_contains_other_dirs_or_files()
+  public function testMakestoragepathMethodCreatesAndIncrementsDirsNumberIfDirExistsAndContainsOtherDirsOrFiles()
   {
     $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
 
@@ -544,7 +544,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_returns_null_when_failed_to_create_the_dir()
+  public function testMakestoragepathMethodReturnsNullWhenFailedToCreateTheDir()
   {
     $file_system_mock = \Mockery::mock(\bbn\File\System::class);
 
@@ -564,7 +564,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function makeStoragePath_method_returns_null_when_failed_to_create_the_sub_dir()
+  public function testMakestoragepathMethodReturnsNullWhenFailedToCreateTheSubDir()
   {
     $file_system_mock = \Mockery::mock(\bbn\File\System::class);
 
@@ -594,7 +594,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function cleanStoragePath_method_deletes_the_given_dir_with_default_date_format_if_dir_is_empty()
+  public function testCleanstoragepathMethodDeletesTheGivenDirWithDefaultDateFormatIfDirIsEmpty()
   {
     $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
     mkdir($dirpath, 0777, true);
@@ -606,7 +606,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function cleanStoragePath_method_deletes_the_given_dir_and_date_format_if_dir_is_empty()
+  public function testCleanstoragepathMethodDeletesTheGivenDirAndDateFormatIfDirIsEmpty()
   {
     $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('m/d');
     mkdir($dirpath, 0777, true);
@@ -618,7 +618,7 @@ class XTest extends TestCase
   }
   
   /** @test */
-  public function cleanStoragePath_method_does_not_delete_the_given_dir_if_it_is_not_empty()
+  public function testCleanstoragepathMethodDoesNotDeleteTheGivenDirIfItIsNotEmpty()
   {
     $dirpath = constant('BBN_DATA_PATH') . 'foo/' . date('Y/m/d');
 
@@ -635,7 +635,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function cleanStoragePath_method_returns_null_if_the_given_dir_path_does_not_exist()
+  public function testCleanstoragepathMethodReturnsNullIfTheGivenDirPathDoesNotExist()
   {
     $this->assertNull(
       X::cleanStoragePath('foo')
@@ -643,7 +643,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function mergeObjects_method_merges_two_or_more_object_properties_into_one()
+  public function testMergeobjectsMethodMergesTwoOrMoreObjectPropertiesIntoOne()
   {
     $obj1 = (object)[
       'a' => 1,
@@ -698,7 +698,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function mergeObjects_method_throws_an_exception_if_the_provided_arguments_is_not_an_object()
+  public function testMergeobjectsMethodThrowsAnExceptionIfTheProvidedArgumentsIsNotAnObject()
   {
     $this->expectException(\Exception::class);
 
@@ -710,7 +710,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function flatten_method_flattens_a_multi_dimensional_array_for_the_given_children_index_name()
+  public function testFlattenMethodFlattensAMultiDimensionalArrayForTheGivenChildrenIndexName()
   {
     $arr = [
       [
@@ -744,7 +744,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function mergeArrays_method_merges_two_or_more_arrays_into_one()
+  public function testMergearraysMethodMergesTwoOrMoreArraysIntoOne()
   {
     $arr1 = ['a', 'b'];
     $arr2 = ['c', 'd', 'f'];
@@ -762,7 +762,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function mergeArrays_method_throws_an_exception_if_the_provided_extra_argument_is_not_an_array()
+  public function testMergearraysMethodThrowsAnExceptionIfTheProvidedExtraArgumentIsNotAnArray()
   {
     $this->expectException(\Exception::class);
 
@@ -770,7 +770,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function toObject_method_converts_a_json_string_or_an_array_to_object()
+  public function testToobjectMethodConvertsAJsonStringOrAnArrayToObject()
   {
     $result = X::toObject('{"a":1, "b":2}');
 
@@ -792,7 +792,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function toArray_method_convert_a_json_string_or_an_object_to_array()
+  public function testToarrayMethodConvertAJsonStringOrAnObjectToArray()
   {
     $this->assertSame(
       ['a' => 1, 'b' => 2],
@@ -810,7 +810,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function jsObject_method_returns_a_js_object_from_the_given_iterable()
+  public function testJsobjectMethodReturnsAJsObjectFromTheGivenIterable()
   {
     $arr = [
       'a' => 1,
@@ -841,7 +841,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function indentJson_method_indents_a_flat_json_string_to_be_human_readable()
+  public function testIndentjsonMethodIndentsAFlatJsonStringToBeHumanReadable()
   {
     $result   = X::indentJson('{"a": 1, "b":"bar", "c":"foo\"bar"}');
     $expected =  '{'.PHP_EOL.'  "a": 1,'.PHP_EOL.'   "b":"bar",'.PHP_EOL.'   "c":"foo\"bar"'.PHP_EOL.'}';
@@ -850,7 +850,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function removeEmpty_method_returns_an_array_or_object_cleaned_of_all_empty_values()
+  public function testRemoveemptyMethodReturnsAnArrayOrObjectCleanedOfAllEmptyValues()
   {
     $arr      = [
       'a' => 'foo',
@@ -889,7 +889,7 @@ class XTest extends TestCase
   }
   
   /** @test */
-  public function toGroups_method_converts_an_array_into_groups_of_array_from_the_provided_key_and_value_index_names()
+  public function testTogroupsMethodConvertsAnArrayIntoGroupsOfArrayFromTheProvidedKeyAndValueIndexNames()
   {
     $arr       = ['a', 'b', 'c'];
     $expected  = [['value' => 0, 'text' => 'a'], ['value' => 1, 'text' => 'b'], ['value' => 2, 'text' => 'c']];
@@ -914,7 +914,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function isAssoc_method_checks_if_an_array_is_associative()
+  public function testIsassocMethodChecksIfAnArrayIsAssociative()
   {
     $this->assertTrue(X::isAssoc(['a' => 'foo', 'b' => 'bar']));
     $this->assertTrue(X::isAssoc([0 => 'a', 1 => 'b', 2 => 'c', 4 => 'd']));
@@ -925,7 +925,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function isCli_method_returns_true_if_request_is_from_cli()
+  public function testIscliMethodReturnsTrueIfRequestIsFromCli()
   {
     $this->assertTrue(X::isCli());
 
@@ -934,7 +934,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function getDump_method_returns_a_dump_of_the_given_variable()
+  public function testGetdumpMethodReturnsADumpOfTheGivenVariable()
   {
     $expected = <<<EXPECTED
 
@@ -971,7 +971,7 @@ EXPECTED;
    * @test
    * @depends getDump_method_returns_a_dump_of_the_given_variable
    */
-  public function getHdump_method_returns_an_html_dump_of_the_given_arguments($data)
+  public function testGethdumpMethodReturnsAnHtmlDumpOfTheGivenArguments($data)
   {
     $result   = X::getHDump(...$data['args']);
     $expected = nl2br(
@@ -988,7 +988,7 @@ EXPECTED;
    * @test
    * @depends getDump_method_returns_a_dump_of_the_given_variable
    */
-  public function dump_method_dumps_the_given_arguments($data)
+  public function testDumpMethodDumpsTheGivenArguments($data)
   {
     $this->expectOutputString($data['expected']);
 
@@ -999,7 +999,7 @@ EXPECTED;
    * @test
    * @depends getHdump_method_returns_an_html_dump_of_the_given_arguments
    */
-  public function hdump_method_dumps_the_given_arguments_in_html($data)
+  public function testHdumpMethodDumpsTheGivenArgumentsInHtml($data)
   {
     $this->expectOutputString($data['expected']);
 
@@ -1010,7 +1010,7 @@ EXPECTED;
    * @test
    * @depends getDump_method_returns_a_dump_of_the_given_variable
    */
-  public function adump_method_dumps_the_given_arguments_in_cli_when_running_from_console($data)
+  public function testAdumpMethodDumpsTheGivenArgumentsInCliWhenRunningFromConsole($data)
   {
     $this->expectOutputString($data['expected']);
 
@@ -1021,7 +1021,7 @@ EXPECTED;
    * @test
    * @depends getHdump_method_returns_an_html_dump_of_the_given_arguments
    */
-  public function adump_method_dumps_the_given_arguments_in_html_when_not_running_from_console($data)
+  public function testAdumpMethodDumpsTheGivenArgumentsInHtmlWhenNotRunningFromConsole($data)
   {
     $this->setNonPublicPropertyValue('_cli', false);
 
@@ -1031,7 +1031,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function buildOptions_method_returns_html_content_of_option_tags_from_the_given_arguments()
+  public function testBuildoptionsMethodReturnsHtmlContentOfOptionTagsFromTheGivenArguments()
   {
     $this->assertSame(
       '<option value="a">a</option><option value="b">b</option>',
@@ -1055,7 +1055,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function toKeypair_method_converts_a_numeric_array_into_associative_one_alternating_key_and_value()
+  public function testTokeypairMethodConvertsANumericArrayIntoAssociativeOneAlternatingKeyAndValue()
   {
     $this->assertSame(
       ['a' => 'b', 'c' => 'd'],
@@ -1087,7 +1087,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function maxWithKey_method_returns_the_maximum_value_of_a_given_index_from_a_two_dimensions_array()
+  public function testMaxwithkeyMethodReturnsTheMaximumValueOfAGivenIndexFromATwoDimensionsArray()
   {
     $this->assertSame(
       45,
@@ -1101,7 +1101,7 @@ EXPECTED;
     );
   }
 
-  public function maxWithKey_method_returns_null_if_the_given_index_does_not_exist_or_the_given_array_empty()
+  public function testMaxwithkeyMethodReturnsNullIfTheGivenIndexDoesNotExistOrTheGivenArrayEmpty()
   {
     $this->assertNull(
       X::maxWithKey([
@@ -1117,7 +1117,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function minWithKey_method_returns_the_minimum_value_of_a_given_index_from_a_two_dimensions_array()
+  public function testMinwithkeyMethodReturnsTheMinimumValueOfAGivenIndexFromATwoDimensionsArray()
   {
     $this->assertSame(
       1,
@@ -1132,7 +1132,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function minWithKey_method_returns_null_if_the_given_index_does_not_exist_or_the_given_array_is_empty()
+  public function testMinwithkeyMethodReturnsNullIfTheGivenIndexDoesNotExistOrTheGivenArrayIsEmpty()
   {
     $this->assertNull(
       X::minWithKey([
@@ -1152,7 +1152,7 @@ EXPECTED;
   /**
    * @test
    */
-  public function map_method_applies_the_provided_cal_back_to_all_levels_of_a_provided_multi_dimensions_array_if_item_is_provided()
+  public function testMapMethodAppliesTheProvidedCalBackToAllLevelsOfAProvidedMultiDimensionsArrayIfItemIsProvided()
   {
     $arr = [
       [
@@ -1236,7 +1236,7 @@ EXPECTED;
   /**
    * @test
    */
-  public function rmap_method_applies_the_provided_cal_back_to_all_levels_of_a_provided_multi_dimensions_array_after_picking_the_item_if_provided()
+  public function testRmapMethodAppliesTheProvidedCalBackToAllLevelsOfAProvidedMultiDimensionsArrayAfterPickingTheItemIfProvided()
   {
     $arr = [
       [
@@ -1318,7 +1318,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function find_method_returns_array_first_index_that_satisfies_the_given_where_condition_and_null_if_not_found()
+  public function testFindMethodReturnsArrayFirstIndexThatSatisfiesTheGivenWhereConditionAndNullIfNotFound()
   {
     $arr = [
       ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1367,7 +1367,7 @@ EXPECTED;
   }
   
   /** @test */
-  public function filter_method_filters_the_given_array_using_the_given_where_conditions()
+  public function testFilterMethodFiltersTheGivenArrayUsingTheGivenWhereConditions()
   {
     $arr = [
       ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1431,7 +1431,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function getRows_method_filters_the_given_array_using_the_given_where_conditions()
+  public function testGetrowsMethodFiltersTheGivenArrayUsingTheGivenWhereConditions()
   {
     $arr = [
       ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1495,7 +1495,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function sum_method_returns_the_sum_of_the_given_field_in_the_given_array()
+  public function testSumMethodReturnsTheSumOfTheGivenFieldInTheGivenArray()
   {
     $arr = [
       ['age' => 19, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1556,7 +1556,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function getRow_method_returns_the_first_row_that_satisfies_the_given_condition_or_null_otherwise()
+  public function testGetrowMethodReturnsTheFirstRowThatSatisfiesTheGivenConditionOrNullOtherwise()
   {
     $arr = [
       ['age' => 19, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1599,7 +1599,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function getField_method_returns_the_first_value_of_given_field_that_satisfies_the_given_condition()
+  public function testGetfieldMethodReturnsTheFirstValueOfGivenFieldThatSatisfiesTheGivenCondition()
   {
     $arr = [
       ['age' => 19, 'first_name' => 'John', 'last_name' => 'Doe'],
@@ -1651,7 +1651,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function pick_method_returns_a_reference_to_sub_array_from_the_given_keys()
+  public function testPickMethodReturnsAReferenceToSubArrayFromTheGivenKeys()
   {
     $arr = [
       'session' => [
@@ -1700,7 +1700,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function sort_method_sorts_the_items_in_the_given_array()
+  public function testSortMethodSortsTheItemsInTheGivenArray()
   {
     $arr = [2, 99, 1, 0, 888, 7, 1, 3];
 
@@ -1724,7 +1724,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function sortBy_method_sorts_the_given_array_by_index_based_of_a_given_key()
+  public function testSortbyMethodSortsTheGivenArrayByIndexBasedOfAGivenKey()
   {
     $arr = [
       ['name' => 'Nick', 'age' => 24],
@@ -1810,14 +1810,14 @@ EXPECTED;
   }
   
   /** @test */
-  public function curl_method_makes_a_curl_request_to_the_given_url_and_returns_the_result_as_string()
+  public function testCurlMethodMakesACurlRequestToTheGivenUrlAndReturnsTheResultAsString()
   {
     // Cannot test this method since it uses curl which cannot be mocked
     $this->assertTrue(true);
   }
 
   /** @test */
-  public function getTree_method_returns_the_given_array_or_object_as_a_tree_structure_ready_for_a_js_tree()
+  public function testGettreeMethodReturnsTheGivenArrayOrObjectAsATreeStructureReadyForAJsTree()
   {
     $arr = [
       [
@@ -1899,7 +1899,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function move_method_moves_an_index_in_the_given_array_to_a_new_index()
+  public function testMoveMethodMovesAnIndexInTheGivenArrayToANewIndex()
   {
     $arr = [
       ['a' => 1, 'b' => 2],
@@ -1942,7 +1942,7 @@ EXPECTED;
    * @test
    * @depends getTree_method_returns_the_given_array_or_object_as_a_tree_structure_ready_for_a_js_tree
    */
-  public function makeTree_method_returns_a_view_of_an_array_or_object_as_js_tree($data)
+  public function testMaketreeMethodReturnsAViewOfAnArrayOrObjectAsJsTree($data)
   {
     $result = X::makeTree($data['arr']);
 
@@ -1951,7 +1951,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function fromCsv_method_formats_the_given_csv_line_and_returns_it_as_array()
+  public function testFromcsvMethodFormatsTheGivenCsvLineAndReturnsItAsArray()
   {
     $string   = '"141";"10/11/2002";"350.00";"1311742251"
     "142";"12/12/2002";"349.00";"1311742258"';
@@ -1975,7 +1975,7 @@ EXPECTED;
   }
 
   /** @test */
-  public function toCsv_method_formats_an_array_as_a_csv_string()
+  public function testTocsvMethodFormatsAnArrayAsACsvString()
   {
     $arr = [["John", "Mike", "David", "Clara"],["White", "Red", "Green", "Blue"]];
 
@@ -1998,7 +1998,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function isSame_method_checks_if_two_files_are_the_same_from_given_paths()
+  public function testIssameMethodChecksIfTwoFilesAreTheSameFromGivenPaths()
   {
     $this->createDir('foo');
     $file = $this->createFile('bar.txt', 'Hello World!', 'foo');
@@ -2021,7 +2021,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function isSame_method_throws_an_exception_if_files_does_not_exist()
+  public function testIssameMethodThrowsAnExceptionIfFilesDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -2029,7 +2029,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function retrieveArrayVar_method_retrieves_values_from_the_given_array_based_on_the_given_keys()
+  public function testRetrievearrayvarMethodRetrievesValuesFromTheGivenArrayBasedOnTheGivenKeys()
   {
     $arr = ['a' => ['e' => 33, 'f' => 'foo'], 'b' => 2, 'c' => 3, 'd' => ['g' => 11]];
 
@@ -2039,7 +2039,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function retrieveArrayVar_method_throws_an_exception_when_keys_cannot_be_found()
+  public function testRetrievearrayvarMethodThrowsAnExceptionWhenKeysCannotBeFound()
   {
     $this->expectException(\Exception::class);
 
@@ -2049,7 +2049,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function retrieveObjectVar_method_retrieves_values_from_the_given_object_based_on_the_given_properties()
+  public function testRetrieveobjectvarMethodRetrievesValuesFromTheGivenObjectBasedOnTheGivenProperties()
   {
     $obj = (object)['a' => (object)['e' => 33, 'f' => 'foo'], 'b' => 2, 'c' => 3, 'd' => (object)['g' => 11]];
 
@@ -2059,7 +2059,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function retrieveObjectVar_method_throws_an_exception_when_properties_cannot_be_found()
+  public function testRetrieveobjectvarMethodThrowsAnExceptionWhenPropertiesCannotBeFound()
   {
     $obj = (object)['a' => (object)['e' => 33, 'f' => 'foo'], 'b' => 2, 'c' => 3, 'd' => (object)['g' => 11]];
 
@@ -2069,7 +2069,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function countProperties_method_returns_the_count_of_the_properties_of_the_given_object()
+  public function testCountpropertiesMethodReturnsTheCountOfThePropertiesOfTheGivenObject()
   {
     $obj = (object)[
       'a' => 1,
@@ -2081,7 +2081,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function toExcel_method_creates_an_excel_file_from_the_given_array()
+  public function testToexcelMethodCreatesAnExcelFileFromTheGivenArray()
   {
     if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
       $this->expectException(\Exception::class);
@@ -2121,7 +2121,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function makeUid_method_generates_a_uid()
+  public function testMakeuidMethodGeneratesAUid()
   {
     $this->assertTrue(
       \bbn\Str::isUid(X::makeUid())
@@ -2133,7 +2133,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function convertUids_method_converts_hex_uid_to_binary_uid_from_string_or_iterables()
+  public function testConvertuidsMethodConvertsHexUidToBinaryUidFromStringOrIterables()
   {
     $uid        = 'b39e594c261e4bba85f4994bc08657dc';
     $binary_uid = hex2bin($uid);
@@ -2165,7 +2165,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function compareFloats_method_compares_two_floats_with_given_operator()
+  public function testComparefloatsMethodComparesTwoFloatsWithGivenOperator()
   {
     $this->assertTrue(
       X::compareFloats(2.0, 4.0, '<')
@@ -2185,7 +2185,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function jsonBase64Encode_method_encodes_the_given_array_values_to_base64_and_return_array_or_json()
+  public function testJsonbase64encodeMethodEncodesTheGivenArrayValuesToBase64AndReturnArrayOrJson()
   {
     $string = 'Hello World!';
     $base64 = base64_encode($string);
@@ -2202,7 +2202,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function jsonBase64Decode_method_()
+  public function testJsonbase64decodeMethod()
   {
     $arr      = ['a' => base64_encode('Hello World!'), 'b' => ['c' => base64_encode('Foo')]];
     $expected = ['a' => 'Hello World!', 'b' => ['c' => 'Foo']];
@@ -2214,7 +2214,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function indexByFirstVal_method_creates_an_associative_array_from_the_given_first_array_value()
+  public function testIndexbyfirstvalMethodCreatesAnAssociativeArrayFromTheGivenFirstArrayValue()
   {
     $arr = [
       [
@@ -2233,7 +2233,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function join_method_joins_array_with_a_string()
+  public function testJoinMethodJoinsArrayWithAString()
   {
     $this->assertSame('foobar' , X::join(['foo', 'bar']));
     $this->assertSame('foo bar' , X::join(['foo', 'bar'], ' '));
@@ -2241,7 +2241,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function concat_method_splits_a_string_by_a_string()
+  public function testConcatMethodSplitsAStringByAString()
   {
     $this->assertSame(['foo', 'bar'], X::concat('foo bar', ' '));
     $this->assertSame(['foo', 'bar'], X::concat('foo,bar', ','));
@@ -2249,7 +2249,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function split_method_splits_a_string_by_a_string()
+  public function testSplitMethodSplitsAStringByAString()
   {
     $this->assertSame(['foo', 'bar'], X::split('foo bar', ' '));
     $this->assertSame(['foo', 'bar'], X::split('foo,bar', ','));
@@ -2257,7 +2257,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function indexOf_method_searches_the_given_subject_from_start_to_end()
+  public function testIndexofMethodSearchesTheGivenSubjectFromStartToEnd()
   {
     $this->assertSame(1, X::indexOf(['a', 'b', 'c'], 'b'));
     $this->assertSame(1, X::indexOf(['a', 'b', 'c'], 'b', 1));
@@ -2272,7 +2272,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function lastIndexOf_method_searches_the_given_from_last_to_end()
+  public function testLastindexofMethodSearchesTheGivenFromLastToEnd()
   {
     $this->assertSame(1, X::lastIndexOf(['a', 'b', 'c', 'd'], 'c', 3));
     $this->assertSame(3, X::lastIndexOf(['a', 'b', 'c', 'd'], 'a', 3));
@@ -2287,7 +2287,7 @@ White,Red,Green,Blue';
   }
 
   /** @test */
-  public function output_method_test()
+  public function testOutputMethodTest()
   {
     $expected = <<<OUTPUT
 1
@@ -2318,14 +2318,14 @@ OUTPUT;
   }
 
   /** @test */
-  public function call_static_method_test_forwards_the_call_to_the_function_if_exists_and_stats_with_is()
+  public function testCallStaticMethodTestForwardsTheCallToTheFunctionIfExistsAndStatsWithIs()
   {
     $this->assertFalse(X::is_file('foo'));
     $this->assertFalse(X::is_dir('foo'));
   }
 
   /** @test */
-  public function call_static_method_throws_an_exception_when_the_function_starts_with_is_but_does_not_exist()
+  public function testCallStaticMethodThrowsAnExceptionWhenTheFunctionStartsWithIsButDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -2333,7 +2333,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function call_static_method_throws_an_exception_when_the_function_does_not_exist()
+  public function testCallStaticMethodThrowsAnExceptionWhenTheFunctionDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
