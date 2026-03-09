@@ -9,11 +9,12 @@ use bbn\Str;
 use bbn\Db;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Tables\Link;
-use bbn\Entities\Tables\Options as EntityOptions;
+use bbn\Entities\Models\Internals\EntityObjects;
 use bbn\Appui\Option;
 use bbn\Appui\Uauth;
 use bbn\Models\Tts\Cache;
 
+use function in_array;
 
 class Entity
 {
@@ -369,8 +370,7 @@ class Entity
     $excluded[] = History::$table_uids;
     $excluded[] = $ocfg['table'];
     $tableCfgs = Entities::dbConfigGetTableClasses();
-    foreach ($this->db->getForeignKeys(array_values($this->fields)[0], $this->table) as $tfn => $col) {
-      $table = $this->db->tsn($tfn);
+    foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
       if ($filter && !in_array($table, $checked)) {
         $checked[] = $table;
         if (!$filter($table)) {
@@ -383,9 +383,9 @@ class Entity
         continue;
       }
 
-      $dbModel = $this->db->modelize($tfn);
+      $dbModel = $this->db->modelize($table);
       if ($dbModel['primary'] && (count($dbModel['primary']) === 1)) {
-        $tableUids = $this->db->getColumnValues($tfn, 'DISTINCT '.$dbModel['primary'][0], [
+        $tableUids = $this->db->getColumnValues($table, 'DISTINCT '.$dbModel['primary'][0], [
           $col[0] => $this->getId(),
           [$dbModel['primary'][0], 'isnotnull'],
           [$dbModel['primary'][0] => 'ASC']
@@ -522,34 +522,55 @@ class Entity
     $res = $this->getAllRelatedIds($excluded);
     $final = [];
     $cfg = Entities::dbConfigGetTableClasses();
-    $getObject = function($cfg, $db, $entities, $entity = null) {
-      if (empty($cfg['cache'])) {
-        return new $cfg['class']($db);
-      }
-      else {
-        return new $cfg['class']($db, $entities, $entity);
-      }
-    };
+    $identity = $this->identity();
+    $address = $this->address();
+    $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];
     foreach ($res as $table => $ids) {
       if (isset($cfg[$table])) {
         $final[$table] = [];
-        $obj = match(true) {
-          $table === $this->table => $this->entities,
-          $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $this->identity()),
-          true => $getObject($cfg[$table], $this->db, $this->entities, $this)
-        };
-        if (method_exists($obj, 'dbTraitCacheGetSetFull')) {
-          foreach ($ids as $i => $id) {
-            if ($tmp = $obj->dbTraitCacheGetSetFull($id)) {
-              $final[$table][$id] = [
-                'state' => $tmp ? $tmp['hash'] : null,
-                'data' => $tmp ? $tmp['value'] : null
-              ];
+        if (in_array($table, $linkedTables)) {
+          $obj = match(true) {
+            $table === $this->table => $this->entities,
+            $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
+            true => $this->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
+          };
+          if (method_exists($obj, 'dbTraitCacheGetSetFull')) {
+            foreach ($ids as $i => $id) {
+              if ($tmp = $obj->dbTraitCacheGetSetFull($id)) {
+                $final[$table][$id] = [
+                  'state' => $tmp ? $tmp['hash'] : null,
+                  'data' => $tmp ? $tmp['value'] : null
+                ];
+              }
+              else {
+                X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+                //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+              }
             }
-            else {
-              X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
-              //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
-            }
+          }
+        }
+        elseif ($table === 'bbn_identities') {
+          foreach ($ids as $id) {
+            $final[$table][$id] = [
+              'state' => null,
+              'data' => $identity->getInfo($id)
+            ];
+          }
+        }
+        elseif ($table === 'bbn_addresses') {
+          foreach ($ids as $id) {
+            $final[$table][$id] = [
+              'state' => null,
+              'data' => $address->getInfo($id)
+            ];
+          }
+        }
+        else {
+          foreach ($ids as $id) {
+            $final[$table][$id] = [
+              'state' => null,
+              'data' => $this->db->rselect($table, [], ['id' => $id])
+            ];
           }
         }
       }
@@ -600,5 +621,23 @@ class Entity
         fn($b) => $b['data'],
         $a ?: []
       )), $this->records);
+  }
+
+  protected static function getDbObject($table, $cfg, $db, $entities, $entity = null)
+  {
+    $keys = Entities::getEntityKeys($db, $entities);
+    try {
+      if (isset($keys[$table])) {
+        $cls = new $cfg['class']($db, $entities, $entity);
+      }
+      else {
+        $cls = new $cfg['class']($db);
+      }
+    }
+    catch (Exception $e) {
+      throw new Exception(X::_("The class %s for table %s cannot be instantiated", $cfg['class'], $cfg['table']));
+    }
+
+    return $cls;
   }
 }

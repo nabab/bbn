@@ -714,14 +714,19 @@ class Cache implements CacheInterface
           $list = [];
           $it = null;
           $prefixLength = strlen($this->prefix);
-          while ($keys = $this->obj->scan($it, ($this->prefix ?? '' ).($dir ? "$dir*" : '*'))) {
-            foreach ($keys as $key) {
-              $key = mb_substr($key, $prefixLength);
-              if (empty($dir) || (mb_strpos($key, $dir) === 0)) {
-                $list[] = $key;
+          do {
+            // Scan for some keys
+            $arr_keys = $this->obj->scan($it);
+
+            // Redis may return empty results, so protect against that
+            if ($arr_keys !== FALSE) {
+              foreach($arr_keys as $str_key) {
+                if ($emptyDir || (mb_strpos($str_key, $this->prefix . $dir) === 0)) {
+                  $list[] = mb_substr($str_key, $prefixLength);
+                }
               }
             }
-          }
+          } while ($it > 0);
 
           sort($list);
           return $list;

@@ -48,6 +48,7 @@ abstract class EntityTable extends DbCls
   public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
   {
     $res = $this->getRecords();
+    $filter = $this->dbTraitGetFilterCfg($filter);
     if (!empty($filter)) {
       $res = X::filter($res, $filter);
     }

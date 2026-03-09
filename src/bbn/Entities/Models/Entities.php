@@ -15,6 +15,7 @@ use bbn\Entities\Identity;
 use bbn\Entities\Address;
 use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Models\Internals\EntitiesObjects;
 use bbn\Entities\Junctions\Consultation;
 use bbn\Entities\Tables\Document;
 use bbn\Entities\Tables\Options as EntityOptions;
@@ -131,6 +132,8 @@ abstract class Entities extends DbCls
   private $linkCls;
 
   private $links;
+
+  private static $entityKeys;
   /**
    * Entities constructor.
    *
@@ -179,7 +182,7 @@ abstract class Entities extends DbCls
    */
   public function __call($method, $args)
   {
-    $path = "\\" . get_class($this) . "\\";
+    $path = static::class . "\\";
     $cls = ucfirst($method);
     $entity = $args[0] ?? null;
 
@@ -465,79 +468,6 @@ abstract class Entities extends DbCls
     return $this->options;
   }
 
-  public function consultation(): ?Consultation
-  {
-    $cls = $this->class_cfg["classes"];
-    if (!$this->consultation && $cls["consultation"]) {
-      $this->consultation = new ($cls["consultation"])($this->db);
-    }
-
-    return $this->consultation;
-  }
-
-  public function mail(): ?Option
-  {
-    $cls = $this->class_cfg["classes"];
-    if (!$this->mail && $cls["mail"]) {
-      $this->mail = new ($cls["mail"])($this->db);
-    }
-
-    return $this->mail;
-  }
-
-  public function document(Entity|null $entity = null): ?Document
-  {
-    $cls = $this->class_cfg["classes"];
-    if (!empty($cls["document"])) {
-      if ($entity) {
-        return new ($cls["document"])($this->db, $this, $entity);
-      }
-
-      if (!$this->document) {
-        $this->document = new ($cls["document"])($this->db);
-      }
-
-      return $this->document;
-    }
-
-    return null;
-  }
-
-  public function request(Entity|null $entity = null): ?DocumentRequest
-  {
-    $cls = $this->class_cfg["classes"];
-    if (!empty($cls["request"])) {
-      if ($entity) {
-        return new ($cls["request"])($this->db, $this, $entity);
-      }
-
-      if (!$this->request) {
-        $this->request = new ($cls["request"])($this->db);
-      }
-
-      return $this->request;
-    }
-
-    return null;
-  }
-
-  public function entityOptions(Entity|null $entity = null): ?EntityOptions
-  {
-    $cls = $this->class_cfg["classes"];
-    if (!empty($cls["entity_options"])) {
-      if ($entity) {
-        return new ($cls["entity_options"])($this->db, $this, $entity);
-      }
-
-      if (!$this->entityOptions) {
-        $this->entityOptions = new ($cls["entity_options"])($this->db);
-      }
-
-      return $this->entityOptions;
-    }
-
-    return null;
-  }
 
   public function getLink(string $linkCls, Entity|null $entity = null): ?Link
   {
@@ -568,6 +498,50 @@ abstract class Entities extends DbCls
   }
 
 
+  public static function getEntityKeys(Db $db, Entities $ent): array
+  {
+    if (!self::$entityKeys) {
+      $keys = [];
+      $cfg = $ent->getClassCfg();
+      foreach ($db->getForeignKeys($cfg['arch']['entities']['id'], $cfg['tables']['entities']) as $tfn => $col) {
+        $keys[$db->tsn($tfn)] = $col;
+      }
+  
+      self::$entityKeys = $keys;
+    }
+
+    return self::$entityKeys;
+  }
+
+
+  protected function factorEntityObject(string $method, string $clsName, ?Entity $entity = null): object
+  {
+    if (!$entity) {
+      if (!isset(self::$classes[$method])) {
+        try {
+          $cls = new $clsName($this->db, $this);
+          self::setClass($method, $cls);
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The method %s cannot create the instance of %s", $method, $clsName));
+        }
+      }
+      else {
+        $cls = self::$classes[$method];
+      }
+    }
+    else {
+      try {
+        $cls = new $clsName($this->db, $this, $entity);
+      }
+      catch (Exception $e) {
+        throw new Exception(X::_("The method %s cannot create the instance of %s", $method, $clsName));
+      }
+    }
+
+    return $cls;
+  }
+
 
   protected function getClass(
     string $clsName,
@@ -576,14 +550,34 @@ abstract class Entities extends DbCls
   ): EntityJunction|EntityTable|DbCls {
     if (!$entity) {
       if (!isset(self::$classes[$index])) {
-        $cls = new $clsName($this->db, $this);
-        self::setClass($index, $cls);
+        try {
+          $cls = new $clsName($this->db, $this);
+          self::setClass($index, $cls);
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+        }
+      }
+      else {
+        try {
+          $cls = self::$classes[$index];
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+        }
       }
 
-      return self::$classes[$index];
+    }
+    else {
+      try {
+        $cls = new $clsName($this->db, $this, $entity);
+      }
+      catch (Exception $e) {
+        throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+      }
     }
 
-    return new $clsName($this->db, $this, $entity);
+    return $cls;
   }
 
   protected function treatWhere(string|array $where): string|array
@@ -601,7 +595,7 @@ abstract class Entities extends DbCls
     self::$linksCache[$id] = $link;
   }
 
-  private static function setClass(
+  protected static function setClass(
     string $index,
     EntityJunction|EntityTable $cls,
   ): void {

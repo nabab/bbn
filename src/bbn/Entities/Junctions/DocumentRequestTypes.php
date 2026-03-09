@@ -2,12 +2,10 @@
 
 namespace bbn\Entities\Junctions;
 
-use bbn\Entities\Models\EntityJunction;
-use bbn\Models\Tts\DbJunction;
+use bbn\Entities\Models\EntityTable;
 
-class DocumentRequestTypes extends EntityJunction
+class DocumentRequestTypes extends EntityTable
 {
-  use DbJunction;
 
   protected static $default_class_cfg = [
     'table' => 'bbn_documents_requests_types',

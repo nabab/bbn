@@ -17,7 +17,12 @@ use bbn\Mvc;
 
 trait DbJunction
 {
-  use DbTrait;
+  use DbConfig;
+  use DbFiltering;
+  use DbStructure;
+  use DbData;
+  use DbSelection;
+  use DbWrite;
 
   private static array $_isInitJunction = [];
   protected $rootFilterCfg = [];
@@ -25,7 +30,7 @@ trait DbJunction
   private static array $dbJunctionCfg = [];
 
   /**
-   * @param array|string $id
+   * @param array $filter
    * @return bool
    */
   public function dbTraitExists(array $filter): bool

@@ -110,6 +110,19 @@ class Address extends DbCls
     return $d;
   }
 
+  public function get($id)
+  {
+    $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
+    if ($d) {
+      if (!empty($d['tel'])) {
+        $d['tel'] = (string)$d['tel'];
+      }
+      $d['fadresse'] = $this->fadresse($d);
+    }
+
+    return $d;
+  }
+
   public function search($fn, $cp = null)
   {
     $f = $this->getClassCfg()['arch']['addresses'];

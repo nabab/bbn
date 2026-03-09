@@ -64,21 +64,16 @@ trait DbCache
 
         return $o;
       });
-      $this->on("afterselect", function (InternalEvent $o): InternalEvent {
-        [$id, $data] = $o->getData();
-
-        return $o;
-      });
       $this->on("afterinsert", function (InternalEvent $o): InternalEvent {
         $id = $o->getData()[0];
         $this->dbTraitCacheSet($id);
-
         return $o;
       });
       $this->on("beforeupdate", function (InternalEvent $o): InternalEvent {
-        [$filter, $data] = $o->getData();
+        $filter = $o->getData()[0];
         $ids = $this->dbTraitGetIds($filter);
         $o->setResponse($ids);
+        return $o;
       });
       $this->on("afterupdate", function (InternalEvent $o): InternalEvent {
         $id = $o->getData()[0];
@@ -94,7 +89,6 @@ trait DbCache
         foreach ($ids as $id) {
           $this->dbTraitCacheDelete($id);
         }
-
         return $o;
       });
     }
@@ -109,19 +103,6 @@ trait DbCache
   protected function dbTraitRowCacheKey(string $id): string
   {
     return "table/{$this->class_table}/{$id}";
-  }
-
-  /**
-   * Returns the cache key for an "ids list" query.
-   *
-   * @param array $filter Filter config.
-   * @param array $order Order config.
-   * @return string
-   */
-  protected function dbTraitIdsCacheKey(array $filter, array $order): string
-  {
-    $signature = md5(json_encode([$filter, $order]));
-    return "table/{$this->class_table}/ids/{$signature}";
   }
 
   /**
@@ -277,7 +258,7 @@ trait DbCache
                 $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
                 if ($idx1 !== null) {
                   $id = $cfg['values'][$idx1];
-                  $cache->delete("table/" . $table . "/". $id);
+                  $cache->delete("table/$table/$id");
                 }
               }
             }
@@ -286,9 +267,9 @@ trait DbCache
                 $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
                 if ($idx1 !== null) {
                   $id = $cfg['values'][$idx1];
-                  $ids = $db->getColumnValues($dep['table'], 'id', [$dep['field'] => $id]);
+                  $ids = $db->getColumnValues($dep, 'id', [$dep['field'] => $id]);
                   foreach ($ids as $id) {
-                    $cache->delete("table/" . $dep['table'] . "/". $id);
+                    $cache->delete("table/$dep/$id");
                   }
                 }
               }
