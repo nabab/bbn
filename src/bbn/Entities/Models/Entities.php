@@ -597,7 +597,8 @@ abstract class Entities extends DbCls
 
   protected static function setClass(
     string $index,
-    EntityJunction|EntityTable $cls,
+    //EntityJunction|EntityTable $cls,
+    $cls,
   ): void {
     self::$classes[$index] = $cls;
   }
