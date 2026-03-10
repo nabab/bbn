@@ -100,7 +100,7 @@ trait DbWrite
         }
 
         $o = $this->emit("afterdelete", [$filter, $cascade]);
-        return $o->response() ?: $res;
+        return $o->getResponse() ?: $res;
       }
     }
 
@@ -165,14 +165,14 @@ trait DbWrite
       }
 
       $f = $this->dbTraitGetFilterCfg($filter);
-      $o = $this->emit("beforeupdate", [$f, $data]);
+      $o = $this->emit("beforeupdate", $f, $data);
 
       if (
         !$o->isDefaultPrevented() &&
         ($res = $this->db->update($this->class_table, $data, $f))
       ) {
-        $o = $this->emit("afterupdate", [$f, $data]);
-        return $o->response() ?: $res;
+        $this->emit("afterupdate", $f, $data, $res, $o);
+        return $o->getResponse() ?: $res;
       }
     }
 

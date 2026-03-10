@@ -13,6 +13,7 @@ use function mb_ereg_replace;
 use function is_object;
 use function is_string;
 use function count;
+use function strlen;
 
 /**
  * Universal caching class: called once per request, it holds the cache system.
@@ -288,8 +289,8 @@ class Cache implements CacheInterface
         case 'apc':
           return call_user_func('\\apcu_delete', $key);
         case 'redis':
-          if ($this->prefix && mb_strpos($key, $this->prefix) !== 0) {
-            $key = $this->prefix . $key;
+          if ($this->prefix && mb_strpos($key, $this->prefix) === 0) {
+            $key = substr($key, strlen($this->prefix));
           }
 
           return $this->obj->unlink($key);

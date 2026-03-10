@@ -3,6 +3,7 @@
 namespace bbn\Util;
 
 use LogicException;
+use function array_last;
 
 final class InternalEvent
 {
@@ -39,9 +40,9 @@ final class InternalEvent
     return $this->responses;
   }
 
-  public function response(): mixed
+  public function getResponse(): mixed
   {
-    return end($this->responses) ?: null;
+    return array_last($this->responses) ?: null;
   }
 
   public function preventDefault(): void

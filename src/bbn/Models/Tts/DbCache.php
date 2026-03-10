@@ -74,8 +74,14 @@ trait DbCache
         return $o;
       });
       $this->on("afterupdate", function (InternalEvent $o): InternalEvent {
-        $id = $o->getData()[0];
-        $this->dbTraitCacheSet($id);
+        if ($ids = $o->getResponse()) {
+          foreach ($ids as $id) {
+            $this->dbTraitCacheSet($id);
+          }
+          [ , , $res] = $o->getData();
+          $o->setResponse($res);
+        }
+
         return $o;
       });
       $this->on("beforedelete", function (InternalEvent $o): InternalEvent {
