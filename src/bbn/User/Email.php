@@ -2004,12 +2004,15 @@ class Email extends Basic
           if ($id_parent) {
             $a['id_parent'] = $id_parent;
             $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
+            $a['num'] = $pref->getMaxBitNum($id_account, $id_parent) + 1;
           }
           else {
             if (!empty($rules)
               && ($rule = array_search($a['uid'], $rules))
             ) {
-              $a['id_option'] = X::getField($types, ['code' => $rule], 'id');
+              $tmpRule = X::getRow($types, ['code' => $rule]);
+              $a['id_option'] = $tmpRule['id'];
+              $a['num'] = $tmpRule['num'] ?: null;
             }
             else {
               foreach ($types as $type) {
@@ -2021,6 +2024,7 @@ class Email extends Basic
                   )) {
                     if (empty($rules) || empty($rules[$type['code']])) {
                       $a['id_option'] = $type['id'];
+                      $a['num'] = $type['num'] ?: null;
                     }
 
                     break;
@@ -2030,7 +2034,15 @@ class Email extends Basic
             }
 
             if (!isset($a['id_option'])) {
-              $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
+              $tmpType = X::getRow($types, ['code' => 'folders']);
+              $a['id_option'] = $tmpType['id'];
+              if (empty($a['num'])) {
+                $a['num'] = $tmpType['num'] ?: null;
+                $tmpMax = $pref->getMaxBitNum($id_account, $a['id_parent'] ?? null);
+                if ($tmpMax >= $a['num']) {
+                  $a['num'] = $tmpMax + 1;
+                }
+              }
             }
           }
 
@@ -2040,6 +2052,8 @@ class Email extends Basic
             }
           }
         }
+
+        //$this->pref->fixBitsOrder($id_account, null, true);
       };
 
       $update = function(array $toUpdate) use ($pref): void {
