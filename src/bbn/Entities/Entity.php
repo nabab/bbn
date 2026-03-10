@@ -529,6 +529,7 @@ class Entity
             true => $this->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
           };
           if (method_exists($obj, 'dbTraitCacheGetSetFull')) {
+            X::log(get_class($obj), 'classes');
             foreach ($ids as $i => $id) {
               if ($tmp = $obj->dbTraitCacheGetSetFull($id)) {
                 $final[$table][$id] = [

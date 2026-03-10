@@ -8,18 +8,13 @@
 
 namespace bbn\Models\Tts;
 
+use Exception;
 use bbn\Cache;
 use bbn\Db;
 use bbn\X;
-use bbn\Mvc;
-use bbn\Mvc\Controller;
-use bbn\Mvc\Model;
 use bbn\Util\InternalEvent;
-use ReflectionProperty;
-use Exception;
 use function array_key_exists;
 use function count;
-use function is_string;
 use function is_array;
 use function in_array;
 
@@ -105,6 +100,20 @@ trait DbCache
    */
   protected function dbTraitRowCacheKey(string $id): string
   {
+    if (!isset($this->class_table)) {
+      $cfg = self::getDefaultClassCfg();
+      while ($cfg && empty($cfg['table'])) {
+        $cls = get_parent_class($this);
+        if (!$cls) {
+          throw new Exception(X::_("Impossible to find a table for class %s", self::class));
+        }
+
+        $cfg = $cls::getDefaultClassCfg();
+      }
+
+      return "table/{$cfg['table']}/{$id}";
+    }
+
     return "table/{$this->class_table}/{$id}";
   }
 
@@ -182,6 +191,9 @@ trait DbCache
   protected function dbTraitCacheSet(string $id, array $fields = []): ?array
   {
     static::dbTraitGlobalCacheInit();
+    if (!isset($this->class_table)) {
+      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", self::class));
+    }
     $cfg = $this->getClassCfg();
     $f = array_values($cfg["arch"][$this->class_table_index]);
     $tableCfg = self::dbConfigGetTableClasses($this->db);
