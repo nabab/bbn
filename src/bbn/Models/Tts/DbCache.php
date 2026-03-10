@@ -55,8 +55,10 @@ trait DbCache
   {
     static::dbTraitGlobalCacheInit();
     if ($this->class_cfg["cache"] ?? false) {
+      /*
       $this->on("beforeselect", function (InternalEvent $o): InternalEvent {
         $filter = $o->getData()[0];
+        X::ddump($filter, "cache beforeselect filter");
         if (is_string($filter) && $this->dbTraitCacheGet($filter)) {
           $o->setResponse($this->dbTraitCacheGet($filter));
           $o->preventDefault();
@@ -64,6 +66,7 @@ trait DbCache
 
         return $o;
       });
+      */
       $this->on("afterinsert", function (InternalEvent $o): InternalEvent {
         $id = $o->getData()[0];
         $this->dbTraitCacheSet($id);
@@ -181,6 +184,7 @@ trait DbCache
     static::dbTraitGlobalCacheInit();
     $cfg = $this->getClassCfg();
     $f = array_values($cfg["arch"][$this->class_table_index]);
+    $tableCfg = self::dbConfigGetTableClasses($this->db);
     if (is_array($cfg["cache"]) && isset($cfg["cache"]["excluded"])) {
       $excluded = $cfg["cache"]["excluded"];
       foreach ($excluded as $col) {
@@ -198,11 +202,102 @@ trait DbCache
         array_values($f),
       )
     ) {
+      if (!empty($tableCfg[$this->class_table]['junctions'])) {
+        $this->dbTraitCacheApplyJunctions(
+          $data,
+          $tableCfg[$this->class_table]['junctions'],
+          $tableCfg
+        );
+      }
+
       self::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
       return $this->dbTraitCacheGet($id, $fields);
     }
 
     return null;
+  }
+
+  /**
+   * Applies junction enrichment recursively to a row.
+   *
+   * Each junction can:
+   * - fetch one linked row from another table
+   * - attach it under `property`
+   * - or merge it into the current row if no property is given
+   * - recursively apply nested junctions through `junctions`
+   *
+   * Supported junction config keys:
+   * - table      : linked table name
+   * - field      : local field containing the linked row id
+   * - property   : optional property name for embedding
+   * - filter     : optional extra filter
+   * - fields     : optional selected fields
+   * - mode       : optional, defaults to 'one'
+   * - junctions  : optional nested junction definitions
+   *
+   * @param array $data
+   * @param array $junctions
+   * @param array $tableCfg
+   * @return array
+   */
+  protected function dbTraitCacheApplyJunctions(
+    array &$data,
+    array $junctions,
+    array $tableCfg
+  ): array {
+    foreach ($junctions as $j) {
+      if (
+        !X::hasProps($j, ['table', 'field'], true) ||
+        empty($data[$j['field']])
+      ) {
+        continue;
+      }
+
+      $mode = $j['mode'] ?? 'one';
+
+      // Not implemented yet, kept here for later extension
+      if ($mode === 'many') {
+        continue;
+      }
+
+      $where = $j['filter'] ?? [];
+
+      if (isset($tableCfg[$j['table']]['primary'][0])) {
+        $where[$tableCfg[$j['table']]['primary'][0]] = $data[$j['field']];
+      }
+
+      if (empty($where)) {
+        continue;
+      }
+
+      $jdata = $this->db->rselect(
+        $j['table'],
+        $j['fields'] ?? [],
+        $where
+      );
+
+      if (!$jdata) {
+        continue;
+      }
+
+      // Apply nested junctions on the fetched row
+      if (!empty($j['junctions']) && is_array($j['junctions'])) {
+        $this->dbTraitCacheApplyJunctions(
+          $jdata,
+          $j['junctions'],
+          $tableCfg
+        );
+      }
+
+      if (!empty($j['property'])) {
+        $data[$j['property']] = $jdata;
+      }
+      else {
+        X::extendOut($data, $jdata);
+      }
+    }
+
+    return $data;
   }
 
   /**
@@ -247,7 +342,7 @@ trait DbCache
     if (!defined("BBN_DBACTIONS_CACHE_INIT")) {
       define("BBN_DBACTIONS_CACHE_INIT", true);
       $cache = Cache::getEngine();
-      $arr = self::dbConfigGetTableClasses();
+      $arr = self::dbConfigGetTableClasses($db);
       $db->setTrigger(function ($cfg) use ($cache, $db, $arr) {
         if (!empty($cfg["write"]) && $cfg["moment"] === "after") {
           $table = $db->tsn(array_values($cfg["tables"])[0]);

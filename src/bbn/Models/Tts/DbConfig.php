@@ -3,6 +3,7 @@ namespace bbn\Models\Tts;
 
 use Exception;
 use bbn\X;
+use bbn\Db;
 use bbn\Models\Internal\DbConfigRegistryBuilder;
 
 use function count;
@@ -307,13 +308,13 @@ trait DbConfig
    * @return array<string, array<string, mixed>>
    * @throws Exception If the Composer class map cannot be loaded.
    */
-  public static function dbConfigGetTableClasses(): array
+  public static function dbConfigGetTableClasses(Db $db): array
   {
     if (isset(self::$dbConfigTableClasses)) {
       return self::$dbConfigTableClasses;
     }
 
-    $builder = new DbConfigRegistryBuilder();
+    $builder = new DbConfigRegistryBuilder($db);
     self::$dbConfigTableClasses = $builder->getRegistry();
 
     return self::$dbConfigTableClasses;

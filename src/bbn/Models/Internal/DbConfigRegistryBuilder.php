@@ -6,6 +6,7 @@ use bbn\Cache;
 use bbn\Mvc;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 use Exception;
 use ReflectionProperty;
 
@@ -73,6 +74,7 @@ class DbConfigRegistryBuilder
    * @param object|null $cacheEngine Optional cache engine. If omitted, the default engine is used.
    */
   public function __construct(
+    protected ?Db $db,
     protected ?object $cacheEngine = null
   )
   {
@@ -170,23 +172,117 @@ class DbConfigRegistryBuilder
         $registry[$table]['cache'] = true;
       }
 
+      if (!empty($meta['primary'])) {
+        $registry[$table]['primary'] = $meta['primary'];
+      }
+
       if (!empty($meta['junctions'])) {
-        foreach ($meta['junctions'] as $j) {
-          $registry[$table]['junctions'][] = $j;
-        }
+        $registry[$table]['junctions'] = $this->normalizeJunctions($meta['junctions']);
       }
     }
 
     ksort($registry);
-    $this->buildReverseDependencies($registry);
-
     foreach ($registry as $table => $cfg) {
       if (empty($cfg['junctions'])) {
         unset($registry[$table]['junctions']);
       }
+      else {
+        $this->ensureJunctionTablesInRegistry($registry, $cfg['junctions']);
+      }
     }
 
+    $this->buildReverseDependencies($registry);
+
     return $registry;
+  }
+
+  /**
+   * Ensures that every table referenced in junctions exists in the registry.
+   *
+   * If a table is not class-backed, a minimal registry entry is created
+   * using DB metadata.
+   *
+   * This is recursive and will also inspect nested subjunctions.
+   *
+   * @param array $registry
+   * @param array $junctions
+   * @return void
+   */
+  protected function ensureJunctionTablesInRegistry(
+    array &$registry,
+    array $junctions
+  ): void {
+    foreach ($junctions as $junction) {
+      if (empty($junction['table']) || !is_string($junction['table'])) {
+        continue;
+      }
+
+      $table = $junction['table'];
+
+      if (!isset($registry[$table])) {
+        $registry[$table] = $this->makeVirtualRegistryEntry($table);
+      }
+      else {
+        if (empty($registry[$table]['primary'])) {
+          $registry[$table]['primary'] = $this->getTablePrimary($table);
+        }
+
+        if (!isset($registry[$table]['cache'])) {
+          $registry[$table]['cache'] = false;
+        }
+
+        if (!isset($registry[$table]['junctions'])) {
+          $registry[$table]['junctions'] = [];
+        }
+      }
+
+      if (!empty($junction['junctions']) && is_array($junction['junctions'])) {
+        $this->ensureJunctionTablesInRegistry($registry, $junction['junctions']);
+      }
+    }
+  }
+
+  /**
+   * Creates a minimal registry entry for a table that has no mapped class.
+   *
+   * @param string $table
+   * @return array<string, mixed>
+   */
+  protected function makeVirtualRegistryEntry(string $table): array
+  {
+    return [
+      'class' => null,
+      'cache' => false,
+      'primary' => $this->getTablePrimary($table),
+      'junctions' => []
+    ];
+  }
+
+  /**
+   * Returns the primary key columns for a table.
+   *
+   * Falls back to ['id'] if the DB model does not expose a primary key.
+   *
+   * @param string $table
+   * @return array<int, string>
+   */
+  protected function getTablePrimary(string $table): array
+  {
+    try {
+      $model = $this->db->modelize($table);
+
+      if (!empty($model['keys']['PRIMARY']['columns'])) {
+        return array_values($model['keys']['PRIMARY']['columns']);
+      }
+
+      if (!empty($model['primary']) && is_array($model['primary'])) {
+        return array_values($model['primary']);
+      }
+    }
+    catch (\Throwable) {
+    }
+
+    return ['id'];
   }
 
   /**
@@ -232,6 +328,42 @@ class DbConfigRegistryBuilder
   }
 
   /**
+   * Normalizes junction definitions recursively.
+   *
+   * @param array $junctions
+   * @return array
+   */
+  protected function normalizeJunctions(array $junctions): array
+  {
+    $result = [];
+
+    foreach ($junctions as $j) {
+      if (empty($j['table']) || empty($j['field'])) {
+        continue;
+      }
+
+      $normalized = [
+        'table' => $j['table'],
+        'field' => $j['field']
+      ];
+
+      foreach (['property', 'filter', 'fields', 'mode'] as $opt) {
+        if (array_key_exists($opt, $j)) {
+          $normalized[$opt] = $j[$opt];
+        }
+      }
+
+      if (!empty($j['junctions']) && is_array($j['junctions'])) {
+        $normalized['junctions'] = $this->normalizeJunctions($j['junctions']);
+      }
+
+      $result[] = $normalized;
+    }
+
+    return $result;
+  }
+
+  /**
    * Extracts table metadata from a class and its parents.
    *
    * The scan stops once both:
@@ -253,6 +385,7 @@ class DbConfigRegistryBuilder
     $cacheDone = false;
     $hasCache = false;
     $table = null;
+    $primary = null;
     $junctionDone = false;
     $junctions = [];
     $current = $cls;
@@ -272,22 +405,32 @@ class DbConfigRegistryBuilder
               $hasCache = (bool)$value['cache'];
             }
 
-            if (!$table && isset($value['table']) && is_string($value['table'])) {
+            if (!$table && !empty($value['table']) && is_string($value['table'])) {
               $table = $value['table'];
+            }
+
+            if (!$primary && !empty($table)) {
+              try {
+                $model = $this->db->modelize($table);
+                if (!empty($model['keys']['PRIMARY']['columns'])) {
+                  $primary = $model['keys']['PRIMARY']['columns'];
+                }
+                elseif (!empty($model['primary'])) {
+                  $primary = $model['primary'];
+                }
+              }
+              catch (\Throwable) {
+              }
             }
 
             if (
               $hasCache
               && !$junctionDone
-              && isset($value['junctions'])
+              && !empty($value['junctions'])
               && is_array($value['junctions'])
             ) {
               $junctionDone = true;
-              foreach ($value['junctions'] as $j) {
-                if (isset($j['table'], $j['field'])) {
-                  $junctions[] = $j;
-                }
-              }
+              $junctions = $value['junctions'];
             }
 
             if ($hasCache && $table) {
@@ -307,39 +450,108 @@ class DbConfigRegistryBuilder
     return [
       'table' => $table,
       'cache' => $hasCache,
+      'primary' => $primary ?: ['id'],
       'junctions' => $junctions
     ];
   }
 
   /**
-   * Builds reverse dependencies (`deps`) from junction definitions.
+   * Builds reverse dependencies recursively from junction definitions.
    *
-   * Example:
-   * if `bbn_members_entities` has a junction to `bbn_members`,
-   * then `bbn_members` gets `deps => ['bbn_members_entities']`.
+   * A direct junction:
+   *   source -> target
    *
-   * @param array<string, array<string, mixed>> $registry
+   * creates:
+   *   target['deps'][] = [
+   *     'table' => source,
+   *     'field' => junction.field
+   *   ]
+   *
+   * Nested junctions also create reverse dependencies, keeping the root source table.
+   *
+   * @param array $registry
    * @return void
    */
   protected function buildReverseDependencies(array &$registry): void
   {
-    foreach ($registry as $table => $cfg) {
+    foreach ($registry as $sourceTable => $cfg) {
       if (empty($cfg['junctions'])) {
         continue;
       }
 
-      foreach ($cfg['junctions'] as $j) {
-        if (isset($j['table']) && isset($registry[$j['table']])) {
-          if (!isset($registry[$j['table']]['deps'])) {
-            $registry[$j['table']]['deps'] = [];
-          }
+      $this->appendReverseDependencies(
+        $registry,
+        $sourceTable,
+        $cfg['junctions']
+      );
+    }
+  }
 
-          if (!in_array($table, $registry[$j['table']]['deps'], true)) {
-            $registry[$j['table']]['deps'][] = $table;
-          }
+  /**
+   * Recursively appends reverse dependencies for a source table.
+   *
+   * @param array  $registry
+   * @param string $sourceTable
+   * @param array  $junctions
+   * @return void
+   */
+  protected function appendReverseDependencies(
+    array &$registry,
+    string $sourceTable,
+    array $junctions
+  ): void {
+    foreach ($junctions as $junction) {
+      if (empty($junction['table']) || empty($junction['field'])) {
+        continue;
+      }
+
+      $targetTable = $junction['table'];
+
+      if (isset($registry[$targetTable])) {
+        if (!isset($registry[$targetTable]['deps'])) {
+          $registry[$targetTable]['deps'] = [];
+        }
+
+        $dep = [
+          'table' => $sourceTable,
+          'field' => $junction['field']
+        ];
+
+        if (!$this->hasDependency($registry[$targetTable]['deps'], $dep)) {
+          $registry[$targetTable]['deps'][] = $dep;
         }
       }
+
+      if (!empty($junction['junctions']) && is_array($junction['junctions'])) {
+        $this->appendReverseDependencies(
+          $registry,
+          $sourceTable,
+          $junction['junctions']
+        );
+      }
     }
+  }
+
+  /**
+   * Checks whether a dependency already exists.
+   *
+   * @param array $deps
+   * @param array $needle
+   * @return bool
+   */
+  protected function hasDependency(array $deps, array $needle): bool
+  {
+    foreach ($deps as $dep) {
+      if (
+        isset($dep['table'], $dep['field']) &&
+        $dep['table'] === $needle['table'] &&
+        $dep['field'] === $needle['field']
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

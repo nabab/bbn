@@ -45,26 +45,29 @@ trait DbFiltering
   protected function dbTraitGetFilterCfg(array $cfg): array
   {
     $conditions = [];
-    if (!empty($this->rootFilterCfg)) {
-      $conditions[] = $this->rootFilterCfg;
-    }
-
-    if (!empty($this->dbTraitFilterCfg)) {
-      $conditions[] = $this->dbTraitFilterCfg;
-    }
-
-    if (!empty($cfg)) {
-      $conditions[] = $cfg;
+    $todo = [$this->rootFilterCfg ?? [], $this->dbTraitFilterCfg ?? [], $cfg];
+    foreach ($todo as $c) {
+      if (!empty($c)) {
+        if (X::isAssoc($c)) {
+          if (isset($c['logic']) && $c['logic'] === 'OR') {
+            $conditions[] = $c;
+          }
+          elseif (isset($c['conditions']) && is_array($c['conditions'])) {
+            array_push($conditions, ...array_values($c['conditions'])); // Flatten conditions into main list
+          }
+          else {
+            X::extendOut($conditions, $c);
+          }
+        }
+        else {
+          array_push($conditions, ...array_values($c));
+        }
+      }
     }
 
     // Return empty array if no conditions exist
     if (empty($conditions)) {
       return [];
-    }
-
-    // Return single condition if only one exists
-    if (count($conditions) === 1) {
-      return $conditions[0];
     }
 
     // Combine all conditions with 'AND' logic

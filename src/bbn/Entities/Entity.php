@@ -31,9 +31,6 @@ class Entity
 
   protected array $records;
 
-  /** @var null|bool Adherent verification status. */
-  private $checked = null;
-
   protected array $info = [];
 
   protected ?Link $links;
@@ -103,13 +100,8 @@ class Entity
 
   public function check(): bool
   {
-    if ($this->checked === null) {
-      $this->checked = (bool)$this->db->count($this->class_cfg['tables']['entities'], $this->where);
-    }
-
-    return $this->checked;
+    return (bool)$this->id;
   }
-
 
   public function getId(): string
   {
@@ -369,7 +361,6 @@ class Entity
     $ocfg = $this->options()->getClassCfg();
     $excluded[] = History::$table_uids;
     $excluded[] = $ocfg['table'];
-    $tableCfgs = Entities::dbConfigGetTableClasses();
     foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
       if ($filter && !in_array($table, $checked)) {
         $checked[] = $table;
@@ -398,6 +389,8 @@ class Entity
       }
     }
 
+    /*
+    $tableCfgs = Entities::dbConfigGetTableClasses($this->db);
     foreach ($tableCfgs as $table => $cfg) {
       if (!empty($cfg['deps'])) {
         foreach ($cfg['deps'] as $dep) {
@@ -418,6 +411,7 @@ class Entity
         }
       }
     }
+      */
 
     foreach ($res as $table => $ids) {
       $res[$table] = array_unique($ids);
@@ -521,7 +515,7 @@ class Entity
   {
     $res = $this->getAllRelatedIds($excluded);
     $final = [];
-    $cfg = Entities::dbConfigGetTableClasses();
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
     $identity = $this->identity();
     $address = $this->address();
     $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];

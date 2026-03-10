@@ -266,7 +266,7 @@ trait DbJunction
 
     /*
     $keys = $this->db->getKeys($this->class_cfg['table']);
-    $tcs = self::dbConfigGetTableClasses()['tables'];
+    $tcs = self::dbConfigGetTableClasses($this->db)['tables'];
     $linkedClasses = [];
     foreach ($keys["keys"] as $n => $v) {
       if (
