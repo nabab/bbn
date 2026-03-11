@@ -8,7 +8,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
-use bbn\Cache;
+use bbn\Models\Tts\Cache;
 use bbn\Mail;
 use bbn\User;
 use bbn\User\Preferences;
@@ -28,6 +28,7 @@ use Exception;
  */
 class Manager
 {
+  use Cache;
 
   protected static $admin_group;
 
@@ -175,9 +176,7 @@ You can click the following link to access directly your account:<br>
   public function groups(): array
   {
     if (!isset(self::$_groups)) {
-      $cache = Cache::getEngine();
-      $key = Str::replace('\\', '/', get_class($this)) . '_groups';
-      if (!($cached = $cache->get($key))) {
+      if (!($cached = $this->cacheGet('groups'))) {
         $cfg = $this->class_cfg;
         $a             =& $cfg['arch'];
         $t             =& $cfg['tables'];
@@ -211,7 +210,7 @@ You can click the following link to access directly your account:<br>
           $c[$a['groups']['cfg']] = $c[$a['groups']['cfg']] ? json_decode($c[$a['groups']['cfg']], true) : [];
         }
         unset($c);
-        $cache->set($key, $cached, 1440);
+        $this->cacheSet('groups', '', $cached, 1440);
       }
       self::setGroups($cached);
     }

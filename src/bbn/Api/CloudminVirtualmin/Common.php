@@ -41,7 +41,6 @@ trait Common
   public function __construct(array $cfg)
   {
     if (isset($cfg['user'], $cfg['pass'])) {
-      $this->cacheInit();
       $this->user     = $cfg['user'];
       $this->pass     = $cfg['pass'];
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';

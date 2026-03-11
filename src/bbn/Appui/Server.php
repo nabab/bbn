@@ -73,7 +73,6 @@ class Server
    */
   public function __construct($cfg)
   {
-    $this->cacheInit();
     self::optionalInit();
     if (\is_string($cfg)) {
       $opt = self::getOption($cfg, 'servers');

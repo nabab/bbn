@@ -115,7 +115,8 @@ class History
       self::$ok = true;
       self::$is_used = true;
       self::$cache = Cache::getEngine();
-      self::$cache_prefix = Str::encodeFilename(str_replace('\\', '/', self::class), true).'/';
+      $sep = Cache::getSeparator();
+      self::$cache_prefix = str_replace('\\', $sep, self::class).$sep;
       self::$links = self::$db->getForeignKeys('bbn_uid', self::$prefix . 'history_uids', self::$admin_db);
       self::$db->setTrigger('\\bbn\\Appui\\History::trigger');
     }

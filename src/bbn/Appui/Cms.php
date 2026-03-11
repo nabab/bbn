@@ -56,7 +56,6 @@ class Cms extends DbCls
   public function __construct(Db $db, Note $note = null)
   {
     parent::__construct($db);
-    $this->cacheInit();
     $this->event = new Event($this->db);
     $this->opt   = Option::getInstance();
     $this->url   = new Url($this->db);

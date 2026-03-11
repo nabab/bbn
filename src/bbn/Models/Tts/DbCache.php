@@ -106,6 +106,7 @@ trait DbCache
    */
   protected function dbTraitRowCacheKey(string $id): string
   {
+    $sep = Cache::getSeparator();
     if (!isset($this->class_table)) {
       $cfg = self::getDefaultClassCfg();
       while ($cfg && empty($cfg['table'])) {
@@ -117,10 +118,10 @@ trait DbCache
         $cfg = $cls::getDefaultClassCfg();
       }
 
-      return "table/{$cfg['table']}/{$id}";
+      return "table{$sep}{$cfg['table']}{$sep}{$id}";
     }
 
-    return "table/{$this->class_table}/{$id}";
+    return "table{$sep}{$this->class_table}{$sep}{$id}";
   }
 
   /**
@@ -360,6 +361,7 @@ trait DbCache
     if (!defined("BBN_DBACTIONS_CACHE_INIT")) {
       define("BBN_DBACTIONS_CACHE_INIT", true);
       $cache = Cache::getEngine();
+      $sep = Cache::getSeparator();
       $arr = self::dbConfigGetTableClasses($db);
       $db->setTrigger(function ($cfg) use ($cache, $db, $arr) {
         if (!empty($cfg["write"]) && $cfg["moment"] === "after") {
@@ -371,7 +373,7 @@ trait DbCache
                 $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
                 if ($idx1 !== null) {
                   $id = $cfg['values'][$idx1];
-                  $cache->delete("table/$table/$id");
+                  $cache->delete("table{$sep}{$table}{$sep}{$id}");
                 }
               }
             }
@@ -382,7 +384,7 @@ trait DbCache
                   $id = $cfg['values'][$idx1];
                   $ids = $db->getColumnValues($dep, 'id', [$dep['field'] => $id]);
                   foreach ($ids as $id) {
-                    $cache->delete("table/$dep/$id");
+                    $cache->delete("table{$sep}{$dep}{$sep}{$id}");
                   }
                 }
               }

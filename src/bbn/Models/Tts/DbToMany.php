@@ -3,7 +3,7 @@ namespace bbn\Entities\Models;
 
 use bbn\X;
 use Exception;
-
+use bbn\Cache;
 /**
  * Trait to handle many-to-many relationships for entity caching.
  */
@@ -98,29 +98,28 @@ trait DbToMany
      */
     protected function invalidateEntityCacheForTable(string $table, $entityId, bool $force = false): void
     {
-        // Get the model class for this table
-        $modelClass = $this->entities->getModelClass($table);
+      // Get the model class for this table
+      $modelClass = $this->entities->getModelClass($table);
+      $sep = Cache::getSeparator();
 
-        if ($modelClass) {
-            /** @var EntityTable $model */
-            $model = new $modelClass($this->db, $this->entities, $this->entity);
+      if ($modelClass) {
+        /** @var EntityTable $model */
+        $model = new $modelClass($this->db, $this->entities, $this->entity);
 
-            // Invalidate cache for the specific record
-            $cacheKey = DbCache::getRowCacheKey($table, $entityId);
-            $this->getDbCacheManager()->delete($cacheKey);
+        // Invalidate cache for the specific record
+        $cacheKey = self::getRowCacheKey($table, $entityId);
+        $this->getDbCacheManager()->delete($cacheKey);
 
-            if ($force) {
-                // Force invalidation of all records in this table for this entity
-                $ids = $model->dbTraitGetIds([$model->fields['id_entity'] => $this->id_entity]);
-                foreach ($ids as $id) {
-                    $this->getDbCacheManager()->delete(DbCache::getRowCacheKey($table, $id));
-                }
-            }
-
-            // Invalidate the IDs cache for this table
-            $this->getDbCacheManager()->deleteAll(
-                'table/' . $table . '/ids/'
-            );
+        if ($force) {
+          // Force invalidation of all records in this table for this entity
+          $ids = $model->dbTraitGetIds([$model->fields['id_entity'] => $this->id_entity]);
+          foreach ($ids as $id) {
+            $this->getDbCacheManager()->delete(self::getRowCacheKey($table, $id));
+          }
         }
+
+        // Invalidate the IDs cache for this table
+        $this->getDbCacheManager()->deleteAll("table{$sep}{$table}");
+      }
     }
 }

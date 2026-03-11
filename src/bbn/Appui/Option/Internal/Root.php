@@ -113,7 +113,6 @@ trait Root
   public function init(): bool
   {
     if (!$this->is_init) {
-      $this->cacheInit();
       $t          =& $this;
       $this->root = $this->cacheGet('root');
       if (!$this->root) {

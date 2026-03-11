@@ -29,19 +29,21 @@ class Cache implements CacheInterface
 {
   private string $host;
   private int $port;
-  protected static $is_init = false;
+  protected static bool $is_init = false;
 
-  protected static $type = null;
+  protected static string $type;
 
-  protected static $max_wait = 10;
+  protected static int $max_wait = 10;
 
-  protected static $default_ttl = 0;
+  protected static int $default_ttl = 0;
 
-  protected static $max_ttl;
+  protected static int $max_ttl;
+
+  protected static string $sep = '/';
 
   protected static $engine;
 
-  protected $path;
+  protected string $path;
 
   protected $obj;
 
@@ -65,6 +67,11 @@ class Cache implements CacheInterface
     if (!isset(self::$max_ttl)) {
       self::$max_ttl = defined('BBN_MAX_TTL') ? constant('BBN_MAX_TTL') : 90 * 24 * 3600;
     }
+  }
+
+  private static function setSeparator(string $sep): void
+  {
+    self::$sep = $sep;
   }
 
 
@@ -92,6 +99,17 @@ class Cache implements CacheInterface
   public static function getType(): ?string
   {
     return self::$type;
+  }
+
+
+  /**
+   * Returns the type of cache engine running in the class.
+   *
+   * @return string The cache engine
+   */
+  public static function getSeparator(): ?string
+  {
+    return self::$sep;
   }
 
   public function getObj() {
@@ -185,13 +203,14 @@ class Cache implements CacheInterface
       self::_set_type('apc');
     }
     elseif ((($engine === 'redis')) && class_exists("Redis")) {
+      self::setSeparator(':');
       $this->obj = new \Redis();
       $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
       $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
       if ($this->obj->connect($this->host, $this->port, 2.5)) {
         $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
         $this->obj->select($dbIndex);
-        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX') . '/';
+        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX') . self::$sep;
         if ($this->prefix) {
           $this->obj->setOption(\Redis::OPT_PREFIX, $this->prefix);
         }
@@ -760,7 +779,7 @@ class Cache implements CacheInterface
           $dirs  = $this->fs->getDirs($this->path.($dir ? "/$dir" : ''));
           if (count($dirs)) {
             foreach ($dirs as $d){
-              $res = $this->items($dir ? $dir.'/'.X::basename($d) : X::basename($d));
+              $res = $this->items($dir ? $dir.self::$sep.X::basename($d) : X::basename($d));
               foreach ($res as $r){
                 array_push($list, $r);
               }
@@ -835,13 +854,13 @@ class Cache implements CacheInterface
           $list = [];
           $done = [];
           foreach ($keys as $i => $k){
-            $bits = X::split($k, '/');
+            $bits = X::split($k, self::$sep);
             $idx = 0;
             if (empty($path)) {
               $name = $bits[0];
             }
             elseif (mb_strpos($k, $path) === 0) {
-              $idx = count(X::split(trim($path, '/'), '/'));
+              $idx = count(X::split(trim($path, self::$sep), self::$sep));
               $name = $bits[$idx];
             }
             else {
@@ -849,12 +868,12 @@ class Cache implements CacheInterface
             }
 
             if ($name) {
-              $fullName = trim(trim($path, '/') . '/' . $name, '/');
+              $fullName = trim(trim($path, self::$sep) . self::$sep . $name, self::$sep);
               $num = 0;
               if ($isFolder = $k !== $fullName) {
                 $num++;
-                $name .= '/';
-                $fullName .= '/';
+                $name .= self::$sep;
+                $fullName .= self::$sep;
               }
               if (in_array($name, $done)) {
                 continue;
@@ -867,7 +886,7 @@ class Cache implements CacheInterface
                   $keys,
                   function($a, $j) use ($i, $fullName, $idx, &$subdone) {
                     if (($i !== $j) && (strpos($a, $fullName) === 0)) {
-                      $bits = X::split($a, '/');
+                      $bits = X::split($a, self::$sep);
                       $subname = $bits[$idx+1];
                       if (!in_array($subname, $subdone)) {
                         $subdone[] = $subname;
@@ -888,7 +907,7 @@ class Cache implements CacheInterface
                 'nodePath' => $fullName,
                 'items'=> [],
                 'num' => $num,
-                'path' => X::split(dirname($fullName), '/'),
+                'path' => X::split(dirname($fullName), self::$sep),
                 'folder' => $isFolder
               ];
             }
@@ -901,13 +920,13 @@ class Cache implements CacheInterface
           $list = [];
           $done = [];
           foreach ($keys as $i => $k){
-            $bits = X::split($k, '/');
+            $bits = X::split($k, self::$sep);
             $idx = 0;
             if (empty($path)) {
               $name = $bits[0];
             }
             elseif (mb_strpos($k, $path) === 0) {
-              $idx = count(X::split(trim($path, '/'), '/'));
+              $idx = count(X::split(trim($path, self::$sep), self::$sep));
               $name = $bits[$idx];
             }
             else {
@@ -915,12 +934,12 @@ class Cache implements CacheInterface
             }
 
             if ($name) {
-              $fullName = trim(trim($path, '/') . '/' . $name, '/');
+              $fullName = trim(trim($path, self::$sep) . self::$sep . $name, self::$sep);
               $num = 0;
               if ($isFolder = $k !== $fullName) {
                 $num++;
-                $name .= '/';
-                $fullName .= '/';
+                $name .= self::$sep;
+                $fullName .= self::$sep;
               }
               if (in_array($name, $done)) {
                 continue;
@@ -933,7 +952,7 @@ class Cache implements CacheInterface
                   $keys,
                   function($a, $j) use ($i, $fullName, $idx, &$subdone) {
                     if (($i !== $j) && (strpos($a, $fullName) === 0)) {
-                      $bits = X::split($a, '/');
+                      $bits = X::split($a, self::$sep);
                       $subname = $bits[$idx+1];
                       if (!in_array($subname, $subdone)) {
                         $subdone[] = $subname;
@@ -954,7 +973,7 @@ class Cache implements CacheInterface
                 'nodePath' => $fullName,
                 'items'=> [],
                 'num' => $num,
-                'path' => X::split(dirname($fullName), '/'),
+                'path' => X::split(dirname($fullName), self::$sep),
                 'folder' => $isFolder
               ];
             }

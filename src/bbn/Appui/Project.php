@@ -74,7 +74,6 @@ class Project extends DbCls
   {
     parent::__construct($db);
     self::optionalInit();
-    self::cacheInit();
     $this->options = Option::getInstance();
     $this->fs      = new System();
     if (Str::isUid($id)) {

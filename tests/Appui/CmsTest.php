@@ -73,7 +73,6 @@ class CmsTest extends TestCase
     $cfg = $this->getClassCgf();
 
     $this->cms = \Mockery::mock(Cms::class)->makePartial();
-    $this->cms->cacheInit();
 
     $this->setNonPublicPropertyValue('db', $this->db_mock);
     $this->setNonPublicPropertyValue('note', $this->notes_mock);

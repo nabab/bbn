@@ -102,7 +102,6 @@ class Db implements Db\Actions
       }
 
       self::retrieverInit($this);
-      $this->cacheInit();
 
       if ($cfg = $this->getCfg()) {
         $this->postCreation();

@@ -264,7 +264,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     $cfg = $this->getConnection($cfg);
 
     try {
-      $this->cacheInit();
       $this->current = $cfg['db'] ?? null;
       $this->host = $cfg['host'] ?? null;
       $this->username = $cfg['user'] ?? null;

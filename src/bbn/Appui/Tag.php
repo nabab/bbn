@@ -51,7 +51,6 @@ class Tag extends DbCls
     $this->lang = $lang ?: "en";
     $this->initClassCfg();
     parent::__construct($db);
-    $this->cacheInit();
     $this->options = Option::getInstance();
   }
 

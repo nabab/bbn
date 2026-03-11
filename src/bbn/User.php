@@ -1318,10 +1318,7 @@ class User extends DbCls implements Implementor
    */
   public function getCache(string $key, bool $raw = false): mixed
   {
-    if (
-      $this->cacheInit() &&
-      ($file = Cache::_file($key, $this->getCachePath()))
-    ) {
+    if ($file = Cache::_file($key, $this->getCachePath())) {
       $fs = new System();
       if (
         $fs->isFile($file) &&
@@ -1351,7 +1348,6 @@ class User extends DbCls implements Implementor
   {
     $fs = new System();
     if (
-      $this->cacheInit() &&
       ($file = Cache::_file($key, $this->getCachePath())) &&
       $fs->createPath(X::dirname($file))
     ) {
@@ -1380,8 +1376,7 @@ class User extends DbCls implements Implementor
    */
   public function deleteCache(string $key): bool
   {
-    return $this->cacheInit() &&
-      ($file = Cache::_file($key, $this->getCachePath())) &&
+    return ($file = Cache::_file($key, $this->getCachePath())) &&
       ($fs = new System()) &&
       $fs->delete($file);
   }
@@ -1394,8 +1389,7 @@ class User extends DbCls implements Implementor
    */
   public function deleteAllCache(): bool
   {
-    return $this->cacheInit() &&
-      ($path = $this->getCachePath()) &&
+    return ($path = $this->getCachePath()) &&
       ($fs = new System()) &&
       $fs->delete($path, false);
   }

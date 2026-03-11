@@ -65,7 +65,6 @@ class Vcs
     $this->db = $db;
     $this->opt = Option::getInstance();
     $this->pwd = new Passwords($this->db);
-    $this->cacheInit();
     self::optionalInit();
     if (!empty($idServer)) {
       $this->changeServer($idServer);

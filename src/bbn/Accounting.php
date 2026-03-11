@@ -33,7 +33,6 @@ class Accounting extends Basic
   public function __construct()
   {
     $this->options = Option::getInstance();
-    $this->cacheInit();
     self::optionalInit();
   }
 

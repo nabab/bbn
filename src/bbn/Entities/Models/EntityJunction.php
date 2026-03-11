@@ -24,7 +24,6 @@ abstract class EntityJunction extends DbCls
     $this->initClassCfg();
     parent::__construct($db);
     $this->dbJunctionInit();
-    $this->cacheInit();
     if (!is_a($entity, '\\bbn\\Models\\Cls\\Nullall')) {
       $this->id_entity = $entity->getId();
       $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);

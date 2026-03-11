@@ -25,7 +25,6 @@ class NoteLink extends DbCls
   ) {
     $this->initClassCfg();
     parent::__construct($db);
-    $this->cacheInit();
     if ($entity) {
       $this->id_entity = $entity->getId();
       $this->dbTraitSetFilterCfg([

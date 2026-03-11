@@ -94,8 +94,6 @@ class Entity
     $this->where = [
       $this->db->cfn($this->fields['id'], $this->table) => $this->id
     ];
-
-    $this->cacheInit();
 	}
 
   public function check(): bool

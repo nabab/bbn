@@ -62,7 +62,6 @@ trait Connection
     $cfg = $this->getConnection($cfg);
 
     try {
-      $this->cacheInit();
       $this->current = $cfg['db'] ?? null;
       $this->host = $cfg['host'] ?? null;
       $this->username = $cfg['user'] ?? null;

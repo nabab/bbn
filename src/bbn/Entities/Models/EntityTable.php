@@ -24,7 +24,6 @@ abstract class EntityTable extends DbCls
   ) {
     $this->initClassCfg();
     parent::__construct($db);
-    $this->cacheInit();
     if (!is_a($entity, Nullall::class)) {
       $this->id_entity = $entity->getId();
       $this->dbTraitSetFilterCfg([

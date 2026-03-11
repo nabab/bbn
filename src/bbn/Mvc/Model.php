@@ -109,7 +109,6 @@ class Model extends DbClass
         parent::__construct($db);
       }
 
-      $this->cacheInit();
       $this->_ctrl = $ctrl;
       $this->_mvc  = $mvc;
       $this->inc = &$mvc->inc;

@@ -28,20 +28,8 @@ trait Cache
   {
     if ( \is_null($this->cache_engine) ){
       $this->cache_engine = CacheCls::getEngine();
-      $this->_cache_prefix = Str::encodeFilename(str_replace('\\', '/', \get_class($this)), true).'/';
-    }
-  }
-
-
-  /**
-   * Throws an exception if the cache has not been initialized
-   *
-   * @return void
-   */
-  protected function cacheCheck(): void
-  {
-    if (!$this->cache_engine) {
-      throw new Exception(X::_("The cache object has not been initialized"));
+      $sep = CacheCls::getSeparator();
+      $this->_cache_prefix = str_replace('\\', $sep, \get_class($this)).$sep;
     }
   }
 
@@ -56,9 +44,11 @@ trait Cache
    */
   protected function _cache_name($uid, $method = '', string $locale = ''): string
   {
+    $this->cacheInit();
     $uid  = (string)$uid;
-    $path = Str::isUid($uid) ? Str::sub($uid, 0, 3).'/' . Str::sub($uid, 3, 3).'/' . Str::sub($uid, 6) : $uid;
-    return $this->_cache_prefix.$path.(empty($method) ? '' : '/'.(string)$method).(empty($locale) ? '' : "-$locale");
+    $sep = CacheCls::getSeparator();
+    $path = Str::isUid($uid) ? Str::sub($uid, 0, 3).$sep . Str::sub($uid, 3, 3).$sep . Str::sub($uid, 6) : $uid;
+    return $this->_cache_prefix.$path.(empty($method) ? '' : $sep.(string)$method).(empty($locale) ? '' : "-$locale");
   }
 
 
@@ -69,7 +59,7 @@ trait Cache
    */
   protected function cacheDeleteAll(): static
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     $this->cache_engine->deleteAll($this->_cache_prefix);
     return $this;
   }
@@ -84,7 +74,7 @@ trait Cache
    */
   protected function cacheDelete(string $uid, string $method = ''): static
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     $this->cache_engine->deleteAll($this->_cache_name($uid, $method));
     return $this;
   }
@@ -100,7 +90,7 @@ trait Cache
    */
   protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): static
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));
     return $this;
   }
@@ -115,7 +105,7 @@ trait Cache
    */
   protected function cacheGet(string $uid, string $method = ''): mixed
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->get($this->_cache_name($uid, $method));
   }
 
@@ -128,7 +118,7 @@ trait Cache
    */
   protected function cacheGetRaw(string $uid, string $method = ''): mixed
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->getFull($this->_cache_name($uid, $method));
   }
 
@@ -141,7 +131,7 @@ trait Cache
    */
   protected function cacheGetFull(string $uid, string $method = ''): ?array
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->getFull($this->_cache_name($uid, $method));
   }
 
@@ -156,7 +146,7 @@ trait Cache
    */
   protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));
   }
 
@@ -172,7 +162,7 @@ trait Cache
    */
   protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): static
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);
     return $this;
   }
@@ -190,7 +180,7 @@ trait Cache
    */
   protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): static
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);
     return $this;
   }
@@ -207,7 +197,7 @@ trait Cache
    */
   protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);
   }
 
@@ -224,7 +214,7 @@ trait Cache
    */
   protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);
   }
 
@@ -238,7 +228,7 @@ trait Cache
    */
   protected function cacheHas(string $uid, string $method = ''): bool
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cacheGet($uid, $method) ? true : false;
   }
 
@@ -252,7 +242,7 @@ trait Cache
    */
   protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool
   {
-    $this->cacheCheck();
+    $this->cacheInit();
     return $this->cacheGetLocale($uid, $locale, $method) ? true : false;
   }
 }
