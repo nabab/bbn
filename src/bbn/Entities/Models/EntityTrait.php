@@ -93,7 +93,6 @@ trait EntityTrait
 
   public function getRecords(?string $idx = null)
   {
-    return $this->entity->getRecords($idx ?: static::$default_class_cfg['table']
-    );
+    return $this->entity->getRecords($idx ?: static::$default_class_cfg['table']);
   }
 }

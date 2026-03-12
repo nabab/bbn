@@ -153,9 +153,14 @@ class Link extends EntityTable
 
   public function getFullList(array $filter = [])
   {
-    $res = $this->getRecords();
-    if ($res && $filter) {
-      $res = X::filter($res, $filter);
+    if (is_a($this->entity(), 'bbn\Models\Cls\Nullall')) {
+      $res = $this->dbTraitRselectAll($filter);
+    }
+    else {
+      $res = $this->getRecords();
+      if ($res && $filter) {
+        $res = X::filter($res, $filter);
+      }
     }
 
     return $res;
