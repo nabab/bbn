@@ -378,6 +378,11 @@ TEMPLATE;
 
   public function send($cfg){
     $r = false;
+    if (!constant('BBN_ADMIN_EMAIL')) {
+      X::log($cfg, 'unsent_mail');
+      return true;
+    }
+
     if ($this->makeMail($cfg)) {
       try {
         $r = $this->mailer->send();
