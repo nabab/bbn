@@ -11,7 +11,9 @@ use bbn\Cache;
 use bbn\Models\Tts\Singleton;
 
 /**
- * History class for tracking changes to database tables
+ * Class History
+ *
+ * Manages database history tracking functionality.
  */
 class HistoryMistral
 {
@@ -19,15 +21,15 @@ class HistoryMistral
 
   /** @var Db The DB connection */
   private $db;
-  /** @var array A collection of DB connections */
-  private $dbs = [];
+  /** @var array A collection of DB connections  */
+  private static $dbs = [];
   /** @var array A collection of DB structures */
-  private $structures = [];
+  private static $structures = [];
   /** @var Database The database class which collects the columns IDs */
   private $database_obj;
   /** @var string Name of the database where the history table is */
   private $admin_db = '';
-  /** @var string User's ID */
+  /** @var string User's ID  */
   private $user;
   /** @var string Prefix of the history table */
   private $prefix = 'bbn_';
@@ -35,163 +37,230 @@ class HistoryMistral
   private $date;
   /** @var boolean Set to true once the initial configuration has been checked */
   private $ok = false;
-  /** @var boolean Setting it to false avoids execution of history triggers */
+  /** @var boolean Setting it to false avoid execution of history triggers */
   private $enabled = true;
-  /** @var array The foreign links atytached to history UIDs' table */
+  /** @var array The foregin links attached to history UIDs' table */
   private $links;
 
   /** @var string|bool The history table's name */
-  public static $table_uids = false;
+  public $table_uids = false;
   /** @var string|bool The history table's name */
-  public static $table = false;
+  public $table = false;
   /** @var string The UIDs table */
-  public static $uids = 'uids';
+  public $uids = 'uids';
   /** @var string The history default column's name */
-  public static $column = 'bbn_active';
-  /** @var bool Whether the class is in use */
-  public static $is_used = false;
+  public $column = 'bbn_active';
+  /** @var boolean */
+  public $is_used = false;
 
   private $cache;
   private $cache_prefix;
 
   /**
-   * Constructor - initializes singleton pattern
+   * History constructor.
+   *
+   * @param Db $db
+   * @param array $cfg
    */
-  protected function __construct()
+  public function __construct(Db $db, array $cfg = [])
   {
     self::singletonInit($this);
+    $this->init($db, $cfg);
   }
 
   /**
-   * Destructor - cleans up resources
-   */
-  public function __destruct()
-  {
-    self::singletonUnset();
-  }
-
-  /**
-   * Returns the column's corresponding option's ID
+   * Returns the history table name.
    *
-   * @param string $column The column name
-   * @param string $table The table name
-   * @return null|string The column ID or false if not found
+   * @return string|bool
+   */
+  public function getTable()
+  {
+    return $this->table;
+  }
+
+  /**
+   * Returns the UIDs table name.
+   *
+   * @return string|bool
+   */
+  public function getTableUids()
+  {
+    return $this->table_uids;
+  }
+
+  /**
+   * Returns the column's corresponding option's ID.
+   *
+   * @param string $column
+   * @param string $table
+   * @return null|string
    */
   public function getIdColumn(string $column, string $table): ?string
   {
-    if ($db = self::_get_db()) {
-      $full_table = $db->tfn($table);
+    if (
+      ($db = $this->_get_db()) &&
+      ($full_table = $db->tfn($table)) &&
+      ($database_obj = $this->_get_database())
+    ) {
       [$database, $table] = explode('.', $full_table);
-
-      return $this->database_obj->columnId($column, $table, $database);
-    }
-    return false;
-  }
-
-  /**
-   * Initializes the history system
-   *
-   * @param Db $db The database connection
-   * @param array $cfg Configuration options
-   */
-  public function init(Db $db, array $cfg = []): void
-  {
-    /** @var string $hash Unique hash for this DB connection */
-    $hash = $db->getHash();
-    if (!in_array($hash, self::$dbs, true) && $db->check()) {
-      // Adding the connection to the list of connections
-      self::$dbs[] = $hash;
-      /** @var Db db */
-      self::$db = $db;
-
-      // Apply configuration values from array
-      foreach ($cfg as $cf_name => $cf_value) {
-        if (property_exists($this, $cf_name)) {
-          $this->$cf_name = $cf_value;
-        }
-      }
-
-      if (!self::$admin_db) {
-        self::$admin_db = self::$db->getCurrent();
-      }
-
-      // Set up table names
-      self::$table = self::$admin_db . '.' . self::$prefix . 'history';
-      self::$table_uids = self::$admin_db . '.' . self::$prefix . 'history_uids';
-
-      self::$ok = true;
-      self::$is_used = true;
-
-      // Initialize cache engine if available
-      self::$cache = Cache::getEngine();
-      self::$cache_prefix = Str::encodeFilename(str_replace('\\', '/', get_class($this)), true);
-
-      // Get foreign keys relationships
-      self::$links = $db->getForeignKeys('bbn_uid', self::$prefix . 'history_uids', self::$admin_db);
-
-      // Set up trigger if enabled
-      if (self::isEnabled()) {
-        $db->setTrigger($this::class . '::trigger');
-      }
-    }
-  }
-
-  /**
-   * Sets cache data
-   *
-   * @param string $id Cache identifier
-   * @param mixed $data Data to store in cache
-   */
-  public function setCache(string $id, $data): void
-  {
-    if (self::$cache) {
-      self::$cache->set(self::$cache_prefix . $id, $data, 3600);
-    }
-  }
-
-  /**
-   * Gets cached data
-   *
-   * @param string $id Cache identifier
-   * @return mixed|null Data from cache or null if not found
-   */
-  public function getCache(string $id)
-  {
-    if (self::$cache) {
-      return self::$cache->get(self::$cache_prefix . $id, 3600);
+      return $database_obj->columnId($column, $table, $database);
     }
     return null;
   }
 
   /**
-   * Deletes cached data
+   * Initializes the history tracking.
    *
-   * @param string $id Cache identifier
+   * @param Db $db
+   * @param array $cfg
+   * @return void
    */
-  public function deleteCache(string $id)
+  public function init(Db $db, array $cfg = []): void
   {
-    if (self::$cache) {
-      self::$cache->get(self::$cache_prefix . $id, 3600); // Will delete if exists
+    /** @var string $hash Unique hash for this DB connection (so we don't init twice a same connection) */
+    $hash = $db->getHash();
+    if (!in_array($hash, self::$dbs, true) && $db->check()) {
+      // Adding the connection to the list of connections
+      self::$dbs[] = $hash;
+      /** @var Db db */
+      $this->db = $db;
+      $vars = get_class_vars(__CLASS__);
+      foreach ($cfg as $cf_name => $cf_value) {
+        if (array_key_exists($cf_name, $vars)) {
+          $this->$cf_name = $cf_value;
+        }
+      }
+      if (!$this->admin_db) {
+        $this->admin_db = $this->db->getCurrent();
+      }
+      $this->table = $this->admin_db . '.' . $this->prefix . 'history';
+      $this->table_uids = $this->admin_db . '.' . $this->prefix . 'history_uids';
+      $this->ok = true;
+      $this->is_used = true;
+      $this->cache = Cache::getEngine();
+      $this->cache_prefix = Str::encodeFilename(str_replace('\\', '/', self::class), true) . '/';
+      $this->links = $this->db->getForeignKeys('bbn_uid', $this->prefix . 'history_uids', $this->admin_db);
+      $this->db->setTrigger([$this, 'trigger']);
     }
   }
 
   /**
-   * Checks if history is initialized and enabled
+   * Sets cache data.
    *
-   * @return bool True if properly configured
+   * @param string $id
+   * @param mixed $data
+   * @return void
    */
-  public function check(): bool
+  public function setCache($id, $data): void
   {
-    return isset($this->user, self::$table, $this->db) &&
-      self::isInit() &&
-      self::_get_db();
+    if ($this->cache) {
+      $this->cache->set($this->cache_prefix . $id, $data, 3600);
+    }
   }
 
   /**
-   * Returns true if the given DB connection is configured for history
+   * Gets cached data.
    *
-   * @param Db $db The database connection to check
-   * @return bool True if this connection has history enabled
+   * @param string $id
+   * @return mixed|null
+   */
+  public function getCache($id)
+  {
+    if ($this->cache) {
+      return $this->cache->get($this->cache_prefix . $id, 3600);
+    }
+    return null;
+  }
+
+  /**
+   * Deletes cached data.
+   *
+   * @param string $id
+   * @return mixed|null
+   */
+  public function deleteCache($id)
+  {
+    if ($this->cache) {
+      return $this->cache->get($this->cache_prefix . $id, 3600);
+    }
+    return null;
+  }
+
+  /**
+   * Checks if the history is initialized.
+   *
+   * @return bool
+   */
+  public function isInit(): bool
+  {
+    return $this->ok;
+  }
+
+  /**
+   * Disables history tracking.
+   *
+   * @return void
+   */
+  public function disable(): void
+  {
+    $this->enabled = false;
+  }
+
+  /**
+   * Enables history tracking.
+   *
+   * @return void
+   */
+  public function enable(): void
+  {
+    $this->enabled = true;
+  }
+
+  /**
+   * Checks if history is enabled.
+   *
+   * @return bool
+   */
+  public function isEnabled(): bool
+  {
+    return $this->ok && ($this->enabled === true);
+  }
+
+  /**
+   * Validates a timestamp.
+   *
+   * @param mixed $d
+   * @return null|float
+   */
+  public function validTimestamp($d): ?float
+  {
+    if (!Str::isNumber($d)) {
+      $d = strtotime($d);
+    }
+    if (($d > 0) && Str::isNumber($d)) {
+      return (float)$d;
+    }
+    return null;
+  }
+
+  /**
+   * Checks if all history parameters are set in order to read and write into history.
+   *
+   * @return bool
+   */
+  public function check(): bool
+  {
+    return
+      isset($this->user, $this->table, $this->db) &&
+      $this->isInit() &&
+      $this->_get_db();
+  }
+
+  /**
+   * Returns true if the given DB connection is configured for history.
+   *
+   * @param Db $db
+   * @return bool
    */
   public function hasHistory(Db $db): bool
   {
@@ -200,248 +269,260 @@ class HistoryMistral
   }
 
   /**
-   * Effectively deletes a row (deletes the row, the history row and the ID row)
+   * Effectively deletes a row (deletes the row, the history row and the ID row).
    *
-   * @param string $id The record ID to delete
-   * @return bool True if deletion was successful
+   * @param string $id
+   * @return bool
    */
   public function delete(string $id): bool
   {
-    if ($id && ($db = self::_get_db())) {
-      return $db->delete(self::$table_uids, ['bbn_uid' => $id]);
+    if ($id && ($db = $this->_get_db())) {
+      return $db->delete($this->table_uids, ['bbn_uid' => $id]);
     }
     return false;
   }
 
   /**
-   * Sets the "active" column name
+   * Sets the "active" column name.
    *
-   * @param string $column The new active column name
+   * @param string $column
+   * @return void
    */
   public function setColumn(string $column): void
   {
     if (Str::checkName($column)) {
-      self::$column = $column;
+      $this->column = $column;
     }
   }
 
   /**
-   * Gets the "active" column name
+   * Gets the "active" column name.
    *
-   * @return string The current active column name
+   * @return string the "active" column name
    */
   public function getColumn(): string
   {
-    return self::$column;
+    return $this->column;
   }
 
   /**
-   * Sets the date for history operations
+   * Sets the current date for history tracking.
    *
-   * @param mixed $date Date to use (can be timestamp or string)
+   * @param mixed $date
+   * @return void
    */
   public function setDate($date): void
   {
-    // Convert string dates to timestamps if needed
+    // Sets the current date
     if (!Str::isNumber($date) && !($date = strtotime($date))) {
       return;
     }
-
     $t = time();
-    // Can't write history in the future
+    // Impossible to write history in the future
     if ($date > $t) {
       $date = $t;
     }
-    self::$date = $date;
+    $this->date = $date;
   }
 
   /**
-   * Gets the current date for history operations
+   * Gets the current date for history tracking.
    *
-   * @return float|null The timestamp or null if not set
+   * @return float|null
    */
   public function getDate(): ?float
   {
-    return self::$date;
+    return $this->date;
   }
 
   /**
-   * Resets the date to default (null)
+   * Unsets the current date for history tracking.
+   *
+   * @return void
    */
   public function unsetDate(): void
   {
-    self::$date = null;
+    $this->date = null;
   }
 
   /**
-   * Sets the history table name
+   * Sets the history table name.
    *
-   * @param string $db_name The database name
+   * @param string $db_name
+   * @return void
    */
   public function setAdminDb(string $db_name): void
   {
+    // Sets the history table name
     if (Str::checkName($db_name)) {
-      self::$admin_db = $db_name;
-      self::$table = self::$admin_db . '.' . self::$prefix . 'history';
+      $this->admin_db = $db_name;
+      $this->table = $this->admin_db . '.' . $this->prefix . 'history';
     }
   }
 
   /**
-   * Sets the user ID that will be used to fill the user_id field
+   * Sets the user ID that will be used to fill the user_id field.
    *
-   * @param mixed $user User ID (can be string or numeric)
+   * @param mixed $user
+   * @return void
    */
   public function setUser($user): void
   {
+    // Sets the history table name
     if (Str::isUid($user)) {
-      self::$user = $user;
+      $this->user = $user;
     }
   }
 
   /**
-   * Gets the user ID that is being used to fill the user_id field
+   * Gets the user ID that is being used to fill the user_id field.
    *
-   * @return null|string The current user ID or null if not set
+   * @return null|string
    */
   public function getUser(): ?string
   {
-    return self::$user;
+    return $this->user;
   }
 
   /**
-   * Gets all history records for a table
+   * Gets all history records for a table.
    *
-   * @param string $table The table name
-   * @param int $start Starting offset (default 0)
-   * @param int $limit Maximum number of results (default 20)
-   * @param string|null $dir Sort direction (ASC/DESC, default null)
-   * @return array Array of history records
+   * @param string $table
+   * @param int $start
+   * @param int $limit
+   * @param string|null $dir
+   * @return array
    */
   public function getAllHistory(string $table, int $start = 0, int $limit = 20, string|null $dir = null): array
   {
-    if ($db = self::_get_db()) {
-      $dbc = self::_get_database();
-      $id_table = $dbc->tableId($table, $db->getCurrent());
-
-      if ($id_table) {
-        $order = $dir && (Str::changeCase($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
-        return $db->getColumnValues([
-          'table' => self::$table_uids,
-          'fields' => ['bbn_uid'],
-          'join' => [
-            [
-              'table' => self::$table,
-              'on' => [
-                'conditions' => [[
-                  'field' => 'bbn_uid',
-                  'exp' => 'uid'
-                ]]
-              ]
+    if (
+      ($db = $this->_get_db()) &&
+      ($dbc = $this->_get_database()) &&
+      ($id_table = $dbc->tableId($table, $this->db->getCurrent()))
+    ) {
+      $order = $dir && (Str::changeCase($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
+      return $db->getColumnValues([
+        'table' => $this->table_uids,
+        'fields' => ['bbn_uid'],
+        'join' => [
+          [
+            'table' => $this->table,
+            'on' => [
+              'conditions' => [[
+                'field' => 'bbn_uid',
+                'exp' => 'uid'
+              ]]
             ]
-          ],
-          'where' => ['bbn_table' => $id_table],
-          'order' => [[
-            'field' => 'tst',
-            'dir' => $order
-          ]],
-          'start' => $start,
-          'limit' => $limit
-        ]);
-      }
+          ]
+        ],
+        'where' => ['bbn_table' => $id_table],
+        'order' => [[
+          'field' => 'tst',
+          'dir' => $order
+        ]],
+        'start' => $start,
+        'limit' => $limit
+      ]);
     }
-
     return [];
   }
 
   /**
-   * Gets the last modified lines for a table
+   * Gets the last modified lines for a table.
    *
-   * @param string $table The table name
-   * @param int $start Starting offset (default 0)
-   * @param int $limit Maximum number of results (default 20)
-   * @return array Array of UID values from history records
+   * @param string $table
+   * @param int $start
+   * @param int $limit
+   * @return array
    */
   public function getLastModifiedLines(string $table, int $start = 0, int $limit = 20): array
   {
     $r = [];
-    if ($db = self::_get_db()) {
-      $dbc = self::_get_database();
-      $id_table = $dbc->tableId($table);
-
-      if ($id_table) {
-        $tab = $db->escape(self::$table);
-        $tab_uids = $db->escape(self::$table_uids);
-        $uid = $db->cfn('bbn_uid', self::$table_uids, true);
-        $active = $db->cfn(self::$column, self::$table_uids, true);
-        $id_tab = $db->cfn('bbn_table', self::$table_uids, true);
-        $line = $db->cfn('uid', self::$table, true);
-        $chrono = $db->escape('tst');
-
-        $sql = <<< MYSQL
+    if (
+      ($db = $this->_get_db()) &&
+      ($dbc = $this->_get_database()) &&
+      ($id_table = $dbc->tableId($table, $this->db->getCurrent()))
+    ) {
+      $tab = $db->escape($this->table);
+      $tab_uids = $db->escape($this->table_uids);
+      $uid = $db->cfn('bbn_uid', $this->table_uids, true);
+      $active = $db->cfn($this->column, $this->table_uids, true);
+      $id_tab = $db->cfn('bbn_table', $this->table_uids, true);
+      $line = $db->cfn('uid', $this->table, true);
+      $chrono = $db->escape('tst');
+      $sql = <<< MYSQL
 SELECT DISTINCT($line)
 FROM $tab_uids
   JOIN $tab
     ON $uid = $line
-WHERE $id_tab = ?
-AND $active = 1
+WHERE $id_tab = ? AND $active = 1
 ORDER BY $chrono
 LIMIT $start, $limit
 MYSQL;
-
-        $r = $db->getColArray($sql, hex2bin($id_table));
-      }
+      $r = $db->getColArray($sql, hex2bin($id_table));
     }
-
     return $r;
   }
 
   /**
-   * Gets the next update timestamp for a record
+   * Gets the next update for a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $from_when Timestamp to start from (string or number)
-   * @param string|null $column Optional column to filter by
-   * @return null|array History record data or null if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $from_when
+   * @param string|null $column
+   * @return null|array
    */
-  public function getNextUpdate(string $table, string $id, mixed $from_when, string|null $column = null): ?array
+  public function getNextUpdate(string $table, string $id, string|float  $from_when, string|null $column = null)
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
-      Str::checkName($table) && ($date = self::validTimestamp($from_when)) &&
-      ($db = self::_get_db()) && ($dbc = self::_get_database()) &&
+      Str::checkName($table) &&
+      ($date = $this->validTimestamp($from_when)) &&
+      ($db = $this->_get_db()) &&
+      ($dbc = $this->_get_database()) &&
       ($id_table = $dbc->tableId($table))
     ) {
-
-      $isDisabled = !self::$enabled;
+      $isDisabled = !$this->enabled;
       if (!$isDisabled) {
-        self::disable();
+        $this->disable();
       }
 
-      $tab = $db->escape(self::$table);
-      $tab_uids = $db->escape(self::$table_uids);
-      $uid = $db->cfn('bbn_uid', self::$table_uids);
-      $id_tab = $db->cfn('bbn_table', self::$table_uids);
-      $id_col = $db->cfn('col', self::$table);
-      $line = $db->cfn('uid', self::$table);
-      $usr = $db->cfn('usr', self::$table);
-      $chrono = $db->cfn('tst', self::$table);
-
+      $tab = $db->escape($this->table);
+      $tab_uids = $db->escape($this->table_uids);
+      $uid = $db->cfn('bbn_uid', $this->table_uids);
+      $id_tab = $db->cfn('bbn_table', $this->table_uids);
+      $id_col = $db->cfn('col', $this->table);
+      $line = $db->cfn('uid', $this->table);
+      $usr = $db->cfn('usr', $this->table);
+      $chrono = $db->cfn('tst', $this->table);
       $where = [
         'logic' => 'AND',
         'conditions' => [
-          ['field' => $uid, 'operator' => '=', 'value' => $line],
-          ['field' => $id_tab, 'operator' => '=', 'value' => $id_table],
-          ['field' => $chrono, 'operator' => '>', 'value' => $date]
+          [
+            'field' => $uid,
+            'operator' => '=',
+            'value' => $line
+          ],
+          [
+            'field' => $id_tab,
+            'operator' => '=',
+            'value' => $id_table
+          ],
+          [
+            'field' => $chrono,
+            'operator' => '>',
+            'value' => $date
+          ]
         ]
       ];
 
       if ($column) {
         $where['conditions'][] = [
           'field' => $id_col,
-          'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $table)
+          'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $id_table)
         ];
-      } else if ($w = self::_getTableWhere($table)) {
+      } else if ($w = $this->_getTableWhere($table)) {
         $where['conditions'][] = $w;
       }
 
@@ -472,7 +553,7 @@ MYSQL;
       ]);
 
       if (!$isDisabled) {
-        self::enable();
+        $this->enable();
       }
 
       return $res;
@@ -482,37 +563,51 @@ MYSQL;
   }
 
   /**
-   * Gets the previous update timestamp for a record
+   * Gets the previous update for a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $from_when Timestamp to start from (string or number)
-   * @param string|null $column Optional column to filter by
-   * @return null|array History record data or null if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $from_when
+   * @param string|null $column
+   * @return null|array
    */
-  public function getPrevUpdate(string $table, string $id, mixed $from_when, string|null $column = null): ?array
+  public function getPrevUpdate(string $table, string $id, string|float $from_when, string|null $column = null): ?array
   {
     if (
-      Str::checkName($table) && ($date = self::validTimestamp($from_when)) &&
-      ($dbc = self::_get_database()) && ($db = self::_get_db())
+      Str::checkName($table) &&
+      ($date = $this->validTimestamp($from_when)) &&
+      ($dbc = $this->_get_database()) &&
+      ($db = $this->_get_db())
     ) {
-
       if ($column) {
         $where = [
           'conditions' => [
-            ['field' => 'col', 'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $table)]
+            [
+              'field' => 'col',
+              'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $table)
+            ]
           ]
         ];
-      } else if ($w = self::_getTableWhere($table)) {
+      } else if ($w = $this->_getTableWhere($table)) {
         $where = $w;
       }
 
-      return $db->rselect(self::$table, [], [
+      return $db->rselect($this->table, [], [
         'conditions' => [
-          ['field' => 'uid', 'value' => $id],
+          [
+            'field' => 'uid',
+            'value' => $id
+          ],
           $where,
-          ['field' => 'opr', 'value' => 'UPDATE'],
-          ['field' => 'tst', 'operator' => '<', 'value' => $date]
+          [
+            'field' => 'opr',
+            'value' => 'UPDATE'
+          ],
+          [
+            'field' => 'tst',
+            'operator' => '<',
+            'value' => $date
+          ]
         ]
       ]);
     }
@@ -521,77 +616,81 @@ MYSQL;
   }
 
   /**
-   * Gets the next value for a column in history
+   * Gets the next value for a table row column.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $from_when Timestamp to start from (string or number)
-   * @param mixed $column Column name to get value for
-   * @return bool|mixed Value from history record or false if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $from_when
+   * @param mixed $column
+   * @return bool|mixed
    */
-  public function getNextValue(string $table, string $id, mixed $from_when, $column): mixed
+  public function getNextValue(string $table, string $id, string|float $from_when, $column)
   {
-    if ($r = self::getNextUpdate($table, $id, $from_when, $column)) {
+    if ($r = $this->getNextUpdate($table, $id, $from_when, $column)) {
       return $r['ref'] ?: $r['val'];
     }
     return false;
   }
 
   /**
-   * Gets the previous value for a column in history
+   * Gets the previous value for a table row column.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $from_when Timestamp to start from (string or number)
-   * @param mixed $column Column name to get value for
-   * @return bool|mixed Value from history record or false if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $from_when
+   * @param mixed $column
+   * @return bool|mixed
    */
-  public function getPrevValue(string $table, string $id, mixed $from_when, $column): mixed
+  public function getPrevValue(string $table, string $id, string|float $from_when, $column)
   {
-    if ($r = self::getPrevUpdate($table, $id, $from_when, $column)) {
+    if ($r = $this->getPrevUpdate($table, $id, $from_when, $column)) {
       return $r['ref'] ?: $r['val'];
     }
     return false;
   }
 
   /**
-   * Gets a row from history at a specific timestamp
+   * Gets the row state at a specific time.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $when Timestamp to get data for (string or number)
-   * @param array $columns Optional columns to retrieve (empty for all)
-   * @return null|array Record data or null if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $when
+   * @param array $columns
+   * @return array|null
    */
-  public function getRowBack(string $table, string $id, mixed $when, array $columns = []): ?array
+  public function getRowBack(string $table, string $id, string|float $when, array $columns = []): ?array
   {
-    if (!($when = self::validTimestamp($when))) {
-      X::log(["The date $when is incorrect", __CLASS__, __LINE__], 'history_errors');
-    } else if (($db = self::_get_db()) && ($cfg = self::getTableCfg($table))) {
-
+    if (!($when = $this->validTimestamp($when))) {
+      throw new Exception("The date $when is incorrect");
+    } else if (
+      ($db = $this->_get_db()) &&
+      ($cfg = $this->getTableCfg($table))
+    ) {
       // Time is after last modification: the current is given
-      $isDisabled = !self::$enabled;
+      $isDisabled = !$this->enabled;
       if (!$isDisabled) {
-        self::disable();
+        $this->disable();
       }
 
       if ($when >= time()) {
-        $r = $db->rselect($table, $columns, [$cfg['primary'] => $id]) ?: null;
+        $r = $db->rselect($table, $columns, [
+          $cfg['primary'] => $id
+        ]) ?: null;
       }
       // Time is before creation: null is given
-      else if ($when < self::getCreationDate($table, $id)) {
+      else if ($when < $this->getCreationDate($table, $id)) {
         $r = null;
       } else {
         // No columns = All columns
         if (count($columns) === 0) {
           $columns = array_keys($cfg['fields']);
         }
-
         $r = [];
+        //die(var_dump($columns, $model['fields']));
         foreach ($columns as $col) {
           $tmp = null;
           if (isset($cfg['fields'][$col]['id_option'])) {
-            if ($tmp = $db->rselect(self::$table, ['val', 'ref'], [
+            if ($tmp = $db->rselect($this->table, ['val', 'ref'], [
               'uid' => $id,
               'col' => $cfg['fields'][$col]['id_option'],
               'opr' => 'UPDATE',
@@ -603,13 +702,15 @@ MYSQL;
           }
 
           if (!$tmp) {
-            $r[$col] = $db->selectOne($table, $col, [$cfg['primary'] => $id]);
+            $r[$col] = $db->selectOne($table, $col, [
+              $cfg['primary'] => $id
+            ]);
           }
         }
       }
 
       if (!$isDisabled) {
-        self::enable();
+        $this->enable();
       }
 
       return $r;
@@ -619,33 +720,33 @@ MYSQL;
   }
 
   /**
-   * Gets a value from history at a specific timestamp
+   * Gets the value of a column at a specific time.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed $when Timestamp to get data for (string or number)
-   * @param string $column Column name to retrieve
-   * @return bool|mixed Value from history record or false if not found
+   * @param string $table
+   * @param string $id
+   * @param string|float $when
+   * @param string $column
+   * @return bool|mixed
    */
-  public function getValBack(string $table, string $id, mixed $when, string $column): mixed
+  public function getValBack(string $table, string $id, string|float $when, string $column)
   {
-    if ($row = self::getRowBack($table, $id, $when, [$column])) {
+    if ($row = $this->getRowBack($table, $id, $when, [$column])) {
       return $row[$column];
     }
     return false;
   }
 
   /**
-   * Gets the creation date for a record
+   * Gets the creation date of a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param bool $asString Whether to return as string or timestamp (default false)
-   * @return null|float|string Creation timestamp or null if not found
+   * @param string $table
+   * @param string $id
+   * @param bool $asString
+   * @return null|float|string
    */
-  public function getCreationDate(string $table, string $id, bool $asString = false): mixed
+  public function getCreationDate(string $table, string $id, bool $asString = false): null|float|string
   {
-    if ($res = self::getCreation($table, $id)) {
+    if ($res = $this->getCreation($table, $id)) {
       return $asString ? $res['date'] : $res['timestamp'];
     }
 
@@ -653,32 +754,35 @@ MYSQL;
   }
 
   /**
-   * Gets the creation record for a table
+   * Gets the creation information of a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @return array|null History record data or null if not found
+   * @param string $table
+   * @param string $id
+   * @return array|null
    */
   public function getCreation(string $table, string $id): ?array
   {
     $r = null;
-    if (($db = self::_get_db()) && ($cfg = self::getTableCfg($table)) &&
-      ($id_col = self::getIdColumn($cfg['primary'], $table))
+    if (
+      ($db = $this->_get_db()) &&
+      ($cfg = $this->getTableCfg($table)) &&
+      ($id_col = $this->getIdColumn($cfg['primary'], $table))
     ) {
-
-      $isDisabled = !self::$enabled;
+      $isDisabled = !$this->enabled;
       if (!$isDisabled) {
-        self::disable();
+        $this->disable();
       }
 
-      $r = $db->rselect(self::$table, ['date' => 'dt', 'timestamp' => 'tst', 'user' => 'usr'], [
+      $r = $db->rselect($this->table, ['date' => 'dt', 'timestamp' => 'tst', 'user' => 'usr'], [
         'uid' => $id,
         'col' => $id_col,
         'opr' => 'INSERT'
-      ], ['tst' => 'DESC']);
+      ], [
+        'tst' => 'DESC'
+      ]);
 
       if (!$isDisabled) {
-        self::enable();
+        $this->enable();
       }
     }
 
@@ -686,146 +790,68 @@ MYSQL;
   }
 
   /**
-   * Gets the last date modified for a record
+   * Gets the last modification date of a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param mixed|null $column Optional column to filter by (null for all)
-   * @return null|float Last timestamp or null if not found
+   * @param string $table
+   * @param string $id
+   * @param null $column
+   * @return float|null
    */
   public function getLastDate(string $table, string $id, $column = null): ?float
   {
-    if ($db = self::_get_db()) {
-      if ($column && ($id_col = self::getIdColumn($column, $table))) {
-        return $db->selectOne(self::$table, 'tst', [
+    if ($db = $this->_get_db()) {
+      if (
+        $column &&
+        ($id_col = $this->getIdColumn($column, $table))
+      ) {
+        return $this->db->selectOne($this->table, 'tst', [
           'uid' => $id,
           'col' => $id_col
-        ], ['tst' => 'DESC']);
-      } elseif (!$column && ($where = self::_getTableWhere($table))) {
-        return $db->selectOne(self::$table, 'tst', [
+        ], [
+          'tst' => 'DESC'
+        ]);
+      } elseif (!$column && ($where = $this->_getTableWhere($table))) {
+        return $db->selectOne($this->table, 'tst', [
           'conditions' => [
-            ['field' => 'uid', 'value' => $id],
+            [
+              'field' => 'uid',
+              'value' => $id
+            ],
             $where
           ]
-        ], ['tst' => 'DESC']);
+        ], [
+          'tst' => 'DESC'
+        ]);
       }
     }
-
     return null;
   }
 
   /**
-   * Gets history records for a table and ID
+   * Gets the full history of a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param string|null $col Optional column to filter by (empty for all columns)
-   * @param string|null $since Optional timestamp to start from
-   * @return null|array History records or null if not found
-   */
-  public function getHistory(string $table, string $id, string|null $col = '', string|null $since = ''): ?array
-  {
-    if (self::check() && self::isLinked($table) && ($modelize = self::getTableCfg($table))) {
-
-      $pat = [
-        'ins' => 'INSERT',
-        'upd' => 'UPDATE',
-        'res' => 'RESTORE',
-        'del' => 'DELETE'
-      ];
-      $r = [];
-      $fields = [
-        'date' => 'tst',
-        'user' => 'usr',
-        'dt',
-        'col'
-      ];
-
-      // Build WHERE conditions
-      $where = ['uid' => $id];
-
-      if (!empty($since)) {
-        if (!Str::isNumber($since)) {
-          $since = strtotime($since);
-        }
-        $where[] = ['tst', '>=', $since];
-      }
-
-      if (!empty($col)) {
-        if (!Str::isUid($col)) {
-          $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? 'ref' : 'val';
-          $col = self::$database_obj->columnId($col, $table);
-        } else {
-          $idx = X::search($modelize['fields'], ['id_option' => strtolower($col)]);
-          if (null === $idx) {
-            throw new Exception("Impossible to find the option $col");
-          }
-
-          $fields['old'] = $modelize['fields'][$idx]['type'] === 'binary' ? 'ref' : 'val';
-        }
-
-        $where['col'] = $col;
-      } else {
-        $fields['old'] = 'IFNULL(' . self::$table . '.ref, ' . self::$table . '.val)';
-      }
-
-      // Process each operation type
-      foreach ($pat as $k => $p) {
-        $where['opr'] = $p;
-        if ($all = self::$db->rselectAll([
-          'table' => self::$table,
-          'fields' => $fields,
-          'where' => $where,
-          'order' => [['field' => 'tst', 'dir' => 'desc']]
-        ])) {
-          if ($p === 'UPDATE') {
-            foreach ($all as &$a) {
-              $colname = X::search($modelize['fields'], ['id_option' => $a['col']]);
-              $a['field'] = $colname;
-              $a['new'] = self::getValBack($table, $id, $a['date'], $colname);
-            }
-          }
-
-          $r[$k] = $all;
-        }
-      }
-
-      return $r;
-    }
-
-    return null;
-  }
-
-  /**
-   * Gets the full history for a table and ID
-   *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param string|null $column Optional column to filter by (null for all columns)
-   * @return array History records with detailed operations
+   * @param string $table
+   * @param string $id
+   * @param string|null $column
+   * @return array
    */
   public function getFullHistory(string $table, string $id, string|null $column = null): array
   {
     $res = [];
-    if ($db = self::_get_db()) {
-      $cfg = self::getTableCfg($table);
+    if ($db = $this->_get_db()) {
+      $cfg = $this->getTableCfg($table);
       $fields = [];
-
       foreach ($cfg['fields'] as $name => $f) {
         $fields[$f['id_option']] = $name;
       }
 
       $where = ['uid' => $id];
       if ($column) {
-        $where['col'] = self::$database_obj->columnId($column, $table);
+        $where['col'] = $this->database_obj->columnId($column, $table);
       }
 
-      // Get current record
       $origin = $db->rselect($table, [], [$cfg['primary'] => $id]);
-
-      // Get history records
-      $all = $db->rselectAll(self::$table, [], $where, ['tst' => 'ASC']);
-
+      $all = $db->rselectAll($this->table, [], $where, ['tst' => 'ASC']);
       while (count($all)) {
         $row = array_shift($all);
         $ele = [
@@ -836,10 +862,8 @@ MYSQL;
           'value' => $row['ref'] ?: $row['val'],
           'operation' => $row['opr'],
         ];
-
         if ($row['opr'] === 'UPDATE') {
           $ele['old'] = $ele['value'];
-          // Get next record for new value
           $next = X::getRow($all, ['col' => $row['col']]);
           $ele['new'] = $next ? ($next['ref'] ?: $next['val']) : $origin[$ele['column']];
         }
@@ -852,33 +876,35 @@ MYSQL;
   }
 
   /**
-   * Gets history for a specific column
+   * Gets the history of a specific column for a table row.
    *
-   * @param string $table The table name
-   * @param string $id The record ID
-   * @param string $column Column to get history for
+   * @param string $table
+   * @param string $id
+   * @param string $column
+   * @return array
    */
   public function getColumnHistory(string $table, string $id, string $column)
   {
-    return self::getFullHistory($table, $id, $column);
+    return $this->getFullHistory($table, $id, $column);
   }
 
   /**
-   * Gets configuration for a table
+   * Gets all information about a given table.
    *
-   * @param string $table The table name
-   * @param bool $force Whether to force recalculation (default false)
-   * @return null|array Table structure or null if not found
+   * @param string $table
+   * @param bool $force
+   * @return null|array Table's full name
    */
   public function getTableCfg(string $table, bool $force = false): ?array
   {
     // Check history is enabled and table's name correct
-    if (($db = self::_get_db()) && ($dbc = self::_get_database()) &&
+    if (
+      ($db = $this->_get_db()) &&
+      ($dbc = $this->_get_database()) &&
       ($table = $db->tfn($table))
     ) {
-
       if ($force || !isset(self::$structures[$table])) {
-        if (!$force && ($data = self::getCache($table))) {
+        if (!$force && ($data = $this->getCache($table))) {
           self::$structures[$table] = $data;
           if (!empty(self::$structures[$table]['history'])) {
             return self::$structures[$table];
@@ -887,12 +913,8 @@ MYSQL;
           return null;
         }
 
-        // Get table model
-        $model = $dbc->modelize($table);
-        [$dbName, $tableName] = X::split($table, '.');
-
-        // Initialize structure if not exists
-        if (!isset(self::$structures[$table])) {
+        if ($model = $dbc->modelize($table)) {
+          [$dbName, $tableName] = X::split($table, '.');
           self::$structures[$table] = [
             'history' => false,
             'primary' => false,
@@ -903,46 +925,30 @@ MYSQL;
             'unique' => [],
             'fields' => []
           ];
-        }
-
-        // Check if table has history
-        if (
-          self::isLinked($table) &&
-          isset($model['keys']['PRIMARY']) &&
-          (count($model['keys']['PRIMARY']['columns']) === 1) &&
-          ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
-          !empty($model['fields'][$primary])
-        ) {
-
-          // Set up history configuration
-          self::$structures[$table]['history'] = true;
-          self::$structures[$table]['primary'] = $primary;
-          self::$structures[$table]['primary_type'] = $model['fields'][$primary]['type'];
-          self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
-          self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) &&
-            ($model['fields'][$primary]['extra'] === 'auto_increment');
-
-          // Get table ID
-          self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
-
-          // Find foreign key references
-          $refs = $db->findReferences("$tableName.$primary");
-          self::$structures[$table]['refs'] = array_map(function ($a) use ($db) {
-            [$d, $t, $c] = X::split($a, '.');
-            return [
-              'db' => $d,
-              'table' => $t,
-              'col' => $c
-            ];
-          }, $refs);
-
-          // Process each reference
-          foreach (self::$structures[$table]['refs'] as &$r) {
-            $refCfg = $db->modelize($r['table']);
-            $r['nullable'] = $refCfg['fields'][$r['col']]['null'] ?? false;
-
-            // Check for foreign key constraints
-            if ($keys = $refCfg['cols'][$r['col']]) {
+          if (
+            $this->isLinked($table) &&
+            isset($model['keys']['PRIMARY']) &&
+            (count($model['keys']['PRIMARY']['columns']) === 1) &&
+            ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
+            !empty($model['fields'][$primary])
+          ) {
+            // Looking for the config of the table
+            self::$structures[$table]['history'] = 1;
+            self::$structures[$table]['primary'] = $primary;
+            self::$structures[$table]['primary_type'] = $model['fields'][$primary]['type'];
+            self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
+            self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
+            self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
+            $refs = $db->findReferences("$tableName.$primary");
+            self::$structures[$table]['refs'] = array_map(fn($a) => [
+              'db' => X::split($a, '.')[0],
+              'table' => X::split($a, '.')[1],
+              'col' => X::split($a, '.')[2]
+            ], $refs);
+            foreach (self::$structures[$table]['refs'] as &$r) {
+              $refCfg = $db->modelize($r['table']);
+              $r['nullable'] = $refCfg['fields'][$r['col']]['null'] ?? false;
+              $keys = $refCfg['cols'][$r['col']];
               foreach ($keys as $k) {
                 if ((count($refCfg['keys'][$k]['columns']) === 1) && $refCfg['keys'][$k]['constraint']) {
                   $r['constraint'] = $refCfg['keys'][$k]['constraint'];
@@ -952,118 +958,107 @@ MYSQL;
                 }
               }
             }
-          }
 
-          // Process unique constraints
-          self::$structures[$table]['constraints'] = [];
-          foreach ($model['keys'] as $name => $key) {
-            if (!empty($key['unique']) && ((count($key['columns']) > 1) || ($key['columns'][0] !== $primary))) {
-              $toPush = [
-                'name' => $name,
-                'columns' => []
-              ];
-
-              foreach ($key['columns'] as $col) {
-                $toPush['columns'][] = [
-                  'name' => $col,
-                  'nullable' => empty($model['fields'][$col]['virtual']) ? !!$model['fields'][$col]['null'] : false
+            self::$structures[$table]['constraints'] = [];
+            foreach ($model['keys'] as $name => $key) {
+              if (!empty($key['unique']) && ((count($key['columns']) > 1) || ($key['columns'][0] !== $primary))) {
+                $toPush = [
+                  'name' => $name,
+                  'columns' => []
                 ];
+
+                foreach ($key['columns'] as $col) {
+                  $toPush['columns'][] = [
+                    'name' => $col,
+                    'nullable' => empty($model['fields'][$col]['virtual']) ? !!$model['fields'][$col]['null'] : false
+                  ];
+                }
+
+                array_push(self::$structures[$table]['unique'], $toPush);
               }
 
-              array_push(self::$structures[$table]['unique'], $toPush);
+              if (!empty($key['ref_column']) && (count($key['columns']) === 1) && ($key['columns'][0] !== $primary)) {
+                self::$structures[$table]['constraints'][$name] = [
+                  'column' => $key['columns'][0],
+                  'ref_table' => $key['ref_table'],
+                  'ref_column' => $key['ref_column']
+                ];
+              }
             }
+
+            self::$structures[$table]['fields'] = array_filter($model['fields'], function ($a) {
+              return isset($a['id_option']);
+            });
           }
 
-          // Process foreign key constraints
-          if (
-            !empty($key['ref_column']) && (count($key['columns']) === 1) &&
-            ($key['columns'][0] !== $primary)
-          ) {
-            self::$structures[$table]['constraints'][$name] = [
-              'column' => $key['columns'][0],
-              'ref_table' => $key['ref_table'],
-              'ref_column' => $key['ref_column']
-            ];
-          }
-
-          // Filter fields to only include those with id_option
-          self::$structures[$table]['fields'] = array_filter($model['fields'], function ($a) {
-            return isset($a['id_option']);
-          });
-        }
-
-        // Cache the structure if we found history
-        if (isset(self::$structures[$table]) && !empty(self::$structures[$table]['history'])) {
-          self::setCache($table, self::$structures[$table]);
+          $this->setCache($table, self::$structures[$table]);
         }
       }
-
-      return isset(self::$structures[$table]) && !empty(self::$structures[$table]['history'])
-        ? self::$structures[$table]
-        : null;
+      // The table exists and has history
+      if (isset(self::$structures[$table]) && !empty(self::$structures[$table]['history'])) {
+        return self::$structures[$table];
+      }
     }
-
     return null;
   }
 
   /**
-   * Gets configuration for all tables
+   * Gets the configuration of all tables in a database.
    *
-   * @param string|null $db Optional database name (default current)
-   * @param bool $force Whether to force recalculation (default false)
-   * @return null|array Table configurations or null if not found
+   * @param string|null $db
+   * @param bool $force
+   * @return array|null
    */
   public function getDbCfg(string|null $db = null, bool $force = false): ?array
   {
-    if ($db = self::_get_db()) {
+    if ($db = $this->_get_db()) {
       $res = [];
       $tables = $db->getTables($db);
-
       if ($tables && count($tables)) {
         foreach ($tables as $t) {
-          if ($tmp = self::getTableCfg($t, $force)) {
+          if ($tmp = $this->getTableCfg($t, $force)) {
             $res[$t] = $tmp;
           }
         }
       }
-
       return $res;
     }
-
     return null;
   }
 
   /**
-   * Checks if a table is linked to history
+   * Checks if a table is linked to history tracking.
    *
-   * @param string $table The table name
-   * @return bool True if the table has history enabled
+   * @param string $table
+   * @return bool
    */
   public function isLinked(string $table): bool
   {
-    return ($db = self::_get_db()) &&
+    return ($db = $this->_get_db()) &&
       ($ftable = $db->tfn($table)) &&
-      isset(self::$links[$ftable]);
+      isset($this->links[$ftable]);
   }
 
   /**
-   * Gets foreign key relationships
+   * Gets the foreign key links.
    *
-   * @return array Foreign key relationships
+   * @return array
    */
   public function getLinks()
   {
-    return self::$links;
+    return $this->links;
   }
 
   /**
-   * Gets related IDs for a record and table
+   * Gets related IDs for a table row.
    *
-   * @param string $id The ID to find related records
-   * @param string $table The table name
-   * @param array $relatedTables Optional list of tables to search (default all)
-   * @param int $depth Maximum depth of recursion (default 2)
-   * @return array Array of related IDs
+   * @param string $id
+   * @param string $table
+   * @param array $relatedTables
+   * @param int $depth
+   * @param int $current
+   * @param array $uids
+   * @return array
    */
   public function getRelatedIds(
     string $id,
@@ -1075,47 +1070,35 @@ MYSQL;
   ): array {
     $uids = [$id];
     $noDirects = $relatedTables;
-    $db = self::_get_db();
+    $db = $this->_get_db();
     $primary = $db->getPrimary($table);
-
     if (count($primary) !== 1) {
       return $uids;
     }
-
     foreach ($db->getForeignKeys($primary[0], $table) as $tfn => $col) {
       $table = $db->tsn($tfn);
-      if (($hcfg = self::getTableCfg($tfn)) && $hcfg['history']) {
+      if (($hcfg = History::getTableCfg($tfn)) && $hcfg['history']) {
         $allTables[] = $table;
         $dbModel = $db->modelize($tfn);
-
-        // Get UIDs from foreign key
         $tableUids = $db->getColumnValues($tfn, $hcfg['primary'], [$col[0] => $id]);
         array_push($uids, ...$tableUids);
-
         if (!in_array($table, $noDirects)) {
           continue;
         }
-
         foreach ($dbModel['fields'] as $colName => $colCfg) {
           if (empty($colCfg['key']) || ($colCfg['key'] === 'primary')) {
             continue;
           }
           if (!empty($dbModel['cols'][$colName])) {
             foreach ($dbModel['cols'][$colName] as $keyName) {
-              if (
-                !empty($dbModel['keys'][$keyName]['ref_table']) &&
-                (count($dbModel['keys'][$keyName]['columns']) === 1)
-              ) {
-
+              if (!empty($dbModel['keys'][$keyName]['ref_table']) && (count($dbModel['keys'][$keyName]['columns']) === 1)) {
                 $stable = $db->tsn($dbModel['keys'][$keyName]['ref_table']);
                 if (in_array($stable, [$table])) {
                   continue;
                 }
 
-                if (($shcfg = self::getTableCfg($stable)) && $shcfg['history']) {
+                if (($shcfg = History::getTableCfg($stable)) && $shcfg['history']) {
                   $allTables[] = $stable;
-
-                  // Get UIDs from related table
                   if ($stableUids = $db->getColumnValues($table, $colName, [$hcfg['primary'] => $tableUids])) {
                     array_push($uids, ...$stableUids);
                   }
@@ -1128,44 +1111,43 @@ MYSQL;
       }
     }
 
-    // Remove duplicates and return
     $uids = array_unique($uids);
+    $current++;
+    if ($depth > $current) {
+    }
 
     return $uids;
   }
 
   /**
-   * Merges multiple records into one main record
+   * Merges multiple records into one.
    *
-   * @param array $ids Array of IDs to merge
-   * @param string $table The table name
-   * @param Db $db Database connection
-   * @param mixed|null $main Optional main ID (will be oldest if not provided)
-   * @return bool True if fusion was successful
+   * @param array $ids
+   * @param string $table
+   * @param Db $db
+   * @param null|string $main
+   * @return bool
    */
   public function fusion(array $ids, string $table, Db $db, $main = null): bool
   {
-    if (!self::check()) {
+    if (!$this->check()) {
       return false;
     }
 
-    // Ensure main ID is in the list
     if ($main && !in_array($main, $ids, true)) {
       $ids[] = $main;
     }
 
-    // Find oldest record to use as main
     $oldest = null;
     $oldestId = null;
     foreach ($ids as $a) {
-      $tmp = self::getCreationDate($table, $a);
+      $tmp = History::getCreationDate($table, $a);
       if (!$oldest || ($tmp < $oldest)) {
         $oldest = $tmp;
         $oldestId = $a;
       }
     }
 
-    // Set main ID
     if (!$main) {
       $main = $oldestId;
     }
@@ -1174,21 +1156,19 @@ MYSQL;
       throw new Exception(X::_("Impossible to find the main record"));
     }
 
-    // Remove main from list and reorder
     $idx = array_search($main, $ids);
     if ($idx !== false) {
       array_splice($ids, $idx, 1);
     }
+
     array_unshift($ids, $main);
 
-    // Get history records for all IDs
     $tables = $db->rselectAll(
-      self::$table_uids,
+      $this->table_uids,
       'bbn_table',
       ['bbn_uid' => $ids]
     );
 
-    // Check if all records are from the same table
     $unique = array_unique(array_map(function ($a) {
       return $a['bbn_table'];
     }, $tables));
@@ -1198,84 +1178,102 @@ MYSQL;
       throw new Exception(X::_("The fusion you wanna do seems to go on different tables"));
     }
 
-    // Check if all records exist in history
     if (count($tables) !== count($ids)) {
       throw new Exception(X::_("They are not all in the history table"));
     }
 
     $source = array_shift($ids);
 
-    // Check if source record is active
     $isActive = $db->selectOne(
-      self::$table_uids,
+      $this->table_uids,
       'bbn_active',
-      ['bbn_uid' => $source]
+      [
+        'bbn_uid' => $source
+      ]
     );
 
     if (!$isActive) {
       throw new Exception(X::_("Main record is deleted"));
     }
 
-    // Update history records with oldest timestamp
     $db->update(
-      self::$table,
+      $this->table,
       ['tst' => $oldest],
       [
         'uid' => $ids,
         'opr' => 'INSERT'
       ]
+
     );
 
-    // Process foreign key relationships
     $model = $db->modelize($table);
     $primary = $model['keys']['PRIMARY']['columns'][0];
     $refs = $db->findReferences($db->cfn($primary, $table));
+    $relations = [];
+    foreach ($refs as $ref) {
+      [$d, $t, $c] = X::split($ref, '.');
+      $relations[] = [
+        'table' => $t,
+        'column' => $c
+      ];
+    }
 
+    $isDisabled = !$this->enabled;
+    if (!$isDisabled) {
+      $this->disable();
+    }
+
+    if ($isTriggerEnabled = $db->isTriggerEnabled()) {
+      $db->disableTrigger();
+    }
+
+    $num = 0;
     foreach ($ids as $id) {
-      // Update foreign key references
-      foreach ($refs as $ref) {
-        [$d, $t, $c] = X::split($ref, '.');
+      foreach ($relations as $ref) {
         $num += (int)$db->update(
-          $t,
-          [$c => $source],
-          [$c => $id]
+          $ref['table'],
+          [$ref['column'] => $source],
+          [$ref['column'] => $id]
         );
       }
 
-      // Update history records
       $num += (int)$db->update(
-        self::$table,
+        $this->table,
         ['uid' => $source],
         [
           'uid' => $id,
           'opr' => ['UPDATE', 'RESTORE', 'DELETE']
         ]
       );
-
-      // Delete old history record
       $num += (int)$db->delete(
-        self::$table_uids,
+        $this->table_uids,
         ['bbn_uid' => $id]
       );
+    }
+
+    if ($isTriggerEnabled) {
+      $db->enableTrigger();
+    }
+
+    if (!$isDisabled) {
+      $this->enable();
     }
 
     return (bool)$num;
   }
 
   /**
-   * Upgrades table structure to include history
+   * Upgrades a table to support history tracking.
    *
-   * @param string $table The table name
-   * @param mixed|null $idUser Optional user ID for history records
-   * @param mixed|null $date Optional timestamp for history records
-   * @return array Result of upgrade operation
+   * @param string $table
+   * @param null|string $idUser
+   * @param null|int|string $date
+   * @return array
    */
-  public function upgrade(string $table, ?string $idUser = null, mixed $date = null): array
+  public function upgrade(string $table, ?string $idUser = null, null|int|string $date = null): array
   {
     $res = ['success' => false, 'total' => 0, 'updated' => 0, 'inserted' => 0];
-    if ($db = self::_get_db()) {
-
-      // Set default user ID and date
+    if ($db = $this->_get_db()) {
       if (!$idUser) {
         $idUser = constant('BBN_EXTERNAL_USER_ID');
       }
@@ -1283,21 +1281,16 @@ MYSQL;
         $date = time();
       }
 
-      $database = self::$database_obj;
+      $database = $this->database_obj;
       $structure = $db->modelize($table, true);
       $ostructure = $database->modelize($table);
-
-      // Check for primary key configuration
       if ($ostructure['id_option']) {
-
-        // Set user and date before any operations
-        self::setUser($idUser);
-        self::setDate($date);
-
-        // Get database ID
+        $areTriggerEnabled = $db->isTriggerEnabled();
+        $this->setUser($idUser);
+        $this->setDate($date);
         $dbId = $database->dbIdFromTable($ostructure['id_option']);
-
-        // Check for primary key changes needed
+        $fields = [];
+        $primary = null;
         if (isset($structure['keys']['PRIMARY'])) {
           $fields = $structure['keys']['PRIMARY']['columns'];
           if (count($fields) > 1) {
@@ -1308,7 +1301,6 @@ MYSQL;
             }
 
             if (empty($res['error'])) {
-              // Rebuild primary key
               $structure = $db->modelize($table, true);
               $structure['keys'] = [
                 X::join($fields, '_') => [
@@ -1316,7 +1308,7 @@ MYSQL;
                   'unique' => 1
                 ]
               ];
-
+              //X::ddump($db->getCreateKeys($table, $ncfg), $ncfg);
               try {
                 $db->createKeys($table, $structure);
                 $structure = $db->modelize($table, true);
@@ -1325,107 +1317,83 @@ MYSQL;
               }
             }
           } else {
-            // Single-column primary key
             $primary = $fields[0];
           }
         } else {
-          // Find unique constraint as primary key
           foreach ($structure['keys'] as $k => $key) {
             if (!empty($key['unique'])) {
               $fields = $key['columns'];
               break;
             }
           }
+        }
 
-          if (empty($res['error']) && !isset($primary)) {
+        if (empty($res['error'])) {
+          if (!isset($primary)) {
             $primary = 'id';
           }
-        }
 
-        // Disable triggers for safety
-        $areTriggerEnabled = $db->isTriggerEnabled();
-        $db->disableTrigger();
-
-        // Get all data from table
-        $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) ? [$primary => null] : []);
-        $res['total'] = count($data);
-
-        if ($areTriggerEnabled) {
-          $db->enableTrigger();
-        }
-
-        // Handle case where table doesn't have primary key
-        if (!isset($structure['keys']['PRIMARY'])) {
-          if (!isset($structure['fields']['id'])) {
-            $db->alter($table, [
-              [
-                'alter_type' => 'add',
-                'name' => 'id',
-                'type' => 'binary',
-                'maxlength' => 16,
-                'null' => true,
-                'defaultExp' => 'NULL',
-                'first' => true
-              ]
-            ]);
-
-            $structure = $db->modelize($table, true);
-          }
-
-          // Import table to database structure
-          $database->importTable($table, $dbId);
-
-          // Get updated structure
-          $ostructure = $database->modelize($table);
-
-          // Disable triggers again
           $db->disableTrigger();
-
-          foreach ($data as &$d) {
-            $id = X::makeUid();
-            while ($db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
-              $id = X::makeUid();
-            }
-
-            // Update table with new ID
-            $res['updated'] += $db->update($table, ['id' => $id], $d);
-            $d[$primary] = $id;
-          }
-          unset($d);
-
-          // Rebuild primary key
-          $structure['fields']['id']['key'] = 'PRI';
-          $structure['keys'] = [
-            'PRIMARY' => [
-              'columns' => ['id'],
-              'unique' => 1
-            ]
-          ];
-
-          try {
-            $db->createKeys($table, $structure);
-            $structure = $db->modelize($table, true);
-            $database->importTable($table, $dbId);
-            $ostructure = $database->modelize($table);
-          } catch (Exception $e) {
-            $res['error'] = $e->getMessage();
-          }
-
+          $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) ? [$primary => null] : []);
+          $res['total'] = count($data);
           if ($areTriggerEnabled) {
             $db->enableTrigger();
           }
+
+          if (!isset($structure['keys']['PRIMARY'])) {
+            if (!isset($structure['fields']['id'])) {
+              $db->alter($table, [
+                [
+                  'alter_type' => 'add',
+                  'name' => 'id',
+                  'type' => 'binary',
+                  'maxlength' => 16,
+                  'null' => true,
+                  'defaultExp' => 'NULL',
+                  'first' => true
+                ]
+              ]);
+              $structure = $db->modelize($table, true);
+            }
+            $database->importTable($table, $dbId);
+            $ostructure = $database->modelize($table);
+            $db->disableTrigger();
+            foreach ($data as &$d) {
+              $id = X::makeUid();
+              while ($db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
+                $id = X::makeUid();
+              }
+
+              $res['updated'] += $db->update($table, ['id' => $id], $d);
+              $d[$primary] = $id;
+              //$db->insert
+            }
+            unset($d);
+
+            $structure['fields']['id']['key'] = 'PRI';
+            $structure['keys'] = [
+              'PRIMARY' => [
+                'columns' => ['id'],
+                'unique' => 1
+              ]
+            ];
+            try {
+              $db->createKeys($table, $structure);
+              $structure = $db->modelize($table, true);
+              $database->importTable($table, $dbId);
+              $ostructure = $database->modelize($table);
+            } catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+
+            if ($areTriggerEnabled) {
+              $db->enableTrigger();
+            }
+          }
         }
 
-        // Check for primary key linked to history
         if (empty($res['error']) && $structure['keys']['PRIMARY']['ref_table'] !== History::$table_uids) {
-          $res['inserted'] += self::insertUid(
-            $table,
-            array_map(fn($d) => $d[$primary], $data),
-            true,
-            $ostructure['fields'][$primary]['id_option']
-          );
-
-          // Update table structure
+          $res['inserted'] += $this->insertUid($table, array_map(fn($d) => $d['id'], $data), true, $ostructure['fields'][$primary]['id_option']);
           $structure = $db->modelize($table, true);
           $structure['keys'] = [
             'PRIMARY' => [
@@ -1437,21 +1405,17 @@ MYSQL;
               'unique' => 1
             ]
           ];
-
           try {
             $db->createConstraints($table, $structure);
             $structure = $db->modelize($table, true);
             $database->importTable($table, $dbId);
-
-            // Mark success if everything went well
             $res['success'] = true;
           } catch (Exception $e) {
             $res['deleted'] = 0;
-
             foreach ($data as $d) {
               if (
-                $db->deleteIgnore(self::$table, ['uid' => $d[$primary]]) ||
-                $db->deleteIgnore(self::$table_uids, ['bbn_uid' => $d[$primary]])
+                $db->deleteIgnore($this->table, ['uid' => $d[$primary]]) ||
+                $db->deleteIgnore($this->table_uids, ['bbn_uid' => $d[$primary]])
               ) {
                 $res['deleted']++;
               }
@@ -1460,7 +1424,6 @@ MYSQL;
             $res['error'] = $e->getMessage();
           }
         } else {
-          // Table already has primary key linked to history
           $res['error'] = X::_("The table already has a primary key linked to the history table");
         }
       }
@@ -1470,46 +1433,43 @@ MYSQL;
   }
 
   /**
-   * Inserts UIDs into history table
+   * Inserts UID records into the history tracking tables.
    *
-   * @param string $table The table name
-   * @param array|string IDs to insert (array of strings or single string)
-   * @param bool $withInsert Whether to also insert into history table
-   * @param mixed|null $idCol Optional column ID for history records
-   * @return int Number of successful operations
+   * @param string $table
+   * @param array|string $id
+   * @param bool $withInsert
+   * @param null|string $idCol
+   * @return int
    */
   public function insertUid(string $table, array|string $id, bool $withInsert = true, ?string $idCol = null): int
   {
     $res = 0;
-    if (($db = self::_get_db()) && ($dbc = self::_get_database()) &&
-      ($id_table = $dbc->tableId($table)) && ($primary = $db->getPrimary($table)) &&
-      (count($primary) === 1)
+    if (($db = $this->_get_db())
+      && ($dbc = $this->_get_database())
+      && ($id_table = $dbc->tableId($table))
+      && ($primary = $db->getPrimary($table))
+      && (count($primary) === 1)
     ) {
-
-      // Convert single ID to array
       if (is_string($id)) {
         $id = [$id];
       }
-
       foreach ($id as $i) {
-        $res += $db->insertIgnore(self::$table_uids, [
+        $res += $db->insertIgnore($this->table_uids, [
           'bbn_uid' => $i,
           'bbn_table' => $id_table,
           'bbn_active' => 1
         ]);
-
-        // Insert into history table if requested
-        if ($res && $withInsert) {
-          $col = $idCol ?: $dbc->columnId($primary[0], $table);
-          foreach ($id as $i) {
-            $res += $db->insert(self::$table, [
-              'uid' => $i,
-              'col' => $col,
-              'opr' => 'INSERT',
-              'tst' => self::getDate(),
-              'usr' => self::getUser()
-            ]);
-          }
+      }
+      if ($res && $withInsert) {
+        $col = $idCol ?: $dbc->columnId($primary[0], $table);
+        foreach ($id as $i) {
+          $res += $db->insert($this->table, [
+            'uid' => $i,
+            'col' => $col,
+            'opr' => 'INSERT',
+            'tst' => $this->getDate(),
+            'usr' => $this->getUser()
+          ]);
         }
       }
     }
@@ -1518,433 +1478,474 @@ MYSQL;
   }
 
   /**
-   * Database trigger function for history operations
+   * The function used by the db trigger.
    *
-   * @param array $cfg Configuration array from database trigger
+   * This will basically execute the history query if it's configured for.
+   *
+   * @param array $cfg
+   * @return array The $cfg array, modified or not
    */
   public function trigger(array $cfg): array
   {
-    if (!self::isEnabled() || !($db = self::_get_db())) {
+    if (!$this->isEnabled() || !($db = $this->_get_db())) {
       return $cfg;
     }
-
-    // Handle SELECT queries to add history joins
-    if ($cfg['kind'] === 'SELECT' && $cfg['moment'] === 'before') {
-      $tables = $cfg['tables'] ?? (array)$cfg['table'];
+    $tables = $cfg['tables'] ?? (array)$cfg['table'];
+    // Will return false if disabled, the table doesn't exist, or doesn't have history
+    if (
+      ($cfg['kind'] === 'SELECT') &&
+      ($cfg['moment'] === 'before') &&
+      !empty($tables) &&
+      !in_array($db->tfn($this->table), $cfg['tables_full'], true) &&
+      !in_array($db->tfn($this->table_uids), $cfg['tables_full'], true)
+    ) {
       $change = 0;
-
-      foreach ($cfg['join'] as $t) {
-        $model = $db->modelize($t['table']);
-        if (
-          isset($model['keys']['PRIMARY']) &&
-          ($model['keys']['PRIMARY']['ref_table'] === $db->tsn(self::$table_uids))
-        ) {
-          $change++;
-          if (!isset($t['join'])) {
-            $t['join'] = [];
-          }
-          $t['join'][] = [
-            'table' => self::$table_uids,
-            'alias' => $db->tsn(self::$table_uids) . $change,
-            'on' => [
-              'conditions' => [
-                [
-                  'field' => $db->cfn('bbn_uid', self::$table_uids . $change),
-                  'operator' => 'eq',
-                  'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
-                ],
-                [
-                  'field' => $db->cfn('bbn_active', self::$table_uids . $change),
-                  'operator' => '=',
-                  'exp' => '1'
-                ]
-              ],
-              'logic' => 'AND'
-            ]
-          ];
-        }
-
-        if (!empty($t['join'])) {
-          foreach ($t['join'] as $j) {
-            if ($j['table'] !== self::$table_uids) {
-              $model = $db->modelize($j['table']);
-              if (
-                isset($model['keys']['PRIMARY']) &&
-                ($model['keys']['PRIMARY']['ref_table'] === $db->csn(self::$table_uids))
-              ) {
-                $change++;
-                $t['join'][] = [
-                  'table' => self::$table_uids,
-                  'alias' => $db->tsn(self::$table_uids) . $change,
-                  'on' => [
-                    'conditions' => [
-                      [
-                        'field' => $db->cfn('bbn_uid', self::$table_uids . $change),
-                        'operator' => 'eq',
-                        'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
-                      ],
-                      [
-                        'field' => $db->cfn('bbn_active', self::$table_uids . $change),
-                        'operator' => '=',
-                        'exp' => '1'
-                      ]
-                    ],
-                    'logic' => 'AND'
+      if (!isset($cfg['history'])) {
+        $cfg['history'] = [];
+        $new_join = [];
+        foreach ($cfg['join'] as $t) {
+          $model = $db->modelize($t['table']);
+          if (
+            isset($model['keys']['PRIMARY']) &&
+            ($model['keys']['PRIMARY']['ref_table'] === $db->tsn($this->table_uids))
+          ) {
+            $change++;
+            if (!isset($t['join'])) {
+              $t['join'] = [];
+            }
+            $t['join'][] = [
+              'table' => $this->table_uids,
+              'alias' => $db->tsn($this->table_uids) . $change,
+              'on' => [
+                'conditions' => [
+                  [
+                    'field' => $db->cfn('bbn_uid', $this->table_uids . $change),
+                    'operator' => 'eq',
+                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
+                  ],
+                  [
+                    'field' => $db->cfn('bbn_active', $this->table_uids . $change),
+                    'operator' => '=',
+                    'exp' => '1'
                   ]
-                ];
+                ],
+                'logic' => 'AND'
+              ]
+            ];
+          }
+
+          if (!empty($t['join'])) {
+            foreach ($t['join'] as $j) {
+              if ($j['table'] !== $this->table_uids) {
+                $model = $db->modelize($j['table']);
+                if (
+                  isset($model['keys']['PRIMARY']) &&
+                  ($model['keys']['PRIMARY']['ref_table'] === $db->csn($this->table_uids))
+                ) {
+                  $change++;
+                  $t['join'][] = [
+                    'table' => $this->table_uids,
+                    'alias' => $db->tsn($this->table_uids) . $change,
+                    'on' => [
+                      'conditions' => [
+                        [
+                          'field' => $db->cfn('bbn_uid', $this->table_uids . $change),
+                          'operator' => 'eq',
+                          'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
+                        ],
+                        [
+                          'field' => $db->cfn('bbn_active', $this->table_uids . $change),
+                          'operator' => '=',
+                          'exp' => '1'
+                        ]
+                      ],
+                      'logic' => 'AND'
+                    ]
+                  ];
+                }
               }
             }
           }
 
-          // Process tables with primary key references
-          foreach ($cfg['tables'] as $alias => $table) {
-            $model = $db->modelize($table);
-            if (
-              isset($model['keys']['PRIMARY']['ref_table']) &&
-              ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
-            ) {
-              $change++;
-              $new_join[] = [
-                'table' => self::$table_uids,
-                'alias' => $db->tsn(self::$table_uids) . $change,
-                'on' => [
-                  'conditions' => [
-                    [
-                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
-                      'operator' => 'eq',
-                      'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
-                    ],
-                    [
-                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
-                      'operator' => '=',
-                      'exp' => '1'
-                    ]
-                  ],
-                  'logic' => 'AND'
-                ]
-              ];
-            }
-          }
+          $new_join[] = $t;
+        }
 
-          if ($change) {
-            $cfg['join'] = $new_join;
-            $cfg['where'] = $cfg['filters'];
-            $cfg = $db->reprocessCfg($cfg);
+        foreach ($cfg['tables'] as $alias => $table) {
+          $model = $db->modelize($table);
+          if (
+            isset($model['keys']['PRIMARY']['ref_table']) &&
+            ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
+          ) {
+            $change++;
+            $new_join[] = [
+              'table' => $this->table_uids,
+              'alias' => $db->tsn($this->table_uids) . $change,
+              'on' => [
+                'conditions' => [
+                  [
+                    'field' => $db->cfn($this->table_uids . $change . '.bbn_uid'),
+                    'operator' => 'eq',
+                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
+                  ],
+                  [
+                    'field' => $db->cfn($this->table_uids . $change . '.bbn_active'),
+                    'operator' => '=',
+                    'exp' => '1'
+                  ]
+                ],
+                'logic' => 'AND'
+              ]
+            ];
           }
+        }
+        if ($change) {
+          $cfg['join'] = $new_join;
+          $cfg['where'] = $cfg['filters'];
+          $cfg = $db->reprocessCfg($cfg);
         }
       }
     }
 
-    // Handle write operations
     if (
       $cfg['write'] &&
       ($table = $db->tfn(current($tables))) &&
-      ($s = self::getTableCfg($table))
+      ($s = $this->getTableCfg($table))
     ) {
-      $isDisabled = !self::$enabled;
       // This happens before the query is executed
       if ($cfg['moment'] === 'before') {
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
-
-        // Find primary key value from configuration
         $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
         if ($idx1 !== null) {
           $primary_where = $cfg['values'][$idx1];
         }
-
         $idx = array_search($s['primary'], $cfg['fields'], true);
         if (($idx !== false) && isset($cfg['values'][$idx])) {
-          $primary_defined = $cfg['generate_id'] ? false : true;
+          $primary_defined = empty($cfg['generate_id']) ? true : false;
           $primary_value = $cfg['values'][$idx];
         }
 
-        // Handle INSERT operations
-        if ($cfg['kind'] === 'INSERT') {
-          // Check for existing record with same unique values
-          if (!$primary_defined) {
-            foreach ($s['unique'] as $key) {
-              $fields = [];
-              $exit = false;
-              foreach ($key['columns'] as $col) {
-                $col_idx = array_search($col, $cfg['fields'], true);
-                if (($col_idx === false) || is_null($cfg['values'][$col_idx])) {
-                  $exit = true;
+        switch ($cfg['kind']) {
+
+          case 'INSERT':
+            // If the primary is specified and already exists in a row in deleted state
+            // (if it exists in active state, DB will return its standard error but it's not this class' problem)
+            if (!$primary_defined) {
+              // Checks if there is a unique value (non based on UID)
+              foreach ($s['unique'] as $key) {
+                $fields = [];
+                $exit = false;
+                foreach ($key['columns'] as $col) {
+                  $col_idx = array_search($col, $cfg['fields'], true);
+                  if (($col_idx === false) || is_null($cfg['values'][$col_idx])) {
+                    $exit = true;
+                    break;
+                  } else {
+                    $fields[] = [
+                      'field' => $col['name'],
+                      'operator' => 'eq',
+                      'value' => $cfg['values'][$col_idx]
+                    ];
+                  }
+                }
+                if ($exit) {
+                  continue;
+                }
+
+                $isDisabled = !$this->enabled;
+                if (!$isDisabled) {
+                  $this->disable();
+                }
+
+                if ($tmp = $db->selectOne([
+                  'tables' => [$table],
+                  'fields' => [$s['primary']],
+                  'join' => [[
+                    'table' => $this->table_uids,
+                    'on' => [[
+                      'field' => $db->cfn('bbn_uid', $this->table_uids),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn($s['primary'], $table, true)
+                    ]]
+                  ]],
+                  'where' => [
+                    'conditions' => $fields,
+                    'logic' => 'AND'
+                  ]
+                ])) {
+                  $primary_value = $tmp;
+                  $primary_defined = true;
+                  if (!$isDisabled) {
+                    $this->enable();
+                  }
+
                   break;
-                } else {
-                  $fields[] = [
-                    'field' => $col['name'],
-                    'operator' => 'eq',
-                    'value' => $cfg['values'][$col_idx]
-                  ];
+                }
+
+                if (!$isDisabled) {
+                  $this->enable();
                 }
               }
-
-              if ($exit) continue;
-
-              // Check for existing record with same values
-              if (!$isDisabled) {
-                self::disable();
-              }
-
-              if ($tmp = $db->selectOne([
-                'tables' => [$table],
-                'fields' => [$s['primary']],
+            }
+            if (
+              $primary_defined &&
+              ($db->selectOne($this->table_uids, $this->column, ['bbn_uid' => $primary_value]) === 0) &&
+              //($all = self::$db->rselect($table, [], [$s['primary'] => $primary_value]))
+              ($all = $this->db->rselect([
+                'table' => $table,
+                'fields' => $cfg['fields'],
                 'join' => [[
-                  'table' => self::$table_uids,
+                  'table' => $this->table_uids,
                   'on' => [
-                    'conditions' => [
-                      ['field' => $db->cfn('bbn_uid', self::$table_uids), 'operator' => '=', 'exp' => $db->cfn($s['primary'], $table, true)]
-                    ]
+                    'conditions' => [[
+                      'field' => $s['primary'],
+                      'exp' => 'bbn_uid'
+                    ], [
+                      'field' => $this->column,
+                      'value' => 0
+                    ]]
                   ]
                 ]],
                 'where' => [
-                  'conditions' => $fields,
-                  'logic' => 'AND'
+                  'conditions' => [[
+                    'field' => $s['primary'],
+                    'value' => $primary_value
+                  ]]
                 ]
-              ])) {
-                $primary_value = $tmp;
-                $primary_defined = true;
-
-                if (!$isDisabled) {
-                  self::enable();
+              ]))
+            ) {
+              // We won't execute the after trigger
+              $cfg['trig'] = false;
+              // Real query's execution will be prevented
+              $cfg['run'] = false;
+              $cfg['value'] = 0;
+              /** @var array $update The values to be updated */
+              $update = [];
+              // We update each element which needs to (the new ones different from the old, and the old ones different from the default)
+              foreach ($all as $k => $v) {
+                if ($k !== $s['primary']) {
+                  $idx = array_search($k, $cfg['fields'], true);
+                  if ($idx !== false) {
+                    if ($v !== $cfg['values'][$idx]) {
+                      $update[$k] = $cfg['values'][$idx];
+                    }
+                  } else if ($v !== $s['fields'][$k]['default']) {
+                    $update[$k] = $s['fields'][$k]['default'];
+                  }
                 }
+              }
 
-                break;
+              if ($cfg['value'] = $this->db->update($this->table_uids, ['bbn_active' => 1], [
+                ['bbn_uid', '=', $primary_value]
+              ])) {
+                // Without this the record won't be write in bbn_history. Added by Mirko
+                $cfg['trig'] = true;
+                // --------
+                if (count($update) > 0) {
+                  $this->enable();
+                  $this->db->update($table, $update, [
+                    $s['primary'] => $primary_value
+                  ]);
+                }
+                $cfg['history'][] = [
+                  'operation' => 'RESTORE',
+                  'column' => $s['fields'][$s['primary']]['id_option'],
+                  'line' => $primary_value
+                ];
+                $this->db->setLastInsertId($primary_value);
               }
 
               if (!$isDisabled) {
-                self::enable();
+                $this->enable();
+              }
+            } else {
+              $isDisabled = !$this->enabled;
+              if (!$isDisabled) {
+                $this->disable();
+              }
+
+              if ($primary_defined && !$this->db->count($table, [$s['primary'] => $primary_value])) {
+                $primary_defined = false;
+              }
+              if (!$primary_defined && $this->db->insertIgnore($this->table_uids, [
+                'bbn_uid' => $primary_value,
+                'bbn_table' => $s['id']
+              ])) {
+                $cfg['history'][] = [
+                  'operation' => 'INSERT',
+                  'column' => isset($s['fields'][$s['primary']]) ? $s['fields'][$s['primary']]['id_option'] : null,
+                  'line' => $primary_value
+                ];
+                $this->db->setLastInsertId($primary_value);
+              }
+
+              if (!$isDisabled) {
+                $this->enable();
               }
             }
-          }
+            break;
+          case 'UPDATE':
 
-          // Check for existing record with same primary value
-          if ($primary_defined && !self::$db->count($table, [$s['primary'] => $primary_value])) {
-            $primary_defined = false;
-          }
+            // ********** CHANGED BY MIRKO *************
 
-          // If no active record exists, insert new history record
-          if (!$primary_defined) {
-            if (!$isDisabled) {
-              self::disable();
+            /*if ( $primary_defined ){
+                          $where = [$s['primary'] => $primary_value];
+                          // If the only update regards the history field
+                          $row = self::$db->rselect($table, array_keys($cfg['fields']), $where);
+                          $time = microtime(true);
+                          foreach ( $cfg['values'] as $k => $v ){
+                            if (
+                              ($row[$k] !== $v) &&
+                              isset($s['fields'][$k])
+                            ){
+                              $cfg['history'][] = [
+                                'operation' => 'UPDATE',
+                                'column' => $s['fields'][$k]['id_option'],
+                                'line' => $primary_value,
+                                'old' => $row[$k],
+                                'chrono' => $time
+                              ];
+                            }
+                          }
+                        }*/
+            $tmp = [];
+            foreach ($cfg['fields'] as $i => $f) {
+              $tmp[$f] = $cfg['values'][$i];
             }
-
-            if ($db->insertIgnore(self::$table_uids, [
-              'bbn_uid' => $primary_value,
-              'bbn_table' => $s['id']
-            ])) {
-              $cfg['history'][] = [
-                'operation' => 'INSERT',
-                'column' => isset($s['fields'][$s['primary']]) ? $s['fields'][$s['primary']]['id_option'] : null,
-                'line' => $primary_value
-              ];
-            }
-
-            if (!$isDisabled) {
-              self::enable();
-            }
-          } else {
-            // Record already exists, mark as restored
-            $cfg['trig'] = false;
-            $cfg['run'] = false;
-
-            // Update active status to 1 (restored)
-            $cfg['value'] = self::$db->update(self::$table_uids, ['bbn_active' => 1], [
-              'bbn_uid' => $primary_value
-            ]);
-
-            if ($cfg['value']) {
-              $cfg['trig'] = true;
-              // Update the record in history table
-              if (count($cfg['values_desc'])) {
-                self::enable();
-                foreach ($cfg['fields'] as $i => $idx) {
-                  if (
-                    $s['fields'][$idx] && isset($cfg['values'][$idx]) &&
-                    ($s['fields'][$idx]['id_option'] !== null)
-                  ) {
-
-                    // Find the column ID for this field
-                    $col_id = self::$database_obj->columnId(
-                      $s['fields'][$idx]['name'],
-                      $table,
-                      $db->getCurrent()
-                    );
-
-                    if ($col_id) {
-                      $cfg['history'][] = [
-                        'operation' => 'UPDATE',
-                        'column' => $col_id,
-                        'line' => $primary_value,
-                        'old' => self::$db->selectOne($table, $idx, [$s['primary'] => $primary_value]),
-                        'chrono' => microtime(true)
-                      ];
+            if ($primary_where) {
+              $fields = $cfg['fields'];
+              $isDefined = false;
+              foreach ($s['unique'] as $unique) {
+                $isDefined = count(X::filter($unique['columns'], fn($a) => in_array($a['name'], $cfg['fields'], true))) ? $unique : false;
+                if ($isDefined) {
+                  foreach ($isDefined['columns'] as $a) {
+                    if (!in_array($a['name'], $fields, true)) {
+                      $fields[] = $a['name'];
                     }
                   }
-                }
-
-                // Update the record in database
-                $update = [];
-                foreach ($cfg['fields'] as $i => $f) {
-                  if (isset($cfg['values'][$i]) && isset($s['fields'][$i])) {
-                    $update[$f] = $cfg['values'][$i];
-                  }
-                }
-
-                self::$db->update($table, $update, [$s['primary'] => $primary_value]);
-              }
-            }
-
-            if (!$isDisabled) {
-              self::enable();
-            }
-          }
-        } else if ($cfg['kind'] === 'UPDATE') {
-
-          // Handle UPDATE operations
-          $tmp = [];
-          foreach ($cfg['fields'] as $i => $f) {
-            $tmp[$f] = $cfg['values'][$i];
-          }
-
-          // Check for unique constraints
-          $isDefined = false;
-          foreach ($s['unique'] as $unique) {
-            if (count(X::filter($unique['columns'], fn($a) => in_array($a['name'], $cfg['fields'], true))) ? $unique : false) {
-              $isDefined = $unique;
-              break;
-            }
-          }
-
-          // Check for existing record with same values
-          if ($primary_where && $isDefined) {
-            if (!$isDisabled) {
-              self::disable();
-            }
-
-            $row = $db->rselect($table, array_keys($cfg['fields']), [$s['primary'] => $primary_where]);
-
-            // Check for unique constraint violations
-            foreach ($isDefined['columns'] as $col) {
-              if (!in_array($col['name'], $cfg['fields'])) {
-                continue;
-              }
-
-              $search = [];
-              foreach ($isDefined['columns'] as $a) {
-                $search[$a['name']] = in_array($a['name'], $cfg['fields']) ? $tmp[$a['name']] : $row[$a['name']];
-
-                if (is_null($search[$a['name']])) {
-                  $search = [];
                   break;
                 }
               }
 
-              if (!empty($search)) {
-                $search[] = [$s['primary'], '!=', $primary_where];
-                if ($checkRow = self::$db->selectOne($table, $s['primary'], $search)) {
-                  // Check for nullable columns
-                  if (!$col['nullable']) {
-                    throw new Exception(X::_(
-                      "Impossible to update the record with primary %s from %s because a unique constraint already exists in record %s, you should make one of the unique keys columns nullable",
-                      $primary_where,
-                      $table,
-                      $checkRow
-                    ));
+              $isDisabled = !$this->enabled;
+              if (!$isDisabled) {
+                $this->disable();
+              }
+              $row = $this->db->rselect($table, $fields, [$s['primary'] => $primary_where]);
+              if ($isDefined) {
+                $search = [];
+                foreach ($isDefined['columns'] as $col) {
+                  $search[$col['name']] = in_array($col['name'], $cfg['fields']) ? $tmp[$col['name']] : $row[$col['name']];
+                  if (is_null($search[$col['name']])) {
+                    $search = [];
+                    break;
+                  }
+                }
+                if (!empty($search)) {
+                  $search[] = [$s['primary'], '!=', $primary_where];
+                  if ($checkRow = $this->db->selectOne($table, $s['primary'], $search)) {
+                    // ONLY IF DELETED OTHERWISE REGULAR DB ERROR
+                    $deleted = !$this->db->selectOne($this->table_uids, $this->column, ['bbn_uid' => $checkRow]);
+                    if ($deleted) {
+                      if (!X::getRow($isDefined['columns'], ['nullable' => true])) {
+                        throw new Exception(X::_("Impossible to update the record with primary %s from %s because a unique constraint already exists in record %s, you should make one of the unique keys columns nullable", $primary_where, $table, $checkRow));
+                      } else {
+                        // Should have been done on the delete action
+                      }
+                    }
                   }
                 }
               }
-            }
+              if (!$isDisabled) {
+                $this->enable();
+              }
 
-            if (!$isDisabled) {
-              self::enable();
-            }
-
-            // Record changes for each field that changed
-            foreach ($cfg['fields'] as $i => $idx) {
-              $csn = self::$db->csn($idx);
-              if (
-                array_key_exists($csn, $s['fields']) &&
-                ($row[$csn] !== $cfg['values'][$i])
-              ) {
-
-                // Find column ID for this field
-                $col_id = self::$database_obj->columnId(
-                  $s['fields'][$csn]['name'],
-                  $table,
-                  $db->getCurrent()
-                );
-
-                if ($col_id) {
+              foreach ($cfg['fields'] as $i => $idx) {
+                $csn = $this->db->csn($idx);
+                if (
+                  array_key_exists($csn, $s['fields']) &&
+                  ($row[$csn] !== $cfg['values'][$i])
+                ) {
                   $cfg['history'][] = [
                     'operation' => 'UPDATE',
-                    'column' => $col_id,
+                    'column' => $s['fields'][$csn]['id_option'],
                     'line' => $primary_where,
                     'old' => $row[$csn]
                   ];
                 }
               }
             }
-          } else if (!$isDisabled && $ids = self::$db->getColumnValues($table, $s['primary'], $cfg['filters'])) {
-            // Handle multiple records with same primary value
+            // Case where the primary is not defined, we'll update each primary instead
+            else if ($ids = $this->db->getColumnValues($table, $s['primary'], $cfg['filters'])) {
+              // We won't execute the after trigger
+              $cfg['trig'] = false;
+              // Real query's execution will be prevented
+              $cfg['run'] = false;
+              $cfg['value'] = 0;
+              foreach ($ids as $id) {
+                $cfg['value'] += $this->db->update($table, $tmp, [$s['primary'] => $id]);
+              }
+
+              // ****************************************
+
+            }
+            break;
+
+          // Nothing is really deleted, the hcol is just set to 0
+          case 'DELETE':
+            // We won't execute the after trigger
             $cfg['trig'] = false;
+            // Real query's execution will be prevented
             $cfg['run'] = false;
+            $cfg['value'] = 0;
+            // Case where the primary is not defined, we'll delete based on each primary instead
+            if (!$primary_where) {
+              $ids = $this->db->getColumnValues($table, $s['primary'], $cfg['filters']);
+              foreach ($ids as $id) {
+                $cfg['value'] += $this->db->delete($table, [$s['primary'] => $id]);
+              }
+            } else {
+              $isDisabled = !$this->enabled;
+              if (!$isDisabled) {
+                $this->disable();
+              }
 
-            foreach ($ids as $id) {
-              $cfg['value'] += self::$db->update($table, $tmp, [$s['primary'] => $id]);
-            }
-          }
-        } else if ($cfg['kind'] === 'DELETE') {
-
-          // Handle DELETE operations
-          $cfg['trig'] = false;
-          $cfg['run'] = false;
-
-          // Check for existing record with same primary value
-          if (!$primary_where) {
-            $ids = self::$db->getColumnValues($table, $s['primary'], $cfg['filters']);
-
-            foreach ($ids as $id) {
-              $cfg['value'] += self::$db->delete($table, [$s['primary'] => $id]);
-            }
-          } else {
-            // Check for foreign key constraints
-            if (!$isDisabled) {
-              self::disable();
-            }
-
-            foreach ($s['refs'] as $ref) {
-              if (!empty($ref['constraint']) && $db->count($ref['table'], [$ref['col'] => $primary_where])) {
-                if ($ref['delete'] === 'RESTRICT') {
-                  if ($ref['table'] !== $db->tsn(self::$table)) {
-                    throw new Exception(X::_(
-                      "Impossible to delete the record with primary %s from %s because it is referenced in the table %s",
-                      $primary_where,
-                      $table,
-                      $ref['table']
-                    ));
+              $this->enable();
+              foreach ($s['refs'] as $ref) {
+                if (!empty($ref['constraint']) && $db->count($ref['table'], [$ref['col'] => $primary_where])) {
+                  if ($ref['delete'] === 'RESTRICT') {
+                    if ($ref['table'] !== $this->db->tsn($this->table)) {
+                      throw new Exception(X::_(
+                        "Impossible to delete the record with primary %s from %s because it is referenced in the table %s",
+                        $primary_where,
+                        $table,
+                        $ref['table']
+                      ));
+                    }
+                  } elseif ($ref['delete'] === 'SET NULL') {
+                    $this->db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
+                  } elseif ($ref['delete'] === 'CASCADE') {
+                    $this->db->delete($ref['table'], [$ref['col'] => $primary_where]);
+                  } elseif ($ref['delete'] !== 'NO ACTION') {
+                    throw new Exception(X::_("Impossible to find what to do with the record referenced in the table %s", $ref['table']));
                   }
-                } elseif ($ref['delete'] === 'SET NULL') {
-                  self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
-                } elseif ($ref['delete'] === 'CASCADE') {
-                  self::$db->delete($ref['table'], [$ref['col'] => $primary_where]);
-                } else {
-                  throw new Exception(X::_("Impossible to find what to do with the record referenced in the table %s", $ref['table']));
                 }
               }
-            }
+              $this->disable();
 
-            // Update nullable columns
-            foreach ($s['unique'] as $unique) {
-              foreach ($unique['columns'] as $col) {
-                if (!$col['nullable']) continue;
+              foreach ($s['unique'] as $unique) {
+                foreach ($unique['columns'] as $col) {
+                  if (!$col['nullable']) {
+                    continue;
+                  }
 
-                $old = self::$db->selectOne($table, $col['name'], [$s['primary'] => $primary_where]);
-                self::$db->update($table, [$col['name'] => null], [$s['primary'] => $primary_where]);
-
-                if (isset($s['fields'][$col['name']])) {
+                  $old = $this->db->selectOne($table, $col['name'], [$s['primary'] => $primary_where]);
+                  $this->db->update($table, [$col['name'] => null], [$s['primary'] => $primary_where]);
+                  if (!isset($s['fields'][$col['name']])) {
+                    X::log([$col['name'], $s], '_toDoHistoryStructureError');
+                    continue;
+                  }
                   $cfg['history'][] = [
                     'operation' => 'UPDATE',
                     'column' => $s['fields'][$col['name']]['id_option'],
@@ -1953,50 +1954,50 @@ MYSQL;
                   ];
                 }
               }
+
+              $cfg['value'] = $this->db->update($this->table_uids, [
+                'bbn_active' => 0
+              ], [
+                'bbn_uid' => $primary_where
+              ]);
+              //var_dump("HIST", $primary_where);
+              if (!$isDisabled) {
+                $this->enable();
+              }
+
+              if ($cfg['value']) {
+                $cfg['trig'] = 1;
+                // And we insert into the history table
+                $cfg['history'][] = [
+                  'operation' => 'DELETE',
+                  'column' => $s['fields'][$s['primary']]['id_option'],
+                  'line' => $primary_where,
+                  'old' => NULL
+                ];
+              }
             }
-
-            // Mark record as deleted in history table
-            $cfg['value'] = self::$db->update(self::$table_uids, [
-              'bbn_active' => 0
-            ], [
-              'bbn_uid' => $primary_where
-            ]);
-
-            if ($cfg['value']) {
-              $cfg['trig'] = true;
-              // Add delete operation to history
-              $cfg['history'][] = [
-                'operation' => 'DELETE',
-                'column' => $s['fields'][$s['primary']]['id_option'],
-                'line' => $primary_where,
-                'old' => NULL
-              ];
-            }
-          }
-
-          if (!$isDisabled) {
-            self::enable();
-          }
+            break;
         }
-      } else if ($cfg['moment'] === 'after' && isset($cfg['history'])) {
-        // Process history records after write operations
+      } else if (
+        ($cfg['moment'] === 'after') &&
+        isset($cfg['history'])
+      ) {
         $time = microtime(true);
         foreach ($cfg['history'] as $h) {
           $h['chrono'] = $time;
-          self::_insert($h);
+          $this->_insert($h);
         }
         unset($cfg['history']);
       }
     }
-
     return $cfg;
   }
 
   /**
-   * Helper method to get primary value from configuration
+   * Returns the primary value from a configuration array.
    *
-   * @param array $cfg Configuration array
-   * @return null|string Primary key value or null if not found
+   * @param array $cfg
+   * @return string|null
    */
   private function get_primary_value(array $cfg): ?string
   {
@@ -2012,14 +2013,13 @@ MYSQL;
         $primary = $cfg['values'][$idx];
       }
     }
-
     return $primary;
   }
 
   /**
-   * Returns the database connection object
+   * Returns the database connection object.
    *
-   * @return Db|null Database connection or null if not initialized
+   * @return Db
    */
   private function _get_db(): ?Db
   {
@@ -2030,14 +2030,14 @@ MYSQL;
   }
 
   /**
-   * Returns an instance of the Database class
+   * Returns an instance of the Database class.
    *
-   * @return Database|null Database object or null if not initialized
+   * @return Database
    */
   private function _get_database(): ?Database
   {
-    if (self::check()) {
-      if (!isset($this->database_obj) && ($db = self::_get_db())) {
+    if ($this->check()) {
+      if (!$this->database_obj && ($db = $this->_get_db())) {
         $this->database_obj = new Database($db);
       }
       return $this->database_obj;
@@ -2046,35 +2046,32 @@ MYSQL;
   }
 
   /**
-   * Inserts a history record
+   * Adds a row in the history table.
    *
-   * @param array $cfg History record configuration
-   * @return int Number of successful operations
+   * @param array $cfg
+   * @return int
    */
   private function _insert(array $cfg): int
   {
     if (
       isset($cfg['column'], $cfg['line'], $cfg['chrono']) &&
-      self::check() && ($db = self::_get_db())
+      $this->check() &&
+      ($db = $this->_get_db())
     ) {
-
-      // Record the last ID temporarily
+      // Recording the last ID
       $id = $db->lastId();
       $db->disableLast();
-
-      // Disable history if not enabled
-      $isDisabled = !self::$enabled;
+      $isDisabled = !$this->enabled;
       if (!$isDisabled) {
-        self::disable();
+        $this->disable();
       }
 
-      // Set default values for ref and val if not provided
       if (!array_key_exists('old', $cfg)) {
         $cfg['ref'] = null;
         $cfg['val'] = null;
       } else if (
         Str::isUid($cfg['old']) &&
-        self::$db->count(self::$table_uids, ['bbn_uid' => $cfg['old']])
+        $this->db->count($this->table_uids, ['bbn_uid' => $cfg['old']])
       ) {
         $cfg['ref'] = $cfg['old'];
         $cfg['val'] = null;
@@ -2083,23 +2080,23 @@ MYSQL;
         $cfg['val'] = $cfg['old'];
       }
 
-      // Insert into history table
-      if ($res = $db->insert(self::$table, [
+      // New row in the history table
+      if ($res = $db->insert($this->table, [
         'opr' => $cfg['operation'],
         'uid' => $cfg['line'],
         'col' => $cfg['column'],
         'val' => $cfg['val'],
         'ref' => $cfg['ref'],
-        'tst' => self::$date ?: $cfg['chrono'],
-        'usr' => self::$user
+        'tst' => $this->date ?: $cfg['chrono'],
+        'usr' => $this->user
       ])) {
-        // Restore last ID
+        // Set back the original last ID
         $db->setLastInsertId($id);
       }
 
       $db->enableLast();
       if (!$isDisabled) {
-        self::enable();
+        $this->enable();
       }
 
       return $res;
@@ -2108,23 +2105,23 @@ MYSQL;
   }
 
   /**
-   * Gets WHERE conditions for a table
+   * Get a string for the WHERE in the query with all the columns selection.
    *
-   * @param string $table The table name
-   * @return array|null WHERE conditions or null if not found
+   * @param string $table
+   * @return array|null
    */
   private function _getTableWhere(string $table): ?array
   {
     if (
-      Str::checkName($table) && ($db = self::_get_db()) &&
-      ($database_obj = self::_get_database()) && ($model = $database_obj->modelize($table))
+      Str::checkName($table) &&
+      ($db = $this->_get_db()) &&
+      ($database_obj = $this->_get_database()) &&
+      ($model = $database_obj->modelize($table))
     ) {
-
       $where_ar = [
         'logic' => 'OR',
         'conditions' => []
       ];
-
       foreach ($model['fields'] as $f) {
         if (!empty($f['id_option'])) {
           $where_ar['conditions'][] = [
@@ -2140,99 +2137,4 @@ MYSQL;
 
     return null;
   }
-
-  /**
-   * Validates a timestamp
-   *
-   * @param mixed $d Timestamp or date string to validate
-   * @return float|null Validated timestamp or null if invalid
-   */
-  private function validTimestamp($d): ?float
-  {
-    if (!Str::isNumber($d)) {
-      $d = strtotime($d);
-    }
-
-    if (($d > 0) && Str::isNumber($d)) {
-      return (float)$d;
-    }
-    return null;
-  }
-
-  /**
-   * Checks if history is initialized
-   *
-   * @return bool True if properly configured
-   */
-  public static function isInit(): bool
-  {
-    return self::$ok;
-  }
-
-  /**
-   * Disables history operations
-   */
-  public static function disable(): void
-  {
-    self::$enabled = false;
-  }
-
-  /**
-   * Enables history operations
-   */
-  public static function enable(): void
-  {
-    self::$enabled = true;
-  }
-
-  /**
-   * Checks if history is enabled
-   *
-   * @return bool True if properly configured and enabled
-   */
-  public static function isEnabled(): bool
-  {
-    return self::isInit() && (self::$enabled === true);
-  }
 }
-
-/**
- * General comments about the History class:
- *
- * 1. This class implements a database history tracking system that records changes to tables.
- *    It maintains a history of all modifications, allowing users to roll back to previous states.
- * 
- * 2. The Singleton pattern is implemented to ensure only one instance of this class exists,
- *    which is crucial for maintaining consistent state across multiple operations on the same database connection.
- * 
- * 3. Key features include:
- *    - Automatic tracking of INSERT/UPDATE/DELETE operations
- *    - Ability to query history records by timestamp, column, or operation type
- *    - Support for complex relationships between tables through foreign keys
- *    - Methods for merging and upgrading table structures
- * 
- * 4. The class handles several edge cases:
- *    - Prevents future writes in the history table
- *    - Manages primary key conflicts during inserts
- *    - Handles foreign key constraints properly
- *    - Supports both direct UID references and column-based lookups
- * 
- * 5. Performance considerations:
- *    - Uses caching to avoid repeated database queries for common configurations
- *    - Implements efficient query building with prepared statements
- *    - Minimizes database operations by batching updates
- * 
- * 6. The class is designed to work seamlessly with the BBN framework's database abstraction layer,
- *    providing a consistent interface across different database backends.
- * 
- * 7. Error handling is integrated throughout, with appropriate checks for:
- *    - Invalid timestamps
- *    - Missing or invalid table configurations
- *    - Database connection issues
- *    - Primary key conflicts
- * 
- * 8. The implementation maintains backward compatibility while adding new features like:
- *    - Support for complex relationships between tables
- *    - Detailed history records with old/new values
- *    - Timestamp-based queries and rollbacks
- */

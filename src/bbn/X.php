@@ -6,8 +6,6 @@ use Exception;
 use InvalidArgumentException;
 use Throwable;
 use stdClass;
-use bbn\File\System;
-use bbn\File\Dir;
 use function dgettext;
 use function floatval;
 use function array_key_exists;
@@ -502,14 +500,12 @@ class X
    * @param string $path
    * @param string $format
    * @param int $max
-   * @param File\System|null $fs
    * @return string|null
    */
   public static function makeStoragePath(
     string $path,
     $format = 'Y/m/d',
-    $max = 100,
-    ?System $fs = null
+    $max = 100
   ): ?string {
     if (empty($format)) {
       $format = 'Y/m/d';
@@ -519,20 +515,19 @@ class X
       $max = 100;
     }
 
-    if (!$fs) {
-      $fs = new File\System();
-    }
-
     // One dir per $format
     $spath = date($format);
     if ($spath) {
-      $path = $fs->createPath($path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath);
-      if ($path && $fs->isDir($path)) {
-        $num = count($fs->getDirs($path));
+      $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
+      mkdir($path, 0777, true);
+      if (is_dir($path)) {
+        $dirs = array_filter(scandir($path), fn ($a) => is_dir("$path/$a") && $a !== '.' && $a !== '..');
+        $num = count($dirs);
         if ($num) {
           // Dir or files
-          if ($fs->isDir("$path/$num")) {
-            $num_files = count($fs->getFiles("$path/$num", true));
+          if (is_dir("$path/$num")) {
+            $files = array_filter(scandir("$path/$num"), fn ($a) => !is_dir("$path/$num/$a"));
+            $num_files = count($files);
             if ($num_files >= $max) {
               $num++;
             }
@@ -541,7 +536,7 @@ class X
           $num = 1;
         }
 
-        if ($fs->createPath("$path/$num")) {
+        if (mkdir("$path/$num", 0777, true)) {
           return "$path/$num/";
         }
       }
@@ -556,30 +551,25 @@ class X
    *
    * @param string $path
    * @param string $format
-   * @param File\System|null $fs
    * @return int|null
    */
   public static function cleanStoragePath(
     string $path,
-    $format = 'Y/m/d',
-    ?System $fs = null
+    $format = 'Y/m/d'
   ): ?int {
     if (empty($format)) {
       $format = 'Y/m/d';
     }
 
-    if (!$fs) {
-      $fs = new System();
-    }
-
-    if (!$fs->isDir($path)) {
+    if (!is_dir($path)) {
       return null;
     }
 
     $limit = count(self::split($format, '/')) + 1;
     $res   = 0;
     while ($limit > 0) {
-      if (!$fs->getNumFiles($path) && $fs->delete($path)) {
+      $scan = array_filter(scandir($path), fn ($a) => $a !== '.' && $a !== '..');
+      if (!count($scan)) {
         $limit--;
         $res++;
         $path = self::dirname($path);
@@ -3309,11 +3299,13 @@ class X
       $can_save = true;
     }
 
-    if (
-      $can_save
-      && Dir::createPath(self::dirname($file))
-    ) {
-      $ow->save($file);
+    if ($can_save) {
+      try {
+        $ow->save($file);
+      } catch (Exception $e) {
+        return false;
+      }
+
       return is_file($file);
     }
 
