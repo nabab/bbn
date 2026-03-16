@@ -185,6 +185,27 @@ class File extends Models\Cls\Basic
   }
 
   /**
+   * Tests if the object is a file.
+   */
+  public function test()
+  {
+    if ($this->make()) {
+      if ($this->error) {
+        return false;
+      }
+
+      if ($this->file && !is_file($this->file)) {
+        $this->error = "The file doesn't exist";
+        return false;
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Creates a temporary file in tmp directory.
    *
    * @todo of adjusting
