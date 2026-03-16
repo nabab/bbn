@@ -736,7 +736,7 @@ class Cache implements CacheInterface
           $prefixLength = strlen($this->prefix);
           do {
             // Scan for some keys
-            $arr_keys = $dir ? $this->obj->scan($it, $dir) : $this->obj->scan($it);
+            $arr_keys = $dir ? $this->obj->scan($it, $this->prefix . $dir . '*') : $this->obj->scan($it);
 
             // Redis may return empty results, so protect against that
             if ($arr_keys !== FALSE) {
@@ -905,7 +905,7 @@ class Cache implements CacheInterface
                 'nodePath' => $fullName,
                 'items'=> [],
                 'num' => $num,
-                'path' => X::split(dirname($fullName), self::$sep),
+                'path' => array_slice(X::split($fullName, self::$sep), 0, -1),
                 'folder' => $isFolder
               ];
             }

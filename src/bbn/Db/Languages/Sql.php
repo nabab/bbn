@@ -9,7 +9,8 @@ use PDOException;
 use PDOStatement;
 use bbn\Str;
 use bbn\X;
-use bbn\Models\Tts\Cache;
+use bbn\Cache;
+use bbn\Models\Tts\Cache as CacheTrait;
 use bbn\Db\Engines;
 use bbn\Db\HasError;
 use bbn\Db\EnginesApi;
@@ -32,7 +33,7 @@ use function is_callable;
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Types
 {
   use HasError;
-  use Cache;
+  use CacheTrait;
   use Commands;
   use Formatters;
 
@@ -2558,15 +2559,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $h = str_replace('/', '-', $this->getConnectionCode() . '-' . $this->getCurrent());
     }
 
+    $sep = Cache::getSeparator();
     switch ($mode){
       case 'columns':
-        $r = $this->getEngine().'/'.$h.'/'.str_replace('.', '/', $this->tableFullName($item));
+        $r = $this->getEngine().$sep.$h.$sep.str_replace('.', $sep, $this->tableFullName($item));
         break;
       case 'tables':
-        $r = $this->getEngine().'/'.$h.'/' . ($item ?: X::dirname($this->getCurrent()));
+        $r = $this->getEngine().$sep.$h.$sep . ($item ?: X::dirname($this->getCurrent()));
         break;
       case 'databases':
-        $r = $this->getEngine().'/'.$h.'/_bbn-database';
+        $r = $this->getEngine().$sep.$h.$sep.'_bbn-database';
         break;
     }
 

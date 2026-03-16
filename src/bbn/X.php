@@ -504,8 +504,8 @@ class X
    */
   public static function makeStoragePath(
     string $path,
-    $format = 'Y/m/d',
-    $max = 100
+    string $format = 'Y/m/d',
+    int $max = 100
   ): ?string {
     if (empty($format)) {
       $format = 'Y/m/d';
@@ -521,7 +521,7 @@ class X
       $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
       mkdir($path, 0777, true);
       if (is_dir($path)) {
-        $dirs = array_filter(scandir($path), fn ($a) => is_dir("$path/$a") && $a !== '.' && $a !== '..');
+        $dirs = X::filter(scandir($path), fn ($a) => ($a !== '.') && ($a !== '..') && is_dir("$path/$a"));
         $num = count($dirs);
         if ($num) {
           // Dir or files
@@ -536,9 +536,8 @@ class X
           $num = 1;
         }
 
-        if (mkdir("$path/$num", 0777, true)) {
-          return "$path/$num/";
-        }
+        mkdir("$path/$num", 0777, true);
+        return "$path/$num/";
       }
     }
 

@@ -7,12 +7,7 @@
 
 namespace bbn\Cron;
 
-use bbn\Str;
-use bbn\Mvc;
-use bbn\Db;
-use bbn\File\System;
-use bbn\Mvc\Controller;
-use function count;
+use bbn\X;
 
 trait Filesystem {
   /**
@@ -56,7 +51,7 @@ trait Filesystem {
         $path .= '/';
       }
       else {
-        $path = \bbn\X::makeStoragePath($path);
+        $path = X::makeStoragePath($path);
       }
     }
 

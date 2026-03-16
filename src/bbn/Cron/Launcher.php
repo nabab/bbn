@@ -48,7 +48,7 @@ class Launcher extends Basic {
       $cfg['exe_path'] = $this->exe_path;
       $log = $this->cron->getLogPath($cfg).date('Y-m-d-H-i-s').'.txt';
       $cfg['log_file'] = $log;
-      exec(sprintf('php -f router.php %s "%s" > %s 2>&1 &',
+      exec(\sprintf('php -f router.php %s "%s" > %s 2>&1 &',
         $this->exe_path,
         Str::escapeDquotes(json_encode($cfg)),
         $log
