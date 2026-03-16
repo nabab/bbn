@@ -736,14 +736,12 @@ class Cache implements CacheInterface
           $prefixLength = strlen($this->prefix);
           do {
             // Scan for some keys
-            $arr_keys = $this->obj->scan($it);
+            $arr_keys = $dir ? $this->obj->scan($it, $dir) : $this->obj->scan($it);
 
             // Redis may return empty results, so protect against that
             if ($arr_keys !== FALSE) {
               foreach($arr_keys as $str_key) {
-                if ($emptyDir || (mb_strpos($str_key, $this->prefix . $dir) === 0)) {
-                  $list[] = mb_substr($str_key, $prefixLength);
-                }
+                $list[] = mb_substr($str_key, $prefixLength);
               }
             }
           } while ($it > 0);

@@ -363,7 +363,6 @@ trait DbCache
       $cache = Cache::getEngine();
       $sep = Cache::getSeparator();
       $arr = self::dbConfigGetTableClasses($db);
-      X::ddump($arr);
       $db->setTrigger(function ($cfg) use ($cache, $db, $arr, $sep) {
         if (!empty($cfg["write"]) && $cfg["moment"] === "after") {
           $table = $db->tsn(array_values($cfg["tables"])[0]);
