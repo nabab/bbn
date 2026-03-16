@@ -549,10 +549,10 @@ class Model extends DbClass
    * @param array|null $data
    * @param string $spec
    */
-  public function deleteCache(array|null $data = null, $spec = '', string $path = '')
+  public function deleteCache(array|null $data = null, $spec = '')
   {
     if ($cn = $this->modelCacheName($data, $spec)) {
-      return $this->cache_engine->deleteAll($cn);
+      return $this->cacheDelete($cn);
     }
   }
 

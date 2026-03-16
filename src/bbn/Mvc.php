@@ -918,7 +918,6 @@ class Mvc implements Api
 
   public function destruct()
   {
-    X::log('Critical error, MVC reseted', 'mvc_ouch');
     self::$_app_name = null;
     self::singletonUnset();
   }
