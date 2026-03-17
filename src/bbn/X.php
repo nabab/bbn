@@ -519,7 +519,10 @@ class X
     $spath = date($format);
     if ($spath) {
       $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
-      mkdir($path, 0777, true);
+      if (!is_dir($path)) {
+        mkdir($path, 0777, true);
+      }
+
       if (is_dir($path)) {
         $dirs = X::filter(scandir($path), fn ($a) => ($a !== '.') && ($a !== '..') && is_dir("$path/$a"));
         $num = count($dirs);
@@ -536,7 +539,10 @@ class X
           $num = 1;
         }
 
-        mkdir("$path/$num", 0777, true);
+        if (!is_dir("$path/$num")) {
+          mkdir("$path/$num", 0777, true);
+        }
+
         return "$path/$num/";
       }
     }
