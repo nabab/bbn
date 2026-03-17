@@ -203,6 +203,10 @@ trait Cfg
               unset($v['title']);
               $change = true;
             }
+            if (isset($v['options']) && empty($v['options']) && is_array($v['options'])) {
+              $v['options'] = null;
+              $change = true;
+            }
           }
           unset($v);
         }

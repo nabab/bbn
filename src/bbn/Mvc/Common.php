@@ -296,6 +296,16 @@ trait Common
     return Mvc::getCurPath();
   }
 
+  public function getStartTime(): float
+  {
+    return $this->_mvc->getStartTime();
+  }
+
+  public function getDuration(): float
+  {
+    return $this->_mvc->getDuration();
+  }
+
 
   public function userTmpPath(string|null $id_user = null, string|null $plugin = null):? string
   {

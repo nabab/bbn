@@ -504,6 +504,9 @@ class Model extends DbClass
         if (is_array($data)) {
           ksort($data);
         }
+        if (isset($data['res']) && (json_encode($data['res']) === '{"success":false}')) {
+          unset($data['res']);
+        }
 
         $cn .= '/' . md5(serialize($data));
       }

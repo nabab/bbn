@@ -111,6 +111,7 @@ class Mvc implements Api
   private $is_controlled = false;
 
   private Timer $timer;
+  private float $startTime;
   /**
    * The current controller
    * @var null|Controller
@@ -495,7 +496,15 @@ class Mvc implements Api
     return $this->static_routes;
   }
 
+  public function getStartTime(): float
+  {
+    return $this->startTime;
+  }
 
+  public function getDuration(): float
+  {
+    return microtime(true) - $this->startTime;
+  }
 
   /**
    * Adds a route to static routes list if not already exists.
@@ -873,6 +882,7 @@ class Mvc implements Api
     self::singletonInit($this);
     self::initPath();
     $this->timer = new Timer();
+    $this->startTime = microtime(true);
     $this->env = new Environment();
     if (is_object($db) && ($class = get_class($db)) && ($class === 'PDO' || Str::pos($class, '\Db') !== false)) {
       $this->db = $db;

@@ -95,7 +95,10 @@ trait HasError
       $msg[] = self::getLogLine('BACKTRACE');
       $last = '';
       $i = 0;
-      $btr = array_map(function($a) use (&$last, &$i) {
+      $btr = array_map(function($a) use ($e, &$last, &$i) {
+        if (!isset($a['file'])) {
+          X::log([$a, $e->getMessage()], 'hasError');
+        }
         $r = [
           'dfile' => X::basename(
             X::dirname($a['file'])).'/'.
