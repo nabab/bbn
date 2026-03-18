@@ -18,16 +18,23 @@
 
 namespace bbn\Appui;
 
-use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\User;
+use bbn\Mvc;
+use bbn\Appui\Observer;
+use bbn\Util\Timer;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Cache;
 use function array_key_exists;
 use function in_array;
 use function is_array;
 use function is_string;
 
-class Grid extends bbn\Models\Cls\Cache
+class Grid extends DbCls
 {
+  use Cache;
   /**
    * @var array The definitive DB config array
    */
@@ -77,9 +84,9 @@ class Grid extends bbn\Models\Cls\Cache
   private $query_time = 0;
 
   /**
-   * @var bbn\Util\Timer The timer object
+   * @var Timer The timer object
    */
-  private $chrono;
+  private Timer $chrono;
 
   /**
    * @var array
@@ -95,7 +102,7 @@ class Grid extends bbn\Models\Cls\Cache
    * @param array $post Mandatory configuration sent by the table component (client side)
    * @param string|array $cfg Original table configuration (server side)
    */
-  public function __construct(bbn\Db $db, array $post, $cfg)
+  public function __construct(Db $db, array $post, $cfg)
   {
 
     // We inherit db and cacher properties
@@ -234,7 +241,7 @@ class Grid extends bbn\Models\Cls\Cache
       'start' => $this->cfg['start'],
       'filters' => $this->cfg['filters']
     ]));
-    $this->chrono = new bbn\Util\Timer();
+    $this->chrono = new Timer();
   }
 
   protected function fixFilters(&$cfg)
@@ -251,7 +258,7 @@ class Grid extends bbn\Models\Cls\Cache
 
   protected function getCache()
   {
-    return parent::cacheGet($this->cache_uid);
+    return $this->cacheGet($this->cache_uid);
   }
 
   protected function setCache($data)
@@ -383,7 +390,7 @@ class Grid extends bbn\Models\Cls\Cache
   public function getObserver(): ?array
   {
     if ($this->observer) {
-      $obs = new bbn\Appui\Observer($this->db);
+      $obs = new Observer($this->db);
       if ($id_obs = $obs->add($this->observer)) {
         return [
           'id' => $id_obs,
@@ -425,7 +432,7 @@ class Grid extends bbn\Models\Cls\Cache
       //unset($this->count_cfg['where']['conditions'][0]['time']);
       //$this->count_cfg['where']['conditions'][0]['value'] = hex2bin($this->count_cfg['where']['conditions'][0]['value']);
       //die(X::dump($this->db->selectOne($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));
-      if (!defined('BBN_IS_PROD') || (($usr = bbn\User::getInstance()) && $usr->isAdmin())) {
+      if (!defined('BBN_IS_PROD') || (($usr = User::getInstance()) && $usr->isAdmin())) {
         $r['query'] = $this->db->last();
         $r['queryValues'] = array_map(function ($a) {
           if (Str::isBuid($a)) {
@@ -451,7 +458,7 @@ class Grid extends bbn\Models\Cls\Cache
    */
   public function toExcel(array|null $data = null, array|null $options = null): array
   {
-    $path = X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
+    $path = X::makeStoragePath(Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
     $cfg = $this->getExcel();
     $dates = array_values(
       array_filter(

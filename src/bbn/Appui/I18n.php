@@ -18,7 +18,8 @@ use bbn\Appui\Option;
 use bbn\Appui\Project;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\DbOps;
-use bbn\Models\Cls\Cache as cacheCls;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Cache;
 use Gettext\Translations;
 use Gettext\Scanner\PhpScanner;
 use Gettext\Scanner\JsScanner;
@@ -31,8 +32,9 @@ use Sepia\PoParser\Catalog\Header;
 use Sepia\PoParser\Catalog\Entry;
 use bbn\Appui\I18n\Api;
 
-class I18n extends cacheCls
+class I18n extends DbCls
 {
+  use Cache;
   use Optional;
   use DbOps;
   use Api;

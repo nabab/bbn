@@ -246,7 +246,7 @@ class Image extends bbn\File
      * Construct
      * @return void
      */
-  public function __construct($file, System $fs = null)
+  public function __construct($file, ?System $fs = null)
   {
     parent::__construct($file, $fs);
     if (!\in_array($this->ext, bbn\File\Image::$allowed_extensions)) {

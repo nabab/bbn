@@ -267,7 +267,7 @@ SQL;
   }
 
 
-  public function getChatsHash(float $entrance = null): ?string
+  public function getChatsHash(?float $entrance = null): ?string
   {
     $res = '';
     foreach ($this->getChats($entrance) as $c) {
@@ -580,7 +580,7 @@ SQL;
   }
 
 
-  public function getChats(float $entrance = null): ?array
+  public function getChats(?float $entrance = null): ?array
   {
     if ($this->check()) {
       $where = [
@@ -621,6 +621,8 @@ SQL;
         ]
       );
     }
+
+    return null;
   }
 
 
@@ -698,13 +700,13 @@ SQL;
   }
 
 
-  public function getPrevMessages(string $id_chat, float $moment = null, int $num = 50, string|null $id_user = null): ?array
+  public function getPrevMessages(string $id_chat, ?float $moment = null, int $num = 50, string|null $id_user = null): ?array
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '<', $num, $id_user);
   }
 
 
-  public function getNextMessages(string $id_chat, float $moment = null, int $num = 0, string|null $id_user = null)
+  public function getNextMessages(string $id_chat, ?float $moment = null, int $num = 0, string|null $id_user = null)
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '>', $num, $id_user);
   }
@@ -813,7 +815,7 @@ SQL;
   }
 
 
-  public function setLastNotification(string $id_chat, string $id_user, float $moment = null): bool
+  public function setLastNotification(string $id_chat, string $id_user, ?float $moment = null): bool
   {
     if (bbn\Str::isUid($id_chat) && bbn\Str::isUid($id_user)) {
       if (\is_null($moment)) {
@@ -909,11 +911,11 @@ SQL;
    * Returns messages from the given chat sent after $last.
    *
    * @param $id_chat
-   * @param null    $last
-   * @param null    $day
+   * @param null|float     $last
+   * @param null|string    $day
    * @return array
    */
-  public function getMessages($id_chat, $last = null, $day = null): array
+  public function getMessages($id_chat, ?float $last = null, ?string $day = null): array
   {
     $res = ['success' => false, 'last' => null, 'messages' => []];
     if ($this->check()) {

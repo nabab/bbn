@@ -8,18 +8,22 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
 use bbn\Str;
 use bbn\X;
 use bbn\Db;
+use bbn\User;
+use bbn\Appui\Option;
 use bbn\Appui\Passwords;
 use bbn\Appui\History;
-use Exception;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\Optional;
 
-class Database extends bbn\Models\Cls\Cache
+class Database extends DbCls
 {
-  use bbn\Models\Tts\Optional;
-
+  use Optional;
+  use Cache;
 
   /**
    * The option object.
@@ -108,14 +112,14 @@ class Database extends bbn\Models\Cls\Cache
   {
     parent::__construct($db);
     self::optionalInit();
-    $this->o = bbn\Appui\Option::getInstance();
+    $this->o = Option::getInstance();
     $this->currentConn = $db;
   }
 
 
   private function getConnectionInfo(string|null $host = null, string $engine = 'mysql', string $db = ''): array
   {
-    if (bbn\Str::isUid($host)) {
+    if (Str::isUid($host)) {
       $id_host = $host;
     }
     elseif (!($id_host = $this->hostId($host, $engine))) {
@@ -186,7 +190,7 @@ class Database extends bbn\Models\Cls\Cache
         case 'mysql':
         case 'pgsql':
           if (Str::pos($c2, '@')) {
-            $bits = bbn\X::split($c2, '@');
+            $bits = X::split($c2, '@');
             if (count($bits) === 2) {
               if (!($password = $this->getPassword($info['host']['id']))) {
                 throw new Exception(X::_("No password for %s", $c2));
@@ -268,7 +272,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function engineCode(string $engineId): ?string
   {
-    if (bbn\Str::isUid($engineId)) {
+    if (Str::isUid($engineId)) {
       return $this->o->code($engineId) ?: null;
     }
 
@@ -279,7 +283,7 @@ class Database extends bbn\Models\Cls\Cache
   public function engineIdFromHost(string $hostId): ?string
   {
     if (($idEngineTemplate = $this->o->getTemplateId('engine'))
-      && bbn\Str::isUid($hostId)
+      && Str::isUid($hostId)
       && ($idParent = $this->o->getIdParent($hostId))
       && ($idEngines = self::getOptionId('engines'))
     ) {
@@ -325,7 +329,7 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if (!empty($engineCode)) {
-      $c = "bbn\\Db\\Languages\\". ucfirst($engineCode);
+      $c = "\\bbn\\Db\\Languages\\". ucfirst($engineCode);
       if (class_exists($c)) {
         return $c::getTypes();
       }
@@ -355,7 +359,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function hostId(string|null $host, string $engine = 'mysql'): ?string
   {
-    if (bbn\Str::isUid($host)) {
+    if (Str::isUid($host)) {
       return $host;
     }
 
@@ -439,7 +443,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function dbId(string $db = '', string $host = '', string $engine = 'mysql'): ?string
   {
-    if (!\bbn\Str::isUid($host)) {
+    if (!Str::isUid($host)) {
       $host = $this->hostId($host, $engine);
     }
 
@@ -465,7 +469,7 @@ class Database extends bbn\Models\Cls\Cache
       $num = $this->o->count(self::getOptionId('dbs', $engine, 'engines'));
       return $num;
     }
-    elseif (!bbn\Str::isUid($host)) {
+    elseif (!Str::isUid($host)) {
       $host = $this->hostId($host, $engine);
     }
 
@@ -486,7 +490,7 @@ class Database extends bbn\Models\Cls\Cache
     if (!$host) {
       $arr = $this->o->fullOptions(self::getOptionId('dbs', $engine, 'engines'));
     }
-    elseif (!bbn\Str::isUid($host)) {
+    elseif (!Str::isUid($host)) {
       $host = $this->hostId($host, $engine);
     }
 
@@ -519,7 +523,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullDbs(string $host = '', string $engine = 'mysql'): array
   {
-    if (!bbn\Str::isUid($engine)) {
+    if (!Str::isUid($engine)) {
       $engineId = $this->engineId($engine);
     }
     else {
@@ -547,7 +551,7 @@ class Database extends bbn\Models\Cls\Cache
       $engine = $this->db->getEngine();
     }
 
-    if (bbn\Str::isUid($engine)) {
+    if (Str::isUid($engine)) {
       $engineId = $engine;
       $engine = $this->engineCode($engineId);
     }
@@ -617,7 +621,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function tableId(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?string
   {
-    if (!bbn\Str::isUid($db)) {
+    if (!Str::isUid($db)) {
       if (Str::isUid($host)) {
         if (!($parent = $this->o->parent($this->o->getIdParent($host)))) {
           throw new Exception(X::_("Impossible to find the host engine"));
@@ -631,7 +635,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    if (bbn\Str::isUid($db)
+    if (Str::isUid($db)
         && ($id_parent = $this->o->fromCode('tables', $db))
         && ($id = $this->o->fromCode($table, $id_parent))
     ) {
@@ -651,7 +655,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function countTables(string $db, string $host = '', string $engine = 'mysql'): ?int
   {
-    if (!bbn\Str::isUid($db)) {
+    if (!Str::isUid($db)) {
       if (Str::isUid($host)) {
         $db = $this->dbId($db, $host);
       }
@@ -660,7 +664,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    if (bbn\Str::isUid($db) && ($id_parent = $this->o->fromCode('tables', $db))) {
+    if (Str::isUid($db) && ($id_parent = $this->o->fromCode('tables', $db))) {
       $num = $this->o->count($id_parent);
       return $num ?: 0;
     }
@@ -678,7 +682,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function tables(string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
-    if (!bbn\Str::isUid($db)) {
+    if (!Str::isUid($db)) {
       if (Str::isUid($host)) {
         $db = $this->dbId($db, $host);
       }
@@ -687,7 +691,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    if (bbn\Str::isUid($db)
+    if (Str::isUid($db)
         && ($id_parent = $this->o->fromCode('tables', $db))
         && ($fo = array_values($this->o->codeOptions($id_parent)))
     ) {
@@ -717,7 +721,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullTables(string $db = '', string $host = '', string $engine = 'mysql'): array
   {
-    if (!bbn\Str::isUid($engine)) {
+    if (!Str::isUid($engine)) {
       $engineId = $this->engineId($engine);
     }
     else {
@@ -749,7 +753,7 @@ class Database extends bbn\Models\Cls\Cache
       $engine = $this->db->getEngine();
     }
 
-    if (bbn\Str::isUid($engine)) {
+    if (Str::isUid($engine)) {
       $engineId = $engine;
       $engine = $this->engineCode($engineId);
     }
@@ -833,7 +837,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function tableIdFromItem(string $id_keycol): ?string
   {
-    if (bbn\Str::isUid($id_keycol)
+    if (Str::isUid($id_keycol)
         && ($id_cols = $this->o->getIdParent($id_keycol))
         && ($id_table = $this->o->getIdParent($id_cols))
     ) {
@@ -870,7 +874,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function dbIdFromTable(string $id_table): ?string
   {
-    if (bbn\Str::isUid($id_table)
+    if (Str::isUid($id_table)
         && ($id_tables = $this->o->getIdParent($id_table))
         && ($id_db = $this->o->getIdParent($id_tables))
     ) {
@@ -980,11 +984,11 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function columns(string $table, string $db = ''): ?array
   {
-    if (!bbn\Str::isUid($table) && Str::isUid($db)) {
+    if (!Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($this->db->tsn($table), $db);
     }
 
-    if (bbn\Str::isUid($table)
+    if (Str::isUid($table)
         && ($id_parent = $this->o->fromCode('columns', $table))
         && ($res = $this->o->options($id_parent))
     ) {
@@ -1004,11 +1008,11 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullColumns(string $table, string $db = ''): array
   {
-    if (!bbn\Str::isUid($table) && Str::isUid($db)) {
+    if (!Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($table, $db);
     }
 
-    if (bbn\Str::isUid($table)
+    if (Str::isUid($table)
         && ($id_parent = $this->o->fromCode('columns', $table))
         && ($res = $this->o->fullOptions($id_parent))
     ) {
@@ -1058,11 +1062,11 @@ class Database extends bbn\Models\Cls\Cache
   public function countKeys(string $table, string $db = ''): int
   {
     $num = 0;
-    if (!bbn\Str::isUid($table) && Str::isUid($db)) {
+    if (!Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($table, $db);
     }
 
-    if (bbn\Str::isUid($table)
+    if (Str::isUid($table)
         && ($id_parent = $this->o->fromCode('keys', $table))
     ) {
       $num = $this->o->count($id_parent);
@@ -1082,11 +1086,11 @@ class Database extends bbn\Models\Cls\Cache
   public function keys(string $table, string $db = ''): array
   {
     $res = [];
-    if (!bbn\Str::isUid($table) && bbn\Str::isUid($db)) {
+    if (!Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($table, $db);
     }
 
-    if (bbn\Str::isUid($table)
+    if (Str::isUid($table)
         && ($id_parent = $this->o->fromCode('keys', $table))
         && ($tree = $this->o->fullTree($id_parent))
         && $tree['items']
@@ -1353,7 +1357,7 @@ class Database extends bbn\Models\Cls\Cache
   public function importDb(string $db, string $host = '', $full = false): ?string
   {
     $id_db = null;
-    if (!bbn\Str::isUid($host)) {
+    if (!Str::isUid($host)) {
       throw new Exception(_("Invalid host ID"));
     }
     else if (!$this->o->exists($host)) {
@@ -1472,10 +1476,10 @@ class Database extends bbn\Models\Cls\Cache
       $host_id = $this->retrieveHost($id_db);
     }
     else{
-      $host_id = bbn\Str::isUid($host) ? $host : $this->hostId($host);
+      $host_id = Str::isUid($host) ? $host : $this->hostId($host);
     }
 
-    if (!bbn\Str::isUid($host_id)) {
+    if (!Str::isUid($host_id)) {
       throw new Exception(_("Invalid host ID"));
     }
     else if (!$this->o->exists($host_id)) {
@@ -1535,14 +1539,14 @@ class Database extends bbn\Models\Cls\Cache
             $fields[$col] = $optColId;
           }
           /* if ($opt_col = $this->o->option($col, $id_columns)) {
-            $num_cols += (int)$this->o->set($opt_col['id'], bbn\X::mergeArrays($opt_col, $cfg, [
+            $num_cols += (int)$this->o->set($opt_col['id'], X::mergeArrays($opt_col, $cfg, [
               'text' => $opt_col['text'] === $opt_col['code'] ? $col : $opt_col['text'],
               'code' => $col,
               'num' => $cfg['position']
             ]));
           }
           elseif ($id = $this->o->add(
-            bbn\X::mergeArrays(
+            X::mergeArrays(
               $cfg,
               [
                 'id_parent' => $id_columns,
@@ -1569,7 +1573,7 @@ class Database extends bbn\Models\Cls\Cache
 
         if (!empty($ocols)) {
           foreach ($ocols as $id) {
-            if (bbn\Str::isUid($id)) {
+            if (Str::isUid($id)) {
               $num_cols_rem += (int)$this->o->remove($id);
             }
           }
@@ -1589,10 +1593,10 @@ class Database extends bbn\Models\Cls\Cache
           }
 
           if ($opt_key = $this->o->option($key, $id_keys)) {
-            $num_keys += (int)$this->o->set($opt_key['id'], bbn\X::mergeArrays($opt_key, $cfg));
+            $num_keys += (int)$this->o->set($opt_key['id'], X::mergeArrays($opt_key, $cfg));
           }
           elseif ($id = $this->o->add(
-            bbn\X::mergeArrays(
+            X::mergeArrays(
               $cfg, [
               'id_parent' => $id_keys,
               'text' => $key,
@@ -1621,7 +1625,7 @@ class Database extends bbn\Models\Cls\Cache
               if (isset($fields[$col])) {
                 if ($opt = $this->o->option($col, $opt_key['id'])) {
                   $this->o->set(
-                    $opt['id'], bbn\X::mergeArrays(
+                    $opt['id'], X::mergeArrays(
                       $opt, [
                       'id_alias' => $fields[$col]
                       ]
@@ -1646,7 +1650,7 @@ class Database extends bbn\Models\Cls\Cache
 
         if (!empty($okeys)) {
           foreach (array_values($okeys) as $id) {
-            if (bbn\Str::isUid($id)) {
+            if (Str::isUid($id)) {
               $children = $this->o->items($id);
               foreach ($children as $cid) {
                 $num_keys_rem += (int)$this->o->removeFull($cid);
@@ -1672,7 +1676,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function importColumn(string $column, string $tableId, string $hostId, ?array $cfg = null): ?string
   {
-    if (!bbn\Str::isUid($tableId)) {
+    if (!Str::isUid($tableId)) {
       throw new Exception(_("Invalid table ID"));
     }
     else if (!$this->o->exists($tableId)) {
@@ -1691,7 +1695,7 @@ class Database extends bbn\Models\Cls\Cache
       throw new Exception(X::_("Impossible to get the database's code with ID \"%s\"", $dbId));
     }
 
-    if (!bbn\Str::isUid($hostId)) {
+    if (!Str::isUid($hostId)) {
       throw new Exception(_("Invalid host ID"));
     }
     else if (!$this->o->exists($hostId)) {
@@ -1969,7 +1973,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function addDatabase(string $name, string $hostId): ?string
   {
-    if (!bbn\Str::isUid($hostId)) {
+    if (!Str::isUid($hostId)) {
       throw new Exception(_("Invalid host ID"));
     }
     else if (!$this->o->exists($hostId)) {
@@ -2024,7 +2028,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function removeDatabase(string $id): int
   {
-    if (!bbn\Str::isUid($id)) {
+    if (!Str::isUid($id)) {
       throw new Exception(_("Invalid database ID"));
     }
     else if (!$this->o->exists($id)) {
@@ -2037,7 +2041,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function renameDatabase(string $id, string $name): bool
   {
-    if (!bbn\Str::isUid($id)) {
+    if (!Str::isUid($id)) {
       throw new Exception(_("Invalid database ID"));
     }
     else if (!$this->o->exists($id)) {
@@ -2056,7 +2060,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function duplicateDatabase(string $id, string $name): bool
   {
-    if (!bbn\Str::isUid($id)) {
+    if (!Str::isUid($id)) {
       throw new Exception(_("Invalid database ID"));
     }
     else if (!$this->o->exists($id)) {
@@ -2081,7 +2085,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function addTable(string $name, string $dbId, string $hostId): ?string
   {
-    if (!bbn\Str::isUid($hostId)) {
+    if (!Str::isUid($hostId)) {
       throw new Exception(_("Invalid host ID"));
     }
     else if (!$this->o->exists($hostId)) {
@@ -2123,7 +2127,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function renameTable(string $id, string $name): bool
   {
-    if (!bbn\Str::isUid($id)) {
+    if (!Str::isUid($id)) {
       throw new Exception(_("Invalid table ID"));
     }
     else if (!$this->o->exists($id)) {
@@ -2148,7 +2152,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function removeTable(string $id): int
   {
-    if (!bbn\Str::isUid($id)) {
+    if (!Str::isUid($id)) {
       throw new Exception(_("Invalid table ID"));
     }
     else if (!$this->o->exists($id)) {
@@ -2606,7 +2610,7 @@ class Database extends bbn\Models\Cls\Cache
     if (($engineId = $this->engineIdFromHost($host))
       && ($engine = $this->engineCode($engineId))
       && ($conn = $this->connection($host, $engine, $db))
-      && class_exists('bbn\\Appui\\History')
+      && class_exists('\\bbn\\Appui\\History')
       && History::hasHistory($conn)
       && $conn->tableExists($table)
       && ($mod = $conn->modelize($table))
@@ -2673,9 +2677,7 @@ class Database extends bbn\Models\Cls\Cache
         if (defined('BBN_EXTERNAL_USER_ID')) {
           $user = BBN_EXTERNAL_USER_ID;
         }
-        else if (class_exists('bbn\\User')
-          && ($uclass = bbn\User::getInstance())
-        ) {
+        else if ($uclass = User::getInstance()) {
           $user = $uclass->getId();
         }
 

@@ -7,11 +7,14 @@
  */
 
 namespace bbn\Appui;
-use bbn;
+
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Cache;
 
 
-class Data extends bbn\Models\Cls\Cache
+class Data extends DbCls
 {
+  use Cache;
   protected static $registry = [];
 
   public static function register($table, $fn, $variant = 'default'){
@@ -27,7 +30,7 @@ class Data extends bbn\Models\Cls\Cache
       $fn = self::$registry[$table][$variant];
       return $fn();
     }
-    return def_display($table, $where);
+    return $this->defDisplay($table, $where);
   }
 
   public function defDisplay($table, array $where){

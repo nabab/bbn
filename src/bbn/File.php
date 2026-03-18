@@ -5,7 +5,9 @@
 namespace bbn;
 
 use Exception;
+use Generator;
 use bbn\Str;
+use bbn\File\System;
 /**
  * Perform a single file objectification and manage its manipulation.
  *
@@ -72,12 +74,12 @@ class File extends Models\Cls\Basic
    * $file=new bbn\File('/home/user/Desktop/test.txt');
    * ```
    *
-   * @param mixed $file
+   * @param null|System $file
    * @return $this
    */
-  public function __construct($file, File\System $fs = null)
+  public function __construct($file, ?System $fs = null)
   {
-    $this->fs = $fs ?: new File\System();
+    $this->fs = $fs ?: new System();
     if ( \is_array($file) )
     {
       if ( isset($file['name'],$file['tmp_name']) )
@@ -141,7 +143,7 @@ class File extends Models\Cls\Basic
   /**
    * @return Generator
    */
-  public function iterateLines()//: Generator
+  public function iterateLines()
   {
     if ( $this->file ){
       $f = fopen($this->file, 'r');
@@ -232,10 +234,13 @@ class File extends Models\Cls\Basic
           $this->error = 'Impossible to get the file '.$this->path.$this->name;
         }
       }
-      catch ( Error $e )
-        { $this->error = 'Impossible to get the file '.$this->path.$this->name; }
+      catch ( Exception $e ) {
+        $this->error = 'Impossible to get the file '.$this->path.$this->name;
+      }
+
       chdir($d);
     }
+
     return $this;
   }
 

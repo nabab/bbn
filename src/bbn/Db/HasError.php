@@ -97,7 +97,13 @@ trait HasError
       $i = 0;
       $btr = array_map(function($a) use ($e, &$last, &$i) {
         if (!isset($a['file'])) {
-          X::log([$a, $e->getMessage()], 'hasError');
+          $a['file'] = 'unknown';
+          $closure = '{closure:';
+          if (isset($a['function']) && Str::startsWith($a['function'], $closure)) {
+            $tmp = substr($a['function'], strlen($closure), -1);
+            [$a['file'], $a['line']] = X::split($tmp, ':');
+            $a['function'] = 'closure';
+          }
         }
         $r = [
           'dfile' => X::basename(
