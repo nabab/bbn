@@ -519,6 +519,7 @@ class X
     $spath = date($format);
     if ($spath) {
       $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
+      clearstatcache();
       if (!file_exists($path)) {
         mkdir($path, 0777, true);
       }
