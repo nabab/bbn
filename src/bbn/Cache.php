@@ -1,11 +1,12 @@
 <?php
 namespace bbn;
 
-use bbn\Str;
 use Exception;
 use Memcached;
 use Traversable;
 use Psr\SimpleCache\CacheInterface;
+use bbn\Str;
+use bbn\X;
 use function defined;
 use function in_array;
 use function is_array;
@@ -202,11 +203,11 @@ class Cache implements CacheInterface
     if ((($engine === 'apc')) && function_exists('apcu_clear_cache')) {
       self::_set_type('apc');
     }
-    elseif ((($engine === 'redis')) && class_exists("Redis")) {
+    elseif ((($engine === 'redis')) && class_exists("\\Redis")) {
       self::setSeparator(':');
       $this->obj = new \Redis();
-      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
-      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
+      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1';
+      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('REDIS_PORT') ?: 6379));
       if ($this->obj->connect($this->host, $this->port, 2.5)) {
         $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
         $this->obj->select($dbIndex);
@@ -219,7 +220,7 @@ class Cache implements CacheInterface
     }
     elseif ((($engine === 'memcache')) && class_exists("Memcached")) {
       $this->obj = new \Memcached();
-      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '172.18.0.2';
+      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1';
       $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
       if ($this->obj->addServer($this->host, $this->port)) {
         self::_set_type('memcache');
@@ -308,11 +309,8 @@ class Cache implements CacheInterface
         case 'apc':
           return call_user_func('\\apcu_delete', $key);
         case 'redis':
-          if ($this->prefix && mb_strpos($key, $this->prefix) !== 0) {
-            $key = $this->prefix . $key;
-          }
-
-          return $this->obj->unlink($key);
+          $res = $this->obj->unlink($key);
+          return $res;
         case 'memcache':
           return $this->obj->delete($key);
         case 'files':
