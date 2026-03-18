@@ -519,7 +519,7 @@ class X
     $spath = date($format);
     if ($spath) {
       $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
-      if (!is_dir($path)) {
+      if (!file_exists($path)) {
         mkdir($path, 0777, true);
       }
 
@@ -539,7 +539,7 @@ class X
           $num = 1;
         }
 
-        if (!is_dir("$path/$num")) {
+        if (!file_exists("$path/$num")) {
           mkdir("$path/$num", 0777, true);
         }
 
