@@ -1450,8 +1450,11 @@ class User extends DbCls implements Implementor
   {
     $this->error = null;
     if ($this->check() && $id) {
-      $this->_authenticate($id, true);
-      $this->fakeUser = true;
+      if (X::isCli()) {
+        $this->fakeUser = true;
+      }
+
+      $this->_authenticate($id);
     }
 
     return $this;
@@ -1883,6 +1886,7 @@ class User extends DbCls implements Implementor
       if (isset($id_session, $id)) {
         $this->_init_session();
         $new_id_session = $this->getSessionDbId();
+        //var_dump('isdiff', $id_session, $new_id_session, $id_session !== $new_id_session);
         if ($id_session !== $new_id_session) {
           return $this->_sess_info($new_id_session);
         }
@@ -1972,12 +1976,12 @@ class User extends DbCls implements Implementor
    * @param string $id
    * @return self
    */
-  private function _authenticate(string $id, bool $fake = false): static
+  private function _authenticate(string $id): static
   {
     if ($this->check() && $id) {
       $this->id = $id;
       $this->auth = true;
-      if (!X::isCli() && !$fake) {
+      if (!X::isCli() && !$this->isFake()) {
         $update = [
           $this->class_cfg["arch"]["sessions"]["id_user"] => $id,
         ];
