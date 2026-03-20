@@ -411,12 +411,14 @@ class DbConfigRegistryBuilder
 
             if (!$primary && !empty($table)) {
               try {
-                $model = $this->db->modelize($table);
-                if (!empty($model['keys']['PRIMARY']['columns'])) {
-                  $primary = $model['keys']['PRIMARY']['columns'];
-                }
-                elseif (!empty($model['primary'])) {
-                  $primary = $model['primary'];
+                if ($this->db->tableExists($table)) {
+                  $model = $this->db->modelize($table);
+                  if (!empty($model['keys']['PRIMARY']['columns'])) {
+                    $primary = $model['keys']['PRIMARY']['columns'];
+                  }
+                  elseif (!empty($model['primary'])) {
+                    $primary = $model['primary'];
+                  }
                 }
               }
               catch (\Throwable) {
