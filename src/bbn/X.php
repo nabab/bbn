@@ -3801,7 +3801,12 @@ class X
    */
   public static function split(string $st, string $separator): array
   {
-    return mb_split($separator === '.' ? '\.' : $separator, $st) ?: [];
+    if ($separator === '') {
+      return [$st];
+    }
+
+    $result = mb_split(preg_quote($separator, '/'), $st);
+    return is_array($result) ? array_values($result) : [];
   }
 
 

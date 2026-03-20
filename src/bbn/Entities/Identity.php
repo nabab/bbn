@@ -77,7 +77,7 @@ class Identity extends DbCls
    */
   protected static $stes = [];
 
- 
+
   /**
    * A mapping of alternate civility representations to standard forms.
    */
@@ -91,6 +91,7 @@ class Identity extends DbCls
     parent::__construct($db);
     $this->dbUauthInit();
   }
+
 
   public function getRelatedEntities(string $id): array
   {
@@ -204,10 +205,12 @@ class Identity extends DbCls
     return $res;
   }
 
+
   public function exists(array|string $filter): bool
   {
     return $this->dbTraitExists($filter);
   }
+
 
   /**
    * Adds or updates a person record in the database.
@@ -246,6 +249,7 @@ class Identity extends DbCls
 
     return $id;
   }
+
 
   public function search(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
   {
@@ -287,6 +291,7 @@ class Identity extends DbCls
     //X::ddump($cfg);
     return $this->db->rselectAll($cfg);
   }
+
 
   public function getByUauth(string $id_uauth): array
   {
@@ -332,11 +337,14 @@ class Identity extends DbCls
     return (int)$ok;
   }
 
+
   public function getTableRelations(string|null $table = null): array
   {
     return $this->dbTraitGetTableRelations($table);
 
   }
+
+
   public function getRelations($id): ?array
   {
     return $this->dbTraitGetRelations($id);
@@ -347,6 +355,7 @@ class Identity extends DbCls
   {
     return $this->dbTraitDelete($id);
   }
+
 
   public function setEmail($id, $email): ?string
   {
@@ -386,6 +395,7 @@ class Identity extends DbCls
     return null;
   }
 
+
   public function get(string $id): array
   {
     $arc = &$this->class_cfg['arch']['identities'];
@@ -409,6 +419,7 @@ class Identity extends DbCls
     return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
   }
 
+
   public function getUauth(): Uauth
   {
     return $this->dbUauthGetClass();
@@ -420,10 +431,12 @@ class Identity extends DbCls
     return $this->dbUauthRetrieve($identity, $type);
   }
 
+
   public function addUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthAdd($identity, $value, $type);
   }
+
 
   public function searchUauth(string $value, string $type): ?array
   {
@@ -434,6 +447,30 @@ class Identity extends DbCls
   public function removeUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthRemove($identity, $value, $type);
+  }
+
+
+  public function pickMany(array $ids, ?string $id_entity = null): array
+  {
+    return [];
+  }
+
+
+  public function pickByEntity(string $id_entity, bool $allRelations = false): array
+  {
+    return [];
+  }
+
+
+  public function pickOne(string $id, ?string $id_entity = null, bool $allRelations = false): array
+  {
+    return [];
+  }
+
+
+  public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
+  {
+    return [];
   }
 
 

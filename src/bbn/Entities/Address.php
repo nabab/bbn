@@ -694,6 +694,30 @@ class Address extends DbCls
   }
 
 
+  public function pickMany(array $ids): array
+  {
+    return [];
+  }
+
+
+  public function pickByEntity(string $id_entity): array
+  {
+    return [];
+  }
+
+
+  public function pickOne(string $id): array
+  {
+    return [];
+  }
+
+
+  public function getList(array $tableCfg, string $id_entity = null, array $ids = null): array
+  {
+    return [];
+  }
+
+
   private function getTableRelations(): array
   {
     if (!isset($this->tableRelations)) {

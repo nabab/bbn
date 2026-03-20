@@ -1017,11 +1017,11 @@ class Dashboard extends Basic
       !empty($code)
       && ($perm && $this->isPvtWidget($idWidget)
         || (!empty($id_perm)
-          && (!$perm || $perm->has($id_perm))))
+          && (!$perm || ($perm->has($id_perm)))))
     ) {
       return [
         'code' => $code,
-        'id_perm' => $id_perm,
+        'id_perm' => $id_perm ?? null,
         'info' => $info
       ];
     }
