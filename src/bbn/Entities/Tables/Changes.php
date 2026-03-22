@@ -490,13 +490,13 @@ class Changes extends EntityTable
           else {
             $error = _('Error during the identity') . ' ';
             switch ($cfg['type']){
-              case 'insert';
+              case 'insert':
                 $error .= _('inserting.');
                 break;
-              case 'update';
+              case 'update':
                 $error .= _('updating.');
                 break;
-              case 'delete';
+              case 'delete':
                 $error .= _('deleting.');
                 break;
             }
@@ -518,13 +518,13 @@ class Changes extends EntityTable
           else {
             $error = _('Error during the address') . ' ';
             switch ($cfg['type']){
-              case 'insert';
+              case 'insert':
                 $error .= _('inserting.');
                 break;
-              case 'update';
+              case 'update':
                 $error .= _('updating.');
                 break;
-              case 'delete';
+              case 'delete':
                 $error .= _('deleting.');
                 break;
             }
@@ -834,7 +834,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function getAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     $cfgField = $this->fields['cfg'];
     $all = parent::getAll(...func_get_args());

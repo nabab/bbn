@@ -779,7 +779,7 @@ class Event extends modelDb
 
   public function getList(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 50,
     int $start = 0,
     $fields = [],

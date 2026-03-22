@@ -50,10 +50,10 @@ class Cms extends DbCls
    * Cms constructor.
    *
    * @param Db $db
-   * @param null $notes
+   * @param Note|null $note
    * @throws Exception
    */
-  public function __construct(Db $db, Note $note = null)
+  public function __construct(Db $db, ?Note $note = null)
   {
     parent::__construct($db);
     $this->event = new Event($this->db);
@@ -507,7 +507,7 @@ class Cms extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array
+  public function getAll(bool $with_content = false, array $filter = [], string|array $order= [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array
   {
     $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);
     $type_cond = [];

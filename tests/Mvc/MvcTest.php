@@ -813,7 +813,7 @@ class MvcTest extends TestCase
     // Swap the controller property with the mocked version
     $this->setNonPublicPropertyValue('controller', $controller_mock);
 
-    self::$mvc->reroute('foo/bar', false, ['arg' => 'arg_value']);
+    self::$mvc->reroute('foo/bar', null, ['arg' => 'arg_value']);
 
     $info = $this->getNonPublicProperty('info');
 
@@ -831,7 +831,7 @@ class MvcTest extends TestCase
     );
 
     // Reroute again with arguments is false
-    self::$mvc->reroute('foo/baz', false, false);
+    self::$mvc->reroute('foo/baz', null, null);
 
     $this->assertSame('foo/baz', self::$mvc->getUrl());
     $this->assertSame('foo/baz', self::$mvc->getRequest());

@@ -602,7 +602,7 @@ class Dashboard extends Basic
 
   /**
    * Sorts the widgets' order
-   * @param array $order The ordered keys list
+   * @param string|array $orderThe ordered keys list
    * @return int|null
    */
   public function sort(array $order): ?int

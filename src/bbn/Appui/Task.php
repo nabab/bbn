@@ -2246,7 +2246,8 @@ class Task extends DbCls
     if (
       ($manager = $this->idRole('managers')) &&
       ($worker = $this->idRole('workers')) &&
-      ($ongoing = $this->idState('ongoing'))
+      ($ongoing = $this->idState('ongoing')) &&
+      ($idUser || $this->id_user)
     ){
       return $this->db->getRows("
         SELECT bbn_tasks.*, bbn_notes_versions.title, bbn_notes_versions.content

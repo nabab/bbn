@@ -31,7 +31,7 @@ trait DbPublicOps
 
   public function rselect(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?array {
     return $this->dbTraitRselect($filter, $order, $fields);
@@ -39,7 +39,7 @@ trait DbPublicOps
 
   public function select(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?\stdClass {
     return $this->dbTraitSelect($filter, $order, $fields);
@@ -48,7 +48,7 @@ trait DbPublicOps
   public function selectOne(
     string $field,
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
   ): mixed {
     return $this->dbTraitSelectOne($field, $filter, $order);
   }
@@ -56,7 +56,7 @@ trait DbPublicOps
   public function selectValues(
     string $field,
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
   ): array {
@@ -65,7 +65,7 @@ trait DbPublicOps
 
   public function selectAll(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     $limit = 0,
     $start = 0,
     array $fields = [],
@@ -75,7 +75,7 @@ trait DbPublicOps
 
   public function rselectAll(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     $limit = 0,
     $start = 0,
     array $fields = [],

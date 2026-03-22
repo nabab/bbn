@@ -150,25 +150,25 @@ class Feed
 
 	/**
 	 * Converts a SimpleXMLElement into an array.
-	 * @param  SimpleXMLElement
+	 * @param  SimpleXMLElement|null $xml
 	 * @return array
 	 */
-	public function toArray(SimpleXMLElement $xml = null)
+	public function toArray(?SimpleXMLElement $xml = null, $level = 0)
 	{
 		if ($xml === null) {
 			$xml = $this->xml;
 		}
 
 		if (!$xml->children()) {
-			return (string) $xml;
+			return $level ? (string)$xml : [];
 		}
 
 		$arr = [];
 		foreach ($xml->children() as $tag => $child) {
 			if (count($xml->$tag) === 1) {
-				$arr[$tag] = $this->toArray($child);
+				$arr[$tag] = $this->toArray($child, $level + 1);
 			} else {
-				$arr[$tag][] = $this->toArray($child);
+				$arr[$tag][] = $this->toArray($child, $level + 1);
 			}
 		}
 

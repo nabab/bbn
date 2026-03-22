@@ -1607,7 +1607,7 @@ class Note extends DbCls
    * @param int $limit
    * @return array
    */
-  public function getMediasNotes(int $start = 0, int $limit): array
+  public function getMediasNotes(int $start = 0, int $limit = 100): array
   {
     $res = [];
     $cf = &$this->class_cfg;

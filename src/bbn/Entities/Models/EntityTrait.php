@@ -80,13 +80,13 @@ trait EntityTrait
     return count(X::filter($this->getRecords(), $filter));
   }
 
-  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function getAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     $ids = $this->dbTraitSelectValues($this->fields["id"], $filter, $order, $limit, $start);
     return array_map(fn($a) => $this->rselect($a), $ids);
   }
 
-  public function getOne($filter = [], array $order = [], int $start = 0, $fields = []): ?array
+  public function getOne($filter = [], string|array $order= [], int $start = 0, $fields = []): ?array
   {
     return $this->dbTraitRselect(...func_get_args());
   }

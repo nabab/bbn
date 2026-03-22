@@ -191,7 +191,7 @@ class Link extends EntityTable
 
   public function getAll(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
     $fields = [],

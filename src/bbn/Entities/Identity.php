@@ -92,7 +92,6 @@ class Identity extends DbCls
     $this->dbUauthInit();
   }
 
-
   public function getRelatedEntities(string $id): array
   {
     $lnk = new Link($this->db, $this->entities);
@@ -250,8 +249,7 @@ class Identity extends DbCls
     return $id;
   }
 
-
-  public function search(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
+  public function search(array|string $filter, array $cols = [], array $fields = [], string|array $order= [], bool $strict = false, int $limit = 0, int $start = 0): array
   {
     $ccfg = $this->getClassCfg();
     $uauthCfg = self::$dbUauth->getClassCfg();

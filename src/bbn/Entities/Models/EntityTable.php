@@ -44,7 +44,7 @@ abstract class EntityTable extends DbCls
     return count($this->getAll($filter));
   }
 
-  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function getAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     $res = $this->getRecords();
     $filter = $this->dbTraitGetFilterCfg($filter);
@@ -63,7 +63,7 @@ abstract class EntityTable extends DbCls
     return $res;
   }
 
-  public function getOne($filter = [], array $order = [], int $start = 0, $fields = []): ?array
+  public function getOne($filter = [], string|array $order= [], int $start = 0, $fields = []): ?array
   {
     $res = $this->getAll($filter, $order, 1, $start, $fields);
     return $res[0] ?? null;

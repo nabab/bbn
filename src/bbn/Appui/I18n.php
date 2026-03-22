@@ -892,7 +892,7 @@ class I18n extends DbCls
    */
   public function getTranslation(
     string $idExpOrExp,
-    ?string $originalLang = null,
+    string $originalLang,
     string $transLang,
   ): ?string {
     $clsCfg = $this->getClassCfg();

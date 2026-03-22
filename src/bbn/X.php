@@ -621,34 +621,113 @@ class X
    * @return object The merged object.
    * @throws Exception
    */
-  public static function mergeObjects(object $o1, object $o2): stdClass
+  public static function mergeObjects(object ...$objects): object
   {
-    $args = func_get_args();
+    $count = count($objects);
 
-    if (count($args) > 2) {
-      for ($i = count($args) - 1; $i > 1; $i--) {
-        if (!is_object($args[$i])) {
-          throw new Exception('The provided argument must be an object, ' . gettype($args[$i]) . ' given.');
-        }
-        $args[$i - 1] = self::mergeObjects($args[$i - 1], $args[$i]);
-      }
-
-      $o2 = $args[1];
+    if ($count === 0) {
+      return new stdClass();
     }
 
-    $a1  = self::toArray($o1);
-    $a2  = self::toArray($o2);
-    $res = self::mergeArrays($a1, $a2);
-    return self::toObject($res);
+    $result = clone $objects[0];
+    return self::mergeObjectsInPlace($result, ...array_slice($objects, 1));
+  }
+
+  public static function mergeObjectsInPlace(object &$target, object ...$sources): object
+  {
+    foreach ($sources as $source) {
+      self::mergeTwoObjectsInPlace($target, $source);
+    }
+
+    return $target;
+  }
+
+  private static function mergeTwoObjectsInPlace(object &$target, object $source): void
+  {
+    foreach (get_object_vars($source) as $key => $value2) {
+
+      if (!property_exists($target, $key)) {
+        $target->$key = $value2;
+        continue;
+      }
+
+      $value1 = $target->$key;
+
+      if (is_object($value1) && is_object($value2)) {
+        self::mergeTwoObjectsInPlace($value1, $value2);
+      }
+      elseif (is_array($value1) && is_array($value2)) {
+        $target->$key = self::mergeArrays($value1, $value2);
+      }
+      else {
+        $target->$key = $value2;
+      }
+    }
+  }
+
+  /**
+   * Merges two or more arrays into one.
+   * Values from later array overwrite the previous array.
+   *
+   * ```php
+   * X::mergeArrays([1, 'Test'], [2, 'Example']);
+   * // array [1, 'Test', 2, 'Example']
+   *
+   * $arr1 = ['a' => 1, 'b' => 2];
+   * $arr2 = ['b' => 3, 'c' => 4, 'd' => 5];
+   * $arr3 = ['e' => 6, 'b' => 33];
+   *
+   * X::mergeArrays($arr1, $arr2, $arr3)
+   * // (array) ['a' => 1, 'b' => 33, 'c' => 4, 'd' => 5, 'e' => 6]
+   *
+   * ```
+   *
+   * @param array $a1 The first array to merge.
+   * @param array $a2 The second array to merge.
+   * @return array The merged array.
+   * @throws Exception
+   */
+  public static function mergeArrays(array ...$arrays): array
+  {
+    $count = count($arrays);
+
+    if ($count === 0) {
+      return [];
+    }
+
+    $res = [];
+    return self::mergeArraysInPlace($res, ...$arrays);
+  }
+
+  public static function mergeArraysInPlace(array &$a1, array ...$arrays): array
+  {
+    foreach ($arrays as $a2) {
+      foreach ($a2 as $k => $v2) {
+        if (
+          array_key_exists($k, $a1) &&
+          is_array($a1[$k]) &&
+          is_array($v2) &&
+          (empty($a1[$k]) || self::isAssoc($a1[$k])) &&
+          (empty($v2) || self::isAssoc($v2))
+        ) {
+          self::mergeArraysInPlace($a1[$k], $v2);
+        }
+        else {
+          $a1[$k] = $v2;
+        }
+      }
+    }
+
+    return $a1;
   }
 
   public static function extend(iterable &$obj, iterable ...$others): array|stdClass
   {
     if (is_object($obj)) {
-      return self::mergeObjects($obj, ...$others);
+      return self::mergeObjectsInPlace($obj, ...$others);
     }
 
-    return self::mergeArrays($obj, ...$others);
+    return self::mergeArraysInPlace($obj, ...$others);
   }
 
   public static function extendOut(array|stdClass &$obj, array|stdClass ...$others): array|stdClass
@@ -766,64 +845,6 @@ class X
     }
 
     return $res;
-  }
-
-
-  /**
-   * Merges two or more arrays into one.
-   * Values from later array overwrite the previous array.
-   *
-   * ```php
-   * X::mergeArrays([1, 'Test'], [2, 'Example']);
-   * // array [1, 'Test', 2, 'Example']
-   *
-   * $arr1 = ['a' => 1, 'b' => 2];
-   * $arr2 = ['b' => 3, 'c' => 4, 'd' => 5];
-   * $arr3 = ['e' => 6, 'b' => 33];
-   *
-   * X::mergeArrays($arr1, $arr2, $arr3)
-   * // (array) ['a' => 1, 'b' => 33, 'c' => 4, 'd' => 5, 'e' => 6]
-   *
-   * ```
-   *
-   * @param array $a1 The first array to merge.
-   * @param array $a2 The second array to merge.
-   * @return array The merged array.
-   * @throws Exception
-   */
-  public static function mergeArrays(array $a1, array $a2): array
-  {
-    $args = func_get_args();
-    if (count($args) > 2) {
-      for ($i = count($args) - 1; $i > 1; $i--) {
-        if (!is_array($args[$i])) {
-          throw new Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.');
-        }
-        $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);
-      }
-
-      $a2 = $args[1];
-    }
-
-    if ((self::isAssoc($a1) || empty($a1)) && (self::isAssoc($a2) || empty($a2))) {
-      $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
-      $r    = [];
-      foreach ($keys as $k) {
-        if (!array_key_exists($k, $a1) && !array_key_exists($k, $a2)) {
-          continue;
-        } elseif (!array_key_exists($k, $a2)) {
-          $r[$k] = $a1[$k];
-        } elseif (!array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
-          $r[$k] = $a2[$k];
-        } else {
-          $r[$k] = self::mergeArrays($a1[$k], $a2[$k]);
-        }
-      }
-    } else {
-      $r = array_merge($a1, $a2);
-    }
-
-    return $r;
   }
 
 
@@ -1858,9 +1879,9 @@ class X
   /**
    * @param array $where
    * @param bool  $full
-   * @return array|bool
+   * @return array|null
    */
-  public static function treatConditions(array $where)
+  public static function treatConditions(array $where): ?array
   {
     if (!isset($where['conditions'])) {
       $where['conditions'] = $where;
@@ -1913,7 +1934,7 @@ class X
                 } else {
                   $tmp['conditions'][] = [
                     'field' => $key,
-                    'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                    'operator' => is_string($v) && !Str::isUid($v) ? 'LIKE' : '=',
                     'value' => $v
                   ];
                 }
@@ -1976,106 +1997,156 @@ class X
     return null;
   }
 
-
-  public static function compare($v1, $v2, $operator)
+  private static function normalizeString($v): string
   {
-    switch ($operator) {
-      case "===":
-      case "=":
-      case "equal":
-      case "eq":
-      case "is":
+    return Str::changeCase(Str::removeAccents((string)$v), 'lower');
+  }
+
+  private static function canonicalOperator(string $operator): string
+  {
+    static $map = [
+      '===' => 'strict_eq',
+      '=' => 'strict_eq',
+      'equal' => 'strict_eq',
+      'eq' => 'strict_eq',
+      'is' => 'strict_eq',
+
+      '!==' => 'strict_neq',
+      'notequal' => 'strict_neq',
+      'neq' => 'strict_neq',
+      'isnot' => 'strict_neq',
+
+      '!=' => 'neq',
+      'different' => 'neq',
+
+      'contains' => 'icontains',
+      'contain' => 'icontains',
+      'icontains' => 'icontains',
+      'icontain' => 'icontains',
+
+      'doesnotcontain' => 'not_icontains',
+      'donotcontain' => 'not_icontains',
+
+      'starts' => 'starts',
+      'start' => 'starts',
+
+      'startswith' => 'istarts',
+      'startsi' => 'istarts',
+      'starti' => 'istarts',
+      'istarts' => 'istarts',
+      'istart' => 'istarts',
+
+      'endswith' => 'iends',
+      'endsi' => 'iends',
+      'endi' => 'iends',
+      'iends' => 'iends',
+      'iend' => 'iends',
+
+      'like' => 'like',
+      'gt' => 'gt',
+      '>' => 'gt',
+      'gte' => 'gte',
+      '>=' => 'gte',
+      'lt' => 'lt',
+      '<' => 'lt',
+      'lte' => 'lte',
+      '<=' => 'lte',
+      'isnull' => 'isnull',
+      'isnotnull' => 'isnotnull',
+      'isempty' => 'isempty',
+      'isnotempty' => 'isnotempty',
+      '==' => 'loose_eq'
+    ];
+
+    $operator = strtolower($operator);
+    return $map[$operator] ?? 'loose_eq';
+  }
+
+  public static function compare($v1, $v2, $operator): bool
+  {
+    switch (self::canonicalOperator($operator)) {
+      case 'strict_eq':
         return $v1 === $v2;
-      case "!==":
-      case "notequal":
-      case "neq":
-      case "isnot":
+
+      case 'strict_neq':
         return $v1 !== $v2;
-      case "!=":
-      case "different":
+
+      case 'neq':
         return $v1 != $v2;
-      case "contains":
-      case "contain":
-      case "icontains":
-      case "icontain":
-        if (empty($v1) || empty($v2)) {
+
+      case 'icontains':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return str_contains(
+          self::normalizeString($v1),
+          self::normalizeString($v2)
+        );
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) !== false;
-      case "doesnotcontain":
-      case "donotcontain":
-        if (empty($v1) || empty($v2)) {
+      case 'not_icontains':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return !str_contains(
+          self::normalizeString($v1),
+          self::normalizeString($v2)
+        );
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === false;
-      case "starts":
-      case "start":
-        if (empty($v1) || empty($v2)) {
+      case 'starts':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return str_starts_with((string)$v1, (string)$v2);
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::pos($v1, $v2) === 0;
-      case "startswith":
-      case "startsi":
-      case "starti":
-      case "istarts":
-      case "istart":
-        if (empty($v1) || empty($v2)) {
+      case 'istarts':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return str_starts_with(
+          self::normalizeString($v1),
+          self::normalizeString($v2)
+        );
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::pos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === 0;
-      case "endswith":
-      case "endsi":
-      case "endi":
-      case "iends":
-      case "iend":
-        if (empty($v1) || empty($v2)) {
+      case 'iends':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return str_ends_with(
+          self::normalizeString($v1),
+          self::normalizeString($v2)
+        );
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::rpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === Str::len($v1) - Str::len($v2);
-      case "like":
-        if (empty($v1) || empty($v2)) {
+      case 'like':
+        if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
+        return self::normalizeString($v1) === self::normalizeString($v2);
 
-        $v1 = (string)$v1;
-        $v2 = (string)$v2;
-        return Str::changeCase(Str::removeAccents($v1), 'lower') === Str::changeCase(Str::removeAccents($v2), 'lower');
-      case "gt":
-      case ">":
+      case 'gt':
         return $v1 > $v2;
-      case "gte":
-      case ">=":
+
+      case 'gte':
         return $v1 >= $v2;
-      case "lt":
-      case "<":
+
+      case 'lt':
         return $v1 < $v2;
-      case "lte":
-      case "<=":
+
+      case 'lte':
         return $v1 <= $v2;
-      case "isnull":
+
+      case 'isnull':
         return $v1 === null;
-      case "isnotnull":
+
+      case 'isnotnull':
         return $v1 !== null;
-      case "isempty":
+
+      case 'isempty':
         return $v1 === '';
-      case "isnotempty":
+
+      case 'isnotempty':
         return $v1 !== '';
-      case '==':
+
+      case 'loose_eq':
       default:
         if (is_array($v1) && is_array($v2)) {
           $k1 = array_keys($v1);
@@ -2085,10 +2156,17 @@ class X
           if ($k1 != $k2) {
             return false;
           }
+
           $s1 = [];
-          array_map(fn($a) => $s1[] = $v1[$a], $k1);
+          foreach ($k1 as $k) {
+            $s1[] = $v1[$k];
+          }
+
           $s2 = [];
-          array_map(fn($a) => $s2[] = $v2[$a], $k2);
+          foreach ($k2 as $k) {
+            $s2[] = $v2[$k];
+          }
+
           return json_encode([$k1, $s1]) === json_encode([$k2, $s2]);
         }
 
@@ -2096,44 +2174,55 @@ class X
     }
   }
 
-
-  public static function compareConditions($data, $filter)
+  public static function compareConditions(array $data, array $filter): bool
   {
-    if (!isset($filter['conditions']) || empty($filter['logic']) || !is_array($filter['conditions'])) {
-      throw new Exception(X::_("Error in compareConditions: the filter should an abject with conditions and logic properties and conditions should be an array of arrays"));
+    if (
+      !isset($filter['conditions']) ||
+      !is_array($filter['conditions']) ||
+      empty($filter['logic'])
+    ) {
+      throw new Exception(X::_(
+        "Error in compareConditions: the filter should be an object with conditions and logic properties and conditions should be an array of arrays"
+      ));
     }
 
-    $ok = $filter['logic'] === 'AND' ? true : false;
-    foreach ($filter['conditions'] as $a) {
-      if (!is_array($a)) {
+    $isAnd = strtoupper($filter['logic']) !== 'OR';
+
+    foreach ($filter['conditions'] as $condition) {
+      if (!is_array($condition)) {
         throw new Exception(X::_("Error in compareConditions: each condition should be an array"));
       }
 
-      if (!isset($a['field'])) {
-        throw new Exception(X::_("Field is mandatory in filter"));
+      if (isset($condition['conditions']) && is_array($condition['conditions'])) {
+        $matched = self::compareConditions($data, $condition);
       }
-
-      $compare = null;
-      if (isset($a['conditions']) && is_array($a['conditions'])) {
-        $compare = self::compareConditions($data, $a);
-      } else {
-        $compare = self::compare($data[$a['field']] ?? null, $a['value'] ?? null, $a['operator'] ?? '=');
-      }
-
-      if ($compare) {
-        if ($filter['logic'] === 'OR') {
-          $ok = true;
-          break;
+      else {
+        if (!isset($condition['field'])) {
+          self::log($filter, 'bad_filter');
+          throw new Exception(X::_("Field is mandatory in filter"));
         }
-      } elseif ($filter['logic'] === 'AND') {
-        $ok = false;
-        break;
+
+        $matched = self::compare(
+          $data[$condition['field']] ?? null,
+          $condition['value'] ?? null,
+          $condition['operator'] ?? '='
+        );
+      }
+
+      if ($isAnd) {
+        if (!$matched) {
+          return false;
+        }
+      }
+      else {
+        if ($matched) {
+          return true;
+        }
       }
     }
 
-    return $ok;
+    return $isAnd;
   }
-
 
 
   /**
@@ -2258,22 +2347,38 @@ class X
    */
   public static function filter(array $ar, $where): array
   {
+    if (empty($where)) {
+      return $ar;
+    }
+
+    if (is_array($where)) {
+      $where = self::treatConditions($where);
+    }
+
+    $callable = is_callable($where);
+    $isArrayFilter = is_array($where);
+
     $res = [];
-    $num = count($ar);
-    $i   = 0;
-    while ($i < $num) {
-      $idx = self::search($ar, $where, $i);
-      if ($idx === null) {
-        break;
-      } else {
-        $res[] = $ar[$idx];
-        $i     = $idx + 1;
+    foreach ($ar as $item) {
+      $ok = false;
+
+      if ($callable) {
+        $ok = (bool)$where($item);
+      }
+      elseif (!$isArrayFilter) {
+        $ok = ($item === $where);
+      }
+      else {
+        $ok = self::compareConditions((array)$item, $where);
+      }
+
+      if ($ok) {
+        $res[] = $item;
       }
     }
 
     return $res;
   }
-
 
   /**
    * Filters the given array which satisfies the 'where' condition.

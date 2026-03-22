@@ -105,7 +105,7 @@ trait DbSelection
   protected function dbTraitSelectOne(
     string $field,
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
   ) {
     if ($res = $this->dbTraitSingleSelection($filter, $order, "array", [$field])) {
       return $res[$field] ?? null;
@@ -124,7 +124,7 @@ trait DbSelection
    */
   protected function dbTraitSelect(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?stdClass {
     return $this->dbTraitSingleSelection($filter, $order, "object", $fields);
@@ -140,7 +140,7 @@ trait DbSelection
    */
   protected function dbTraitRselect(
     string|array $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?array {
     return $this->dbTraitSingleSelection($filter, $order, "array", $fields);
@@ -159,7 +159,7 @@ trait DbSelection
   protected function dbTraitSelectValues(
     string $field,
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
   ): array {
@@ -198,7 +198,7 @@ trait DbSelection
    */
   protected function dbTraitSelectAll(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
     $fields = [],
@@ -225,7 +225,7 @@ trait DbSelection
    */
   protected function dbTraitRselectAll(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
     $fields = [],
@@ -304,7 +304,7 @@ trait DbSelection
     array|string $filter,
     array $cols = [],
     array $fields = [],
-    array $order = [],
+    string|array $order= [],
     bool $strict = false,
     int $limit = 0,
     int $start = 0,
@@ -332,7 +332,7 @@ trait DbSelection
    * Returns an array of rows from the table for the given conditions.
    *
    * @param array $filter Filter conditions.
-   * @param array $order Order by conditions.
+   * @param string|array $orderOrder by conditions.
    * @param int $limit Maximum number of rows to return.
    * @param int $start Offset of the first row to return.
    * @param string $mode The mode of result ('array', 'object', 'value').

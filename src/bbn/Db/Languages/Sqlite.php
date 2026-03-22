@@ -603,6 +603,14 @@ class Sqlite extends Sql
   {
     $res = '';
     if (!empty($cfg['order'])) {
+      if (is_string($cfg['order'])) {
+        if (Str::startsWith($cfg['order'], 'rand', false)) {
+          return 'ORDER BY RANDOM()' . PHP_EOL;
+        }
+
+        return 'ORDER BY ' . $cfg['order'] . PHP_EOL;
+      }
+
       foreach ($cfg['order'] as $col => $dir) {
         if (\is_array($dir) && isset($dir['field'])) {
           $col = $dir['field'];

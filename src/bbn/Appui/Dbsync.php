@@ -228,7 +228,7 @@ MYSQL
     self::addMethod('cbf2', $f);
   }
 
-  public static function deleteCompleted(float $start = null)
+  public static function deleteCompleted(?float $start = null)
   {
     if (!self::isInit()) {
       die("DB sync is not initiated");

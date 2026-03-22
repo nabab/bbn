@@ -95,9 +95,8 @@ class Timer
    *
    * @param string $key
    * @return float
-   * @throws \Exception
    */
-  public function stop(string $key = 'default')
+  public function stop(string $key = 'default'): float
   {
     if ($this->hasStarted($key)) {
       $this->_measures[$key]['num']++;
@@ -107,7 +106,8 @@ class Timer
       return $time;
     }
 
-    throw new \Exception(X::_("Missing a start declaration for timer")." $key");
+    X::log("Trying to stop a timer that hasn't been started for key $key", 'warning');
+    return 0;
   }
 
 

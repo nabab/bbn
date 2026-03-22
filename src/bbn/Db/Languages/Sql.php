@@ -1710,6 +1710,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     $res = '';
     if (!empty($cfg['order'])) {
+      if (is_string($cfg['order'])) {
+        if (Str::startsWith($cfg['order'], 'rand', false)) {
+          return 'ORDER BY RAND()' . PHP_EOL;
+        }
+
+        return 'ORDER BY ' . $cfg['order'] . PHP_EOL;
+      }
+
       foreach ($cfg['order'] as $col => $dir) {
         if (is_array($dir) && isset($dir['field'])) {
           $col = $dir['field'];
@@ -3354,7 +3362,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
 
       if (isset($cfg[4])) {
-        $res['order'] = is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
+        $res['order'] = $cfg[4];
       }
 
       if (isset($cfg[5]) && Str::isInteger($cfg[5])) {
@@ -3436,10 +3444,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
     if (!is_array($res['where'])) {
       $res['where'] = [];
-    }
-
-    if (!is_array($res['order'])) {
-      $res['order'] = is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
     }
 
     if (!Str::isInteger($res['limit'])) {
@@ -4175,12 +4179,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields' name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return null|stdClass
    * @throws Exception
    */
-  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?stdClass
+  public function select($table, $fields = [], array $where = [], string|array $order = [], int $start = 0): ?stdClass
   {
     $args = $this->_add_kind($this->_set_limit_1(func_get_args()));
     if ($r = $this->_exec(...$args)) {
@@ -4213,13 +4217,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields' name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return null|array
    * @throws Exception
    */
-  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function selectAll($table, $fields = [], array $where = [], string|array $order = [], int $limit = 0, int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
       return $r->getObjects();
@@ -4244,12 +4248,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields' name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return array|null
    * @throws Exception
    */
-  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  public function iselect($table, $fields = [], array $where = [], string|array $order = [], int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       return $r->getIrow();
@@ -4282,13 +4286,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return array|null
    * @throws Exception
    */
-  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function iselectAll($table, $fields = [], array $where = [], string|array $order = [], int $limit = 0, int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
       return $r->getIrows();
@@ -4316,7 +4320,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return null;
   }
 
-  public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  public function selectUnion(array $union, $fields = [], array $where = [], string|array $order = [], $limit = 0, $start = 0): ?array
   {
     if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
       return $r->getObjects();
@@ -4325,7 +4329,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return [];
   }
 
-  public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  public function iselectUnion(array $union, $fields = [], array $where = [], string|array $order = [], $limit = 0, $start = 0): ?array
   {
     if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
       return $r->getIrows();
@@ -4334,7 +4338,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return [];
   }
 
-  public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  public function rselectUnion(array $union, $fields = [], array $where = [], string|array $order = [], $limit = 0, $start = 0): ?array
   {
     if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
       return $r->getRows();
@@ -4343,7 +4347,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return [];
   }
 
-  protected function adaptUnionParams(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)
+  protected function adaptUnionParams(array $union, $fields = [], array $where = [], string|array $order = [], $limit = 0, $start = 0)
   {
     if (!X::isAssoc($union)) {
       $union = [
@@ -4381,12 +4385,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields' name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return null|array
    * @throws Exception
    */
-  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  public function rselect($table, $fields = [], array $where = [], string|array $order = [], int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       return $r->getRow();
@@ -4418,13 +4422,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields' name
    * @param array $where The "where" condition
-   * @param array $order condition, default: false
+   * @param string|array $order condition, default: false
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return null|array
    * @throws Exception
    */
-  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  public function rselectAll($table, $fields = [], array $where = [], string|array $order = [], $limit = 0, $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
       return $r->getRows();
@@ -4445,12 +4449,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition, default: false
+   * @param string|array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return mixed
    * @throws Exception
    */
-  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
+  public function selectOne($table, $field = null, array $where = [], string|array $order = [], int $start = 0)
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       if (method_exists($r, 'getIrow')) {
@@ -4518,13 +4522,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param array $fields The fields's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $order The "order" condition
    * @param int $limit The $limit condition, default: 0
    * @param int $start The $limit condition, default: 0
    * @return array|null
    * @throws Exception
    */
-  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function selectAllByKeys($table, array $fields = [], array $where = [], string|array $order = [], int $limit = 0, int $start = 0): ?array
   {
     if ($rows = $this->rselectAll($table, $fields, $where, $order, $limit, $start)) {
       return X::indexByFirstVal($rows);
@@ -4554,11 +4558,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string $table The table's name or a configuration array.
    * @param string $column The field's name.
    * @param array $where The "where" condition.
-   * @param array $order The "order" condition.
+   * @param string|array $order The "order" condition.
    * @return array|null
    * @throws Exception
    */
-  public function stat(string $table, string $column, array $where = [], array $order = []): ?array
+  public function stat(string $table, string $column, array $where = [], string|array $order = []): ?array
   {
     if ($this->check()) {
       return $this->rselectAll(
@@ -4592,7 +4596,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param array        $order The "order" condition
    * @return array|null
    */
-  public function countFieldValues($table, string|null $field = null, array $where = [], array $order = []): ?array
+  public function countFieldValues($table, string|null $field = null, array $where = [], string|array $order = []): ?array
   {
     if (is_array($table) && is_array($table['fields']) && count($table['fields'])) {
       $args  = $table;
@@ -4636,12 +4640,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param string|array $table The table's name or a configuration array
    * @param string|null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $order The "order" condition
    * @param int $limit
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function getColumnValues($table, string|null $field = null,  array $where = [], string|array $order = [], int $limit = 0, int $start = 0): ?array
   {
     $res = null;
     if ($this->check()) {

@@ -142,7 +142,7 @@ trait DbJunction
    *
    * @return mixed
    */
-  public function dbTraitSelectOne(string $field, array $filter = [], array $order = [])
+  public function dbTraitSelectOne(string $field, array $filter = [], string|array $order= [])
   {
     if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {
       return $res[$field] ?? null;
@@ -160,7 +160,7 @@ trait DbJunction
    *
    * @return stdClass|null
    */
-  public function dbTraitSelect(array $filter = [], array $order = [], array $fields = []): ?stdClass
+  public function dbTraitSelect(array $filter = [], string|array $order= [], array $fields = []): ?stdClass
   {
     return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);
   }
@@ -174,12 +174,12 @@ trait DbJunction
    *
    * @return array|null
    */
-  public function dbTraitRselect(array $filter = [], array $order = [], array $fields = []): ?array
+  public function dbTraitRselect(array $filter = [], string|array $order= [], array $fields = []): ?array
   {
     return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);
   }
 
-  public function dbTraitSelectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
+  public function dbTraitSelectValues(string $field, array $filter = [], string|array $order= [], int $limit = 0, int $start = 0): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'value', [$field]);
   }
@@ -214,7 +214,7 @@ trait DbJunction
    *
    * @return array
    */
-  public function dbTraitSelectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function dbTraitSelectAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'object', $fields);
   }
@@ -231,7 +231,7 @@ trait DbJunction
    *
    * @return array
    */
-  public function dbTraitRselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function dbTraitRselectAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);
   }

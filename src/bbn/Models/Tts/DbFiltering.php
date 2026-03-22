@@ -134,7 +134,7 @@ trait DbFiltering
    * Prepares the request configuration for a database query.
    *
    * @param array $filter Filter conditions.
-   * @param array $order Order by conditions.
+   * @param string|array $orderOrder by conditions.
    * @param int $limit Maximum number of rows to return.
    * @param int $start Offset of the first row to return.
    * @param array $fields Fields to select.

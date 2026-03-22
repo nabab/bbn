@@ -495,12 +495,12 @@ class Sales extends DbCls
   /**
    * Sends the order confirm email to the client
    * @param string $idTransaction
-   * @param \bbn\Mail $mailCls
+   * @param null|\bbn\Mail $mailCls
    * @return bool
    */
   public function sendConfirmEmailToClient(
     string $idTransaction,
-    \bbn\Mail $mailCls = null,
+    ?\bbn\Mail $mailCls = null,
   ): bool {
     if (
       ($opt = Option::getInstance()) &&
@@ -532,12 +532,12 @@ class Sales extends DbCls
   /**
    * Sends the order confirm email to the client
    * @param string $idTransaction
-   * @param \bbn\Mail $mailCls
+   * @param null|\bbn\Mail $mailCls
    * @return bool
    */
   public function sendConfirmEmailToProviders(
     string $idTransaction,
-    \bbn\Mail $mailCls = null,
+    ?\bbn\Mail $mailCls = null,
   ) {
     if ($opt = Option::getInstance()) {
       $masksCls = new Masks($this->db);
@@ -590,13 +590,13 @@ class Sales extends DbCls
    * Sends an email to notify a new order
    * @param string $idTransaction The transaction ID
    * @param string $email The email address to send to
-   * @param \bbn\Mail $mailCls
+   * @param null|\bbn\Mail $mailCls
    * @return bool
    */
   public function sendNewOrderEmail(
     string $idTransaction,
     string $email = "",
-    \bbn\Mail $mailCls = null,
+    ?\bbn\Mail $mailCls = null,
   ): bool {
     if (
       ($opt = Option::getInstance()) &&

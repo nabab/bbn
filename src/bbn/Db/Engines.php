@@ -495,7 +495,7 @@ interface Engines
    * @param array $order
    * @return array|null
    */
-  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array;
+  public function countFieldValues($table, string|null $field = null,  array $where = [], string|array $order= []): ?array;
 
   /**
    * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
@@ -514,12 +514,12 @@ interface Engines
    * @param string|array $table The table's name or a configuration array
    * @param string|null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $orderThe "order" condition
    * @param int $limit
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+  public function getColumnValues($table, string|null $field = null,  array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array;
 
   /**
    * Return an indexed array with the first result of the query or false if there are no results.

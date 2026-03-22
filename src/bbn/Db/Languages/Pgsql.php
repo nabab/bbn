@@ -1682,6 +1682,53 @@ PGSQL
   }
 
   /**
+   * Get a string starting with ORDER BY with corresponding parameters to $order.
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function getOrder(array $cfg): string
+  {
+    $res = '';
+    if (!empty($cfg['order'])) {
+      if (\is_string($cfg['order'])) {
+        if (Str::startsWith($cfg['order'], 'rand', false)) {
+          return 'ORDER BY RANDOM()' . PHP_EOL;
+        }
+
+        return 'ORDER BY ' . $cfg['order'] . PHP_EOL;
+      }
+
+      foreach ($cfg['order'] as $col => $dir) {
+        if (\is_array($dir) && isset($dir['field'])) {
+          $col = $dir['field'];
+          $dir = $dir['dir'] ?? 'ASC';
+        }
+
+        if (isset($cfg['available_fields'][$col])) {
+          // If it's an alias we use the simple name
+          if (isset($cfg['fields'][$col])) {
+            $f = $this->colSimpleName($col, true);
+          } elseif ($cfg['available_fields'][$col] === false) {
+            $f = $col;
+          } else {
+            $f = $this->colFullName($col, $cfg['available_fields'][$col], true);
+          }
+
+          $res .= $f . ' ' . (strtolower($dir) === 'desc' ? 'DESC' : 'ASC') . ',' . PHP_EOL;
+        }
+      }
+
+      if (!empty($res)) {
+        return 'ORDER BY ' . Str::sub($res, 0, Strrpos($res, ',')) . PHP_EOL;
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
    * Get a string starting with LIMIT with corresponding parameters to $where
    *
    * @param array $cfg

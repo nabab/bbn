@@ -392,11 +392,10 @@ class Environment
 
   /**
    * @param $url
-   * @param false $post
-   * @param array|null $arguments
-   * @throws \Exception
+   * @param ?array $post
+   * @param ?array $arguments
    */
-  public function simulate(string $url, $post = false, $arguments = null)
+  public function simulate(string $url, ?array $post = null, ?array $arguments = null)
   {
     unset($this->_params);
     $this->setParams($url . (empty($arguments) ? '' : '/' . implode('/', $arguments)));
@@ -471,8 +470,7 @@ class Environment
   /**
    * Returns the post information.
    * If the _post private prop is not set, puts all the post information into it,
-   * except any index starting with _bbn_; in that case it will become a BBN constant
-   * if it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)
+   * Indexes starting with _bbn_ are now treated in mvc's getPost
    * 
    * @return array
    */
@@ -491,16 +489,6 @@ class Environment
       }
       else {
         $this->_has_post = true;
-        //$this->_post     = Str::correctTypes($this->_post);
-        foreach ($this->_post as $k => $v) {
-          if (X::indexOf($k, '_bbn_') === 0) {
-            if (!defined(strtoupper(Str::sub($k, 1)))) {
-              define(strtoupper(Str::sub($k, 1)), $v);
-            }
-
-            unset($this->_post[$k]);
-          }
-        }
       }
     }
 

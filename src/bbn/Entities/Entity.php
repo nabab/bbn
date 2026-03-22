@@ -545,7 +545,7 @@ class Entity
           foreach ($ids as $id) {
             $final[$table][$id] = [
               'state' => null,
-              'data' => $identity->getInfo($id)
+              'data' => $identity->pickOne($id)
             ];
           }
         }

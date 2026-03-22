@@ -291,6 +291,26 @@ class Controller implements Api
   }
 
 
+  public function getInfo(): array
+  {
+    return [
+      'path' => $this->_path,
+      'plugin' => $this->_plugin,
+      'request' => $this->_request,
+      'file' => $this->_file,
+      'root' => $this->_root,
+      'arguments' => $this->arguments,
+      'checkers' => $this->_checkers,
+      'plugin' => $this->_plugin,
+      'plugin_name' => $this->_plugin_name,
+      'mode' => $this->mode,
+      'url' => $this->url,
+      'params' => $this->params,
+      'constants' => $this->_mvc->getAllConstants()
+    ];
+  }
+
+
   /**
    * Add a route to authorized routes list if not already exists.
    *
@@ -519,9 +539,11 @@ class Controller implements Api
    * This will reroute a controller to another one seamlessly.
    *
    * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+   * @param ?array $post POST data (optional)
+   * @param ?array $arguments Arguments array (optional)
    * @return void
    */
-  public function reroute($path = '', $post = false, $arguments = false)
+  public function reroute(string $path = '', ?array $post = null, ?array $arguments = null)
   {
     if (!in_array($path, $this->_reroutes) && ($this->_path !== $path)) {
       $this->_reroutes[] = $path;

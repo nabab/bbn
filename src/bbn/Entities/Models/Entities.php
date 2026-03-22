@@ -279,11 +279,11 @@ abstract class Entities extends DbCls
    *
    * @param string $field The field to select.
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    *
    * @return mixed
    */
-  public function selectOne(string $field, $filter = [], array $order = [])
+  public function selectOne(string $field, $filter = [], string|array $order= [])
   {
     return $this->dbTraitSelectOne($field, $filter, $order);
   }
@@ -292,14 +292,14 @@ abstract class Entities extends DbCls
    * Selects a row as an object from the table through its condition.
    *
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param array $fields Fields to select.
    *
    * @return stdClass|null
    */
   public function select(
     $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?stdClass {
     return $this->dbTraitSelect($filter, $order, $fields);
@@ -309,14 +309,14 @@ abstract class Entities extends DbCls
    * Selects a row as an array from the table through its condition.
    *
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param array $fields Fields to select.
    *
    * @return array|null
    */
   public function rselect(
     $filter = [],
-    array $order = [],
+    string|array $order= [],
     array $fields = [],
   ): ?array {
     return $this->dbTraitRselect($filter, $order, $fields);
@@ -327,7 +327,7 @@ abstract class Entities extends DbCls
    *
    * @param string $field The field to select.
    * @param array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param int $limit Maximum number of results.
    * @param int $start Starting point for results.
    *
@@ -336,7 +336,7 @@ abstract class Entities extends DbCls
   public function selectValues(
     string $field,
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
   ): array {
@@ -368,7 +368,7 @@ abstract class Entities extends DbCls
    */
   public function selectAll(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
     array $fields = [],
@@ -388,7 +388,7 @@ abstract class Entities extends DbCls
    */
   public function rselectAll(
     array $filter = [],
-    array $order = [],
+    string|array $order= [],
     int $limit = 0,
     int $start = 0,
     array $fields = [],
@@ -410,6 +410,11 @@ abstract class Entities extends DbCls
     }
 
     return $this->options()->text($cid);
+  }
+
+  public function getFilterCfg(array $cfg): array
+  {
+    return $this->dbTraitGetFilterCfg($cfg);
   }
 
   public function get($id): Entity

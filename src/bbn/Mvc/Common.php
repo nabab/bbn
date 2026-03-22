@@ -333,6 +333,16 @@ trait Common
     return $this->_mvc->deleteSubpluginModelCache($path, $data, $plugin, $subplugin);
   }
 
+  public function getConstant(string $name): mixed
+  {
+    return $this->_mvc->getConstant($name);
+  }
+
+  public function setConstant(string $name, mixed $value): bool
+  {
+    return $this->_mvc->setConstant($name, $value);
+  }
+
 
 
 

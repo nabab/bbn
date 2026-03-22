@@ -32,7 +32,7 @@ trait Read
    * @param int             $start  The "start" condition, default: 0
    * @return null|\stdClass
    */
-  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
+  public function select($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?\stdClass
   {
     return $this->language->select($table, $fields, $where, $order, $start);
   }
@@ -66,7 +66,7 @@ trait Read
    * @param int             $start  The "start" condition, default: 0
    * @return null|array
    */
-  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function selectAll($table, $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array
   {
     return $this->language->selectAll($table, $fields, $where, $order, $limit, $start);
   }
@@ -92,7 +92,7 @@ trait Read
    * @param int             $start  The "start" condition, default: 0
    * @return array
    */
-  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  public function iselect($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?array
   {
     return $this->language->iselect($table, $fields, $where, $order, $start);
   }
@@ -126,7 +126,7 @@ trait Read
    * @param int           $start  The "start" condition, default: 0
    * @return array
    */
-  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function iselectAll($table, $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array
   {
     return $this->language->iselectAll($table, $fields, $where, $order, $limit, $start);
   }
@@ -152,7 +152,7 @@ trait Read
    * @param int           $start  The "start" condition, default: 0
    * @return null|array
    */
-  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  public function rselect($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?array
   {
     return $this->language->rselect($table, $fields, $where, $order, $start);
   }
@@ -186,7 +186,7 @@ trait Read
    * @param int             $start  The "start" condition, default: 0
    * @return null|array
    */
-  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  public function rselectAll($table, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array
   {
     return $this->language->rselectAll($table, $fields, $where, $order, $limit, $start);
   }
@@ -206,7 +206,7 @@ trait Read
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+	public function selectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array
   {
     return $this->language->selectUnion($union, $fields, $where, $order, $limit, $start);
   }
@@ -222,7 +222,7 @@ trait Read
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+	public function rselectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array
   {
     return $this->language->rselectUnion($union, $fields, $where, $order, $limit, $start);
   }
@@ -238,7 +238,7 @@ trait Read
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+	public function iselectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array
   {
     return $this->language->iselectUnion($union, $fields, $where, $order, $limit, $start);
   }
@@ -259,7 +259,7 @@ trait Read
    * @param int             $start The "start" condition, default: 0
    * @return mixed
    */
-  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
+  public function selectOne($table, $field = null, array $where = [], string|array $order= [], int $start = 0)
   {
     return $this->language->selectOne($table, $field, $where, $order, $start);
   }
@@ -311,7 +311,7 @@ trait Read
    * @param int           $start  The $limit condition, default: 0
    * @return array|false
    */
-  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function selectAllByKeys($table, array $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array
   {
     return $this->language->selectAllByKeys($table, $fields, $where, $order, $limit, $start);
   }
@@ -340,7 +340,7 @@ trait Read
    * @param array        $order  The "order" condition.
    * @return array
    */
-  public function stat(string $table, string $column, array $where = [], array $order = []): ?array
+  public function stat(string $table, string $column, array $where = [], string|array $order= []): ?array
   {
     return $this->language->stat($table, $column, $where, $order);
   }
@@ -360,7 +360,7 @@ trait Read
    * @param array        $order The "order" condition
    * @return array | false
    */
-  public function getFieldValues($table, string|null $field = null, array $where = [], array $order = []): ?array
+  public function getFieldValues($table, string|null $field = null, array $where = [], string|array $order= []): ?array
   {
     return $this->getColumnValues($table, $field, $where, $order);
   }
@@ -380,7 +380,7 @@ trait Read
    * @param array        $order The "order" condition
    * @return array|null
    */
-  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array
+  public function countFieldValues($table, string|null $field = null,  array $where = [], string|array $order= []): ?array
   {
     return $this->language->countFieldValues($table, $field, $where, $order);
   }
@@ -403,12 +403,12 @@ trait Read
    * @param string|array $table The table's name or a configuration array
    * @param string|null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $orderThe "order" condition
    * @param int $limit
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function getColumnValues($table, string|null $field = null,  array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array
   {
     return $this->language->getColumnValues($table, $field, $where, $order, $limit, $start);
   }
@@ -429,11 +429,11 @@ trait Read
    * @param string|array $table The table's name or a configuration array
    * @param string|null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $orderThe "order" condition
    * @return array
    * // TODO-testing: this method stated that it will return string but actually it returns an array!
    */
-  public function getValuesCount($table, string|null $field = null, array $where = [], array $order = []): array
+  public function getValuesCount($table, string|null $field = null, array $where = [], string|array $order= []): array
   {
     return $this->countFieldValues($table, $field, $where, $order);
   }
