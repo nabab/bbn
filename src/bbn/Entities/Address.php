@@ -706,7 +706,7 @@ class Address extends DbCls
   }
 
 
-  public function pickOne(string $id): array
+  public function pickOne(string $id, ?string $id_entity = null): array
   {
     return [];
   }
