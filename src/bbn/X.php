@@ -520,8 +520,8 @@ class X
     if ($spath) {
       $path = $path . (Str::sub($path, -1) === '/' ? '' : '/') . $spath;
       clearstatcache();
-      if (!file_exists($path)) {
-        mkdir($path, 0777, true);
+      if (!is_dir($path)) {
+        @mkdir($path, 0777, true);
       }
 
       if (is_dir($path)) {
@@ -540,8 +540,12 @@ class X
           $num = 1;
         }
 
-        if (!file_exists("$path/$num")) {
-          mkdir("$path/$num", 0777, true);
+        if (!is_dir("$path/$num")) {
+          @mkdir("$path/$num", 0777, true);
+        }
+
+        if (!is_dir("$path/$num")) {
+          return null;
         }
 
         return "$path/$num/";
