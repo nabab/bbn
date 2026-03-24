@@ -543,26 +543,32 @@ class Entity
         }
         elseif ($table === 'bbn_identities') {
           foreach ($ids as $id) {
-            $final[$table][$id] = [
-              'state' => null,
-              'data' => $identity->pickOne($id, $this->getId(), true) ?: $identity->pickOne($id, null, true)
-            ];
+            if ($d = $identity->pickOne($id, $this->getId(), true) ?: $identity->pickOne($id, null, true)) {
+              $final[$table][$id] = [
+                'state' => null,
+                'data' => $d
+              ];
+            }
           }
         }
         elseif ($table === 'bbn_addresses') {
           foreach ($ids as $id) {
-            $final[$table][$id] = [
-              'state' => null,
-              'data' => $address->pickOne($id, $this->getId())
-            ];
+            if ($d = $address->pickOne($id, $this->getId())) {
+              $final[$table][$id] = [
+                'state' => null,
+                'data' => $d
+              ];
+            }
           }
         }
         else {
           foreach ($ids as $id) {
-            $final[$table][$id] = [
-              'state' => null,
-              'data' => $this->db->rselect($table, [], ['id' => $id])
-            ];
+            if ($d = $this->db->rselect($table, [], ['id' => $id])) {
+              $final[$table][$id] = [
+                'state' => null,
+                'data' => $d
+              ];
+            }
           }
         }
       }
