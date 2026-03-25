@@ -419,7 +419,11 @@ class Cache implements CacheInterface
   public function hash(string $key): ?string
   {
     if ($r = $this->getRaw($key)) {
-      return $r['hash'];
+      if (isset($r['_bbn_cache'])) {
+        return $r['hash'];
+      }
+
+      return self::makeHash($r);
     }
 
     return null;
@@ -443,7 +447,9 @@ class Cache implements CacheInterface
   public function isAfter(string $key, int $time): bool
   {
     if ($r = $this->getRaw($key)) {
-      return $r['timestamp'] > $time;
+      if (is_array($r) && isset($r['_bbn_cache'])) {
+        return $r['timestamp'] > $time;
+      }
     }
 
     return true;
@@ -462,16 +468,16 @@ class Cache implements CacheInterface
           return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
         case 'redis':
           return $this->obj->set(
-            $key, json_encode($val), ['ex' => $ttl ?: self::$max_ttl]
+            $key, serialize($val), ['ex' => $ttl ?: self::$max_ttl]
           );
         case 'memcache':
           return $this->obj->set(
-            $key, json_encode($val), $ttl ?: self::$max_ttl
+            $key, serialize($val), $ttl ?: self::$max_ttl
           );
         case 'files':
           $file = self::_file($key, $this->path);
           if ($this->fs->createPath(X::dirname($file))) {
-            if ($this->fs->putContents($file, json_encode($val, JSON_PRETTY_PRINT))) {
+            if ($this->fs->putContents($file, serialize($val))) {
               return true;
             }
           }
@@ -495,6 +501,7 @@ class Cache implements CacheInterface
     $hash = self::makeHash($val);
     $t = time();
     $value = [
+      '_bbn_cache' => true,
       'timestamp' => $t,
       'hash' => $hash,
       'expire' => $t + ($ttl ?: self::$max_ttl),
@@ -536,20 +543,38 @@ class Cache implements CacheInterface
         }
 
         if (call_user_func('\\apcu_exists', $key)) {
-          $t = call_user_func('\\apcu_fetch', $key);
+          try {
+            $t = call_user_func('\\apcu_fetch', $key);
+          }
+          catch (Exception $e) {
+            X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+            return null;
+          }
         }
         break;
       case 'redis':
-        $tmp = $this->obj->get($key);
+        try {
+          $tmp = $this->obj->get($key);
+        }
+        catch (Exception $e) {
+          X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+          return null;
+        }
         if ($tmp) {
-          $t = json_decode($tmp, true);
+          $t = unserialize($tmp);
         }
 
         break;
       case 'memcache':
-        $tmp = $this->obj->get($key);
+        try {
+          $tmp = $this->obj->get($key);
+        }
+        catch (Exception $e) {
+          X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+          return null;
+        }
         if ($tmp) {
-          $t = json_decode($tmp, true);
+          $t = unserialize($tmp);
         }
 
         break;
@@ -557,13 +582,14 @@ class Cache implements CacheInterface
         $file = self::_file($key, $this->path);
         if ($this->fs->isFile($file)
           && ($t = $this->fs->getContents($file))) {
-          $t = json_decode($t, true);
+          $t = unserialize($t);
         }
         break;
     }
 
     if (!empty($t)) {
-      if (!empty($t['building'])) {
+      $isBbn = is_array($t) && !empty($t['_bbn_cache']);
+      if ($isBbn && !empty($t['building'])) {
         if ($attempts < 500) {
           usleep(10000);
           X::log("$attempts : Waiting for cache $key to be built...", 'wait');
@@ -576,6 +602,10 @@ class Cache implements CacheInterface
 
       $ttl = self::ttl($ttl);
       $time = time();
+      if (!$isBbn) {
+        return $t;
+      }
+
       $diff = $time - $t['timestamp'];
       if ($t['expire'] < $time) {
         $this->delete($key);
@@ -643,6 +673,7 @@ class Cache implements CacheInterface
     if (!$tmp) {
       $ttl = self::ttl($ttl);
       if ($this->setRaw($key, [
+        '_bbn_cache' => true,
         'value' => null,
         'hash' => null,
         'building' => true,
@@ -672,20 +703,24 @@ class Cache implements CacheInterface
 
 
   /**
-   * @return array|bool|false
+   * @return array|null
    */
-  public function info()
+  public function info(): ?array
   {
     if (self::$type) {
       switch (self::$type){
         case 'apc':
           return call_user_func('\\apcu_cache_info');
+        case 'redis':
+          return $this->obj->getStats('slabs');
         case 'memcache':
           return $this->obj->getStats('slabs');
         case 'files':
           return $this->fs->getFiles($this->path);
       }
     }
+
+    return null;
   }
 
 

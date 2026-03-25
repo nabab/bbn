@@ -83,13 +83,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   protected static $defaultEngine;
 
   /** @var array The 'kinds' of writing statement */
-  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME'];
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME', 'SET'];
 
   /** @var array The 'kinds' of reading statement */
   protected static $read_kinds = ['SELECT', 'SHOW'];
 
   /** @var array The 'kinds' of structure alteration statement */
-  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME'];
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME', 'SET'];
 
   /**
    * @var mixed $cache

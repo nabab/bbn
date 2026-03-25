@@ -311,6 +311,18 @@ class Pgsql extends Sql
 
 
   /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    $this->query('SET TIME ZONE = ?', $tz);
+  }
+
+
+  /**
    * Disables foreign keys check.
    *
    * @return self

@@ -288,6 +288,18 @@ class Sqlite extends Sql
   }
 
   /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    // It doesn't exist in sqlite
+  }
+
+
+  /**
    * Disable foreign keys check
    *
    * @return self

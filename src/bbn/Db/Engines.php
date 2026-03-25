@@ -113,6 +113,13 @@ interface Engines
 
 
   /**
+   * Set the connection timezone
+   *
+   */
+  public function setTimezone(string $tz): void;
+
+
+  /**
    * Disables foreign keys check.
    *
    */

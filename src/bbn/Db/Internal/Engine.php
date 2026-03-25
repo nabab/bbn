@@ -182,6 +182,22 @@ trait Engine
 
 
   /**
+   * Sets the timezone for the connection.
+   *
+   * ```php
+   * $db->setTimezone('Europe/Paris');
+   * ```
+   *
+   * @return self
+   */
+  public function setTimezone(string $tz): static
+  {
+    $this->language->setTimezone($tz);
+    return $this;
+  }
+
+
+  /**
    * Disables foreign keys constraints.
    *
    * ```php

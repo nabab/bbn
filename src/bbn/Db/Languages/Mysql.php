@@ -254,6 +254,19 @@ class Mysql extends Sql
     return $this->cfg;
   }
 
+
+  /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    $this->query('SET SESSION time_zone = ?', $tz);
+  }
+
+
   /**
    * Disables foreign keys check.
    *

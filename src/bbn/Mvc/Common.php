@@ -343,6 +343,16 @@ trait Common
     return $this->_mvc->setConstant($name, $value);
   }
 
+  public function getGlobal(string $name): mixed
+  {
+    return Mvc::getGlobal($name);
+  }
+
+  public function setGlobal(string $name, mixed $value): void
+  {
+    Mvc::setGlobal($name, $value);
+  }
+
 
 
 

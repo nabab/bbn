@@ -170,6 +170,20 @@ trait Cache
 
 
   /**
+   * Gets the hash from a cache key
+   *
+   * @param string $uid
+   * @param string $method
+   * @return mixed
+   */
+  protected function cacheHash(string $uid, string $method = ''): mixed
+  {
+    $this->cacheInit();
+    return $this->cache_engine->hash($this->_cache_name($uid, $method));
+  }
+
+
+  /**
    * Gets the cached data
    *
    * @param string $uid

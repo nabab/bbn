@@ -238,6 +238,7 @@ final class Mvc implements Api
    */
   protected static $db_in_controller = false;
 
+  protected static $globals = [];
   /**
    * @var bool Internal flag – request has been routed.
    */
@@ -666,6 +667,29 @@ final class Mvc implements Api
   public function getConstant(string $name)
   {
     return X::hasProp($this->constants, $name) ? $this->constants[$name] : null;
+  }
+
+  /**
+   * Store a constant‑like value.
+   *
+   * @param string $name  Constant name.
+   * @param mixed  $value Value to store.
+   * @return bool         True on success, false if the key already exists.
+   */
+  public static function setGlobal(string $name, $value): void
+  {
+    self::$globals[$name] = $value;
+  }
+
+  /**
+   * Retrieve a stored constant‑like value.
+   *
+   * @param string $name Constant name.
+   * @return mixed|null   Value or null if not found.
+   */
+  public static function getGlobal(string $name)
+  {
+    return X::hasProp(self::$globals, $name) ? self::$globals[$name] : null;
   }
 
   /**
@@ -2326,4 +2350,6 @@ final class Mvc implements Api
 
     return null;
   }
+
+
 }

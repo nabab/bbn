@@ -525,12 +525,12 @@ class X
       }
 
       if (is_dir($path)) {
-        $dirs = X::filter(scandir($path), fn ($a) => ($a !== '.') && ($a !== '..') && is_dir("$path/$a"));
+        $dirs = X::filter(scandir($path), fn($a) => ($a !== '.') && ($a !== '..') && is_dir("$path/$a"));
         $num = count($dirs);
         if ($num) {
           // Dir or files
           if (is_dir("$path/$num")) {
-            $files = array_filter(scandir("$path/$num"), fn ($a) => !is_dir("$path/$num/$a"));
+            $files = array_filter(scandir("$path/$num"), fn($a) => !is_dir("$path/$num/$a"));
             $num_files = count($files);
             if ($num_files >= $max) {
               $num++;
@@ -578,7 +578,7 @@ class X
     $limit = count(self::split($format, '/')) + 1;
     $res   = 0;
     while ($limit > 0) {
-      $scan = array_filter(scandir($path), fn ($a) => $a !== '.' && $a !== '..');
+      $scan = array_filter(scandir($path), fn($a) => $a !== '.' && $a !== '..');
       if (!count($scan)) {
         $limit--;
         $res++;
@@ -715,8 +715,7 @@ class X
           (empty($v2) || self::isAssoc($v2))
         ) {
           self::mergeArraysInPlace($a1[$k], $v2);
-        }
-        else {
+        } else {
           $a1[$k] = $v2;
         }
       }
@@ -748,8 +747,7 @@ class X
           }
         }
       }
-    }
-    else if (is_array($obj)) {
+    } else if (is_array($obj)) {
       foreach ($others as $o) {
         if (!is_array($o)) {
           throw new Exception('The provided argument must be an array, ' . gettype($o) . ' given.');
@@ -2199,8 +2197,7 @@ class X
 
       if (isset($condition['conditions']) && is_array($condition['conditions'])) {
         $matched = self::compareConditions($data, $condition);
-      }
-      else {
+      } else {
         if (!isset($condition['field'])) {
           self::log($filter, 'bad_filter');
           throw new Exception(X::_("Field is mandatory in filter"));
@@ -2217,8 +2214,7 @@ class X
         if (!$matched) {
           return false;
         }
-      }
-      else {
+      } else {
         if ($matched) {
           return true;
         }
@@ -2368,11 +2364,9 @@ class X
 
       if ($callable) {
         $ok = (bool)$where($item);
-      }
-      elseif (!$isArrayFilter) {
+      } elseif (!$isArrayFilter) {
         $ok = ($item === $where);
-      }
-      else {
+      } else {
         $ok = self::compareConditions((array)$item, $where);
       }
 
@@ -2659,35 +2653,22 @@ class X
    */
   public static function sortBy(array &$ar, $key, $dir = ''): array
   {
-    $blackOrder = [
-      false,
-      null,
-      0,
-      '',
-      []
-    ];
+    $blackOrder = [false, null, 0, '', []];
 
-    $args = func_get_args();
-    array_shift($args);
+    // Process arguments
     if (is_array($key)) {
-      $args = $key;
-      if (X::isAssoc($args)) {
-        $tmp = [];
-        foreach ($args as $k => $v) {
+      if (X::isAssoc($key)) {
+        $args = [];
+        foreach ($key as $k => $v) {
           if (!is_array($v)) {
-            $tmp[] = [
-              'key' => $k,
-              'dir' => $v
-            ];
+            $args[] = ['key' => $k, 'dir' => $v];
           }
         }
-        $args = $tmp;
+      } else {
+        $args = $key;
       }
     } elseif (is_string($key)) {
-      $args = [[
-        'key' => $key,
-        'dir' => $dir
-      ]];
+      $args = [['key' => $key, 'dir' => $dir]];
     }
 
     usort(
@@ -2710,66 +2691,58 @@ class X
 
           $v1 = self::pick($a, $key);
           $v2 = self::pick($b, $key);
-          if (!$v1) {
-            if ($v2) {
-              $v1 = -1;
-              $v2 = 1;
-            } else {
-              $v1 = array_search($v1, $blackOrder);
-              $v2 = array_search($v2, $blackOrder);
+
+          // Handle null/empty values
+          if ($v1 === null || $v1 === '') {
+            if ($v2 !== null && $v2 !== '') {
+              return -1;
             }
-          } elseif (!$v2) {
-            $v1 = 1;
-            $v2 = -1;
-          } elseif (is_array($v1)) {
+            $pos1 = array_search($v1, $blackOrder, true);
+            $pos2 = array_search($v2, $blackOrder, true);
+            if ($pos1 !== false && $pos2 !== false) {
+              return $pos1 - $pos2;
+            }
+          } elseif ($v2 === null || $v2 === '') {
+            return 1;
+          }
+
+          // Handle arrays and objects
+          if (is_array($v1)) {
             if (!is_array($v2)) {
-              $v1 = 1;
-              $v2 = -1;
-            } else {
-              $v1 = json_encode($v1);
-              $v2 = json_encode($v2);
+              return 1;
             }
-          } elseif (is_array($v2)) {
-            $v1 = -1;
-            $v2 = 1;
+            $v1 = json_encode($v1);
+            $v2 = json_encode($v2);
           } elseif (is_object($v1)) {
             if (!is_object($v2)) {
-              $v1 = 1;
-              $v2 = -1;
-            } else {
-              $v1 = json_encode($v1);
-              $v2 = json_encode($v2);
+              return 1;
             }
-          } elseif (is_object($v2)) {
-            $v1 = -1;
-            $v2 = 1;
+            $v1 = json_encode($v1);
+            $v2 = json_encode($v2);
           }
 
-          $a1 = $dir === 'desc' ? $v2 : $v1;
-          $a2 = $dir === 'desc' ? $v1 : $v2;
-          if (!Str::isNumber($v1, $v2)) {
-            $a1  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a1, 'lower')));
-            $a2  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a2, 'lower')));
-            $cmp = strcmp($a1, $a2);
-            if (!empty($cmp)) {
-              return $cmp;
-            }
+          // Compare values
+          if ($dir === 'desc') {
+            [$v1, $v2] = [$v2, $v1];
           }
 
-          if ($a1 > $a2) {
-            return 1;
-          } elseif ($a1 < $a2) {
-            return -1;
+          if (is_numeric($v1) && is_numeric($v2)) {
+            return $v1 <=> $v2;
           }
+
+          // String comparison with case normalization
+          $cmp1 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v1, 'lower'));
+          $cmp2 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v2, 'lower'));
+
+          return strcmp($cmp1, $cmp2);
         }
 
         return 0;
       }
     );
+
     return $ar;
   }
-
-
   /**
    * Checks if the operating system, from which PHP is executed, is Windows or not.
    * ```php
