@@ -78,7 +78,7 @@ trait DbCache
           foreach ($ids as $id) {
             $this->dbTraitCacheSet($id);
           }
-          [ , , $res] = $o->getData();
+          $res = $o->getData()[2] ?? null;
           $o->setResponse($res);
         }
 
