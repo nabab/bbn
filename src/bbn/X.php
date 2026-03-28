@@ -281,7 +281,7 @@ class X
       self::sortBy($r, 'last_date', 'DESC');
       file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
     } else {
-      die(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
+      throw new Exception(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
     }
   }
 
