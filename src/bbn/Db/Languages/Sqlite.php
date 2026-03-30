@@ -121,7 +121,7 @@ class Sqlite extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     $cfg['engine'] = 'sqlite';
 

@@ -130,6 +130,8 @@ class Db implements Db\Actions
       $this->language->close();
       $this->setErrorMode('continue');
     }
+
+    self::retrieverRemove($this);
   }
 
 
@@ -313,15 +315,15 @@ class Db implements Db\Actions
   /**
    * 
    * ```php
-   * X::adump($ctrl->db->getConnection()); 
+   * X::adump($ctrl->db->getConnectionParams()); 
    * ```
    * 
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
-    return $this->language->getConnection($cfg);
+    return $this->language->getConnectionParams($cfg);
   }
 
   private function ensureLanguageMethodExists(string $method)

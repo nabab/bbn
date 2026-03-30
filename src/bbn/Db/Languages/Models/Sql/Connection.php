@@ -12,7 +12,7 @@ use bbn\Db\Query;
 
 trait Connection
 {
-  /** @var array Connection config (normalized by getConnection()). */
+  /** @var array Connection config (normalized by getConnectionParams()). */
   protected array $cfg;
 
   /** @var string|null Connection code as stored in option (code_host). */
@@ -42,9 +42,6 @@ trait Connection
   /** @var bool If true last_query/last_params are updated. */
   protected bool $_last_enabled = true;
 
-  /** @var int Cache renewal duration (seconds). */
-  protected int $cache_renewal = 3600;
-
   /**
    * Constructor (creates PDO connection + initializes cache and connection metadata).
    *
@@ -59,7 +56,7 @@ trait Connection
       throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
-    $cfg = $this->getConnection($cfg);
+    $cfg = $this->getConnectionParams($cfg);
 
     try {
       $this->current = $cfg['db'] ?? null;
@@ -74,10 +71,6 @@ trait Connection
 
       $this->cfg = $cfg;
       $this->setHash($cfg['args']);
-
-      if (!empty($cfg['cache_length'])) {
-        $this->cache_renewal = (int)$cfg['cache_length'];
-      }
 
       if (isset($cfg['on_error'])) {
         $this->on_error = $cfg['on_error'];

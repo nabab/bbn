@@ -2350,7 +2350,7 @@ class DbTest extends TestCase
       ->with(['a' => 'b'])
       ->andReturn(['c' => 'd']);
 
-    $this->assertSame(['c' => 'd'], $this->db->getConnection(['a' => 'b']));
+    $this->assertSame(['c' => 'd'], $this->db->getConnectionParams(['a' => 'b']));
   }
 
   /** @test */

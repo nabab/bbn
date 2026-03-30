@@ -285,7 +285,7 @@ class X
     }
   }
 
-  public static function logException(Throwable $err): void
+  public static function logException(Throwable $err, bool $throw = true): void
   {
     if ($err->getFile() === __FILE__) {
       return;
@@ -298,7 +298,9 @@ class X
       $err->getLine()
     );
 
-    throw $err;
+    if ($throw) {
+      throw $err;
+    }
   }
 
   public static function percent(float | int $val, float | int $total, int $decimals = 2)

@@ -212,7 +212,7 @@ class Pgsql extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     if (!X::hasProps($cfg, ['host', 'user'])) {
       if (!defined('BBN_DB_HOST')) {

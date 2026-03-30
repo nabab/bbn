@@ -174,7 +174,7 @@ class Mysql extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     $numParams = count(array_keys($cfg));
     if (($numParams > 1) && empty($cfg['host'])) {

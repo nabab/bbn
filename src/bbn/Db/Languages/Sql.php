@@ -97,11 +97,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   protected $cache = [];
 
   /**
-   * @var integer $cache_renewal
-   */
-  protected $cache_renewal = 3600;
-
-  /**
    * @var PDO
    */
   protected ?PDO $pdo;
@@ -262,7 +257,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
-    $cfg = $this->getConnection($cfg);
+    $cfg = $this->getConnectionParams($cfg);
 
     try {
       $this->current = $cfg['db'] ?? null;
@@ -276,10 +271,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
       $this->cfg = $cfg;
       $this->setHash($cfg['args']);
-
-      if (!empty($cfg['cache_length'])) {
-        $this->cache_renewal = (int)$cfg['cache_length'];
-      }
 
       if (isset($cfg['on_error'])) {
         $this->on_error = $cfg['on_error'];
@@ -2538,7 +2529,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         }
 
         $tmp['fingerprint'] = md5(json_encode($tmp));
-        $this->cacheSet($cache_name, '', $tmp, $this->cache_renewal);
+        $this->cacheSet($cache_name, '', $tmp);
       }
 
       if ($tmp) {
@@ -3847,6 +3838,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     $num                = count($this->queries);
     $this->queries      = [];
     $this->list_queries = [];
+    $this->cache = [];
+    $this->last_query = null;
+    $this->last_real_query = null;
+    $this->last_params = ['sequences' => false, 'values' => false];
+    $this->last_real_params = ['sequences' => false, 'values' => false];
+    $this->last_cfg = null;
+    $this->last_insert_id = null;
+    $this->cfgs = [];
     return $num;
   }
 

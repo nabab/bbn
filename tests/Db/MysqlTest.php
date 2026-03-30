@@ -223,7 +223,6 @@ class MysqlTest extends TestCase
     $this->assertSame($db_cfg['host'], $this->getNonPublicProperty('host'));
     $this->assertSame($db_cfg['user'], $this->getNonPublicProperty('username'));
 
-    $this->assertSame(3000, $this->getNonPublicProperty('cache_renewal'));
     $this->assertSame(Errors::E_STOP, $this->getNonPublicProperty('on_error'));
     $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
   }
@@ -8483,8 +8482,7 @@ GROUP BY `id`
               'defaultExpression' => false
             ]
           ]
-        ],
-        $this->getNonPublicProperty('cache_renewal')
+        ]
       )
       ->andReturnTrue();
 

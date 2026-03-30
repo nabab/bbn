@@ -3641,8 +3641,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
               'type' => 'INTEGER'
             ]
           ],
-        ],
-        $this->getNonPublicProperty('cache_renewal')
+        ]
       )
       ->andReturnTrue();
 
