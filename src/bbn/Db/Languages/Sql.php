@@ -213,7 +213,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * And use startFancyStuff to set it back to true
    * @var int $fancy
    */
-  protected $_fancy = 1;
+  protected $_fancy = null;
 
   /**
    * The currently selected database
@@ -875,9 +875,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         if (array_key_exists('conditions', $c) && is_array($c['conditions'])) {
           $this->arrangeConditions($c, $cfg);
         }
-        elseif (isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->isColFullName($c['field'])) {
-          foreach ($cfg['tables'] as $t => $o){
-            if (isset($cfg['available_fields'][$this->colFullName($c['field'], $t)])) {
+        elseif (isset($c['field'])
+          && empty($cfg['available_fields'][$c['field']])
+          && !$this->isColFullName($c['field'])
+          && (strpos($c['field'], '(') === false)
+        ) {
+          foreach ($cfg['tables'] as $t => $o) {
+            if (!$this->colFullName($c['field'], $t)) {
+              X::log([$c, $t], 'field_not_found_in_sql');
+            }
+            elseif (isset($cfg['available_fields'][$this->colFullName($c['field'], $t)])) {
               $c['field'] = $this->colFullName($c['field'], $t);
               break;
             }
@@ -3914,8 +3921,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function startFancyStuff(): static
   {
-    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [Query::class, [$this]]);
-    $this->_fancy = 1;
+    if (!$this->_fancy) {
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [Query::class, [$this]]);
+      $this->_fancy = 1;
+    }
 
     return $this;
   }
@@ -3932,8 +3941,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    */
   public function stopFancyStuff(): static
   {
-    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
-    $this->_fancy = false;
+    if ($this->_fancy) {
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
+      $this->_fancy = false;
+    }
 
     return $this;
   }

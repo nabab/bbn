@@ -124,10 +124,21 @@ trait Connection
       $switch_to_fancy = true;
     }
 
-    $result = $this->pdo->query(...func_get_args());
-
-    if (!empty($switch_to_fancy)) {
-      $this->startFancyStuff();
+    try {
+      $result = $this->pdo->query(...func_get_args());
+    }
+    catch (PDOException $e) {
+      if (isset($this->on_error)) {
+        call_user_func($this->on_error, $e, $this);
+      }
+      else {
+        throw $e;
+      }
+    }
+    finally {
+      if (!empty($switch_to_fancy)) {
+        $this->startFancyStuff();
+      }
     }
 
     return $result;
