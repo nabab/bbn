@@ -459,6 +459,10 @@ class Cache implements CacheInterface
   {
     if (self::$type) {
       $ttl  = self::ttl($ttl);
+      $sep = self::$sep;
+      $parts = explode($sep, $key);
+      $hash = array_pop($parts);
+      $baseKey = implode($sep, $parts);
       switch (self::$type){
         case 'apc':
           if (!function_exists('\\apcu_store')) {
@@ -467,9 +471,18 @@ class Cache implements CacheInterface
 
           return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
         case 'redis':
-          return $this->obj->set(
-            $key, serialize($val), ['ex' => $ttl ?: self::$max_ttl]
-          );
+          $this->obj->multi();
+          $latestKey = "{$baseKey}:__latest";
+          $newVersion = (int)$this->obj->get($latestKey) + 1;
+          $versionKey = "{$baseKey}:{$hash}:{$newVersion}:data";
+          if ($this->obj->exists($versionKey)) {
+            $this->obj->discard();
+            return true;
+          }
+
+          $this->obj->set($versionKey, serialize($val), ['ex' => $ttl ?: self::$max_ttl]);
+          $this->obj->set($latestKey, $newVersion);
+          return $this->obj->exec();
         case 'memcache':
           return $this->obj->set(
             $key, serialize($val), $ttl ?: self::$max_ttl
