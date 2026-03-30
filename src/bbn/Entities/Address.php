@@ -712,7 +712,7 @@ class Address extends DbCls
   }
 
 
-  public function getList(array $tableCfg, string $id_entity = null, array $ids = null): array
+  public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
   {
     return [];
   }
