@@ -701,13 +701,21 @@ class X
       return [];
     }
 
-    $res = [];
+    $res = array_shift($arrays);
     return self::mergeArraysInPlace($res, ...$arrays);
   }
 
   public static function mergeArraysInPlace(array &$a1, array ...$arrays): array
   {
     foreach ($arrays as $a2) {
+      if (
+        !(self::isAssoc($a1) || empty($a1)) &&
+        !(self::isAssoc($a2) || empty($a2))
+      ) {
+          $a1 = array_merge($a1, $a2);
+          continue;
+      }
+
       foreach ($a2 as $k => $v2) {
         if (
           array_key_exists($k, $a1) &&
