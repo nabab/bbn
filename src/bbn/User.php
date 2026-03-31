@@ -601,6 +601,12 @@ class User extends DbCls implements Implementor
     }
   }
 
+  public function destruct(): void
+  {
+    $this->session?->destruct();
+    self::retrieverRemove($this);
+  }
+
   /**
    * Checks if the it's a login request.
    *

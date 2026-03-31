@@ -121,6 +121,14 @@ class Preferences extends DbCls
     }
   }
 
+  /**
+   * Destructor – clears static state.
+   */
+  public function destruct(): void
+  {
+    self::retrieverRemove($this);
+  }
+
   public function getIdUser(): ?string
   {
     return $this->user ? $this->user->getId() : null;

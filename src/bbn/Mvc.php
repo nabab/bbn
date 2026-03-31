@@ -1239,6 +1239,7 @@ final class Mvc implements Api
   public function destruct(): void
   {
     self::$_app_name = null;
+    $this->router->destruct();
     self::singletonUnset();
   }
 

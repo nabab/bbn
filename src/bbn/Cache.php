@@ -7,6 +7,7 @@ use Traversable;
 use Psr\SimpleCache\CacheInterface;
 use bbn\Str;
 use bbn\X;
+use bbn\Models\Cls\Basic;
 use function defined;
 use function in_array;
 use function is_array;
@@ -26,7 +27,7 @@ use function strlen;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
 
-class Cache implements CacheInterface
+class Cache extends Basic implements CacheInterface
 {
   private string $host;
   private int $port;
@@ -34,7 +35,7 @@ class Cache implements CacheInterface
 
   protected static string $type;
 
-  protected static int $max_wait = 10;
+  protected static int $max_wait = 50;
 
   protected static int $default_ttl = 0;
 
@@ -46,9 +47,7 @@ class Cache implements CacheInterface
 
   protected string $path;
 
-  protected $obj;
-
-  protected $fs;
+  protected mixed $obj;
 
   protected $prefix;
 
@@ -228,7 +227,7 @@ class Cache implements CacheInterface
     }
     elseif ($this->path = Mvc::getCachePath()) {
       self::_set_type('files');
-      $this->fs = new \bbn\File\System();
+      $this->obj = new \bbn\File\System();
     }
   }
 
@@ -240,7 +239,7 @@ class Cache implements CacheInterface
    * @param null|int|string $ttl  The time-to-live value
    * @return bool
    */
-  public function has($key, null|int|string $ttl = null): bool
+  public function hasRaw($key): bool
   {
     if (self::$type) {
       switch (self::$type){
@@ -248,47 +247,31 @@ class Cache implements CacheInterface
           return (bool)call_user_func('\\apcu_exists', $key);
 
         case 'redis':
-          $t = $this->getRaw($key);
-          if ($t) {
-            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
-                && (!$t['expire'] || ($t['expire'] > time()))
-            ) {
-              return true;
-            }
-
-            $this->delete($key);
-          }
-
-          return false;
+          return $this->obj->exists($key);
 
         case 'memcache':
-          $t = $this->getRaw($key);
-          if ($t) {
-            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
-                && (!$t['expire'] || ($t['expire'] > time()))
-            ) {
-              return true;
-            }
-
-            $this->delete($key);
-          }
-
-          return false;
+          return (bool)$this->obj->get($key);
 
         case 'files':
           $file = self::_file($key, $this->path);
-          if (($content = $this->fs->getContents($file))
-              && ($t = json_decode($content, true))
-          ) {
-            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
-                && (!$t['expire'] || ($t['expire'] > time()))
-            ) {
-              return true;
-            }
+          return is_file($file);
+      }
+    }
 
-            $this->fs->delete($file);
-          }
-          return false;
+    return false;
+  }
+
+
+  public function has($key): bool
+  {
+    $t = $this->info($key);
+    if ($t) {
+      $newKey = "{$key}".self::$sep."{$t['version']}";
+      if ($this->hasRaw($newKey)) {
+        return true;
+      }
+      else {
+        $this->delete($key);
       }
     }
 
@@ -304,22 +287,23 @@ class Cache implements CacheInterface
    */
   public function delete($key): bool
   {
-    if (self::$type) {
-      switch (self::$type){
-        case 'apc':
-          return call_user_func('\\apcu_delete', $key);
-        case 'redis':
-          $res = $this->obj->unlink($key);
-          return $res;
-        case 'memcache':
-          return $this->obj->delete($key);
-        case 'files':
-          $file = self::_file($key, $this->path);
-          if ($this->fs->isFile($file)) {
-            return (bool)$this->fs->delete($file);
-          }
-          return false;
+    if ($this->setLock($key)) {
+      $sep = self::$sep;
+      try {
+        $info = $this->info($key);
+        $this->deleteRaw("{$key}{$sep}__info");
+        $res = $this->deleteRaw("{$key}{$sep}{$info['version']}");
+        $this->removeKey($key);
       }
+      catch (Exception $e) {
+        $this->log(X::_("Error while setting cache for key %s: %s", $key, $e->getMessage()));
+        return false;
+      }
+      finally {
+        $this->releaseLock($key);
+      }
+
+      return (bool)$res;
     }
 
     return false;
@@ -341,12 +325,12 @@ class Cache implements CacheInterface
       }
 
       $dir = self::_dir($st, $this->path, false);
-      if ($this->fs->isDir($dir)) {
-        return $this->fs->delete($dir, $dir === $this->path ? false : true);
+      if ($this->obj->isDir($dir)) {
+        return $this->obj->delete($dir, $dir === $this->path ? false : true);
       }
       else {
         try {
-          $res = $this->fs->delete($dir.'.bbn.cache');
+          $res = $this->obj->delete($dir.'.bbn.cache');
         }
         catch (Exception $e) {
           $res = 0;
@@ -394,42 +378,6 @@ class Cache implements CacheInterface
   }
 
 
-  /**
-   * Returns the timestamp of the given item.
-   *
-   * @param string $key The name of the item
-   * @return null|int
-   */
-  public function timestamp(string $key): ?int
-  {
-    if ($r = $this->getRaw($key)) {
-      return $r['timestamp'];
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns the hash of the given item.
-   *
-   * @param string $key The name of the item
-   * @return null|string
-   */
-  public function hash(string $key): ?string
-  {
-    if ($r = $this->getRaw($key)) {
-      if (isset($r['_bbn_cache'])) {
-        return $r['hash'];
-      }
-
-      return self::makeHash($r);
-    }
-
-    return null;
-  }
-
-
   public function isSame(string $key, mixed $data): bool
   {
     $hash = self::makeHash($data);
@@ -455,14 +403,39 @@ class Cache implements CacheInterface
     return true;
   }
 
+  /**
+   * Removes the given item from the cache.
+   *
+   * @param string $key The name of the item
+   * @return bool
+   */
+  public function deleteRaw($key): bool
+  {
+    if (self::$type) {
+      switch (self::$type){
+        case 'apc':
+          return call_user_func('\\apcu_delete', $key);
+        case 'redis':
+          $res = $this->obj->unlink($key);
+          return $res;
+        case 'memcache':
+          return $this->obj->delete($key);
+        case 'files':
+          $file = self::_file($key, $this->path);
+          if ($this->obj->isFile($file)) {
+            return (bool)$this->obj->delete($file);
+          }
+          return false;
+      }
+    }
+
+    return false;
+  }
+
+
   public function setRaw($key, $val, $ttl): bool
   {
     if (self::$type) {
-      $ttl  = self::ttl($ttl);
-      $sep = self::$sep;
-      $parts = explode($sep, $key);
-      $hash = array_pop($parts);
-      $baseKey = implode($sep, $parts);
       switch (self::$type){
         case 'apc':
           if (!function_exists('\\apcu_store')) {
@@ -471,26 +444,15 @@ class Cache implements CacheInterface
 
           return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
         case 'redis':
-          $this->obj->multi();
-          $latestKey = "{$baseKey}:__latest";
-          $newVersion = (int)$this->obj->get($latestKey) + 1;
-          $versionKey = "{$baseKey}:{$hash}:{$newVersion}:data";
-          if ($this->obj->exists($versionKey)) {
-            $this->obj->discard();
-            return true;
-          }
-
-          $this->obj->set($versionKey, serialize($val), ['ex' => $ttl ?: self::$max_ttl]);
-          $this->obj->set($latestKey, $newVersion);
-          return $this->obj->exec();
+          return $this->obj->set($key, serialize($val), ['ex' => $ttl ?: self::$max_ttl]);
         case 'memcache':
           return $this->obj->set(
             $key, serialize($val), $ttl ?: self::$max_ttl
           );
         case 'files':
           $file = self::_file($key, $this->path);
-          if ($this->fs->createPath(X::dirname($file))) {
-            if ($this->fs->putContents($file, serialize($val))) {
+          if ($this->obj->createPath(X::dirname($file))) {
+            if ($this->obj->putContents($file, serialize($val))) {
               return true;
             }
           }
@@ -506,24 +468,88 @@ class Cache implements CacheInterface
    * @param string $key The name of the item
    * @param mixed  $val  The value to be stored in the cache
    * @param int    $ttl  The length in seconds during which the value will be considered as valid
+   * @param int    $num  The number of retries
    * @return bool Returns true in case of success false otherwise
    */
-  public function set($key, $val, $ttl = null, ?float $exec = null): bool
+  public function set($key, $val, $ttl = null, $num = 0): bool
   {
-    $ttl  = self::ttl($ttl);
-    $hash = self::makeHash($val);
-    $t = time();
-    $value = [
-      '_bbn_cache' => true,
-      'timestamp' => $t,
-      'hash' => $hash,
-      'expire' => $t + ($ttl ?: self::$max_ttl),
-      'ttl' => $ttl,
-      'exec' => $exec,
-      'value' => $val
-    ];
+    if ($this->setLock($key)) {
+      try {
+        $res = $this->commit($key, $val, $ttl);
+      }
+      catch (Exception $e) {
+        $this->log(X::_("Error while setting cache for key %s: %s", $key, $e->getMessage()));
+        return false;
+      }
+      finally {
+        $this->releaseLock($key);
+      }
 
-    return $this->setRaw($key, $value, $ttl);
+      return (bool)$res;
+    }
+    elseif ($num < self::$max_wait) {
+      usleep(10000);
+      return $this->set($key, $val, $ttl, $num + 1);
+    }
+    else {
+      return false;
+    }
+
+  }
+
+  public function info(string $key): ?array
+  {
+    $sep = self::$sep;
+    $infoKey = "{$key}{$sep}__info";
+    return $this->getRaw($infoKey) ?? null;
+  }
+
+  /**
+   * Returns the hash of the given item.
+   *
+   * @param string $key The name of the item
+   * @return null|string
+   */
+  public function hash($key): ?string
+  {
+    if ($r = $this->info($key)) {
+      return $r['hash'] ?? null;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the timestamp of the given item.
+   *
+   * @param string $key The name of the item
+   * @return null|int
+   */
+  public function timestamp($key): ?int
+  {
+    if ($r = $this->info($key)) {
+      return $r['timestamp'] ?? null;
+    }
+
+    return null;
+  }
+
+  public function expire($key): ?int
+  {
+    if ($r = $this->info($key)) {
+      return $r['expire'] ?? null;
+    }
+
+    return null;
+  }
+
+  public function latest($key): ?int
+  {
+    if ($r = $this->info($key)) {
+      return $r['version'] ?? null;
+    }
+
+    return null;
   }
 
 
@@ -534,9 +560,9 @@ class Cache implements CacheInterface
    * @param string $hash A MD5 hash to compare with
    * @return bool Returns true if the hashes are different, false otherwise
    */
-  public function isChanged(string $key, $hash): bool
+  public function isChanged(string $key, $value): bool
   {
-    return $hash !== $this->hash($key);
+    return self::makeHash($value) !== $this->hash($key);
   }
 
 
@@ -547,7 +573,7 @@ class Cache implements CacheInterface
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $key, ?int $ttl = null, bool $force = false, int $attempts = 0): ?array
+  private function getRaw(string $key, ?int $ttl = null, bool $force = false, int $attempts = 0): mixed
   {
     switch (self::$type) {
       case 'apc':
@@ -560,7 +586,7 @@ class Cache implements CacheInterface
             $t = call_user_func('\\apcu_fetch', $key);
           }
           catch (Exception $e) {
-            X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+            $this->log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()));
             return null;
           }
         }
@@ -570,7 +596,7 @@ class Cache implements CacheInterface
           $tmp = $this->obj->get($key);
         }
         catch (Exception $e) {
-          X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+          $this->log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()));
           return null;
         }
         if ($tmp) {
@@ -583,7 +609,7 @@ class Cache implements CacheInterface
           $tmp = $this->obj->get($key);
         }
         catch (Exception $e) {
-          X::log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()), 'warning');
+          $this->log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()));
           return null;
         }
         if ($tmp) {
@@ -593,43 +619,17 @@ class Cache implements CacheInterface
         break;
       case 'files':
         $file = self::_file($key, $this->path);
-        if ($this->fs->isFile($file)
-          && ($t = $this->fs->getContents($file))) {
+        if ($this->obj->isFile($file)
+          && ($t = $this->obj->getContents($file))) {
           $t = unserialize($t);
         }
         break;
     }
 
     if (!empty($t)) {
-      $isBbn = is_array($t) && !empty($t['_bbn_cache']);
-      if ($isBbn && !empty($t['building'])) {
-        if ($attempts < 500) {
-          usleep(10000);
-          X::log("$attempts : Waiting for cache $key to be built...", 'wait');
-          return $this->getRaw($key, $ttl, $force, $attempts + 1);
-        }
-        else {
-          return null;
-        }
-      }
-
-      $ttl = self::ttl($ttl);
-      $time = time();
-      if (!$isBbn) {
-        return $t;
-      }
-
-      $diff = $time - $t['timestamp'];
-      if ($t['expire'] < $time) {
-        $this->delete($key);
-      }
-      elseif (($ttl ?: self::$max_ttl) < $diff) {
-        $this->delete($key);
-      }
-      else {
-        return $t;
-      }
+      return $t;
     }
+
     return null;
   }
 
@@ -641,13 +641,19 @@ class Cache implements CacheInterface
    * @param int    $ttl  The cache length
    * @return mixed
    */
-  public function get(string $key, mixed $ttl = null): mixed
+  public function get(string $key, mixed $ttl = null, $nullValue = null): mixed
   {
-    if ($r = $this->getRaw($key, $ttl)) {
-      return $r['value'];
+    $info = $this->info($key);
+    if ($info) {
+      if ($info['expire'] > time()) {
+        return $this->getRaw("{$key}".self::$sep."{$info['version']}", $ttl) ?? $nullValue;
+      }
+      else {
+        $this->delete($key);
+      }
     }
 
-    return false;
+    return $nullValue;
   }
 
 
@@ -678,67 +684,39 @@ class Cache implements CacheInterface
    * @return mixed
    * @throws Exception
    */
-  public function getSet(callable $fn, string $key, int $ttl = 0)
+  public function getSet(callable $fn, string $key, int $ttl = 0, int $attempts = 0): mixed
   {
-    $tmp  = $this->getRaw($key, $ttl);
-    $data = null;
-    // Can't get the data
-    if (!$tmp) {
-      $ttl = self::ttl($ttl);
-      if ($this->setRaw($key, [
-        '_bbn_cache' => true,
-        'value' => null,
-        'hash' => null,
-        'building' => true,
-        'ttl' => $ttl,
-        'expire' => time() + ($ttl ?: self::$max_ttl)
-      ], $ttl)) {
-        try {
-          $data = $fn();
-          $this->set($key, $data, $ttl);
-        }
-        catch (Exception $e) {
-          X::log(X::_("Error while building cache for key %s: %s", $key, $e->getMessage()), 'warning');
-          $this->delete($key);
-          throw new Exception(X::_("Error while building cache for key $key: ").$e->getMessage(), $e->getCode(), $e);
-        }
-      }
-      else {
-        X::log(X::_("Impossible to build cache for key %s", $key), 'warning');
-      }
-    }
-    else {
-      $data = $tmp['value'];
+    if ($data = $this->get($key, $ttl)) {
+      return $data;
     }
 
-    return $data;
+    if ($this->setLock($key)) {
+      try {
+        $data = $fn();
+        $version = $this->commit($key, $data, $ttl);
+      }
+      catch (Exception $e) {
+        $this->log(X::_("Error while building cache for key %s: %s", $key, $e->getMessage()));
+        return null;
+      }
+      finally {
+        $this->releaseLock($key);
+      }
+      return $data;
+    }
+    elseif ($attempts < self::$max_wait) {
+      usleep(10000);
+      return $this->getSet($fn, $key, $ttl, $attempts + 1);
+    }
+    else {
+      $this->log(X::_("Max attempts reached while trying to get cache for key %s", $key));
+      return null;
+    }
   }
 
 
   /**
    * @return array|null
-   */
-  public function info(): ?array
-  {
-    if (self::$type) {
-      switch (self::$type){
-        case 'apc':
-          return call_user_func('\\apcu_cache_info');
-        case 'redis':
-          return $this->obj->getStats('slabs');
-        case 'memcache':
-          return $this->obj->getStats('slabs');
-        case 'files':
-          return $this->fs->getFiles($this->path);
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @return array|bool|false
    */
   public function stat()
   {
@@ -749,9 +727,11 @@ class Cache implements CacheInterface
         case 'memcache':
           return $this->obj->getStats();
         case 'files':
-          return $this->fs->getFiles($this->path);
+          return $this->obj->getFiles($this->path);
       }
     }
+
+    return null;
   }
 
 
@@ -810,14 +790,14 @@ class Cache implements CacheInterface
             array_map(
               function ($a) use ($dir) {
                 return ( $dir ? "$dir/" : '' ).X::basename($a, '.bbn.cache');
-              }, $this->fs->getFiles($this->path.($dir ? "/$dir" : ''))
+              }, $this->obj->getFiles($this->path.($dir ? "/$dir" : ''))
             ),
             function ($a) use ($cache) {
               // Only gives valid cache
               return $cache->has($a);
             }
           );
-          $dirs  = $this->fs->getDirs($this->path.($dir ? "/$dir" : ''));
+          $dirs  = $this->obj->getDirs($this->path.($dir ? "/$dir" : ''));
           if (count($dirs)) {
             foreach ($dirs as $d){
               $res = $this->items($dir ? $dir.self::$sep.X::basename($d) : X::basename($d));
@@ -1023,8 +1003,8 @@ class Cache implements CacheInterface
 
           return $list;
         case 'files':
-          $this->fs->cd($this->path);
-          $content = $this->fs->getFiles($path ? "/$path" : '', true);
+          $this->obj->cd($this->path);
+          $content = $this->obj->getFiles($path ? "/$path" : '', true);
           $all = [];
           if (!empty($content)) {
             foreach ($content as $nodePath) {
@@ -1035,12 +1015,12 @@ class Cache implements CacheInterface
                 //'path' => [],
                 'nodePath' => $nodePath,
                 'items'=> [],
-                'num' => $this->fs->isDir($nodePath) ? count($this->fs->getFiles($nodePath, true)) : 0,
-                'folder' => $this->fs->isDir($nodePath)
+                'num' => $this->obj->isDir($nodePath) ? count($this->obj->getFiles($nodePath, true)) : 0,
+                'folder' => $this->obj->isDir($nodePath)
               ];
         
         
-              if ($this->fs->isDir($nodePath)) {
+              if ($this->obj->isDir($nodePath)) {
                 $paths = $element !== $nodePath ? X::split($nodePath, '/') : [];
                 $ele['path'] = count($paths) ? array_splice($paths, 0, count($paths) - 1) : $paths;
               }
@@ -1049,13 +1029,131 @@ class Cache implements CacheInterface
             }
           }
 
-          $this->fs->back();
-          return $this->fs->getFiles($this->path.($path ? "/$path" : ''));
+          $this->obj->back();
+          return $this->obj->getFiles($this->path.($path ? "/$path" : ''));
       }
     }
 
     return [];
   }
+
+  protected function commit($key, $val, $ttl): ?string
+  {
+    $this->addKey($key);
+    $ttl  = self::ttl($ttl);
+    $infoKey = "{$key}".self::$sep."__info";
+    $current = $this->getRaw($infoKey);
+    $hash = self::makeHash($val);
+    $next = time();
+    $version = 1;
+    $write = true;
+    if ($current) {
+      if ($current['hash'] === $hash) {
+        $next = $current['version'];
+        $write = false;
+      }
+      else {
+        [$time, $version] = X::split($current['version'], '|');
+        if ($time == $next) {
+          $version++;
+        }
+  
+        $next = "{$next}|{$version}";
+      }
+    }
+    else {
+      $next = "{$next}|1";
+    }
+
+    $t = microtime(true);
+    $info = [
+      'hash' => $hash,
+      'timestamp' => $t,
+      'expire' => $t + ($ttl ?: self::$max_ttl),
+      'ttl' => self::ttl($ttl),
+      'version' => $next
+    ];
+    $sep = self::$sep;
+    $this->setRaw($infoKey, $info, 0);
+    $newKey = "{$key}{$sep}{$next}";
+    if (!$write || $this->setRaw($newKey, $val, $ttl)) {
+      return $next;
+    }
+
+    return null;
+  }
+
+  public function hasLock($key): bool
+  {
+    $lockKey = "lock:{$key}";
+    return $this->hasRaw($lockKey);
+  }
+
+  protected function setLock($key): bool
+  {
+    $lockKey = "lock:{$key}";
+    if ($this->has($lockKey)) {
+      return false;
+    }
+
+    return (bool)$this->setRaw($lockKey, '1', 0);
+  }
+
+  protected function releaseLock($key): bool
+  {
+    $lockKey = "lock:{$key}";
+    return (bool)$this->deleteRaw($lockKey);
+  }
+
+  protected function getKeys(string $path = ''): array
+  {
+    $sep = $this->getSeparator();
+    return $this->getRaw($path.$sep.'__keys') ?: [];
+  }
+
+  protected function addKey(string $key): void
+  {
+    $sep = $this->getSeparator();
+    $bits = X::split($key, $sep);
+    $key = array_pop($bits);
+    while (count($bits)) {
+      $cur = X::join($bits, $sep).$sep;
+      $indexes = $this->getRaw($cur.'__keys') ?: [];
+      if (!in_array($key, $indexes)) {
+        $indexes[] = $key;
+        $this->setRaw($cur.'__keys', $indexes, 0);
+      }
+      else {
+        break;
+      }
+
+      $key = array_pop($bits);
+    }
+  }
+
+  protected function removeKey(string $key): void
+  {
+    $sep = $this->getSeparator();
+    $bits = X::split($key, $sep);
+    $key = array_pop($bits);
+    while (count($bits)) {
+      $cur = X::join($bits, $sep).$sep;
+      $indexes = $this->getRaw($cur.'__keys') ?: [];
+      if (in_array($key, $indexes)) {
+        array_splice($indexes, array_search($key, $indexes), 1);
+        if (!count($indexes)) {
+          $this->deleteRaw($cur.'__keys');
+        }
+        else {
+          $this->setRaw($cur.'__keys', $indexes, 0);
+          break;
+        }
+      }
+
+      $key = array_pop($bits);
+    }
+  }
+
 
   private function getAllKeys() {
     $sock = fsockopen($this->host, $this->port, $errno, $errstr);

@@ -13,6 +13,8 @@ use bbn\Cache;
 use bbn\Db;
 use bbn\X;
 use bbn\Util\InternalEvent;
+use Mpdf\Tag\A;
+
 use function array_key_exists;
 use function count;
 use function is_array;
@@ -186,21 +188,9 @@ trait DbCache
     return $res ?: null;
   }
 
-  /**
-   * Loads a row from DB and stores it into cache.
-   *
-   * If $fields is provided, returns only the requested fields (with optional aliases).
-   *
-   * @param string $id The row's id.
-   * @param array  $fields List of fields to return (same format as dbTraitCacheGet()).
-   * @return array|null The row fetched from DB (possibly projected), or null if not found.
-   */
-  protected function dbTraitCacheSet(string $id, array $fields = []): ?array
+  protected function dbTraitCacheRetrieveRecord(string $id): ?array
   {
     static::dbTraitGlobalCacheInit();
-    if (!isset($this->class_table)) {
-      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", self::class));
-    }
     $cfg = $this->getClassCfg();
     $f = array_values($cfg["arch"][$this->class_table_index]);
     $tableCfg = self::dbConfigGetTableClasses($this->db);
@@ -212,7 +202,6 @@ trait DbCache
         }
       }
     }
-
     if (
       $data = $this->dbTraitSingleSelection(
         ["id" => $id],
@@ -229,6 +218,29 @@ trait DbCache
         );
       }
 
+      return $data;
+    }
+
+    return null;
+  }
+
+  /**
+   * Loads a row from DB and stores it into cache.
+   *
+   * If $fields is provided, returns only the requested fields (with optional aliases).
+   *
+   * @param string $id The row's id.
+   * @param array  $fields List of fields to return (same format as dbTraitCacheGet()).
+   * @return array|null The row fetched from DB (possibly projected), or null if not found.
+   */
+  protected function dbTraitCacheSet(string $id, array $fields = []): ?array
+  {
+    static::dbTraitGlobalCacheInit();
+    if (!isset($this->class_table)) {
+      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", self::class));
+    }
+
+    if ($data = $this->dbTraitCacheRetrieveRecord($id)) {
       self::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
       return $this->dbTraitCacheGet($id, $fields);
     }
@@ -331,30 +343,42 @@ trait DbCache
     self::$dbTraitCache->delete($this->dbTraitRowCacheKey($id));
   }
 
-  public function dbTraitCacheGetHash(string $id): ?string
-  {
-    $res = $this->dbTraitCacheGetSetFull($id);
-    return $res["hash"] ?? null;
-  }
 
-  public function dbTraitCacheGetSetFull(string $id): ?array
+  public function dbTraitCacheHash(string $id): ?string
   {
     static::dbTraitGlobalCacheInit();
-    $res = null;
-    $cn = $this->dbTraitRowCacheKey($id);
-    if (!($res = self::$dbTraitCache->getFull($cn))) {
-      $this->dbTraitCacheSet($id);
-      $res = self::$dbTraitCache->getFull($cn);
+    if ($r = $this->dbTraitCacheInfo($id)) {
+      return $r['hash'] ?? null;
     }
 
-    return $res;
+    return null;
   }
 
-  public function dbTraitCacheGetFull(string $id): ?array
+  public function dbTraitCacheInfo(string $id): ?array
   {
     static::dbTraitGlobalCacheInit();
     $cn = $this->dbTraitRowCacheKey($id);
-    return self::$dbTraitCache->getFull($cn);
+    return self::$dbTraitCache->info($cn);
+  }
+
+  public function dbTraitCacheGetSet(string $id, array $fields = [], bool $autoExclude = false): ?array
+  {
+    static::dbTraitGlobalCacheInit();
+    $cn = $this->dbTraitRowCacheKey($id);
+    $cache = self::$dbTraitCache;
+    $self = $this;
+    return $cache->getSet(
+      function () use ($cn, $fields, $autoExclude, $self, $id) {
+        if (($data = $self->dbTraitCacheRetrieveRecord($id))
+          && self::$dbTraitCache->set($cn, $data)
+        ) {
+          return $self->dbTraitCacheGet($id, $fields);
+        }
+
+        return null;
+      },
+      $cn
+    );
   }
 
   public static function dbTraitCacheInitTrigger(Db $db): void {

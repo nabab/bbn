@@ -51,53 +51,6 @@ trait Cache
     return $this->_cache_prefix.$path.(empty($method) ? '' : $sep.(string)$method).(empty($locale) ? '' : "-$locale");
   }
 
-  protected function cacheGetKeys(string $path = ''): array
-  {
-    $sep = CacheCls::getSeparator();
-    return $this->cache_engine->get($path.$sep.'__keys') ?: [];
-  }
-
-  protected function cacheSetKey(string $key): void
-  {
-    $sep = CacheCls::getSeparator();
-    $bits = X::split($key, $sep);
-    $key = array_pop($bits);
-    $cur = '';
-    foreach ($bits as $i => $bit) {
-      $cur .= $bit.$sep;
-      $indexes = $this->cache_engine->get($cur.'__keys') ?: [];
-      if (!in_array($bits[$i+1] ?? $key, $indexes)) {
-        $indexes[] = $bits[$i+1] ?? $key;
-        $this->cache_engine->set($cur.'__keys', $indexes);
-      }
-    }
-  }
-
-  protected function cacheUnsetKey(string $key): void
-  {
-    $sep = CacheCls::getSeparator();
-    $bits = X::split($key, $sep);
-    $cur = '';
-    $key = array_pop($bits);
-    while (count($bits)) {
-      $cur = X::join($bits, $sep).$sep;
-      $indexes = $this->cache_engine->get($cur.'__keys') ?: [];
-      if (in_array($key, $indexes)) {
-        array_splice($indexes, array_search($key, $indexes), 1);
-        if (!count($indexes)) {
-          $this->cache_engine->delete($cur.'__keys');
-        }
-        else {
-          $this->cache_engine->set($cur.'__keys', $indexes);
-          break;
-        }
-      }
-
-      $key = array_pop($bits);
-    }
-  }
-
-
   /**
    * Deletes all the cache related to the current class
    *
@@ -121,21 +74,15 @@ trait Cache
   protected function cacheDelete(string $uid, string $method = ''): static
   {
     $this->cacheInit();
-    $root = $this->_cache_name($uid);
-    $sep = CacheCls::getSeparator();
     if (!$method) {
-      if ($keys = $this->cacheGetKeys($root)) {
-        foreach ($keys as $k) {
-          $this->cache_engine->delete($root.$sep.$k);
-          $this->cacheUnsetKey($root.$sep.$k);
-        }
-      }
+      $root = $this->_cache_name($uid);
+      $this->cache_engine->deleteAll($root);
     }
     else {
       $cn = $this->_cache_name($uid, $method);
-      $this->cacheUnsetKey($cn);
       $this->cache_engine->delete($cn);
     }
+
     return $this;
   }
 
@@ -151,20 +98,15 @@ trait Cache
   protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): static
   {
     $this->cacheInit();
-    $root = $this->_cache_name($uid);
-    $sep = CacheCls::getSeparator();
     if (!$method) {
-      if ($keys = $this->cacheGetKeys($root)) {
-        foreach ($keys as $k) {
-          $this->cache_engine->delete($root.$sep.$k);
-          $this->cacheUnsetKey($root.$sep.$k);
-        }
-      }
+      $root = $this->_cache_name($uid, '', $locale);
+      $this->cache_engine->deleteAll($root);
     }
     else {
       $cn = $this->_cache_name($uid, $method, $locale);
       $this->cache_engine->delete($cn);
     }
+
     return $this;
   }
 
@@ -184,6 +126,34 @@ trait Cache
 
 
   /**
+   * Gets the hash from a cache key
+   *
+   * @param string $uid
+   * @param string $method
+   * @return mixed
+   */
+  protected function cacheInfo(string $uid, string $method = ''): mixed
+  {
+    $this->cacheInit();
+    return $this->cache_engine->info($this->_cache_name($uid, $method));
+  }
+
+
+  /**
+   * Gets the hash from a cache key
+   *
+   * @param string $uid
+   * @param string $method
+   * @return mixed
+   */
+  protected function cacheVersion(string $uid, string $method = ''): mixed
+  {
+    $this->cacheInit();
+    return $this->cache_engine->latest($this->_cache_name($uid, $method));
+  }
+
+
+  /**
    * Gets the cached data
    *
    * @param string $uid
@@ -195,33 +165,6 @@ trait Cache
     $this->cacheInit();
     return $this->cache_engine->get($this->_cache_name($uid, $method));
   }
-
-  /**
-   * Gets the cached data
-   *
-   * @param string $uid
-   * @param string $method
-   * @return mixed
-   */
-  protected function cacheGetRaw(string $uid, string $method = ''): mixed
-  {
-    $this->cacheInit();
-    return $this->cache_engine->getFull($this->_cache_name($uid, $method));
-  }
-
-  /**
-   * Gets the cached data
-   *
-   * @param string $uid
-   * @param string $method
-   * @return ?array
-   */
-  protected function cacheGetFull(string $uid, string $method = ''): ?array
-  {
-    $this->cacheInit();
-    return $this->cache_engine->getFull($this->_cache_name($uid, $method));
-  }
-
 
   /**
    * Gets the cached data for a specific locale
@@ -251,7 +194,6 @@ trait Cache
   {
     $this->cacheInit();
     $cn = $this->_cache_name($uid, $method);
-    $this->cacheSetKey($cn);
     $this->cache_engine->set($cn, $data, $ttl);
     return $this;
   }
@@ -290,7 +232,6 @@ trait Cache
   {
     $this->cacheInit();
     $cn = $this->_cache_name($uid, $method);
-    $this->cacheSetKey($cn);
     return $this->cache_engine->getSet($fn, $cn, $ttl);
   }
 
@@ -309,7 +250,6 @@ trait Cache
   {
     $this->cacheInit();
     $cn = $this->_cache_name($uid, $method, $locale);
-    $this->cacheSetKey($cn);
     return $this->cache_engine->getSet($fn, $cn, $ttl);
   }
 

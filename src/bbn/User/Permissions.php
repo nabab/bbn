@@ -108,7 +108,15 @@ class Permissions extends Basic
     $this->db = Db::getInstance();
   }
 
+  /**
+   * Destructor – clears static state.
+   */
+  public function destruct(): void
+  {
+    self::retrieverRemove($this);
+  }
 
+  
   public function isAuthorizedRoute($url): bool
   {
     if (in_array($url, $this->allowedRoutes, true)) {

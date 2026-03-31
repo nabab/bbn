@@ -196,6 +196,14 @@ class Router
 
 
   /**
+   * Destructor – clears static state.
+   */
+  public function destruct(): void
+  {
+    self::retrieverRemove($this);
+  }
+
+  /**
    * Resets the full path in the mvc/mode of an external app (plugin).
    *
    * @return self

@@ -526,12 +526,12 @@ class Entity
             $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
             true => $this->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
           };
-          if (method_exists($obj, 'dbTraitCacheGetSetFull')) {
+          if (method_exists($obj, 'dbTraitCacheGetSet')) {
             foreach ($ids as $i => $id) {
-              if ($tmp = $obj->dbTraitCacheGetSetFull($id)) {
+              if ($tmp = $obj->dbTraitCacheGetSet($id)) {
                 $final[$table][$id] = [
-                  'state' => $tmp ? $tmp['hash'] : null,
-                  'data' => $tmp ? $tmp['value'] : null
+                  'state' => $obj->dbTraitCacheHash($id),
+                  'data' => $tmp
                 ];
               }
               else {

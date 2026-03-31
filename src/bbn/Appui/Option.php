@@ -119,6 +119,14 @@ class Option extends DbCls
   }
 
   /**
+   * Destructor – clears static state.
+   */
+  public function destruct(): void
+  {
+    self::retrieverRemove($this);
+  }
+
+  /**
    * Checks if the class is initialized and the database connection is valid.
    *
    * @return bool True if the class is initialized and the database connection is valid, false otherwise
