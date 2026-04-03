@@ -7,7 +7,8 @@ use Exception;
 use bbn\Mail;
 use bbn\X;
 use bbn\Str;
-use bbn\Mvc\Controller;
+use bbn\Appui\Mailbox\Idle;
+use bbn\Appui\Mailbox\RawClient;
 use HTMLPurifier_Config;
 use HTMLPurifier_URIScheme;
 use HTMLPurifier;
@@ -133,6 +134,11 @@ class Mailbox extends Basic
    */
   protected $folders = [];
 
+  /**
+   * @var array The folders that are currently in IDLE
+   */
+  protected $foldersIdle = [];
+
   protected $mailer;
 
   /**
@@ -146,54 +152,9 @@ class Mailbox extends Basic
   protected $validateCertificate = false;
 
   /**
-   * IMAP IDLE related properties
+   * @var RawClient|null The raw IMAP client
    */
-  protected $idleStream;
-
-  /**
-   * @var float Last time an IDLE command was sent
-   */
-  protected $idleLastTime;
-
-  /**
-   * @var string The last IDLE command sent
-   */
-  protected $idleLastCommand;
-
-  /**
-   * @var string The IDLE tag
-   */
-  protected $idleTag;
-
-  /**
-   * @var string The IDLE tag prefix
-   */
-  protected $idleTagPrefix = 'BBN_';
-
-  /**
-   * @var bool Whether the IDLE is running
-   */
-  protected $idleRunning = false;
-
-  /**
-   * @var bbn\Mvc\Controller|null The controller instance
-   */
-  protected $idleCtrl = null;
-
-  /**
-   * @var int The timeout for the controller to stop the IDLE
-   */
-  protected $idleCtrlTimeout = 3;
-
-  /**
-   * @var int The time of the last CTRL ping
-   */
-  protected $idleCtrlLastPing = 0;
-
-  /**
-   * @var int The timeout for the IDLE command
-   */
-  protected $idleTimeout = 300;
+  protected RawClient|null $rawClient = null;
 
 
   public static function setDefaultPingInterval(int $val): void
@@ -319,6 +280,12 @@ class Mailbox extends Basic
     }
 
     return $this->mailer;
+  }
+
+
+  public function getEncription(): bool
+  {
+    return $this->encryption;
   }
 
 
@@ -727,73 +694,7 @@ class Mailbox extends Basic
     return false;
   }
 
-  private function transformString($string) {
-    // Use the md5 hash function to generate a 32-character hexadecimal string
-    $hash = md5($string);
-
-    // Initialize an empty result variable
-    $result = '';
-
-    // Loop through the characters of the hash string
-    for ($i = 0; $i < strlen($hash); $i++) {
-      // Get the current character
-      $char = $hash[$i];
-
-      // Append the current character to the result string
-      $result .= $char;
-
-      // If the current position is a multiple of 4, append a dash
-      if (($i + 1) % 4 == 0 && $i != 31) {
-        $result .= '-';
-      }
-    }
-
-    // Return the final result
-    return $result;
-  }
-
-
-  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
-  private function decode_encoded_words($string) {
-
-    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
-    if (!empty($matches)) {
-      for ($i = 0; $i < count($matches[0]); $i++) {
-        $encoding = $matches[2][$i];
-        $encoded_text = $matches[3][$i];
-        if (strtolower($encoding) == "q") {
-          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
-        } else {
-          $decoded_text = base64_decode($encoded_text);
-        }
-        $string = Str::replace($matches[0][$i], $decoded_text, $string);
-      }
-    }
-
-    return $string;
-  }
-
-  private function decode_encoded_words_array(array $array) {
-    for($i = 0; $i < count($array); $i++) {
-      $array[$i] = $this->decode_encoded_words($array[$i]);
-    }
-    return $array;
-  }
-
-  private function decode_encoded_words_deep($obj) {
-    if (is_string($obj)) {
-      $obj = $this->decode_encoded_words($obj);
-    }
-    elseif (is_object($obj)) {
-      foreach ($obj as $idx => $val) {
-        $obj->$idx = $this->decode_encoded_words_deep($val);
-      }
-    }
-
-    return $obj;
-  }
-
-  public function getEmailsList(array $folder, int $start, int $end, bool $generator = false)
+  public function getEmailsList(array $folder, int $start, int $end)
   {
     if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
@@ -823,21 +724,17 @@ class Mailbox extends Basic
             }
           }
 
-          // to fetch the message priority
-          $msg_header = $this->getMsgHeader($start);
-          preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
-          $priority = $matches[1] ?? 3;
-
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
             $start--;
             continue;
           }
 
+          $tmp['priority'] = $this->getMsgPriority($start) ?: 3;
+          $tmp['flags'] = $this->getMsgFlags($start);
           $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
           $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
           $tmp['uid'] = $this->getMsgUid($start);
-          $tmp['priority'] = $priority;
           unset(
             $tmp['Date'],
             $tmp['MailDate'],
@@ -905,9 +802,7 @@ class Mailbox extends Basic
 
           $res[] = $tmp;
           $start--;
-          if (!empty($generator)) {
-            yield $tmp;
-          }
+          yield $tmp;
         } catch (Exception $e) {
           X::log([
             'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
@@ -1221,21 +1116,20 @@ class Mailbox extends Basic
    * @param int|bool $uid    Set true f the msgnum is a UID
    * @return bool|string
    */
-  public function getMsgHeader($msgnum, $uid = false)
+  public function getMsgHeader(int $msgnum, bool $uid = false): ?string
   {
     if ($this->_is_connected()) {
-      try {
-        if ($uid) {
-          $res = imap_fetchheader($this->stream, $msgnum, FT_UID);
-        }
+      return imap_fetchheader($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
+    }
 
-        $res = imap_fetchheader($this->stream, $msgnum);
-      }
-      catch (Exception $e) {
-        $this->log($e->getMessage().' '.(string)$msgnum);
-      }
+    return null;
+  }
 
-      return $res ?: null;
+
+  public function getMsgOverview(int $msgnum, bool $uid = false): ?array
+  {
+    if ($this->_is_connected()) {
+      return imap_fetch_overview($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
     }
 
     return null;
@@ -1301,13 +1195,44 @@ class Mailbox extends Basic
   {
     if ($this->_is_connected()) {
       if (empty($part)) {
-        return imap_body($this->stream, $msgno);
+        return imap_body($this->stream, $msgno, FT_PEEK);
       }
 
-      return imap_fetchbody($this->stream, $msgno, $part);
+      return imap_fetchbody($this->stream, $msgno, $part, FT_PEEK);
     }
 
     return false;
+  }
+
+
+  /**
+   * Gets the flags of the message.
+   * @param int $msgno No of the message
+   * @return array|null
+   */
+  public function getMsgFlags(int $msgno): ?array
+  {
+    $flags = null;
+    if ($overview = $this->getMsgOverview($msgno)) {
+      $flags = [];
+      $toCheck = ['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'];
+      foreach ($toCheck as $flag) {
+        if (!empty($overview[0]->$flag)) {
+          $flags[] = '\\' . ucfirst($flag);
+        }
+      }
+
+      if (!empty($overview[0]->flags)) {
+        $keywords = preg_split('/\s+/', trim($overview[0]->flags)) ?: [];
+        foreach ($keywords as $kw) {
+          if (!in_array($kw, $toCheck)) {
+            $flags[] = $kw;
+          }
+        }
+      }
+    }
+
+    return $flags ?: null;
   }
 
 
@@ -1327,6 +1252,36 @@ class Mailbox extends Basic
     }
 
     return false;
+  }
+
+
+  public function getMsgPriority(int $msgno): ?int
+  {
+    $priority = null;
+    if ($msgHeader = $this->getMsgHeader($msgno)) {
+      // X-Priority
+      if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
+        $priority = (int)$m[1];
+      }
+
+      // Importance
+      if (is_null($priority) &&
+        preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
+      ) {
+        $map = ['high' => 1, 'normal' => 3, 'low' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+
+      // Priority
+      if (is_null($priority)
+        && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
+      ) {
+        $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+    }
+
+    return $priority;
   }
 
 
@@ -1430,262 +1385,61 @@ class Mailbox extends Basic
   }
 
 
-  public function idle(
-    callable $callback,
-    ?int $timeout = null,
-    ?Controller $ctrl = null
-  ): bool
+  /**
+   * Starts an IDLE connection to the mailbox for a specific folder.
+   * @param string $folderUid The UID of the folder to monitor
+   * @param callable $callback The callback function to execute when new messages arrive
+   * @param int|null $timeout The timeout in seconds for the IDLE connection
+   * @return void
+   */
+  public function idle(string $folderUid, callable $callback, ?int $timeout = null)
   {
-    set_time_limit(0);
-    ignore_user_abort(true);
-    $this->idleRunning = false;
-    $this->idleTag = 0;
-    $context = [];
-    if ($this->encryption) {
-      $context['ssl'] = [
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-      ];
-    }
-
-    if (!empty($timeout)) {
-      $this->idleTimeout = $timeout;
-    }
-
-    if (!empty($ctrl)) {
-      $this->idleCtrl = $ctrl;
-    }
-
-    // Establish the connection
-    $this->idleStream = stream_socket_client(
-      ($this->encryption ? "ssl" : "tls") . "://{$this->host}:{$this->port}",
-      $errno,
-      $errstr,
-      $this->idleTimeout,
-      STREAM_CLIENT_CONNECT,
-      stream_context_create($context)
+    $this->stopIdle($folderUid);
+    $this->foldersIdle[$folderUid] = new Idle(
+      $this->getHost(),
+      $this->getPort(),
+      $this->encryption,
+      $this->login,
+      $this->pass,
+      $folderUid,
+      $callback,
+      $timeout ?: 0
     );
-    if (!$this->idleStream) {
-      throw new Exception(X::_("Failed to connect: %s (%s)", $errstr, $errno));
-    }
-
-    try {
-      if (!empty($this->idleCtrl)) {
-        $this->pingIdleCtrl();
-      }
-
-      $this->sendCommand("LOGIN {$this->login} {$this->pass}");
-      $this->sendCommand("SELECT {$this->folder}");
-      $this->sendCommand("CAPABILITY", false);
-      $capabilityResponse = $this->readCommandResponseLine();
-      $canIdle = !empty($capabilityResponse)
-        && str_contains($capabilityResponse, "CAPABILITY")
-        && in_array("IDLE", explode(" ", $capabilityResponse));
-      if (empty($canIdle)) {
-        $this->stopIdle();
-        throw new Exception(X::_("IDLE not supported by the server"));
-      }
-
-      $this->sendCommand("IDLE", false);
-      $this->idleRunning = true;
-      $callback('MIRKO IDLE STARTED');
-      while ($this->idleRunning) {
-        try {
-          $response = $this->readCommandResponseLine();
-        }
-        catch (Exception $e) {
-          $errCode = $e->getCode();
-          if (($errCode === 1) && $this->isIdleConnected()) {
-            continue;
-          }
-
-          if (($errCode === 4)
-            || (!str_contains($e->getMessage(), "connection closed")
-              && ($errCode !== 3))
-          ) {
-            throw $e;
-          }
-        }
-
-        if (!empty($response)
-          && (($pos = Str::pos($response, "EXISTS")) !== false)
-        ) {
-          $msgn = (int)Str::sub($response, 2, $pos - 2);
-          $this->idleLastTime = time();
-          $this->selectFolder($this->folder);
-          $callback($this->getMsg($msgn));
-        }
-
-        if (!empty($this->idleCtrl)
-          && (($this->idleCtrlLastPing + $this->idleCtrlTimeout) <= time())
-        ) {
-          $this->pingIdleCtrl();
-        }
-
-        // Check if the stream is still alive or should be considered stale
-        if (!$this->_is_connected()
-          || (($this->idleLastTime + $this->idleTimeout) < time())
-        ) {
-          // Stop current IDLE connection
-          $this->stopIdle();
-          // Close the main stream
-          if (!empty($this->stream)) {
-            imap_close($this->stream);
-          }
-
-          // Establish a new connection
-          $this->connect();
-          // Run IDLE again
-          return $this->idle($callback, $this->idleTimeout, $ctrl);
-        }
-      }
-    }
-    catch (Exception $e) {
-      $this->stopIdle();
-      throw $e;
-    }
-
-    return true;
+    $this->foldersIdle[$folderUid]->idle();
   }
 
 
-  public function stopIdle()
+  /**
+   * Stops the IDLE connection for a specific folder.
+   * @param string $folderUid The UID of the folder to stop monitoring
+   * @return bool True if the IDLE connection was stopped, false if it was not running
+   */
+  public function stopIdle(string $folderUid): bool
   {
-    $this->idleRunning = false;
-    $this->idleCtrl = null;
-    if (!empty($this->idleStream)) {
-      fwrite($this->idleStream, "DONE\r\n");
-      fclose($this->idleStream);
-      $this->idleStream = null;
-    }
-  }
-
-
-  public function getIdleStream()
-  {
-    return $this->idleStream;
-  }
-
-
-  protected function getCurrentIdleTagPrefix(): string
-  {
-    return $this->idleTagPrefix . $this->idleTag . ' ';
-  }
-
-
-  protected function sendCommand(string $command, bool $response = true, bool $responseAsArray = false): string|array
-  {
-    $this->idleTag++;
-    $this->idleLastCommand = $this->getCurrentIdleTagPrefix() . $command;
-    fwrite($this->idleStream, $this->idleLastCommand . "\r\n");
-    $this->idleLastTime = time();
-    return empty($response) ? (empty($responseAsArray) ? '' : []) : $this->readCommandResponse($responseAsArray);
-  }
-
-
-  protected function readCommandResponse(bool $asArray = false): string|array
-  {
-    $response = [];
-    try {
-      while ($line = trim($this->readCommandResponseLine())) {
-        $response[] = $line;
-        $prefix = $this->getCurrentIdleTagPrefix();
-        if (str_starts_with($line, $prefix)) {
-          if (str_starts_with($line, $prefix . 'BAD ')
-            || str_starts_with($line, $prefix . 'NO ')
-          ) {
-            throw new Exception(X::_('Error response (command: %s): %s', $this->idleLastCommand, $line), 2);
-          }
-
-          if (empty($asArray)) {
-            return $line;
-          }
-        }
-      }
-    }
-    catch(Exception $e) {
-      throw $e;
-    }
-
-    $this->idleLastTime = time();
-    return !empty($asArray) ? $response : (!empty($response) ? $response[count($response) - 1] : '');
-  }
-
-
-  protected function readCommandResponseLine(): string
-  {
-    stream_set_blocking($this->idleStream, false);
-    $line = '';
-    while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL])) {
-      if (!empty($this->idleCtrl)
-        && (($this->idleCtrlLastPing + $this->idleCtrlTimeout) <= time())
-      ) {
-        $this->pingIdleCtrl();
-      }
-
-      if (!$this->_is_connected()
-        || (($this->idleLastTime + $this->idleTimeout) < time())
-      ) {
-        throw new Exception(X::_('IDLE Connection lost'), 3);
-      }
-
-      //$line .= fgets($this->idleStream, 1024);
-      $read = [$this->idleStream];
-      $write = $except = [];
-      $n = @stream_select($read, $write, $except, $this->idleCtrlTimeout ?: 10);
-
-      if (($n === 0) || ($n === false)) {
-        continue;
-      }
-
-      $chunk = fgets($this->idleStream, 1024);
-      if ($chunk === false) {
-        continue;
-      }
-
-      $line .= $chunk;
-    }
-
-    $this->idleLastTime = time();
-    if ($this->idleRunning
-      && ($line === '')
-    ) {
-      throw new Exception(X::_('Empty response (command: %s)', $this->idleLastCommand), 1);
-    }
-
-    return $line;
-  }
-
-
-  protected function pingIdleCtrl(): bool
-  {
-    $this->idleCtrlLastPing = time();
-    $ping = $this->idleCtrl->pingStream();
-    if (empty($ping)) {
-      throw new Exception(_("User connection lost"), 4);
-    }
-
-    return true;
-  }
-
-
-  protected function isIdleConnected(): bool
-  {
-    if (!empty($this->idleStream)) {
-      try {
-        $this->sendCommand("NOOP");
-        return true;
-      }
-      catch (Exception $e) {
-        return false;
-      }
+    if (!empty($this->foldersIdle[$folderUid])) {
+      return $this->foldersIdle[$folderUid]->stopIdle();
     }
 
     return false;
   }
 
 
-  protected function connect(): bool
+  /**
+   * Checks if the IDLE connection is running for a specific folder.
+   * @param string $folderUid The UID of the folder to check
+   * @return bool True if the IDLE connection is running, false otherwise
+   */
+  public function isIdleRunning(string $folderUid): bool
+  {
+    if (!empty($this->foldersIdle[$folderUid])) {
+      return $this->foldersIdle[$folderUid]->isRunning();
+    }
+
+    return false;
+  }
+
+
+  public function connect(): bool
   {
     if (isset($this->mbParam)) {
       $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
@@ -1702,140 +1456,6 @@ class Mailbox extends Basic
         $this->status = imap_last_error();
         return false;
       }
-    }
-
-    return false;
-  }
-
-
-  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
-    if (!empty($part->ifdisposition)
-      && !empty($part->disposition)
-      && !empty($part->ifparameters)
-      && ((strtolower($part->disposition) === 'attachment')
-        || (strtolower($part->disposition) === 'inline'))
-      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-      && (empty($filename) || ($filename === $nameParam->value))
-    ) {
-      if ($data = $this->getMsgBody($msgNum, $partNum)) {
-        $attachments[] = [
-          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
-          'name' => $nameParam->value,
-          'size' => $part->bytes,
-          'data' => $this->_get_decode_value($data, $part->encoding)
-        ];
-      }
-    }
-
-    if (!empty($part->parts)
-      && (empty($filename) || !count($attachments))
-    ) {
-      foreach ($part->parts as $np2 => $p) {
-        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
-        if (!empty($filename) && count($attachments)) {
-          break;
-        }
-      }
-    }
-  }
-
-
-  /**
-   * Checks if we are connected  (Test: ok)
-   *
-   * @return bool
-   */
-  private function _is_connected()
-  {
-    if ($this->stream) {
-      $now = microtime(true);
-      if ($now - $this->_last_ping < $this->_ping_interval) {
-        return true;
-      }
-
-      if (imap_ping($this->stream)) {
-        $this->_last_ping = $now;
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array containing the names of the mailboxes that you have subscribed. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return bool|array
-   */
-  private function _list_subscribed($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_lsub($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array containing the full names of the mailboxes.  (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return bool|array
-   */
-  private function _list_folders($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_list($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns an array of objects containing detailed mailboxes information. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return array|bool
-   */
-  private function _get_folders($dir)
-  {
-    if ($this->_is_connected()) {
-      return imap_getmailboxes($this->stream, $this->mbParam, $dir);
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Returns a sorted array containing the simple names of the mailboxes. (Test: ok)
-   *
-   * @param string $dir Mailbox folder
-   * @return array
-   */
-  private function _get_names_folders($dir)
-  {
-    if ($folders = $this->_get_folders($dir)) {
-      $i   = 0;
-      $ret = [];
-      foreach($folders as $val) {
-        $name      = imap_utf7_decode($val->name);
-        $name_arr  = explode('}', $name);
-        $j         = \count($name_arr) - 1;
-        $mbox_name = $name_arr[$j];
-        if($mbox_name == "") {
-          continue; // the folder itself
-        }
-
-        $ret[$i++] = $mbox_name;
-      }
-
-      sort($ret);
-      return $ret;
     }
 
     return false;
@@ -2010,6 +1630,302 @@ class Mailbox extends Basic
       'quote' => '',
       'method' => 'no_quote_detected',
     ];
+  }
+
+
+  /**
+   * Returns a RawClient instance for executing raw IMAP commands.
+   * @return RawClient
+   */
+  public function getRawClient(): RawClient
+  {
+    if (!$this->rawClient) {
+      $this->rawClient = new RawClient(
+        $this->getHost(),
+        $this->getPort(),
+        $this->encryption,
+        $this->login,
+        $this->pass
+      );
+    }
+
+    if (!$this->rawClient->isConnected()) {
+      $this->rawClient->connect();
+    }
+
+    return $this->rawClient;
+  }
+
+
+  /**
+   * Executes a raw IMAP command and returns the response as a string.
+   * @param string $command The raw IMAP command to execute
+   * @param bool $disconnectAfter Whether to disconnect the client after executing the command (default: true)
+   * @return string|null The response from the IMAP server
+   */
+  public function rawCommand(string $command, bool $disconnectAfter = true): ?string
+  {
+    if ($client = $this->getRawClient()) {
+      $res = $client->sendCommand($command, true);
+      if ($disconnectAfter) {
+        $client->disconnect();
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the HIGHESTMODSEQ of the folder, or null if not supported by the server.
+   * @param string $folderUid The UID of the folder
+   * @return int|null The HIGHESTMODSEQ value or null if not supported
+   */
+  public function getFolderHighestmodseq(string $folderUid): ?int
+  {
+    if (($client = $this->getRawClient())
+      && $client->hasCapability('CONDSTORE')
+    ) {
+      $res = $this->rawCommand('STATUS ' . $folderUid . ' (HIGHESTMODSEQ)');
+      if (preg_match('/HIGHESTMODSEQ\s+(\d+)/i', $res, $m)) {
+        return (int)$m[1];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the messsages UIDs changed since lastModseq.
+   * @param string $folderUid The UID of the folder
+   * @param int $lastModseq The last known MODSEQ value
+   * @return array An array of UIDs that have changed since lastModseq
+   * @note This method requires the server to support CONDSTORE and may not work on
+   */
+  public function getMsgUidsChangedSinceModseq(string $folderUid, int $lastModseq): array
+  {
+    if (($client = $this->getRawClient())
+      && $client->hasCapability('CONDSTORE')
+    ) {
+      $this->rawCommand('SELECT ' . $folderUid . ' (CONDSTORE)', false);
+      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq + 1));
+      if (preg_match('/^\*\s+SEARCH\s*(.*)$/i', $res, $m)) {
+        $list = trim($m[1]);
+        if ($list === '') {
+          return [];
+        }
+
+        $uids = preg_split('/\s+/', $list) ?: [];
+        $uids = array_values(array_unique(array_map('intval', $uids)));
+        sort($uids);
+        return $uids;
+      }
+    }
+
+    return [];
+  }
+
+
+  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
+    if (!empty($part->ifdisposition)
+      && !empty($part->disposition)
+      && !empty($part->ifparameters)
+      && ((strtolower($part->disposition) === 'attachment')
+        || (strtolower($part->disposition) === 'inline'))
+      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+      && (empty($filename) || ($filename === $nameParam->value))
+    ) {
+      if ($data = $this->getMsgBody($msgNum, $partNum)) {
+        $attachments[] = [
+          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
+          'name' => $nameParam->value,
+          'size' => $part->bytes,
+          'data' => $this->_get_decode_value($data, $part->encoding)
+        ];
+      }
+    }
+
+    if (!empty($part->parts)
+      && (empty($filename) || !count($attachments))
+    ) {
+      foreach ($part->parts as $np2 => $p) {
+        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
+        if (!empty($filename) && count($attachments)) {
+          break;
+        }
+      }
+    }
+  }
+
+
+  private function transformString($string) {
+    // Use the md5 hash function to generate a 32-character hexadecimal string
+    $hash = md5($string);
+
+    // Initialize an empty result variable
+    $result = '';
+
+    // Loop through the characters of the hash string
+    for ($i = 0; $i < strlen($hash); $i++) {
+      // Get the current character
+      $char = $hash[$i];
+
+      // Append the current character to the result string
+      $result .= $char;
+
+      // If the current position is a multiple of 4, append a dash
+      if (($i + 1) % 4 == 0 && $i != 31) {
+        $result .= '-';
+      }
+    }
+
+    // Return the final result
+    return $result;
+  }
+
+
+  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
+  private function decode_encoded_words($string) {
+
+    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
+    if (!empty($matches)) {
+      for ($i = 0; $i < count($matches[0]); $i++) {
+        $encoding = $matches[2][$i];
+        $encoded_text = $matches[3][$i];
+        if (strtolower($encoding) == "q") {
+          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
+        } else {
+          $decoded_text = base64_decode($encoded_text);
+        }
+        $string = Str::replace($matches[0][$i], $decoded_text, $string);
+      }
+    }
+
+    return $string;
+  }
+
+  private function decode_encoded_words_array(array $array) {
+    for($i = 0; $i < count($array); $i++) {
+      $array[$i] = $this->decode_encoded_words($array[$i]);
+    }
+    return $array;
+  }
+
+  private function decode_encoded_words_deep($obj) {
+    if (is_string($obj)) {
+      $obj = $this->decode_encoded_words($obj);
+    }
+    elseif (is_object($obj)) {
+      foreach ($obj as $idx => $val) {
+        $obj->$idx = $this->decode_encoded_words_deep($val);
+      }
+    }
+
+    return $obj;
+  }
+
+
+  /**
+   * Checks if we are connected  (Test: ok)
+   *
+   * @return bool
+   */
+  private function _is_connected()
+  {
+    if ($this->stream) {
+      $now = microtime(true);
+      if ($now - $this->_last_ping < $this->_ping_interval) {
+        return true;
+      }
+
+      if (imap_ping($this->stream)) {
+        $this->_last_ping = $now;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array containing the names of the mailboxes that you have subscribed. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return bool|array
+   */
+  private function _list_subscribed($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_lsub($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array containing the full names of the mailboxes.  (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return bool|array
+   */
+  private function _list_folders($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_list($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns an array of objects containing detailed mailboxes information. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return array|bool
+   */
+  private function _get_folders($dir)
+  {
+    if ($this->_is_connected()) {
+      return imap_getmailboxes($this->stream, $this->mbParam, $dir);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns a sorted array containing the simple names of the mailboxes. (Test: ok)
+   *
+   * @param string $dir Mailbox folder
+   * @return array
+   */
+  private function _get_names_folders($dir)
+  {
+    if ($folders = $this->_get_folders($dir)) {
+      $i   = 0;
+      $ret = [];
+      foreach($folders as $val) {
+        $name      = imap_utf7_decode($val->name);
+        $name_arr  = explode('}', $name);
+        $j         = \count($name_arr) - 1;
+        $mbox_name = $name_arr[$j];
+        if($mbox_name == "") {
+          continue; // the folder itself
+        }
+
+        $ret[$i++] = $mbox_name;
+      }
+
+      sort($ret);
+      return $ret;
+    }
+
+    return false;
   }
 
 

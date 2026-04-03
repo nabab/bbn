@@ -147,7 +147,7 @@ trait Commands {
 
       if ($sql = $this->getDropDatabase($database)) {
         try {
-          if ($this->query($sql)) {
+          if ($this->emulatePreparesAndQuery($sql)) {
             if ($cacheName = $this->_db_cache_name($database, 'tables')) {
               $this->cacheDelete($cacheName);
             }
@@ -187,7 +187,7 @@ trait Commands {
 
       if ($sql = $this->getRenameDatabase($oldName, $newName)) {
         try {
-          if ($this->query($sql)) {
+          if ($this->emulatePreparesAndQuery($sql)) {
             if ($cacheName = $this->_db_cache_name($oldName, 'tables')) {
               $this->cacheDelete($cacheName);
             }
@@ -230,7 +230,7 @@ trait Commands {
       if ($sql = $this->getDuplicateDatabase($source, $target, $withData)) {
         try {
           $this->disableKeys();
-          if ($res = (bool)$this->query($sql)) {
+          if ($res = (bool)$this->emulatePreparesAndQuery($sql)) {
             if ($cacheName = $this->_db_cache_name($target, 'tables')) {
               $this->cacheDelete($cacheName);
             }
@@ -260,7 +260,7 @@ trait Commands {
     if ($this->check()
       && ($sql = $this->getAnalyzeDatabase($database))
     ) {
-      return (bool)$this->query($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -323,7 +323,7 @@ trait Commands {
   ): bool
   {
     if ($sql = $this->getCreateTableRaw($table, $cfg, $createKeys, $createConstraints)) {
-      if ($this->query($sql)) {
+      if ($this->emulatePreparesAndQuery($sql)) {
         if ($cacheName = $this->_db_cache_name($table, 'columns')) {
           $this->cacheDelete($cacheName);
         }
@@ -344,7 +344,7 @@ trait Commands {
       }
 
       if (($sql = $this->getRenameTable($table, $newName))
-        && $this->query($sql)
+        && $this->emulatePreparesAndQuery($sql)
       ) {
         if ($cacheName = $this->_db_cache_name($table, 'columns')) {
           $this->cacheDelete($cacheName);
@@ -382,7 +382,7 @@ trait Commands {
     }
 
     if (($sql = $this->getDropTable($table, $database))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -424,7 +424,7 @@ trait Commands {
       if ($sql = $this->getDuplicateTable($source, $target, $withData)) {
         try {
           $this->disableKeys();
-          if ($res = (bool)$this->query($sql)) {
+          if ($res = (bool)$this->emulatePreparesAndQuery($sql)) {
             if ($cacheName = $this->_db_cache_name($target, 'columns')) {
               $this->cacheDelete($cacheName);
             }
@@ -500,7 +500,7 @@ trait Commands {
     if ($this->check()
       && ($sql = $this->getAnalyzeTable($table, $database))
     ) {
-      return (bool)$this->query($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -558,7 +558,7 @@ trait Commands {
   public function createColumn(string $table, string $column, array $columnCfg): bool
   {
     if (($sql = $this->getCreateColumn($table, $column, $columnCfg))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -580,7 +580,7 @@ trait Commands {
   public function dropColumn(string $table, string $column): bool
   {
     if (($sql = $this->getDropColumn($table, $column))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -603,7 +603,7 @@ trait Commands {
   public function alterColumn(string $table, string $column, array $columnCfg): bool
   {
     if (($sql = $this->getAlterColumn($table, $columnCfg))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -624,7 +624,7 @@ trait Commands {
   public function createKeys(string $table, ?array $cfg = null): bool
   {
     if (($sql = $this->getCreateKeys($table,  $cfg))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -645,7 +645,7 @@ trait Commands {
   public function dropKey(string $table, string $key): bool
   {
     if (($sql = $this->getDropKey($table, $key))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -666,7 +666,7 @@ trait Commands {
   public function createConstraints(string $table, ?array $cfg = null): bool
   {
     if (($sql = $this->getCreateConstraints($table,  $cfg))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
@@ -687,7 +687,7 @@ trait Commands {
   public function dropConstraint(string $table, string $constraint): bool
   {
     if (($sql = $this->getDropConstraint($table, $constraint))
-      && $this->query($sql)
+      && $this->emulatePreparesAndQuery($sql)
     ) {
       if ($cacheName = $this->_db_cache_name($table, 'columns')) {
         $this->cacheDelete($cacheName);
