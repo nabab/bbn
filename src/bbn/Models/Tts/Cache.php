@@ -228,11 +228,11 @@ trait Cache
    * @param integer $ttl
    * @return mixed
    */
-  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed
+  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0, int $timeout = 2): mixed
   {
     $this->cacheInit();
     $cn = $this->_cache_name($uid, $method);
-    return $this->cache_engine->getSet($fn, $cn, $ttl);
+    return $this->cache_engine->getSet($fn, $cn, $ttl, $timeout);
   }
 
 

@@ -229,18 +229,22 @@ class Grid extends DbCls
         }
       }
     }
-    $this->cache_uid = md5(serialize([
-      'tables' => $this->cfg['tables'],
-      'fields' => $this->cfg['fields'],
-      'order' => $this->cfg['order'],
-      'values' => $this->cfg['values'],
-      'join' => $this->cfg['join'],
-      'group_by' => $this->cfg['group_by'],
-      'having' => $this->cfg['having'],
-      'limit' => $this->cfg['limit'],
-      'start' => $this->cfg['start'],
-      'filters' => $this->cfg['filters']
-    ]));
+
+    if (!empty($this->cfg['cache'])) {
+      $this->cache_uid = md5(serialize([
+        'tables' => $this->cfg['tables'],
+        'fields' => $this->cfg['fields'],
+        'order' => $this->cfg['order'],
+        'values' => $this->cfg['values'],
+        'join' => $this->cfg['join'],
+        'group_by' => $this->cfg['group_by'],
+        'having' => $this->cfg['having'],
+        'limit' => $this->cfg['limit'],
+        'start' => $this->cfg['start'],
+        'filters' => $this->cfg['filters']
+      ]));
+    }
+
     $this->chrono = new Timer();
   }
 
@@ -258,13 +262,13 @@ class Grid extends DbCls
 
   protected function getCache()
   {
-    return $this->cacheGet($this->cache_uid);
+    return $this->cache_uid ? $this->cacheGet($this->cache_uid) : null;
   }
 
   protected function setCache($data)
   {
     $max = 600;
-    if (isset($data['time'])) {
+    if ($this->cache_uid && isset($data['time'])) {
       if ($data['time'] < 0.01) {
         $ttl = 3;
       } else if ($data['time'] < 0.1) {
@@ -366,10 +370,6 @@ class Grid extends DbCls
 
       $this->count_time = $this->chrono->measure();
       $this->chrono->stop();
-      $this->setCache([
-        'num' => $this->num,
-        'time' => $this->count_time
-      ]);
       return $this->num ?: 0;
     } else if ($this->count_cfg) {
       //X::log($this->count_cfg, 'mirko');
@@ -378,10 +378,6 @@ class Grid extends DbCls
       $this->num = $this->db->selectOne($this->count_cfg);
       $this->count_time = $this->chrono->measure();
       $this->chrono->stop();
-      $this->setCache([
-        'num' => $this->num,
-        'time' => $this->count_time
-      ]);
       return $this->num ?: 0;
     }
     return null;

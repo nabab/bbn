@@ -508,7 +508,9 @@ class Model extends DbClass
           unset($data['res']);
         }
 
-        $cn .= '/' . md5(serialize($data));
+        if ($data) {
+          $cn .= '/' . md5(serialize($data));
+        }
       }
 
       return $cn;
@@ -568,10 +570,10 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 0)
+  public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 0, int $timeout = 5): ?array
   {
     $model = &$this;
-    return $this->getSetFromCache(fn() => $model->get($data), $data, $spec ? "auto-$spec" : '', $ttl);
+    return $this->getSetFromCache(fn() => $model->get($data), $data, $spec ? "auto-$spec" : 'auto', $ttl, $timeout);
   }
 
 
@@ -584,10 +586,10 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getSetFromCache(\Closure $fn, array|null $data = null, string $spec = '', int $ttl = 0): ?array
+  public function getSetFromCache(\Closure $fn, array|null $data = null, string $spec = '', int $ttl = 0, int $timeout = 5): ?array
   {
     if ($cn = $this->modelCacheName($data, $spec)) {
-      return $this->cacheGetSet($fn, $cn, '', $ttl) ?: null;
+      return $this->cacheGetSet($fn, $cn, '', $ttl, $timeout) ?: null;
     }
 
     return null;

@@ -361,26 +361,33 @@ trait DbCache
     return self::$dbTraitCache->info($cn);
   }
 
-  public function dbTraitCacheGetSet(string $id, array $fields = [], bool $autoExclude = false): ?array
+  public function dbTraitCacheGetSet(string $id, array $fields = []): ?array
   {
     static::dbTraitGlobalCacheInit();
     $cn = $this->dbTraitRowCacheKey($id);
     $cache = self::$dbTraitCache;
-    $self = $this;
-    return $cache->getSet(
-      function () use ($cn, $fields, $autoExclude, $self, $id) {
-        if (($data = $self->dbTraitCacheRetrieveRecord($id))
-          && self::$dbTraitCache->set($cn, $data)
-        ) {
-          return $self->dbTraitCacheGet($id, $fields);
-        }
-
-        return null;
-      },
+    $data = $cache->getSet(
+      fn () => $this->dbTraitCacheRetrieveRecord($id),
       $cn
     );
+    if (!$data) {
+      return null;
+    }
+    if (count($fields)) {
+      $arr = [];
+      foreach ($fields as $alias => $field) {
+        if (array_key_exists($field, $data)) {
+          $arr[is_int($alias) ? $field : $alias] = $data[$field];
+        }
+      }
+
+      return $arr;
+    }
+
+    return $data;
   }
 
+ 
   public static function dbTraitCacheInitTrigger(Db $db): void {
     if (!defined("BBN_DBACTIONS_CACHE_INIT")) {
       define("BBN_DBACTIONS_CACHE_INIT", true);
