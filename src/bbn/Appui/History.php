@@ -132,14 +132,14 @@ class History
   public static function getCache($id)
   {
     if (self::$cache) {
-      return self::$cache->get(self::$cache_prefix . $id, 3600);
+      return self::$cache->get(self::$cache_prefix . $id);
     }
   }
 
   public static function deleteCache($id)
   {
     if (self::$cache) {
-      return self::$cache->get(self::$cache_prefix . $id, 3600);
+      return self::$cache->delete(self::$cache_prefix . $id);
     }
   }
 
@@ -891,6 +891,7 @@ MYSQL;
     ) {
       if ($force || !isset(self::$structures[$table])) {
         if (!$force && ($data = self::getCache($table))) {
+
           self::$structures[$table] = $data;
           if (!empty(self::$structures[$table]['history'])) {
             return self::$structures[$table];
