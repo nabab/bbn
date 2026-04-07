@@ -7,6 +7,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Appui\Option;
+use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\DbCache;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Models\Entities;
@@ -15,6 +16,7 @@ use bbn\Models\Cls\Nullall;
 
 class Address extends DbCls
 {
+  use Cache;
   use DbCache;
 
   /** @var array */
@@ -715,6 +717,55 @@ class Address extends DbCls
   public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
   {
     return [];
+  }
+
+
+  public function cDelete(string $id): self
+  {
+    return $this->cacheDelete($id);
+  }
+
+
+  /**
+   * Return adherent's cache.
+   *
+   * @param string $method
+   * @return mixed
+   */
+  public function cGet($id, $method = '')
+  {
+    return $this->cacheGet($id, $method);
+  }
+
+
+  /**
+   * Sets adherent cache.
+   *
+   * @param string $id
+   * @param string $method
+   * @param $data
+   * @return string|null
+   */
+  public function cSet($id, $method, $data): ?string
+  {
+    if ($this->cacheSet($id, $method, $data, 0)) {
+      return $this->cacheHash($id, $method);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if the given cache method exists.
+   *
+   * @param string $method
+   *
+   * @return bool
+   */
+  public function cHas($id, $method = '')
+  {
+    return $this->cacheHas($id, $method);
   }
 
 

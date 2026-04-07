@@ -622,6 +622,60 @@ class Entity
       )), $this->records);
   }
 
+  public function cDelete(): self
+  {
+    $this->records = [];
+    $this->db->query("UPDATE apst_adherents SET cached = NULL WHERE id = ?", hex2bin($this->getId()));
+    return $this->cacheDelete($this->getId());
+  }
+
+
+  /**
+   * Return adherent's cache.
+   *
+   * @param string $method
+   * @return mixed
+   */
+  public function cGet($method = '')
+  {
+    return $this->cacheGet($this->getId(), $method);
+  }
+
+
+  /**
+   * Sets adherent cache.
+   *
+   * @param string $method
+   * @param $data
+   * @return string|null
+   */
+  public function cSet($method, $data): ?string
+  {
+    if ($this->cacheSet($this->getId(), $method, $data, 0)) {
+      return $this->cacheHash($this->getId(), $method);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if the given cache method exists.
+   *
+   * @param string $method
+   *
+   * @return bool
+   */
+  public function cHas($method = '')
+  {
+    if (!$this->getField('cached')) {
+      return false;
+    }
+
+    return $this->cacheHas($this->getId(), $method);
+  }
+
+
   protected static function getDbObject($table, $cfg, $db, $entities, $entity = null)
   {
     $keys = Entities::getEntityKeys($db, $entities);
