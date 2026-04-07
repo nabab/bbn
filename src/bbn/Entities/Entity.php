@@ -676,6 +676,12 @@ class Entity
   }
 
 
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
+  }
+
+
   protected static function getDbObject($table, $cfg, $db, $entities, $entity = null)
   {
     $keys = Entities::getEntityKeys($db, $entities);

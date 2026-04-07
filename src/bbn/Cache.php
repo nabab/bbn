@@ -879,10 +879,16 @@ class Cache extends Basic implements CacheInterface
 
   public function setMultiple($values, $ttl = null): bool
   {
+    if (self::$type === 'redis') {
+      $this->obj->multi();
+    }
     foreach ($values as $k => $v) {
       if (!$this->set($k, $v, $ttl)) {
         return false;
       }
+    }
+    if (self::$type === 'redis') {
+      return $this->obj->exec();
     }
 
     return true;

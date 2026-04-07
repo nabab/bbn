@@ -533,6 +533,11 @@ class Identity extends DbCls
     return $this->cacheHas($id, $method);
   }
 
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
+  }
+
 
   protected function getJoin(): array
   {

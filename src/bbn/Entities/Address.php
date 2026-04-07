@@ -769,6 +769,12 @@ class Address extends DbCls
   }
 
 
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
+  }
+
+
   private function getTableRelations(): array
   {
     if (!isset($this->tableRelations)) {
