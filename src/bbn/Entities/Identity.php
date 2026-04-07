@@ -468,17 +468,6 @@ class Identity extends DbCls
   }
 
 
-  public function pick(
-    string|array|null $idIdentity = null,
-    ?string $idEntity = null,
-    bool $allRelations = false,
-    int $limit = 1
-  ): array
-  {
-    return [];
-  }
-
-
   public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
   {
     return [];

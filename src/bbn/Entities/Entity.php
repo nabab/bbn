@@ -543,8 +543,7 @@ class Entity
         }
         elseif ($table === 'bbn_identities') {
           foreach ($ids as $id) {
-            if ($d = $identity->pick($id, $this->getId(), true)) {
-            //if ($d = $identity->pickOne($id, $this->getId(), true) ?: $identity->pickOne($id, null, true)) {
+            if ($d = $identity->pickOne($id, $this->getId(), true)) {
               $final[$table][$id] = [
                 'state' => null,
                 'data' => $d
