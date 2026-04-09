@@ -982,7 +982,7 @@ class Email extends Basic
         }
 
         $end = $start;
-        $all = $mb->getEmailsList($folder, $start, $real_end);
+        $all = $mb->getEmailsList($folder['uid'], $start, $real_end);
         $this->setFolderSync($folder['id']);
         if ($all) {
           foreach ($all as $i => $a) {
@@ -2444,7 +2444,7 @@ class Email extends Basic
                   if ($this->checkFolder($folder)
                     && !empty($msgn)
                   ) {
-                    foreach ($mb->getEmailsList($folder, $msgn, $msgn) as $e) {
+                    foreach ($mb->getEmailsList($folder['uid'], $msgn, $msgn) as $e) {
                       if ($newId = $this->insertEmail($folder, $e)) {
                         $t = $newId;
                       }

@@ -694,10 +694,10 @@ class Mailbox extends Basic
     return false;
   }
 
-  public function getEmailsList(array $folder, int $start, int $end)
+  public function getEmailsList(string $folderUid, int $start, int $end)
   {
-    if (isset($this->folders[$folder['uid']])
-      && $this->selectFolder($folder['uid'])
+    if (isset($this->folders[$folderUid])
+      && $this->selectFolder($folderUid)
     ) {
       $res = [];
       while ($start >= $end) {

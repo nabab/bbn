@@ -290,6 +290,7 @@ class Mailbox extends Basic
 
   public function getParams(): string
   {
+    return '';
     return $this->mbParam;
   }
 
@@ -875,6 +876,7 @@ class Mailbox extends Basic
     }
 
     $raw = $this->getMsgHeader($msgUid, true);
+    die(var_dump($raw));
     if (!$raw) {
       return null;
     }
@@ -1192,6 +1194,16 @@ class Mailbox extends Basic
     }
 
     return $priority;
+  }
+
+
+  public function getMsgSize(int $msgno, bool $uid = false): ?int
+  {
+    if ($overview = $this->getMsgOverview($msgno, $uid)) {
+      return $overview[0]->size ?? null;
+    }
+
+    return null;
   }
 
 
@@ -1729,12 +1741,11 @@ class Mailbox extends Basic
 
   private function getMsgByUid(int $uid): ?array
   {
-    $headerRaw = $this->getMsgHeader($uid, true);
-    if (!$headerRaw) {
+    $headers = $this->getMsgHeaderinfo($uid);
+    if (!$headers) {
       return null;
     }
 
-    $headers = $this->parseHeaderInfo($headerRaw);
     $msg = (array)$this->decode_encoded_words_deep($headers);
 
     foreach ($msg as $key => $value) {
