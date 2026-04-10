@@ -1632,7 +1632,7 @@ class Email extends Basic
           $cfg["date"] => date("Y-m-d H:i:s", strtotime($email["date"])),
           $cfg["id_sender"] => $id_sender,
           $cfg["subject"] => $email["subject"] ?: "",
-          $cfg["size"] => $email["Size"],
+          $cfg["size"] => $email["Size"] ?? $email["size"] ?? 0,
           $cfg["attachments"] => empty($email["attachments"])
             ? null
             : json_encode($email["attachments"]),

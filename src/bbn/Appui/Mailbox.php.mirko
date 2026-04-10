@@ -876,12 +876,15 @@ class Mailbox extends Basic
     }
 
     $raw = $this->getMsgHeader($msgUid, true);
-    die(var_dump($raw));
     if (!$raw) {
       return null;
     }
 
-    return $this->parseHeaderInfo($raw);
+    if ($parsed = $this->parseHeaderInfo($raw)) {
+      $parsed->size = $this->getMsgSize($msgUid, true);
+    }
+
+    return $parsed;
   }
 
 
@@ -987,7 +990,7 @@ class Mailbox extends Basic
   }
 
 
-  public function getMsgOverview(int $msgnum, bool $uid = false): ?array
+  public function getMsgOverview(int $msgnum, bool $uid = false): ?stdClass
   {
     try {
       $lines = $this->rawCommand(
@@ -1015,7 +1018,7 @@ class Mailbox extends Basic
         $obj->uid = (int)$m[1];
       }
 
-      return [$obj];
+      return $obj;
     }
     catch (Exception $e) {
       $this->setError($e->getMessage(), $e->getCode());
@@ -1125,13 +1128,13 @@ class Mailbox extends Basic
       $flags = [];
       $toCheck = ['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'];
       foreach ($toCheck as $flag) {
-        if (!empty($overview[0]->$flag)) {
+        if (!empty($overview->$flag)) {
           $flags[] = '\\' . ucfirst($flag);
         }
       }
 
-      if (!empty($overview[0]->flags)) {
-        $keywords = preg_split('/\s+/', trim($overview[0]->flags)) ?: [];
+      if (!empty($overview->flags)) {
+        $keywords = preg_split('/\s+/', trim($overview->flags)) ?: [];
         foreach ($keywords as $kw) {
           if (!in_array(strtolower(ltrim($kw, '\\')), $toCheck, true)) {
             $flags[] = $kw;
@@ -1200,7 +1203,7 @@ class Mailbox extends Basic
   public function getMsgSize(int $msgno, bool $uid = false): ?int
   {
     if ($overview = $this->getMsgOverview($msgno, $uid)) {
-      return $overview[0]->size ?? null;
+      return $overview->size ?? null;
     }
 
     return null;
@@ -1281,31 +1284,26 @@ class Mailbox extends Basic
   public function append(string $mbox, string $msg, ?string $opt = null)
   {
     try {
-      $literalSize = strlen($msg);
       $cmd = 'APPEND ' . $this->escapeString($mbox);
-
       if (!empty($opt)) {
         $cmd .= ' (' . trim($opt) . ')';
       }
 
-      $cmd .= ' {' . $literalSize . '}';
-
-      $lines = $this->rawCommand($cmd, true);
-      $last = end($lines);
-      if (!preg_match('/^\+\s/', $last ?? '')) {
-        $stream = $this->getClient()->getStreamResource();
-        fwrite($stream, $msg . "\r\n");
-      }
-      else {
-        $stream = $this->getClient()->getStreamResource();
-        fwrite($stream, $msg . "\r\n");
+      $cmd .= ' {' . strlen($msg) . '}';
+      $this->rawCommand($cmd, false, false);
+      die(var_dump('ciao'));
+      $resp = $this->getClient()->readCommandResponseLine();
+      if (preg_match('/^\+\s/', $resp ?? '')) {
+        $this->getClient()->write($msg, false);
+        return true;
       }
 
-      return true;
+      return false;
     }
     catch (Exception $e) {
       $this->status = $e->getMessage();
       $this->setError($e->getMessage(), $e->getCode());
+      die($e->getMessage());
       return false;
     }
   }
@@ -1745,9 +1743,7 @@ class Mailbox extends Basic
     if (!$headers) {
       return null;
     }
-
     $msg = (array)$this->decode_encoded_words_deep($headers);
-
     foreach ($msg as $key => $value) {
       if (is_string($value)) {
         $msg[$key] = quoted_printable_decode($value);

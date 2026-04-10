@@ -206,12 +206,63 @@ class Client extends Basic
   }
 
   /**
-   * Returns the current stream resource used for the IDLE connection.
-   * @return resource|null The stream resource for the IDLE connection, or null if not connected
+   * Returns the current stream resource used for the connection.
+   * @return resource|null The stream resource for the connection, or null if not connected
    */
   public function getStreamResource()
   {
     return $this->streamResource;
+  }
+
+  /**
+   * Writes a string of data to the IMAP server through the stream resource. Appends a CRLF to the data if it does not already end with one. Returns true if the data was successfully written, false otherwise.
+   * @param string $data The data to write to the server
+   * @return bool True if the data was successfully written, false otherwise
+   */
+  public function write(string $data, bool $appendCRLF = true): bool
+  {
+    if (($sr = $this->getStreamResource())
+      && strlen($data)
+    ) {
+      $data .= $appendCRLF && !str_ends_with($data, "\r\n")
+        ? "\r\n"
+        : '';
+      $len = strlen($data);
+      $written = 0;
+      while ($written < $len) {
+        $read = [];
+        $write = [$sr];
+        $except = [];
+        $n = @stream_select($read, $write, $except, 10);
+        if ($n === false) {
+          throw new Exception('stream_select failed while writing');
+        }
+
+        if ($n === 0) {
+          $meta = stream_get_meta_data($sr);
+          if (!empty($meta['timed_out'])) {
+            throw new Exception('Write failed (timed out)');
+          }
+
+          continue;
+        }
+
+        $chunk = fwrite($sr, substr($data, $written));
+        if ($chunk === false) {
+          throw new Exception('Write failed');
+        }
+
+        if ($chunk === 0) {
+          continue;
+        }
+
+        $written += $chunk;
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -231,7 +282,7 @@ class Client extends Basic
     $tag = $this->getNextTag();
     $this->lastTag = $tag;
     $this->lastCommand = $tag . $command;
-    fwrite($this->streamResource, $this->lastCommand . "\r\n");
+    $this->write($this->lastCommand);
     $this->lastTime = time();
 
     if (!$response) {
@@ -269,20 +320,12 @@ class Client extends Basic
   }
 
   /**
-   * Generates the next unique tag for IMAP commands by incrementing the internal tag counter and concatenating it with the tag prefix. Returns the generated tag as a string.
-   */
-  protected function getNextTag(): string
-  {
-    $this->tag++;
-    return $this->tagPrefix . $this->tag . ' ';
-  }
-
-  /**
    * Reads the response from the IMAP server after sending a command. Collects lines of response until it detects the end of the response based on the command tag. Checks for error responses and throws exceptions if an error is detected. Returns the response as a string or an array of lines, depending on the $allResponse parameter.
    * @param bool $allResponse Whether to return the response as an array of lines instead of a single string
    * @return string|array The response from the server as a string or an array of lines, depending on the $allResponse parameter
    * @throws Exception If there is an error response from the server or if the response is empty when a response is expected
-   */  protected function readCommandResponse(string $tag, bool $allResponse = false): string|array
+   */
+  public function readCommandResponse(string $tag, bool $allResponse = false): string|array
   {
     $response = [];
 
@@ -329,35 +372,54 @@ class Client extends Basic
    * @return string The line of response read from the server
    * @throws Exception If the connection is lost or if an empty response is received when a
    */
-  protected function readCommandResponseLine(): string
+  public function readCommandResponseLine(): string
   {
     stream_set_blocking($this->streamResource, false);
-    $line = '';
-    while (!in_array(Str::sub($line, -1), ["\n", PHP_EOL], true)) {
-      if (($this->lastTime + $this->timeout) < time()) {
-        throw new Exception(X::_('Connection lost'), 3);
+    try {
+      $line = '';
+      while (!in_array(Str::sub($line, -1), ["\n", PHP_EOL], true)) {
+        if (($this->lastTime + $this->timeout) < time()) {
+          throw new Exception(X::_('Connection lost'), 3);
+        }
+
+        $read = [$this->streamResource];
+        $write = [];
+        $except = [];
+        $n = @stream_select($read, $write, $except, 10);
+        if (($n === 0) || ($n === false)) {
+          continue;
+        }
+
+        $chunk = fgets($this->streamResource, 8192);
+        if ($chunk === false) {
+          continue;
+        }
+
+        $line .= $chunk;
       }
 
-      $read = [$this->streamResource];
-      $write = $except = [];
-      $n = @stream_select($read, $write, $except, 10);
-      if (($n === 0) || ($n === false)) {
-        continue;
+      $this->lastTime = time();
+      if ($line === '') {
+        throw new Exception(X::_('Empty response (command: %s)', $this->lastCommand), 1);
       }
 
-      $chunk = fgets($this->streamResource, 8192);
-      if ($chunk === false) {
-        continue;
-      }
-
-      $line .= $chunk;
+      return $line;
     }
-
-    $this->lastTime = time();
-    if ($line === '') {
-      throw new Exception(X::_('Empty response (command: %s)', $this->lastCommand), 1);
+    catch (Exception $e) {
+      throw $e;
     }
-
-    return $line;
+    finally {
+      stream_set_blocking($this->streamResource, true);
+    }
   }
+
+  /**
+   * Generates the next unique tag for IMAP commands by incrementing the internal tag counter and concatenating it with the tag prefix. Returns the generated tag as a string.
+   */
+  protected function getNextTag(): string
+  {
+    $this->tag++;
+    return $this->tagPrefix . $this->tag . ' ';
+  }
+
 }

@@ -46,6 +46,7 @@ use bbn\Str;
 use bbn\Mvc;
 use bbn\Models\Cls\Basic;
 use PHPMailer\PHPMailer\PHPMailer;
+use bbn\Appui\Mailbox;
 
 class Mail extends Basic
 {
@@ -116,6 +117,18 @@ TEMPLATE;
   private $path;
 
   /**
+   * The IMAP host for appending sent emails.
+   * @var string
+   */
+  private string $imap_host;
+
+    /**
+     * The IMAP port for appending sent emails.
+    * @var int
+    */
+  private int $imap_port;
+
+  /**
    * @todo document
    * 
    * @var string
@@ -154,6 +167,18 @@ TEMPLATE;
    * @var string
    */
   private $imap;
+
+  /**
+   * True if you want to use the IMAP PHP extension for appending sent emails, false to use the bbn\Appui\Mailbox class.
+   * @var bool
+   */
+  private bool $imap_php = false;
+
+  /**
+   * The mailbox instance for appending sent emails when not using the IMAP PHP extension.
+   * @var Mailbox
+   */
+  private Mailbox $mailbox;
 
   /**
    * Sets the static variable content and hash_content with the given string with CSS transformed in inline style.
@@ -299,33 +324,63 @@ TEMPLATE;
    */
   public function setImap(array $cfg): static
   {
-    if (!isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass'])) {
+    if (!isset($cfg['imap_user'], $cfg['imap_pass'])
+      && !isset($cfg['user'], $cfg['pass'])
+    ) {
       die("You need to provide user and password for IMAP connection");
     }
-    $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];
-    $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];
-    $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];
-    $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';
-    $this->imap_drafts = isset($cfg['imap_drafts']) ? $cfg['imap_drafts'] : 'Drafts';
+
+    $this->imap_host = isset($cfg['imap_host'])
+      ? $cfg['imap_host']
+      : $cfg['host'];
+    $this->imap_user = isset($cfg['imap_user'])
+      ? $cfg['imap_user']
+      : $cfg['user'];
+    $this->imap_pass = isset($cfg['imap_pass'])
+      ? $cfg['imap_pass']
+      : $cfg['pass'];
+    $this->imap_sent = isset($cfg['imap_sent'])
+      ? $cfg['imap_sent']
+      : 'Sent';
+    $this->imap_drafts = isset($cfg['imap_drafts'])
+      ? $cfg['imap_drafts']
+      : 'Drafts';
     if (isset($cfg['imap_port'])) {
-      $imap_port = $cfg['imap_port'];
+      $this->imap_port = $cfg['imap_port'];
     }
+
     if (!empty($cfg['imap_ssl'])) {
       if (!isset($cfg['imap_port'])) {
-        $imap_port = 993;
+        $this->imap_port = 993;
       }
-      $this->imap_string = "{".$imap_host.":".$imap_port."/ssl";
+
+      $this->imap_string = "{".$this->imap_host.":".$this->imap_port."/ssl";
     }
     else {
       if (!isset($cfg['imap_port'])) {
-        $imap_port = 143;
+        $this->imap_port = 143;
       }
-      $this->imap_string = "{".$imap_host.":".$imap_port."/tls";
+
+      $this->imap_string = "{".$this->imap_host.":".$this->imap_port."/tls";
     }
+
     if (empty($cfg['valid'])) {
       $this->imap_string .= "/novalidate-cert";
     }
+
     $this->imap_string .= "}";
+    $this->imap_php = !empty($cfg['imap_php']);
+    if (empty($this->imap_php)) {
+      $this->mailbox = new Mailbox([
+        'type' => 'imap',
+        'host' => $this->imap_host,
+        'port' => $this->imap_port,
+        'login' => $this->imap_user,
+        'pass' => $this->imap_pass,
+        'encryption' => !empty($cfg['imap_ssl']),
+      ]);
+    }
+
     return $this;
   }
 
@@ -336,7 +391,18 @@ TEMPLATE;
    */
   public function unsetImap(): static
   {
-    unset($this->imap_string, $this->imap_user, $this->imap_pass);
+    unset(
+      $this->imap_string,
+      $this->imap_host,
+      $this->imap_port,
+      $this->imap_user,
+      $this->imap_pass,
+      $this->imap_sent,
+      $this->imap_drafts,
+      $this->imap,
+      $this->mailbox
+    );
+    $this->imap_php = false;
     return $this;
   }
 
@@ -393,19 +459,35 @@ TEMPLATE;
         $this->log(\imap_last_error());
       }
 
-      if ($r && !empty($this->imap_string)) {
+      if ($r) {
         $mail_string = $this->mailer->getSentMIMEMessage();
-        if (!\is_resource($this->imap)
-          && !($this->imap instanceof \IMAP\Connection)
+        if (!empty($this->imap_php)
+          && !empty($this->imap_string)
         ) {
-          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
-        }
+          if (!\is_resource($this->imap)
+            && !($this->imap instanceof \IMAP\Connection)
+          ) {
+            $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
+          }
 
-        if ((!\is_resource($this->imap)
-            && !($this->imap instanceof \IMAP\Connection))
-          || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
+          if ((!\is_resource($this->imap)
+              && !($this->imap instanceof \IMAP\Connection))
+            || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
+          ) {
+            $this->log(\imap_errors());
+          }
+        }
+        elseif (empty($this->imap_php)
+          && !empty($this->mailbox)
         ) {
-          $this->log(\imap_errors());
+          $a = $this->mailbox->append(
+            $this->imap_sent,
+            $mail_string,
+            "\\Seen"
+          );
+          if (!$a) {
+            $this->log("Impossible to append the sent email to the mailbox: " . $this->mailbox->getError());
+          }
         }
       }
     }
@@ -426,20 +508,36 @@ TEMPLATE;
         $this->log($e->getMessage());
       }
 
-      if ($r && !empty($this->imap_string)) {
+      if ($r) {
         $mailString = $this->mailer->getSentMIMEMessage();
         $r = $this->mailer->getLastMessageID();
-        if (!\is_resource($this->imap)
-          && !($this->imap instanceof \IMAP\Connection)
+        if (!empty($this->imap_php)
+          && !empty($this->imap_string)
         ) {
-          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
-        }
+          if (!\is_resource($this->imap)
+            && !($this->imap instanceof \IMAP\Connection)
+          ) {
+            $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
+          }
 
-        if ((!\is_resource($this->imap)
-            && !($this->imap instanceof \IMAP\Connection))
-          || !\imap_append($this->imap, $this->imap_string.$this->imap_drafts, $mailString, "\\Seen \\Draft")
+          if ((!\is_resource($this->imap)
+              && !($this->imap instanceof \IMAP\Connection))
+            || !\imap_append($this->imap, $this->imap_string.$this->imap_drafts, $mailString, "\\Seen \\Draft")
+          ) {
+            $this->log(\imap_errors());
+          }
+        }
+        elseif (empty($this->imap_php)
+          && !empty($this->mailbox)
         ) {
-          $this->log(\imap_errors());
+          $a = $this->mailbox->append(
+            $this->imap_drafts,
+            $mailString,
+            "\\Seen \\Draft"
+          );
+          if (!$a) {
+            $this->log("Impossible to append the sent email to the mailbox: " . $this->mailbox->getError());
+          }
         }
       }
     }
