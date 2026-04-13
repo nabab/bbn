@@ -102,7 +102,7 @@ final class Output extends Basic {
    *
    * @return void
    */
-  public function run()
+  public function run(array $additionalHeaders = []): void
   {
     if (\count((array)$this->obj) === 0) {
       self::statusHeader(404);
@@ -218,9 +218,14 @@ final class Output extends Basic {
       $mdParser = new Markdown();
       $this->obj->help = $mdParser->compile($this->obj->help);
     }
-    
-    switch ( $this->mode ){
 
+    if (count($additionalHeaders)) {
+      foreach ($additionalHeaders as $k => $v) {
+        header("$k: $v");
+      }
+    }
+
+    switch ($this->mode) {
       case 'public':
         header('Content-type: application/json; charset=utf-8');
         if (BBN_IS_DEV) {

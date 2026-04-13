@@ -1051,7 +1051,7 @@ class Dashboard extends Basic
     }
   }
 
-  public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null): ?array
+  public function getWidgetData(string $idWidget, Controller|Model $mvc, array $data = [], ?Permissions $perm = null, $forceCache = false): ?array
   {
     $res = null;
     $timer = $this->getTimer();
@@ -1069,11 +1069,11 @@ class Dashboard extends Basic
         $plugin = $o->getPluginName($id_plugin);
         if ($plugin === 'appui-dashboard') {
           $timer->start('model');
-          $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
+          $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), 0);
           $timer->stop('model');
         } else {
           $timer->start('model');
-          $res = $mvc->getSubpluginModel($code, $data, $plugin, 'appui-dashboard', $info['cache'] ?? 0);
+          $res = $mvc->getSubpluginModel($code, $data, $plugin, 'appui-dashboard', 0);
           $timer->stop('model');
         }
         /*
@@ -1082,7 +1082,7 @@ class Dashboard extends Basic
         }
         */
       } else {
-        $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $info['cache'] ?? 0);
+        $res = $mvc->getPluginModel($code, $data, $mvc->pluginUrl('appui-dashboard'), $forceCache ? $info['cache'] ?? 0 : 0);
       }
 
       $timer->stop('lastPart');

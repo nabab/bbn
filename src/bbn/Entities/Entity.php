@@ -7,18 +7,19 @@ use BadMethodCallException;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
+use bbn\Cache;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Models\Internals\EntityObjects;
 use bbn\Appui\Option;
 use bbn\Appui\Uauth;
-use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\Cache as CacheTts;
 
 use function in_array;
 
 class Entity
 {
-  use Cache;
+  use CacheTts;
 
   protected array $class_cfg;
 
@@ -545,7 +546,7 @@ class Entity
           foreach ($ids as $id) {
             if ($d = $identity->pickOne($id, $this->getId(), true)) {
               $final[$table][$id] = [
-                'state' => null,
+                'state' => Cache::makeHash($d),
                 'data' => $d
               ];
             }
@@ -555,7 +556,7 @@ class Entity
           foreach ($ids as $id) {
             if ($d = $address->pickOne($id, $this->getId())) {
               $final[$table][$id] = [
-                'state' => null,
+                'state' => Cache::makeHash($d),
                 'data' => $d
               ];
             }
@@ -565,7 +566,7 @@ class Entity
           foreach ($ids as $id) {
             if ($d = $this->db->rselect($table, [], ['id' => $id])) {
               $final[$table][$id] = [
-                'state' => null,
+                'state' => Cache::makeHash($d),
                 'data' => $d
               ];
             }

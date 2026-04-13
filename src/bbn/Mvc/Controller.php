@@ -1459,6 +1459,13 @@ class Controller implements Api
   }
 
 
+  public function clientCache(int $ttl = 0): self
+  {
+    $this->_mvc->clientCache($ttl);
+    return $this;
+  }
+
+
   /**
    * Compile and echoes all the views with the given data
    *

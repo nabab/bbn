@@ -245,6 +245,10 @@ final class Mvc implements Api
   private $is_routed = false;
 
   /**
+   * @var int|bool Flag indicating whether client-side caching is enabled and its TTL (in seconds) or false if disabled.
+   */
+  private $clientCacheValue = false;
+  /**
    * @var string Default controller name (fallback).
    */
   private $default;
@@ -639,6 +643,11 @@ final class Mvc implements Api
   public function getTimer(): Timer
   {
     return $this->timer;
+  }
+
+  public function getClientCache(): bool|int
+  {
+    return $this->clientCacheValue;
   }
 
   /**
@@ -1242,6 +1251,18 @@ final class Mvc implements Api
     $this->router->destruct();
     self::singletonUnset();
   }
+
+  /**
+   * Set the value clientCacheValue which will send a special header to the client to allow caching of the response for a given number of seconds.
+   * @param int $ttl
+   * @return Mvc
+   */
+  public function clientCache(int $ttl = 0): self
+  {
+    $this->clientCacheValue = $ttl === 0 ? true : $ttl;
+    return $this;
+  }
+
 
   /**
    * Get the default controller name.
@@ -2275,7 +2296,12 @@ final class Mvc implements Api
       }
 
       $output = new Output($obj, $this->getMode());
-      $output->run();
+      $additionalHeaders = [];
+      if ($this->clientCacheValue) {
+        $additionalHeaders['bbn-cache'] = $this->clientCacheValue === true ? '1' : $this->clientCacheValue;
+      }
+
+      $output->run($additionalHeaders);
     } else {
       // 404 fallback
       Output::statusHeader(404);
