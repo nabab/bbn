@@ -191,8 +191,9 @@ class Mailbox extends Basic
    */
   public function __destruct()
   {
-    if ($this->client) {
+    if ($this->client && !$this->client->isDisconnecting()) {
       $this->client->disconnect();
+      $this->client = null;
     }
   }
 
@@ -1290,20 +1291,23 @@ class Mailbox extends Basic
       }
 
       $cmd .= ' {' . strlen($msg) . '}';
-      $this->rawCommand($cmd, false, false);
-      die(var_dump('ciao'));
-      $resp = $this->getClient()->readCommandResponseLine();
+      $this->rawCommand($cmd, false, false, false);
+      $client = $this->getClient();
+      $resp = $client->readCommandResponseLine();
       if (preg_match('/^\+\s/', $resp ?? '')) {
-        $this->getClient()->write($msg, false);
+        $client->write($msg, false);
+        $client->write("\r\n", false, true);
+        $client->readCommandResponse($client->getLastTag(), true);
         return true;
       }
 
+      $this->getClient()->closeCommunication();
       return false;
     }
     catch (Exception $e) {
+      $this->getClient()->closeCommunication();
       $this->status = $e->getMessage();
       $this->setError($e->getMessage(), $e->getCode());
-      die($e->getMessage());
       return false;
     }
   }
@@ -1651,7 +1655,7 @@ class Mailbox extends Basic
       );
     }
 
-    if (!$this->client->isConnected()) {
+    if (!$this->client->isCommunicating() &&!$this->client->isConnected()) {
       $this->client->connect();
     }
 
@@ -1669,10 +1673,16 @@ class Mailbox extends Basic
   public function rawCommand(
     string $command,
     bool $allResponse = false,
-    bool $response = true
+    bool $response = true,
+    bool $closeCommunication = true
   ): string|array
   {
-    return $this->getClient()->sendCommand($command, $allResponse, $response);
+    return $this->getClient()->sendCommand(
+      $command,
+      $allResponse,
+      $response,
+      $closeCommunication
+    );
   }
 
 

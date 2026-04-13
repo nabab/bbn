@@ -71,6 +71,16 @@ class Client extends Basic
    */
   protected ?string $lastTag = null;
 
+  /**
+   * @var bool Whether the client is currently in the process of disconnecting
+   */
+  protected bool $disconnetting = false;
+
+  /**
+   * @var bool Whether the client is currently in the process of communicating with the server
+   */
+  protected bool $communicating = false;
+
 
   /**
    * Escapes a string for use in IMAP commands by adding quotes and escaping special characters.
@@ -117,7 +127,9 @@ class Client extends Basic
    */
   public function __destruct()
   {
-    $this->disconnect();
+    if (!$this->isDisconnecting()) {
+      $this->disconnect();
+    }
   }
 
   /**
@@ -172,7 +184,8 @@ class Client extends Basic
    */
   public function disconnect(): static
   {
-    if (!empty($this->streamResource)) {
+    if (!empty($this->streamResource) && !$this->isDisconnecting()) {
+      $this->disconnetting = true;
       try {
         $this->sendCommand("LOGOUT");
       }
@@ -180,9 +193,19 @@ class Client extends Basic
 
       fclose($this->streamResource);
       $this->streamResource = null;
+      $this->disconnetting = false;
     }
 
     return $this;
+  }
+
+  /**
+   * Checks if the client is currently in the process of disconnecting. This can be used to prevent multiple simultaneous disconnect attempts or to check if a disconnect operation is already underway. Returns true if the client is currently disconnecting, false otherwise.
+   * @return bool True if the client is currently disconnecting, false otherwise
+   */
+  public function isDisconnecting(): bool
+  {
+    return $this->disconnetting;
   }
 
   /**
@@ -193,6 +216,10 @@ class Client extends Basic
   public function isConnected(): bool
   {
     if (!empty($this->getStreamResource())) {
+      if ($this->isCommunicating()) {
+        return true;
+      }
+
       try {
         $this->sendCommand("NOOP");
         return true;
@@ -203,6 +230,24 @@ class Client extends Basic
     }
 
     return false;
+  }
+
+  /**
+   * Checks if the client is currently in the process of communicating with the server (e.g., sending a command or waiting for a response). This can be used to prevent multiple simultaneous operations that may interfere with each other. Returns true if the client is currently communicating, false otherwise.
+   * @return bool True if the client is currently communicating, false otherwise
+   */
+  public function isCommunicating(): bool
+  {
+    return $this->communicating;
+  }
+
+  /**
+   * Sets the communicating state of the client to false
+   */
+  public function closeCommunication(): static
+  {
+    $this->communicating = false;
+    return $this;
   }
 
   /**
@@ -219,11 +264,16 @@ class Client extends Basic
    * @param string $data The data to write to the server
    * @return bool True if the data was successfully written, false otherwise
    */
-  public function write(string $data, bool $appendCRLF = true): bool
+  public function write(
+    string $data,
+    bool $appendCRLF = true,
+    bool $closeCommunication = false
+  ): bool
   {
     if (($sr = $this->getStreamResource())
       && strlen($data)
     ) {
+      $this->communicating = true;
       $data .= $appendCRLF && !str_ends_with($data, "\r\n")
         ? "\r\n"
         : '';
@@ -259,6 +309,10 @@ class Client extends Basic
         $written += $chunk;
       }
 
+      if ($closeCommunication) {
+        $this->closeCommunication();
+      }
+
       return true;
     }
 
@@ -276,7 +330,8 @@ class Client extends Basic
   public function sendCommand(
     string $command,
     bool $allResponse = false,
-    bool $response = true
+    bool $response = true,
+    bool $closeCommunication = true
   ): string|array
   {
     $tag = $this->getNextTag();
@@ -286,6 +341,10 @@ class Client extends Basic
     $this->lastTime = time();
 
     if (!$response) {
+      if ($closeCommunication) {
+        $this->closeCommunication();
+      }
+
       return $allResponse ? [] : '';
     }
 
@@ -344,6 +403,7 @@ class Client extends Basic
           throw new Exception(X::_('Error response (command: %s): %s', $this->lastCommand, $line), 2);
         }
 
+        $this->closeCommunication();
         break;
       }
     }
@@ -411,6 +471,15 @@ class Client extends Basic
     finally {
       stream_set_blocking($this->streamResource, true);
     }
+  }
+
+  /**
+   * Returns the last tag used in a command. This can be useful for tracking the most recent command sent to the server and correlating it with responses received. Returns the last tag as a string, or null if no commands have been sent yet.
+   * @return string|null The last tag used in a command, or null if no commands have been sent yet
+   */
+  public function getLastTag(): ?string
+  {
+    return $this->lastTag;
   }
 
   /**
