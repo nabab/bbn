@@ -474,16 +474,17 @@ interface Engines
 
   /**
    * @param $statement
+   * @param mixed $additionalArgs
    * @return mixed
    */
-  public function query($statement);
+  public function query(string $statement, ...$additionalArgs);
 
   /**
    * Executes the given query with given vars, and extracts the first cell's result.
    *
    * @return mixed
    */
-  public function getOne();
+  public function getOne(string $statement, ...$additionalArgs);
 
   /**
    * Return an array indexed on the first field of the request.
@@ -491,7 +492,7 @@ interface Engines
    *
    * @return array|null
    */
-  public function getKeyVal(): ?array;
+  public function getKeyVal(string $statement, ...$additionalArgs): ?array;
 
   /**
    * Return an array with the values of single field resulting from the query.
@@ -500,7 +501,7 @@ interface Engines
    * @param mixed values
    * @return array
    */
-  public function getColArray(): array;
+  public function getColArray(string $statement, ...$additionalArgs): array;
 
   /**
    * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.
@@ -543,28 +544,24 @@ interface Engines
    * @param string $query
    * @return array|false
    */
-  public function fetch(string $query);
+  public function fetch(string $query, ...$additionalArgs);
 
   /**
    * Return an array of indexed array with all results of the query or false if there are no results.
    *
-   * @param string $query
    * @return array|false
    */
-  public function fetchAll(string $query);
+  public function fetchAll(string $query, ...$additionalArgs);
 
   /**
-   * @param $query
-   * @param int $num
    * @return mixed
    */
-  public function fetchColumn($query, int $num = 0);
+  public function fetchColumn(string $query, int $num = 0, ...$additionalArgs);
 
   /**
-   * @param $query
    * @return bool|\stdClass
    */
-  public function fetchObject($query);
+  public function fetchObject(string $query, ...$additionalArgs);
 
 
   /**

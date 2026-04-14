@@ -29,11 +29,12 @@ class Native extends Sub implements ItfNative
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return array|false
    */
-  public function fetch(string $query)
+  public function fetch(string $query, ...$additionalArgs)
   {
-    return $this->language->fetch(...\func_get_args());
+    return $this->language->fetch($query, ...$additionalArgs);
   }
 
 
@@ -64,11 +65,12 @@ class Native extends Sub implements ItfNative
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return array|false
    */
-  public function fetchAll(string $query)
+  public function fetchAll(string $query, ...$additionalArgs)
   {
-    return $this->language->fetchAll(...\func_get_args());
+    return $this->language->fetchAll($query, ...$additionalArgs);
   }
 
 
@@ -78,11 +80,12 @@ class Native extends Sub implements ItfNative
    *
    * @param $query
    * @param int   $num
+   * @param mixed $additionalArgs
    * @return mixed
    */
-  public function fetchColumn($query, int $num = 0)
+  public function fetchColumn(string $query, int $num = 0, ...$additionalArgs)
   {
-    return $this->language->fetchColumn(...\func_get_args());
+    return $this->language->fetchColumn($query, $num, ...$additionalArgs);
   }
 
 
@@ -99,11 +102,12 @@ class Native extends Sub implements ItfNative
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return bool|\stdClass
    */
-  public function fetchObject($query)
+  public function fetchObject(string $query, ...$additionalArgs)
   {
-    return $this->language->fetchObject(...\func_get_args());
+    return $this->language->fetchObject($query, ...$additionalArgs);
   }
 
 
@@ -119,12 +123,13 @@ class Native extends Sub implements ItfNative
    * ```
    *
    * @param array|string $statement
+   * @param mixed $additionalArgs
    * @return false|int|Query
    */
-  public function query($statement)
+  public function query(string $statement, ...$additionalArgs)
   {
     if ($this->db->check()) {
-      return $this->language->query(...\func_get_args());
+      return $this->language->query($statement, ...$additionalArgs);
     }
 
     return false;

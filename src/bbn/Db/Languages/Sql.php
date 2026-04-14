@@ -21,6 +21,7 @@ use bbn\Db\Types;
 use PHPSQLParser\PHPSQLParser;
 use bbn\Db\Languages\Models\Sql\Commands;
 use bbn\Db\Languages\Models\Sql\Formatters;
+use Mpdf\Tag\S;
 
 use function array_key_exists;
 use function count;
@@ -2109,10 +2110,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @return false|PDOStatement
    * @throws Exception
    */
-  public function query($statement)
+  public function query(string $statement, ...$additionalArgs)
   {
     if (!$this->pdo) {
-      return null;
+      throw new Exception('No connection to the database');
     }
 
     $args = func_get_args();
@@ -4145,10 +4146,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param mixed values
    * @return mixed
    */
-  public function getOne()
+  public function getOne(string $statement, ...$additionalArgs)
   {
     /** @var Query $r */
-    if ($r = $this->query(...func_get_args())) {
+    if ($r = $this->query($statement, ...$additionalArgs)) {
       return $r->fetchColumn(0);
     }
 
@@ -4186,9 +4187,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param mixed values
    * @return null|array
    */
-  public function getKeyVal(): ?array
+  public function getKeyVal(string $statement, ...$additionalArgs): ?array
   {
-    if ($r = $this->query(...func_get_args())) {
+    if ($r = $this->query($statement, ...$additionalArgs)) {
       /** @var Query $r */
       if ($rows = $r->getRows()) {
         return X::indexByFirstVal($rows);
@@ -4209,13 +4210,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * (array)[1, 2, 3, 4]
    * ```
    *
-   * @param string query
-   * @param mixed values
+   * @param string $statement
+   * @param mixed $additionalArgs
    * @return array
    */
-  public function getColArray(): array
+  public function getColArray(string $statement, ...$additionalArgs): array
   {
-    if ($r = $this->getByColumns(...func_get_args())) {
+    if ($r = $this->getByColumns($statement, ...$additionalArgs)) {
       return array_values(current($r));
     }
 
@@ -4971,11 +4972,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return array|false
    */
-  public function fetch(string $query)
+  public function fetch(string $query, ...$additionalArgs)
   {
-    if ($r = $this->query(...func_get_args())) {
+    if ($r = $this->query($query, ...$additionalArgs)) {
       return $r->fetch();
     }
 
@@ -5010,11 +5012,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return array|false
    */
-  public function fetchAll(string $query)
+  public function fetchAll(string $query, ...$additionalArgs)
   {
-    if ($r = $this->query(...func_get_args())) {
+    if ($r = $this->query($query, ...$additionalArgs)) {
       return $this->fetchAllResults($r);
     }
 
@@ -5033,11 +5036,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * // (string) "john@mail.com"
    * ```
    *
-   * @param $query
+   * @param string $query
    * @param int   $num
+   * @param mixed $additionalArgs
    * @return mixed
    */
-  public function fetchColumn($query, int $num = 0)
+  public function fetchColumn(string $query, int $num = 0, ...$additionalArgs)
   {
     $args = func_get_args();
 
@@ -5045,7 +5049,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       unset($args[1]);
     }
 
-    if ($r = $this->query(...$args)) {
+    if ($r = $this->query($query, ...$additionalArgs)) {
       return $r->fetchColumn($num);
     }
 
@@ -5065,11 +5069,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * ```
    *
    * @param string $query
+   * @param mixed $additionalArgs
    * @return bool|stdClass
    */
-  public function fetchObject($query)
+  public function fetchObject(string $query, ...$additionalArgs)
   {
-    if ($r = $this->query(...func_get_args())) {
+    if ($r = $this->query($query, ...$additionalArgs)) {
       return $r->fetchObject();
     }
 

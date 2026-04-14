@@ -678,7 +678,7 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
 
   public function log($st): static
   {
-    return $this->subInternal()->log($st);
+    return $this->subInternal()->log(...\func_get_args());
   }
 
   public function setErrorMode(string $mode): static
@@ -711,29 +711,29 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     return $this->subInternal()->startFancyStuff();
   }
 
-  public function fetch(string $query)
+  public function fetch(string $query, ...$additionalArgs)
   {
-    return $this->subNative()->fetch($query);
+    return $this->subNative()->fetch($query, ...$additionalArgs);
   }
 
-  public function fetchAll(string $query)
+  public function fetchAll(string $query, ...$additionalArgs)
   {
-    return $this->subNative()->fetchAll($query);
+    return $this->subNative()->fetchAll($query, ...$additionalArgs);
   }
 
-  public function fetchColumn($query, int $num = 0)
+  public function fetchColumn(string $query, int $num = 0, ...$additionalArgs)
   {
-    return $this->subNative()->fetchColumn($query, $num);
+    return $this->subNative()->fetchColumn($query, $num, ...$additionalArgs);
   }
 
-  public function fetchObject($query)
+  public function fetchObject(string $query, ...$additionalArgs)
   {
-    return $this->subNative()->fetchObject($query);
+    return $this->subNative()->fetchObject($query, ...$additionalArgs);
   }
 
-  public function query($statement)
+  public function query(string $statement, ...$additionalArgs)
   {
-    return $this->subNative()->query($statement);
+    return $this->subNative()->query($statement, ...$additionalArgs);
   }
 
   public function executeStatement(string $statement)
