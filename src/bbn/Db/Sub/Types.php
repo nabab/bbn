@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Types
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Types as ItfTypes;
+
+class Types extends Sub implements ItfTypes
 {
   /****************************************************************
    *                                                              *

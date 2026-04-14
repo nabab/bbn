@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Query 
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Query as ItfQuery;
+
+class Query extends Sub implements ItfQuery
 {
   
   /****************************************************************

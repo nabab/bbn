@@ -1,8 +1,13 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Structure
+use Exception;
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Structure as ItfStructure;
+
+
+class Structure extends Sub implements ItfStructure
 {
   /****************************************************************
    *                                                              *

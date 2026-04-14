@@ -158,9 +158,15 @@ class Grid extends DbCls
         $this->log(['NO TABLES!', $db_cfg]);
       } else if (empty($db_cfg['fields'])) {
         foreach (array_unique(array_values($db_cfg['tables'])) as $t) {
-          foreach ($this->db->getFieldsList($t) as $f) {
-            if (!\in_array($f, $db_cfg['fields'], true)) {
-              $db_cfg['fields'][] = $f;
+          if (is_array($t)) {
+            /** @todo implement cfg for table */
+
+          }
+          else {
+            foreach ($this->db->getFieldsList($t) as $f) {
+              if (!\in_array($f, $db_cfg['fields'], true)) {
+                $db_cfg['fields'][] = $f;
+              }
             }
           }
         }

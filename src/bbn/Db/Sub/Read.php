@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Read
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Read as ItfRead;
+
+class Read extends Sub implements ItfRead
 {
   /****************************************************************
    *                                                              *

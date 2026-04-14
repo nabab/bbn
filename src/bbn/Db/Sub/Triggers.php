@@ -1,8 +1,12 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Triggers
+use bbn\Db;
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Triggers as ItfTriggers;
+
+class Triggers extends Sub implements ItfTriggers
 {
   /****************************************************************
    *                                                              *
@@ -20,12 +24,12 @@ trait Triggers
    * X::adump($ctrl->db->enableTrigger()); // bbn\Db Object
    * ```
    * 
-   * @return self
+   * @return Db
    */
-  public function enableTrigger(): static
+  public function enableTrigger(): Db
   {
     $this->language->enableTrigger();
-    return $this;
+    return $this->db;
   }
 
 
@@ -36,12 +40,12 @@ trait Triggers
    * X::adump($ctrl->db->disableTrigger());
    * ```
    * 
-   * @return self
+   * @return Db
    */
-  public function disableTrigger(): static
+  public function disableTrigger(): Db
   {
     $this->language->disableTrigger();
-    return $this;
+    return $this->db;
   }
 
   /**
@@ -80,13 +84,13 @@ trait Triggers
    * @param array|string|null   $kind     select|insert|update|delete
    * @param array|string|null   $moment   before|after
    * @param null|string|array   $tables   database's table(s) name(s)
-   * @return self
+   * @return Db
    */
-  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): static
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): Db
   {
     $this->language->setTrigger($function, $kind, $moment, $tables);
 
-    return $this;
+    return $this->db;
   }
 
 

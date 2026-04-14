@@ -249,6 +249,15 @@ interface Engines
   public function dropDatabase(string $database): bool;
 
   /**
+   * Checks if a table exists
+   *
+   * @param string $table
+   * @param string $database
+   * @return bool
+   */
+  public function tableExists(string $table, string $database = ''): bool;
+
+  /**
    * Creates a table
    *
    * @param string $table

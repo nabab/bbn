@@ -1,9 +1,13 @@
 <?php
 
-namespace bbn\Db\Internal;
-use bbn\X;
+namespace bbn\Db\Sub;
 
-trait Internal
+use bbn\X;
+use bbn\Db;
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Internal as ItfInternal;
+
+class Internal extends Sub implements ItfInternal
 {
   /****************************************************************
    *                                                              *
@@ -106,16 +110,16 @@ trait Internal
    * ```
    * 
    * @param mixed $st
-   * @return self
+   * @return Db
    */
-  public function log($st): static
+  public function log($st): Db
   {
     $args = \func_get_args();
     foreach ($args as $a){
       X::log($a, 'db');
     }
 
-    return $this;
+    return $this->db;
   }
 
 
@@ -128,12 +132,12 @@ trait Internal
    * ```
    *
    * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
-   * @return self
+   * @return Db
    */
-  public function setErrorMode(string $mode): static
+  public function setErrorMode(string $mode): Db
   {
     $this->language->setErrorMode($mode);
-    return $this;
+    return $this->db;
   }
 
 
@@ -163,15 +167,15 @@ trait Internal
    *
    * @param string $item 'db_name' or 'table_name'
    * @param string $mode 'columns','tables' or 'databases'
-   * @return self
+   * @return Db
    */
-  public function clearCache(string $item, string $mode): static
+  public function clearCache(string $item, string $mode): Db
   {
     if ($this->cacheHas($item, $mode)) {
       $this->cacheDelete($item, $mode);
     }
 
-    return $this;
+    return $this->db;
   }
 
 
@@ -183,13 +187,13 @@ trait Internal
    * // (db)
    * ```
    *
-   * @return self
+   * @return Db
    */
-  public function clearAllCache(): static
+  public function clearAllCache(): Db
   {
     $this->cacheDeleteAll();
     $this->language->initCache();
-    return $this;
+    return $this->db;
   }
 
 
@@ -201,15 +205,15 @@ trait Internal
    * // (self)
    * ```
    *
-   * @return self
+   * @return Db
    */
-  public function stopFancyStuff(): static
+  public function stopFancyStuff(): Db
   {
     if ($this->language) {
       $this->language->stopFancyStuff();
     }
 
-    return $this;
+    return $this->db;
   }
 
 
@@ -221,15 +225,15 @@ trait Internal
    * // (self)
    * ```
    * 
-   * @return self
+   * @return Db
    */
-  public function startFancyStuff(): static
+  public function startFancyStuff(): Db
   {
     if ($this->language) {
       $this->language->startFancyStuff();
     }
 
-    return $this;
+    return $this->db;
   }
 
 }

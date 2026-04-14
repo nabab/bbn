@@ -1243,10 +1243,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * Generates a string starting with SELECT ... FROM with corresponding parameters
    *
    * @param array $cfg The configuration array
+   * @param bool $subCfg If set to true, the configuration is a sub configuration and the function will not add unhex the UIDS
    * @return string
    * @throws Exception
    */
-  public function getSelect(array $cfg): string
+  public function getSelect(array $cfg, bool $subCfg = false): string
   {
     $res = '';
     if (is_array($cfg['tables']) && !empty($cfg['tables'])) {
@@ -1362,7 +1363,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             }
 
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
-            if ($is_uid) {
+            if ($is_uid && !$subCfg) {
               if (method_exists($this, 'getHexStatement')) {
                 $st = 'LOWER(' . call_user_func([$this, 'getHexStatement'], $this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
               }
@@ -1396,9 +1397,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $res          .= PHP_EOL;
       $tables_to_put = [];
       foreach ($cfg['tables'] as $alias => $tfn) {
-        $st = $this->tableFullName($tfn, true);
-        if (is_string($alias) && $alias !== $tfn) {
-          $st .= ' AS ' . $this->escape($alias);
+        if (is_array($tfn)) {
+          $st = "( $tfn[sql] ) AS " . $this->escape($alias);
+        }
+        else {
+          $st = $this->tableFullName($tfn, true);
+          if (is_string($alias) && $alias !== $tfn) {
+            $st .= ' AS ' . $this->escape($alias);
+          }
         }
 
         $tables_to_put[] = $st;
@@ -2801,7 +2807,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     }
 
     if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
-      $table = $this->tableFullName(is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
+      $currentTable = is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables'];
+      if (is_array($currentTable)) {
+        $currentTable = current($currentTable['tables']);
+      }
+
+      $table = $this->tableFullName($currentTable);
       // Specific to a table
       if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
         foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $f){
@@ -2810,7 +2821,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
               $cfg['run']  = false;
               $cfg['trig'] = false;
             }
-            else{
+            else {
               $cfg = $tmp;
             }
           }
@@ -2953,7 +2964,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @return array|null
    * @throws Exception
    */
-  public function processCfg(array $args, bool $force = false): ?array
+  public function processCfg(array $args, bool $subCfg = false): ?array
   {
     // Avoid confusion when
     while (isset($args[0]) && is_array($args[0])) {
@@ -3009,10 +3020,29 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             throw new Exception("$key is not defined");
           }
 
-          $tfn = $this->tableFullName($tab);
+          if (is_array($tab) && is_string($key) && count($args['tables']) === 1) {
+            $tableCfg = $this->processCfg($tab, true);
+            if (!empty($tableCfg['tables']) && (count($tableCfg['tables']) === 1)) {
+              $tfn     = $this->tableFullName($tableCfg['tables'][0] ?? $key);
+              $idx = $key;
+              $res['tables'][$idx] = $tableCfg;
+            }
+            else {
+              $this->error('Error! The table array must have only one table defined'.PHP_EOL.X::getDump($tab), false);
+              return null;
+            }
+          }
+          elseif (is_string($tab)) {
+            $tfn = $this->tableFullName($tab);
+            // 2 tables in the same statement can't have the same idx
+            $idx = is_string($key) ? $key : $tfn;
+            $res['tables'][$idx] = $tfn;
+          }
+          else {
+            $this->error('Error! The table must be defined as a string or an array with one table'.PHP_EOL.X::getDump($tab), false);
+            return null;
+          }
 
-          // 2 tables in the same statement can't have the same idx
-          $idx = is_string($key) ? $key : $tfn;
           // Error if they do
           if (isset($tables_full[$idx])) {
             $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']), false);
@@ -3020,7 +3050,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
 
           $tables_full[$idx]   = $tfn;
-          $res['tables'][$idx] = $tfn;
           if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
             $models[$tfn] = $model;
           }
@@ -3028,6 +3057,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
         if ((count($res['tables']) === 1)
           && ($tfn = array_values($res['tables'])[0])
+          && is_string($tfn)
           && isset($models[$tfn]['keys']['PRIMARY'])
           && (count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
           && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
@@ -3072,17 +3102,35 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
         }
 
+        $hasSub = false;
         foreach ($tables_full as $idx => $tfn){
           foreach ($models[$tfn]['fields'] as $col => $cfg){
-            $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
-            $csn                                             = $this->colSimpleName($col);
-            if (!isset($res['available_fields'][$csn])) {
-              /*
-              $res['available_fields'][$csn] = false;
+            if (isset($res['tables'][$idx]) && is_array($res['tables'][$idx])) {
+              if (in_array($col, $res['tables'][$idx]['fields'], true)) {
+                $hasSub = true;
+                $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
+                $csn                                             = $this->colSimpleName($col);
+                if (!isset($res['available_fields'][$csn])) {
+                  /*
+                  $res['available_fields'][$csn] = false;
+                  }
+                  else{
+                  */
+                  $res['available_fields'][$csn] = $idx;
+                }
               }
-              else{
-              */
-              $res['available_fields'][$csn] = $idx;
+            }
+            else {
+              $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
+              $csn                                             = $this->colSimpleName($col);
+              if (!isset($res['available_fields'][$csn])) {
+                /*
+                $res['available_fields'][$csn] = false;
+                }
+                else{
+                */
+                $res['available_fields'][$csn] = $idx;
+              }
             }
           }
         }
@@ -3205,7 +3253,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
             $res['sql'] = $res['select_st'];
             //die(json_encode([$res, $this->processCfg(['kind' => 'select', 'table' => 'bbn_users', 'fields' => [], 'where' => ['id' => 2]])]));
           }
-          elseif ($res['select_st'] = $this->getSelect($res)) {
+          elseif ($res['select_st'] = $this->getSelect($res, $subCfg)) {
             $res['sql'] = $res['select_st'];
           }
           break;
@@ -3396,12 +3444,20 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
 
       foreach ($res['tables'] as $i => $t){
-        if (!is_string($t)) {
-          X::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new Exception("Impossible to identify the tables, check the log");
+        if (is_array($t) && is_string($i) && count($res['tables']) === 1) {
+          $tableCfg = $this->_treat_arguments($t);
+          if ($tableCfg && !empty($tableCfg['tables'])) {
+            $res['tables'][$i] = $tableCfg;
+          }
         }
-
-        $res['tables'][$i] = $this->tableFullName($t);
+        else {
+          if (!is_string($t)) {
+            X::log([$cfg, debug_backtrace()], 'db_explained');
+            throw new Exception("Impossible to identify the tables, check the log");
+          }
+  
+          $res['tables'][$i] = $this->tableFullName($t);
+        }
       }
     }
     elseif (empty($res['union'])) {

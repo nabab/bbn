@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Write 
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Write as ItfWrite;
+
+class Write extends Sub implements ItfWrite
 {
   /****************************************************************
    *                                                              *

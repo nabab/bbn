@@ -1518,33 +1518,70 @@ MYSQL;
         }
 
         foreach ($cfg['tables'] as $alias => $table) {
-          $model = $db->modelize($table);
-          if (
-            isset($model['keys']['PRIMARY']['ref_table']) &&
-            ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
-          ) {
-            $change++;
-            $new_join[] = [
-              'table' => self::$table_uids,
-              'alias' => $db->tsn(self::$table_uids) . $change,
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
-                    'operator' => 'eq',
-                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
-                  ],
-                  [
-                    'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
-                    'operator' => '=',
-                    'exp' => '1'
+          if (\is_array($table)) {
+            foreach ($table['tables'] as $alias2 => $table2) {
+              $model = $db->modelize($table2);
+              if (
+                isset($model['keys']['PRIMARY']['ref_table']) &&
+                ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
+              ) {
+                if (!isset($table['tables'][$alias2]['join'])) {
+                  $cfg['tables'][$alias]['tables'][$alias2]['join'] = [];
+                }
+
+                $cfg['tables'][$alias]['tables'][$alias2]['join'][] = [
+                  'table' => self::$table_uids,
+                  'alias' => $db->tsn(self::$table_uids) . $change,
+                  'on' => [
+                    'conditions' => [
+                      [
+                        'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
+                        'operator' => 'eq',
+                        'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
+                      ],
+                      [
+                        'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
+                        'operator' => '=',
+                        'exp' => '1'
+                      ]
+                    ],
+                    'logic' => 'AND'
                   ]
-                ],
-                'logic' => 'AND'
-              ]
-            ];
+                ];
+                $cfg['tables'][$alias]['tables'][$alias2] = $db->reprocessCfg($cfg['tables'][$alias]['tables'][$alias2]);
+              }
+            }
+          }
+          else {
+            $model = $db->modelize($table);
+            if (
+              isset($model['keys']['PRIMARY']['ref_table']) &&
+              ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
+            ) {
+              $change++;
+              $new_join[] = [
+                'table' => self::$table_uids,
+                'alias' => $db->tsn(self::$table_uids) . $change,
+                'on' => [
+                  'conditions' => [
+                    [
+                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
+                    ],
+                    [
+                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
+                      'operator' => '=',
+                      'exp' => '1'
+                    ]
+                  ],
+                  'logic' => 'AND'
+                ]
+              ];
+            }
           }
         }
+
         if ($change) {
           $cfg['join'] = $new_join;
           $cfg['where'] = $cfg['filters'];

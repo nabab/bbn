@@ -1,12 +1,17 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
 use Exception;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\Db\Query;
 
-trait Actions
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Actions as ItfActions;
+
+class Actions extends Sub implements ItfActions
 {
   /****************************************************************
    *                                                              *
@@ -370,12 +375,12 @@ trait Actions
    * Copies a table to another database
    *
    * @param string $table The source table name
-   * @param self $target The target database connection
+   * @param Db $target The target database connection
    * @param bool $withData If true, the data will be copied too
    * @param string $newName The new name for the copied table
    * @return bool True if it succeeded
    */
-  public function copyTableTo(string $table, self $target, bool $withData = true, string $newName = ''): bool
+  public function copyTableTo(string $table, Db $target, bool $withData = true, string $newName = ''): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
     return $this->language->copyTableTo($table, $target, $withData, $newName);
@@ -564,7 +569,7 @@ trait Actions
       $cfg['kind'] = 'SELECT';
     }
 
-    if ($cfg = $this->processCfg($cfg)) {
+    if ($cfg = $this->db->processCfg($cfg)) {
       return $this->language->query($cfg['sql'], ...array_map(function($a) {
         return Str::isUid($a) ? hex2bin($a) : $a;
       }, $cfg['values']));
@@ -600,7 +605,7 @@ trait Actions
       $table_name = $database . '.' . $table_name; 
     }
 
-    $structure = $this->modelize($table_name);
+    $structure = $this->db->modelize($table_name);
     foreach ($structure['keys'] as $k => &$m) {
       unset($m['ref_db'], $m['constraint']);
       if (empty($m['ref_table'])) {
@@ -612,7 +617,7 @@ trait Actions
       if (!in_array($f['type'], ['decimal', 'float', 'double'])) {
         unset($f['decimals']);
       }
-      if (!$this->isNumericType($f['type'])) {
+      if (!$this->db->isNumericType($f['type'])) {
         unset($f['signed']);
       }
       if (empty($f['defaultExpression']) && is_null($f['default'])) {

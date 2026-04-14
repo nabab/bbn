@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Shortcuts
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Shortcuts as ItfShortcuts;
+
+class Shortcuts extends Sub implements ItfShortcuts
 {
   /****************************************************************
    *                                                              *
@@ -30,7 +33,7 @@ trait Shortcuts
    */
   public function tfn(string $table, bool $escaped = false): ?string
   {
-    return $this->tableFullName($table, $escaped);
+    return $this->db->tableFullName($table, $escaped);
   }
 
 
@@ -51,7 +54,7 @@ trait Shortcuts
    */
   public function tsn(string $table, bool $escaped = false): ?string
   {
-    return $this->tableSimpleName($table, $escaped);
+    return $this->db->tableSimpleName($table, $escaped);
   }
 
 
@@ -73,7 +76,7 @@ trait Shortcuts
    */
   public function cfn(string $col, ?string $table = null, bool $escaped = false): ?string
   {
-    return $this->colFullName($col, $table, $escaped);
+    return $this->db->colFullName($col, $table, $escaped);
   }
 
 
@@ -94,7 +97,7 @@ trait Shortcuts
    */
   public function csn(string $col, bool $escaped = false): ?string
   {
-    return $this->colSimpleName($col, $escaped);
+    return $this->db->colSimpleName($col, $escaped);
   }
 
 }

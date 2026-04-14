@@ -1,10 +1,13 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
 use bbn\Str;
+use bbn\Db;
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Utilities as ItfUtilities;
 
-trait Utilities
+class Utilities extends Sub implements ItfUtilities
 {
   /****************************************************************
    *                                                              *
@@ -45,13 +48,13 @@ trait Utilities
    * // (db)
    * ```
    * @param mixed $id The last inserted id
-   * @return self
+   * @return Db
    */
-  public function setLastInsertId($id = ''): static
+  public function setLastInsertId($id = ''): Db
   {
     $this->language->setLastInsertId($id);
 
-    return $this;
+    return $this->db;
   }
 
   /**
@@ -114,7 +117,7 @@ trait Utilities
    */
   public function newId($table, int $min = 1)
   {
-    $tab = $this->modelize($table);
+    $tab = $this->db->modelize($table);
     if (\count($tab['keys']['PRIMARY']['columns']) !== 1) {
       die("Error! Unique numeric primary key doesn't exist");
     }
@@ -128,7 +131,7 @@ trait Utilities
         $max = mt_getrandmax();
       }
 
-      if (($max > $min) && ($table = $this->tfn($table, true))) {
+      if (($max > $min) && ($table = $this->db->tfn($table, true))) {
         $i = 0;
         do {
           $id = random_int($min, $max);
@@ -140,7 +143,7 @@ trait Utilities
           */
           $i++;
         }
-        while (($i < 100) && $this->select($table, [$id_field], [$id_field => $id]));
+        while (($i < 100) && $this->db->select($table, [$id_field], [$id_field => $id]));
         return $id;
       }
     }
@@ -160,14 +163,14 @@ trait Utilities
   public function randomValue($col, $table)
   {
     $val = null;
-    if (($tab = $this->modelize($table)) && isset($tab['fields'][$col])) {
+    if (($tab = $this->db->modelize($table)) && isset($tab['fields'][$col])) {
       foreach ($tab['keys'] as $cfg){
         if ($cfg['unique']
             && !empty($cfg['ref_column'])
             && (\count($cfg['columns']) === 1)
             && ($col === $cfg['columns'][0])
         ) {
-          return ($num = $this->count($cfg['ref_column'])) ? $this->selectOne(
+          return ($num = $this->db->count($cfg['ref_column'])) ? $this->db->selectOne(
             [
             'tables' [$cfg['ref_table']],
             'fields' => [$cfg['ref_column']],

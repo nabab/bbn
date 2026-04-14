@@ -1,10 +1,13 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
 use Exception;
+use bbn\Db;
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Engine as ItfEngine;
 
-trait Engine
+class Engine extends Sub implements ItfEngine
 {
   /****************************************************************
    *                                                              *
@@ -25,7 +28,7 @@ trait Engine
    */
   public function postCreation()
   {
-    if ($this->language && !$this->engine) {
+    if ($this->language && !$this->db->getEngine()) {
       $this->language->postCreation();
     }
   }
@@ -41,13 +44,13 @@ trait Engine
    * ```
    *
    * @param string $db The database's name
-   * @return self
+   * @return Db
    */
-  public function change(string $db): static
+  public function change(string $db): Db
   {
     $this->language->change($db);
 
-    return $this;
+    return $this->db;
   }
 
 
@@ -188,12 +191,12 @@ trait Engine
    * $db->setTimezone('Europe/Paris');
    * ```
    *
-   * @return self
+   * @return Db
    */
-  public function setTimezone(string $tz): static
+  public function setTimezone(string $tz): Db
   {
     $this->language->setTimezone($tz);
-    return $this;
+    return $this->db;
   }
 
 
@@ -205,12 +208,12 @@ trait Engine
    * // (self)
    * ```
    *
-   * @return self
+   * @return Db
    */
-  public function disableKeys(): static
+  public function disableKeys(): Db
   {
     $this->language->disableKeys();
-    return $this;
+    return $this->db;
   }
 
 
@@ -222,12 +225,12 @@ trait Engine
    * // (db)
    * ```
    *
-   * @return self
+   * @return Db
    */
-  public function enableKeys(): static
+  public function enableKeys(): Db
   {
     $this->language->enableKeys();
-    return $this;
+    return $this->db;
   }
 
 
@@ -422,7 +425,7 @@ trait Engine
    * @return string
    * @throws Exception
    */
-  public function getSelect(array $cfg): string
+  public function getSelect(array $cfg, bool $subCfg = false): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -461,7 +464,7 @@ trait Engine
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
     $cfg['kind'] = 'INSERT';
-    return $this->language->getInsert($this->processCfg($cfg));
+    return $this->language->getInsert($this->db->processCfg($cfg));
   }
 
 
@@ -489,7 +492,7 @@ trait Engine
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
     $cfg['kind'] = 'UPDATE';
-    return $this->language->getUpdate($this->processCfg($cfg));
+    return $this->language->getUpdate($this->db->processCfg($cfg));
   }
 
 
@@ -510,7 +513,7 @@ trait Engine
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
     $cfg['kind'] = 'DELETE';
-    return $this->language->getDelete($this->processCfg($cfg));
+    return $this->language->getDelete($this->db->processCfg($cfg));
   }
 
 
@@ -807,7 +810,7 @@ trait Engine
       $res = (int)$this->language->rawQuery($st);
     }
 
-    $this->modelize($table, true);
+    $this->db->modelize($table, true);
 
     return $res;
   }

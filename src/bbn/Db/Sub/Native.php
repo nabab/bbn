@@ -1,8 +1,11 @@
 <?php
 
-namespace bbn\Db\Internal;
+namespace bbn\Db\Sub;
 
-trait Native
+use bbn\Db\Models\Cls\Sub;
+use bbn\Db\Models\Itf\Native as ItfNative;
+
+class Native extends Sub implements ItfNative
 {
   /****************************************************************
    *                                                              *
@@ -120,7 +123,7 @@ trait Native
    */
   public function query($statement)
   {
-    if ($this->check()) {
+    if ($this->db->check()) {
       return $this->language->query(...\func_get_args());
     }
 
@@ -130,7 +133,7 @@ trait Native
 
   public function executeStatement(string $statement)
   {
-    if ($this->check()) {
+    if ($this->db->check()) {
       return $this->language->executeStatement($statement);
     }
 
