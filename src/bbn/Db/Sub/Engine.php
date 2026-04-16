@@ -807,7 +807,10 @@ class Engine extends Sub implements ItfEngine
     }
 
     if ($st = $this->language->getAlterTable($table, $cfg)) {
-      $res = (int)$this->language->rawQuery($st);
+      $res = $this->language->rawQuery($st);
+      if ($res && !\is_int($res)) {
+        $res = 1;
+      }
     }
 
     $this->db->modelize($table, true);

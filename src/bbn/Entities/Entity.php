@@ -525,7 +525,7 @@ class Entity
           $obj = match(true) {
             $table === $this->table => $this->entities,
             $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
-            true => $this->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
+            true => $this->entities->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
           };
           if (method_exists($obj, 'dbTraitCacheGetSet')) {
             foreach ($ids as $i => $id) {
@@ -679,24 +679,5 @@ class Entity
   public function cName($id, $method = ''): ?string
   {
     return $this->_cache_name($id, $method);
-  }
-
-
-  protected static function getDbObject($table, $cfg, $db, $entities, $entity = null)
-  {
-    $keys = Entities::getEntityKeys($db, $entities);
-    try {
-      if (isset($keys[$table])) {
-        $cls = new $cfg['class']($db, $entities, $entity);
-      }
-      else {
-        $cls = new $cfg['class']($db);
-      }
-    }
-    catch (Exception $e) {
-      throw new Exception(X::_("The class %s for table %s cannot be instantiated", $cfg['class'], $cfg['table']));
-    }
-
-    return $cls;
   }
 }

@@ -13,6 +13,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Models\Entities;
+use bbn\Models\Cls\Nullall;
 use bbn\Entities\Entity;
 use bbn\Models\Tts\TmpFiles;
 
@@ -76,7 +77,7 @@ class Changes extends EntityTable
   protected $skipEmailVerfication = false;
 
 
-  public function __construct(Db &$db, Entities $entities, Entity $entity)
+  public function __construct(Db &$db, Entities $entities, Entity|Nullall $entity)
   {
     parent::__construct($db, $entities, $entity);
     self::setTables();

@@ -27,7 +27,7 @@ use bbn\Appui\Option;
 use bbn\Appui\Uauth;
 use bbn\Appui\History;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbOps;
+use bbn\Models\Cls\Nullall;
 
 use function is_int;
 
@@ -517,6 +517,25 @@ abstract class Entities extends DbCls
 
     return self::$entityKeys;
   }
+
+  public static function getDbObject($table, $cfg, $db, $entities, $entity = null)
+  {
+    $keys = Entities::getEntityKeys($db, $entities);
+    try {
+      if (isset($keys[$table])) {
+        $cls = new $cfg['class']($db, $entities, $entity ?: new Nullall());
+      }
+      else {
+        $cls = new $cfg['class']($db);
+      }
+    }
+    catch (Exception $e) {
+      throw new Exception(X::_("The class %s for table %s cannot be instantiated", $cfg['class'], $cfg['table']));
+    }
+
+    return $cls;
+  }
+
 
 
   protected function factorEntityObject(string $method, string $clsName, ?Entity $entity = null): object

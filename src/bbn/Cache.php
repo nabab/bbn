@@ -479,28 +479,32 @@ class Cache extends Basic implements CacheInterface
    * Returns the cache value, false otherwise.
    *
    * @param string $key The name of the item
-   * @param int    $ttl  The cache length
+   * @param mixed  $notFoundValue What to return if the value is not found
    * @return mixed
    */
-  public function get(string $key, $nullValue = null): mixed
+  public function get(string $key, $notFoundValue = null): mixed
   {
+    if ($notFoundValue && \is_int($notFoundValue)) {
+      throw new Exception(X::_("The not found value shouldn't be an integer, you must have forgotten to unset the ttl parameter on get"));
+    }
+
     $info = $this->info($key);
     if (!$info || empty($info['version']) || !isset($info['expire'])) {
-      return $nullValue;
+      return $notFoundValue;
     }
 
     if ($info['expire'] <= microtime(true)) {
       $this->delete($key);
-      return $nullValue;
+      return $notFoundValue;
     }
 
     $payloadKey = "{$key}" . self::$sep . "{$info['version']}";
     if (!$this->hasRaw($payloadKey)) {
       $this->delete($key);
-      return $nullValue;
+      return $notFoundValue;
     }
     
-    return $this->getRaw($payloadKey) ?? $nullValue;
+    return $this->getRaw($payloadKey) ?? $notFoundValue;
   }
 
 
@@ -583,7 +587,11 @@ class Cache extends Basic implements CacheInterface
 
           return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
         case 'redis':
-          return $this->obj->set($key, serialize($val), ['ex' => $ttl ?: self::$max_ttl]);
+          if ($this->obj->set($key, serialize($val), ['ex' => $ttl ?: self::$max_ttl])) {
+            return true;
+          }
+
+          return false;
         case 'memcache':
           return $this->obj->set(
             $key, serialize($val), $ttl ?: self::$max_ttl
@@ -879,16 +887,77 @@ class Cache extends Basic implements CacheInterface
 
   public function setMultiple($values, $ttl = null): bool
   {
-    if (self::$type === 'redis') {
-      $this->obj->multi();
-    }
-    foreach ($values as $k => $v) {
-      if (!$this->set($k, $v, $ttl)) {
-        return false;
+    $done = 0;
+    $itemIndexes = [];
+    $sep = $this->getSeparator();
+
+    foreach ($values as $key => $val) {
+      $bits = X::split($key, $sep);
+      if (!$done) {
+        $rootChild = $bits[0];
+        $rootIndexes = $this->getKeys('');
+        if (!in_array($rootChild, $rootIndexes, true)) {
+          $rootIndexes[] = $rootChild;
+          $this->setRaw('__keys', $rootIndexes, 0);
+        }
+        while (count($bits) > 1) {
+          $child = array_pop($bits);
+          $cur = X::join($bits, $sep);
+          $indexes = $this->getKeys($cur);
+          if (empty($itemIndexes)) {
+            array_push($itemIndexes, $child, ...$indexes);
+          }
+  
+          if (!in_array($child, $indexes, true)) {
+            $indexes[] = $child;
+            $indexKey = $cur . $sep . '__keys';
+            $this->setRaw($indexKey, $indexes, 0);
+          }
+        }
       }
+      else {
+        $itemIndexes[] = end($bits);
+      }
+
+
+      $done++;
+    }
+
+    array_pop($bits);
+    $cur = X::join($bits, $sep);
+    $indexKey = $cur . $sep . '__keys';
+    $this->setRaw($indexKey, array_unique($itemIndexes), 0);
+
+    $ttl  = self::ttl($ttl);
+    $realTtl = $ttl ?: self::$max_ttl;
+    if (self::$type === 'redis') {
+      $this->obj->multi(\Redis::PIPELINE);
+    }
+
+    $nowSec = time();
+    $now = microtime(true);
+    $next = "{$nowSec}|1";
+    foreach ($values as $key => $val) {
+      $infoKey = "{$key}{$sep}__info";
+      $hash = self::makeHash($val);
+      $num = 0;
+      $payloadKey = "{$key}{$sep}{$next}";
+      $info = [
+        'num' => $num + 1,
+        'hash' => $hash,
+        'timestamp' => $now,
+        'expire' => $now + $realTtl,
+        'ttl' => $ttl,
+        'version' => $next
+      ];
+
+      // Always write payload so TTL stays in sync with metadata
+      $this->setRaw($payloadKey, $val, $ttl);
+
+      $this->setRaw($infoKey, $info, 0);
     }
     if (self::$type === 'redis') {
-      return $this->obj->exec();
+      return (bool)$this->obj->exec();
     }
 
     return true;

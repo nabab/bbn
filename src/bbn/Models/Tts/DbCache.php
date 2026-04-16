@@ -361,6 +361,65 @@ trait DbCache
     return self::$dbTraitCache->info($cn);
   }
 
+  public function dbTraitCacheImport(): ?int
+  {
+    static::dbTraitGlobalCacheInit();
+    if (!isset($this->class_table)) {
+      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", static::class));
+    }
+    $cfg = $this->getClassCfg();
+    $f = array_values($cfg["arch"][$this->class_table_index]);
+    $tableCfg = self::dbConfigGetTableClasses($this->db);
+    if (is_array($cfg["cache"]) && isset($cfg["cache"]["excluded"])) {
+      $excluded = $cfg["cache"]["excluded"];
+      foreach ($excluded as $col) {
+        if (in_array($col, $f)) {
+          unset($f[array_search($col, $f)]);
+        }
+      }
+    }
+    $start = 0;
+    $limit = 10000;
+    $num = 0;
+    $cache = self::$dbTraitCache;
+    $idCol = $tableCfg[$this->class_table]['primary'][0];
+    while (
+      $data = $this->dbTraitSelection(
+        [],
+        [$idCol => 'ASC'],
+        $limit,
+        $start,
+        "array",
+        array_values($f),
+      )
+    ) {
+      if (!empty($tableCfg[$this->class_table]['junctions'])) {
+        foreach ($data as &$row) {
+          $this->dbTraitCacheApplyJunctions(
+            $row,
+            $tableCfg[$this->class_table]['junctions'],
+            $tableCfg
+          );
+        }
+      }
+
+      $toCache = [];
+      foreach ($data as $d) {
+        $toCache[$this->dbTraitRowCacheKey($d[$idCol])] = $d;
+      }
+
+      if ($cache->setMultiple($toCache, 0)) {
+        $num += count($data);
+        $start += $limit;
+      }
+      else {
+        return null;
+      }
+    }
+
+    return $num;
+  }
+
   public function dbTraitCacheGetSet(string $id, array $fields = []): ?array
   {
     static::dbTraitGlobalCacheInit();
