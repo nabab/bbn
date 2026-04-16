@@ -368,6 +368,7 @@ trait DbCache
       throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", static::class));
     }
     $cfg = $this->getClassCfg();
+    $cacheFn = $cfg["cache"]["fn"] ?? null;
     $f = array_values($cfg["arch"][$this->class_table_index]);
     $tableCfg = self::dbConfigGetTableClasses($this->db);
     if (is_array($cfg["cache"]) && isset($cfg["cache"]["excluded"])) {
@@ -393,6 +394,12 @@ trait DbCache
         array_values($f),
       )
     ) {
+      if ($cacheFn && method_exists($this, $cacheFn)) {
+        foreach ($data as &$d) {
+          $d = $this->$cacheFn($d);
+        }
+      }
+
       if (!empty($tableCfg[$this->class_table]['junctions'])) {
         foreach ($data as &$row) {
           $this->dbTraitCacheApplyJunctions(

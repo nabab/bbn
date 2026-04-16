@@ -32,6 +32,10 @@ class Cache extends Basic implements CacheInterface
   private string $host;
   private int $port;
 
+  protected bool $isRecording = false;
+
+  protected array $recorded = [];
+
   protected $locks = [];
 
   protected static bool $is_init = false;
@@ -579,6 +583,13 @@ class Cache extends Basic implements CacheInterface
   public function setRaw($key, $val, $ttl): bool
   {
     if (self::$type) {
+      if ($this->isRecording) {
+        $this->recorded[] = [
+          'key' => $key,
+          'val' => $val,
+          'ttl' => $ttl
+        ];
+      }
       switch (self::$type){
         case 'apc':
           if (!function_exists('\\apcu_store')) {
@@ -1226,6 +1237,20 @@ class Cache extends Basic implements CacheInterface
   public function hasLock($key): bool
   {
     return $this->hasRaw($this->getLockKey($key));
+  }
+
+  public function startRecording(): void
+  {
+    $this->isRecording = true;
+    $this->recorded = [];
+  }
+
+  public function stopRecording(): array
+  {
+    $this->isRecording = false;
+    $recorded = $this->recorded;
+    $this->recorded = [];
+    return $recorded;
   }
 
   protected function setLock($key, $length = 2): bool
