@@ -238,6 +238,35 @@ class Cache extends Basic implements CacheInterface
     }
   }
 
+  public function check(): bool
+  {
+    if (self::$type === 'files') {
+      return $this->obj->isDir($this->path);
+    }
+    elseif (self::$type === 'redis') {
+      try {
+        return $this->obj->ping();
+      }
+      catch (Exception $e) {
+        return false;
+      }
+    }
+    elseif (self::$type === 'memcache') {
+      try {
+        $stats = $this->obj->getStats();
+        return is_array($stats) && count($stats) > 0;
+      }
+      catch (Exception $e) {
+        return false;
+      }
+    }
+    elseif (self::$type === 'apc') {
+      return function_exists('\\apcu_store');
+    }
+
+    return false;
+  }
+
 
   /**
    * Checks whether a valid cache exists for the given item.

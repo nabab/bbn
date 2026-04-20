@@ -2744,7 +2744,10 @@ class X
           $cmp1 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v1, 'lower'));
           $cmp2 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v2, 'lower'));
 
-          return strcmp($cmp1, $cmp2);
+          $res = strcmp($cmp1, $cmp2);
+          if ($res !== 0) {
+            return $res;
+          }
         }
 
         return 0;
