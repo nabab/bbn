@@ -970,6 +970,30 @@ class Medias extends DbCls
     return null;
   }
 
+  public function getMediaInfo(string $id){
+    $cf = &$this->class_cfg;
+    if (Str::isUid($id)
+      && ($link_type = $this->opt->fromCode("link", $this->opt_id))
+      && ($media = $this->db->rselect($cf["table"], $cf["arch"]["medias"], [
+        $cf["arch"]["medias"]["id"] => $id,
+      ]))
+      && ($link_type !== $media[$cf["arch"]["medias"]["type"]])
+    ) {
+      $media["content"] = json_decode($media["content"], true);
+      $file = $this->getPath($media);
+      $media["file"] = $file;
+      $media["full_path"] = $file;
+      $media["is_image"] = $this->isImage($file);
+      $media["path"] = empty($media["is_image"])
+        ? $this->getFileUrl($id)
+        : $this->getImageUrl($id);
+      $media["url"] = $this->getUrl($id);
+      return $media;
+    }
+
+    return null;
+  }
+
   /**
    * @param $medias
    * @param $dest

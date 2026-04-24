@@ -13,6 +13,7 @@ use bbn\Entities\Tables\Link;
 use bbn\Entities\Models\Internals\EntityObjects;
 use bbn\Appui\Option;
 use bbn\Appui\Uauth;
+use bbn\Appui\Medias;
 use bbn\Models\Tts\Cache as CacheTts;
 
 use function in_array;
@@ -517,6 +518,7 @@ class Entity
     $cfg = Entities::dbConfigGetTableClasses($this->db);
     $identity = $this->identity();
     $address = $this->address();
+    $medias = new Medias($this->db);
     $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];
     foreach ($res as $table => $ids) {
       if (isset($cfg[$table])) {
@@ -555,6 +557,16 @@ class Entity
         elseif ($table === 'bbn_addresses') {
           foreach ($ids as $id) {
             if ($d = $address->pickOne($id, $this->getId())) {
+              $final[$table][$id] = [
+                'state' => Cache::makeHash($d),
+                'data' => $d
+              ];
+            }
+          }
+        }
+        elseif ($table === 'bbn_medias') {
+          foreach ($ids as $id) {
+            if ($d = $medias->getMediaInfo($id)) {
               $final[$table][$id] = [
                 'state' => Cache::makeHash($d),
                 'data' => $d
