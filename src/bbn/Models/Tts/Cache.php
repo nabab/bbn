@@ -213,7 +213,7 @@ trait Cache
   {
     $this->cacheInit();
     $cn = $this->_cache_name($uid, $method, $locale);
-    $this->cacheSetKey($cn);
+    //$this->cacheSetKey($cn);
     $this->cache_engine->set($cn, $data, $ttl);
     return $this;
   }

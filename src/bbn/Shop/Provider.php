@@ -35,6 +35,11 @@ class Provider extends DbCls
   private $note;
 
   /**
+   * @var Medias
+   */
+  private $media;
+
+  /**
    * @var Option
    */
   private $opt;
@@ -217,7 +222,7 @@ class Provider extends DbCls
       ($cfg = $this->dbTraitSelectOne($this->fields["cfg"], [
         $this->fields["id"] => $id,
       ])) &&
-      ($cfg = json_decode($cfg, true))
+      ($cfg = Str::isJson($cfg) ? json_decode($cfg, true) : $cfg)
     ) {
       return X::getRow($cfg, ["territory" => $territory]);
     }

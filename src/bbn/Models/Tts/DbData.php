@@ -126,9 +126,10 @@ trait DbData
                   $r[$v['field']] = $r[$f['cfg']][$v['field']];
                 }
               }
+
+              unset($r[$f['cfg']]);
             }
 
-            unset($r[$f['cfg']]);
           }
         }
 
@@ -144,9 +145,9 @@ trait DbData
               $res->{$v['field']} = $res->{$f['cfg']}->{$v['field']};
             }
           }
-        }
 
-        unset($res->{$f['cfg']});
+          unset($res->{$f['cfg']});
+        }
       }
     }
 

@@ -249,7 +249,7 @@ trait I18n
       if ($c = $this->getCache($id, __FUNCTION__)) {
         return $c['i18n'];
       }
-        
+
       $i18n = null;
       $clsCfg = $this->getClassCfg();
       $idParent = $this->dbTraitSelectOne($clsCfg['arch']['options']['id_parent'], $id);
@@ -259,7 +259,7 @@ trait I18n
       }
 
       if ($jsonCfg = $this->dbTraitSelectOne($clsCfg['arch']['options']['cfg'], $idParent)) {
-        $cfg = json_decode($jsonCfg, true);
+        $cfg = Str::isJson($jsonCfg) ? json_decode($jsonCfg, true) : $jsonCfg;
         X::ddump($cfg);
         if (!$level && !empty($cfg['i18n'])) {
           $i18n = $cfg['i18n'];
@@ -276,7 +276,7 @@ trait I18n
       if (empty($i18n)) {
         $i18n = $this->findI18nById($idParent, $level + 1);
       }
-      
+
       $this->setCache($id, __FUNCTION__, ['i18n' => $i18n]);
       return $i18n;
     }
