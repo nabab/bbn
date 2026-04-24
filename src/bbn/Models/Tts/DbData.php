@@ -117,8 +117,17 @@ trait DbData
       if (is_array($res)) {
         foreach ($res as &$r) {
           if (!empty($r[$f['cfg']])) {
-            $cfg = json_decode($r[$f['cfg']], true);
-            $r = array_merge($cfg, $r);
+            $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
+            if (!empty($this->class_cfg['cfg'])) {
+              foreach ($this->class_cfg['cfg'] as $v) {
+                if (isset($v['field'])
+                  && !array_key_exists($v['field'], $r)
+                ) {
+                  $r[$v['field']] = $r[$f['cfg']][$v['field']];
+                }
+              }
+            }
+
             unset($r[$f['cfg']]);
           }
         }
@@ -126,8 +135,17 @@ trait DbData
         unset($r);
       }
       elseif (!empty($res->{$f['cfg']})) {
-        $cfg = json_decode($res->{$f['cfg']});
-        $res = X::mergeObjects($cfg, $res);
+        $res->{$f['cfg']} = json_decode($res->{$f['cfg']});
+        if (!empty($this->class_cfg['cfg'])) {
+          foreach ($this->class_cfg['cfg'] as $v) {
+            if (isset($v['field'])
+              && !property_exists($res, $v['field'])
+            ) {
+              $res->{$v['field']} = $res->{$f['cfg']}->{$v['field']};
+            }
+          }
+        }
+
         unset($res->{$f['cfg']});
       }
     }
