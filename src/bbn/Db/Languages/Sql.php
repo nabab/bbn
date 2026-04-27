@@ -650,6 +650,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     try {
       $result = $this->pdo->query(...func_get_args());
     }
+    catch (PDOException $e) {
+      X::logException($e);
+    }
     finally {
       if (!empty($switch_to_fancy)) {
         $this->startFancyStuff();
