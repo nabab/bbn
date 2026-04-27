@@ -918,7 +918,7 @@ class Dashboard extends Basic
 
             // Set the widget's url
             if (!empty($o[$this->archOpt['code']])) {
-              $o['url'] = $url . $o[$this->archOpt['code']];
+              $o['source'] = $url . $o[$this->archOpt['code']];
             }
 
             unset(
@@ -962,7 +962,7 @@ class Dashboard extends Basic
             $o[$this->archBits['id_option']] = $o[$this->archOpt['id']];
             // Set the widget's url
             if (!empty($o[$this->archOpt['code']])) {
-              $o['url'] = $url . $o[$this->archOpt['code']];
+              $o['source'] = $url . $o[$this->archOpt['code']];
             }
 
             unset(
@@ -1145,7 +1145,7 @@ class Dashboard extends Basic
     $widget[$this->archOpt['id_alias']] = $widget[$this->archOpt['id_alias']] ?? null;
     $widget['closable']                 = $widget['closable'] ?? false;
     $widget['observe']                  = $widget['observe'] ?? false;
-    $widget['limit']                    = $widget['limit'] ?? 5;
+    $widget['limit']                    = $widget['limit'] ?? 100;
     $widget['buttonsRight']             = $widget['buttonsRight'] ?? [];
     $widget['buttonsLeft']              = $widget['buttonsLeft'] ?? [];
     $widget['options']                  = $widget['options'] ?? new stdClass();
@@ -1241,7 +1241,7 @@ class Dashboard extends Basic
               $o['key'] = $w[$this->archBits['id']];
               // Set the widget's url
               if (!empty($o[$this->archOpt['code']])) {
-                $o['url'] = $url . $o[$this->archOpt['code']];
+                $o['source'] = $url . $o[$this->archOpt['code']];
               }
 
               // Get the preferences of the single widget
@@ -1294,9 +1294,9 @@ class Dashboard extends Basic
               $this->archBits['text'] => $w[$this->archBits['text']],
               $this->archBits['num'] => $w[$this->archBits['num']]
             ]);
-            // Set the widget's url
+            // Set the widget's source
             if (!empty($o['code'])) {
-              $o['url'] = $url . $o['code'];
+              $o['source'] = $url . $o['code'];
             }
             // Get the preferences of the single widget
             if (!empty($widgetPrefs[$o['key']])) {

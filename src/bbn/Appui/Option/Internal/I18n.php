@@ -260,7 +260,6 @@ trait I18n
 
       if ($jsonCfg = $this->dbTraitSelectOne($clsCfg['arch']['options']['cfg'], $idParent)) {
         $cfg = Str::isJson($jsonCfg) ? json_decode($jsonCfg, true) : $jsonCfg;
-        X::ddump($cfg);
         if (!$level && !empty($cfg['i18n'])) {
           $i18n = $cfg['i18n'];
         }
