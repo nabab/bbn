@@ -1216,7 +1216,7 @@ MYSQL;
     return (bool)$num;
   }
 
-  public static function upgrade(string $table, ?string $idUser = null, null|int|string $date = null): array
+  public static function upgrade(string $table, ?string $idUser = null, null|int|string $date = null, bool $allRows = false): array
   {
     $res = ['success' => false, 'total' => 0, 'updated' => 0, 'inserted' => 0];
     if ($db = self::_get_db()) {
@@ -1241,12 +1241,16 @@ MYSQL;
           $fields = $structure['keys']['PRIMARY']['columns'];
           if (count($fields) > 1) {
             try {
-              $db->dropKey($table, 'PRIMARY');
+              $dropres = $db->dropKey($table, 'PRIMARY');
+              if (!$dropres) {
+                $res['error'] = X::_("Impossible to drop the primary key");
+              }
+
+              $structure = $db->modelize($table, true);
             }
             catch (Exception $e) {
               $res['error'] = $e->getMessage();
             }
-
             if (empty($res['error'])) {
               $structure = $db->modelize($table, true);
               $structure['keys'] = [
@@ -1257,7 +1261,11 @@ MYSQL;
               ];
               //X::ddump($db->getCreateKeys($table, $ncfg), $ncfg);
               try {
-                $db->createKeys($table, $structure);
+                $ckres = $db->createKeys($table, $structure);
+                if (!$ckres) {
+                  $res['error'] = X::_("Impossible to create the new key");
+                }
+
                 $structure = $db->modelize($table, true);
               }
               catch (Exception $e) {
@@ -1284,13 +1292,13 @@ MYSQL;
           }
 
           $db->disableTrigger();
-          $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) ? [$primary => null] : []);
+          $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) && !$allRows ? [$primary => null] : []);
           $res['total'] = count($data);
           if ($areTriggerEnabled) {
             $db->enableTrigger();
           }
-
           if (!isset($structure['keys']['PRIMARY'])) {
+            $primary = 'id';
             if (!isset($structure['fields']['id'])) {
               $db->alter($table, [
                 [
@@ -1313,13 +1321,16 @@ MYSQL;
               while ($db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
                 $id = X::makeUid();
               }
-    
+
               $res['updated'] += $db->update($table, ['id' => $id], $d);
               $d[$primary] = $id;
-              //$db->insert
             }
+
             unset($d);
-  
+            if ($areTriggerEnabled) {
+              $db->enableTrigger();
+            }
+
             $structure['fields']['id']['key'] = 'PRI';
             $structure['keys'] = [
               'PRIMARY' => [
@@ -1328,17 +1339,21 @@ MYSQL;
               ]
             ];
             try {
-              $db->createKeys($table, $structure);
+              $ckres = $db->createKeys($table, $structure);
+              if (!$ckres) {
+                $res['error'] = X::_("Impossible to create the new key");
+              }
+
               $structure = $db->modelize($table, true);
-              $database->importTable($table, $dbId);
+              $impres = $database->importTable($table, $dbId);
+              if (!$impres) {
+                $res['error'] = X::_("Impossible to import the table in the options");
+              }
+
               $ostructure = $database->modelize($table);
             }
             catch (Exception $e) {
               $res['error'] = $e->getMessage();
-            }
-
-            if ($areTriggerEnabled) {
-              $db->enableTrigger();
             }
           }
         }
@@ -1375,7 +1390,7 @@ MYSQL;
           }
         }
         else {
-          $res['error'] = X::_("The table already has a primary key linked to the history table");
+          $res['error'] = !empty($res['error']) ? $res['error'] : X::_("The table already has a primary key linked to the history table");
         }
       }
     }
