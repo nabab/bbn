@@ -2010,7 +2010,7 @@ final class Mvc implements Api
    */
   public function getPluginView(string $path, string $mode, array $data, string $plugin): ?string
   {
-    return $this->customPluginView(Router::parse($path), $mode, $data, $this->pluginName($plugin));
+    return $this->customPluginView(Router::parse($path), $mode, $data, $this->isPlugin($plugin) ? $plugin : $this->pluginName($plugin));
   }
 
   /**
@@ -2112,7 +2112,7 @@ final class Mvc implements Api
    */
   public function getPluginModel(string $path, array $data, Controller $ctrl, string $plugin, ?int $ttl = null): ?array
   {
-    return $this->customPluginModel(Router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
+    return $this->customPluginModel(Router::parse($path), $data, $ctrl, $this->isPlugin($plugin) ? $plugin : $this->pluginName($plugin), $ttl);
   }
 
   /**

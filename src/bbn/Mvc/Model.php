@@ -336,9 +336,9 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getPluginModel($path, array $data = [], string|null $plugin = null, int $ttl = 0): ?array
+  public function getPluginModel(string $path, array $data = [], string|null $plugin = null, int $ttl = 0): ?array
   {
-    return $this->_ctrl->getPluginModel(...\func_get_args());
+    return $this->_ctrl->getPluginModel($path, $data, $plugin, $ttl);
   }
 
 
@@ -354,7 +354,7 @@ class Model extends DbClass
    */
   public function getSubpluginModel($path, array $data, string|null $plugin, string $subplugin, int $ttl = 0): ?array
   {
-    return $this->_ctrl->getSubpluginModel(...\func_get_args());
+    return $this->_ctrl->getSubpluginModel($path, $data, $plugin, $subplugin, $ttl);
   }
 
 
@@ -368,7 +368,7 @@ class Model extends DbClass
    */
   public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
-    return $this->_ctrl->hasSubpluginModel(...\func_get_args());
+    return $this->_ctrl->hasSubpluginModel($path, $plugin, $subplugin);
   }
 
 
