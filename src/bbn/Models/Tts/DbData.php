@@ -123,7 +123,9 @@ trait DbData
                 if (isset($v['field'])
                   && !array_key_exists($v['field'], $r)
                 ) {
-                  $r[$v['field']] = $r[$f['cfg']][$v['field']];
+                  $r[$v['field']] = !empty($r[$f['cfg']])
+                    ? ($r[$f['cfg']][$v['field']] ?? null)
+                    : null;
                 }
               }
 
@@ -142,7 +144,9 @@ trait DbData
             if (isset($v['field'])
               && !property_exists($res, $v['field'])
             ) {
-              $res->{$v['field']} = $res->{$f['cfg']}->{$v['field']};
+              $res->{$v['field']} = !empty($res->{$f['cfg']})
+                ? ($res->{$f['cfg']}->{$v['field']} ?? null)
+                : null;
             }
           }
 

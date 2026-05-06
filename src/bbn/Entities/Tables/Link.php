@@ -157,7 +157,7 @@ class Link extends EntityTable
       $res = $this->dbTraitRselectAll($filter);
     }
     else {
-      $res = $this->getRecords();
+      $res = $this->normalize($this->getRecords());
       if ($res && $filter) {
         $res = X::filter($res, $filter);
       }
@@ -179,11 +179,7 @@ class Link extends EntityTable
     }
 
     if ($res) {
-      if ($this->hasTags) {
-        $res["tags"] = $this->getTags($res[$this->fields["id"]]);
-      }
-
-      return $res;
+      return $this->normalize([$res])[0];
     }
 
     return null;
@@ -197,13 +193,7 @@ class Link extends EntityTable
     $fields = [],
   ): array {
     $res = parent::getAll($filter, $order, $limit, $start, $fields);
-    if ($this->hasTags) {
-      foreach ($res as &$r) {
-        $r["tags"] = $this->getTags($r[$this->fields["id"]]);
-      }
-      unset($r);
-    }
-    return $res;
+    return $this->normalize($res);
   }
 
   public function getByIdentity(string $id): ?array
@@ -213,9 +203,7 @@ class Link extends EntityTable
       $this->fields["id_identity"] => $id,
     ]);
     if ($res) {
-      if ($this->hasTags) {
-        $res["tags"] = $this->getTags($res[$this->fields["id"]]);
-      }
+      $res = $this->normalize([$res])[0];
     }
 
     return $res;
@@ -228,9 +216,7 @@ class Link extends EntityTable
       $this->fields["id_address"] => $id,
     ]);
     if ($res) {
-      if ($this->hasTags) {
-        $res["tags"] = $this->getTags($res[$this->fields["id"]]);
-      }
+      $res = $this->normalize([$res])[0];
     }
 
     return $res;
@@ -287,5 +273,42 @@ class Link extends EntityTable
   public static function getCodes(Link $link): array
   {
     return $link::$codes;
+  }
+
+  protected function normalize(array $data): array
+  {
+    if ($this->hasTags
+      || (!empty($this->class_cfg["cfg"])
+        && !empty($this->fields["cfg"])
+      )
+    ) {
+      foreach ($data as &$d) {
+        if ($this->hasTags) {
+          $d["tags"] = $this->getTags($d[$this->fields["id"]]);
+        }
+
+        if (!empty($this->class_cfg["cfg"])
+          && !empty($this->fields["cfg"])
+        ) {
+          foreach ($this->class_cfg["cfg"] as $v) {
+            if (isset($v["field"])
+              && !array_key_exists($v["field"], $d)
+            ) {
+              $d[$v["field"]] = !empty($d[$this->fields["cfg"]])
+                ? ($d[$this->fields["cfg"]][$v["field"]] ?? null)
+                : null;
+            }
+          }
+
+          if (array_key_exists($this->fields["cfg"], $d)) {
+            unset($d[$this->fields["cfg"]]);
+          }
+        }
+      }
+
+      unset($d);
+    }
+
+    return $data;
   }
 }
