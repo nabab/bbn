@@ -374,6 +374,10 @@ trait Formatters {
     if (($table = $this->tableFullName($table, true))
       && Str::checkName($key)
     ) {
+      if ($key === 'PRIMARY') {
+        return 'ALTER TABLE '.$this->escape($table).' DROP PRIMARY KEY;';
+      }
+
       return 'ALTER TABLE '.$this->escape($table).' DROP KEY '.$this->escape($key).';';
     }
 

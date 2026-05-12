@@ -1240,38 +1240,36 @@ MYSQL;
         if (isset($structure['keys']['PRIMARY'])) {
           $fields = $structure['keys']['PRIMARY']['columns'];
           if (count($fields) > 1) {
-            try {
-              $dropres = $db->dropKey($table, 'PRIMARY');
-              if (!$dropres) {
-                $res['error'] = X::_("Impossible to drop the primary key");
-              }
-
-              $structure = $db->modelize($table, true);
-            }
-            catch (Exception $e) {
-              $res['error'] = $e->getMessage();
-            }
-            if (empty($res['error'])) {
-              $structure = $db->modelize($table, true);
-              $structure['keys'] = [
+            $structure = [
+              'keys' => [
                 X::join($fields, '_') => [
                   'columns' => $fields,
                   'unique' => 1
                 ]
-              ];
-              //X::ddump($db->getCreateKeys($table, $ncfg), $ncfg);
-              try {
-                $ckres = $db->createKeys($table, $structure);
-                if (!$ckres) {
-                  $res['error'] = X::_("Impossible to create the new key");
-                }
-
-                $structure = $db->modelize($table, true);
-              }
-              catch (Exception $e) {
-                $res['error'] = $e->getMessage();
+              ]
+            ];
+            try {
+              $ckres = $db->createKeys($table, $structure);
+              if (!$ckres) {
+                $res['error'] = X::_("Impossible to create the new key");
               }
             }
+            catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+
+            try {
+              $structure = $db->modelize($table, true);
+              $dropres = $db->dropKey($table, 'PRIMARY');
+              if (!$dropres) {
+                $res['error'] = X::_("Impossible to drop the primary key");
+              }
+            }
+            catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+
+            $structure = $db->modelize($table, true);
           }
           else {
             $primary = $fields[0];
