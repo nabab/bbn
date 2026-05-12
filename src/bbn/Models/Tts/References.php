@@ -10,6 +10,7 @@ namespace bbn\Models\Tts;
 
 use bbn\Str;
 use bbn\Db;
+use bbn\X;
 
 
 trait References
@@ -30,14 +31,12 @@ trait References
       }
       else{
         foreach ( $this->references as $table => $ref ){
-          foreach ( $ref['refs'] as $j => $r ){
-            $this->references_select = empty($this->references_select) ?
-              $this->db->cfn($j, $table, 1) :
-              "IFNULL(".$this->references_select.", ".$this->db->cfn($j, $table, 1).")";
+          $this->references_select = empty($this->references_select) ?
+              $this->db->cfn($ref['column'], $table, 1) :
+              "IFNULL(".$this->references_select.", ".$this->db->cfn($ref['column'], $table, 1).")";
 
-            $this->references_join .= "LEFT JOIN ".$this->db->tfn($table, 1).PHP_EOL.
-              "ON ".$this->db->cfn($ref['column'], $table, 1)." = bbn_tasks.id".PHP_EOL;
-          }
+          $this->references_join .= "LEFT JOIN ".$this->db->tfn($table, 1).PHP_EOL.
+            "ON ".$this->db->cfn($ref['column'], $table, 1)." = bbn_tasks.id".PHP_EOL;
         }
         if ( !empty($this->references_select) ){
           $this->references_select .= " AS reference,".PHP_EOL;

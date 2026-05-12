@@ -902,7 +902,7 @@ class Changes extends EntityTable
       X::sortBy($records, $this->fields['moment'], 'DESC');
       return $withFiles ? array_map(
         function ($e) use ($t) {
-          $cfg = json_decode($e[$t->fields['cfg']], true);
+          $cfg = \is_array($e[$t->fields['cfg']]) ? $e[$t->fields['cfg']] : ($e[$t->fields['cfg']] ? json_decode($e[$t->fields['cfg']], true) : []);
           $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
           return $e;
         },
