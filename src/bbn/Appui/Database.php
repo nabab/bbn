@@ -54,7 +54,7 @@ class Database extends DbCls
    * I can put code in it
    * </code>
    *
-   * @var Db
+   * @var array
    */
   protected $connections = [
     'mysql' => [],
@@ -1304,6 +1304,11 @@ class Database extends DbCls
     return $model;
   }
 
+  public function getTables(string $database = '', string $host = '', string $engine = 'mysql'): ?array
+  {
+    return $this->o->optionsByCode('tables', $this->dbId($database, $host, $engine));
+  }
+
 
   /**
    * Imports a database's structure into the options table.
@@ -1328,7 +1333,7 @@ class Database extends DbCls
       );
     }
 
-    if ($id_host) {
+    if (isset($id_host)) {
       if (!empty($cfg['password'])) {
         if (!$this->pw) {
           $this->pw = new Passwords($this->db);
@@ -1342,7 +1347,7 @@ class Database extends DbCls
       }*/
     }
 
-    return $id_host ?: null;
+    return $id_host ?? null;
   }
 
 

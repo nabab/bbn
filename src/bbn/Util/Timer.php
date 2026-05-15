@@ -217,7 +217,12 @@ class Timer
    */
   public function results(): array
   {
-    return array_map(fn ($a) => $this->result($a), array_keys($this->_measures));
+    $res = [];
+    foreach (array_keys($this->_measures) as $k) {
+      $res[$k] = $this->result($k);
+    }
+
+    return $res;
   }
 
 
