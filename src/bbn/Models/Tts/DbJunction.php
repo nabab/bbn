@@ -55,9 +55,9 @@ trait DbJunction
    *
    * @param array $data
    *
-   * @return array|null
+   * @return string|null
    */
-  public function dbTraitInsert(array $data, bool $ignore = false): ?array
+  public function dbTraitInsert(array $data, bool $ignore = false): ?string
   {
     if ($data = $this->dbTraitPrepare($data)) {
       $ccfg = $this->getClassCfg();
@@ -68,9 +68,7 @@ trait DbJunction
         }
       }
 
-      if ($this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data)) {
-        return $this->dbTraitRselect($data);
-      }
+      return $this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data);
     }
 
     return null;
@@ -80,11 +78,11 @@ trait DbJunction
   /**
    * Deletes a single row from the table through its id.
    *
-   * @param string $id
+   * @param string|array $filter
    *
    * @return int
    */
-  public function dbTraitDelete(array $filter, bool $cascade = false): int
+  public function dbTraitDelete(array|string $filter): int
   {
     if ($this->dbTraitExists($filter)) {
       $cfg = $this->getClassCfg();
@@ -100,12 +98,12 @@ trait DbJunction
   /**
    * Updates a single row in the table through its id.
    *
-   * @param string $id
+   * @param string|array $filter
    * @param array $data
    *
    * @return int
    */
-  public function dbTraitUpdate(array $filter, array $data, bool $addCfg = false): int
+  public function dbTraitUpdate(array|string $filter, array $data): int
   {
     if (!$this->dbTraitExists($filter)) {
       throw new Exception(X::_("Impossible to find the given row"));

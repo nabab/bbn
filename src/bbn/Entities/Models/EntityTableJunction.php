@@ -4,53 +4,51 @@ namespace bbn\Entities\Models;
 use bbn\X;
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Models\Tts\DbPublicOps;
 use bbn\Entities\Models\EntityTrait;
 
 abstract class EntityTableJunction extends DbCls
 {
+  use DbPublicCache {
+    dbTraitUpdate as dbTraitEntityCacheUpdate;
+    dbTraitDelete as dbTraitEntityCacheDelete;
+    dbTraitInsert as dbTraitEntityCacheInsert;
+    dbTraitInsertUpdate as dbTraitEntityCacheInsertUpdate;
+  }
   use DbPublicOps;
   use EntityTrait;
 
-  public function insert(array $data): ?string
+  protected function dbTraitInsert(array $data, bool $ignore = false): ?string
   {
-    if ($res = $this->dbTraitInsert($data)) {
+    if ($res = $this->dbTraitEntityCacheInsert($data, $ignore)) {
       $data = $this->dbTraitCacheGetSet($res);
-      $this->entity()->updateRecord($this->getClassTable(), $res, $data);
+      $this->entity()->updateRecord($this->getClassTable(), $res);
     }
 
     return $res;
   }
 
-  public function insertIgnore(array $data): ?string
+  protected function dbTraitUpdate(string|array $filter, array $data): int
   {
-    if ($res = $this->dbTraitInsert($data, true)) {
-      $data = $this->dbTraitCacheGetSet($res);
-      $this->entity()->updateRecord($this->getClassTable(), $res, $data);
-    }
-
-    return $res;
-  }
-
-  public function update(string|array $filter, array $data): int
-  {
-    if ($res = $this->dbTraitUpdate($filter, $data)) {
+    if ($res = $this->dbTraitEntityCacheUpdate($filter, $data)) {
       $ids = $this->dbTraitGetIds($filter);
       foreach ($ids as $id) {
-        $data = $this->dbTraitCacheGetSet($id);
-        $this->entity()->updateRecord($this->getClassTable(), $id, $data);
+        $data = $this->dbTraitCacheSet($id);
+        $this->entity()->updateRecord($this->getClassTable(), $id);
       }      
     }
 
     return $res;
   }
 
-  public function delete(string|array $filter): int
+  protected function dbTraitDelete(string|array $filter): int
   {
-    if ($res = $this->dbTraitDelete($filter)) {
+    if ($res = $this->dbTraitEntityCacheDelete($filter)) {
       $ids = $this->dbTraitGetIds($filter);
       foreach ($ids as $id) {
-        $this->entity()->deleteRecord($this->getClassTable(), $id, []);
+        $this->dbTraitCacheDelete($id);
+        $this->entity()->deleteRecord($this->getClassTable(), $id);
       }
     }
 

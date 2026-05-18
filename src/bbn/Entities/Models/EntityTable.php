@@ -5,13 +5,11 @@ use bbn\X;
 use bbn\Db;
 use bbn\Models\Cls\Nullall;
 use bbn\Entities\Models\Entities;
-use bbn\Models\Tts\DbCache;
 use bbn\Entities\Models\EntityTableJunction;
 use bbn\Entities\Entity;
 
 abstract class EntityTable extends EntityTableJunction
 {
-  use DbCache;
 
   public function __construct(
     Db $db,

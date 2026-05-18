@@ -8,7 +8,7 @@ use stdClass;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
-use bbn\Models\Tts\DbCache;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Identity;
@@ -38,7 +38,7 @@ use function is_int;
  */
 abstract class Entities extends DbCls
 {
-  use DbCache;
+  use DbPublicCache;
 
   /**
    * Default class configuration.
@@ -518,7 +518,7 @@ abstract class Entities extends DbCls
     return self::$entityKeys;
   }
 
-  public static function getDbObject($table, $cfg, $db, $entities, $entity = null)
+  public static function getDbObject(string $table, array $cfg, Db $db, Entities $entities, ?Entity $entity = null)
   {
     $keys = Entities::getEntityKeys($db, $entities);
     try {

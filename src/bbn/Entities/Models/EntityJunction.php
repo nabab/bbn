@@ -10,8 +10,6 @@ use bbn\Entities\Entity;
 
 abstract class EntityJunction extends EntityTableJunction
 {
-  use DbJunction;
-
   public function __construct(
     Db $db, 
     protected Entities $entities,
@@ -20,7 +18,7 @@ abstract class EntityJunction extends EntityTableJunction
   {
     $this->initClassCfg();
     parent::__construct($db);
-    $this->dbJunctionInit();
+    //$this->dbJunctionInit();
     if (!is_a($entity, '\\bbn\\Models\\Cls\\Nullall')) {
       $this->id_entity = $entity->getId();
       $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);

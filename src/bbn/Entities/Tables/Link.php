@@ -8,17 +8,15 @@ use bbn\X;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Entity;
-use bbn\Entities\LinkTrait;
 use bbn\Models\Cls\Nullall;
-use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\Tagger;
 
 class Link extends EntityTable
 {
   use Tagger;
 
-  private $type;
-  private $cfg;
+  private string $type;
+  private array $cfg;
   protected static $default_class_cfg = [
     "table" => "bbn_entities_links",
     "tables" => [

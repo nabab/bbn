@@ -527,6 +527,80 @@ class Entity
     return $res;
   }
 
+  public function createRecords(string $table, array $ids): array
+  {
+    X::log($table, 'table_record');
+    $identity = $this->identity();
+    $address = $this->address();
+    $medias = new Medias($this->db);
+    $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];
+    $res = [];
+    if (in_array($table, $linkedTables)) {
+      $cfg = Entities::dbConfigGetTableClasses($this->db);
+      $obj = match(true) {
+        $table === $this->table => $this->entities,
+        $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
+        true => $this->entities->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
+      };
+      if (method_exists($obj, 'dbCacheGetSet')) {
+        foreach ($ids as $i => $id) {
+          if ($tmp = $obj->dbCacheSet($id)) {
+            $res[$id] = [
+              'state' => $obj->dbCacheHash($id),
+              'data' => $tmp
+            ];
+          }
+          else {
+            X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+            //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+          }
+        }
+      }
+    }
+    elseif ($table === 'bbn_identities') {
+      foreach ($ids as $id) {
+        if ($d = $identity->pickOne($id, $this->getId(), true)) {
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+      }
+    }
+    elseif ($table === 'bbn_addresses') {
+      foreach ($ids as $id) {
+        if ($d = $address->pickOne($id, $this->getId())) {
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+      }
+    }
+    elseif ($table === 'bbn_medias') {
+      foreach ($ids as $id) {
+        if ($d = $medias->getMediaInfo($id)) {
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+      }
+    }
+    else {
+      foreach ($ids as $id) {
+        if ($d = $this->db->rselect($table, [], ['id' => $id])) {
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+      }
+    }
+
+    return $res;
+  }
+
   public function getAllRelatedRecords(): array
   {
     $res = $this->getAllRelatedIds();
@@ -537,74 +611,9 @@ class Entity
 
     $final = [];
     $cfg = Entities::dbConfigGetTableClasses($this->db);
-    $identity = $this->identity();
-    $address = $this->address();
-    $medias = new Medias($this->db);
-    $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];
     foreach ($res as $table => $ids) {
       if (isset($cfg[$table])) {
-        $final[$table] = [];
-        if (in_array($table, $linkedTables)) {
-          $obj = match(true) {
-            $table === $this->table => $this->entities,
-            $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
-            true => $this->entities->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
-          };
-          if (method_exists($obj, 'dbTraitCacheGetSet')) {
-            foreach ($ids as $i => $id) {
-              if ($tmp = $obj->dbTraitCacheGetSet($id)) {
-                $final[$table][$id] = [
-                  'state' => $obj->dbTraitCacheHash($id),
-                  'data' => $tmp
-                ];
-              }
-              else {
-                X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
-                //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
-              }
-            }
-          }
-        }
-        elseif ($table === 'bbn_identities') {
-          foreach ($ids as $id) {
-            if ($d = $identity->pickOne($id, $this->getId(), true)) {
-              $final[$table][$id] = [
-                'state' => Cache::makeHash($d),
-                'data' => $d
-              ];
-            }
-          }
-        }
-        elseif ($table === 'bbn_addresses') {
-          foreach ($ids as $id) {
-            if ($d = $address->pickOne($id, $this->getId())) {
-              $final[$table][$id] = [
-                'state' => Cache::makeHash($d),
-                'data' => $d
-              ];
-            }
-          }
-        }
-        elseif ($table === 'bbn_medias') {
-          foreach ($ids as $id) {
-            if ($d = $medias->getMediaInfo($id)) {
-              $final[$table][$id] = [
-                'state' => Cache::makeHash($d),
-                'data' => $d
-              ];
-            }
-          }
-        }
-        else {
-          foreach ($ids as $id) {
-            if ($d = $this->db->rselect($table, [], ['id' => $id])) {
-              $final[$table][$id] = [
-                'state' => Cache::makeHash($d),
-                'data' => $d
-              ];
-            }
-          }
-        }
+        $final[$table] = $this->createRecords($table, $ids);
       }
     }
 
@@ -640,7 +649,7 @@ class Entity
     }
 
     if ($idx) {
-      if (!is_array($this->records[$idx] ?? null)) {
+      if (!\is_array($this->records[$idx] ?? null)) {
         return [];
         X::ddump($idx, $this->records[$idx], array_keys($this->records));
         throw new Exception(X::_("The table %s is not related to the entity", $idx));
@@ -656,7 +665,7 @@ class Entity
       )), $this->records);
   }
 
-  public function updateRecord(string $table, string $id, array $data): bool
+  public function updateRecord(string $table, string $id): bool
   {
     $sr = "relatedRecords";
     $cfg = Entities::dbConfigGetTableClasses($this->db);
@@ -672,15 +681,14 @@ class Entity
         $this->cacheSet($this->getId(), $sr2, $cached);
       }
     }
-    $this->records[$table][$id] = [
-      'state' => Cache::makeHash($data),
-      'data' => $data
-    ];
+
+    $res = $this->createRecords($table, [$id]);
+    $this->records[$table][$id] = $res[$id] ?? null;
     $this->cacheSet($this->getId(), $sr, $this->records);
     return true;
   }
 
-  public function deleteRecord(string $table, string $id, array $data): bool
+  public function deleteRecord(string $table, string $id): bool
   {
     $sr = "relatedRecords";
     $cfg = Entities::dbConfigGetTableClasses($this->db);

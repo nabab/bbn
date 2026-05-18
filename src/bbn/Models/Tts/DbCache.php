@@ -344,7 +344,7 @@ trait DbCache
   }
 
 
-  public function dbTraitCacheHash(string $id): ?string
+  protected function dbTraitCacheHash(string $id): ?string
   {
     static::dbTraitGlobalCacheInit();
     if ($r = $this->dbTraitCacheInfo($id)) {
@@ -354,14 +354,14 @@ trait DbCache
     return null;
   }
 
-  public function dbTraitCacheInfo(string $id): ?array
+  protected function dbTraitCacheInfo(string $id): ?array
   {
     static::dbTraitGlobalCacheInit();
     $cn = $this->dbTraitRowCacheKey($id);
     return self::$dbTraitCache->info($cn);
   }
 
-  public function dbTraitCacheImport(): ?int
+  protected function dbTraitCacheImport(): ?int
   {
     static::dbTraitGlobalCacheInit();
     if (!isset($this->class_table)) {
@@ -427,7 +427,7 @@ trait DbCache
     return $num;
   }
 
-  public function dbTraitCacheGetSet(string $id, array $fields = []): ?array
+  protected function dbTraitCacheGetSet(string $id, array $fields = []): ?array
   {
     static::dbTraitGlobalCacheInit();
     $cn = $this->dbTraitRowCacheKey($id);

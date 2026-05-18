@@ -69,14 +69,12 @@ class Options extends EntityTable
         throw new Exception(X::_("The option already exists for this entity"));
       }
 
-      if ($this->dbTraitInsert([
+      return $this->dbTraitInsert([
           $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type,
           $f['id_option'] => $id_option
         ], true
-      )) {
-        return $this->db->lastId();
-      }
+      );
     }
 
     return null;
