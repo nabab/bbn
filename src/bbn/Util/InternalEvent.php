@@ -30,6 +30,11 @@ final class InternalEvent
     return $this->data;
   }
 
+  public function setData(array $data): void
+  {
+    $this->data = $data;
+  }
+
   public function setResponse(mixed $response): void
   {
     $this->responses[] = $response;

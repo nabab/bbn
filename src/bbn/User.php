@@ -1350,7 +1350,7 @@ class User extends DbCls implements Implementor
    * @param int    $ttl Time to live in seconds (0 for infinite)
    * @return bool
    */
-  public function setCache(string $key, $val, $ttl = null): bool
+  public function setCache(string $key, $val, int $ttl = 0): bool
   {
     $fs = new System();
     if (

@@ -146,7 +146,7 @@ trait DbWrite
       if (!empty($f["cfg"])) {
         $col = $f["cfg"];
         if (!empty($data[$col])) {
-          if (is_string($data[$col])) {
+          if (is_string($data[$col]) && Str::isJson($data[$col])) {
             $data[$col] = json_decode($data[$col], true);
           }
 
@@ -167,12 +167,11 @@ trait DbWrite
       $f = $this->dbTraitGetFilterCfg($filter);
       $o = $this->emit("beforeupdate", $f, $data);
 
-      if (
-        !$o->isDefaultPrevented() &&
-        ($res = $this->db->update($this->class_table, $data, $f))
-      ) {
+      if (!$o->isDefaultPrevented()) {
+        $res = $this->db->update($this->class_table, $data, $f);
         $this->emit("afterupdate", $f, $data, $res, $o);
-        return $o->getResponse() ?: $res;
+        $res2 = $o->getResponse();
+        return \is_int($res2) ? $res2 : $res;
       }
     }
 

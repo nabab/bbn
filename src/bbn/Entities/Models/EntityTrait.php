@@ -8,7 +8,6 @@ use Exception;
 use bbn\Db;
 use bbn\X;
 use bbn\Appui\Option;
-use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
 use bbn\Entities\Identity;
 use bbn\Entities\Address;
@@ -18,6 +17,7 @@ use function count;
 trait EntityTrait
 {
   use Cache;
+
 
   protected static $default_class_cfg;
 

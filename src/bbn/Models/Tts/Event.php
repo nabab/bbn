@@ -41,6 +41,7 @@ trait Event
     $last = array_last($args);
     if (is_object($last) && is_a($last, InternalEvent::class)) {
       $o = array_pop($args);
+      $o->setData($args);
     }
     else {
       $o = new InternalEvent($event, $args);

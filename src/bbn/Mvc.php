@@ -16,15 +16,6 @@ use bbn\Mvc\View;
 use bbn\Util\Timer;
 use stdClass;
 use Exception;
-use function is_null;
-use function is_object;
-use function is_array;
-use function in_array;
-use function count;
-use function func_get_args;
-use function get_class;
-use function defined;
-use function gettype;
 
 /**
  * MVC controller / dispatcher.
@@ -621,15 +612,15 @@ final class Mvc implements Api
     }
 
     // Support for serialized objects
-    if (is_string($d) && ($obj = @unserialize($d)) && is_object($obj)) {
+    if (\is_string($d) && ($obj = @unserialize($d)) && \is_object($obj)) {
       return $d;
     }
 
-    if (is_object($d)) {
+    if (\is_object($d)) {
       $d = X::toArray($d);
     }
 
-    return is_array($d) ? $d : false;
+    return \is_array($d) ? $d : false;
   }
 
     /* -----------------------------------------------------------------------
@@ -844,7 +835,7 @@ final class Mvc implements Api
   public function addAuthorizedRoute(): int
   {
     $res = 0;
-    foreach (func_get_args() as $a) {
+    foreach (\func_get_args() as $a) {
       if (!\in_array($a, $this->authorized_routes, true)) {
         $this->authorized_routes[] = $a;
         $res++;
@@ -863,7 +854,7 @@ final class Mvc implements Api
   public function addForbiddenRoute(): int
   {
     $res = 0;
-    foreach (func_get_args() as $a) {
+    foreach (\func_get_args() as $a) {
       if (!\in_array($a, $this->forbidden_routes, true)) {
         $this->forbidden_routes[] = $a;
         $res++;
@@ -1028,7 +1019,7 @@ final class Mvc implements Api
     ob_start();
     (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random): void {
       if ($bbn_inc_content) {
-        if (count($bbn_inc_data)) {
+        if (\count($bbn_inc_data)) {
           foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {
             $$bbn_inc_key = $bbn_inc_val;
           }
@@ -1117,7 +1108,7 @@ final class Mvc implements Api
    */
   private function route($url = false): Mvc
   {
-    if (is_null($this->info)) {
+    if (\is_null($this->info)) {
       $this->info = $this->getRoute($url ?: $this->getUrl() ?: '', $this->getMode() ?: '');
     }
 
@@ -1169,23 +1160,23 @@ final class Mvc implements Api
    */
   public function __construct(?Db $db = null, $routes = [])
   {
-    if (!defined('BBN_DEFAULT_MODE')) {
+    if (!\defined('BBN_DEFAULT_MODE')) {
       define('BBN_DEFAULT_MODE', 'public');
     }
 
-    if (!defined('BBN_CUR_PATH')) {
+    if (!\defined('BBN_CUR_PATH')) {
       define('BBN_CUR_PATH', '/');
     }
 
-    if (!defined('BBN_APP_NAME')) {
+    if (!\defined('BBN_APP_NAME')) {
       throw new Exception('BBN_APP_NAME must be defined');
     }
 
-    if (!defined('BBN_APP_PATH')) {
+    if (!\defined('BBN_APP_PATH')) {
       throw new Exception('BBN_APP_PATH must be defined');
     }
 
-    if (!defined('BBN_DATA_PATH')) {
+    if (!\defined('BBN_DATA_PATH')) {
       throw new Exception('BBN_DATA_PATH must be defined');
     }
 
@@ -1193,7 +1184,7 @@ final class Mvc implements Api
     self::initPath();
 
     $this->timer = new Timer();
-    $this->startTime = microtime(true);
+    $this->startTime = \microtime(true);
     $this->env = new Environment();
 
     // ---------------------------------------------------------------
@@ -1201,14 +1192,14 @@ final class Mvc implements Api
     // ---------------------------------------------------------------
     $this->db = $db;
     $this->inc = new stdClass();
-    if (is_array($routes)) {
+    if (\is_array($routes)) {
       // -----------------------------------------------------------------
       //  Root routes
       // -----------------------------------------------------------------
       if (isset($routes['root'])) {
         foreach ($routes['root'] as $url => &$route) {
-          if (isset($route['root']) && defined('BBN_' . strtoupper($route['root']) . '_PATH')) {
-            $route['path'] = constant('BBN_' . strtoupper($route['root']) . '_PATH') . $route['path'];
+          if (isset($route['root']) && \defined('BBN_' . strtoupper($route['root']) . '_PATH')) {
+            $route['path'] = \constant('BBN_' . strtoupper($route['root']) . '_PATH') . $route['path'];
           }
 
           if (!empty($route['path']) && Str::sub($route['path'], -1) !== '/') {
@@ -1540,7 +1531,7 @@ final class Mvc implements Api
    */
   public function hasView(string $path = '', string $mode = 'html'): bool
   {
-    return array_key_exists($mode, self::$_loaded_views) && isset(self::$_loaded_views[$mode][$path]);
+    return \array_key_exists($mode, self::$_loaded_views) && isset(self::$_loaded_views[$mode][$path]);
   }
 
   /**
@@ -1552,7 +1543,7 @@ final class Mvc implements Api
    */
   public function addToViews(string $path, string $mode, View $view): void
   {
-    if (!array_key_exists($mode, self::$_loaded_views[$mode])) {
+    if (!\array_key_exists($mode, self::$_loaded_views[$mode])) {
       self::$_loaded_views[$mode] = [];
     }
 
@@ -1583,7 +1574,7 @@ final class Mvc implements Api
       $this->addToViews($path, $mode, $view);
     }
 
-    if (is_object($view) && $view->check()) {
+    if (\is_object($view) && $view->check()) {
       return $view->get($data);
     }
 
@@ -1664,7 +1655,7 @@ final class Mvc implements Api
       $this->addToViews($full_path, $mode, $view);
     }
 
-    if (is_object($view) && $view->check()) {
+    if (\is_object($view) && $view->check()) {
       return $view->get($data);
     }
 
@@ -2142,7 +2133,7 @@ final class Mvc implements Api
    */
   public function getCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 0): ?array
   {
-    if (is_null($data)) {
+    if (\is_null($data)) {
       $data = $this->data;
     }
 
@@ -2164,7 +2155,7 @@ final class Mvc implements Api
    */
   public function setCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 0): void
   {
-    if (is_null($data)) {
+    if (\is_null($data)) {
       $data = $this->data;
     }
 
@@ -2184,7 +2175,7 @@ final class Mvc implements Api
    */
   public function deleteCachedModel(string $path, array $data, Controller $ctrl): void
   {
-    if (is_null($data)) {
+    if (\is_null($data)) {
       $data = $this->data;
     }
 

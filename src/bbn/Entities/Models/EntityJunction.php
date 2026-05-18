@@ -4,16 +4,13 @@ namespace bbn\Entities\Models;
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbJunction;
-use bbn\Models\Tts\DbPublicOps;
-use bbn\Entities\Models\EntityTrait;
 use bbn\Models\Cls\Nullall;
+use bbn\Entities\Models\EntityTableJunction;
 use bbn\Entities\Entity;
 
-abstract class EntityJunction extends DbCls
+abstract class EntityJunction extends EntityTableJunction
 {
   use DbJunction;
-  use EntityTrait;
-  use DbPublicOps;
 
   public function __construct(
     Db $db, 

@@ -3,19 +3,15 @@ namespace bbn\Entities\Models;
 
 use bbn\X;
 use bbn\Db;
-use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Cls\Nullall;
-use bbn\Models\Tts\DbPublicOps;
-use bbn\Models\Tts\DbCache;
 use bbn\Entities\Models\Entities;
-use bbn\Entities\Models\EntityTrait;
+use bbn\Models\Tts\DbCache;
+use bbn\Entities\Models\EntityTableJunction;
 use bbn\Entities\Entity;
 
-abstract class EntityTable extends DbCls
+abstract class EntityTable extends EntityTableJunction
 {
   use DbCache;
-  use DbPublicOps;
-  use EntityTrait;
 
   public function __construct(
     Db $db,

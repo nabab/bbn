@@ -356,20 +356,35 @@ class Entity
 
   public function getAllRelatedIds(array $excluded = [], ?callable $filter = null): array
   {
+    $sr = "relatedIds";
+    if ($this->cacheHas($this->getId(), $sr)) {
+      $res = $this->cacheGet($this->getId(), $sr);
+      if (!empty($excluded)) {
+        foreach ($excluded as $e) {
+          unset($res[$e]);
+        }
+      }
+      return $res;
+    }
+
     $res = [$this->table => [$this->getId()]];
     $checked = [$this->table];
     $ocfg = $this->options()->getClassCfg();
     $excluded[] = History::$table_uids;
     $excluded[] = $ocfg['table'];
-    foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
-      if ($filter && !in_array($table, $checked)) {
-        $checked[] = $table;
-        if (!$filter($table)) {
-          $excluded[] = $table;
-          continue;
+    if ($filter) {
+      foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
+        if (!in_array($table, $checked)) {
+          $checked[] = $table;
+          if (!$filter($table)) {
+            $excluded[] = $table;
+            continue;
+          }
         }
       }
+    }
 
+    foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
       if (in_array($table, $excluded)) {
         continue;
       }
@@ -508,12 +523,18 @@ class Entity
     }
 
     ksort($res);
+    $this->cacheSet($this->getId(), $sr, $res);
     return $res;
   }
 
-  public function getAllRelatedRecords(array $excluded = []): array
+  public function getAllRelatedRecords(): array
   {
-    $res = $this->getAllRelatedIds($excluded);
+    $res = $this->getAllRelatedIds();
+    $sr = "relatedRecords";
+    if ($this->cacheHas($this->getId(), $sr)) {
+      return $this->cacheGet($this->getId(), $sr);
+    }
+
     $final = [];
     $cfg = Entities::dbConfigGetTableClasses($this->db);
     $identity = $this->identity();
@@ -608,6 +629,7 @@ class Entity
       }
     }*/
 
+    $this->cacheSet($this->getId(), $sr, $final);
     return $final;
   }
 
@@ -632,6 +654,54 @@ class Entity
         fn($b) => $b['data'],
         $a ?: []
       )), $this->records);
+  }
+
+  public function updateRecord(string $table, string $id, array $data): bool
+  {
+    $sr = "relatedRecords";
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
+    if (!isset($cfg[$table])) {
+      throw new Exception(X::_("The table %s is not configured", $table));
+    }
+    $this->getRecords($table);
+    if (!isset($this->records[$table][$id])) {
+      $sr2 = "relatedIds";
+      if ($this->cacheHas($this->getId(), $sr2)) {
+        $cached = $this->cacheGet($this->getId(), $sr2);
+        $cached[$table][] = $id;
+        $this->cacheSet($this->getId(), $sr2, $cached);
+      }
+    }
+    $this->records[$table][$id] = [
+      'state' => Cache::makeHash($data),
+      'data' => $data
+    ];
+    $this->cacheSet($this->getId(), $sr, $this->records);
+    return true;
+  }
+
+  public function deleteRecord(string $table, string $id, array $data): bool
+  {
+    $sr = "relatedRecords";
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
+    if (!isset($cfg[$table])) {
+      throw new Exception(X::_("The table %s is not configured", $table));
+    }
+    $this->getRecords($table);
+    $sr2 = "relatedIds";
+    if ($this->cacheHas($this->getId(), $sr2)) {
+      $cached = $this->cacheGet($this->getId(), $sr2);
+      $idx = array_search($id, $cached[$table]);
+      if ($idx !== false) {
+        array_splice($cached[$table], $idx, 1);
+      }
+
+      $this->cacheSet($this->getId(), $sr2, $cached);
+    }
+
+    unset($this->records[$table][$id]);
+    $this->cacheSet($this->getId(), $sr, $this->records);
+    return true;
   }
 
   public function cDelete(): self
