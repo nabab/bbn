@@ -443,7 +443,7 @@ TEMPLATE;
     return $this->mailer->ErrorInfo ?: null;
   }
 
-  public function send($cfg){
+  public function send(array $cfg){
     $r = false;
     if (!constant('BBN_ADMIN_EMAIL')) {
       X::log($cfg, 'unsent_mail');
@@ -459,19 +459,20 @@ TEMPLATE;
         $this->log(\imap_last_error());
       }
 
-      if ($r && function_exists('imap_open')) {
+      if ($r) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!empty($this->imap_php)
           && !empty($this->imap_string)
         ) {
-          if (!\is_resource($this->imap)
-            && !($this->imap instanceof \IMAP\Connection)
+          if (function_exists('imap_open')
+            && (!\is_resource($this->imap)
+              || !($this->imap instanceof \IMAP\Connection))
           ) {
             $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
           }
 
-          if ((!\is_resource($this->imap)
-              && !($this->imap instanceof \IMAP\Connection))
+          if (!\is_resource($this->imap)
+            || !($this->imap instanceof \IMAP\Connection)
             || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
           ) {
             $this->log(\imap_errors());
