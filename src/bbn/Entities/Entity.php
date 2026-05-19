@@ -543,13 +543,15 @@ class Entity
       };
       if (method_exists($obj, 'dbCacheGetSet')) {
         foreach ($ids as $i => $id) {
-          if ($tmp = $obj->dbCacheSet($id)) {
+
+          try {
+            $tmp = $obj->dbCacheSet($id);
             $res[$id] = [
               'state' => $obj->dbCacheHash($id),
               'data' => $tmp
             ];
           }
-          else {
+          catch (Exception $e) {
             X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
             //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
           }
@@ -558,41 +560,58 @@ class Entity
     }
     elseif ($table === 'bbn_identities') {
       foreach ($ids as $id) {
-        if ($d = $identity->pickOne($id, $this->getId(), true)) {
+        try {
+          $d = $identity->pickOne($id, $this->getId(), true);
           $res[$id] = [
             'state' => Cache::makeHash($d),
             'data' => $d
           ];
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
         }
       }
     }
     elseif ($table === 'bbn_addresses') {
       foreach ($ids as $id) {
-        if ($d = $address->pickOne($id, $this->getId())) {
+        try {
+          $d = $address->pickOne($id, $this->getId());
           $res[$id] = [
             'state' => Cache::makeHash($d),
             'data' => $d
           ];
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
         }
       }
     }
     elseif ($table === 'bbn_medias') {
       foreach ($ids as $id) {
-        if ($d = $medias->getMediaInfo($id)) {
+        try {
+          $d = $medias->getMediaInfo($id);
           $res[$id] = [
             'state' => Cache::makeHash($d),
             'data' => $d
           ];
         }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+        }
       }
     }
     else {
       foreach ($ids as $id) {
-        if ($d = $this->db->rselect($table, [], ['id' => $id])) {
-          $res[$id] = [
-            'state' => Cache::makeHash($d),
-            'data' => $d
-          ];
+        try {
+          if ($d = $this->db->rselect($table, [], ['id' => $id])) {
+            $res[$id] = [
+              'state' => Cache::makeHash($d),
+              'data' => $d
+            ];
+          }
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
         }
       }
     }
