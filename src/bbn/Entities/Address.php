@@ -8,7 +8,7 @@ use bbn\Str;
 use bbn\Db;
 use bbn\Appui\Option;
 use bbn\Models\Tts\Cache;
-use bbn\Models\Tts\DbCache;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Nullall;
@@ -17,7 +17,7 @@ use bbn\Models\Cls\Nullall;
 class Address extends DbCls
 {
   use Cache;
-  use DbCache;
+  use DbPublicCache;
 
   /** @var array */
   protected static $default_class_cfg = [
