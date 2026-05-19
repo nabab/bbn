@@ -459,7 +459,7 @@ TEMPLATE;
         $this->log(\imap_last_error());
       }
 
-      if ($r) {
+      if ($r && function_exists('imap_open')) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!empty($this->imap_php)
           && !empty($this->imap_string)
