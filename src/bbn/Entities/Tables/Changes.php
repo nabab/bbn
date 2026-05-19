@@ -60,8 +60,10 @@ class Changes extends EntityTable
         'date_added' => 'date_added'
       ],
       'links' => [
+        'id' => 'id',
         'id_link' => 'id_link',
         'id_file' => 'id_file',
+        'id_entity' => 'id_entity',
         'mandatory' => 'mandatory'
       ]
     ]
