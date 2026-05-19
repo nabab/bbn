@@ -529,7 +529,6 @@ class Entity
 
   public function createRecords(string $table, array $ids): array
   {
-    X::log($table, 'table_record');
     $identity = $this->identity();
     $address = $this->address();
     $medias = new Medias($this->db);
@@ -640,6 +639,12 @@ class Entity
 
     $this->cacheSet($this->getId(), $sr, $final);
     return $final;
+  }
+
+  public function getRecordsHash(): ?string
+  {
+    $sr = "relatedRecords";
+    return $this->cacheHash($this->getId(), $sr);
   }
 
   public function getRecords(?string $idx = null): array
