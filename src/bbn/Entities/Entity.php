@@ -738,7 +738,8 @@ class Entity
   public function cDelete(): self
   {
     $this->records = [];
-    $this->db->query("UPDATE apst_adherents SET cached = NULL WHERE id = ?", hex2bin($this->getId()));
+    $table = $this->class_cfg['table'];
+    $this->db->query("UPDATE $table SET cached = NULL WHERE id = ?", hex2bin($this->getId()));
     return $this->cacheDelete($this->getId());
   }
 
