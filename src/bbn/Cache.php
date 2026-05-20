@@ -3,6 +3,7 @@ namespace bbn;
 
 use Exception;
 use Memcached;
+
 use Traversable;
 use Psr\SimpleCache\CacheInterface;
 use bbn\Str;
@@ -29,7 +30,7 @@ use function strlen;
 
 class Cache extends Basic implements CacheInterface
 {
-  private string $host;
+  private array|string $host;
   private int $port;
 
   protected bool $isRecording = false;
@@ -195,11 +196,19 @@ class Cache extends Basic implements CacheInterface
      *
      * @throws Exception
      */
-  public function __construct(?string $engine = null)
+  public function __construct(null|array|string $engine = null)
   {
     self::setMaxTtl();
     /** @todo APC doesn't work */
-    $engine = defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files';
+    $cfg = [];
+    if (!$engine) {
+      $engine = defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files';
+    }
+    elseif (is_array($engine)) {
+      $cfg = $engine;
+      $engine = $cfg['engine'] ?? (defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files');
+    }
+
     if (self::$is_init) {
       throw new Exception(
         X::_("Only one cache object can be called. Use static function Cache::getEngine()")
@@ -211,13 +220,29 @@ class Cache extends Basic implements CacheInterface
     }
     elseif ((($engine === 'redis')) && class_exists("\\Redis")) {
       self::setSeparator(':');
-      $this->obj = new \Redis();
-      $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1';
-      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('REDIS_PORT') ?: 6379));
-      if ($this->obj->connect($this->host, $this->port, 2.5)) {
-        $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
-        $this->obj->select($dbIndex);
-        $this->prefix = getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX') . self::$sep;
+      $this->host = $cfg['host'] ?? (defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1');
+      if (substr($this->host, 0, 1) === '[') {
+        $this->host = json_decode($this->host);
+      }
+      $this->port = $cfg['port'] ?? (defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('REDIS_PORT') ?: 6379)));
+      if (is_array($this->host)) {
+        $this->obj = new \RedisCluster(null, $this->host);
+      }
+      else {
+        $tmp = new \Redis();
+        if ($tmp->connect($this->host, $this->port, 2.5)) {
+          $this->obj = $tmp;
+          $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
+          $this->obj->select($dbIndex);
+        }
+      }
+
+      if ($this->obj) {
+        $this->prefix = $cfg['prefix'] ?? (getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX'));
+        if (substr($this->prefix, -1) !== self::$sep) {
+          $this->prefix .= self::$sep;
+        }
+
         if ($this->prefix) {
           $this->obj->setOption(\Redis::OPT_PREFIX, $this->prefix);
         }
@@ -245,7 +270,7 @@ class Cache extends Basic implements CacheInterface
     }
     elseif (self::$type === 'redis') {
       try {
-        return $this->obj->ping();
+        return is_array($this->host) ? $this->obj->ping($this->host[0]) : $this->obj->ping();
       }
       catch (Exception $e) {
         return false;
@@ -970,10 +995,6 @@ class Cache extends Basic implements CacheInterface
 
     $ttl  = self::ttl($ttl);
     $realTtl = $ttl ?: self::$max_ttl;
-    if (self::$type === 'redis') {
-      $this->obj->multi(\Redis::PIPELINE);
-    }
-
     $nowSec = time();
     $now = microtime(true);
     $next = "{$nowSec}|1";
@@ -995,9 +1016,6 @@ class Cache extends Basic implements CacheInterface
       $this->setRaw($payloadKey, $val, $ttl);
 
       $this->setRaw($infoKey, $info, 0);
-    }
-    if (self::$type === 'redis') {
-      return (bool)$this->obj->exec();
     }
 
     return true;

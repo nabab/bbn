@@ -367,6 +367,11 @@ trait DbCache
     if (!isset($this->class_table)) {
       throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", static::class));
     }
+
+    $hasEvents = method_exists($this, "disableEvents");
+    if ($hasEvents) {
+      $this->disableEvents();
+    }
     $cfg = $this->getClassCfg();
     $cacheFn = $cfg["cache"]["fn"] ?? null;
     $f = array_values($cfg["arch"][$this->class_table_index]);
@@ -420,8 +425,12 @@ trait DbCache
         $start += $limit;
       }
       else {
-        return null;
+        break;
       }
+    }
+
+    if ($hasEvents) {
+      $this->enableEvents();
     }
 
     return $num;

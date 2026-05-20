@@ -10,6 +10,26 @@ trait Event
   /** @var array<string, array<int, callable>> */
   private array $listeners = [];
 
+  /** @var bool $eventsDisabled */
+  private bool $eventsDisabled = false;
+
+  public function disableEvents(): void
+  {
+    $this->eventsDisabled = true;
+  }
+
+  public function enableEvents(): void
+  {
+    $this->eventsDisabled = false;
+  }
+
+  public function areEventsDisabled(): bool
+  {
+    return $this->eventsDisabled;
+  }
+
+
+
   public function on(string $event, callable $listener): void
   {
     $this->listeners[$event][] = $listener;
@@ -36,8 +56,12 @@ trait Event
     }
   }
 
-  public function emit(string $event, mixed ...$args): InternalEvent
+  public function emit(string $event, mixed ...$args): ?InternalEvent
   {
+    if ($this->eventsDisabled) {
+      return null;
+    }
+
     $last = array_last($args);
     if (is_object($last) && is_a($last, InternalEvent::class)) {
       $o = array_pop($args);
