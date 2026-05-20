@@ -543,9 +543,8 @@ class Entity
       };
       if (method_exists($obj, 'dbCacheGetSet')) {
         foreach ($ids as $i => $id) {
-
           try {
-            $tmp = $obj->dbCacheSet($id);
+            $tmp = $obj->dbCacheGetSet($id);
             $res[$id] = [
               'state' => $obj->dbCacheHash($id),
               'data' => $tmp
