@@ -41,7 +41,7 @@ trait DbWrite
 
       $o = $this->emit("beforeinsert", $data);
 
-      if (
+      if ($o &&
         !$o->isDefaultPrevented() &&
         $this->db->{$ignore ? "insertIgnore" : "insert"}($this->class_table, $data)
       ) {
@@ -84,13 +84,13 @@ trait DbWrite
 
       $o = $this->emit("beforedelete", [$filter, $cascade]);
 
-      if (
-        !$o->isDefaultPrevented() &&
-        ($res = $this->db->delete(
-          $this->class_table,
-          $this->dbTraitGetFilterCfg($filter)
-        ))
-      ) {
+      if ($o && $o->isDefaultPrevented()) {
+        return $o->getResponse() ?? 0;
+      }
+      if ($res = $this->db->delete(
+        $this->class_table,
+        $this->dbTraitGetFilterCfg($filter)
+      )) {
         if ($cascade) {
           foreach ($this->dbTraitGetTableRelations() as $rel) {
             $this->db->delete($rel["table"], [
@@ -99,8 +99,8 @@ trait DbWrite
           }
         }
 
-        $o = $this->emit("afterdelete", [$filter, $cascade]);
-        return $o->getResponse() ?: $res;
+        $this->emit("afterdelete", [$filter, $cascade, $o]);
+        return $o ? $o->getResponse() : $res;
       }
     }
 
@@ -166,13 +166,15 @@ trait DbWrite
 
       $f = $this->dbTraitGetFilterCfg($filter);
       $o = $this->emit("beforeupdate", $f, $data);
-
-      if (!$o->isDefaultPrevented()) {
-        $res = $this->db->update($this->class_table, $data, $f);
-        $this->emit("afterupdate", $f, $data, $res, $o);
-        $res2 = $o->getResponse();
-        return \is_int($res2) ? $res2 : $res;
+      if ($o && $o->isDefaultPrevented()) {
+        $res = $o->getResponse();
+        return \is_int($res) ? $res : 0;
       }
+
+      $res = $this->db->update($this->class_table, $data, $f);
+      $this->emit("afterupdate", $f, $data, $res, $o);
+      $res2 = $o ? $o->getResponse() : null;
+      return \is_int($res2) ? $res2 : $res;
     }
 
     return 0;

@@ -353,7 +353,7 @@ trait DbSelection
     $go = true;
     if (isset($filter['id']) && (count($filter) === 1)) {
       $o = $this->emit('beforeselect', $filter);
-      if ($res = $o->getResponse()) {
+      if ($o && $res = $o->getResponse()) {
         if (!empty($fields)) {
           foreach ($res as $k => $v) {
             if (!in_array($k, $fields)) {

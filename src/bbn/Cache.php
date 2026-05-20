@@ -263,6 +263,11 @@ class Cache extends Basic implements CacheInterface
     }
   }
 
+  public function getNumHosts(): int
+  {
+    return is_array($this->host) ? count($this->host) : 1;
+  }
+
   public function check(): bool
   {
     if (self::$type === 'files') {
@@ -995,6 +1000,10 @@ class Cache extends Basic implements CacheInterface
 
     $ttl  = self::ttl($ttl);
     $realTtl = $ttl ?: self::$max_ttl;
+    if (self::$type === 'redis') {
+      $this->obj->multi(\Redis::PIPELINE);
+    }
+
     $nowSec = time();
     $now = microtime(true);
     $next = "{$nowSec}|1";
@@ -1016,6 +1025,9 @@ class Cache extends Basic implements CacheInterface
       $this->setRaw($payloadKey, $val, $ttl);
 
       $this->setRaw($infoKey, $info, 0);
+    }
+    if (self::$type === 'redis') {
+      return (bool)$this->obj->exec();
     }
 
     return true;

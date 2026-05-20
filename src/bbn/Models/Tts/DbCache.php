@@ -120,10 +120,12 @@ trait DbCache
         $cfg = $cls::getDefaultClassCfg();
       }
 
-      return "table{$sep}{$cfg['table']}{$sep}{$id}";
+      $shard = '{table-' . (crc32($cfg['table']) % self::$dbTraitCache->getNumHosts()) . '}';
+      return "$shard{$sep}{$cfg['table']}{$sep}{$id}";
     }
 
-    return "table{$sep}{$this->class_table}{$sep}{$id}";
+    $shard = '{table-' . (crc32($this->class_table) % self::$dbTraitCache->getNumHosts()) . '}';
+    return "$shard{$sep}{$this->class_table}{$sep}{$id}";
   }
 
   /**
@@ -389,6 +391,7 @@ trait DbCache
     $num = 0;
     $cache = self::$dbTraitCache;
     $idCol = $tableCfg[$this->class_table]['primary'][0];
+    $key = null;
     while (
       $data = $this->dbTraitSelection(
         [],
@@ -417,7 +420,11 @@ trait DbCache
 
       $toCache = [];
       foreach ($data as $d) {
-        $toCache[$this->dbTraitRowCacheKey($d[$idCol])] = $d;
+        if (!isset($key)) {
+          $key = substr($this->dbTraitRowCacheKey($d[$idCol]), 0, - \strlen($idCol));
+        }
+
+        $toCache[$key.$idCol] = $d;
       }
 
       if ($cache->setMultiple($toCache, 0)) {
