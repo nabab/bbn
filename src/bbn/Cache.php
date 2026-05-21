@@ -1438,7 +1438,7 @@ class Cache extends Basic implements CacheInterface
         array_splice($indexes, $pos, 1);
         $indexKey = $cur . $sep . '__keys';
         if (count($indexes)) {
-          $this->setRaw($indexKey, $indexes, 0);
+          $this->setRaw($indexKey, array_values($indexes), 0);
           break;
         }
         else {
@@ -1456,7 +1456,7 @@ class Cache extends Basic implements CacheInterface
     if ($pos !== false) {
       array_splice($rootIndexes, $pos, 1);
       if (count($rootIndexes)) {
-        $this->setRaw('__keys', $rootIndexes, 0);
+        $this->setRaw('__keys', array_values($rootIndexes), 0);
       }
       else {
         $this->deleteRaw('__keys');
