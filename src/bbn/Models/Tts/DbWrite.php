@@ -100,7 +100,8 @@ trait DbWrite
         }
 
         $this->emit("afterdelete", [$filter, $cascade, $o]);
-        return $o ? $o->getResponse() : $res;
+        $res2 = $o ? $o->getResponse() : null;
+        return \is_int($res2) ? $res2 : $res;
       }
     }
 
