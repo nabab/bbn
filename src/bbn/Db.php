@@ -1160,6 +1160,7 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     if ($this->language) {
       $this->language->close();
       $this->setErrorMode('continue');
+      unset($this->language);
     }
 
     self::retrieverRemove($this);

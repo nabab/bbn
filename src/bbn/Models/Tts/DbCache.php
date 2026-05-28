@@ -363,7 +363,7 @@ trait DbCache
     return self::$dbTraitCache->info($cn);
   }
 
-  protected function dbTraitCacheImport(): ?int
+  protected function dbTraitCacheImport(int $limit = 10000): ?int
   {
     static::dbTraitGlobalCacheInit();
     if (!isset($this->class_table)) {
@@ -387,7 +387,6 @@ trait DbCache
       }
     }
     $start = 0;
-    $limit = 10000;
     $num = 0;
     $cache = self::$dbTraitCache;
     $idCol = $tableCfg[$this->class_table]['primary'][0];

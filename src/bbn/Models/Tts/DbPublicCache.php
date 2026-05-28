@@ -91,9 +91,9 @@ trait DbPublicCache
     return $this->dbTraitCacheInfo($id);
   }
 
-  public function dbCacheImport(): ?int
+  public function dbCacheImport(int $limit = 10000): ?int
   {
-    return $this->dbTraitCacheImport();
+    return $this->dbTraitCacheImport($limit);
   }
 
   public function dbCacheGetSet(string $id, array $fields = []): ?array

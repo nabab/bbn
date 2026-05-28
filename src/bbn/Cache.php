@@ -265,7 +265,7 @@ class Cache extends Basic implements CacheInterface
 
   public function getNumHosts(): int
   {
-    return is_array($this->host) ? count($this->host) : 1;
+    return isset($this->host) && is_array($this->host) ? count($this->host) : 1;
   }
 
   public function check(): bool
