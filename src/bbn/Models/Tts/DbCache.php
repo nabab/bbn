@@ -108,7 +108,9 @@ trait DbCache
    */
   protected function dbTraitRowCacheKey(string $id): string
   {
+    static::dbTraitGlobalCacheInit();
     $sep = Cache::getSeparator();
+    $num_hosts = self::$dbTraitCache->getNumHosts();
     if (!isset($this->class_table)) {
       $cfg = self::getDefaultClassCfg();
       while ($cfg && empty($cfg['table'])) {
@@ -119,13 +121,12 @@ trait DbCache
 
         $cfg = $cls::getDefaultClassCfg();
       }
-
-      $shard = '{table-' . (crc32($cfg['table']) % self::$dbTraitCache->getNumHosts()) . '}';
-      return "$shard{$sep}{$cfg['table']}{$sep}{$id}";
+      $shard = $num_hosts > 1 ? '{table-' . (crc32($cfg['table']) % $num_hosts) . '}' : 'table';
+      return "$shard{$sep}{$cfg['table']}{$sep}".substr($id, 0, 3) . $sep . substr($id, 3, 3) . $sep . substr($id, 6);
     }
 
-    $shard = '{table-' . (crc32($this->class_table) % self::$dbTraitCache->getNumHosts()) . '}';
-    return "$shard{$sep}{$this->class_table}{$sep}{$id}";
+    $shard = $num_hosts > 1 ? '{table-' . (crc32($this->class_table) % $num_hosts) . '}' : 'table';
+    return "$shard{$sep}{$this->class_table}{$sep}".substr($id, 0, 3) . $sep . substr($id, 3, 3) . $sep . substr($id, 6);
   }
 
   /**
@@ -391,7 +392,7 @@ trait DbCache
     $cache = self::$dbTraitCache;
     $idCol = $tableCfg[$this->class_table]['primary'][0];
     $key = null;
-    while (
+    if (
       $data = $this->dbTraitSelection(
         [],
         [$idCol => 'ASC'],
@@ -419,19 +420,16 @@ trait DbCache
 
       $toCache = [];
       foreach ($data as $d) {
-        if (!isset($key)) {
-          $key = substr($this->dbTraitRowCacheKey($d[$idCol]), 0, - \strlen($idCol));
+        if (\is_null($key)) {
+          $key = substr($this->dbTraitRowCacheKey($d[$idCol]), 0, - (\strlen($d[$idCol]) + 2));
         }
 
-        $toCache[$key.$idCol] = $d;
+        $toCache[$key.substr($d[$idCol], 0, 3).':'.substr($d[$idCol], 3, 3).':'.substr($d[$idCol], 6)] = $d;
       }
 
       if ($cache->setMultiple($toCache, 0)) {
         $num += count($data);
         $start += $limit;
-      }
-      else {
-        break;
       }
     }
 

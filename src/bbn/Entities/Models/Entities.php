@@ -521,6 +521,10 @@ abstract class Entities extends DbCls
   public static function getDbObject(string $table, array $cfg, Db $db, Entities $entities, ?Entity $entity = null)
   {
     $keys = Entities::getEntityKeys($db, $entities);
+    if (empty($cfg['class'])) {
+      return null;
+    }
+
     try {
       if (isset($keys[$table])) {
         $cls = new $cfg['class']($db, $entities, $entity ?: new Nullall());

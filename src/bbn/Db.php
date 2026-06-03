@@ -1157,7 +1157,7 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
    */
   public function close(): void
   {
-    if ($this->language) {
+    if (isset($this->language)) {
       $this->language->close();
       $this->setErrorMode('continue');
       unset($this->language);

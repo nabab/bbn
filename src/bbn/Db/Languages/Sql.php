@@ -3946,7 +3946,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $st .= is_array($a) ? serialize($a) : '--'.$a.'--';
     }
 
-    return $this->hash_contour.md5($st).$this->hash_contour;
+    return $this->hash_contour.str_pad(hash('xxh3', $st), 32).$this->hash_contour;
   }
 
   /**

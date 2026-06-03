@@ -4138,7 +4138,7 @@ class X
 
     $normalized = self::normalizeData($value);
 
-    return md5(json_encode($normalized));
+    return hash('xxh3', serialize($normalized));
   }
 
   /**

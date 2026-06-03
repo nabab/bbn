@@ -95,7 +95,7 @@ class Cache extends Basic implements CacheInterface
       $value = serialize($value);
     }
 
-    return md5($value);
+    return hash('xxh3', $value);
   }
 
 
@@ -363,23 +363,30 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  protected function deleteBranch(string $path = ''): int
+  protected function deleteBranch(string $path = '', array &$todo = []): int
   {
+    $go = empty($todo);
     $sep = $this->getSeparator();
     $count = 0;
-
-    foreach ($this->getKeys($path) as $child) {
-      $fullKey = $path === '' ? $child : $path . $sep . $child;
-      $count += $this->deleteBranch($fullKey);
-    }
-
-    if ($path !== '') {
-      if ($this->delete($path)) {
-        $count++;
+    if ($keys = $this->getKeys($path)) {
+      $todo[] = $path.$sep.'__keys';
+      foreach ($keys as $child) {
+        $fullKey = $path === '' ? $child : $path . $sep . $child;
+        $count += $this->deleteBranch($fullKey, $todo);
       }
     }
+    if ($info = $this->info($path)) {
+      $payloadKey = "{$path}{$sep}{$info['version']}";
+      if ($this->hasRaw($payloadKey)) {
+        $todo[] = $payloadKey;
+        $count++;
+      }
+      $todo[] = $path.$sep.'__info';
+    }
 
-    $this->deleteKeysIndex($path);
+    if ($go && !empty($todo)) {
+      $this->deleteRaw(...$todo);
+    }
 
     return $count;
   }
@@ -612,26 +619,33 @@ class Cache extends Basic implements CacheInterface
   /**
    * Removes the given item from the cache.
    *
-   * @param string $key The name of the item
+   * @param string ...$keys The names of the items
    * @return bool
    */
-  public function deleteRaw($key): bool
+  public function deleteRaw(...$keys): bool
   {
+    if (empty($keys)) {
+      return false;
+    }
+
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return call_user_func('\\apcu_delete', $key);
+          return call_user_func('\\apcu_delete', $keys);
         case 'redis':
-          $res = $this->obj->unlink($key);
-          return $res;
+          $res = $this->obj->del(...$keys);
+          return $res;    
         case 'memcache':
-          return $this->obj->delete($key);
+          return $this->obj->delete($keys);
         case 'files':
-          $file = self::_file($key, $this->path);
-          if ($this->obj->isFile($file)) {
-            return (bool)$this->obj->delete($file);
+          $num = 0;
+          foreach ($keys as $key) {
+            $file = self::_file($key, $this->path);
+            if ($this->obj->isFile($file) && $this->obj->delete($file)) {
+              $num++;
+            }   
           }
-          return false;
+          return (bool)$num;
       }
     }
 
@@ -690,25 +704,25 @@ class Cache extends Basic implements CacheInterface
    */
   public function set($key, $val, $ttl = null, $num = 0): bool
   {
-    if ($this->setLock($key)) {
+    $res = false;
+    if ($isFree = $this->setLock($key)) {
       try {
-        return (bool)$this->commit($key, $val, $ttl);
+        $res = (bool)$this->commit($key, $val, $ttl);
       }
       catch (Exception $e) {
         $this->log(X::_("Error while setting cache for key %s: %s", $key, $e->getMessage()));
-        return false;
       }
       finally {
         $this->releaseLock($key);
       }
     }
 
-    if ($num < self::$max_wait) {
+    if (!$isFree && ($num < self::$max_wait)) {
       usleep(10000);
       return $this->set($key, $val, $ttl, $num + 1);
     }
 
-    return false;
+    return $res;
   }
 
   /**
@@ -955,63 +969,53 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  public function setMultiple($values, $ttl = null): bool
+  public function setMultiple($values, $ttl = null, array &$hashes = []): bool
   {
-    $done = 0;
-    $itemIndexes = [];
+    $mvc = Mvc::getInstance();
     $sep = $this->getSeparator();
-
-    foreach ($values as $key => $val) {
-      $bits = X::split($key, $sep);
-      if (!$done) {
-        $rootChild = $bits[0];
-        $rootIndexes = $this->getKeys('');
-        if (!in_array($rootChild, $rootIndexes, true)) {
-          $rootIndexes[] = $rootChild;
-          $this->setRaw('__keys', $rootIndexes, 0);
-        }
-        while (count($bits) > 1) {
-          $child = array_pop($bits);
-          $cur = X::join($bits, $sep);
-          $indexes = $this->getKeys($cur);
-          if (empty($itemIndexes)) {
-            array_push($itemIndexes, $child, ...$indexes);
-          }
-  
-          if (!in_array($child, $indexes, true)) {
-            $indexes[] = $child;
-            $indexKey = $cur . $sep . '__keys';
-            $this->setRaw($indexKey, $indexes, 0);
-          }
-        }
-      }
-      else {
-        $itemIndexes[] = end($bits);
-      }
-
-
-      $done++;
-    }
-
-    array_pop($bits);
-    $cur = X::join($bits, $sep);
-    $indexKey = $cur . $sep . '__keys';
-    $this->setRaw($indexKey, array_unique($itemIndexes), 0);
-
-    $ttl  = self::ttl($ttl);
-    $realTtl = $ttl ?: self::$max_ttl;
-    if (self::$type === 'redis') {
-      $this->obj->multi(\Redis::PIPELINE);
-    }
-
+    $rootIndexes = $this->getKeys('');
+    $keys = [];
+    $todo = [];
+    $keysCache = [];
     $nowSec = time();
     $now = microtime(true);
     $next = "{$nowSec}|1";
+    $ttl  = self::ttl($ttl);
+    $realTtl = $ttl ?: self::$max_ttl;
+    $mvc->getTimer()->start("cache_multiple_prepare");
     foreach ($values as $key => $val) {
+      $bits = X::split($key, $sep);
+      if (!count($bits)) {
+        continue;
+      }
+
+      $rootChild = $bits[0];
+      if (!in_array($rootChild, $rootIndexes, true)) {
+        $rootIndexes[] = $rootChild;
+        $keys['__keys'] = $rootIndexes;
+      }
+
+      while (count($bits) > 1) {
+        $child = array_pop($bits);
+        $cur = X::join($bits, $sep);
+        $indexes = $keysCache[$cur] ?? $this->getKeys($cur);
+        if (!isset($keysCache[$cur])) {
+          $keysCache[$cur] = $indexes;
+        }
+
+        if (!in_array($child, $indexes, true)) {
+          $indexes[] = $child;
+          $keysCache[$cur] = $indexes;
+          $indexKey = $cur . $sep . '__keys';
+          $keys[$indexKey] = $indexes;
+        }
+      }
+
       $infoKey = "{$key}{$sep}__info";
       $hash = self::makeHash($val);
       $num = 0;
       $payloadKey = "{$key}{$sep}{$next}";
+      $hashes[$key] = $hash;
       $info = [
         'num' => $num + 1,
         'hash' => $hash,
@@ -1020,17 +1024,34 @@ class Cache extends Basic implements CacheInterface
         'ttl' => $ttl,
         'version' => $next
       ];
-
-      // Always write payload so TTL stays in sync with metadata
-      $this->setRaw($payloadKey, $val, $ttl);
-
-      $this->setRaw($infoKey, $info, 0);
+      $todo[$payloadKey] = serialize($val);
+      $todo[$infoKey] = serialize($info);
     }
+    $mvc->getTimer()->stop("cache_multiple_prepare");
+    $mvc->getTimer()->start("cache_multiple_serialize");
+    foreach ($keys as $k => $v) {
+      $todo[$k] = serialize($v);
+    }
+    $mvc->getTimer()->stop("cache_multiple_serialize");
+    $mvc->getTimer()->start("cache_multiple_write");
     if (self::$type === 'redis') {
-      return (bool)$this->obj->exec();
-    }
+      $this->obj->multi(\Redis::PIPELINE);
+      while (count($todo)) {
+        $batch = array_splice($todo, 0, 10000);
+        $this->obj->mSet($batch);
+      }
 
-    return true;
+      $res = (bool)$this->obj->exec();
+    }
+    else {
+      foreach ($todo as $k => $v) {
+        $this->setRaw($k, unserialize($v), 0);
+      }
+
+      $res = true;
+    }
+    $mvc->getTimer()->stop("cache_multiple_write");
+    return $res;
   }
 
 

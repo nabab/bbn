@@ -3,14 +3,13 @@ namespace bbn\Entities\Models;
 
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Cls\Nullall;
 use bbn\Models\Tts\DbPublicOps;
-use bbn\Models\Tts\DbCache;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Entities\Identity;
 
 abstract class IdentityTable extends DbCls
 {
-  use DbCache;
+  use DbPublicCache;
   use DbPublicOps;
 
   public function __construct(Db $db, protected Identity $identity)
