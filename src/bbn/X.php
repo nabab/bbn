@@ -308,7 +308,7 @@ class X
             ];
           }
           $corresp["$errno|$errstr|$errfile|$errline"] = $idx;
-          unlink($file);
+          unlink($f);
         }
   
   
