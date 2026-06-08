@@ -231,6 +231,11 @@ class X
   {
     if (is_dir(Mvc::getTmpPath() . 'logs')) {
       $file      = Mvc::getTmpPath() . 'logs/_php_error.json';
+      $lock      = Mvc::getTmpPath() . 'logs/_php_error.lock';
+      $units      = Mvc::getTmpPath() . 'logs/bits';
+      if (!is_dir($units)) {
+        @mkdir($units, 0777, true);
+      }
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {
@@ -239,47 +244,78 @@ class X
       }
 
       $r = false;
-      if (is_file($file)) {
-        $r = json_decode(file_get_contents($file), 1);
-      }
+      $mic = microtime(true);
+      $unitFile = $units.'/'.((string)$mic).'.txt';
+      file_put_contents($unitFile, serialize([
+        $errno,
+        $errstr,
+        str_replace(constant('BBN_APP_PATH'), '', $errfile),
+        $errline,
+        $mic,
+        $backtrace
+      ]));
 
-      if (!$r) {
-        $r = [];
-      }
+      if (!is_file($lock)) {
+        file_put_contents($lock, '1');
+        if (is_file($file)) {
+          $r = json_decode(file_get_contents($file), 1);
+        }
+  
+        if (!$r) {
+          $r = [];
+        }
 
-      $t = date('Y-m-d H:i:s');
-      $errfile = str_replace(constant('BBN_APP_PATH'), '', $errfile);
-      $idx     = self::search(
-        $r,
-        [
-          'type' => $errno,
-          'error' => $errstr,
-          'file' => $errfile,
-          'line' => $errline,
-          'request' => ''
-        ]
-      );
-      if ($idx !== null) {
-        $r[$idx]['count']++;
-        $r[$idx]['last_date'] = $t;
-        $r[$idx]['backtrace'] = $backtrace;
-      } else {
-        $r[] = [
-          'first_date' => $t,
-          'last_date' => $t,
-          'count' => 1,
-          'type' => $errno,
-          'error' => $errstr,
-          'file' => $errfile,
-          'line' => $errline,
-          'backtrace' => $backtrace,
-          'request' => ''
-          //'context' => $context
-        ];
-      }
+        $all = scandir($units);
+        $corresp = [];
+        foreach ($all as $f) {
+          if ($f === '.' || $f === '..') {
+            continue;
+          }
 
-      self::sortBy($r, 'last_date', 'DESC');
-      file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
+          [$errno, $errstr, $errfile, $errline, $time, $backtrace] = unserialize(file_get_contents($units.'/'.$f));
+          $t = date('Y-m-d H:i:s', round($time));
+          if (isset($corresp["$errno|$errstr|$errfile|$errline"])) {
+            $idx = $corresp["$errno|$errstr|$errfile|$errline"];
+          }
+          else {
+            $idx     = self::search(
+              $r,
+              [
+                'type' => $errno,
+                'error' => $errstr,
+                'file' => $errfile,
+                'line' => $errline
+              ]
+            );
+          }
+          if ($idx !== null) {
+            $r[$idx]['count']++;
+            $r[$idx]['last_date'] = $t;
+            $r[$idx]['backtrace'] = $backtrace;
+          } else {
+            $idx = count($r);
+            $r[] = [
+              'first_date' => $t,
+              'last_date' => $t,
+              'count' => 1,
+              'type' => $errno,
+              'error' => $errstr,
+              'file' => $errfile,
+              'line' => $errline,
+              'backtrace' => $backtrace,
+              'request' => ''
+              //'context' => $context
+            ];
+          }
+          $corresp["$errno|$errstr|$errfile|$errline"] = $idx;
+          unlink($file);
+        }
+  
+  
+        self::sortBy($r, 'last_date', 'DESC');
+        file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
+        unlink($lock);
+      }
     } else {
       throw new Exception(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
     }
@@ -1296,9 +1332,10 @@ class X
   {
     $arr = ['hddump', 'ddump', 'hdump', 'adump', 'dump'];
     $res = null;
+    $realBacktrace = [];
     foreach ($arr as $fn) {
       $backtrace = array_filter(
-        debug_backtrace(),
+        $realBacktrace,
         function ($a) use ($fn) {
           return $a['function'] === $fn;
         }
