@@ -112,14 +112,20 @@ trait DbData
 
   protected function dbTraitTransformData(array|stdClass $res): array | stdClass
   {
-    $f = $this->class_cfg['arch'][$this->class_table_index];
+    return self::transformData($res, $this);
+  }
+
+
+  public static function transformData(array|stdClass $res, $obj): array | stdClass
+  {
+    $f = $obj->class_cfg['arch'][$obj->class_table_index];
     if (!empty($f['cfg'])) {
-      if (is_array($res)) {
+      if (\is_array($res)) {
         foreach ($res as &$r) {
           if (!empty($r[$f['cfg']])) {
             $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
-            if (!empty($this->class_cfg['cfg'])) {
-              foreach ($this->class_cfg['cfg'] as $v) {
+            if (!empty($obj->class_cfg['cfg'])) {
+              foreach ($obj->class_cfg['cfg'] as $v) {
                 if (isset($v['field'])
                   && !array_key_exists($v['field'], $r)
                 ) {
@@ -139,8 +145,8 @@ trait DbData
       }
       elseif (!empty($res->{$f['cfg']})) {
         $res->{$f['cfg']} = json_decode($res->{$f['cfg']});
-        if (!empty($this->class_cfg['cfg'])) {
-          foreach ($this->class_cfg['cfg'] as $v) {
+        if (!empty($obj->class_cfg['cfg'])) {
+          foreach ($obj->class_cfg['cfg'] as $v) {
             if (isset($v['field'])
               && !property_exists($res, $v['field'])
             ) {
