@@ -118,14 +118,15 @@ trait DbData
 
   public static function transformData(array $res, $obj): array | stdClass
   {
-    $f = $obj->class_cfg['arch'][$obj->class_table_index];
+    $classCfg = $obj->getClassCfg();
+    $f = $classCfg['arch'][$obj->getClassTableIndex()];
     if (!empty($f['cfg'])) {
       foreach ($res as &$r) {
         if (\is_array($res)) {
           if (!empty($r[$f['cfg']])) {
             $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
-            if (!empty($obj->class_cfg['cfg'])) {
-              foreach ($obj->class_cfg['cfg'] as $v) {
+            if (!empty($classCfg['cfg'])) {
+              foreach ($classCfg['cfg'] as $v) {
                 if (isset($v['field'])
                   && !array_key_exists($v['field'], $r)
                 ) {
@@ -142,8 +143,8 @@ trait DbData
         }
         elseif (!empty($res->{$f['cfg']})) {
           $res->{$f['cfg']} = json_decode($res->{$f['cfg']});
-          if (!empty($obj->class_cfg['cfg'])) {
-            foreach ($obj->class_cfg['cfg'] as $v) {
+          if (!empty($classCfg['cfg'])) {
+            foreach ($classCfg['cfg'] as $v) {
               if (isset($v['field'])
                 && !property_exists($res, $v['field'])
               ) {
