@@ -361,7 +361,22 @@ class Cache extends Basic implements CacheInterface
       return 0;
     }
 
-    $st = trim((string)$start) . '*';
+    if (empty($start) || ($start === '*')) {
+      if (self::$type === 'apc') {
+        return call_user_func('\\apcu_clear_cache');
+      }
+      elseif (self::$type === 'redis') {
+        return $this->obj->flushDB(true);
+      }
+      elseif (self::$type === 'memcache') {
+        return $this->obj->flush();
+      }
+      elseif (self::$type === 'files') {
+        return $this->obj->delete($this->path, true);
+      }
+    }
+
+    $st = rtrim(trim((string)$start), '*') . '*';
     $count = 0;
     foreach ($this->find($st) as $keys) {
       if ($this->deleteRaw(...$keys)) {
