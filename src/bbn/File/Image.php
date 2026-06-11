@@ -442,16 +442,16 @@ class Image extends bbn\File
         header('Content-Type: image/'.$this->ext2);
       }
 
-      if (class_exists('\\Imagick')) {
-          echo $this;
-          $this->img->clear();
-          $this->img->destroy();
+      if (self::isImagick()) {
+        echo $this;
+        $this->img->clear();
+        $this->img->destroy();
       }
       else{
-          \call_user_func('image'.$this->ext2, $this->img);
-            imagedestroy($this->img);
+        \call_user_func('image'.$this->ext2, $this->img);
       }
     }
+
     return $this;
   }
 
