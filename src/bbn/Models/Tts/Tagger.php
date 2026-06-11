@@ -38,6 +38,11 @@ trait Tagger
   private $taggerCols;
 
   /**
+   * @var null|string The entity's ID if the tagger is used for an entity.
+   */
+  private $taggerEntity = null;
+
+  /**
    * @var Tag The Tag object.
    */
   protected $taggerObject;
@@ -47,10 +52,15 @@ trait Tagger
   {
     $this->taggerInit();
     $res = [];
+    $where = [$this->taggerCols['id_element'] => $id_element];
+    if ($this->taggerEntity) {
+      $where[$this->taggerCols['id_entity']] = $this->taggerEntity;
+    }
+
     $ids = $this->db->getColumnValues(
       $this->taggerTable,
       $this->taggerCols['id_tag'],
-      [$this->taggerCols['id_element'] => $id_element]
+      $where
     );
     foreach ($ids as $id) {
       if ($tmp = $this->taggerObject->getById($id, $full)) {
@@ -105,25 +115,29 @@ trait Tagger
   public function removeTag(string $id_element, string $id_tag): int
   {
     $this->taggerInit();
-    return $this->db->delete(
-      $this->taggerTable,
-      [
-        $this->taggerCols['id_element'] => $id_element,
-        $this->taggerCols['id_tag'] => $id_tag
-      ]
-    );
+    $where = [
+      $this->taggerCols['id_element'] => $id_element,
+      $this->taggerCols['id_tag'] => $id_tag
+    ];
+    if ($this->taggerEntity) {
+      $where[$this->taggerCols['id_entity']] = $this->taggerEntity;
+    }
+
+    return $this->db->delete($this->taggerTable, $where);
   }
 
 
   public function removeTags(string $id_element): int
   {
     $this->taggerInit();
-    return $this->db->delete(
-      $this->taggerTable,
-      [
-        $this->taggerCols['id_element'] => $id_element,
-      ]
-    );
+    $where = [
+      $this->taggerCols['id_element'] => $id_element,
+    ];
+    if ($this->taggerEntity) {
+      $where[$this->taggerCols['id_entity']] = $this->taggerEntity;
+    }
+
+    return $this->db->delete($this->taggerTable, $where);
   }
 
 
@@ -159,13 +173,15 @@ trait Tagger
       throw new Exception(X::_("Impossible to create the tag %s", $tag));
     }
 
-    return $this->db->insertIgnore(
-      $this->taggerTable,
-      [
-        $this->taggerCols['id_element'] => $id_element,
-        $this->taggerCols['id_tag'] => $id_tag
-      ]
-    );
+    $data = [
+      $this->taggerCols['id_element'] => $id_element,
+      $this->taggerCols['id_tag'] => $id_tag
+    ];
+    if ($this->taggerEntity) {
+      $data[$this->taggerCols['id_entity']] = $this->taggerEntity;
+    }
+
+    return $this->db->insertIgnore($this->taggerTable, $data);
   }
 
 
@@ -187,7 +203,7 @@ trait Tagger
   }
 
 
-  protected function taggerInit(string|null $table = null, array|null $columns = null)
+  protected function taggerInit(?string $table = null, ?array $columns = null, ?string $idEntity = null): bool
   {
     if (!$this->taggerIsInit) {
       if (!$this->db) {
@@ -211,9 +227,14 @@ trait Tagger
         throw new Exception(X::_("Impossible to init the tagger without an id_element column"));
       }
 
+      if (!empty($idEntity) && empty($columns['id_entity'])) {
+        throw new Exception(X::_("Impossible to init the tagger with an id_entity if the corresponding column is not defined"));
+      }
+
       $this->taggerObject = new Tag($this->db);
       $this->taggerTable  = $table;
       $this->taggerCols   = $columns;
+      $this->taggerEntity = $idEntity ?: null;
       $this->taggerIsInit = true;
     }
 
