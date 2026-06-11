@@ -1,6 +1,7 @@
 <?php
 namespace bbn;
 
+use bbn\Util\Timer;
 use Exception;
 use Memcached;
 
@@ -9,6 +10,8 @@ use Psr\SimpleCache\CacheInterface;
 use bbn\Str;
 use bbn\X;
 use bbn\Models\Cls\Basic;
+use Generator;
+
 use function defined;
 use function in_array;
 use function is_array;
@@ -352,94 +355,22 @@ class Cache extends Basic implements CacheInterface
    *
    * @return bool|int
    */
-  public function deleteAll(?string $st = null): int
+  public function deleteAll(?string $start = null): int
   {
     if (!self::$type) {
       return 0;
     }
 
-    $st = trim((string)$st, self::$sep);
-    return $this->deleteBranch($st);
-  }
-
-
-  protected function deleteBranch(string $path = '', array &$todo = []): int
-  {
-    $go = empty($todo);
-    $sep = $this->getSeparator();
+    $st = trim((string)$start) . '*';
     $count = 0;
-    if ($keys = $this->getKeys($path)) {
-      $todo[] = $path.$sep.'__keys';
-      foreach ($keys as $child) {
-        $fullKey = $path === '' ? $child : $path . $sep . $child;
-        $count += $this->deleteBranch($fullKey, $todo);
+    foreach ($this->find($st) as $keys) {
+      if ($this->deleteRaw(...$keys)) {
+        $count += count($keys);
       }
-    }
-    if ($info = $this->info($path)) {
-      $payloadKey = "{$path}{$sep}{$info['version']}";
-      if ($this->hasRaw($payloadKey)) {
-        $todo[] = $payloadKey;
-        $count++;
-      }
-      $todo[] = $path.$sep.'__info';
-    }
-
-    if ($go && !empty($todo)) {
-      $this->deleteRaw(...$todo);
     }
 
     return $count;
   }
-  /*
-  public function deleteAll(?string $st = null): int
-  {
-    if (self::$type === 'files') {
-      if ($st === null) {
-          $st = '';
-      }
-
-      $dir = self::_dir($st, $this->path, false);
-      if ($this->obj->isDir($dir)) {
-        return $this->obj->delete($dir, $dir === $this->path ? false : true);
-      }
-      else {
-        try {
-          $res = $this->obj->delete($dir.'.bbn.cache');
-        }
-        catch (Exception $e) {
-          $res = 0;
-        }
-
-        return $res;
-      }
-    }
-    elseif (self::$type) {
-      $items = $this->items($st);
-      $res   = 0;
-      switch (self::$type){
-        case 'apc':
-          foreach ($items as $item){
-            $res += (int)call_user_func('\\apcu_delete', $item);
-          }
-          break;
-        case 'redis':
-          $res = count($items) ? $this->obj->unlink(...$items) : 0;
-          break;
-        case 'memcache':
-          if (!$st) {
-            $this->obj->flush();
-          }
-
-          $res = count($items) ? $this->obj->deleteMulti($items) : 0;
-          break;
-      }
-
-      return $res;
-    }
-
-    return 0;
-  }
-  */
 
 
   /**
@@ -882,6 +813,7 @@ class Cache extends Basic implements CacheInterface
   {
     if (self::$type) {
       $emptyDir = empty($dir);
+      $sep = self::$sep;
       switch (self::$type){
         case 'apc':
           $all  = call_user_func('\\apcu_cache_info');
@@ -894,21 +826,11 @@ class Cache extends Basic implements CacheInterface
 
         case 'redis':
           $list = [];
-          $it = null;
-          $prefixLength = strlen($this->prefix);
-          do {
-            // Scan for some keys
-            $arr_keys = $dir ? $this->obj->scan($it, $this->prefix . $dir . '*') : $this->obj->scan($it);
+          $arr_keys = $this->getKeys($dir ?: '');
+          foreach($arr_keys as $str_key) {
+            $list[] = $dir ? $dir.$sep.$str_key : $str_key;
+          }
 
-            // Redis may return empty results, so protect against that
-            if ($arr_keys !== FALSE) {
-              foreach($arr_keys as $str_key) {
-                $list[] = mb_substr($str_key, $prefixLength);
-              }
-            }
-          } while ($it > 0);
-
-          sort($list);
           return $list;
 
         case 'memcache':
@@ -1084,7 +1006,7 @@ class Cache extends Basic implements CacheInterface
 
           return $list;
         case 'redis':
-          $keys = $this->items($path);
+          $keys = $this->getKeys($path);
           $list = [];
           $done = [];
           foreach ($keys as $i => $k){
@@ -1134,7 +1056,6 @@ class Cache extends Basic implements CacheInterface
                 )) : 0;
               }
 
-              //X::dump($name, $k, $path, $num, $bits);
               $list[] = [
                 'text' => $name,
                 'key' => $k,
@@ -1145,7 +1066,6 @@ class Cache extends Basic implements CacheInterface
                 'folder' => $isFolder
               ];
             }
-            //X::ddump(count($list));
           }
 
           return $list;
@@ -1200,7 +1120,6 @@ class Cache extends Basic implements CacheInterface
                 )) : 0;
               }
 
-              //X::dump($name, $k, $path, $num, $bits);
               $list[] = [
                 'text' => $name,
                 'key' => $k,
@@ -1211,7 +1130,6 @@ class Cache extends Basic implements CacheInterface
                 'folder' => $isFolder
               ];
             }
-            //X::ddump(count($list));
           }
 
           return $list;
@@ -1332,6 +1250,88 @@ class Cache extends Basic implements CacheInterface
     $this->recorded = [];
     return $recorded;
   }
+
+  /**
+   * @param string $pattern
+   * @return Generator
+   */
+  public function find(?string $pattern): Generator 
+  {
+    if (self::$type) {
+      $emptyDir = empty($pattern);
+      switch (self::$type){
+        case 'apc':
+          $all  = call_user_func('\\apcu_cache_info');
+          $list = [];
+          foreach ($all['cache_list'] as $a){
+            array_push($list, $a['info']);
+          }
+
+          return $list;
+
+        case 'redis':
+          $list = [];
+          $it = null;
+          $prefixLength = strlen($this->prefix);
+          do {
+            $currentList = [];
+            // Scan for some keys
+            $arr_keys = $pattern ? $this->obj->scan($it, $this->prefix . $pattern . '*') : $this->obj->scan($it);
+
+            // Redis may return empty results, so protect against that
+            if (!empty($arr_keys)) {
+              foreach($arr_keys as $str_key) {
+                $currentList[] = mb_substr($str_key, $prefixLength);
+              }
+            }
+            yield $currentList;
+            array_push($list, ...$currentList);
+          } while ($it > 0);
+
+          return $list;
+
+        case 'memcache':
+          $list = [];
+          $arr  = $this->getAllKeys();
+          foreach ($arr as $key){
+            if ($emptyDir || (mb_strpos($key, $pattern) === 0)) {
+              $list[] = $key;
+            }
+          }
+
+          sort($list);
+          return $list;
+
+        case 'files':
+          $cache =& $this;
+          $list  = array_filter(
+            array_map(
+              function ($a) use ($pattern) {
+                return ( $pattern ? "$pattern/" : '' ).X::basename($a, '.bbn.cache');
+              }, $this->obj->getFiles($this->path.($pattern ? "/$pattern" : ''))
+            ),
+            function ($a) use ($cache) {
+              // Only gives valid cache
+              return $cache->has($a);
+            }
+          );
+          $dirs  = $this->obj->getDirs($this->path.($pattern ? "/$pattern" : ''));
+          if (count($dirs)) {
+            foreach ($dirs as $d){
+              $res = $this->items($pattern ? $pattern.self::$sep.X::basename($d) : X::basename($d));
+              foreach ($res as $r){
+                array_push($list, $r);
+              }
+            }
+          }
+
+          return $list;
+      }
+    }
+
+    return [];
+  }
+
 
   protected function setLock($key, $length = 2): bool
   {

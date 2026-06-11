@@ -124,7 +124,10 @@ trait DbData
       foreach ($res as &$r) {
         if (\is_array($res)) {
           if (!empty($r[$f['cfg']])) {
-            $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
+            if (is_string($r[$f['cfg']])) {
+              $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
+            }
+
             if (!empty($classCfg['cfg'])) {
               foreach ($classCfg['cfg'] as $v) {
                 if (isset($v['field'])
