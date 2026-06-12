@@ -89,14 +89,15 @@ class Link extends EntityTable
         "id_tag" => $this->class_cfg["arch"]["tags"]["id_tag"],
         "id_element" => $this->class_cfg["arch"]["tags"]["id_link"],
       ];
-      if (!empty($this->entity)) {
+      $hasEntity = !empty($this->entity) && is_a($this->entity, Entity::class);
+      if ($hasEntity) {
         $taggerFields["id_entity"] = $this->class_cfg["arch"]["tags"]["id_entity"];
       }
 
       $this->taggerInit(
         $this->class_cfg["tables"]["tags"],
         $taggerFields,
-        !empty($this->entity) ? $this->entity->getId() : null
+        $hasEntity ? $this->entity->getId() : null
       );
       if (is_string($this->cfg["tags"])) {
         $this->taggerType = $this->taggerObject->retrieveType(
