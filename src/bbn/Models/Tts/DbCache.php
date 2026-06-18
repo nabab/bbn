@@ -282,9 +282,23 @@ trait DbCache
     foreach ($junctions as $j) {
       if (
         !X::hasProps($j, ['table', 'field'], true) ||
-        empty($data[$j['field']])
+        (!is_array($j['field']) && empty($data[$j['field']]))
       ) {
         continue;
+      }
+
+      if (is_array($j['field']) && X::isAssoc($j['field'])) {
+        $isValid = true;
+        foreach ($j['field'] as $f => $df) {
+          if (empty($data[$df])) {
+            $isValid = false;
+            break;
+          }
+        }
+
+        if (!$isValid) {
+          continue;
+        }
       }
 
       $mode = $j['mode'] ?? 'one';
@@ -296,7 +310,12 @@ trait DbCache
 
       $where = $j['filter'] ?? [];
 
-      if (isset($tableCfg[$j['table']]['primary'][0])) {
+      if (is_array($j['field'])) {
+        foreach ($j['field'] as $df => $f) {
+          $where[$f] = $data[$df];
+        }
+      }
+      elseif (isset($tableCfg[$j['table']]['primary'][0])) {
         $where[$tableCfg[$j['table']]['primary'][0]] = $data[$j['field']];
       }
 
