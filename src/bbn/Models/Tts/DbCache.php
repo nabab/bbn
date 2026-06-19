@@ -310,7 +310,7 @@ trait DbCache
 
       $where = $j['filter'] ?? [];
 
-      if (is_array($j['field'])) {
+      if (is_array($j['field'])  && X::isAssoc($j['field'])) {
         foreach ($j['field'] as $df => $f) {
           $where[$f] = $data[$df];
         }
