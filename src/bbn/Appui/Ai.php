@@ -58,7 +58,7 @@ class Ai extends DbCls
       "prompt_settings" => [
         "id" => "id",
         "id_prompt" => "id_prompt",
-        "model" => "model",
+        "id_model" => "id_model",
         "def" => "def",
         "last_use" => "last_use",
         "hash" => "hash",
@@ -155,7 +155,7 @@ class Ai extends DbCls
 
     $this->ai = new OpenAi($pass);
     $this->ai->setBaseURL($endpoint["data"]["url"]);
-    if (!$model) {
+    if (!$model && !empty($endpoint["models"])) {
       $model = $endpoint["models"][0]["text"];
     }
 
@@ -982,7 +982,7 @@ class Ai extends DbCls
 
     $data = [
       $ccfg["arch"]["prompt_settings"]["id_prompt"] => $id_prompt,
-      $ccfg["arch"]["prompt_settings"]["model"] => $model,
+      $ccfg["arch"]["prompt_settings"]["id_model"] => $model,
       $ccfg["arch"]["prompt_settings"]["hash"] => $hash,
       $ccfg["arch"]["prompt_settings"]["cfg"] => $json,
     ];
