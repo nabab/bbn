@@ -495,9 +495,21 @@ class Ai extends DbCls
     ];
   }
 
-  public function getChatTitle(string $text): string
+  public function getChatTitle(?string $text = null, ?array $cfg = null): string
   {
-    return Str::genpwd(10);
+    if (empty($text) || empty($cfg)) {
+      return Str::genpwd(10);
+    }
+
+    $text = "Suggest me a very concise title for the following chat, the title must make me understand the topic of the chat, the title must be on a single line:" . PHP_EOL . PHP_EOL . $text;
+    $messages = $this->createMessages($text);
+    $query = $this->createRequest($messages, $cfg);
+    $result = $this->request($query);
+    if (empty($result["result"]["content"])) {
+      return Str::genpwd(10);
+    }
+
+    return trim($result["result"]["content"], "\n\r\t *");
   }
 
   public function getTags(string $text): array
@@ -545,7 +557,6 @@ class Ai extends DbCls
       $result["rdate"] = $responseTime;
       $result["input"] = $input;
       $result["request"] = $result;
-      $result["title"] = $this->getChatTitle($fullText);
       $path = $this->user->getDataPath("appui-ai") . "chat";
       $summaryFile = "conversations.json";
       $this->fs->cd($path);
@@ -562,12 +573,14 @@ class Ai extends DbCls
         }
 
         $conversation = $this->fs->decodeContents($row["file"], "json", true);
+        $result["title"] = $this->getChatTitle();
       } else {
         $subpath = Str::sub(
           X::makeStoragePath($path . "/conversations", "Y", 100),
           Str::len($path) + 1,
         );
         $result["file"] = $subpath . $result["id"] . ".json";
+        $result["title"] = $this->getChatTitle($fullText, $cfg);
         $row = [
           "title" => $result["title"],
           "id" => $result["id"],
