@@ -74,7 +74,7 @@ class Client extends Basic
   /**
    * @var bool Whether the client is currently in the process of disconnecting
    */
-  protected bool $disconnetting = false;
+  protected bool $disconnecting = false;
 
   /**
    * @var bool Whether the client is currently in the process of communicating with the server
@@ -185,7 +185,7 @@ class Client extends Basic
   public function disconnect(): static
   {
     if (!empty($this->streamResource) && !$this->isDisconnecting()) {
-      $this->disconnetting = true;
+      $this->disconnecting = true;
       try {
         $this->sendCommand("LOGOUT");
       }
@@ -193,7 +193,7 @@ class Client extends Basic
 
       fclose($this->streamResource);
       $this->streamResource = null;
-      $this->disconnetting = false;
+      $this->disconnecting = false;
     }
 
     return $this;
@@ -205,7 +205,7 @@ class Client extends Basic
    */
   public function isDisconnecting(): bool
   {
-    return $this->disconnetting;
+    return $this->disconnecting;
   }
 
   /**
@@ -331,7 +331,7 @@ class Client extends Basic
     string $command,
     bool $allResponse = false,
     bool $response = true,
-    bool $closeCommunication = true
+    bool $closeCommunication = false
   ): string|array
   {
     $tag = $this->getNextTag();

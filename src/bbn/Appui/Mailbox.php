@@ -714,6 +714,7 @@ class Mailbox extends Basic
     if (isset($this->folders[$folder])
       && $this->selectFolder($folder)
     ) {
+      $res = [];
       while ($start >= $end) {
         try {
           $tmp = $this->getMsgBySeq($start);
@@ -722,8 +723,9 @@ class Mailbox extends Basic
             continue;
           }
 
-          yield $tmp;
+          $res[] = $tmp;
           $start--;
+          yield $tmp;
         }
         catch (Exception $e) {
           X::log([
@@ -733,6 +735,8 @@ class Mailbox extends Basic
           $start--;
         }
       }
+
+      return $res;
     }
 
     return null;
@@ -1655,7 +1659,7 @@ class Mailbox extends Basic
       );
     }
 
-    if (!$this->client->isCommunicating() &&!$this->client->isConnected()) {
+    if (!$this->client->isCommunicating() && !$this->client->isConnected()) {
       $this->client->connect();
     }
 
@@ -1674,7 +1678,7 @@ class Mailbox extends Basic
     string $command,
     bool $allResponse = false,
     bool $response = true,
-    bool $closeCommunication = true
+    bool $closeCommunication = false
   ): string|array
   {
     return $this->getClient()->sendCommand(

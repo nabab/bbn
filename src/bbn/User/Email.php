@@ -869,9 +869,8 @@ class Email extends Basic
 
   public function syncEmails(
     string|array $folder,
-    int $limit = 0,
-    bool $generator = false,
-  ): int|null|Generator {
+    int $limit = 0
+  ) {
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
     }
@@ -890,7 +889,6 @@ class Email extends Basic
         $added = 0;
         $deleted = 0;
         $mb = $this->getMailbox($folder["id_account"]);
-        $mb->selectFolder($folder["uid"]);
         $info = $mb->getInfoFolder($folder["uid"]);
         if ($info->Nmsgs === 0) {
           if (!empty($folder["db_num_msg"])) {

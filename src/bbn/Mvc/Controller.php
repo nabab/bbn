@@ -210,7 +210,7 @@ class Controller implements Api
 
   public function stream($data): void
   {
-    if ($this->_stream) {
+    if ($this->isStream()) {
       if (!$data) {
         return;
       }
@@ -220,9 +220,9 @@ class Controller implements Api
       }
 
       $st = json_encode(
-        is_string($data) ?
-          ['content' => $data] :
-          (is_array($data) ? $data : ['success' => false])
+        is_string($data) 
+          ? ['content' => $data]
+          : (is_array($data) ? $data : ['success' => false])
       ) . PHP_EOL;
       $len = Str::len($st);
       if ($len < 8192) {
