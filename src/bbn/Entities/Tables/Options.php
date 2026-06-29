@@ -130,12 +130,17 @@ class Options extends EntityTable
   {
     if ($this->check()) {
       $f = $this->class_cfg['arch']['entities_options'];
+      $where = [
+        $f['id_type'] => $id_type
+      ];
+      if (!empty($id_entity)) {
+        $where[$f['id_entity']] = $id_entity;
+      }
+
       return $this->db->rselectAll(
         $this->class_cfg['table'],
         [],
-        [
-          $f['id_type'] => $id_type
-        ]
+        $where
       );
     }
 
