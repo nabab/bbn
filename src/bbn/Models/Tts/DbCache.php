@@ -20,6 +20,7 @@ use function count;
 use function is_array;
 use function in_array;
 
+
 /**
  * Provides Cache helpers built on top of DbActions, with row-level caching:
  * - Row cache: table/<table_name>/<id> -> full row array
@@ -32,6 +33,7 @@ use function in_array;
 trait DbCache
 {
   use DbOps;
+  private bool $dbCacheIsInit = false;
 
   /** @var Cache The cache engine used by this trait (shared across instances). */
   protected static Cache $dbTraitCache;
@@ -48,10 +50,53 @@ trait DbCache
     }
   }
 
+  protected function dbCacheOnAfterInsert(InternalEvent $o): InternalEvent
+  {
+    $id = $o->getData()[0];
+    $this->dbTraitCacheSet($id);
+    return $o;
+  }
+
+  protected function dbCacheOnBeforeUpdate(InternalEvent $o): InternalEvent
+  {
+    $filter = $o->getData()[0];
+    $ids = $this->dbTraitGetIds($filter);
+    $o->setResponse($ids);
+    return $o;
+  }
+
+  protected function dbCacheOnAfterUpdate(InternalEvent $o): InternalEvent
+  {
+    X::log(['passing by'], 'dbTraitCache-afterupdate-ids');
+    if ($ids = $o->getResponse()) {
+      foreach ($ids as $id) {
+        $this->dbTraitCacheSet($id);
+      }
+      $res = $o->getData()[2] ?? null;
+      $o->setResponse($res);
+    }
+
+    return $o;
+  }
+
+  protected function dbCacheOnBeforeDelete(InternalEvent $o): InternalEvent
+  {
+    $filter = $o->getData()[0];
+    $ids =
+      $this->class_cfg["cache"] ?? false
+        ? $this->dbTraitGetIds($filter)
+        : [];
+    foreach ($ids as $id) {
+      $this->dbTraitCacheDelete($id);
+    }
+    return $o;
+  }
+
   protected function dbTraitCacheInit(): void
   {
-    static::dbTraitGlobalCacheInit();
-    if ($this->class_cfg["cache"] ?? false) {
+    $this->dbTraitGlobalCacheInit();
+    if (!$this->dbCacheIsInit && ($this->class_cfg["cache"] ?? false)) {
+      $this->dbCacheIsInit = true;
       /*
       $this->on("beforeselect", function (InternalEvent $o): InternalEvent {
         $filter = $o->getData()[0];
@@ -64,39 +109,10 @@ trait DbCache
         return $o;
       });
       */
-      $this->on("afterinsert", function (InternalEvent $o): InternalEvent {
-        $id = $o->getData()[0];
-        $this->dbTraitCacheSet($id);
-        return $o;
-      });
-      $this->on("beforeupdate", function (InternalEvent $o): InternalEvent {
-        $filter = $o->getData()[0];
-        $ids = $this->dbTraitGetIds($filter);
-        $o->setResponse($ids);
-        return $o;
-      });
-      $this->on("afterupdate", function (InternalEvent $o): InternalEvent {
-        if ($ids = $o->getResponse()) {
-          foreach ($ids as $id) {
-            $this->dbTraitCacheSet($id);
-          }
-          $res = $o->getData()[2] ?? null;
-          $o->setResponse($res);
-        }
-
-        return $o;
-      });
-      $this->on("beforedelete", function (InternalEvent $o): InternalEvent {
-        $filter = $o->getData()[0];
-        $ids =
-          $this->class_cfg["cache"] ?? false
-            ? $this->dbTraitGetIds($filter)
-            : [];
-        foreach ($ids as $id) {
-          $this->dbTraitCacheDelete($id);
-        }
-        return $o;
-      });
+      $this->on("afterinsert", fn(InternalEvent $o) => $this->dbCacheOnAfterInsert($o));
+      $this->on("beforeupdate", fn(InternalEvent $o) => $this->dbCacheOnBeforeUpdate($o));
+      $this->on("afterupdate", fn(InternalEvent $o) => $this->dbCacheOnAfterUpdate($o));
+      $this->on("beforedelete", fn(InternalEvent $o) => $this->dbCacheOnBeforeDelete($o));
     }
   }
 

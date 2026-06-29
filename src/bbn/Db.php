@@ -981,6 +981,11 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     return $this->subTriggers()->setTrigger($function, $kind, $moment, $tables);
   }
 
+  public function setTriggers(array $triggers): static
+  {
+    return $this->subTriggers()->setTriggers($triggers);
+  }
+
   public function getTriggers(): array
   {
     return $this->subTriggers()->getTriggers();

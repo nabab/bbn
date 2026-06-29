@@ -59,7 +59,7 @@ trait Cache
   protected function cacheDeleteAll(): static
   {
     $this->cacheInit();
-    $this->cache_engine->deleteAll($this->_cache_prefix);
+    $this->cache_engine->deleteByIndex($this->_cache_prefix);
     return $this;
   }
 
@@ -76,7 +76,7 @@ trait Cache
     $this->cacheInit();
     if (!$method) {
       $root = $this->_cache_name($uid);
-      $this->cache_engine->deleteAll($root);
+      $this->cache_engine->deleteByIndex($root);
     }
     else {
       $cn = $this->_cache_name($uid, $method);
@@ -100,7 +100,7 @@ trait Cache
     $this->cacheInit();
     if (!$method) {
       $root = $this->_cache_name($uid, '', $locale);
-      $this->cache_engine->deleteAll($root);
+      $this->cache_engine->deleteByIndex($root);
     }
     else {
       $cn = $this->_cache_name($uid, $method, $locale);

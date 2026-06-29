@@ -2787,6 +2787,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return $this->_triggers;
   }
 
+  public function setTriggers(array $triggers): static
+  {
+    $this->_triggers = $triggers;
+    return $this;
+  }
+
   /**
    * Launches a function before or after
    *

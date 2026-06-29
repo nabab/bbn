@@ -32,7 +32,9 @@ trait Event
 
   public function on(string $event, callable $listener): void
   {
-    $this->listeners[$event][] = $listener;
+    if (!\in_array($listener, $this->listeners[$event] ?? [], true)) {
+      $this->listeners[$event][] = $listener;
+    }
   }
 
   public function off(string $event, ?callable $listener = null): void

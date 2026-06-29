@@ -52,8 +52,15 @@ trait DbFiltering
           if (isset($c['logic']) && $c['logic'] === 'OR') {
             $conditions[] = $c;
           }
-          elseif (isset($c['conditions']) && is_array($c['conditions'])) {
-            array_push($conditions, ...array_values($c['conditions'])); // Flatten conditions into main list
+          elseif (isset($c['conditions']) && \is_array($c['conditions'])) {
+            foreach ($c['conditions'] as $key => $cond) {
+              if (is_string($key)) {
+                $conditions[$key] = $cond;
+              }
+              else {
+                $conditions[] = $cond;
+              }
+            }
           }
           else {
             X::extendOut($conditions, $c);

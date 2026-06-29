@@ -850,7 +850,7 @@ class Cache extends Basic implements CacheInterface
 
         case 'memcache':
           $list = [];
-          $arr  = $this->getAllKeys();
+          $arr  = $this->getAllKeysMemCache();
           foreach ($arr as $key){
             if ($emptyDir || (mb_strpos($key, $dir) === 0)) {
               $list[] = $key;
@@ -1085,7 +1085,7 @@ class Cache extends Basic implements CacheInterface
 
           return $list;
         case 'memcache':
-          $keys = $this->getAllKeys();
+          $keys = $this->getAllKeysMemCache();
           $list = [];
           $done = [];
           foreach ($keys as $i => $k){
@@ -1307,7 +1307,7 @@ class Cache extends Basic implements CacheInterface
 
         case 'memcache':
           $list = [];
-          $arr  = $this->getAllKeys();
+          $arr  = $this->getAllKeysMemCache();
           foreach ($arr as $key){
             if ($emptyDir || (mb_strpos($key, $pattern) === 0)) {
               $list[] = $key;
@@ -1501,7 +1501,7 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  protected function deleteByIndex(string $path = ''): int
+  public function deleteByIndex(string $path = ''): int
   {
     $sep = $this->getSeparator();
     $count = 0;
@@ -1529,7 +1529,8 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  private function getAllKeys() {
+  private function getAllKeysMemCache() {
+    $allKeys = [];
     $sock = fsockopen($this->host, $this->port, $errno, $errstr);
     if ($sock === false) {
         throw new Exception("Error connection to server {$this->host} on port {$this->port}: ({$errno}) {$errstr}");

@@ -9,6 +9,7 @@ use bbn\Db;
 use bbn\Str;
 use bbn\X;
 use bbn\Models\Tts\DbPublicCache;
+use bbn\Models\Tts\DbPublicOps;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Identity;
@@ -39,6 +40,7 @@ use function is_int;
 abstract class Entities extends DbCls
 {
   use DbPublicCache;
+  use DbPublicOps;
 
   /**
    * Default class configuration.
@@ -165,6 +167,7 @@ abstract class Entities extends DbCls
     parent::__construct($db);
     // Setting up the class configuration
     $this->initClassCfg();
+    $this->dbTraitCacheInit();
     $cls = $this->class_cfg["classes"];
     if (!empty($cls["link"])) {
       $this->linkCls = $cls["link"];

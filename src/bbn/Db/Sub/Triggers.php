@@ -106,4 +106,10 @@ class Triggers extends Sub implements ItfTriggers
   {
     return $this->language->getTriggers();
   }
+
+  public function setTriggers(array $triggers): Db
+  {
+    $this->language->setTriggers($triggers);
+    return $this->db;
+  }
 }

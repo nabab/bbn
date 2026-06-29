@@ -37,17 +37,17 @@ class Entity
 
   protected ?Link $links;
 
-  protected $easyId = null;
+  protected ?int $easyId = null;
 
   protected array $objects = [];
 
-  public function __call($method, $args)
+  public function __call(string $method, array $args)
   {
     if ($this->objects[$method] ?? null) {
       return $this->objects[$method];
     }
     
-    $res = $this->entities->$method($this);
+    $res = $this->entities->$method($this, ...$args);
     if ($res) {
       $this->objects[$method] = $res;
       return $res;
@@ -69,7 +69,7 @@ class Entity
     $this->props = $this->class_cfg['props']['entities'];
     if ($this->fields['easy_id']) {
       if (Str::isInteger($id)) {
-        $this->easyId = $id;
+        $this->easyId = (int)$id;
         if ($uid = $this->entities->selectOne($this->fields['id'], [$this->fields['easy_id'] => $id])) {
           $this->id = $uid;
         }
