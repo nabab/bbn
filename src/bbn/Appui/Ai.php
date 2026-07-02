@@ -265,6 +265,15 @@ class Ai extends DbCls
     return null;
   }
 
+  public function getEndpointByModel(string $idModel): ?array
+  {
+    if ($p = $this->prefs->getBit($idModel)) {
+      return $this->getEndpoint($p["id_user_option"]);
+    }
+
+    return null;
+  }
+
   /**
    * Adds a new AI endpoint with the specified parameters.
    *
@@ -426,7 +435,7 @@ class Ai extends DbCls
    * @param array $cfg Configuration array
    * @return array Request array
    */
-  public function createRequest(array $messages, array $cfg): array
+  public function createRequest(array $messages, array $cfg = []): array
   {
     $config = new Gpt3TokenizerConfig();
     $tokenizer = new Gpt3Tokenizer($config);
@@ -441,23 +450,25 @@ class Ai extends DbCls
         ? $this->db->selectOne('bbn_users_options_bits', 'text', ['id' => $cfg["model"]])
         : $cfg["model"];
     }
+
     $request = [
       "model" => $model,
       "messages" => $messages,
       "max_tokens" => $max_tokens,
     ];
-
-    if (array_key_exists("temperature", $cfg["cfg"])) {
-      $request["temperature"] = $cfg["cfg"]["temperature"];
-    }
-    if (array_key_exists("top_p", $cfg["cfg"])) {
-      $request["top_p"] = $cfg["cfg"]["top_p"];
-    }
-    if (array_key_exists("frequency", $cfg["cfg"])) {
-      $request["frequency_penalty"] = $cfg["cfg"]["frequency"];
-    }
-    if (array_key_exists("presence", $cfg["cfg"])) {
-      $request["presence_penalty"] = $cfg["cfg"]["presence"];
+    if (!empty($cfg['cfg'])) {
+      if (array_key_exists("temperature", $cfg["cfg"])) {
+        $request["temperature"] = $cfg["cfg"]["temperature"];
+      }
+      if (array_key_exists("top_p", $cfg["cfg"])) {
+        $request["top_p"] = $cfg["cfg"]["top_p"];
+      }
+      if (array_key_exists("frequency", $cfg["cfg"])) {
+        $request["frequency_penalty"] = $cfg["cfg"]["frequency"];
+      }
+      if (array_key_exists("presence", $cfg["cfg"])) {
+        $request["presence_penalty"] = $cfg["cfg"]["presence"];
+      }
     }
 
     return $request;
@@ -759,49 +770,43 @@ class Ai extends DbCls
    * Retrieves a prompt based on the specified shortcode.
    *
    * @param string $shortcode The shortcode of the prompt.
-   * @return mixed The prompt data if found, otherwise null.
+   * @return array|null The prompt data if found, otherwise null.
    */
-  public function getPromptByShortcode(string $shortcode)
+  public function getPromptByShortcode(string $shortcode): ?array
   {
     $ccfg = $this->getClassCfg();
-    $prompt = $this->dbTraitRselect([
-      "tables" => [$ccfg["tables"]["prompt"]],
-      "where" => [
-        $ccfg["arch"]["prompt"]["shortcode"] => $shortcode,
-      ],
-    ]);
-
-    if (!empty($prompt)) {
-      $note = $this->note->get($prompt["id_note"]);
-      $prompt["title"] = $note["title"];
-      $prompt["content"] = $note["content"];
-      $prompt["lang"] = $note["lang"];
+    if ($prompt = $this->dbTraitSelectOne('id', [
+      $ccfg["arch"]["prompt"]["shortcode"] => $shortcode,
+    ])) {
+      return $this->getPromptById($prompt);
     }
 
-    return $prompt;
+    return null;
   }
 
   /**
    * Retrieves a prompt based on the specified ID.
    *
    * @param string $id The ID of the prompt.
-   * @return mixed The prompt data if found, otherwise null.
+   * @return array|null The prompt data if found, otherwise null.
    */
-  public function getPromptById(string $id)
+  public function getPromptById(string $id): ?array
   {
-    $prompt = $this->dbTraitRselect($id);
-    if (!empty($prompt)) {
+    if ($prompt = $this->dbTraitRselect($id)) {
       $note = $this->note->get($prompt["id_note"]);
       $prompt["title"] = $note["title"];
       $prompt["content"] = $note["content"];
       $prompt["lang"] = $note["lang"];
       $prompt["items"] = [];
+      $prompt['settings'] = [];
       if ($settings = $this->getPromptDefSettings($id)) {
-       $prompt['settings'] = $settings;
+        $prompt['settings'] = $settings;
       }
+
+      return $prompt;
     }
 
-    return $prompt;
+    return null;
   }
 
   /**
@@ -832,7 +837,7 @@ class Ai extends DbCls
       null,
       null,
       "text/plain",
-      !empty($data["cfg"]["language"]) ? $data["cfg"]["language"] : null
+      !empty($data["lang"]) ? $data["lang"] : null
     );
     $ccfg = $this->getClassCfg();
 
@@ -897,12 +902,12 @@ class Ai extends DbCls
     // Update the title and content of the associated note
     if (($data["title"] !== $note["title"])
       || ($data["content"] !== $note["content"])
-      || (!empty($data["cfg"]["language"]) && ($data["cfg"]["language"] !== $note["lang"]))
+      || (!empty($data["lang"]) && ($data["lang"] !== $note["lang"]))
     ) {
       $res1 = $this->note->update($note["id"], [
         "title" => $data["title"],
         "content" => $data["content"],
-        "lang" => !empty($data["cfg"]["language"]) ? $data["cfg"]["language"] : $note["lang"]
+        "lang" => !empty($data["lang"]) ? $data["lang"] : $note["lang"]
       ]);
     }
 
@@ -1174,10 +1179,21 @@ class Ai extends DbCls
       }
 
       $content = $note["content"];
-      $lang = $note["lang"];
     }
 
-    return $this->buildPrompt($content, $prompt["output"], $lang);
+    if (!empty($prompt['id']) && empty($prompt['settings'])) {
+      $prompt['settings'] = $this->getPromptDefSettings($prompt['id']);
+    }
+
+    if (!empty($prompt['settings']['cfg']['language'])) {
+      $lang = $prompt['settings']['cfg']['language'];
+    }
+
+    return $this->buildPrompt(
+      $content,
+      !empty($prompt["output"]) ? $prompt["output"] : "textarea",
+      $lang
+    );
   }
 
   /**
@@ -1195,19 +1211,21 @@ class Ai extends DbCls
     string|null $lang = null,
     array|null $cfg = null,
   ): string|null {
-    $output = $prompt . "\n\n";
+    $output = "";
     if (!empty($format)
       && ($fo = X::getField(self::$responseFormats, [Str::isUid($format) ? "id" : "code" => $format], "prompt"))
     ) {
-      $output .= $fo . "\n\n";
+      $output .= $fo . "\n";
     }
 
     if (!empty($lang)) {
       $o = Option::getInstance();
       if ($ot = $o->text($lang, "languages", "core", "appui")) {
-        $output .= "The language of the response must be in " . $ot;
+        $output .= "The language of the response must be in " . $ot . "\n";
       }
     }
+
+    $output .= $prompt;
 
     return $output;
   }
