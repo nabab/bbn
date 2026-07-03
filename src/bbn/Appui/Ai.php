@@ -21,8 +21,6 @@ class Ai extends DbCls
   use DbOps;
   use Optional;
 
-  protected const MAX_TOKENS = 4000;
-
   /**
    * Default Dbconfig configuration for the class
    *
@@ -39,8 +37,9 @@ class Ai extends DbCls
       "prompt" => [
         "id" => "id",
         "id_note" => "id_note",
-        "input" => "input",
-        "output" => "output",
+        "input_format" => "input_format",
+        "output_format" => "output_format",
+        "output_language" => "output_language",
         "creation_date" => "creation_date",
         "usage_count" => "usage_count",
         "shortcode" => "shortcode",
@@ -67,39 +66,53 @@ class Ai extends DbCls
     ],
   ];
 
-  /**
-   * Response formats for the AI
-   *
-   * @var array $responseFormats
-   */
+  /** @var array $responseFormats Response formats for the AI */
   private static array $responseFormats;
 
-  /**
-   * OpenAI API instance
-   *
-   * @var OpenAi $ai
-   */
+  private static array $promptMandatoryFields = [
+    "title",
+    "content",
+    "language",
+    "input_format",
+    "output_format",
+    "id_model"
+  ];
+
+  /** @var OpenAi $ai OpenAI API instance */
   protected OpenAi $ai;
 
+  /** @var Preferences $prefs Preferences instance */
   protected Preferences $prefs;
+
+  /** @var int MAX_TOKENS Maximum number of tokens for the AI */
+  protected const MAX_TOKENS = 4000;
+
+  /** @var string $endpoint The current endpoint */
+  protected string $endpoint;
+
+  /** @var string|null $model The current model */
+  protected ?string $model;
+
+  /** @var string $baseUrl The base URL for the API */
+  protected string $baseUrl;
+
+  /** @var array $cfg */
+  protected array $cfg;
 
   /** @var Note $note Note instance */
   private Note $note;
 
-  /** @var Passwords $pass */
+  /** @var Passwords $pass Passwords instance */
   private Passwords $pass;
 
+  /** @var System $fs File system instance */
   private System $fs;
+
+  /** @var User $user User instance */
   private User $user;
 
-  protected string $endpoint;
-
-  protected ?string $model;
-
-  protected string $baseUrl;
-
+  /** @var string $key */
   private string $key;
-  protected array $cfg;
 
   private static function init()
   {
@@ -173,7 +186,7 @@ class Ai extends DbCls
    */
   public function setModel(string $modelName): void
   {
-    $this->model = $modelName;
+    $this->model = Str::isUid($modelName) ? ($this->prefs->getBit($modelName)["text"] ?? null) : $modelName;
   }
 
   /**
@@ -190,6 +203,21 @@ class Ai extends DbCls
       }
 
       return $res;
+    }
+
+    return null;
+  }
+
+  /**
+   * Retrieves the name of a model by its ID.
+   *
+   * @param string $id The ID of the model.
+   * @return string|null The name of the model, or null if not found.
+   */
+  public function getModelName(string $id): ?string
+  {
+    if ($p = $this->prefs->getBit($id)) {
+      return $p["text"];
     }
 
     return null;
@@ -344,7 +372,6 @@ class Ai extends DbCls
       ];
     }
 
-    //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $response = $this->getPromptResponse($prompt, $input, $cfg);
     if (!empty($response) && !empty($response["success"]) && $insert) {
       $this->insertItem($id_prompt, $input, $cfg, false);
@@ -380,7 +407,6 @@ class Ai extends DbCls
       ];
     }
 
-    //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $built_prompt = $this->buildPromptFromRow($prompt);
     $messages = $this->createMessages($input, $built_prompt);
     $request = $this->createRequest($messages, $cfg);
@@ -388,7 +414,6 @@ class Ai extends DbCls
     X::log($request, "ai_logs");
 
     $response = $this->request($request);
-
     $res = [
       "success" => !isset($response["error"]),
       "input" => $built_prompt,
@@ -447,7 +472,7 @@ class Ai extends DbCls
     $model = $this->model;
     if (!empty($cfg["model"])) {
       $model = Str::isUid($cfg["model"])
-        ? $this->db->selectOne('bbn_users_options_bits', 'text', ['id' => $cfg["model"]])
+        ? $this->getModelName($cfg["model"])
         : $cfg["model"];
     }
 
@@ -796,7 +821,7 @@ class Ai extends DbCls
       $note = $this->note->get($prompt["id_note"]);
       $prompt["title"] = $note["title"];
       $prompt["content"] = $note["content"];
-      $prompt["lang"] = $note["lang"];
+      $prompt["language"] = !empty($note["lang"]) ? self::getOptionId($note["lang"], 'languages') : null;
       $prompt["items"] = [];
       $prompt['settings'] = [];
       if ($settings = $this->getPromptDefSettings($id)) {
@@ -812,22 +837,23 @@ class Ai extends DbCls
   /**
    * Inserts a new prompt into the database.
    *
-   * @param string $title The title of the prompt.
-   * @param string $content The content of the prompt.
-   * @param string $lang The language of the prompt.
-   * @param string $input The input of the prompt.
-   * @param string $output The output of the prompt.
-   * @param string|null $shortcode The shortcode of the prompt (optional).
-   * @return mixed The ID of the inserted prompt if successful, otherwise null.
+   * @param array $data The data of the prompt.
+   * @return null|string The ID of the inserted prompt if successful, otherwise null.
    */
   public function insertPrompt(array $data): ?string
   {
     $option = Option::getInstance();
-    if (!X::hasProps($data, ["title", "content", "input", "output", "model", "cfg"])) {
+    if (!X::hasProps($data, self::$promptMandatoryFields, true)) {
       throw new Exception("Missing required data");
     }
 
     $id_option = $option->fromCode("prompt", "types", "note", "appui");
+    if (!empty($data["language"])
+      && Str::isUid($data["language"])
+    ) {
+      $data["language"] = self::getOptionsObject()->code($data["language"]);
+    }
+
     $id_note = $this->note->insert(
       $data["title"],
       $data["content"],
@@ -837,23 +863,29 @@ class Ai extends DbCls
       null,
       null,
       "text/plain",
-      !empty($data["lang"]) ? $data["lang"] : null
+      !empty($data["language"]) ? $data["language"] : null
     );
     $ccfg = $this->getClassCfg();
+    if (!empty($data["output_language"])
+      && !Str::isUid($data["output_language"])
+    ) {
+      $data["output_language"] = self::getOptionId($data["output_language"], "languages") ?: null;
+    }
 
     if (
       $this->dbTraitInsert([
         $ccfg["arch"]["prompt"]["id_note"] => $id_note,
-        $ccfg["arch"]["prompt"]["input"] => $data["input"],
-        $ccfg["arch"]["prompt"]["output"] => $data["output"],
+        $ccfg["arch"]["prompt"]["input_format"] => $data["input_format"],
+        $ccfg["arch"]["prompt"]["output_format"] => $data["output_format"],
+        $ccfg["arch"]["prompt"]["output_language"] => $data["output_language"] ?: null,
         $ccfg["arch"]["prompt"]["shortcode"] => $data["shortcode"] ?: null,
       ])
     ) {
       $idPrompt = $this->db->lastId();
-      $cfg = $data["cfg"];
+      $cfg = $data["cfg"] ?? [];
       ksort($cfg);
       if ($cfg) {
-        $this->insertSettings($idPrompt, $data["model"], $cfg);
+        $this->insertSettings($idPrompt, $data["id_model"], $cfg);
       }
 
       return $idPrompt;
@@ -871,16 +903,7 @@ class Ai extends DbCls
    */
   public function updatePrompt(string $id, array $data): bool
   {
-    if (
-      !X::hasProps($data, [
-        "title",
-        "content",
-        "input",
-        "output",
-        "model",
-        "cfg",
-      ])
-    ) {
+    if (!X::hasProps($data, self::$promptMandatoryFields, true)) {
       throw new Exception("Missing required data");
     }
 
@@ -899,26 +922,40 @@ class Ai extends DbCls
       throw new Exception("The corresponding notedoes not exist");
     }
 
+    if (!empty($data["language"])
+      && Str::isUid($data["language"])
+    ) {
+      $data["language"] = self::getOptionsObject()->code($data["language"]);
+    }
+
     // Update the title and content of the associated note
     if (($data["title"] !== $note["title"])
       || ($data["content"] !== $note["content"])
-      || (!empty($data["lang"]) && ($data["lang"] !== $note["lang"]))
+      || (!empty($data["language"]) && ($data["language"] !== $note["lang"]))
     ) {
       $res1 = $this->note->update($note["id"], [
         "title" => $data["title"],
         "content" => $data["content"],
-        "lang" => !empty($data["lang"]) ? $data["lang"] : $note["lang"]
+        "lang" => !empty($data["language"]) ? $data["language"] : $note["lang"]
       ]);
     }
 
+    if (!empty($data["output_language"])
+      && !Str::isUid($data["output_language"])
+    ) {
+      $data["output_language"] = self::getOptionId($data["output_language"], "languages") ?: null;
+    }
+
     // Update the prompt with the provided ID, input, and output values
-    if (($data["input"] !== $prompt["input"])
-      || ($data["output"] !== $prompt["output"])
+    if (($data["input_format"] !== $prompt["input_format"])
+      || ($data["output_format"] !== $prompt["output_format"])
+      || ($data["output_language"] !== $prompt["output_language"])
       || ($data["shortcode"] !== $prompt["shortcode"])
     ) {
       $res2 = $this->dbTraitUpdate($id, [
-        $ccfg["arch"]["prompt"]["input"] => $data["input"],
-        $ccfg["arch"]["prompt"]["output"] => $data["output"],
+        $ccfg["arch"]["prompt"]["input_format"] => $data["input_format"],
+        $ccfg["arch"]["prompt"]["output_format"] => $data["output_format"],
+        $ccfg["arch"]["prompt"]["output_language"] => $data["output_language"] ?: null,
         $ccfg["arch"]["prompt"]["shortcode"] => $data["shortcode"],
       ]);
     }
@@ -926,7 +963,7 @@ class Ai extends DbCls
     if (!empty($prompt["settings"]['id'])) {
       $res3 = $this->updateSettings(
         $prompt["settings"]["id"],
-        $data["model"],
+        $data["id_model"],
         $data["cfg"],
       );
     } else {
@@ -1014,16 +1051,7 @@ class Ai extends DbCls
       $ccfg["arch"]["prompt_settings"]["hash"] => $hash,
       $ccfg["arch"]["prompt_settings"]["cfg"] => $json,
     ];
-    if (
-      !$this->db->selectOne(
-        $ccfg["tables"]["prompt_settings"],
-        $ccfg["arch"]["prompt_settings"]["id"],
-        [
-          $ccfg["arch"]["prompt_settings"]["id_prompt"] => $idPrompt,
-          $ccfg["arch"]["prompt_settings"]["def"] => 1,
-        ],
-      )
-    ) {
+    if (!$this->getPromptDefSettings($idPrompt)) {
       $data[$ccfg["arch"]["prompt_settings"]["def"]] = 1;
     }
 
@@ -1057,17 +1085,24 @@ class Ai extends DbCls
         $fields["id"] => $id,
       ],
     );
-    $exists = $this->db->rselect(
-      $table,
-      [
+    $exists = $this->db->rselect([
+      'table' => $table,
+      'fields' => [
         $fields["id"],
         $fields["def"],
       ],
-      [
-        $fields["id_prompt"] => $idPrompt,
-        $fields["hash"] => $hash,
-      ],
-    );
+      'where' => [[
+        'field' => $fields["id_prompt"],
+        'value' => $idPrompt,
+      ], [
+        'field' => $fields["hash"],
+        'value' => $hash,
+      ], [
+        'field' => $fields["id"],
+        'operator' => '!=',
+        'value' => $id,
+      ]]
+    ]);
     if ($exists) {
       $this->deleteSettings($exists[$fields["id"]]);
     }
@@ -1099,18 +1134,22 @@ class Ai extends DbCls
   {
     $ccfg = $this->getClassCfg();
     $fields = $ccfg["arch"]["prompt_settings"];
-    $res = array_map(function($r) use ($fields) {
-      if (!empty($r[$fields["cfg"]])) {
-        $r[$fields["cfg"]] = json_decode($r[$fields["cfg"]], true);
-      }
-      return $r;
-    }, $this->db->rselectAll(
-      $ccfg["tables"]["prompt_settings"],
-      [],
-      [
-        $fields["id_prompt"] => $idPrompt,
-      ]
-    ));
+    $res = array_map(
+      function($r) use ($fields) {
+        if (!empty($r[$fields["cfg"]])) {
+          $r[$fields["cfg"]] = json_decode($r[$fields["cfg"]], true);
+        }
+
+        return $r;
+      },
+      $this->db->rselectAll(
+        $ccfg["tables"]["prompt_settings"],
+        [],
+        [
+          $fields["id_prompt"] => $idPrompt,
+        ]
+      )
+    );
     return $res;
   }
 
@@ -1171,7 +1210,6 @@ class Ai extends DbCls
   private function buildPromptFromRow(array $prompt): string|null
   {
     $content = $prompt["content"] ?? "";
-    $lang = null;
     if (empty($content) && !empty($prompt["id_note"])) {
       $note = $this->note->get($prompt["id_note"]);
       if (empty($note) || empty($note["content"])) {
@@ -1181,18 +1219,10 @@ class Ai extends DbCls
       $content = $note["content"];
     }
 
-    if (!empty($prompt['id']) && empty($prompt['settings'])) {
-      $prompt['settings'] = $this->getPromptDefSettings($prompt['id']);
-    }
-
-    if (!empty($prompt['settings']['cfg']['language'])) {
-      $lang = $prompt['settings']['cfg']['language'];
-    }
-
     return $this->buildPrompt(
       $content,
-      !empty($prompt["output"]) ? $prompt["output"] : "textarea",
-      $lang
+      !empty($prompt["output_format"]) ? $prompt["output_format"] : "textarea",
+      $prompt['output_language'] ?? null,
     );
   }
 
@@ -1218,9 +1248,10 @@ class Ai extends DbCls
       $output .= $fo . "\n";
     }
 
-    if (!empty($lang)) {
-      $o = Option::getInstance();
-      if ($ot = $o->text($lang, "languages", "core", "appui")) {
+    if (!empty($lang)
+      && ($idLang = Str::isUid($lang) ? $lang : self::getOptionId($lang, "languages"))
+    ) {
+      if ($ot = self::getOptionsObject()->text($idLang)) {
         $output .= "The language of the response must be in " . $ot . "\n";
       }
     }
