@@ -1758,11 +1758,11 @@ class Mailbox extends Basic
       return null;
     }
     $msg = (array)$this->decode_encoded_words_deep($headers);
-    foreach ($msg as $key => $value) {
+    /* foreach ($msg as $key => $value) {
       if (is_string($value)) {
         $msg[$key] = quoted_printable_decode($value);
       }
-    }
+    } */
 
     $msg['priority'] = $this->getMsgPriority($this->getMsgNo($uid)) ?: 3;
     $msg['flags'] = $this->getMsgFlags($this->getMsgNo($uid));
@@ -1806,8 +1806,10 @@ class Mailbox extends Basic
     $msg['html'] = $parsedMime['html'] ?? '';
     $msg['plain'] = $parsedMime['plain'] ?? '';
     $msg['charset'] = $parsedMime['charset'] ?? '';
-    $msg['attachment'] = $parsedMime['attachments'] ?? [];
-    $msg['inline'] = $parsedMime['inline'] ?? [];
+    //$msg['attachment'] = $parsedMime['attachments'] ?? [];
+    $msg['attachment'] = [];
+    //$msg['inline'] = $parsedMime['inline'] ?? [];
+    $msg['inline'] = [];
     $msg['is_html'] = !empty($msg['html']);
 
     return $msg;

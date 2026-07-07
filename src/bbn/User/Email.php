@@ -1312,6 +1312,7 @@ class Email extends Basic
           }
 
           $arr = $mb->getMsg($number);
+          $arr["id"] = $id;
           $arr["id_account"] = $folder["id_account"];
           $arr["msg_unique_id"] = Str::toUtf8($em["msg_unique_id"]);
           $arr["quote"] = "";

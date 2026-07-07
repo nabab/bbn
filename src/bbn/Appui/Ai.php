@@ -479,7 +479,7 @@ class Ai extends DbCls
     $request = [
       "model" => $model,
       "messages" => $messages,
-      "max_tokens" => $max_tokens,
+      //"max_tokens" => $max_tokens,
     ];
     if (!empty($cfg['cfg'])) {
       if (array_key_exists("temperature", $cfg["cfg"])) {
