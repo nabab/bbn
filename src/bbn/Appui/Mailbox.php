@@ -28,6 +28,15 @@ class Mailbox extends Basic
    */
   private static $destFields = ['to', 'from', 'cc', 'bcc', 'reply_to'];
 
+  private static $flags = [
+    'seen' => '\\Seen',
+    'answered' => '\\Answered',
+    'flagged' => '\\Flagged',
+    'deleted' => '\\Deleted',
+    'draft' => '\\Draft',
+    'recent' => '\\Recent'
+  ];
+
   /**
    * @var float Last time server was pinged
    */
@@ -717,7 +726,7 @@ class Mailbox extends Basic
       $res = [];
       while ($start >= $end) {
         try {
-          $tmp = $this->getMsgBySeq($start);
+          $tmp = $this->getMsgBySeqOrUid($start, false);
           if (!$tmp) {
             $start--;
             continue;
@@ -755,13 +764,7 @@ class Mailbox extends Basic
     $this->_charset = '';
     $this->_attachments = [];
     $this->_inline_files = [];
-
-    $uid = $this->getMsgUid($msgno);
-    if (!$uid) {
-      return null;
-    }
-
-    return $this->getMsgByUid($uid);
+    return $this->getMsgBySeqOrUid($msgno, false);
   }
 
 
@@ -995,33 +998,26 @@ class Mailbox extends Basic
   }
 
 
-  public function getMsgOverview(int $msgnum, bool $uid = false): ?stdClass
+  public function getMsgOverview(int $msgnum, bool $uid = false, ?string $raw = null): ?stdClass
   {
     try {
-      $lines = $this->rawCommand(
-        ($uid ? 'UID FETCH ' : 'FETCH ') . (int)$msgnum . ' (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID)',
-        true
-      );
+      if (is_null($raw)) {
+        $lines = $this->rawCommand(
+          ($uid ? 'UID FETCH ' : 'FETCH ') . (int)$msgnum . ' (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID)',
+          true
+        );
+        $raw = implode("\n", $lines);
+      }
 
       $obj = new stdClass();
-      $raw = implode("\n", $lines);
-
-      if (preg_match('/FLAGS\s+\(([^)]*)\)/i', $raw, $m)) {
-        $flags = preg_split('/\s+/', trim($m[1])) ?: [];
-        $obj->flags = implode(' ', $flags);
-        foreach (['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'] as $f) {
-          $imapFlag = '\\' . ucfirst($f);
-          $obj->$f = in_array($imapFlag, $flags, true);
-        }
+      $flags = $this->parseFlags($raw);
+      $obj->flags = implode(' ', $flags);
+      foreach (self::$flags as $f => $imapFlag) {
+        $obj->$f = in_array($imapFlag, $flags, true);
       }
 
-      if (preg_match('/RFC822\.SIZE\s+(\d+)/i', $raw, $m)) {
-        $obj->size = (int)$m[1];
-      }
-
-      if (preg_match('/UID\s+(\d+)/i', $raw, $m)) {
-        $obj->uid = (int)$m[1];
-      }
+      $obj->size = $this->parseSize($raw);
+      $obj->uid = $this->parseUid($raw);
 
       return $obj;
     }
@@ -1126,22 +1122,22 @@ class Mailbox extends Basic
    * @param int $msgno No of the message
    * @return array|null
    */
-  public function getMsgFlags(int $msgno): ?array
+  public function getMsgFlags(int $msgno, bool $uid = false, ?string $raw = null): ?array
   {
     $flags = null;
-    if ($overview = $this->getMsgOverview($msgno)) {
+    if ($overview = $this->getMsgOverview($msgno, $uid, $raw)) {
       $flags = [];
-      $toCheck = ['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'];
-      foreach ($toCheck as $flag) {
+      foreach (self::$flags as $flag => $imapFlag) {
         if (!empty($overview->$flag)) {
-          $flags[] = '\\' . ucfirst($flag);
+          $flags[] = $imapFlag;
         }
       }
 
       if (!empty($overview->flags)) {
         $keywords = preg_split('/\s+/', trim($overview->flags)) ?: [];
+        $flagsList = array_values(self::$flags);
         foreach ($keywords as $kw) {
-          if (!in_array(strtolower(ltrim($kw, '\\')), $toCheck, true)) {
+          if (!in_array($kw, $flagsList, true)) {
             $flags[] = $kw;
           }
         }
@@ -1175,10 +1171,14 @@ class Mailbox extends Basic
   }
 
 
-  public function getMsgPriority(int $msgno): ?int
+  public function getMsgPriority(int $msgno, bool $uid = false, ?string $msgHeader = null): ?int
   {
     $priority = null;
-    if ($msgHeader = $this->getMsgHeader($msgno)) {
+    if (is_null($msgHeader)) {
+      $msgHeader = $this->getMsgHeader($msgno, $uid);
+    }
+
+    if (!empty($msgHeader)) {
       // X-Priority
       if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
         $priority = (int)$m[1];
@@ -1205,9 +1205,9 @@ class Mailbox extends Basic
   }
 
 
-  public function getMsgSize(int $msgno, bool $uid = false): ?int
+  public function getMsgSize(int $msgno, bool $uid = false, ?string $raw = null): ?int
   {
-    if ($overview = $this->getMsgOverview($msgno, $uid)) {
+    if ($overview = $this->getMsgOverview($msgno, $uid, $raw)) {
       return $overview->size ?? null;
     }
 
@@ -1745,81 +1745,84 @@ class Mailbox extends Basic
     return Client::escapeString($str);
   }
 
-  private function getMsgBySeq(int $seq): ?array
-  {
-    $uid = $this->getMsgUid($seq);
-    return $uid ? $this->getMsgByUid($uid) : null;
-  }
-
-  private function getMsgByUid(int $uid): ?array
-  {
-    $headers = $this->getMsgHeaderinfo($uid);
-    if (!$headers) {
-      return null;
-    }
-    $msg = (array)$this->decode_encoded_words_deep($headers);
-    /* foreach ($msg as $key => $value) {
-      if (is_string($value)) {
-        $msg[$key] = quoted_printable_decode($value);
-      }
-    } */
-
-    $msg['priority'] = $this->getMsgPriority($this->getMsgNo($uid)) ?: 3;
-    $msg['flags'] = $this->getMsgFlags($this->getMsgNo($uid));
-    $msg['uid'] = $uid;
-    $msg['date_sent'] = !empty($msg['date']) ? date('Y-m-d H:i:s', strtotime($msg['date'])) : null;
-    $msg['date_server'] = $msg['date_sent'];
-
-    foreach (self::getDestFields() as $df) {
-      if (!empty($msg[$df]) && is_array($msg[$df])) {
-        $ads = [];
-        foreach ($msg[$df] as $a) {
-          if (!empty($a['email'])) {
-            $ads[] = [
-              'name' => $a['name'] ?? null,
-              'email' => strtolower($a['email']),
-              'host' => Str::parsePath($a['email'])['extension'] ?? null
-            ];
-          }
-        }
-        $msg[$df] = $ads;
-      }
-    }
-
-    $msg['references'] = empty($msg['references'])
-      ? []
-      : (preg_split('/\s+/', trim(str_replace(['<', '>'], '', $msg['references']))) ?: []);
-
-    if (!isset($msg['subject'])) {
-      $msg['subject'] = '';
-    }
-
-    $msg['message_id'] = !empty($msg['message_id'])
-      ? trim($msg['message_id'], '<>')
-      : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
-
-    $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
-
-    $fullRaw = $this->getFullMessageByUid($uid);
-    $parsedMime = $this->parseMimeMessage($fullRaw);
-
-    $msg['html'] = $parsedMime['html'] ?? '';
-    $msg['plain'] = $parsedMime['plain'] ?? '';
-    $msg['charset'] = $parsedMime['charset'] ?? '';
-    //$msg['attachment'] = $parsedMime['attachments'] ?? [];
-    $msg['attachment'] = [];
-    //$msg['inline'] = $parsedMime['inline'] ?? [];
-    $msg['inline'] = [];
-    $msg['is_html'] = !empty($msg['html']);
-
-    return $msg;
-  }
-
-  private function getFullMessageByUid(int $uid): ?string
+  private function getMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
   {
     try {
       $lines = $this->rawCommand(
-        'UID FETCH ' . $uid . ' (BODY.PEEK[])',
+        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODY.PEEK[HEADER])",
+        true
+      );
+      $raw = $this->extractLiteralBlock($lines);
+      $headers = $this->parseHeaderInfo($raw);
+      if (!$headers) {
+        return null;
+      }
+
+      $msg = (array)$this->decode_encoded_words_deep($headers);
+      /* foreach ($msg as $key => $value) {
+        if (is_string($value)) {
+          $msg[$key] = quoted_printable_decode($value);
+        }
+      } */
+
+      $msg['priority'] = $this->getMsgPriority($msgno, false, $lines[0]) ?: 3;
+      $msg['flags'] = $this->getMsgFlags($msgno, false, $lines[0]) ?: [];
+      $msg['uid'] = $this->parseUid($lines[0]);
+      $msg['size'] = $this->parseSize($lines[0]);
+      $msg['date_sent'] = !empty($msg['date']) ? date('Y-m-d H:i:s', strtotime($msg['date'])) : null;
+      $msg['date_server'] = $msg['date_sent'];
+
+      foreach (self::getDestFields() as $df) {
+        if (!empty($msg[$df]) && is_array($msg[$df])) {
+          $ads = [];
+          foreach ($msg[$df] as $a) {
+            if (!empty($a['email'])) {
+              $ads[] = [
+                'name' => $a['name'] ?? null,
+                'email' => strtolower($a['email']),
+                'host' => Str::parsePath($a['email'])['extension'] ?? null
+              ];
+            }
+          }
+          $msg[$df] = $ads;
+        }
+      }
+
+      $msg['references'] = empty($msg['references'])
+        ? []
+        : (preg_split('/\s+/', trim(str_replace(['<', '>'], '', $msg['references']))) ?: []);
+
+      if (!isset($msg['subject'])) {
+        $msg['subject'] = '';
+      }
+
+      $msg['message_id'] = !empty($msg['message_id'])
+        ? trim($msg['message_id'], '<>')
+        : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
+
+      $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
+      $fullRaw = $this->getFullMessage($msgno, false);
+      $parsedMime = $this->parseMimeMessage($fullRaw);
+      $msg['html'] = $parsedMime['html'] ?? '';
+      $msg['plain'] = $parsedMime['plain'] ?? '';
+      $msg['charset'] = $parsedMime['charset'] ?? '';
+      //$msg['attachment'] = $parsedMime['attachments'] ?? [];
+      $msg['attachment'] = [];
+      //$msg['inline'] = $parsedMime['inline'] ?? [];
+      $msg['inline'] = [];
+      $msg['is_html'] = !empty($msg['html']);
+      return $msg;
+    }
+    catch (Exception $e) {
+      return null;
+    }
+  }
+
+  private function getFullMessage(int $msgno, bool $uid = false): ?string
+  {
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? 'UID ' : '') . "FETCH $msgno (BODY.PEEK[])",
         true
       );
 
@@ -1943,6 +1946,33 @@ class Mailbox extends Basic
     }
 
     return $headers;
+  }
+
+  private function parseFlags(string $raw): array
+  {
+    if (preg_match('/FLAGS\s+\(([^)]*)\)/i', $raw, $m)) {
+      return preg_split('/\s+/', trim($m[1])) ?: [];
+    }
+
+    return [];
+  }
+
+  private function parseSize(string $raw): int
+  {
+    if (preg_match('/RFC822\.SIZE\s+(\d+)/i', $raw, $m)) {
+      return (int)$m[1];
+    }
+
+    return 0;
+  }
+
+  private function parseUid(string $raw): ?int
+  {
+    if (preg_match('/UID\s+(\d+)/i', $raw, $m)) {
+      return (int)$m[1];
+    }
+
+    return null;
   }
 
   private function parseAddressList(string $value): array

@@ -883,9 +883,11 @@ class Email extends Basic
       }
 
       if ($check) {
-        $db = $this->pref->isLocale($folder["id"], $this->pref->getClassCfg()["tables"]["user_options_bits"])
-          ? $this->getLocaleDb()
-          : $this->db;
+        $isLocale = $this->pref->isLocale(
+          $folder["id"],
+          $this->pref->getClassCfg()["tables"]["user_options_bits"]
+        );
+        $db = $isLocale ? $this->getLocaleDb() : $this->db;
         $added = 0;
         $deleted = 0;
         $mb = $this->getMailbox($folder["id_account"]);
@@ -980,8 +982,8 @@ class Email extends Basic
         }
 
         $end = $start;
-        $all = $mb->getEmailsList($folder['uid'], $start, $real_end);
         $this->setFolderSync($folder['id']);
+        $all = $mb->getEmailsList($folder['uid'], $start, $real_end);
         if ($all) {
           foreach ($all as $i => $a) {
             if ($this->insertEmail($folder, $a)) {
@@ -1008,7 +1010,7 @@ class Email extends Basic
         $this->syncFlags($folder["id"]);
         $this->setFolderSync($folder["id"], false);
         if ($added) {
-          $this->syncThreads();
+          $this->syncThreads($folder["id_account"]);
         }
 
         return $added;
@@ -1035,22 +1037,32 @@ class Email extends Basic
   /**
    * Returns a list of emails based on their folder.
    *
-   * @param string $id_folder
-   * @param array $filter
-   * @param int $limit
-   * @param int $start
+   * @param string|array $id_folder
+   * @param array $post
+   * @param bool $checkFolder
    *
    * @return array|null
    */
-  public function getList(string|array $id_folder, array $post): ?array
+  public function getList(
+    string|array $id_folder,
+    array $post,
+    bool $checkFolder = true
+  ): ?array
   {
-    if (is_array($id_folder)) {
-      $ids = [];
-      foreach ($id_folder as $i) {
-        $ids = array_merge($ids, $this->idsFromFolder($i));
+    $ids = [];
+    if ($checkFolder) {
+      if (is_array($id_folder)) {
+        $ids = [];
+        foreach ($id_folder as $i) {
+          $ids = array_merge($ids, $this->idsFromFolder($i));
+        }
       }
-    } else {
-      $ids = $this->idsFromFolder($id_folder);
+      else {
+        $ids = $this->idsFromFolder($id_folder);
+      }
+    }
+    else {
+      $ids = is_array($id_folder) ? $id_folder : [$id_folder];
     }
 
     if (!empty($ids)) {
@@ -1219,65 +1231,63 @@ class Email extends Basic
 
   public function getListAsThreads(string|array $idFolder, array $cfg): ?array
   {
-    $ids = [];
-    if (is_array($idFolder)) {
-      foreach ($idFolder as $i) {
-        $ids = array_merge($ids, $this->idsFromFolder($i));
-      }
-    } else {
-      $ids = $this->idsFromFolder($idFolder);
-    }
-
-    if (!empty($ids)) {
-      $res = $this->getList($idFolder, $cfg);
-      if ($res && !empty($res["data"])) {
-        $grouped = [];
-        foreach ($res["data"] as $d) {
-          $threadId = $d["id_thread"] ?: $d["id"];
-          if (!isset($grouped[$threadId])) {
-            $grouped[$threadId] = [];
-          }
-
-          $grouped[$threadId][] = $d;
+    $res = $this->getList($idFolder, $cfg);
+    if (!empty($res["data"])) {
+      $grouped = [];
+      foreach ($res["data"] as $d) {
+        $threadId = $d["id_thread"] ?: $d["id"];
+        if (!isset($grouped[$threadId])) {
+          $grouped[$threadId] = [];
         }
 
-        $numData = count($res["data"]);
-        $t = $this;
-        function extractIds($folders, $types)
-        {
-          $res = [];
-          foreach ($folders as $f) {
-            if (in_array($f["type"], $types)) {
-              $res[] = $f["id"];
-            }
-
-            if (!empty($f["items"])) {
-              $res = array_merge($res, extractIds($f["items"], $types));
-            }
-          }
-
-          return $res;
-        }
-
-        $res["data"] = array_values(
-          array_map(
-            function ($d) use ($t) {
-              X::sortBy($d, "date", "desc");
-              $foldersIds = extractIds($t->getFolders($d[0]["id_account"]), ["inbox", "sent", "folders"]);
-              $threadId = $d[0]["id_thread"] ?: $d[0]["id"];
-              $d[0]["thread"] = $t->getThread($threadId, $foldersIds);
-              return $d[0];
-            },
-            $grouped
-          )
-        );
-        $res["total"] -= $numData - count($res["data"]);
+        $grouped[$threadId][] = $d;
       }
 
-      return $res;
+      $numData = count($res["data"]);
+      $t = $this;
+      function extractIds(array $folders, array $types)
+      {
+        $res = [];
+        foreach ($folders as $f) {
+          if (in_array($f["type"], $types)) {
+            $res[] = $f["id"];
+          }
+
+          if (!empty($f["items"])) {
+            $res = array_merge($res, extractIds($f["items"], $types));
+          }
+        }
+
+        return $res;
+      }
+
+      $foldersIds = [];
+      $res["data"] = array_values(
+        array_map(
+          function ($d) use ($t, &$foldersIds) {
+            X::sortBy($d, "date", "desc");
+            $d = $d[0];
+            if (!isset($foldersIds[$d["id_account"]])) {
+              $foldersIds[$d["id_account"]] = extractIds(
+                $t->getFolders($d["id_account"]),
+                ["inbox", "sent", "folders"],
+              );
+            }
+
+            $threadId = $d["id_thread"] ?: $d["id"];
+            $d["thread"] = $t->getThread(
+              $threadId,
+              $foldersIds[$d["id_account"]]
+            );
+            return $d;
+          },
+          $grouped
+        )
+      );
+      $res["total"] -= $numData - count($res["data"]);
     }
 
-    return null;
+    return $res;
   }
 
   public function getLoginByEmailId($id)
@@ -1299,12 +1309,16 @@ class Email extends Basic
   {
     $db = $this->getRightDb($id, $this->class_table);
     if ($em = $db->rselect($this->class_table, $this->fields, [$this->fields["id"] => $id])) {
-      if ($force || !($arr = $this->user->getCache($this->cachePrefix . $id))) {
-        if (
-          ($folder = $this->getFolder($em["id_folder"])) &&
-          ($mb = $this->getMailbox($folder["id_account"])) &&
-          $mb->selectFolder($folder["uid"]) &&
-          Str::isInteger($number = $mb->getMsgNo($em["msg_uid"]))
+      $folder = $this->getFolder($em["id_folder"]);
+      if (!empty($folder)
+        && ($force
+          || !($arr = $this->user->getCache($this->cachePrefix . $id))
+          || ($folder['type'] === 'drafts'))
+      ) {
+        if (!empty($folder)
+          && ($mb = $this->getMailbox($folder["id_account"]))
+          && $mb->selectFolder($folder["uid"])
+          && Str::isInteger($number = $mb->getMsgNo($em["msg_uid"]))
         ) {
           if ($number === 0) {
             $db->delete($this->class_table, [$this->fields["id"] => $id]);
@@ -1449,24 +1463,28 @@ class Email extends Basic
 
   public function getThread(string $idThread, array $foldersIds): array
   {
-    return $this->getList($foldersIds, [
-      "filters" => [
-        "logic" => "OR",
-        "conditions" => [
-          [
-            "field" => $this->fields["id"],
-            "value" => $idThread,
-          ],
-          [
-            "field" => $this->fields["id_thread"],
-            "value" => $idThread,
+    return $this->getList(
+      $foldersIds,
+      [
+        "filters" => [
+          "logic" => "OR",
+          "conditions" => [
+            [
+              "field" => $this->fields["id"],
+              "value" => $idThread,
+            ],
+            [
+              "field" => $this->fields["id_thread"],
+              "value" => $idThread,
+            ],
           ],
         ],
+        "order" => [
+          $this->fields["date"] => "DESC",
+        ],
       ],
-      "order" => [
-        $this->fields["date"] => "DESC",
-      ],
-    ])["data"] ?? [];
+      false
+    )["data"] ?? [];
   }
 
   public function setSeen(string $id, bool $seen = true): bool
@@ -1503,35 +1521,41 @@ class Email extends Basic
   }
 
 
-  public function syncThreads(int $limit = 0, bool $onlyLocale = false): int
+  public function syncThreads(string $idAccount, int $limit = 0): int
   {
+    $accountsTable = $this->pref->getClassCfg()["tables"]["user_options"];
+    $foldersTable = $this->pref->getClassCfg()["tables"]["user_options_bits"];
+    $foldersFields = $this->pref->getClassCfg()["arch"]["user_options_bits"];
+    $isLocale = $this->pref->isLocale($idAccount, $accountsTable);
+    $db = $isLocale ? $this->getLocaleDb() : $this->db;
     $did = 0;
-    if ($onlyLocale && !$this->hasLocaleDb()) {
-      return $did;
-    }
-
-    $db = $onlyLocale ? $this->getLocaleDb() : $this->db;
     // select all emails of the user where id_thread is null and external_id is not null
     if (
       $emails = $db->rselectAll([
         "table" => $this->class_table,
         "fields" => $this->fields,
-        "where" => [
-          [
-            "field" => $this->fields["id_user"],
-            "value" => $this->user->getId(),
-          ],
-          [
-            "field" => $this->fields["external_uids"],
-            "operator" => "isnotnull",
-          ],
-          [
-            "field" => $this->fields["id_thread"],
-            "operator" => "isnull",
-          ],
-        ],
+        "join" => [[
+          "table" => $foldersTable,
+          "on" => [[
+            "field" => $db->cfn($foldersFields["id"], $foldersTable),
+            "exp" => $db->cfn($this->fields["id_folder"], $this->class_table)
+          ], [
+            "field" => $db->cfn($foldersFields["id_user_option"], $foldersTable),
+            "value" => $idAccount
+          ]]
+        ]],
+        "where" => [[
+          "field" => $db->cfn($this->fields["id_user"], $this->class_table),
+          "value" => $this->user->getId(),
+        ], [
+          "field" => $db->cfn($this->fields["external_uids"], $this->class_table),
+          "operator" => "isnotnull",
+        ], [
+          "field" => $db->cfn($this->fields["id_thread"], $this->class_table),
+          "operator" => "isnull",
+        ]],
         "order" => [
-          $this->fields["date"] => "DESC",
+          $db->cfn($this->fields["date"], $this->class_table) => "DESC",
         ],
         "limit" => $limit,
       ])
@@ -1566,9 +1590,6 @@ class Email extends Basic
       }
     }
 
-    if (!$onlyLocale) {
-      $did += $this->syncThreads($limit, true);
-    }
     return $did;
   }
 
@@ -2570,9 +2591,9 @@ class Email extends Basic
       $bit = $this->pref->getBit($id_folder);
       if (!$bit) {
         // It's not a folder but an account
-        if ($pref = $this->pref->get($id_folder)) {
+        //if ($pref = $this->pref->get($id_folder)) {
           // we look for inbox
-        }
+        //}
       } else {
         $ids = [$id_folder];
       }
@@ -2738,11 +2759,9 @@ class Email extends Basic
       if (is_null($last) || ($hms > $last)) {
         if ($uids = $mb->getMsgUidsChangedSinceModseq($folder['uid'], $last ?: 0)) {
           foreach ($uids as $uid) {
-            if (($emailId = $this->getEmailIdByUid($uid, $folder['id']))
-              && ($msgn = $mb->getMsgNo($uid))
-            ) {
+            if ($emailId = $this->getEmailIdByUid($uid, $folder['id'])) {
               $changed = 0;
-              $flags = $mb->getMsgFlags($msgn) ?: [];
+              $flags = $mb->getMsgFlags($uid, true) ?: [];
               $changed += (int)$this->setSeen($emailId, in_array('\\Seen', $flags));
               $changed += (int)$this->setDraft($emailId, in_array('\\Draft', $flags));
               $flags = array_values(
