@@ -1318,14 +1318,14 @@ class Email extends Basic
         if (!empty($folder)
           && ($mb = $this->getMailbox($folder["id_account"]))
           && $mb->selectFolder($folder["uid"])
-          && Str::isInteger($number = $mb->getMsgNo($em["msg_uid"]))
         ) {
-          if ($number === 0) {
+
+          $arr = $mb->getMsg($em["msg_uid"], true);
+          if (empty($arr)) {
             $db->delete($this->class_table, [$this->fields["id"] => $id]);
             return null;
           }
 
-          $arr = $mb->getMsg($number);
           $arr["id"] = $id;
           $arr["id_account"] = $folder["id_account"];
           $arr["msg_unique_id"] = Str::toUtf8($em["msg_unique_id"]);

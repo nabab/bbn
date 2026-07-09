@@ -10,6 +10,8 @@ use bbn\X;
 use bbn\Str;
 use bbn\Appui\Mailbox\Idle;
 use bbn\Appui\Mailbox\Client;
+use bbn\Appui\Mailbox\Parser;
+use bbn\Appui\Mailbox\Encoder;
 use DOMDocument;
 use DOMXPath;
 use DOMNode;
@@ -53,6 +55,16 @@ class Mailbox extends Basic
   private $_attachments = [];
 
   private $_inline_files = [];
+
+  /**
+   * @var Parser The mailbox parser
+   */
+  private $parser;
+
+  /**
+   * @var Encoder The mailbox encoder
+   */
+  private $encoder;
 
   /**
    * @var int The minimum delay between each ping for the current connection
@@ -158,9 +170,11 @@ class Mailbox extends Basic
   }
 
 
-  public function __construct($cfg)
+  public function __construct(array $cfg)
   {
-    if (\is_array($cfg)) {
+    if (is_array($cfg) && !empty($cfg)) {
+      $this->parser = new Parser();
+      $this->encoder = new Encoder();
       if (!empty($cfg['type'])) {
         $this->type = $cfg['type'];
       }
@@ -525,7 +539,7 @@ class Mailbox extends Basic
    */
   public function listAllSubscribed()
   {
-    return $this->_list_subscribed('*');
+    return $this->_listSubscribed('*');
   }
 
 
@@ -537,7 +551,7 @@ class Mailbox extends Basic
    */
   public function listCurlevSubscribed(string $dir = '')
   {
-    return $this->_list_subscribed($dir . '%');
+    return $this->_listSubscribed($dir . '%');
   }
 
 
@@ -548,7 +562,7 @@ class Mailbox extends Basic
    */
   public function listAllFolders()
   {
-    return $this->_list_folders('*');
+    return $this->_listFolders('*');
   }
 
 
@@ -560,7 +574,7 @@ class Mailbox extends Basic
    */
   public function listCurlevFolders(string $dir = '')
   {
-    return $this->_list_folders($dir . '%');
+    return $this->_listFolders($dir . '%');
   }
 
 
@@ -571,7 +585,7 @@ class Mailbox extends Basic
    */
   public function getAllFolders()
   {
-    return $this->_get_folders('*');
+    return $this->_getFolders('*');
   }
 
 
@@ -583,7 +597,7 @@ class Mailbox extends Basic
    */
   public function getCurlevFolders(string $dir = '')
   {
-    return $this->_get_folders($dir . '%');
+    return $this->_getFolders($dir . '%');
   }
 
 
@@ -594,7 +608,7 @@ class Mailbox extends Basic
    */
   public function getAllNamesFolders()
   {
-    return $this->_get_names_folders('*');
+    return $this->_getNamesFolders('*');
   }
 
 
@@ -606,7 +620,7 @@ class Mailbox extends Basic
    */
   public function getCurlevNamesFolders(string $dir = '')
   {
-    return $this->_get_names_folders($dir . '%');
+    return $this->_getNamesFolders($dir . '%');
   }
 
 
@@ -757,14 +771,14 @@ class Mailbox extends Basic
    *
    * @param int $msgno
    */
-  public function getMsg($msgno)
+  public function getMsg(string|int $msgno, bool $uid = false)
   {
     $this->_htmlmsg = '';
     $this->_plainmsg = '';
     $this->_charset = '';
     $this->_attachments = [];
     $this->_inline_files = [];
-    return $this->getMsgBySeqOrUid($msgno, false);
+    return $this->getMsgBySeqOrUid((int)$msgno, $uid);
   }
 
 
@@ -888,7 +902,7 @@ class Mailbox extends Basic
       return null;
     }
 
-    if ($parsed = $this->parseHeaderInfo($raw)) {
+    if ($parsed = $this->parser->headerInfo($raw)) {
       $parsed->size = $this->getMsgSize($msgUid, true);
     }
 
@@ -953,21 +967,16 @@ class Mailbox extends Basic
    * @param int $msgnum No of the message
    * @return bool|object
    */
-  public function getMsgStructure(int $msgnum)
+  public function getMsgStructure(int $msgnum, bool $uid = false): ?object
   {
-    $uid = $this->getMsgUid($msgnum);
-    if (!$uid) {
-      return null;
-    }
-
     try {
       $lines = $this->rawCommand(
-        'UID FETCH ' . (int)$uid . ' (BODYSTRUCTURE)',
+        ($uid ? "UID " : "") . "FETCH $msgnum (BODYSTRUCTURE)",
         true
       );
 
       $raw = implode("\n", $lines);
-      return $this->parseBodyStructureFromFetch($raw);
+      return $this->parser->bodyStructureFromFetch($raw);
     }
     catch (Exception $e) {
       return null;
@@ -990,7 +999,7 @@ class Mailbox extends Basic
         true
       );
 
-      return $this->extractLiteralBlock($lines);
+      return $this->parser->extractLiteralBlock($lines);
     }
     catch (Exception $e) {
       return null;
@@ -1010,14 +1019,14 @@ class Mailbox extends Basic
       }
 
       $obj = new stdClass();
-      $flags = $this->parseFlags($raw);
+      $flags = $this->parser->flags($raw);
       $obj->flags = implode(' ', $flags);
       foreach (self::$flags as $f => $imapFlag) {
         $obj->$f = in_array($imapFlag, $flags, true);
       }
 
-      $obj->size = $this->parseSize($raw);
-      $obj->uid = $this->parseUid($raw);
+      $obj->size = $this->parser->size($raw);
+      $obj->uid = $this->parser->uid($raw);
 
       return $obj;
     }
@@ -1108,7 +1117,7 @@ class Mailbox extends Basic
         true
       );
 
-      return $this->extractLiteralBlock($lines);
+      return $this->parser->extractLiteralBlock($lines);
     }
     catch (Exception $e) {
       $this->setError($e->getMessage(), $e->getCode());
@@ -1452,55 +1461,6 @@ class Mailbox extends Basic
 
 
   /**
-   * Decodes message. (Test: ok)
-   *
-   * @param string $message Messate to decode
-   * @param int    $coding  Type of encoding
-   * @return string
-   */
-  public function _get_decode_value($message, $coding)
-  {
-    switch ($coding) {
-      case 0:
-        return $message;
-      case 1:
-        return imap_8bit($message);
-      case 2:
-        return imap_binary($message);
-      case 3:
-        return imap_base64($message);
-      case 4:
-        return imap_qprint($message);
-      case 5:
-        return imap_base64($message);
-      default:
-        return $message;
-    }
-  }
-
-
-  /* public function _get_decode_value($message, $coding)
-  {
-    switch ((int)$coding) {
-      case 0:
-        return $message;
-      case 1:
-        return quoted_printable_decode($message);
-      case 2:
-        return base64_decode($message);
-      case 3:
-        return base64_decode($message);
-      case 4:
-        return quoted_printable_decode($message);
-      case 5:
-        return base64_decode($message);
-      default:
-        return $message;
-    }
-  } */
-
-
-  /**
    * Splits the quoted part from the reply in an email HTML content.
    */
   public function splitQuoteFromEmail(string $html): ?array
@@ -1749,27 +1709,23 @@ class Mailbox extends Basic
   {
     try {
       $lines = $this->rawCommand(
-        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODY.PEEK[HEADER])",
+        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODY.PEEK[])",
         true
       );
-      $raw = $this->extractLiteralBlock($lines);
-      $headers = $this->parseHeaderInfo($raw);
+      $raw = $this->parser->extractLiteralBlock($lines);
+      $headers = $this->parser->headerInfo(preg_split("/\R\R/", $raw, 2)[0] ?? '');
       if (!$headers) {
         return null;
       }
 
-      $msg = (array)$this->decode_encoded_words_deep($headers);
-      /* foreach ($msg as $key => $value) {
-        if (is_string($value)) {
-          $msg[$key] = quoted_printable_decode($value);
-        }
-      } */
-
+      $msg = (array)$this->encoder->decodeEncodedWordsDeep($headers);
       $msg['priority'] = $this->getMsgPriority($msgno, false, $lines[0]) ?: 3;
       $msg['flags'] = $this->getMsgFlags($msgno, false, $lines[0]) ?: [];
-      $msg['uid'] = $this->parseUid($lines[0]);
-      $msg['size'] = $this->parseSize($lines[0]);
-      $msg['date_sent'] = !empty($msg['date']) ? date('Y-m-d H:i:s', strtotime($msg['date'])) : null;
+      $msg['uid'] = $this->parser->uid($lines[0]);
+      $msg['size'] = $this->parser->size($lines[0]);
+      $msg['date_sent'] = !empty($msg['date'])
+        ? date('Y-m-d H:i:s', strtotime($msg['date']))
+        : null;
       $msg['date_server'] = $msg['date_sent'];
 
       foreach (self::getDestFields() as $df) {
@@ -1788,21 +1744,16 @@ class Mailbox extends Basic
         }
       }
 
-      $msg['references'] = empty($msg['references'])
-        ? []
-        : (preg_split('/\s+/', trim(str_replace(['<', '>'], '', $msg['references']))) ?: []);
-
       if (!isset($msg['subject'])) {
         $msg['subject'] = '';
       }
 
+      $msg['references'] = $this->parser->references($msg['references']);
       $msg['message_id'] = !empty($msg['message_id'])
         ? trim($msg['message_id'], '<>')
         : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
-
       $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
-      $fullRaw = $this->getFullMessage($msgno, false);
-      $parsedMime = $this->parseMimeMessage($fullRaw);
+      $parsedMime = $this->parser->mimeMessage($raw);
       $msg['html'] = $parsedMime['html'] ?? '';
       $msg['plain'] = $parsedMime['plain'] ?? '';
       $msg['charset'] = $parsedMime['charset'] ?? '';
@@ -1826,7 +1777,7 @@ class Mailbox extends Basic
         true
       );
 
-      return $this->extractLiteralBlock($lines);
+      return $this->parser->extractLiteralBlock($lines);
     }
     catch (Exception $e) {
       return null;
@@ -1844,368 +1795,7 @@ class Mailbox extends Basic
       return null;
     }
 
-    return $this->_get_decode_value($body, $encoding);
-  }
-
-  private function extractLiteralBlock(array $lines): ?string
-  {
-    $capture = false;
-    $buffer = [];
-
-    foreach ($lines as $line) {
-      if ($capture) {
-        if (preg_match('/^BBN_\d+\s+(OK|NO|BAD)/i', $line)) {
-          break;
-        }
-
-        if ($line === ')') {
-          continue;
-        }
-
-        $buffer[] = $line;
-      }
-      elseif (preg_match('/\{(\d+)\}$/', $line)) {
-        $capture = true;
-      }
-    }
-
-    if (!$buffer) {
-      return null;
-    }
-
-    return implode("\n", $buffer);
-  }
-
-  private function parseHeaderInfo(string $raw): object
-  {
-    $headers = $this->parseHeaders($raw);
-    $res = new stdClass();
-
-    foreach ($headers as $k => $v) {
-      $lk = strtolower($k);
-      switch ($lk) {
-        case 'subject':
-          $res->subject = $this->decodeMimeHeaderValue($v);
-          break;
-        case 'date':
-          $res->date = $v;
-          $res->Date = $v;
-          break;
-        case 'message-id':
-          $res->message_id = $v;
-          break;
-        case 'references':
-          $res->references = $v;
-          break;
-        case 'in-reply-to':
-          $res->in_reply_to = $v;
-          break;
-        case 'from':
-          $res->from = $this->parseAddressList($v);
-          $res->fromaddress = $v;
-          break;
-        case 'to':
-          $res->to = $this->parseAddressList($v);
-          $res->toaddress = $v;
-          break;
-        case 'cc':
-          $res->cc = $this->parseAddressList($v);
-          break;
-        case 'bcc':
-          $res->bcc = $this->parseAddressList($v);
-          break;
-        case 'reply-to':
-          $res->reply_to = $this->parseAddressList($v);
-          $res->reply_toaddress = $v;
-          break;
-        default:
-          $res->{$lk} = $v;
-      }
-    }
-
-    return $res;
-  }
-
-  private function parseHeaders(string $raw): array
-  {
-    $raw = str_replace("\r\n", "\n", $raw);
-    $lines = explode("\n", $raw);
-    $headers = [];
-    $current = null;
-
-    foreach ($lines as $line) {
-      if (preg_match('/^\s+/', $line) && $current !== null) {
-        $headers[$current] .= ' ' . trim($line);
-        continue;
-      }
-
-      if (preg_match('/^([^:]+):(.*)$/', $line, $m)) {
-        $current = trim($m[1]);
-        $headers[$current] = trim($m[2]);
-      }
-    }
-
-    return $headers;
-  }
-
-  private function parseFlags(string $raw): array
-  {
-    if (preg_match('/FLAGS\s+\(([^)]*)\)/i', $raw, $m)) {
-      return preg_split('/\s+/', trim($m[1])) ?: [];
-    }
-
-    return [];
-  }
-
-  private function parseSize(string $raw): int
-  {
-    if (preg_match('/RFC822\.SIZE\s+(\d+)/i', $raw, $m)) {
-      return (int)$m[1];
-    }
-
-    return 0;
-  }
-
-  private function parseUid(string $raw): ?int
-  {
-    if (preg_match('/UID\s+(\d+)/i', $raw, $m)) {
-      return (int)$m[1];
-    }
-
-    return null;
-  }
-
-  private function parseAddressList(string $value): array
-  {
-    $res = [];
-    $parts = preg_split('/,(?=(?:[^"]*"[^"]*")*[^"]*$)/', $value) ?: [];
-
-    foreach ($parts as $p) {
-      $p = trim($p);
-      if (preg_match('/^(.*?)<([^>]+)>$/', $p, $m)) {
-        $name = trim($m[1], " \t\n\r\0\x0B\"");
-        $email = trim($m[2]);
-        $res[] = [
-          'name' => $name ? $this->decodeMimeHeaderValue($name) : null,
-          'email' => $email
-        ];
-      }
-      elseif (filter_var($p, FILTER_VALIDATE_EMAIL)) {
-        $res[] = [
-          'name' => null,
-          'email' => $p
-        ];
-      }
-    }
-
-    return $res;
-  }
-
-  private function decodeMimeHeaderValue(string $value): string
-  {
-    if (function_exists('iconv_mime_decode')) {
-      $decoded = @iconv_mime_decode($value, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8');
-      if ($decoded !== false) {
-        return $decoded;
-      }
-    }
-
-    return $this->decode_encoded_words($value);
-  }
-
-  private function parseBodyStructureFromFetch(string $raw): ?object
-  {
-    if (preg_match('/BODYSTRUCTURE\s+(.+)\)$/is', $raw, $m)) {
-      $o = new stdClass();
-      $o->raw = trim($m[1]);
-      return $o;
-    }
-
-    return null;
-  }
-
-  private function parseMimeMessage(?string $raw): array
-  {
-    if (!$raw) {
-      return [
-        'html' => '',
-        'plain' => '',
-        'charset' => '',
-        'attachments' => [],
-        'inline' => []
-      ];
-    }
-
-    [$headerText, $body] = preg_split("/\R\R/", $raw, 2) + [null, ''];
-    $headers = $this->parseHeaders($headerText ?? '');
-    $contentType = $headers['Content-Type'] ?? $headers['content-type'] ?? 'text/plain';
-    $encoding = $headers['Content-Transfer-Encoding'] ?? $headers['content-transfer-encoding'] ?? '';
-    $disposition = $headers['Content-Disposition'] ?? $headers['content-disposition'] ?? '';
-    $typeInfo = $this->parseContentType($contentType);
-    $charset = $typeInfo['charset'] ?? '';
-    $boundary = $typeInfo['boundary'] ?? null;
-    $mime = strtolower($typeInfo['mime'] ?? 'text/plain');
-    $result = [
-      'html' => '',
-      'plain' => '',
-      'charset' => $charset,
-      'attachments' => [],
-      'inline' => []
-    ];
-
-    if ($boundary && str_starts_with($mime, 'multipart/')) {
-      $parts = $this->splitMultipartBody($body, $boundary);
-      foreach ($parts as $idx => $partRaw) {
-        $part = $this->parseMimeMessage($partRaw);
-
-        if (!empty($part['html'])) {
-          $result['html'] .= $part['html'];
-        }
-
-        if (!empty($part['plain'])) {
-          $result['plain'] .= $part['plain'];
-        }
-
-        if (!empty($part['charset']) && empty($result['charset'])) {
-          $result['charset'] = $part['charset'];
-        }
-
-        if (!empty($part['attachments'])) {
-          $result['attachments'] = array_merge($result['attachments'], $part['attachments']);
-        }
-
-        if (!empty($part['inline'])) {
-          $result['inline'] = array_merge($result['inline'], $part['inline']);
-        }
-      }
-
-      return $result;
-    }
-
-    $decodedBody = $this->decodeBodyByEncoding($body, $encoding);
-    $filename = $this->extractFilenameFromHeaders($headers);
-    $cid = $headers['Content-ID'] ?? $headers['content-id'] ?? null;
-    if ($filename) {
-      $att = [
-        'id' => $cid ? trim($cid, '<>') : null,
-        'type' => Str::fileExt($filename) ?: $this->mimeToSubtype($mime),
-        'name' => $filename,
-        'size' => strlen($decodedBody),
-        'data' => $decodedBody,
-        'encoding' => $this->mapEncodingNameToInt($encoding),
-        'part' => null
-      ];
-      $result['attachments'][] = $att;
-      if (stripos($disposition, 'inline') !== false) {
-        $result['inline'][] = $att;
-      }
-
-      return $result;
-    }
-
-    if ($mime === 'text/html') {
-      $result['html'] = Str::toUtf8($decodedBody);
-    }
-    elseif ($mime === 'text/plain') {
-      $result['plain'] = Str::toUtf8($decodedBody);
-    }
-
-    return $result;
-  }
-
-  private function parseContentType(string $contentType): array
-  {
-    $parts = array_map('trim', explode(';', $contentType));
-    $mime = strtolower(array_shift($parts) ?: 'text/plain');
-    $res = ['mime' => $mime];
-    foreach ($parts as $p) {
-      if (preg_match('/^([^=]+)=(.*)$/', $p, $m)) {
-        $k = strtolower(trim($m[1]));
-        $v = trim($m[2], " \t\n\r\0\x0B\"");
-        $res[$k] = $v;
-      }
-    }
-
-    return $res;
-  }
-
-  private function splitMultipartBody(string $body, string $boundary): array
-  {
-    $boundaryLine = '--' . $boundary;
-    $endBoundaryLine = '--' . $boundary . '--';
-    $lines = preg_split("/\R/", $body) ?: [];
-    $parts = [];
-    $current = [];
-    $inside = false;
-
-    foreach ($lines as $line) {
-      if ($line === $boundaryLine) {
-        if ($inside && $current) {
-          $parts[] = implode("\r\n", $current);
-          $current = [];
-        }
-        $inside = true;
-        continue;
-      }
-
-      if ($line === $endBoundaryLine) {
-        if ($inside && $current) {
-          $parts[] = implode("\r\n", $current);
-        }
-        break;
-      }
-
-      if ($inside) {
-        $current[] = $line;
-      }
-    }
-
-    return $parts;
-  }
-
-  private function decodeBodyByEncoding(string $body, string $encoding): string
-  {
-    $enc = strtolower(trim($encoding));
-    return match ($enc) {
-      'base64' => base64_decode($body) ?: '',
-      'quoted-printable' => quoted_printable_decode($body),
-      default => $body,
-    };
-  }
-
-  private function extractFilenameFromHeaders(array $headers): ?string
-  {
-    foreach (['Content-Disposition', 'content-disposition', 'Content-Type', 'content-type'] as $key) {
-      if (!empty($headers[$key])) {
-        if (preg_match('/filename\*?=(?:UTF-8\'\')?"?([^";]+)"?/i', $headers[$key], $m)) {
-          return rawurldecode($m[1]);
-        }
-
-        if (preg_match('/name="?([^";]+)"?/i', $headers[$key], $m)) {
-          return $this->decodeMimeHeaderValue($m[1]);
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private function mimeToSubtype(string $mime): string
-  {
-    $parts = explode('/', $mime);
-    return strtolower($parts[1] ?? 'bin');
-  }
-
-  private function mapEncodingNameToInt(string $encoding): int
-  {
-    return match (strtolower(trim($encoding))) {
-      '7bit' => 0,
-      '8bit' => 1,
-      'binary' => 2,
-      'base64' => 3,
-      'quoted-printable' => 4,
-      default => 0,
-    };
+    return $this->encoder->getDecodedValue($body, $encoding);
   }
 
   private function transformString($string)
@@ -2222,56 +1812,6 @@ class Mailbox extends Basic
 
     return $result;
   }
-
-
-  private function decode_encoded_words($string)
-  {
-
-    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
-    if (!empty($matches)) {
-      for ($i = 0; $i < count($matches[0]); $i++) {
-        $encoding = $matches[2][$i];
-        $encoded_text = $matches[3][$i];
-        if (strtolower($encoding) == "q") {
-          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
-        }
-        else {
-          $decoded_text = base64_decode($encoded_text);
-        }
-        $string = Str::replace($matches[0][$i], $decoded_text, $string);
-      }
-    }
-
-    return $string;
-  }
-
-  private function decode_encoded_words_array(array $array)
-  {
-    for ($i = 0; $i < count($array); $i++) {
-      $array[$i] = $this->decode_encoded_words($array[$i]);
-    }
-    return $array;
-  }
-
-  private function decode_encoded_words_deep($obj)
-  {
-    if (is_string($obj)) {
-      $obj = $this->decode_encoded_words($obj);
-    }
-    elseif (is_object($obj)) {
-      foreach ($obj as $idx => $val) {
-        $obj->$idx = $this->decode_encoded_words_deep($val);
-      }
-    }
-    elseif (is_array($obj)) {
-      foreach ($obj as $idx => $val) {
-        $obj[$idx] = $this->decode_encoded_words_deep($val);
-      }
-    }
-
-    return $obj;
-  }
-
 
   /**
    * Checks if we are connected  (Test: ok)
@@ -2302,7 +1842,7 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return bool|array
    */
-  private function _list_subscribed($dir)
+  private function _listSubscribed($dir)
   {
     try {
       $lines = $this->rawCommand(
@@ -2332,7 +1872,7 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return bool|array
    */
-  private function _list_folders($dir)
+  private function _listFolders($dir)
   {
     try {
       $lines = $this->rawCommand(
@@ -2362,7 +1902,7 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return array|bool
    */
-  private function _get_folders($dir)
+  private function _getFolders($dir)
   {
     try {
       $lines = $this->rawCommand(
@@ -2396,9 +1936,9 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return array
    */
-  private function _get_names_folders($dir)
+  private function _getNamesFolders($dir)
   {
-    if ($folders = $this->_get_folders($dir)) {
+    if ($folders = $this->_getFolders($dir)) {
       $ret = [];
       foreach ($folders as $val) {
         $mbox_name = $val->name;
