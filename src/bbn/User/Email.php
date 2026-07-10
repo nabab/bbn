@@ -86,6 +86,12 @@ class Email extends Basic
     ],
   ];
 
+  /** @var array */
+  protected static $folderTypes = [];
+
+  /** @var array */
+  protected static $folderTypesCodes = [];
+
   /** @var array An array of connection objects */
   protected $mboxes = [];
 
@@ -117,7 +123,25 @@ class Email extends Basic
    */
   public static function getFolderTypes(): array
   {
-    return self::getOptions("folders");
+    if ( empty(self::$folderTypes) ) {
+      self::$folderTypes = self::getOptions("folders") ?: [];
+    }
+
+    return self::$folderTypes;
+  }
+
+  /**
+   * Returns a list of typical folder types codes as they are recorded in the options
+   *
+   * @return array
+   */
+  public static function getFolderTypesCodes(): array
+  {
+    if ( empty(self::$folderTypesCodes) ) {
+      self::$folderTypesCodes = self::getOptionsObject()->getCodes(self::getOptionId("folders")) ?: [];
+    }
+
+    return self::$folderTypesCodes;
   }
 
   /**
@@ -242,12 +266,6 @@ class Email extends Basic
           $this->localeField => !empty($a[$this->localeField]),
         ];
         $this->mboxes[$id_account]["folders"] = $this->getFolders($id_account);
-        if (!isset($a["stage"])) {
-          $a["stage"] = 1;
-          $this->pref->set($id_account, $a);
-        }
-
-        $this->mboxes[$id_account]["stage"] = $a["stage"];
       }
     }
     return $this->mboxes[$id_account] ?? null;
@@ -536,7 +554,7 @@ class Email extends Basic
     $mb = $this->getMailbox($id_account);
     $uid_parent = "";
     if ($id_parent) {
-      $uid_parent = $this->getFolder($id_parent)["uid"];
+      $uid_parent = $this->getFolder($id_parent, true)["uid"];
     }
     $mboxName = $id_parent ? $uid_parent . "." . $name : $name;
     if ($mb
@@ -566,7 +584,7 @@ class Email extends Basic
     ];
 
     if ($id_parent) {
-      $uid_parent = $this->getFolder($id_parent)["uid"];
+      $uid_parent = $this->getFolder($id_parent, true)["uid"];
       $a["uid"] = $uid_parent . "." . $name;
       $a["id_parent"] = $id_parent;
     }
@@ -580,13 +598,13 @@ class Email extends Basic
     ?string $idParent = null,
   ): bool {
     if (
-      ($folder = $this->getFolder($id)) &&
+      ($folder = $this->getFolder($id, true)) &&
       !empty($folder["uid"]) &&
       !empty($folder["id_account"]) &&
       ($mb = $this->getMailbox($folder["id_account"]))
     ) {
       if (!empty($idParent)) {
-        if (!($parentFolder = $this->getFolder($idParent))) {
+        if (!($parentFolder = $this->getFolder($idParent, true))) {
           return false;
         }
 
@@ -616,7 +634,7 @@ class Email extends Basic
     ?string $idParent = null,
   ): bool {
     if (
-      ($folder = $this->getFolder($id)) &&
+      ($folder = $this->getFolder($id, true)) &&
       !empty($folder["uid"]) &&
       !empty($folder["id_account"])
     ) {
@@ -629,7 +647,7 @@ class Email extends Basic
       if (!empty($idParent)
         && ($idParent !== $folder["id_parent"])
       ) {
-        if (!($parentFolder = $this->getFolder($idParent))) {
+        if (!($parentFolder = $this->getFolder($idParent, true))) {
           return false;
         }
 
@@ -677,7 +695,7 @@ class Email extends Basic
   public function deleteFolder(string $id, string $id_account): bool
   {
     $mb = $this->getMailbox($id_account);
-    $folder = $this->getFolder($id);
+    $folder = $this->getFolder($id, true);
     if ($folder && $mb->deleteMbox($folder["uid"])) {
       if ($this->deleteFolderDb($id)) {
         $this->mboxes[$id_account]["folders"] = $this->getFolders($id_account);
@@ -726,7 +744,7 @@ class Email extends Basic
 
   public function getInfoFolder($id)
   {
-    $folder = $this->getFolder($id);
+    $folder = $this->getFolder($id, true);
     if ($folder) {
       $mb = $this->getMailbox($folder["id_account"]);
       if ($mb) {
@@ -743,18 +761,9 @@ class Email extends Basic
         $this->syncFolders($idAccount);
       }
 
-      $t =& $this;
-      $folders = X::map(
-        function ($f) use ($t) {
-          $res = $t->normalizeFolder($f);
-          if (!empty($f["items"])) {
-            $res["items"] = $f["items"];
-          }
-
-          return $res;
-        },
-        $this->pref->getFullBits($idAccount),
-        "items",
+      $folders = array_map(
+        fn($f) => $this->normalizeFolder($f, false, true),
+        $this->pref->getFullBits($idAccount) ?: []
       );
       X::sortBy($folders, "text");
       return $folders;
@@ -766,20 +775,19 @@ class Email extends Basic
   public function getFoldersRules(string $idAccount): array
   {
     $res = [];
-    $folders = $this->getFolders($idAccount);
-    $folderTypesCodes = self::getOptionsObject()->getCodes(self::getOptionId("folders"));
-    $bitsFields = $this->pref->getClassCfg()["arch"]["user_options_bits"];
-    if ($folders) {
+    $folders = $this->pref->getFullBits($idAccount);
+    $ftc = self::getFolderTypesCodes();
+    $field = $this->pref->getClassCfg()["arch"]["user_options_bits"]['id_option'];
+    if (!empty($folders)) {
       foreach ($folders as $f) {
-        if (
-          !empty($folderTypesCodes[$f[$bitsFields["id_option"]]]) &&
-          !in_array(
-            $folderTypesCodes[$f[$bitsFields["id_option"]]],
+        if (!empty($ftc[$f[$field]])
+          && !in_array(
+            $ftc[$f[$field]],
             $this->folderTypesNotUnique,
             true,
           )
         ) {
-          $res[$folderTypesCodes[$f[$bitsFields["id_option"]]]] = $f["uid"];
+          $res[$ftc[$f[$field]]] = $f["uid"];
         }
       }
     }
@@ -837,10 +845,10 @@ class Email extends Basic
     return $res;
   }
 
-  public function getFolder(string $id, bool $force = false): ?array
+  public function getFolder(string $id, bool $full = true): ?array
   {
     if ($f = $this->pref->getBit($id)) {
-      return $this->normalizeFolder($f);
+      return $this->normalizeFolder($f, !$full);
     }
 
     return null;
@@ -1297,7 +1305,7 @@ class Email extends Basic
     $db = $this->getRightDb($id, $table);
     $em = $db->rselect($table, $cfg, [$cfg["id"] => $id]);
     if ($em) {
-      $folder = $this->getFolder($em["id_folder"]);
+      $folder = $this->getFolder($em["id_folder"], true);
       if ($folder && ($mb = $this->getAccount($folder["id_account"]))) {
         return $mb;
       }
@@ -1307,60 +1315,48 @@ class Email extends Basic
 
   public function getEmail(string $id, bool $force = false): ?array
   {
+    $r = null;
     $db = $this->getRightDb($id, $this->class_table);
-    if ($em = $db->rselect($this->class_table, $this->fields, [$this->fields["id"] => $id])) {
-      $folder = $this->getFolder($em["id_folder"]);
-      if (!empty($folder)
-        && ($force
-          || !($arr = $this->user->getCache($this->cachePrefix . $id))
-          || ($folder['type'] === 'drafts'))
+    $em = $db->rselect(
+      $this->class_table,
+      $this->fields,
+      [
+        $this->fields["id"] => $id
+      ]
+    );
+    if (!empty($em['id_folder'])
+      && ($folder = $this->getFolder($em["id_folder"], true))
+    ) {
+      if (($force
+          || !($r = $this->user->getCache($this->cachePrefix . $id))
+          || ($this->getFolderType($folder) === 'drafts'))
+        && (($mb = $this->getMailbox($folder["id_account"]))
+          && $mb->selectFolder($folder["uid"]))
       ) {
-        if (!empty($folder)
-          && ($mb = $this->getMailbox($folder["id_account"]))
-          && $mb->selectFolder($folder["uid"])
-        ) {
+        $r = $mb->getMsg($em["msg_uid"], true);
+        if (empty($r)) {
+          $db->delete($this->class_table, [$this->fields["id"] => $id]);
+          return null;
+        }
 
-          $arr = $mb->getMsg($em["msg_uid"], true);
-          if (empty($arr)) {
-            $db->delete($this->class_table, [$this->fields["id"] => $id]);
-            return null;
-          }
-
-          $arr["id"] = $id;
-          $arr["id_account"] = $folder["id_account"];
-          $arr["msg_unique_id"] = Str::toUtf8($em["msg_unique_id"]);
-          $arr["quote"] = "";
-          if (!empty($arr["html"])) {
-            $splitQuote = $mb->splitQuoteFromEmail($arr["html"]);
-            if (!empty($splitQuote["quote"])) {
-              $arr["html"] = $splitQuote["text"];
-              $arr["quote"] = $splitQuote["quote"];
-            }
-          }
-
-          $this->user->setCache($this->cachePrefix . $id, $arr, 86400);
-          $fs = new System();
-          if ($fs->getNumFiles($this->user->getCachePath() . $this->cachePrefix) > 50) {
-            $files = $fs->getFiles(
-              $this->user->getCachePath() . $this->cachePrefix,
-              false,
-              false,
-              null,
-              "m",
-            );
-            X::sortBy($files, "mtime", "desc");
-            array_splice($files, 0, 50);
-            foreach ($files as $f) {
-              $fs->delete($f["name"]);
-            }
+        $r["id"] = $id;
+        $r["id_account"] = $folder["id_account"];
+        $r["msg_unique_id"] = Str::toUtf8($em["msg_unique_id"]);
+        $r["quote"] = "";
+        if (!empty($r["html"])) {
+          $splitQuote = $mb->splitQuoteFromEmail($r["html"]);
+          if (!empty($splitQuote["quote"])) {
+            $r["html"] = $splitQuote["text"];
+            $r["quote"] = $splitQuote["quote"];
           }
         }
-      }
 
-      return $arr;
+        $this->user->setCache($this->cachePrefix . $id, $r, 86400);
+        $this->partialClearUserCache();
+      }
     }
 
-    return null;
+    return $r;
   }
 
 
@@ -1734,7 +1730,7 @@ class Email extends Basic
     if (
       !empty($msgUid) &&
       !empty($folderId) &&
-      ($folder = $this->getFolder($folderId)) &&
+      ($folder = $this->getFolder($folderId, true)) &&
       !empty($folder["id_account"]) &&
       ($mb = $this->getMailbox($folder["id_account"]))
     ) {
@@ -2203,7 +2199,7 @@ class Email extends Basic
       ($em = $db->rselect($this->class_table, $this->fields, [
         $this->fields["id"] => $id,
       ])) &&
-      ($folder = $this->getFolder($em["id_folder"])) &&
+      ($folder = $this->getFolder($em["id_folder"], true)) &&
       ($mb = $this->getMailbox($folder["id_account"])) &&
       $mb->selectFolder($folder["uid"]) &&
       ($msgNum = $mb->getMsgNo($em["msg_uid"]))
@@ -2749,7 +2745,7 @@ class Email extends Basic
   protected function syncFlags(string $idFolder): int
   {
     $synced = 0;
-    if (($folder = $this->getFolder($idFolder))
+    if (($folder = $this->getFolder($idFolder, true))
       && !empty($folder['id_account'])
       && !empty($folder['uid'])
       && ($mb = $this->getMailbox($folder['id_account']))
@@ -2784,36 +2780,68 @@ class Email extends Basic
   }
 
 
-  protected function normalizeFolder(array $folder): array
+  protected function normalizeFolder(
+    array $folder,
+    bool $lite = false,
+    bool $depth = false
+  ): array
   {
-    $types = self::getFolderTypes();
-    return [
+    $folderType = $this->getFolderType($folder, false);
+    $res = [
       "id" => $folder["id"],
       "id_account" => $folder["id_user_option"],
       "text" => $folder["text"],
       "uid" => $folder["uid"],
       "id_option" => $folder["id_option"],
       "id_parent" => $folder["id_parent"] ?? null,
-      "type" => X::getField($types, ["id" => $folder["id_option"]], "code"),
-      "db_uid_max" => $this->getDbUidMax($folder["id"]),
-      "db_uid_min" => $this->getDbUidMin($folder["id"]),
-      "db_num_msg" => $this->getNumMsg($folder["id"]),
-      "db_num_unseen_msg" => $this->getNumUnseenMsg($folder["id"]),
+      "type" => $folderType['code'] ?? null,
       "num_msg" => $folder["num_msg"] ?? 0,
       "last_uid" => $folder["last_uid"] ?? null,
       "last_check" => $folder["last_check"] ?? null,
       "hash" => $folder["hash"] ?? null,
       "subscribed" => $folder["subscribed"] ?? false,
-      "icon" => X::getField($types, ["id" => $folder["id_option"]], "icon"),
+      "icon" => $folderType['icon'] ?? null,
       "synchronizing" => $folder["synchronizing"] ?? false,
       "last_sync_start" => $folder["last_sync_start"] ?? null,
       "last_sync_end" => $folder["last_sync_end"] ?? null,
       "flags_highestmodseq" => $folder["flags_highestmodseq"] ?? null,
-      $this->localeField => $this->pref->isLocale(
-        $folder["id"],
-        $this->pref->getClassCfg()["tables"]["user_options_bits"],
-      ),
     ];
+    if (!$lite) {
+      $res += [
+        "db_uid_max" => $this->getDbUidMax($folder["id"]),
+        "db_uid_min" => $this->getDbUidMin($folder["id"]),
+        "db_num_msg" => $this->getNumMsg($folder["id"]),
+        "db_num_unseen_msg" => $this->getNumUnseenMsg($folder["id"]),
+        $this->localeField => $this->pref->isLocale(
+          $folder["id"],
+          $this->pref->getClassCfg()["tables"]["user_options_bits"],
+        )
+      ];
+    }
+
+    if ($depth && !empty($folder["items"])) {
+      $res["items"] = array_map(
+        fn($f) => $this->normalizeFolder($f, $lite, $depth),
+        $folder["items"],
+      );
+    }
+
+    return $res;
+  }
+
+  protected function getFolderType(string|array $folder, bool $onlyCode = true): string|array|null
+  {
+    $types = self::getFolderTypes();
+    if (Str::isUid($folder)) {
+      $folder = $this->pref->getBit($folder);
+    }
+
+    if (!empty($folder['id_option'])) {
+      $type = X::getRow($types, ["id" => $folder["id_option"]]);
+      return $onlyCode ? ($type["code"] ?? null) : $type;
+    }
+
+    return null;
   }
 
   /**
@@ -2990,7 +3018,6 @@ class Email extends Basic
     );
   }
 
-
   private function makeFolderHash(
     string $idFolder,
     int $numMsg = 0,
@@ -3003,5 +3030,19 @@ class Email extends Basic
         "numMsg" => $numMsg,
       ]),
     );
+  }
+
+  private function partialClearUserCache()
+  {
+    $fs = new System();
+    $path = $this->user->getCachePath() . $this->cachePrefix;
+    if ($fs->getNumFiles($path) > 50) {
+      $files = $fs->getFiles($path, false, false, null, "m");
+      X::sortBy($files, "mtime", "desc");
+      array_splice($files, 0, 50);
+      foreach ($files as $f) {
+        $fs->delete($f["name"]);
+      }
+    }
   }
 }
