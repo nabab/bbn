@@ -1769,21 +1769,6 @@ class Mailbox extends Basic
     }
   }
 
-  private function getFullMessage(int $msgno, bool $uid = false): ?string
-  {
-    try {
-      $lines = $this->rawCommand(
-        ($uid ? 'UID ' : '') . "FETCH $msgno (BODY.PEEK[])",
-        true
-      );
-
-      return $this->parser->extractLiteralBlock($lines);
-    }
-    catch (Exception $e) {
-      return null;
-    }
-  }
-
   private function getAttachmentDataByPart(int $msgNum, ?string $part, int $encoding): ?string
   {
     if (!$part) {
