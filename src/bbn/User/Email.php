@@ -1342,6 +1342,7 @@ class Email extends Basic
         $r["id"] = $id;
         $r["id_account"] = $folder["id_account"];
         $r["msg_unique_id"] = Str::toUtf8($em["msg_unique_id"]);
+        $r['is_draft'] = $em['is_draft'] ?? 0;
         $r["quote"] = "";
         if (!empty($r["html"])) {
           $splitQuote = $mb->splitQuoteFromEmail($r["html"]);
@@ -1612,7 +1613,7 @@ class Email extends Basic
             if ($id = $this->retrieveEmail($dest["email"], $isLocale)) {
               $sent_opt = X::getField(self::getFolderTypes(), ["code" => "sent"], "id");
               if ($sent_opt === $folder["id_option"]) {
-                $this->addSentToLink($id, Date("Y-m-d H:i:s", strtotime($email["date"])));
+                $this->addSentToLink($id, date("Y-m-d H:i:s", strtotime($email["date"])));
               }
             } elseif (
               !($id = $this->addContactFromMail($dest, false, $isLocale))
@@ -1640,6 +1641,25 @@ class Email extends Basic
           ];
         }
 
+        $excerpt = trim(
+          normalizer_normalize(
+            Str::toUtf8(
+              $email["plain"] ?:
+              (!empty($email["html"])
+                ? Str::html2text(quoted_printable_decode($email["html"]))
+                : "")
+            )
+          )
+        );
+        if (Str::len($excerpt) > 65500) {
+          $excerpt = Str::sub($excerpt, 0, 65500);
+        }
+
+        $flags =empty($email['flags'])
+          ? []
+          : (is_array($email['flags'])
+            ? $email['flags']
+            : explode(' ', $email['flags']));
         $ar = [
           $cfg["id_user"] => $this->user->getId(),
           $cfg["id_folder"] => $folder["id"],
@@ -1648,62 +1668,24 @@ class Email extends Basic
           $cfg["date"] => date("Y-m-d H:i:s", strtotime($email["date"])),
           $cfg["id_sender"] => $id_sender,
           $cfg["subject"] => $email["subject"] ?: "",
-          $cfg["size"] => $email["Size"] ?? $email["size"] ?? 0,
+          $cfg["size"] => $email["size"] ?? 0,
           $cfg["attachments"] => empty($email["attachments"])
             ? null
             : json_encode($email["attachments"]),
-          $cfg['flags'] => !empty($email['flags']) ? (is_array($email['flags']) ? implode(' ', $email['flags']) : $email['flags']) : null,
-          $cfg['is_read'] => empty($email['Unseen']) && (empty($email['Recent']) || ($email['Recent'] === 'R')) ? 1 : 0,
-          $cfg["is_draft"] => !empty($email["Draft"]) ? 1 : 0,
+          $cfg['flags'] => !empty($flags) ? implode(' ', $flags) : null,
+          $cfg['is_read'] => in_array("\\Seen", $flags) ? 1 : 0,
+          $cfg["is_draft"] => in_array("\\Draft", $flags) ? 1 : 0,
           $cfg['priority'] => $email['priority'] ?? 3,
           $cfg["id_parent"] => $id_parent,
           $cfg["id_thread"] => $id_thread,
           $cfg["external_uids"] => $external ? json_encode($external) : null,
-          $cfg["excerpt"] => ""
+          $cfg["excerpt"] => $excerpt
         ];
-
         if ($existing) {
           $id = $existing;
-        } elseif ($db->insert($table, $ar)) {
+        }
+        elseif ($db->insert($table, $ar)) {
           $id = $db->lastId();
-          $mb = $this->getMailbox($folder["id_account"]);
-          $mb->selectFolder($folder["uid"]);
-          $number = $mb->getMsgNo($email["uid"]);
-          $text = "";
-          if ($number) {
-            $msg = $mb->getMsg($number);
-            $text = Str::toUtf8(
-              $msg["plain"] ?:
-              (!empty($msg["html"])
-                ? Str::html2text(quoted_printable_decode($msg["html"]))
-                : ""),
-            );
-            if (Str::len($text) > 65500) {
-              $text = Str::sub($text, 0, 65500);
-            }
-          }
-
-          // update excerpt column where id is same
-          try {
-            $db->update(
-              $table,
-              [$cfg["excerpt"] => trim(normalizer_normalize($text))],
-              [$cfg["id"] => $id],
-            );
-          } catch (Exception $e) {
-            X::log(
-              [
-                "id" => $id,
-                "email" => $email,
-                "cfg" => $ar,
-                "text" => trim($text),
-                "error" => $e->getMessage(),
-              ],
-              "user_email_error",
-            );
-            throw new Exception($e->getMessage());
-          }
-
           foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ["to", "cc", "bcc"]) && !empty($email[$df])) {
               foreach ($email[$df] as $dest) {
