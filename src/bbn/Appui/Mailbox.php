@@ -1593,23 +1593,6 @@ class Mailbox extends Basic
         ? date('Y-m-d H:i:s', strtotime($msg['date']))
         : null;
       $msg['date_server'] = $msg['date_sent'];
-
-      foreach (self::getDestFields() as $df) {
-        if (!empty($msg[$df]) && is_array($msg[$df])) {
-          $ads = [];
-          foreach ($msg[$df] as $a) {
-            if (!empty($a['email'])) {
-              $ads[] = [
-                'name' => $a['name'] ?? null,
-                'email' => strtolower($a['email']),
-                'host' => Str::parsePath($a['email'])['extension'] ?? null
-              ];
-            }
-          }
-          $msg[$df] = $ads;
-        }
-      }
-
       if (!isset($msg['subject'])) {
         $msg['subject'] = '';
       }

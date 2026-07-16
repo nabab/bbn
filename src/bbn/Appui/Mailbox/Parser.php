@@ -98,18 +98,31 @@ class Parser extends Basic
     $parts = preg_split('/,(?=(?:[^"]*"[^"]*")*[^"]*$)/', $value) ?: [];
     foreach ($parts as $p) {
       $p = trim($p);
+      $mailbox = null;
+      $host = null;
       if (preg_match('/^(.*?)<([^>]+)>$/', $p, $m)) {
         $name = trim($m[1], " \t\n\r\0\x0B\"");
         $email = trim($m[2]);
+        if (Str::isEmail($email)) {
+          $email = strtolower($email);
+          [$mailbox, $host] = explode('@', $email, 2);
+        }
+
         $res[] = [
-          'name' => $name ? $this->encoder->decodeMimeHeaderValue($name) : null,
-          'email' => $email
+          'name' => !empty($name) ? $this->encoder->decodeMimeHeaderValue($name) : null,
+          'email' => $email,
+          'mailbox' => $mailbox ?: null,
+          'host' => $host ?: null
         ];
       }
-      elseif (filter_var($p, FILTER_VALIDATE_EMAIL)) {
+      elseif (Str::isEmail($p)) {
+        $p = strtolower($p);
+        [$mailbox, $host] = explode('@', $p, 2);
         $res[] = [
           'name' => null,
-          'email' => $p
+          'email' => $p,
+          'mailbox' => $mailbox ?: null,
+          'host' => $host ?: null
         ];
       }
     }
@@ -370,7 +383,7 @@ class Parser extends Basic
      *  1) Strong HTML markers
      *  ------------------------------- */
     $queries = [[
-      '//div[contains(concat(" ", normalize-space(@class), " "), " __bbn__quote ")]',
+      '//div[contains(concat(" ", normalize-space(@class), " "), " __bbn__quote ")]/blockquote',
       'bbn_quote_div'
     ], [
       '//div[contains(concat(" ", normalize-space(@class), " "), " gmail_quote ")]',
@@ -389,10 +402,22 @@ class Parser extends Basic
     foreach ($queries as [$q, $method]) {
       $nodes = $xpath->query($q);
       if ($nodes && $nodes->length > 0) {
-        $quoteNode = $nodes->item(0);
-        $quoteHtml = $outerHTML($quoteNode);
         $replyDom = $this->cloneDomDocument($dom);
-        $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
+        $quoteNode = $nodes->item(0);
+        if ($method === 'bbn_quote_div') {
+          $this->removeFirstNodeByOuterHTML($replyDom, $outerHTML($quoteNode->parentNode));
+          $quoteHtml = '';
+          if ($quoteNode->hasChildNodes()) {
+            foreach ($quoteNode->childNodes as $child) {
+              $quoteHtml .= $outerHTML($child);
+            }
+          }
+        }
+        else {
+          $quoteHtml = $outerHTML($quoteNode);
+          $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
+        }
+
         return [
           'text' => trim($replyDom->saveHTML()),
           'quote' => $quoteHtml,
