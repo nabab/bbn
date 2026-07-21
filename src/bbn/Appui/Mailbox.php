@@ -1131,26 +1131,67 @@ class Mailbox extends Basic
    * @param int $msgno No of the message
    * @return array|null
    */
-  public function getMsgFlags(int $msgno, bool $uid = false, ?string $raw = null): ?array
+  public function getMsgFlags(int|array $msgno, bool $uid = false, ?string $raw = null): ?array
   {
-    $flags = null;
-    if ($overview = $this->getMsgOverview($msgno, $uid, $raw)) {
-      $flags = [];
-      foreach (self::$flags as $flag => $imapFlag) {
-        if (!empty($overview->$flag)) {
-          $flags[] = $imapFlag;
-        }
+    $multi = true;
+    if (!is_array($msgno)) {
+      $msgno = [(int)$msgno];
+      $multi = false;
+    }
+
+    $msgno = array_filter(
+      array_values(array_unique(array_map('intval', $msgno))),
+      fn($n) => $n > 0
+    );
+    if (empty($msgno)) {
+      return null;
+    }
+
+    $flags = [];
+    try {
+      if (is_null($raw)) {
+        $command = (!empty($uid) ? 'UID FETCH ' : 'FETCH ') . implode(',', $msgno) . ' (FLAGS)';
+        $lines = $this->rawCommand($command, true);
+        $raw = implode("\n", $lines);
       }
 
-      if (!empty($overview->flags)) {
-        $keywords = preg_split('/\s+/', trim($overview->flags)) ?: [];
-        $flagsList = array_values(self::$flags);
-        foreach ($keywords as $kw) {
-          if (!in_array($kw, $flagsList, true)) {
-            $flags[] = $kw;
-          }
+      $lines = preg_split('/\R/', $raw) ?: [];
+      foreach ($lines as $line) {
+        if (!preg_match('/^\*\s+(\d+)\s+FETCH\s+\(/i', $line, $messageMatch)) {
+          continue;
+        }
+
+        $messageNumber = (int)$messageMatch[1];
+        if (!preg_match('/\bFLAGS\s+\(([^)]*)\)/i', $line, $flagsMatch)) {
+          continue;
+        }
+
+        $flagsString = trim($flagsMatch[1]);
+        $mflags = $flagsString === ''
+            ? []
+            : preg_split('/\s+/', $flagsString);
+        if ($mflags === false) {
+          $mflags = [];
+        }
+
+        $mflags = array_values(array_unique(array_map('trim', $mflags)));
+        $key = $uid ? false : $messageNumber;
+        if (preg_match('/\bUID\s+(\d+)/i', $line, $uidMatch)) {
+          $key = (int)$uidMatch[1];
+        }
+
+        if ($key !== false) {
+          $flags[$key] = $mflags;
         }
       }
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
+
+    if (!empty($flags) && !$multi) {
+      $flags = reset($flags);
     }
 
     return $flags ?: null;
