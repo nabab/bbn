@@ -298,7 +298,7 @@ class Parser extends Basic
         'type' => $fileType,
         'name' => $filename,
         'size' => strlen($decodedBody),
-        'data' => $decodedBody,
+        //'data' => $decodedBody,
         'encoding' => $this->encoder->getEncodeCode($encoding),
         'part' => null
       ];

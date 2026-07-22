@@ -1320,7 +1320,12 @@ class Email extends Basic
     $db = $this->getRightDb($id, $this->class_table);
     $em = $db->rselect(
       $this->class_table,
-      $this->fields,
+      [
+        $this->fields['id_folder'],
+        $this->fields['msg_uid'],
+        $this->fields['msg_unique_id'],
+        $this->fields['is_draft'],
+      ],
       [
         $this->fields["id"] => $id
       ]

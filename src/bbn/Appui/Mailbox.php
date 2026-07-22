@@ -1389,12 +1389,12 @@ class Mailbox extends Basic
   public function getAttachments(int $msgNum, ?string $filename = null): ?array
   {
     $msg = $this->getMsg($msgNum);
-    if (!$msg || empty($msg['attachment'])) {
+    if (!$msg || empty($msg['attachments'])) {
       return null;
     }
 
     $attachments = [];
-    foreach ($msg['attachment'] as $a) {
+    foreach ($msg['attachments'] as $a) {
       if ((($a['name'] ?? null) === $filename)
         || empty($filename)
       ) {
@@ -1647,10 +1647,8 @@ class Mailbox extends Basic
       $msg['html'] = $parsedMime['html'] ?? '';
       $msg['plain'] = $parsedMime['plain'] ?? '';
       $msg['charset'] = $parsedMime['charset'] ?? '';
-      //$msg['attachment'] = $parsedMime['attachments'] ?? [];
-      $msg['attachment'] = [];
-      //$msg['inline'] = $parsedMime['inline'] ?? [];
-      $msg['inline'] = [];
+      $msg['attachments'] = $parsedMime['attachments'] ?? [];
+      $msg['inline'] = $parsedMime['inline'] ?? [];
       $msg['is_html'] = !empty($msg['html']);
       return $msg;
     }
