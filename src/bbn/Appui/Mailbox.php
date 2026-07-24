@@ -965,18 +965,17 @@ class Mailbox extends Basic
    * Fetches the message structure. (Test: ok)
    *
    * @param int $msgnum No of the message
-   * @return bool|object
+   * @return bool|array
    */
-  public function getMsgStructure(int $msgnum, bool $uid = false): ?object
+  public function getMsgStructure(int $msgnum, bool $uid = false): ?array
   {
     try {
       $lines = $this->rawCommand(
         ($uid ? "UID " : "") . "FETCH $msgnum (BODYSTRUCTURE)",
         true
       );
-
       $raw = implode("\n", $lines);
-      return $this->parser->bodyStructureFromFetch($raw);
+      return $this->parser->bodyStructure($raw);
     }
     catch (Exception $e) {
       return null;
@@ -1646,6 +1645,84 @@ class Mailbox extends Basic
       $parsedMime = $this->parser->mimeMessage($raw);
       $msg['html'] = $parsedMime['html'] ?? '';
       $msg['plain'] = $parsedMime['plain'] ?? '';
+      $msg['charset'] = $parsedMime['charset'] ?? '';
+      $msg['attachments'] = $parsedMime['attachments'] ?? [];
+      $msg['inline'] = $parsedMime['inline'] ?? [];
+      $msg['is_html'] = !empty($msg['html']);
+      return $msg;
+    }
+    catch (Exception $e) {
+      return null;
+    }
+  }
+
+  private function getMsgBySeqOrUid2(int $msgno, bool $uid = false): ?array
+  {
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODYSTRUCTURE BODY.PEEK[HEADER])",
+        true
+      );
+      $raw = $this->parser->extractLiteralBlock($lines);
+      $headers = $this->parser->headerInfo(preg_split("/\R\R/", $raw, 2)[0] ?? '');
+      if (!$headers) {
+        return null;
+      }
+
+      $msg = (array)$this->encoder->decodeEncodedWordsDeep($headers);
+      $msg['priority'] = $this->getMsgPriority($msgno, false, $lines[0]) ?: 3;
+      $msg['flags'] = $this->getMsgFlags($msgno, false, $lines[0]) ?: [];
+      $msg['uid'] = $this->parser->uid($lines[0]);
+      $msg['size'] = $this->parser->size($lines[0]);
+      $msg['date_sent'] = !empty($msg['date'])
+        ? date('Y-m-d H:i:s', strtotime($msg['date']))
+        : null;
+      $msg['date_server'] = $msg['date_sent'];
+      if (!isset($msg['subject'])) {
+        $msg['subject'] = '';
+      }
+
+      $msg['references'] = $this->parser->references($msg['references']);
+      $msg['message_id'] = !empty($msg['message_id'])
+        ? trim($msg['message_id'], '<>')
+        : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
+      $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
+      $parts = $this->parser->bodyStructureParts($lines[0]);
+      $partsToFetch = [];
+      $msg['plain'] = '';
+      $msg['html'] = '';
+      $bodyCommand = '';
+      foreach ($parts as $p) {
+        if ($p['type'] === 'text'
+          && ($p['subtype'] === 'plain'
+            || $p['subtype'] === 'html')
+        ) {
+          $partsToFetch[] = $p;
+          $bodyCommand .= (empty($bodyCommand) ? "" : " ") . "BODY.PEEK[" . $p['section'] . "]";
+        }
+      }
+
+      if (!empty($bodyCommand)) {
+        $partsContent = $this->rawCommand(
+          ($uid ? "UID " : "") . "FETCH $msgno ($bodyCommand)",
+          true
+        );
+        die(var_dump($partsContent));
+        $bodyParts = $this->parser->bodyParts(implode("\n", $partsContent));
+        if (!empty($bodyParts['parts'])) {
+          foreach ($partsToFetch as $p) {
+            if (isset($bodyParts['parts'][$p['section']])) {
+              $msg[$p['subtype']] .= $this->encoder->decodeBodyByEncoding(
+                $bodyParts['parts'][$p['section']],
+                $p['encoding']
+              );
+            }
+          }
+        }
+        die(var_dump($bodyParts['parts']));
+      }
+die(var_dump('cio'));
+      $parsedMime = $this->parser->mimeMessage($raw);
       $msg['charset'] = $parsedMime['charset'] ?? '';
       $msg['attachments'] = $parsedMime['attachments'] ?? [];
       $msg['inline'] = $parsedMime['inline'] ?? [];

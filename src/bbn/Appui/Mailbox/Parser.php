@@ -8,6 +8,7 @@ use bbn\Appui\Mailbox\Encoder;
 use DOMDocument;
 use DOMXPath;
 use DOMNode;
+use Exception;
 
 /**
  * Class providing functionality for parsing mailbox data.
@@ -193,9 +194,18 @@ class Parser extends Basic
     return 0;
   }
 
+  public function msgnum(string $raw): ?int
+  {
+    if (preg_match('/^\*\s+(\d+)\s+FETCH\b/i', $raw, $m)) {
+      return (int)$m[1];
+    }
+
+    return null;
+  }
+
   public function uid(string $raw): ?int
   {
-    if (preg_match('/UID\s+(\d+)/i', $raw, $m)) {
+    if (preg_match('/\bUID\s+(\d+)/i', $raw, $m)) {
       return (int)$m[1];
     }
 
@@ -545,6 +555,582 @@ class Parser extends Basic
       if ($dom->saveHTML($node) === $targetOuterHtml) {
         $node->parentNode?->removeChild($node);
         return;
+      }
+    }
+  }
+
+  /**
+   * Extracts all BODY[...] parts from a FETCH IMAP response.
+   * @param string $raw
+   * @return array
+   */
+  public function bodyParts(string $raw): array
+  {
+    $parts = [];
+    $offset = 0;
+    $rawLength = strlen($raw);
+    $pattern = '/\bBODY(?:\.PEEK)?\[([^\]]*)\](?:<(\d+)>)?\s+\{(\d+)\}\r?\n/i';
+    while (
+      ($offset < $rawLength)
+      && preg_match(
+        $pattern,
+        $raw,
+        $matches,
+        PREG_OFFSET_CAPTURE,
+        $offset
+      )
+    ) {
+      $fullMatch = $matches[0][0];
+      $matchOffset = $matches[0][1];
+      $section = $matches[1][0];
+      $partialOffset = isset($matches[2][0]) && $matches[2][0] !== ''
+        ? (int) $matches[2][0]
+        : null;
+      $literalLength = (int)$matches[3][0];
+      $literalStart = $matchOffset + strlen($fullMatch);
+      $literalEnd = $literalStart + $literalLength;
+      if ($literalEnd > $rawLength) {
+        throw new Exception(
+          sprintf(
+            'Literal IMAP incomplete for BODY[%s]: %d bytes expected, %d available.',
+            $section,
+            $literalLength,
+            max(0, $rawLength - $literalStart)
+          )
+        );
+      }
+
+      $content = substr($raw, $literalStart, $literalLength);
+      $key = $section !== '' ? $section : 'FULL';
+      if ($partialOffset !== null) {
+        $key .= '<' . $partialOffset . '>';
+      }
+
+      $parts[$key] = $content;
+      $offset = $literalEnd;
+    }
+
+    return [
+      'msgnum' => $this->msgnum($raw),
+      'uid' => $this->uid($raw),
+      'parts' => $parts,
+    ];
+  }
+
+  /**
+   * Parses a FETCH BODYSTRUCTURE response.
+   *
+   * @param string $raw
+   * @return array
+   */
+  public function bodyStructure(string $raw): array
+  {
+    $bodyStructure = $this->extractBodyStructure($raw);
+    $tokens = $this->tokenizeBodyStructure($bodyStructure);
+    $position = 0;
+    $parsed = $this->bodyStructureValue($tokens, $position);
+    if (!is_array($parsed)) {
+      throw new Exception('BODYSTRUCTURE IMAP not valid.');
+    }
+
+    if ($position !== count($tokens)) {
+      throw new Exception('Unexpected tokens found after BODYSTRUCTURE.');
+    }
+
+    $structure = $this->interpretBodyStructurePart($parsed, null);
+    $parts = [];
+    $this->flattenBodyStructureParts($structure, $parts);
+    return [
+      'msgnum' => $this->msgnum($raw),
+      'uid' => $this->uid($raw),
+      'structure' => $structure,
+      'parts' => $parts,
+    ];
+  }
+
+  /**
+   * Returns only the MIME parts of BODYSTRUCTURE indexed by IMAP section
+   * @param string $raw
+   * @return array
+   */
+  public function bodyStructureParts(string $raw): array
+  {
+    return $this->bodyStructure($raw)['parts'];
+  }
+
+  /**
+   * Returns only the attachments found in the BODYSTRUCTURE.
+   * @param string $raw
+   * @return array
+   */
+  public function bodyStructureAttachments(string $raw): array
+  {
+    return array_filter(
+      $this->bodyStructureParts($raw),
+      static fn (array $part): bool => ($part['isAttachment'] ?? false) === true
+    );
+  }
+
+  /**
+   * Extracts the BODYSTRUCTURE part from the raw IMAP response.
+   * @param string $raw
+   * @return string
+   */
+  private function extractBodyStructure(string $raw): string
+  {
+    if (!preg_match(
+      '/\bBODYSTRUCTURE\b/i',
+      $raw,
+      $matches,
+      PREG_OFFSET_CAPTURE
+    )) {
+      throw new Exception('The IMAP response does not contain BODYSTRUCTURE.');
+    }
+
+    $offset = $matches[0][1] + strlen($matches[0][0]);
+    $length = strlen($raw);
+    while ($offset < $length && ctype_space($raw[$offset])) {
+      $offset++;
+    }
+
+    if ($offset >= $length || $raw[$offset] !== '(') {
+      throw new Exception('The BODYSTRUCTURE does not start with a parenthesis.');
+    }
+
+    $depth = 0;
+    $inQuotedString = false;
+    $escaped = false;
+    for ($i = $offset; $i < $length; $i++) {
+      $char = $raw[$i];
+      if ($inQuotedString) {
+        if ($escaped) {
+          $escaped = false;
+          continue;
+        }
+
+        if ($char === '\\') {
+          $escaped = true;
+          continue;
+        }
+
+        if ($char === '"') {
+          $inQuotedString = false;
+        }
+
+        continue;
+      }
+
+      if ($char === '"') {
+        $inQuotedString = true;
+        continue;
+      }
+
+      if ($char === '(') {
+        $depth++;
+        continue;
+      }
+
+      if ($char === ')') {
+        $depth--;
+        if ($depth === 0) {
+          return substr($raw, $offset, $i - $offset + 1);
+        }
+      }
+    }
+
+    throw new Exception('Incomplete BODYSTRUCTURE: unbalanced parentheses.');
+  }
+
+  /**
+   * Tokenizes the BODYSTRUCTURE string into a list of tokens.
+   * @param string $raw
+   * @return array
+   */
+  private function tokenizeBodyStructure(string $raw): array
+  {
+    $tokens = [];
+    $length = strlen($raw);
+    $position = 0;
+    while ($position < $length) {
+      $char = $raw[$position];
+      if (ctype_space($char)) {
+        $position++;
+        continue;
+      }
+
+      if ($char === '(') {
+        $tokens[] = ['type' => 'open'];
+        $position++;
+        continue;
+      }
+
+      if ($char === ')') {
+        $tokens[] = ['type' => 'close'];
+        $position++;
+        continue;
+      }
+
+      if ($char === '"') {
+        $position++;
+        $value = '';
+        $closed = false;
+        while ($position < $length) {
+          $char = $raw[$position];
+          if ($char === '\\') {
+            $position++;
+            if ($position >= $length) {
+              throw new Exception('Incomplete escape in an IMAP string.');
+            }
+
+            $value .= $raw[$position];
+            $position++;
+            continue;
+          }
+
+          if ($char === '"') {
+            $position++;
+            $closed = true;
+            break;
+          }
+
+          $value .= $char;
+          $position++;
+        }
+
+        if (!$closed) {
+          throw new Exception('Unterminated IMAP quoted string.');
+        }
+
+        $tokens[] = [
+          'type' => 'string',
+          'value' => $value,
+        ];
+        continue;
+      }
+
+      if ($char === '{') {
+        throw new Exception('IMAP literals are not supported in this BODYSTRUCTURE.');
+      }
+
+      $start = $position;
+      while (
+        $position < $length
+        && !ctype_space($raw[$position])
+        && $raw[$position] !== '('
+        && $raw[$position] !== ')'
+      ) {
+        $position++;
+      }
+
+      $value = substr($raw, $start, $position - $start);
+      $tokens[] = [
+        'type' => 'atom',
+        'value' => $value,
+      ];
+    }
+
+    return $tokens;
+  }
+
+  /**
+   * Parses a value in the BODYSTRUCTURE token list, which can be either a single value or a nested list.
+   * @param array $tokens
+   * @param int $position
+   * @return mixed
+   */
+  private function bodyStructureValue(array $tokens, int &$position)
+  {
+    if (!isset($tokens[$position])) {
+      throw new Exception('Unexpected end while parsing the BODYSTRUCTURE.');
+    }
+
+    $token = $tokens[$position];
+    $position++;
+    if ($token['type'] === 'open') {
+      $values = [];
+      while (true) {
+        if (!isset($tokens[$position])) {
+          throw new Exception('Unterminated BODYSTRUCTURE list.');
+        }
+
+        if ($tokens[$position]['type'] === 'close') {
+          $position++;
+          break;
+        }
+
+        $values[] = $this->bodyStructureValue($tokens, $position);
+      }
+
+      return $values;
+    }
+
+    if ($token['type'] === 'close') {
+      throw new Exception('Unexpected closing parenthesis in BODYSTRUCTURE.');
+    }
+
+    $value = $token['value'] ?? '';
+    if ($token['type'] === 'string') {
+      return $value;
+    }
+
+    if (strcasecmp($value, 'NIL') === 0) {
+      return null;
+    }
+
+    if (preg_match('/^\d+$/', $value)) {
+      return (int)$value;
+    }
+
+    return $value;
+  }
+
+  /**
+   * Interprets a BODYSTRUCTURE part, which can be either a single part or a multipart.
+   * @param array $data
+   * @param string|null $section
+   * @return array
+   */
+  private function interpretBodyStructurePart(array $data, ?string $section): array
+  {
+    if ($data === []) {
+      throw new Exception('Empty MIME part.');
+    }
+
+    if (is_array($data[0] ?? null)) {
+      return $this->interpretMultipartBodyStructure($data, $section);
+    }
+
+    return $this->interpretSingleBodyStructurePart($data, $section);
+  }
+
+  /**
+   * Interprets a multipart BODYSTRUCTURE part.
+   * @param array $data
+   * @param string|null $section
+   * @return array
+   */
+  private function interpretMultipartBodyStructure(array $data, ?string $section): array
+  {
+    $index = 0;
+    $children = [];
+    while (isset($data[$index]) && is_array($data[$index])) {
+      $childNumber = (string) ($index + 1);
+      $childSection = $section === null
+        ? $childNumber
+        : $section . '.' . $childNumber;
+      $children[] = $this->interpretBodyStructurePart($data[$index], $childSection);
+      $index++;
+    }
+
+    $subtype = strtolower((string) ($data[$index] ?? 'mixed'));
+    $parameters = $this->bodyStructureParameters($data[$index + 1] ?? null);
+    $extensions = array_slice($data, $index + 2);
+    $disposition = $this->findBodyStructureDisposition($extensions);
+    return [
+      'section' => $section,
+      'multipart' => true,
+      'type' => 'multipart',
+      'subtype' => $subtype,
+      'mimeType' => 'multipart/' . $subtype,
+      'parameters' => $parameters,
+      'boundary' => $parameters['boundary'] ?? null,
+      'contentId' => null,
+      'description' => null,
+      'encoding' => null,
+      'size' => null,
+      'lines' => null,
+      'disposition' => $disposition['type'],
+      'dispositionParameters' => $disposition['parameters'],
+      'filename' => null,
+      'isAttachment' => false,
+      'children' => $children,
+    ];
+  }
+
+  /**
+   * Interprets a single BODYSTRUCTURE part.
+   * @param array $data
+   * @param string|null $section
+   * @return array
+   */
+  private function interpretSingleBodyStructurePart(array $data, ?string $section): array
+  {
+    $type = strtolower((string) ($data[0] ?? 'application'));
+    $subtype = strtolower((string) ($data[1] ?? 'octet-stream'));
+    $parameters = $this->bodyStructureParameters($data[2] ?? null);
+    $contentId = is_string($data[3] ?? null)
+      ? $data[3]
+      : null;
+    $description = is_string($data[4] ?? null)
+      ? $data[4]
+      : null;
+    $encoding = isset($data[5])
+      ? strtolower((string) $data[5])
+      : null;
+    $size = is_int($data[6] ?? null)
+      ? $data[6]
+      : null;
+    $lines = null;
+    $extensionOffset = 7;
+    $embeddedMessage = null;
+    if ($type === 'text') {
+      $lines = is_int($data[7] ?? null)
+        ? $data[7]
+        : null;
+      $extensionOffset = 8;
+    }
+    elseif ($type === 'message' && $subtype === 'rfc822') {
+      if (is_array($data[8] ?? null)) {
+        $embeddedSection = $section === null
+          ? '1'
+          : $section . '.1';
+        $embeddedMessage = $this->interpretBodyStructurePart($data[8], $embeddedSection);
+      }
+
+      $lines = is_int($data[9] ?? null)
+        ? $data[9]
+        : null;
+      $extensionOffset = 10;
+    }
+
+    $extensions = array_slice($data, $extensionOffset);
+    $disposition = $this->findBodyStructureDisposition($extensions);
+    $filename = $this->findBodyStructureFilename($parameters, $disposition['parameters']);
+    $children = $embeddedMessage === null
+      ? []
+      : [$embeddedMessage];
+    return [
+      'section' => $section,
+      'multipart' => false,
+      'type' => $type,
+      'subtype' => $subtype,
+      'mimeType' => $type . '/' . $subtype,
+      'parameters' => $parameters,
+      'boundary' => null,
+      'contentId' => $contentId,
+      'description' => $description,
+      'encoding' => $encoding,
+      'size' => $size,
+      'lines' => $lines,
+      'disposition' => $disposition['type'],
+      'dispositionParameters' => $disposition['parameters'],
+      'filename' => $filename,
+      'isAttachment' => $this->isBodyStructureAttachment($disposition['type'], $filename),
+      'children' => $children,
+    ];
+  }
+
+  /**
+   * Parses the parameters of a BODYSTRUCTURE part.
+   * @param mixed $value
+   * @return array
+   */
+  private function bodyStructureParameters(mixed $value): array
+  {
+    if (!is_array($value)) {
+      return [];
+    }
+
+    $parameters = [];
+    $count = count($value);
+    for ($index = 0; $index + 1 < $count; $index += 2) {
+      if (!is_scalar($value[$index])) {
+        continue;
+      }
+
+      $name = strtolower((string)$value[$index]);
+      $parameterValue = $value[$index + 1];
+      if ($parameterValue === null || !is_scalar($parameterValue)) {
+        continue;
+      }
+
+      $parameters[$name] = (string)$parameterValue;
+    }
+
+    return $parameters;
+  }
+
+  /**
+   * Finds the disposition of a BODYSTRUCTURE part.
+   * @param array $values
+   * @return array
+   */
+  private function findBodyStructureDisposition(array $values): array
+  {
+    foreach ($values as $value) {
+      if (
+        !is_array($value)
+        || !isset($value[0])
+        || !is_string($value[0])
+      ) {
+        continue;
+      }
+
+      $type = strtolower($value[0]);
+      if (!in_array($type, ['attachment', 'inline'], true)) {
+        continue;
+      }
+
+      return [
+        'type' => $type,
+        'parameters' => $this->bodyStructureParameters($value[1] ?? null)
+      ];
+    }
+
+    return [
+      'type' => null,
+      'parameters' => [],
+    ];
+  }
+
+  /**
+   * Finds the filename of a BODYSTRUCTURE part.
+   * @param array $contentTypeParameters
+   * @param array $dispositionParameters
+   */
+  private function findBodyStructureFilename(array $contentTypeParameters, array $dispositionParameters): ?string
+  {
+    return $dispositionParameters['filename']
+      ?? $dispositionParameters['filename*']
+      ?? $contentTypeParameters['name']
+      ?? $contentTypeParameters['name*']
+      ?? null;
+  }
+
+  /**
+   * Determines if a BODYSTRUCTURE part is an attachment based on its disposition and filename.
+   * @param string|null $disposition
+   * @param string|null $filename
+   * @return bool
+   */
+  private function isBodyStructureAttachment(?string $disposition, ?string $filename): bool
+  {
+    if ($disposition === 'attachment') {
+      return true;
+    }
+
+    return $filename !== null && $filename !== '';
+  }
+
+  /**
+   * Flattens the BODYSTRUCTURE parts into a single associative array indexed by section.
+   * @param array $part
+   * @param array $parts
+   */
+  private function flattenBodyStructureParts(array $part, array &$parts)
+  {
+    $section = $part['section'] ?? null;
+    if (
+      is_string($section)
+      && $section !== ''
+      && ($part['multipart'] ?? false) === false
+    ) {
+      $parts[$section] = $part;
+    }
+
+    foreach ($part['children'] ?? [] as $child) {
+      if (is_array($child)) {
+        $this->flattenBodyStructureParts($child, $parts);
       }
     }
   }
