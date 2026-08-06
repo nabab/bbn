@@ -38,7 +38,7 @@ trait Retriever
 
 
   /**
-   * Initialize the retriever by putting its own instance as static property.
+   * Removes the retriever.
    *
    * @param self $instance The instance object.
    * @return void

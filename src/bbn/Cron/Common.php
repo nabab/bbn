@@ -7,11 +7,9 @@
 
 namespace bbn\Cron;
 
-use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
 use bbn\File\System;
-use bbn\Mvc\Controller;
 use function count;
 
 trait Common {
@@ -29,16 +27,12 @@ trait Common {
    */
   protected $db;
   /**
-   * @var Controller The controller
-   */
-  protected $ctrl;
-  /**
    * @todo The class shouldn't send emails directly
    * @var string
    */
   protected $mail;
   /**
-   * @var array This corresponds to the post property from $ctrl
+   * @var array This corresponds to the post property
    */
   protected $data;
   /**

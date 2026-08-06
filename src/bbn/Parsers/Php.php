@@ -364,12 +364,12 @@ class Php extends bbn\Models\Cls\Basic
               'file' => $file,
               'class' => $class
             ];
-            if (class_exists($class, true)) {
+            if (class_exists($class)) {
               $res['type'] = 'class';
-            } elseif (interface_exists($class, true)) {
-              $res['type'] = 'interface';
-            } elseif (trait_exists($class, true)) {
+            } elseif (trait_exists($class)) {
               $res['type'] = 'trait';
+            } elseif (interface_exists($class)) {
+              $res['type'] = 'interface';
             }
             if (!empty($res['type'])) {
               $arr[] = $res;

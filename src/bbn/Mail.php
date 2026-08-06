@@ -456,7 +456,6 @@ TEMPLATE;
       }
       catch (Exception $e) {
         $this->log($e->getMessage());
-        $this->log(\imap_last_error());
       }
 
       if ($r) {

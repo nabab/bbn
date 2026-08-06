@@ -1,5 +1,5 @@
 <?php
-namespace bbn\Entities\Models;
+namespace bbn\Models\Tts;
 
 use bbn\X;
 use Exception;

@@ -510,6 +510,7 @@ trait DbCache
       $arr = self::dbConfigGetTableClasses($db);
       $db->setTrigger(function ($cfg) use ($cache, $db, $arr, $sep) {
         if (!empty($cfg["write"]) && $cfg["moment"] === "after") {
+          $ids = [];
           $table = $db->tsn(array_values($cfg["tables"])[0]);
           if (isset($arr[$table])) {
             if (!empty($arr[$table]['cache'])) {
@@ -517,8 +518,8 @@ trait DbCache
               } else {
                 $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
                 if ($idx1 !== null) {
-                  $id = $cfg['values'][$idx1];
-                  $cache->delete("table{$sep}{$table}{$sep}{$id}");
+                  $ids[] = $cfg['values'][$idx1];
+                  //$cache->delete("table{$sep}{$table}{$sep}{$id}");
                 }
               }
             }
@@ -527,13 +528,13 @@ trait DbCache
                 $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
                 if ($idx1 !== null) {
                   $id = $cfg['values'][$idx1];
-                  $ids = $db->getColumnValues($dep, 'id', [$dep['field'] => $id]);
-                  foreach ($ids as $id) {
-                    $cache->delete("table{$sep}{$dep['table']}{$sep}{$id}");
-                  }
+                  array_push($ids, ...$db->getColumnValues($dep['table'], 'id', [$dep['field'] => $id]));
                 }
               }
+            }
 
+            if (!empty($ids)) {
+              $cache->deleteMultiple($ids);
             }
           }
         }

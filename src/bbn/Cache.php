@@ -233,10 +233,15 @@ class Cache extends Basic implements CacheInterface
       }
       else {
         $tmp = new \Redis();
-        if ($tmp->connect($this->host, $this->port, 2.5)) {
-          $this->obj = $tmp;
-          $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
-          $this->obj->select($dbIndex);
+        try {
+          if ($tmp->connect($this->host, $this->port, 2.5)) {
+            $this->obj = $tmp;
+            $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
+            $this->obj->select($dbIndex);
+          }
+        }
+        catch (Exception $e) {
+          X::log(X::_("Error while connecting to Redis server %s:%d: %s", $this->host, $this->port, $e->getMessage()), 'cache_connection');
         }
       }
 
@@ -992,19 +997,19 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  public function deleteMultiple($keys): bool
+  public function deleteMultiple(iterable $keys): bool
   {
-    if (!is_iterable($keys)) {
-      throw new Exception("Keys must be iterable");
-    }
-
-    foreach ($keys as $k) {
-      if (!$this->delete($k)) {
-        return false;
+    $sep = self::$sep;
+    $all = [];
+    foreach ($keys as $key) {
+      if ($info = $this->info($key)) {
+        $all[] = "{$key}{$sep}{$info['version']}";
+        $all[] = "{$key}{$sep}__info";
+        $all[] = $key;
       }
     }
 
-    return true;
+    return $this->deleteRaw($all) ? true : false;
   }
 
 

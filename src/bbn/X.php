@@ -2703,6 +2703,10 @@ class X
     $blackOrder = [false, null, 0, '', []];
 
     // Process arguments
+    if (empty($ar)) {
+      return $ar;
+    }
+
     if (is_array($key)) {
       if (X::isAssoc($key)) {
         $args = [];
@@ -2720,7 +2724,7 @@ class X
 
     usort(
       $ar,
-      function ($a, $b) use ($args, $blackOrder) {
+      function ($a, $b) use ($args, $blackOrder, $ar) {
         foreach ($args as $arg) {
           if (!is_array($arg)) {
             throw new Exception(X::_("the order must be made of arrays, not %s", (string)$arg));
@@ -2736,6 +2740,12 @@ class X
             $key = [$key];
           }
 
+          if (!is_array($a)) {
+            X::ddump("A is not an array", $a, $b, $key, $dir, $ar);
+          }
+          if (!is_array($b)) {
+            X::ddump("B is not an array", $a, $b, $key, $dir);
+          }
           $v1 = self::pick($a, $key);
           $v2 = self::pick($b, $key);
 
