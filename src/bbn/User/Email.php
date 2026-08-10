@@ -1351,6 +1351,29 @@ class Email extends Basic
         $r['is_draft'] = $em['is_draft'] ?? 0;
         $r["quote"] = "";
         if (!empty($r["html"])) {
+          if (!empty($r['inline'])) {
+            $inlineParts = [];
+            foreach ($r['inline'] as $p) {
+              if (!empty($p['section'])) {
+                $inlineParts[$p['section']] = $p['encoding'];
+              }
+            }
+
+            if (!empty($inlineParts)
+              && ($partsContent = $mb->getMsgBodyPartData($em["msg_uid"], array_keys($inlineParts), $inlineParts))
+            ) {
+              foreach ($r['inline'] as $p) {
+                if (!empty($p['section']) && !empty($partsContent[$p['section']])) {
+                  $r['html'] = str_replace(
+                    'cid:' . $p['id'],
+                    'data:' . $p['type'] . ';base64,' . base64_encode($partsContent[$p['section']]),
+                    $r['html']
+                  );
+                }
+              }
+            }
+          }
+
           $splitQuote = $mb->splitQuoteFromEmail($r["html"]);
           if (!empty($splitQuote["quote"])) {
             $r["html"] = $splitQuote["text"];
@@ -2216,17 +2239,19 @@ class Email extends Basic
 
   public function getAttachments(string $id, ?string $filename = null): ?array
   {
-    $db = $this->getRightDb($id, $this->class_table);
     if (
-      ($em = $db->rselect($this->class_table, $this->fields, [
+      ($db = $this->getRightDb($id, $this->class_table))
+      && ($em = $db->rselect($this->class_table, [
+        $this->fields['id_folder'],
+        $this->fields['msg_uid']
+      ], [
         $this->fields["id"] => $id,
-      ])) &&
-      ($folder = $this->getFolder($em["id_folder"], true)) &&
-      ($mb = $this->getMailbox($folder["id_account"])) &&
-      $mb->selectFolder($folder["uid"]) &&
-      ($msgNum = $mb->getMsgNo($em["msg_uid"]))
+      ]))
+      && ($folder = $this->getFolder($em["id_folder"], true))
+      && ($mb = $this->getMailbox($folder["id_account"]))
+      && $mb->selectFolder($folder["uid"])
     ) {
-      return $mb->getAttachments($msgNum, $filename);
+      return $mb->getAttachments($em["msg_uid"], $filename, true);
     }
 
     return null;

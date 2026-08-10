@@ -684,7 +684,7 @@ class Parser extends Basic
       $matches,
       PREG_OFFSET_CAPTURE
     )) {
-      throw new Exception('The IMAP response does not contain BODYSTRUCTURE.');
+      throw new Exception(sprintf('The IMAP response does not contain BODYSTRUCTURE: %s', $raw));
     }
 
     $offset = $matches[0][1] + strlen($matches[0][0]);
@@ -694,7 +694,7 @@ class Parser extends Basic
     }
 
     if ($offset >= $length || $raw[$offset] !== '(') {
-      throw new Exception('The BODYSTRUCTURE does not start with a parenthesis.');
+      throw new Exception(sprintf('The BODYSTRUCTURE does not start with a parenthesis: %s', $raw));
     }
 
     $depth = 0;
@@ -738,7 +738,7 @@ class Parser extends Basic
       }
     }
 
-    throw new Exception('Incomplete BODYSTRUCTURE: unbalanced parentheses.');
+    throw new Exception(sprintf('Incomplete BODYSTRUCTURE (unbalanced parentheses): %s', $raw));
   }
 
   /**
@@ -1007,7 +1007,7 @@ class Parser extends Basic
       'mimeType' => $type . '/' . $subtype,
       'parameters' => $parameters,
       'boundary' => null,
-      'contentId' => $contentId,
+      'contentId' => trim($contentId, "<>"),
       'description' => $description,
       'encoding' => $encoding,
       'size' => $size,

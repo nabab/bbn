@@ -2,7 +2,7 @@
 
 namespace bbn\Appui\Mailbox;
 
-use bbn\Appui\Mailbox\RawClient;
+use bbn\Appui\Mailbox\Client;
 use Exception;
 use bbn\X;
 use bbn\Str;
@@ -11,7 +11,7 @@ use bbn\Str;
 /**
  * Class providing functionality for IMAP IDLE.
  */
-class Idle extends RawClient
+class Idle extends Client
 {
   /**
    * @var string The folder UID
@@ -206,49 +206,57 @@ class Idle extends RawClient
    * @return string The line of response read from the server
    * @throws Exception If the connection is lost or if an empty response is received when a
    */
-  protected function readCommandResponseLine(): string
+  public function readCommandResponseLine(): string
   {
     stream_set_blocking($this->streamResource, false);
-    $line = '';
-    while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL])) {
-      if (($this->callbackLastPing + $this->callbackFrequency) <= time()) {
-        $this->pingCallback();
+    try {
+      $line = '';
+      while (!in_array(Str::sub($line, -1), ["\n",  PHP_EOL], true)) {
+        if (($this->callbackLastPing + $this->callbackFrequency) <= time()) {
+          $this->pingCallback();
+        }
+
+        if ($this->isRunning()
+          && !empty($this->callback)
+        ) {
+          ($this->callback)(['action' => 'syncSubscribedFolders']);
+        }
+
+        if (($this->lastTime + $this->timeout) < time()) {
+          throw new Exception(X::_('IDLE Connection lost'), 3);
+        }
+
+        $read = [$this->streamResource];
+        $write = [];
+        $except = [];
+        $n = @stream_select($read, $write, $except, $this->callbackFrequency ?: 10);
+        if (($n === 0) || ($n === false)) {
+          continue;
+        }
+
+        $chunk = fgets($this->streamResource, 8192);
+        if ($chunk === false) {
+          continue;
+        }
+
+        $line .= $chunk;
       }
 
+      $this->lastTime = time();
       if ($this->isRunning()
-        && !empty($this->callback)
+        && ($line === '')
       ) {
-        ($this->callback)(['action' => 'syncSubscribedFolders']);
+        throw new Exception(X::_('Empty response (command: %s)', $this->lastCommand), 1);
       }
 
-      if (($this->lastTime + $this->timeout) < time()) {
-        throw new Exception(X::_('IDLE Connection lost'), 3);
-      }
-
-      $read = [$this->streamResource];
-      $write = $except = [];
-      $n = @stream_select($read, $write, $except, $this->callbackFrequency ?: 10);
-
-      if (($n === 0) || ($n === false)) {
-        continue;
-      }
-
-      $chunk = fgets($this->streamResource, 1024);
-      if ($chunk === false) {
-        continue;
-      }
-
-      $line .= $chunk;
+      return $line;
     }
-
-    $this->lastTime = time();
-    if ($this->isRunning()
-      && ($line === '')
-    ) {
-      throw new Exception(X::_('Empty response (command: %s)', $this->lastCommand), 1);
+    catch (Exception $e) {
+      throw $e;
     }
-
-    return $line;
+    finally {
+      stream_set_blocking($this->streamResource, true);
+    }
   }
 
 

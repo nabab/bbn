@@ -344,7 +344,6 @@ class Mailbox extends Basic
     }
 
     $uids = $this->search('UID ' . ((int)$uid + 1) . ':*');
-    X::hdump('getNextUid', $uids);
     if ($uids) {
       sort($uids);
       return $uids[0] ?? (int)$uid;
@@ -974,7 +973,7 @@ class Mailbox extends Basic
         ($uid ? "UID " : "") . "FETCH $msgnum (BODYSTRUCTURE)",
         true
       );
-      $raw = implode("\n", $lines);
+      $raw = implode("\r\n", $lines);
       return $this->parser->bodyStructure($raw);
     }
     catch (Exception $e) {
@@ -1014,7 +1013,7 @@ class Mailbox extends Basic
           ($uid ? 'UID FETCH ' : 'FETCH ') . (int)$msgnum . ' (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID)',
           true
         );
-        $raw = implode("\n", $lines);
+        $raw = implode("\r\n", $lines);
       }
 
       $obj = new stdClass();
@@ -1151,7 +1150,7 @@ class Mailbox extends Basic
       if (is_null($raw)) {
         $command = (!empty($uid) ? 'UID FETCH ' : 'FETCH ') . implode(',', $msgno) . ' (FLAGS)';
         $lines = $this->rawCommand($command, true);
-        $raw = implode("\n", $lines);
+        $raw = implode("\r\n", $lines);
       }
 
       $lines = preg_split('/\R/', $raw) ?: [];
@@ -1385,40 +1384,26 @@ class Mailbox extends Basic
   }
 
 
-  public function getAttachments(int $msgNum, ?string $filename = null): ?array
+  public function getAttachments(int $msgNum, ?string $filename = null, bool $uid = false): ?array
   {
-    $msg = $this->getMsg($msgNum);
-    if (!$msg || empty($msg['attachments'])) {
+    $msg = $this->getMsg($msgNum, $uid);
+    if (empty($msg['attachments'])) {
       return null;
     }
 
     $attachments = [];
     foreach ($msg['attachments'] as $a) {
-      if ((($a['name'] ?? null) === $filename)
-        || empty($filename)
+      if ((empty($filename) || ($a['name'] === $filename))
+        && !is_null($data = $this->getMsgBodyPartData($msgNum, $a['section'], $a['encoding'], $uid))
       ) {
-        $data = $this->getAttachmentDataByPart($msgNum, $a['part'] ?? null, $a['encoding'] ?? 0);
-        if ($data !== null) {
-          if (!empty($filename)) {
-            if ($filename === ($a['name'] ?? null)) {
-              return [
-                'type' => $a['type'] ?? '',
-                'name' => $a['name'] ?? '',
-                'size' => $a['size'] ?? 0,
-                'data' => $data
-              ];
-            }
-
-            continue;
-          }
-          else {
-            $attachments[] = [
-              'type' => $a['type'] ?? '',
-              'name' => $a['name'] ?? '',
-              'size' => $a['size'] ?? 0,
-              'data' => $data
-            ];
-          }
+        $attachments[] = [
+          'type' => $a['type'] ?? '',
+          'name' => $a['name'] ?? '',
+          'size' => $a['size'] ?? 0,
+          'data' => $data
+        ];
+        if (!empty($filename)) {
+          return $attachments[0];
         }
       }
     }
@@ -1605,13 +1590,65 @@ class Mailbox extends Basic
     return [];
   }
 
+  public function getMsgBodyPartData(
+    int $msgNum,
+    string|array $part,
+    string|array $encoding,
+    bool $uid = true
+  ): null|array|string
+  {
+    if (empty($part)
+      || empty($encoding)
+      || (is_array($part)
+        && (!is_array($encoding)
+          || (count($part) !== count($encoding))))
+    ) {
+      return null;
+    }
+
+    $multi = is_array($part);
+    if (!$multi) {
+      $part = [$part];
+    }
+
+    if (!is_array($encoding)) {
+      $encoding = [$part[0] => $encoding];
+    }
+
+    try {
+      $command = ($uid ? "UID " : "") . "FETCH $msgNum (";
+      foreach ($part as $i => $p) {
+        $command .= 'BODY.PEEK[' . $p . ']' . (isset($part[$i + 1]) ? ' ' : '');
+      }
+
+      $command .= ')';
+      $partsContent = $this->rawCommand($command, true);
+      $bodyParts = $this->parser->bodyParts(implode("\r\n", $partsContent));
+      $res = [];
+      if (!empty($bodyParts['parts'])) {
+        foreach ($bodyParts['parts'] as $s => $p) {
+          if (!isset($encoding[$s])) {
+            continue;
+          }
+
+          $res[$s] = $this->encoder->decodeBodyByEncoding($p, $encoding[$s]);
+        }
+      }
+
+      return $multi ? $res : ($res[$part[0]] ?? null);
+    }
+    catch (Exception $e) {
+      return null;
+    }
+  }
+
 
   private function escapeString(string $str): string
   {
     return Client::escapeString($str);
   }
 
-  private function getMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
+  private function getFullMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
   {
     try {
       $lines = $this->rawCommand(
@@ -1656,24 +1693,26 @@ class Mailbox extends Basic
     }
   }
 
-  private function getMsgBySeqOrUid2(int $msgno, bool $uid = false): ?array
+  private function getMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
   {
     try {
       $lines = $this->rawCommand(
-        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODYSTRUCTURE BODY.PEEK[HEADER])",
+        //($uid ? "UID " : "") . "FETCH $msgno (UID FLAGS RFC822.SIZE BODYSTRUCTURE BODY.PEEK[HEADER] INTERNALDATE ENVELOPE)",
+        ($uid ? "UID " : "") . "FETCH $msgno (BODYSTRUCTURE UID FLAGS RFC822.SIZE BODY.PEEK[HEADER])",
         true
       );
       $raw = $this->parser->extractLiteralBlock($lines);
+      $fullLines = implode("\r\n", $lines);
       $headers = $this->parser->headerInfo(preg_split("/\R\R/", $raw, 2)[0] ?? '');
       if (!$headers) {
         return null;
       }
 
       $msg = (array)$this->encoder->decodeEncodedWordsDeep($headers);
-      $msg['priority'] = $this->getMsgPriority($msgno, false, $lines[0]) ?: 3;
-      $msg['flags'] = $this->getMsgFlags($msgno, false, $lines[0]) ?: [];
-      $msg['uid'] = $this->parser->uid($lines[0]);
-      $msg['size'] = $this->parser->size($lines[0]);
+      $msg['priority'] = $this->getMsgPriority($msgno, false, $fullLines) ?: 3;
+      $msg['flags'] = $this->getMsgFlags($msgno, false, $fullLines) ?: [];
+      $msg['uid'] = $this->parser->uid($fullLines);
+      $msg['size'] = $this->parser->size($fullLines);
       $msg['date_sent'] = !empty($msg['date'])
         ? date('Y-m-d H:i:s', strtotime($msg['date']))
         : null;
@@ -1687,7 +1726,7 @@ class Mailbox extends Basic
         ? trim($msg['message_id'], '<>')
         : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
       $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
-      $parts = $this->parser->bodyStructureParts($lines[0]);
+      $parts = $this->parser->bodyStructureParts($fullLines);
       $partsToFetch = [];
       $msg['plain'] = '';
       $msg['html'] = '';
@@ -1707,8 +1746,7 @@ class Mailbox extends Basic
           ($uid ? "UID " : "") . "FETCH $msgno ($bodyCommand)",
           true
         );
-        die(var_dump($partsContent));
-        $bodyParts = $this->parser->bodyParts(implode("\n", $partsContent));
+        $bodyParts = $this->parser->bodyParts(implode("\r\n", $partsContent));
         if (!empty($bodyParts['parts'])) {
           foreach ($partsToFetch as $p) {
             if (isset($bodyParts['parts'][$p['section']])) {
@@ -1719,14 +1757,41 @@ class Mailbox extends Basic
             }
           }
         }
-        die(var_dump($bodyParts['parts']));
       }
-die(var_dump('cio'));
-      $parsedMime = $this->parser->mimeMessage($raw);
-      $msg['charset'] = $parsedMime['charset'] ?? '';
-      $msg['attachments'] = $parsedMime['attachments'] ?? [];
-      $msg['inline'] = $parsedMime['inline'] ?? [];
+
       $msg['is_html'] = !empty($msg['html']);
+      $attachmentsParts = array_filter(
+        $parts,
+        static fn (array $part): bool => ($part['isAttachment'] ?? false) === true
+      );
+      $contentType = $this->parser->contentType($headers->{'Content-Type'} ?? $headers->{'content-type'} ?? 'text/plain');
+      $msg['charset'] = $contentType['charset'] ?? '';
+      $attFnc = static fn(array $p): array => [
+        'id' => $p['contentId'],
+        'type' => $p['subtype'] ?: 'bin',
+        'name' => $p['filename'],
+        'size' => $p['size'],
+        'encoding' => $p['encoding'],
+        'section' => $p['section'],
+      ];
+      $msg['inline'] = array_values(
+        array_map(
+          $attFnc,
+          array_filter(
+            $attachmentsParts,
+            static fn(array $p): bool => ($p['disposition'] === 'inline') && !empty($p['contentId'])
+          )
+        )
+      );
+      $msg['attachments'] = array_values(
+        array_map(
+          $attFnc,
+          array_filter(
+            $attachmentsParts,
+            static fn(array $p): bool => empty($p['contentId'])
+          )
+        )
+      );
       return $msg;
     }
     catch (Exception $e) {
