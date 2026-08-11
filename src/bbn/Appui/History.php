@@ -1333,13 +1333,13 @@ MYSQL;
               $toCommit = false;
               foreach ($data as $i => &$d) {
                 $id = X::makeUid();
-                while (in_array($id, $ids) || $db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
+                while (isset($ids[$id]) || $db->count('bbn_history_uids', ['bbn_uid' => $id])) {
                   $id = X::makeUid();
                 }
 
                 $bid = hex2bin($id);
                 $success = $prepared->execute([$bid, ...array_values(array_map(fn($v) => Str::isUid($v) ? hex2bin($v) : $v, $d))]);
-                $ids[] = $id;
+                $ids[$id] = 1;
                 $d[$primary] = $id;
                 $res['updated'] += $success ? 1 : 0;
                 if ($res['updated'] % 10000 === 0) {
