@@ -33,7 +33,9 @@ class Tpl {
 
     $md5 = md5($st);
     $file = $dir.'/tpl.'.$md5.'.php';
-    if (!file_exists($file)) {
+    $fp = @fopen($file, 'x');
+
+    if ($fp !== false) {
       $tpl = LightnCandy::compile(
         $st,
         [
@@ -43,7 +45,8 @@ class Tpl {
             Flags::FLAG_ERROR_LOG
         ]
       );
-      file_put_contents($file, '<?php '.$tpl.'?>');
+      fwrite($fp, '<?php '.$tpl.'?>');
+      fclose($fp);
     }
 
     return include($file);

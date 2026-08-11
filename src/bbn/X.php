@@ -255,8 +255,10 @@ class X
         $backtrace
       ]));
 
-      if (!is_file($lock)) {
-        file_put_contents($lock, '1');
+      $fp = @fopen($lock, 'x');
+      if ($fp !== false) {
+        fwrite($fp, '1');
+        fclose($fp);
         if (is_file($file)) {
           $r = json_decode(file_get_contents($file), 1);
         }
@@ -265,56 +267,57 @@ class X
           $r = [];
         }
 
-        $all = scandir($units);
-        $corresp = [];
-        foreach ($all as $f) {
-          if ($f === '.' || $f === '..') {
-            continue;
-          }
+        if ($all = scandir($units)) {
+          $corresp = [];
+          foreach ($all as $f) {
+            if ($f === '.' || $f === '..') {
+              continue;
+            }
 
-          [$errno, $errstr, $errfile, $errline, $time, $backtrace] = unserialize(file_get_contents($units.'/'.$f));
-          $t = date('Y-m-d H:i:s', round($time));
-          if (isset($corresp["$errno|$errstr|$errfile|$errline"])) {
-            $idx = $corresp["$errno|$errstr|$errfile|$errline"];
-          }
-          else {
-            $idx     = self::search(
-              $r,
-              [
+            [$errno, $errstr, $errfile, $errline, $time, $backtrace] = unserialize(file_get_contents($units.'/'.$f));
+            $t = date('Y-m-d H:i:s', round($time));
+            if (isset($corresp["$errno|$errstr|$errfile|$errline"])) {
+              $idx = $corresp["$errno|$errstr|$errfile|$errline"];
+            }
+            else {
+              $idx     = self::search(
+                $r,
+                [
+                  'type' => $errno,
+                  'error' => $errstr,
+                  'file' => $errfile,
+                  'line' => $errline
+                ]
+              );
+            }
+            if ($idx !== null) {
+              $r[$idx]['count']++;
+              $r[$idx]['last_date'] = $t;
+              $r[$idx]['backtrace'] = $backtrace;
+            } else {
+              $idx = count($r);
+              $r[] = [
+                'first_date' => $t,
+                'last_date' => $t,
+                'count' => 1,
                 'type' => $errno,
                 'error' => $errstr,
                 'file' => $errfile,
-                'line' => $errline
-              ]
-            );
+                'line' => $errline,
+                'backtrace' => $backtrace,
+                'request' => ''
+                //'context' => $context
+              ];
+            }
+            $corresp["$errno|$errstr|$errfile|$errline"] = $idx;
+            unlink($units.'/'.$f);
           }
-          if ($idx !== null) {
-            $r[$idx]['count']++;
-            $r[$idx]['last_date'] = $t;
-            $r[$idx]['backtrace'] = $backtrace;
-          } else {
-            $idx = count($r);
-            $r[] = [
-              'first_date' => $t,
-              'last_date' => $t,
-              'count' => 1,
-              'type' => $errno,
-              'error' => $errstr,
-              'file' => $errfile,
-              'line' => $errline,
-              'backtrace' => $backtrace,
-              'request' => ''
-              //'context' => $context
-            ];
-          }
-          $corresp["$errno|$errstr|$errfile|$errline"] = $idx;
-          unlink($units.'/'.$f);
+    
+    
+          self::sortBy($r, 'last_date', 'DESC');
+          file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
+          unlink($lock);
         }
-  
-  
-        self::sortBy($r, 'last_date', 'DESC');
-        file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
-        unlink($lock);
       }
     } else {
       throw new Exception(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
