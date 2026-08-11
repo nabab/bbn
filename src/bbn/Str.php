@@ -139,10 +139,9 @@ class Str
    * @param mixed $case The case to convert to ("lower" or "upper"), default being the title case.
    * @return string
    */
-  public static function changeCase($st, $case = 'x'): string
+  public static function changeCase(string $st, string $case = 'x'): string
   {
-    $st   = self::cast($st);
-    $case = self::sub(strtolower((string)$case), 0, 1);
+    $case = strtolower($st[0]);
     switch ($case){
       case "l":
         $case = MB_CASE_LOWER;
@@ -435,9 +434,14 @@ class Str
    */
   public static function sanitize(string $st): string
   {
-    $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
-    // Removes any run of periods (thanks falstro!)
-    $file = mb_ereg_replace("([\.]{2,})", '', $file);
+    $file = preg_replace(
+        [
+            '/[^\w\s~,;\[\]().-]/u',
+            '/\.{2,}/'
+        ],
+        '',
+        $st
+    );
     return $file;
   }
 
@@ -1266,14 +1270,24 @@ class Str
    */
   public static function removeAccents($st): string
   {
-    $st      = trim(mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\1', self::cast($st)));
-    $search  = explode(",","ç,æ,œ,á,é,í,ó,ú,à,è,ì,ò,ù,ä,ë,ï,ö,ü,ÿ,â,ê,î,ô,û,å,e,i,ø,u,ą,ń,ł,ź,ę,À,Á,Â,Ã,Ä,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ñ,Ò,Ó,Ô,Õ,Ö,Ù,Ú,Û,Ü,Ý,Ł,Ś");
-    $replace = explode(",","c,ae,oe,a,e,i,o,u,a,e,i,o,u,a,e,i,o,u,y,a,e,i,o,u,a,e,i,o,u,a,n,l,z,e,A,A,A,A,A,C,E,E,E,E,I,I,I,I,N,O,O,O,O,O,U,U,U,U,Y,L,S");
-    foreach ($search as $i => $s) {
-      $st = mb_ereg_replace($s, $replace[$i], $st);
+    if (!$st) {
+      return '';
     }
 
-    return $st;
+    $replacer =  [
+      'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'å' => 'a', 'æ' => 'ae', 'ą' => 'a', 'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 
+      'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e', 'e' => 'e', 'ę' => 'e', 'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E', 
+      'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'i' => 'i', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I', 
+      'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o', 'œ' => 'oe', 'ø' => 'o', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 
+      'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'u' => 'u', 'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 
+      'ÿ' => 'y', 'Ý' => 'Y', 
+      'ç' => 'c', 'Ç' => 'C', 
+      'ń' => 'n', 'Ñ' => 'N', 
+      'ł' => 'l', 'Ł' => 'L', 
+      'ß' => 's', 'Ś' => 'S', 'ẞ' => 'SS', 
+      'ź' => 'z', 
+    ];
+    return strtr($st, $replacer);
   }
 
 

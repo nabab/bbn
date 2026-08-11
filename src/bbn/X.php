@@ -1965,7 +1965,7 @@ class X
               } else {
                 $f = [
                   'field' => $key,
-                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                  'operator' => '=',
                   'value' => $f
                 ];
               }
@@ -1983,7 +1983,7 @@ class X
                 } else {
                   $tmp['conditions'][] = [
                     'field' => $key,
-                    'operator' => is_string($v) && !Str::isUid($v) ? 'LIKE' : '=',
+                    'operator' => '=',
                     'value' => $v
                   ];
                 }
@@ -2113,7 +2113,8 @@ class X
 
   public static function compare($v1, $v2, $operator): bool
   {
-    switch (self::canonicalOperator($operator)) {
+    $op = self::canonicalOperator($operator);
+    switch ($op) {
       case 'strict_eq':
         return $v1 === $v2;
 
@@ -2128,8 +2129,8 @@ class X
           return false;
         }
         return str_contains(
-          self::normalizeString($v1),
-          self::normalizeString($v2)
+          Str::changeCase($v1, 'lower'),
+          Str::changeCase($v2, 'lower')
         );
 
       case 'not_icontains':
@@ -2137,8 +2138,8 @@ class X
           return false;
         }
         return !str_contains(
-          self::normalizeString($v1),
-          self::normalizeString($v2)
+          Str::changeCase($v1, 'lower'),
+          Str::changeCase($v2, 'lower')
         );
 
       case 'starts':
@@ -2152,8 +2153,8 @@ class X
           return false;
         }
         return str_starts_with(
-          self::normalizeString($v1),
-          self::normalizeString($v2)
+          Str::changeCase($v1, 'lower'),
+          Str::changeCase($v2, 'lower')
         );
 
       case 'iends':
@@ -2161,15 +2162,15 @@ class X
           return false;
         }
         return str_ends_with(
-          self::normalizeString($v1),
-          self::normalizeString($v2)
+          Str::changeCase($v1, 'lower'),
+          Str::changeCase($v2, 'lower')
         );
 
       case 'like':
         if ($v1 === null || $v2 === null || $v1 === '' || $v2 === '') {
           return false;
         }
-        return self::normalizeString($v1) === self::normalizeString($v2);
+        return Str::changeCase($v1, 'lower') === Str::changeCase($v2, 'lower');
 
       case 'gt':
         return $v1 > $v2;
@@ -2235,8 +2236,7 @@ class X
       ));
     }
 
-    $isAnd = strtoupper($filter['logic']) !== 'OR';
-
+    $isAnd = strtoupper($filter['logic'] ?? '') !== 'OR';
     foreach ($filter['conditions'] as $condition) {
       if (!is_array($condition)) {
         throw new Exception(X::_("Error in compareConditions: each condition should be an array"));
@@ -2244,7 +2244,8 @@ class X
 
       if (isset($condition['conditions']) && is_array($condition['conditions'])) {
         $matched = self::compareConditions($data, $condition);
-      } else {
+      }
+      else {
         if (!isset($condition['field'])) {
           self::log($filter, 'bad_filter');
           throw new Exception(X::_("Field is mandatory in filter"));
@@ -2261,7 +2262,8 @@ class X
         if (!$matched) {
           return false;
         }
-      } else {
+      }
+      else {
         if ($matched) {
           return true;
         }
@@ -2698,56 +2700,76 @@ class X
    * @return array The sorted array
    * @throws Exception
    */
-  public static function sortBy(array &$ar, $key, $dir = ''): array
+  public static function sortBy(array &$ar, string|int|array $key, string $dir = ''): array
   {
     $blackOrder = [false, null, 0, '', []];
-
-    // Process arguments
-    if (empty($ar)) {
+    if (empty($key)) {
       return $ar;
     }
 
+    // Process arguments
     if (is_array($key)) {
+      $args = [];
       if (X::isAssoc($key)) {
-        $args = [];
         foreach ($key as $k => $v) {
-          if (!is_array($v)) {
-            $args[] = ['key' => $k, 'dir' => $v];
+          if (!is_string($v) || !$k) {
+            throw new Exception(X::_("Invalid order for sortBy"));
           }
+
+          $args[] = ['key' => $k, 'dir' => strtolower($v) === 'desc' ? 'desc' : 'asc'];
         }
-      } else {
-        $args = $key;
       }
-    } elseif (is_string($key)) {
-      $args = [['key' => $key, 'dir' => $dir]];
+      else {
+        foreach ($key as $v) {
+          if (!is_array($v)) {
+            throw new Exception(X::_("Invalid order for sortBy"));
+          }
+
+          if (!isset($v['key']) && !isset($v['field'])) {
+            throw new Exception(X::_("Invalid order for sortBy"));
+          }
+
+          $arg = [
+            'key' => $v['key'] ?? $v['field'],
+            'dir' => strtolower($v['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc'
+          ];
+          if (!$arg['key']) {
+            throw new Exception(X::_("Invalid order for sortBy"));
+          }
+
+          $args[] = $arg;
+        }
+      }
+    }
+    else {
+      $args = [['key' => $key, 'dir' => strtolower($dir) === 'desc' ? 'desc' : 'asc']];
     }
 
     usort(
       $ar,
-      function ($a, $b) use ($args, $blackOrder, $ar) {
+      function ($a, $b) use ($args, $blackOrder) {
         foreach ($args as $arg) {
-          if (!is_array($arg)) {
-            throw new Exception(X::_("the order must be made of arrays, not %s", (string)$arg));
-          }
-
-          $key = $arg['key'] ?? $arg['field'] ?? null;
+          $key = $arg['key'];
           if (!$key) {
             throw new Exception(X::_("the order must have a field or key and a dir key"));
           }
 
-          $dir = strtolower($arg['dir'] ?? 'asc');
+          $dir = $arg['dir'];
           if (!is_array($key)) {
             $key = [$key];
           }
 
           if (!is_array($a)) {
-            X::ddump("A is not an array", $a, $b, $key, $dir, $ar);
+            throw new Exception(X::_("A is not an array"));
           }
           if (!is_array($b)) {
-            X::ddump("B is not an array", $a, $b, $key, $dir);
+            throw new Exception(X::_("B is not an array"));
           }
           $v1 = self::pick($a, $key);
           $v2 = self::pick($b, $key);
+          if ($v1 === $v2) {
+            continue;
+          }
 
           // Handle null/empty values
           if ($v1 === null || $v1 === '') {
@@ -2763,15 +2785,17 @@ class X
             return 1;
           }
 
+          $t1 = gettype($v1);
+          $t2 = gettype($v2);
           // Handle arrays and objects
-          if (is_array($v1)) {
-            if (!is_array($v2)) {
+          if ($t1 === 'array') {
+            if ($t2 !== 'array') {
               return 1;
             }
             $v1 = json_encode($v1);
             $v2 = json_encode($v2);
-          } elseif (is_object($v1)) {
-            if (!is_object($v2)) {
+          } elseif ($t1 === 'object') {
+            if ($t2 !== 'object') {
               return 1;
             }
             $v1 = json_encode($v1);
@@ -2787,11 +2811,17 @@ class X
             return $v1 <=> $v2;
           }
 
-          // String comparison with case normalization
-          $cmp1 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v1, 'lower'));
-          $cmp2 = str_replace(['.', '_'], ['0', '1'], Str::changeCase((string)$v2, 'lower'));
+          if ($t1 !== $t2) {
+            return strcmp($t1, $t2);
+          }
 
-          $res = strcmp($cmp1, $cmp2);
+          if ($t1 === 'string') {
+            // String comparison with case normalization
+            $v1 = str_replace(['.', '_'], ['0', '1'], $v1);
+            $v2 = str_replace(['.', '_'], ['0', '1'], $v2);
+          }
+        
+          $res = strcmp($v1, $v2);
           if ($res !== 0) {
             return $res;
           }

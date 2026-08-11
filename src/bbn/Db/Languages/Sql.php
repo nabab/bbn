@@ -288,13 +288,17 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     }
   }
 
-
   /**
    * Destructor; setting the property holding the PDO object to null will close the connection.
    */
   public function __destruct()
   {
     $this->close();
+  }
+
+  public function getPDO(): ?PDO
+  {
+    return $this->pdo;
   }
 
 

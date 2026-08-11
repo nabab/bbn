@@ -82,7 +82,7 @@ trait HasError
             $msg[] = $v ? 'TRUE' : 'FALSE';
           }
           elseif (\is_string($v)) {
-            $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
+            $msg[] = Str::isBuid($v) ? '0x' . bin2hex($v) : Str::cut($v, 30);
           }
           else{
             $msg[] = $v;

@@ -936,13 +936,8 @@ class Appui
         }
 
         if (!empty($cfg['ref_table']) && ('bbn_history_uids' === $cfg['ref_table'])) {
-          if (!isset($constraints[$table])) {
-            $constraints[$table] = [];
-          }
-
-          if (!isset($constraints[$table][$k])) {
-            $constraints[$table][$k] = $tables[$table]['keys'][$k];
-          }
+          $constraints[$table] ??= [];
+          $constraints[$table][$k] ??= $tables[$table]['keys'][$k];
         }
       }
     }
@@ -1191,13 +1186,11 @@ class Appui
                     unset($list[$i]['items'][$k]);
                   }
                 }
-                if (!isset($dashboards[$item['code']])) {
-                  $dashboards[$item['code']] = [
-                    'text' => $item['text'],
-                    'code' => $item['code'],
-                    'items' => []
-                  ];
-                }
+                $dashboards[$item['code']] ??= [
+                  'text' => $item['text'],
+                  'code' => $item['code'],
+                  'items' => []
+                ];
                 $dashboards[$item['code']]['items'] = X::mergeArrays($dashboards[$item['code']]['items'], $list[$i]['items']);
               }
 

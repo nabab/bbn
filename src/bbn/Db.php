@@ -74,110 +74,83 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
 
   private function subActions(): subActions
   {
-    if (!isset($this->subs['subActions'])) {
-      $this->subs['subActions'] = new subActions($this, $this->language);
-    }
-
+    $this->subs['subActions'] ??= new subActions($this, $this->language);
     return $this->subs['subActions'];
   }
 
   private function subEngine(): subEngine
   {
-    if (!isset($this->subs['subEngine'])) {
-      $this->subs['subEngine'] = new subEngine($this, $this->language);
-    }
-
+    $this->subs['subEngine'] ??= new subEngine($this, $this->language);
     return $this->subs['subEngine'];
   }
 
   private function subInternal(): subInternal
   {
-    if (!isset($this->subs['subInternal'])) {
-      $this->subs['subInternal'] = new subInternal($this, $this->language);
-    }
-
+    $this->subs['subInternal'] ??= new subInternal($this, $this->language);
     return $this->subs['subInternal'];
   }
 
   private function subNative(): subNative
   {
-    if (!isset($this->subs['subNative'])) {
-      $this->subs['subNative'] = new subNative($this, $this->language);
-    }
-
+    $this->subs['subNative'] ??= new subNative($this, $this->language);
     return $this->subs['subNative'];
   }
 
   private function subQuery(): subQuery
   {
-    if (!isset($this->subs['subQuery'])) {
-      $this->subs['subQuery'] = new subQuery($this, $this->language);
-    }
-
+    $this->subs['subQuery'] ??= new subQuery($this, $this->language);
     return $this->subs['subQuery'];
   }
 
   private function subRead(): subRead
   {
-    if (!isset($this->subs['subRead'])) {
-      $this->subs['subRead'] = new subRead($this, $this->language);
-    }
-
+    $this->subs['subRead'] ??= new subRead($this, $this->language);
     return $this->subs['subRead'];
   }
 
   private function subShortcuts(): subShortcuts
   {
-    if (!isset($this->subs['subShortcuts'])) {
-      $this->subs['subShortcuts'] = new subShortcuts($this, $this->language);
-    }
-
+    $this->subs['subShortcuts'] ??= new subShortcuts($this, $this->language);
     return $this->subs['subShortcuts'];
   }
 
   private function subStructure(): subStructure
   {
-    if (!isset($this->subs['subStructure'])) {
-      $this->subs['subStructure'] = new subStructure($this, $this->language);
-    }
-
+    $this->subs['subStructure'] ??= new subStructure($this, $this->language);
     return $this->subs['subStructure'];
   }
 
   private function subTriggers(): subTriggers
   {
-    if (!isset($this->subs['subTriggers'])) {
-      $this->subs['subTriggers'] = new subTriggers($this, $this->language);
-    }
-
+    $this->subs['subTriggers'] ??= new subTriggers($this, $this->language);
     return $this->subs['subTriggers'];
   }
 
   private function subTypes(): subTypes
   {
-    if (!isset($this->subs['subTypes'])) {
-      $this->subs['subTypes'] = new subTypes($this, $this->language);
-    }
-
+    $this->subs['subTypes'] ??= new subTypes($this, $this->language);
     return $this->subs['subTypes'];
   }
 
   private function subUtilities(): subUtilities
   {
-    if (!isset($this->subs['subUtilities'])) {
-      $this->subs['subUtilities'] = new subUtilities($this, $this->language);
-    }
-
+    $this->subs['subUtilities'] ??= new subUtilities($this, $this->language);
     return $this->subs['subUtilities'];
   }
 
   private function subWrite(): subWrite
   {
-    if (!isset($this->subs['subWrite'])) {
-      $this->subs['subWrite'] = new subWrite($this, $this->language);
+    $this->subs['subWrite'] ??= new subWrite($this, $this->language);
+    return $this->subs['subWrite'];
+  }
+
+  public function getPDO(): ?\PDO
+  {
+    if ($this->check()) {
+      return $this->language->getPDO();
     }
 
-    return $this->subs['subWrite'];
+    return null;
   }
 
 

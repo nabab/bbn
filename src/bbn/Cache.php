@@ -36,6 +36,8 @@ class Cache extends Basic implements CacheInterface
   private array|string $host;
   private int $port;
 
+  protected const LOCAL_CACHE_LENGTH = 60;
+
   protected bool $isRecording = false;
 
   protected array $recorded = [];
@@ -62,6 +64,8 @@ class Cache extends Basic implements CacheInterface
 
   protected $prefix;
 
+  protected array $localCache = [];
+
 
   /**
    * @param string $key
@@ -75,9 +79,7 @@ class Cache extends Basic implements CacheInterface
 
   private static function setMaxTtl(): void
   {
-    if (!isset(self::$max_ttl)) {
-      self::$max_ttl = defined('BBN_MAX_TTL') ? constant('BBN_MAX_TTL') : 90 * 24 * 3600;
-    }
+    self::$max_ttl ??= defined('BBN_MAX_TTL') ? constant('BBN_MAX_TTL') : 90 * 24 * 3600;
   }
 
   private static function setSeparator(string $sep): void
@@ -315,6 +317,15 @@ class Cache extends Basic implements CacheInterface
    */
   public function hasRaw($key): bool
   {
+    if (array_key_exists($key, $this->localCache)) {
+      if (time() < $this->localCache[$key]['expire']) {
+        return true;
+      }
+      else {
+        unset($this->localCache[$key]);
+      }
+    }
+
     if (self::$type) {
       switch (self::$type){
         case 'apc':
@@ -367,6 +378,7 @@ class Cache extends Basic implements CacheInterface
     }
 
     if (empty($start) || ($start === '*')) {
+      $this->localCache = [];
       if (self::$type === 'apc') {
         return call_user_func('\\apcu_clear_cache');
       }
@@ -386,6 +398,12 @@ class Cache extends Basic implements CacheInterface
     foreach ($this->find($st) as $keys) {
       if ($this->deleteRaw(...$keys)) {
         $count += count($keys);
+      }
+    }
+
+    foreach (array_keys($this->localCache) as $k) {
+      if (mb_ereg_replace('\*', '.*', $st) === $k) {
+        unset($this->localCache[$k]);
       }
     }
 
@@ -440,6 +458,15 @@ class Cache extends Basic implements CacheInterface
   private function getRaw(string $key): mixed
   {
     $t = null;
+    if (array_key_exists($key, $this->localCache)) {
+      if (time() < $this->localCache[$key]['expire']) {
+        return $this->localCache[$key]['value'];
+      }
+      else {
+        unset($this->localCache[$key]);
+      }
+    }
+
     switch (self::$type) {
       case 'apc':
         if (!function_exists('\\apcu_exists')) {
@@ -492,6 +519,10 @@ class Cache extends Basic implements CacheInterface
         break;
     }
 
+    $this->localCache[$key] = [
+      'value' => $t,
+      'expire' => time() + self::LOCAL_CACHE_LENGTH
+    ];
     return $t;
   }
 
@@ -579,15 +610,20 @@ class Cache extends Basic implements CacheInterface
       return false;
     }
 
+    $ret = false;
+
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return call_user_func('\\apcu_delete', $keys);
+          $ret = call_user_func('\\apcu_delete', $keys);
+          break;
         case 'redis':
           $res = $this->obj->del(...$keys);
-          return $res;    
+          $ret = $res;
+          break;
         case 'memcache':
-          return $this->obj->delete($keys);
+          $ret = $this->obj->delete($keys);
+          break;
         case 'files':
           $num = 0;
           foreach ($keys as $key) {
@@ -596,16 +632,25 @@ class Cache extends Basic implements CacheInterface
               $num++;
             }   
           }
-          return (bool)$num;
+
+          $ret = (bool)$num;
+          break;
+      }
+
+      foreach ($keys as $k) {
+        if (array_key_exists($k, $this->localCache)) {
+          unset($this->localCache[$k]);
+        }
       }
     }
 
-    return false;
+    return $ret;
   }
 
 
   public function setRaw($key, $val, $ttl): bool
   {
+    $ret = false;
     if (self::$type) {
       if ($this->isRecording) {
         $this->recorded[] = [
@@ -620,28 +665,38 @@ class Cache extends Basic implements CacheInterface
             throw new Exception(X::_("The APC extension doesn't seem to be installed"));
           }
 
-          return call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
+          $ret = call_user_func('\\apcu_store', $key, $val, $ttl ?: self::$max_ttl);
+          break;
         case 'redis':
           if ($this->obj->set($key, serialize($val), ['ex' => $ttl ?: self::$max_ttl])) {
-            return true;
+            $ret = true;
           }
-
-          return false;
+          break;
         case 'memcache':
-          return $this->obj->set(
+          $ret = $this->obj->set(
             $key, serialize($val), $ttl ?: self::$max_ttl
           );
+          break;
         case 'files':
           $file = self::_file($key, $this->path);
           if ($this->obj->createPath(X::dirname($file))) {
             if ($this->obj->putContents($file, serialize($val))) {
-              return true;
+              $ret = true;
             }
           }
+
+          break;
+      }
+
+      if ($ret) {
+        $this->localCache[$key] = [
+          'value' => $val,
+          'expire' => time() + self::LOCAL_CACHE_LENGTH
+        ];
       }
     }
 
-    return false;
+    return $ret;
   }
 
   /**
@@ -941,9 +996,7 @@ class Cache extends Basic implements CacheInterface
         $child = array_pop($bits);
         $cur = X::join($bits, $sep);
         $indexes = $keysCache[$cur] ?? $this->getKeys($cur);
-        if (!isset($keysCache[$cur])) {
-          $keysCache[$cur] = $indexes;
-        }
+        $keysCache[$cur] ??= $indexes;
 
         if (!in_array($child, $indexes, true)) {
           $indexes[] = $child;
@@ -1010,6 +1063,35 @@ class Cache extends Basic implements CacheInterface
     }
 
     return $this->deleteRaw($all) ? true : false;
+  }
+
+  public function deleteLocalCache(string ...$keys): bool
+  {
+    if (empty($keys)) {
+      return false;
+    }
+
+    $ret = false;
+    foreach ($keys as $k) {
+      if (array_key_exists($k, $this->localCache)) {
+        unset($this->localCache[$k]);
+        $ret = true;
+      }
+    }
+
+    return $ret;
+  }
+
+  public function getAnew(string $key, $notFoundValue = null): mixed
+  {
+    $sep = self::$sep;
+    if (array_key_exists("{$key}{$sep}__info", $this->localCache)) {
+      $info = $this->localCache["{$key}{$sep}__info"]['value'];
+      $payloadKey = "{$key}" . self::$sep . "{$info['version']}";
+      $this->deleteLocalCache("{$key}{$sep}__info", $key, $payloadKey);
+    }
+
+    return $this->get($key, $notFoundValue);
   }
 
 
@@ -1618,6 +1700,7 @@ class Cache extends Basic implements CacheInterface
 
   private static function _sanitize($st)
   {
+    return $st;
     $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
     $st = mb_ereg_replace("([\.]{2,})", '', $st);
     return $st;
@@ -1655,6 +1738,4 @@ class Cache extends Basic implements CacheInterface
       )
     );
   }
-
-
 }

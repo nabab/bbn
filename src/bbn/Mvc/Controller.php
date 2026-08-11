@@ -1346,7 +1346,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getPluginModel(string $path, array $data = [], string|null $plugin = null, int $ttl = 0)
+  public function getPluginModel(string $path, array $data = [], string|null $plugin = null, ?int $ttl = null)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
@@ -1363,7 +1363,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getSubpluginModel(string $path, array $data, string|null $plugin, string $subplugin, int $ttl = 0): ?array
+  public function getSubpluginModel(string $path, array $data, string|null $plugin, string $subplugin, ?int $ttl = null): ?array
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }

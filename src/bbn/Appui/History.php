@@ -2,6 +2,7 @@
 namespace bbn\Appui;
 
 use Exception;
+use Generator;
 use bbn\X;
 use bbn\Appui\Database;
 use bbn\Str;
@@ -1216,7 +1217,7 @@ MYSQL;
     return (bool)$num;
   }
 
-  public static function upgrade(string $table, ?string $idUser = null, null|int|string $date = null, bool $allRows = false): array
+  public static function upgrade(string $table, ?string $idUser = null, null|int|string $date = null, bool $allRows = false): Generator
   {
     $res = ['success' => false, 'total' => 0, 'updated' => 0, 'inserted' => 0];
     if ($db = self::_get_db()) {
@@ -1276,7 +1277,7 @@ MYSQL;
           }
         }
         else {
-          foreach ($structure['keys'] as $k => $key) {
+          foreach ($structure['keys'] as $key) {
             if (!empty($key['unique'])) {
               $fields = $key['columns'];
               break;
@@ -1289,7 +1290,9 @@ MYSQL;
             $primary = 'id';
           }
 
-          $db->disableTrigger();
+          if ($areTriggerEnabled) {
+            $db->disableTrigger();
+          }
           $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) && !$allRows ? [$primary => null] : []);
           $res['total'] = count($data);
           if ($areTriggerEnabled) {
@@ -1313,20 +1316,59 @@ MYSQL;
             }
             $database->importTable($table, $dbId);
             $ostructure = $database->modelize($table);
-            $db->disableTrigger();
-            foreach ($data as &$d) {
-              $id = X::makeUid();
-              while ($db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
-                $id = X::makeUid();
+
+            if (!empty($data)) {
+              if ($areTriggerEnabled) {
+                $db->disableTrigger();
               }
 
-              $res['updated'] += $db->update($table, ['id' => $id], $d);
-              $d[$primary] = $id;
-            }
+              $ids = [];
+              $count = count($data);
+              $pdo = $db->getPDO();
+              $id = X::makeUid();
+              $success = $db->update($table, ['id' => $id], $data[0]);
+              $pdo->beginTransaction();
+              $prepared = $pdo->prepare($db->last());
 
-            unset($d);
-            if ($areTriggerEnabled) {
-              $db->enableTrigger();
+              $toCommit = false;
+              foreach ($data as $i => &$d) {
+                $id = X::makeUid();
+                while (in_array($id, $ids) || $db->selectOne('bbn_history_uids', 'bbn_uid', ['bbn_uid' => $id])) {
+                  $id = X::makeUid();
+                }
+
+                $bid = hex2bin($id);
+                $success = $prepared->execute([$bid, ...array_values(array_map(fn($v) => Str::isUid($v) ? hex2bin($v) : $v, $d))]);
+                $ids[] = $id;
+                $d[$primary] = $id;
+                $res['updated'] += $success ? 1 : 0;
+                if ($res['updated'] % 10000 === 0) {
+                  $pdo->commit();
+                  $pdo->beginTransaction();
+                }
+                else {
+                  $toCommit = true;
+                }
+
+                yield [
+                  'success' => $success,
+                  'type' => 'update',
+                  'id' => $id,
+                  'num' => $i,
+                  'count' => $count,
+                  'total' => $res['updated']
+                ];
+              }
+  
+              unset($d);
+
+              if ($toCommit) {
+                $pdo->commit();
+              }
+
+              if ($areTriggerEnabled) {
+                $db->enableTrigger();
+              }
             }
 
             $structure['fields']['id']['key'] = 'PRI';
@@ -1354,41 +1396,51 @@ MYSQL;
               $res['error'] = $e->getMessage();
             }
           }
-        }
-
-        if (empty($res['error']) && $structure['keys']['PRIMARY']['ref_table'] !== History::$table_uids) {
-          $res['inserted'] += History::insertUid($table, array_map(fn($d) => $d['id'], $data), true, $ostructure['fields'][$primary]['id_option']);
-          $structure = $db->modelize($table, true);
-          $structure['keys'] = [
-            'PRIMARY' => [
-              'columns' => [$primary],
-              'ref_table' => self::$table_uids,
-              'ref_column' => 'bbn_uid',
-              'update' => "CASCADE",
-              'delete' => "CASCADE",
-              'unique' => 1
-            ]
-          ];
-          try {
-            $db->createConstraints($table, $structure);
-            $structure = $db->modelize($table, true);
-            $database->importTable($table, $dbId);
-            $res['success'] = true;
-          }
-          catch (Exception $e) {
-            $res['deleted'] = 0;
-            foreach ($data as $d) {
-              if ($db->deleteIgnore(self::$table, ['uid' => $d[$primary]]) ||
-              $db->deleteIgnore(self::$table_uids, ['bbn_uid' => $d[$primary]])) {
-                $res['deleted']++;
-              }
+          if (empty($res['error']) && $structure['keys']['PRIMARY']['ref_table'] !== History::$table_uids) {
+            $loop = History::insertUid($table, array_map(fn($d) => $d['id'], $data), true, $ostructure['fields'][$primary]['id_option']);
+            foreach ($loop as $l) {
+              $res['inserted'] += $l['success'] ? 1 : 0;
+              yield [
+                'success' => $l['success'],
+                'type' => 'insert',
+                'id' => $l['id'],
+                'count' => $l['count'],
+                'total' => $res['inserted']
+              ];
             }
-
-            $res['error'] = $e->getMessage();
+            $structure = $db->modelize($table, true);
+            $structure['keys'] = [
+              'PRIMARY' => [
+                'columns' => [$primary],
+                'ref_table' => self::$table_uids,
+                'ref_column' => 'bbn_uid',
+                'update' => "CASCADE",
+                'delete' => "CASCADE",
+                'unique' => 1
+              ]
+            ];
+            try {
+              $db->createConstraints($table, $structure);
+              $structure = $db->modelize($table, true);
+              $database->importTable($table, $dbId);
+              $res['success'] = true;
+            }
+            catch (Exception $e) {
+              $res['deleted'] = 0;
+              foreach ($data as $d) {
+                if ($db->deleteIgnore(self::$table, ['uid' => $d[$primary]])
+                  || $db->deleteIgnore(self::$table_uids, ['bbn_uid' => $d[$primary]])
+                ) {
+                  $res['deleted']++;
+                }
+              }
+  
+              $res['error'] = $e->getMessage();
+            }
           }
-        }
-        else {
-          $res['error'] = !empty($res['error']) ? $res['error'] : X::_("The table already has a primary key linked to the history table");
+          else {
+            $res['error'] = !empty($res['error']) ? $res['error'] : X::_("The table already has a primary key linked to the history table");
+          }
         }
       }
     }
@@ -1396,7 +1448,7 @@ MYSQL;
     return $res;
   }
 
-  public static function insertUid(string $table, array|string $id, bool $withInsert = true, ?string $idCol = null): int
+  public static function insertUid(string $table, array|string $ids, bool $withInsert = true, ?string $idCol = null): Generator
   {
     $res = 0;
     if (($db = self::_get_db())
@@ -1405,31 +1457,78 @@ MYSQL;
       && ($primary = $db->getPrimary($table))
       && (count($primary) === 1)
     ) {
-      if (is_string($id)) {
-        $id = [$id];
+      $bid_table = hex2bin($id_table);
+      if (is_string($ids)) {
+        $ids = [$ids];
       }
-      foreach ($id as $i) {
-        $res += $db->insertIgnore(self::$table_uids, [
-          'bbn_uid' => $i,
+      $col = false;
+      $bcol = false;
+      if (!empty($ids)) {
+        if ($withInsert) {
+          $col = $idCol ?: $dbc->columnId($primary[0], $table);
+          $bcol = hex2bin($col);
+        }
+        $user = self::getUser();
+        $date = self::getDate();
+        $buser = hex2bin($user);
+        $tot = 0;
+        $count = count($ids);
+        $db->insertIgnore(self::$table_uids, [
+          'bbn_uid' => $ids[0],
           'bbn_table' => $id_table,
           'bbn_active' => 1
         ]);
-      }
-      if ($res && $withInsert) {
-        $col = $idCol ?: $dbc->columnId($primary[0], $table);
-        foreach ($id as $i) {
-          $res += $db->insert(self::$table, [
-            'uid' => $i,
+        $r1 = $db->last();
+        $r2 = false;
+        if ($col) {
+          $db->insertIgnore(self::$table, [
+            'uid' => $ids[0],
             'col' => $col,
             'opr' => 'INSERT',
-            'tst' => self::getDate(),
-            'usr' => self::getUser()
+            'tst' => $date,
+            'usr' => $user
           ]);
+          $r2 = $db->last();
+        }
+        $pdo = $db->getPDO();
+        $pdo->beginTransaction();
+        $s1 = $pdo->prepare($r1);
+        $s2 = false;
+        if ($r2) {
+          $s2 = $pdo->prepare($r2);
+        }
+        $toCommit = false;
+        foreach ($ids as $i => $id) {
+          $bid = hex2bin($id);
+          $res = 0;
+          $res += (int)$s1->execute([$bid, $bid_table, 1]);
+          if ($col) {
+            $res += (int)$s2->execute([$bid, $bcol, 'INSERT', $date, $buser]);
+          }
+
+          $tot += $res;
+          if ($tot % 10000 === 0) {
+            $pdo->commit();
+            $pdo->beginTransaction();
+          }
+          else {
+            $toCommit = true;
+          }
+          yield [
+            'success' => $res,
+            'type' => 'insert',
+            'id' => $id,
+            'num' => $i,
+            'count' => $count,
+            'total' => $tot
+          ];
+        }
+
+        if ($toCommit) {
+          $pdo->commit();
         }
       }
     }
-
-    return $res;
   }
 
   /**

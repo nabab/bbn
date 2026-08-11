@@ -17,7 +17,6 @@ use bbn\Models\Cls\Db as DbCls;
 use bbn\User\Common;
 use bbn\User\Implementor;
 use bbn\User\Manager;
-use bbn\Models\Tts\DbUauth;
 use bbn\User\Session;
 use bbn\Appui\Option;
 use bbn\Db;
@@ -242,7 +241,7 @@ class User extends DbCls implements Implementor
 
   protected $password_reset = false;
 
-  /** @var User\Session */
+  /** @var Session */
   protected $session = null;
 
   /** @var string */
@@ -1155,13 +1154,13 @@ class User extends DbCls implements Implementor
   }
 
   /**
-   * Gets a bbn\User\Manager instance.
+   * Gets a Manager instance.
    *
-   * @return User\Manager
+   * @return Manager
    */
   public function getManager()
   {
-    return new User\Manager($this);
+    return new Manager($this);
   }
 
   /**
@@ -1555,8 +1554,8 @@ class User extends DbCls implements Implementor
   protected function _init_session($defaults = []): static
   {
     // Getting or creating the session is it doesn't exist yet
-    /** @var User\Session */
-    $this->session = User\Session::getInstance();
+    /** @var Session */
+    $this->session = Session::getInstance();
     if (!$this->session) {
       $session_cls =
         defined("BBN_SESSION") &&
