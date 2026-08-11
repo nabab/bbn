@@ -609,6 +609,9 @@ class Cache extends Basic implements CacheInterface
     if (empty($keys)) {
       return false;
     }
+    if (is_array($keys[0])) {
+      $keys = $keys[0];
+    }
 
     $ret = false;
 
@@ -638,7 +641,7 @@ class Cache extends Basic implements CacheInterface
       }
 
       foreach ($keys as $k) {
-        if (array_key_exists($k, $this->localCache)) {
+        if (isset($this->localCache[$k])) {
           unset($this->localCache[$k]);
         }
       }
