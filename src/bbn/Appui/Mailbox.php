@@ -117,11 +117,6 @@ class Mailbox extends Basic
   protected $status = '';
 
   /**
-   * @var Connection The stream object
-   */
-  protected $stream = null;
-
-  /**
    * @var array The mail folders
    */
   protected $folders = [];
@@ -207,11 +202,6 @@ class Mailbox extends Basic
   }
 
 
-
-  /**
-   *  Closes the imap stream.
-   *
-   */
   public function __destruct()
   {
     if ($this->client && !$this->client->isDisconnecting()) {
@@ -1813,7 +1803,7 @@ class Mailbox extends Basic
     return $this->encoder->getDecodedValue($body, $encoding);
   }
 
-  private function transformString($string)
+  private function transformString(string $string): string
   {
     $hash = md5($string);
     $result = '';
@@ -1833,7 +1823,7 @@ class Mailbox extends Basic
    *
    * @return bool
    */
-  private function isConnected()
+  private function isConnected(): bool
   {
     if ($this->client) {
       $now = microtime(true);

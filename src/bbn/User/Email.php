@@ -49,7 +49,6 @@ class Email extends Basic
         "excerpt" => "excerpt",
         "size" => "size",
         "attachments" => "attachments",
-        "flags" => "flags",
         "priority" => "priority",
         "flags" => "flags",
         "is_read" => "is_read",
@@ -94,9 +93,6 @@ class Email extends Basic
 
   /** @var array An array of connection objects */
   protected $mboxes = [];
-
-  /** @var Option The options object */
-  protected $opt;
 
   /** @var Passwords The passwords object */
   protected $pw;
@@ -203,7 +199,6 @@ class Email extends Basic
   /**
    * Returns the list of the accounts' IDs of the current user.
    *
-   * @param bool $force
    * @return array|null
    */
   public function getAccountsIds(): ?array
@@ -257,21 +252,22 @@ class Email extends Basic
           "port" => $a["port"],
           "encryption" => !empty($a["encryption"]) ? 1 : 0,
           "validatecert" => !empty($a["validatecert"]) ? 1 : 0,
-          "folders" => null,
+          "folders" => $this->getFolders($id_account),
           "last_uid" => $a["last_uid"] ?? null,
           "last_check" => $a["last_check"] ?? null,
           "id_account" => $id_account,
           "smtp" => $a["id_alias"] ?? null,
+          "autosync" => !empty($a["autosync"]) ? 1 : 0,
           "rules" => $this->getFoldersRules($id_account),
           $this->localeField => !empty($a[$this->localeField]),
         ];
-        $this->mboxes[$id_account]["folders"] = $this->getFolders($id_account);
       }
     }
+
     return $this->mboxes[$id_account] ?? null;
   }
 
-  public function checkConfig($cfg): bool
+  public function checkConfig(array $cfg): bool
   {
     if (X::hasProps($cfg, ["login", "pass", "type"], true)) {
       if (Str::isUid($cfg["type"])) {
@@ -296,7 +292,7 @@ class Email extends Basic
 
     if (
       !X::hasProps($cfg, ["text", "login", "pass", "type", "email"], true) ||
-      !X::hasProps($cfg, ["host", "port", "encryption", "validatecert", "smtp"]) ||
+      !X::hasProps($cfg, ["host", "port", "encryption", "validatecert", "smtp", "autosync"]) ||
       (in_array($cfg["type"], ["imap", "local"]) &&
         !X::hasProps($cfg, ["host", "port"], true))
     ) {
@@ -322,6 +318,7 @@ class Email extends Basic
       "id_alias" => $cfg["smtp"] ?: null,
       "last_uid" => $cfg["last_uid"] ?? null,
       "last_check" => $cfg["last_check"] ?? null,
+      "autosync" => !empty($cfg["autosync"]) ? 1 : 0
     ]);
 
     if (!empty($cfg["pass"])) {
@@ -361,7 +358,7 @@ class Email extends Basic
 
     if (
       !X::hasProps($cfg, ["text", "login", "pass", "type", "email"], true) ||
-      !X::hasProps($cfg, ["host", "port", "encryption", "validatecert", "smtp"]) ||
+      !X::hasProps($cfg, ["host", "port", "encryption", "validatecert", "smtp", "autosync"]) ||
       (in_array($cfg["type"], ["imap", "local"]) &&
         !X::hasProps($cfg, ["host", "port"], true))
     ) {
@@ -387,6 +384,7 @@ class Email extends Basic
         "encryption" => !empty($cfg["encryption"]) ? 1 : 0,
         "validatecert" => !empty($cfg["validatecert"]) ? 1 : 0,
         "id_alias" => $cfg["smtp"] ?: null,
+        "autosync" => !empty($cfg["autosync"]) ? 1 : 0,
         $this->localeField => !empty($cfg[$this->localeField]),
       ]))
     ) {
@@ -666,8 +664,13 @@ class Email extends Basic
       $newUid = implode(".", $newUid);
       $a["uid"] = $newUid;
       if ($this->pref->updateBit($id, $a)) {
-        function updateChildren($idp, $ouid, $nuid, $pref, $idAccount)
-        {
+        function updateChildren(
+          string $idp,
+          string $ouid,
+          string $nuid,
+          Preferences $pref,
+          string $idAccount
+        ) {
           if ($items = $pref->getBits($idAccount, $idp, true, true)) {
             foreach ($items as $it) {
               if (!empty($it["uid"])) {
@@ -742,7 +745,7 @@ class Email extends Basic
     return null;
   }
 
-  public function getInfoFolder($id)
+  public function getInfoFolder(string $id)
   {
     $folder = $this->getFolder($id, true);
     if ($folder) {
@@ -806,7 +809,7 @@ class Email extends Basic
   }
 
 
-  public function flattenFolders($folders): array
+  public function flattenFolders(array $folders): array
   {
     $res = [];
     foreach ($folders as $f) {
@@ -882,10 +885,12 @@ class Email extends Basic
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
     }
+
     if (X::hasProps($folder, ["id", "id_account", "last_uid", "uid"])) {
       try {
         $check = $this->checkFolder($folder);
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         X::log($e->getMessage(), "user_email_error");
         $check = false;
       }
@@ -896,19 +901,21 @@ class Email extends Basic
           $this->pref->getClassCfg()["tables"]["user_options_bits"]
         );
         $db = $isLocale ? $this->getLocaleDb() : $this->db;
-        $added = 0;
-        $deleted = 0;
+        $ret = [
+          "added" => 0,
+          "deleted" => 0,
+          "flagged" => 0
+        ];
         $mb = $this->getMailbox($folder["id_account"]);
         $info = $mb->getInfoFolder($folder["uid"]);
         if ($info->Nmsgs === 0) {
           if (!empty($folder["db_num_msg"])) {
             $this->setFolderSync($folder["id"]);
-            $deleted += $db->delete($this->class_table, [$this->fields["id_folder"] => $folder["id"]]);
+            $ret['deleted'] += $db->delete($this->class_table, [$this->fields["id_folder"] => $folder["id"]]);
             $this->setFolderSync($folder["id"], false);
-            return $deleted;
           }
 
-          return 0;
+          return $ret;
         }
 
         $first_uid = $mb->getFirstUid();
@@ -917,47 +924,51 @@ class Email extends Basic
         $real_end = null;
 
         if (isset($folder["db_uid_min"], $folder["db_uid_max"])) {
-          if (
-            ($folder["db_uid_min"] == $first_uid) &&
-            ($folder["db_uid_max"] == $last_uid)
+          if (($folder["db_uid_min"] == $first_uid)
+            && ($folder["db_uid_max"] == $last_uid)
           ) {
-            $n = 0;
             if ($info->Nmsgs != $folder["db_num_msg"]) {
-              $n += count($this->checkAndDeleteEmails($folder["id"])) ?: 0;
+              $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"])) ?: 0;
             }
 
-            $n += $this->syncFlags($folder["id"]);
-            return $n;
+            $ret['flagged'] = $this->syncFlags($folder["id"]);
+            return $ret;
           }
 
           if ($folder["db_uid_max"] != $last_uid) {
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder["db_uid_max"]);
-          } elseif ($folder["db_uid_min"] != $first_uid) {
+          }
+          elseif ($folder["db_uid_min"] != $first_uid) {
             $start = $folder["db_uid_min"];
             if (!empty($limit)) {
               $nstart = $mb->getMsgNo($start);
               $nstart -= $limit;
               if ($nstart < 1) {
                 $real_end = $first_uid;
-              } else {
+              }
+              else {
                 $real_end = $mb->getMsgUid($nstart);
               }
-            } else {
+            }
+            else {
               $real_end = $first_uid;
             }
           }
-        } else {
+        }
+        else {
           $start = $last_uid;
           if (!empty($limit)) {
             $nstart = $mb->getMsgNo($start);
             $nstart -= $limit;
             if ($nstart < 1) {
               $real_end = $first_uid;
-            } else {
+            }
+            else {
               $real_end = $mb->getMsgUid($nstart);
             }
-          } else {
+          }
+          else {
             $real_end = $first_uid;
           }
         }
@@ -965,28 +976,28 @@ class Email extends Basic
         try {
           $start = $mb->getMsgNo($start);
           $real_end = $mb->getMsgNo($real_end < 1 ? $first_uid : $real_end);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
           $start = $mb->getMsgNo($last_uid);
           $real_end = $mb->getMsgNo($first_uid);
-
           if ($folder["db_uid_min"]
             && ($folder["db_uid_max"] == $last_uid)
           ) {
             $start = $folder["db_uid_min"];
-          } elseif ($folder["db_uid_max"] != $last_uid) {
+          }
+          elseif ($folder["db_uid_max"] != $last_uid) {
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder["db_uid_max"]);
           }
         }
 
         if (!$start || !$real_end) {
-          $n = 0;
           if ($info->Nmsgs != $folder["db_num_msg"]) {
-            $n += count($this->checkAndDeleteEmails($folder["id"])) ?: 0;
+            $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"]));
           }
 
-          $n += $this->syncFlags($folder["id"]);
-          return $n;
+          $ret['flagged'] = $this->syncFlags($folder["id"]);
+          return $ret;
         }
 
         $end = $start;
@@ -995,15 +1006,16 @@ class Email extends Basic
         if ($all) {
           foreach ($all as $i => $a) {
             if ($this->insertEmail($folder, $a)) {
-              $added++;
-              yield $i + 1;
-            } else {
+              $ret['added']++;
+              yield 'added' => 1;
+            }
+            else {
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
               $this->log(X::_("Impossible to insert the email with ID %s", $a["message_id"]));
             }
           }
-
-        } else {
+        }
+        else {
           $err = X::_(
             "Impossible to get the emails for folder %s from %s to %s (%s)",
             $folder["uid"],
@@ -1015,28 +1027,32 @@ class Email extends Basic
           throw new \Exception($err);
         }
 
-        $this->checkAndDeleteEmails($folder["id"]);
-        $this->syncFlags($folder["id"]);
+        $deleted = count($this->checkAndDeleteEmails($folder["id"]));
+        yield 'deleted' => $deleted;
+        $ret['deleted'] += $deleted;
+        $flags = $this->syncFlags($folder["id"]);
+        yield 'flagged' => $flags;
+        $ret['flagged'] += $flags;
         $this->setFolderSync($folder["id"], false);
-        if ($added) {
+        if (!empty($ret['added'])) {
           $this->syncThreads($folder["id_account"]);
         }
 
-        return $added;
+        return $ret;
       }
     }
 
     return null;
   }
 
-  public function getLastUid($folder)
+  public function getLastUid(array $folder)
   {
     $mb = $this->getMailbox($folder["id_account"]);
     $mb->selectFolder($folder["uid"]);
     return $mb->getLastUid();
   }
 
-  public function getFirstUid($folder)
+  public function getFirstUid(array $folder)
   {
     $mb = $this->getMailbox($folder["id_account"]);
     $mb->selectFolder($folder["uid"]);
@@ -1299,7 +1315,7 @@ class Email extends Basic
     return $res;
   }
 
-  public function getLoginByEmailId($id)
+  public function getLoginByEmailId(string $id)
   {
     $cfg = $this->class_cfg["arch"]["users_emails"];
     $table = $this->class_cfg["tables"]["users_emails"];
@@ -1428,7 +1444,7 @@ class Email extends Basic
     return $db->selectOne($this->class_table, $this->fields["id"], $where);
   }
 
-  public function getEmailByUid($post): ?array
+  public function getEmailByUid(array $post): ?array
   {
     $cfg = $this->class_cfg["arch"]["users_emails"];
     $table = $this->class_cfg["tables"]["users_emails"];
@@ -1831,7 +1847,7 @@ class Email extends Basic
     return null;
   }
 
-  public function getLink($id): ?array
+  public function getLink(string $id): ?array
   {
     $cfg = $this->class_cfg["arch"]["users_contacts_links"];
     $table = $this->class_cfg["tables"]["users_contacts_links"];
@@ -2546,6 +2562,7 @@ class Email extends Basic
                       $toCallbackData['id'] = $emailId;
                       $toCallbackData[in_array('\\Draft', $subdata['flags']) ? 'draft' : 'undraft'] = true;
                     }
+
                     $flags = array_values(
                       array_filter(
                         $subdata['flags'],
@@ -2584,18 +2601,10 @@ class Email extends Basic
                   if (($folder = $this->getFolderByUid($idAccount, $folderUid))
                     && !empty($folder['last_sync_end'])
                   ) {
-                    $t = 0;
                     $sync = $this->syncEmails($folder);
-                    if ($sync instanceof Generator) {
-                      foreach ($sync as $s) {
-                        $t++;
-                      }
-                    }
-                    else {
-                      $t = $sync;
-                    }
-
-                    if (!empty($t)) {
+                    foreach ($sync as $s) {}
+                    $syncRes = $sync->getReturn();
+                    if (array_filter($syncRes, fn($r) => !empty($r))) {
                       $callback([
                         'action' => $action,
                         'data' => [
@@ -2617,7 +2626,7 @@ class Email extends Basic
   }
 
 
-  protected function idsFromFolder($id_folder): ?array
+  protected function idsFromFolder(string $id_folder): ?array
   {
     $types = self::getFolderTypes();
     if ($common_folder = X::getRow($types, ["id" => $id_folder])) {
@@ -2808,14 +2817,14 @@ class Email extends Basic
               $flags = $allFlags[$uid] ?? [];
               $u = [
                 $fields['is_read'] => in_array('\\Seen', $flags) ? 1 : 0,
-                $fields['is_draft'] => in_array('\\Draft', $flags) ? 1 : 0
-              ];
-              $u[$fields['flags']] = array_values(
-                array_filter(
-                  $flags,
-                  fn($flag) => !in_array($flag, ['\\Seen', '\\Deleted', '\\Draft', '\\Recent'])
+                $fields['is_draft'] => in_array('\\Draft', $flags) ? 1 : 0,
+                $fields['flags'] => array_values(
+                  array_filter(
+                    $flags,
+                    fn($flag) => !in_array($flag, ['\\Seen', '\\Deleted', '\\Draft', '\\Recent'])
+                  )
                 )
-              );
+              ];
               $u[$fields['flags']] = !empty($u[$fields['flags']]) ? implode(',', $u[$fields['flags']]) : null;
               $synced += $db->update($table, $u, [$fields["id"] => $emailId]);
             }
