@@ -606,11 +606,12 @@ class Cache extends Basic implements CacheInterface
    */
   public function deleteRaw(...$keys): bool
   {
-    if (empty($keys)) {
-      return false;
-    }
     if (is_array($keys[0])) {
       $keys = $keys[0];
+    }
+
+    if (empty($keys)) {
+      return false;
     }
 
     $ret = false;
@@ -691,11 +692,8 @@ class Cache extends Basic implements CacheInterface
           break;
       }
 
-      if ($ret) {
-        $this->localCache[$key] = [
-          'value' => $val,
-          'expire' => time() + self::LOCAL_CACHE_LENGTH
-        ];
+      if (isset($this->localCache[$key])) {
+        unset($this->localCache[$key]);
       }
     }
 

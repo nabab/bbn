@@ -67,6 +67,7 @@ class Runner extends Basic
       return RunResult::error(1, 'Invalid runner configuration');
     }
 
+    X::log('inside _run with type ' . $this->data['type'], 'poller');
     if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
       call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
     }
@@ -76,7 +77,8 @@ class Runner extends Basic
     $pid_file = $this->getPidPath($this->data);
 
     // Manual files check
-  if (!$this->isActive() || ($type->isCron() && !$this->isCronActive()) || ($type->isPoll() && !$this->isPollActive())) {
+    X::log(['PARAMS', $this->isActive(), $type->isCron(), $this->isCronActive(), $type->isPoll(), $this->isPollActive()], 'poller');
+    if (!$this->isActive() || ($type->isCron() && !$this->isCronActive()) || ($type->isPoll() && !$this->isPollActive())) {
       $message = "GETTING OUT of {$this->data['type']} BECAUSE one of the manual files is missing";
       $this->log($message);
 
@@ -113,7 +115,8 @@ class Runner extends Basic
     if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
       register_shutdown_function([$this, 'shutdown']);
 
-      if ($type === 'poll') {
+      if ($type->isPoll()) {
+        X::log('calling poll', 'poller');
         $this->poll();
       }
       elseif (array_key_exists('id', $this->data)) {
@@ -269,7 +272,9 @@ class Runner extends Basic
    */
   public function poll(?Observer $observer = null)
   {
+    X::log('inside poll function', 'poller');
     if ($this->check()) {
+      X::log('inside poll function: checked', 'poller');
       $this->timer->start('timeout');
       $this->timer->start('users');
       $this->timer->start('cron_check');
@@ -287,6 +292,7 @@ class Runner extends Basic
       while ($this->isPollActive()) {
         // The only centralized action are the observers
         $res = $obs->observe();
+        X::log('observed', 'poller');
         if (is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
