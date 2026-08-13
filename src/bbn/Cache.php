@@ -651,6 +651,11 @@ class Cache extends Basic implements CacheInterface
     return $ret;
   }
 
+  public function clearLocalCache(): void
+  {
+    $this->localCache = [];
+  }
+
 
   public function setRaw($key, $val, $ttl): bool
   {
