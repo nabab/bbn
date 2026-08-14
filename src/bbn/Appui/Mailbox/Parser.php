@@ -212,6 +212,18 @@ class Parser extends Basic
     return null;
   }
 
+  public function fetch(string $raw)
+  {
+    preg_match_all(
+      '/^\*\s+(\d+)\s+FETCH\s+\((.*?)\)$/ims',
+      $raw,
+      $matches,
+      PREG_SET_ORDER
+    );
+
+    return $matches;
+  }
+
   public function references(?string $raw): array
   {
     return empty($raw)

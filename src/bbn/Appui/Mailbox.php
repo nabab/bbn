@@ -401,20 +401,20 @@ class Mailbox extends Basic
   /**
    * Gets IMAP essential info (Test: ok)
    *
-   * @return object|bool
+   * @return null|array
    */
-  public function update(string|null $dir = null)
+  public function update(string|null $dir = null): ?array
   {
     if (($dir = $this->selectFolder($dir))
       && ($info = $this->getInfoFolder($dir))
     ) {
       $this->folders[$dir]['last_uid'] = $this->getLastUid() ?: 0;
-      $this->folders[$dir]['num_msg'] = $info->Nmsgs ?? 0;
+      $this->folders[$dir]['num_msg'] = $info['nmsgs'] ?? 0;
       $this->folders[$dir]['last_check'] = microtime(true);
       return $info;
     }
 
-    return false;
+    return null;
   }
 
 
@@ -628,14 +628,11 @@ class Mailbox extends Basic
 
     try {
       $this->rawCommand('SELECT ' . $this->escapeString($folder));
-      if (!isset($this->folders[$folder])) {
-        $this->folders[$folder] = [
-          'last_uid' => null,
-          'num_msg' => null,
-          'last_check' => null
-        ];
-      }
-
+      $this->folders[$folder] ??= [
+        'last_uid' => null,
+        'num_msg' => null,
+        'last_check' => null
+      ];
       $this->folder = $folder;
       return $folder;
     }
@@ -650,41 +647,56 @@ class Mailbox extends Basic
   /**
    * Returns an object containing the current mailbox info.
    *
-   * @return stdClass|null
+   * @return array|null
    */
-  public function getInfoFolder(?string $dir = null): ?stdClass
+  public function getInfoFolder(?string $dir = null): ?array
   {
     if (!($dir = $this->selectFolder($dir))) {
       return null;
     }
 
     try {
-      $info = new stdClass();
-      $info->Date = date('d-M-Y H:i:s O');
-      $info->Driver = 'bbn';
-      $info->Mailbox = $dir;
-      $info->Nmsgs = 0;
-      $info->Recent = 0;
-      $info->Unread = 0;
-      $info->Deleted = 0;
-      $info->Size = 0;
-      $hasSize = $this->getClient()->hasCapability('STATUS=SIZE');
-      $lines = $this->rawCommand(
-        'STATUS ' . $this->escapeString($dir) . ' (MESSAGES RECENT UIDNEXT UIDVALIDITY UNSEEN' . ($hasSize ? ' SIZE' : '') . ')',
-        true
-      );
+      $info = [
+        'date' => date('d-M-Y H:i:s O'),
+        'mailbox' => $dir,
+        'nmsgs' => 0,
+        'recent' => 0,
+        'unread' => 0,
+        'deleted' => 0,
+        'size' => 0,
+        'uidnext' => null,
+        'uidvalidity' => null,
+        'highestmodseq' => null
+      ];
+      $hasImap4rev2 = $this->getClient()->hasCapability('IMAP4rev2');
+      $hasSize = $this->getClient()->hasCapability('STATUS=SIZE') || $hasImap4rev2;
+      $cmd = 'STATUS ' . $this->escapeString($dir) . ' (UIDNEXT UIDVALIDITY MESSAGES RECENT UNSEEN';
+      if ($hasSize) {
+        $cmd .= ' SIZE';
+      }
+
+      if ($this->getClient()->hasCapability('CONDSTORE')) {
+        $cmd .= ' HIGHESTMODSEQ';
+      }
+
+      if ($hasImap4rev2) {
+        $cmd .= ' DELETED';
+      }
+
+      $cmd .= ')';
+      $lines = $this->rawCommand($cmd, true);
       if (!$hasSize) {
         if ($this->getClient()->hasCapability('QUOTA')) {
           $quota = $this->rawCommand('GETQUOTA ' . $this->escapeString($dir));
           if (preg_match('/STORAGE\s+(\d+)/i', $quota, $m)) {
-            $info->Size = (int)$m[1];
+            $info['size'] = (int)$m[1];
           }
         }
         else {
           $sizes = $this->rawCommand('FETCH 1:* (RFC822.SIZE)', true);
           foreach ($sizes as $s) {
             if (preg_match('/^\*\s+\d+\s+FETCH\s+\((?:.*\s)?RFC822\.SIZE\s+(\d+)/i', $s, $m)) {
-              $info->Size += (int)$m[1];
+              $info['size'] += (int)$m[1];
             }
           }
         }
@@ -696,18 +708,16 @@ class Mailbox extends Basic
           for ($i = 0; $i < count($pairs); $i += 2) {
             $k = strtoupper($pairs[$i] ?? '');
             $v = (int)($pairs[$i + 1] ?? 0);
-            if ($k === 'MESSAGES') {
-              $info->Nmsgs = $v;
-            }
-            elseif ($k === 'RECENT') {
-              $info->Recent = $v;
-            }
-            elseif ($k === 'UNSEEN') {
-              $info->Unread = $v;
-            }
-            elseif ($k === 'SIZE') {
-              $info->Size = $v;
-            }
+            match ($k) {
+              'MESSAGES' => $info['nmsgs'] = $v,
+              'RECENT' => $info['recent'] = $v,
+              'UNSEEN' => $info['unread'] = $v,
+              'DELETED' => $info['deleted'] = $v,
+              'SIZE' => $info['size'] = $v,
+              'UIDNEXT' => $info['uidnext'] = $v,
+              'UIDVALIDITY' => $info['uidvalidity'] = $v,
+              'HIGHESTMODSEQ' => $info['highestmodseq'] = $v
+            };
           }
         }
       }
@@ -843,11 +853,11 @@ class Mailbox extends Basic
 
 
   /**
-   * Returns an object containing the current mailbox info. (Test: ok)
+   * Returns an array containing the current mailbox info.
    *
-   * @return bool|object
+   * @return null|array
    */
-  public function getInfoMbox()
+  public function getInfoMbox(): ?array
   {
     return $this->getInfoFolder();
   }
@@ -995,7 +1005,7 @@ class Mailbox extends Basic
   }
 
 
-  public function getMsgOverview(int $msgnum, bool $uid = false, ?string $raw = null): ?stdClass
+  public function getMsgOverview(int $msgnum, bool $uid = false, ?string $raw = null): ?array
   {
     try {
       if (is_null($raw)) {
@@ -1006,17 +1016,17 @@ class Mailbox extends Basic
         $raw = implode("\r\n", $lines);
       }
 
-      $obj = new stdClass();
+      $overview = [];
       $flags = $this->parser->flags($raw);
-      $obj->flags = implode(' ', $flags);
+      $overview['flags'] = implode(' ', $flags);
       foreach (self::$flags as $f => $imapFlag) {
-        $obj->$f = in_array($imapFlag, $flags, true);
+        $overview[$f] = in_array($imapFlag, $flags, true);
       }
 
-      $obj->size = $this->parser->size($raw);
-      $obj->uid = $this->parser->uid($raw);
+      $overview['size'] = $this->parser->size($raw);
+      $overview['uid'] = $this->parser->uid($raw);
 
-      return $obj;
+      return $overview;
     }
     catch (Exception $e) {
       $this->setError($e->getMessage(), $e->getCode());
@@ -1246,7 +1256,7 @@ class Mailbox extends Basic
   public function getMsgSize(int $msgno, bool $uid = false, ?string $raw = null): ?int
   {
     if ($overview = $this->getMsgOverview($msgno, $uid, $raw)) {
-      return $overview->size ?? null;
+      return $overview['size'] ?? null;
     }
 
     return null;
@@ -1563,8 +1573,8 @@ class Mailbox extends Basic
       && $client->hasCapability('CONDSTORE')
     ) {
       $this->rawCommand('SELECT ' . $this->escapeString($folderUid) . ' (CONDSTORE)');
-      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq + 1));
-      if (preg_match('/^\*\s+SEARCH\s*(.*)$/mi', $res, $m)) {
+      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq));
+      if (preg_match('/^\*\s+SEARCH\s*(.*)\s+\(.*\)$/mi', $res, $m)) {
         $list = trim($m[1]);
         if ($list === '') {
           return [];
@@ -1578,6 +1588,28 @@ class Mailbox extends Basic
     }
 
     return [];
+  }
+
+  public function getMsgChangedSinceModseq(string $folderUid, int $lastModseq)
+  {
+    $ret = [];
+    if (($client = $this->getClient())
+      && $client->hasCapability('CONDSTORE')
+    ) {
+      $this->rawCommand('SELECT ' . $this->escapeString($folderUid) . ' (CONDSTORE)');
+      $lines = $this->rawCommand("UID FETCH 1:* (UID FLAGS) (CHANGEDSINCE $lastModseq)", true);
+      foreach ($lines as $line) {
+        foreach ($this->parser->fetch($line) as $match) {
+          $ret[] = [
+            'msgnum' => (int)$match[1],
+            'uid' => $this->parser->uid($match[2]),
+            'flags' => $this->parser->flags($match[2])
+          ];
+        }
+      }
+    }
+
+    return $ret;
   }
 
   public function getMsgBodyPartData(

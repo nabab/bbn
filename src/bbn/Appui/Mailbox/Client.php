@@ -81,6 +81,11 @@ class Client extends Basic
    */
   protected bool $communicating = false;
 
+  /**
+   * @var array The capabilities of the IMAP server
+   */
+  protected array $capabilities = [];
+
 
   /**
    * Escapes a string for use in IMAP commands by adding quotes and escaping special characters.
@@ -153,6 +158,7 @@ class Client extends Basic
       ];
     }
 
+    $this->resetProperties();
     $this->streamResource = stream_socket_client(
       $proto . "://{$this->host}:{$this->port}",
       $errno,
@@ -193,7 +199,7 @@ class Client extends Basic
 
       fclose($this->streamResource);
       $this->streamResource = null;
-      $this->disconnecting = false;
+      $this->resetProperties();
     }
 
     return $this;
@@ -358,13 +364,17 @@ class Client extends Basic
    */
   public function getCapabilities(): array
   {
+    if (!empty($this->capabilities)) {
+      return $this->capabilities;
+    }
+
     $response = $this->sendCommand("CAPABILITY");
     if (preg_match('/^\*\s+CAPABILITY\s+(.+)$/i', $response, $m)) {
       $caps = preg_split('/\s+/', trim($m[1])) ?: [];
-      return array_values(array_unique(array_map('strtoupper', $caps)));
+      $this->capabilities = array_values(array_unique(array_map('strtoupper', $caps)));
     }
 
-    return [];
+    return $this->capabilities;
   }
 
   /**
@@ -489,6 +499,20 @@ class Client extends Basic
   {
     $this->tag++;
     return $this->tagPrefix . $this->tag . ' ';
+  }
+
+  /**
+   * Resets the internal properties of the client to their initial state. This is useful for ensuring a clean state when reconnecting or reinitializing the client. Resets the tag counter, last time, last command, last tag, disconnecting state, communicating state, and capabilities.
+   */
+  protected function resetProperties(): void
+  {
+    $this->tag = 0;
+    $this->lastTime = 0;
+    $this->lastCommand = null;
+    $this->lastTag = null;
+    $this->disconnecting = false;
+    $this->communicating = false;
+    $this->capabilities = [];
   }
 
 }

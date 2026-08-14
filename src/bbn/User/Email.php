@@ -5,6 +5,7 @@ namespace bbn\User;
 use Exception;
 use bbn\X;
 use bbn\Db;
+use bbn\Db\Languages\Sqlite;
 use bbn\Str;
 use bbn\User;
 use bbn\User\Preferences;
@@ -16,6 +17,7 @@ use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\LocaleDatabase;
 use bbn\Mvc\Controller;
+use bbn\Mvc;
 use bbn\File\System;
 use Generator;
 use stdClass;
@@ -111,6 +113,18 @@ class Email extends Basic
 
   /** @var bool Whether the idle synchronization is currently running */
   protected $idleSyncing = false;
+
+  /** @var bool Whether the processing queue is currently running */
+  protected $processingQueue = false;
+
+  /** @var int The timestamp of the last queue callback ping */
+  protected $queueCallbackLastPing = 0;
+
+  /** @var int The frequency for the queue callback ping */
+  protected $queueCallbackPingFrequency = 5;
+
+  /** @var callable|null The queue callback */
+  protected $queueCallback = null;
 
   /**
    * Returns a list typical folder types as they are recorded in the options
@@ -719,41 +733,37 @@ class Email extends Basic
       $folder = $this->getFolder($folder);
     }
 
-    if (
-      X::hasProp($folder, "uid") &&
-      ($mb = $this->getMailbox($folder["id_account"])) &&
-      $mb->check()
+    if (X::hasProp($folder, "uid")
+      && ($mb = $this->getMailbox($folder["id_account"]))
+      && $mb->check()
+      && $mb->update($folder["uid"])
+      && ($folders = $mb->getFolders())
+      && ($res = $folders[$folder["uid"]])
     ) {
-      if (
-        $mb->update($folder["uid"]) &&
-        ($folders = $mb->getFolders()) &&
-        ($res = $folders[$folder["uid"]])
+      $res["hash"] = $this->makeFolderHash($folder["id"], $res["num_msg"], $res["last_uid"]);
+      if (($res["num_msg"] && !$folder["last_uid"])
+        || ($folder["hash"] !== $res["hash"])
       ) {
-        $res["hash"] = $this->makeFolderHash($folder["id"], $res["num_msg"], $res["last_uid"]);
-        if (
-          ($res["num_msg"] && !$folder["last_uid"]) ||
-          $folder["hash"] !== $res["hash"]
-        ) {
-          $this->pref->updateBit($folder["id"], $res, true);
-          $this->getAccount($folder["id_account"], true);
-        }
-
-        return $res;
+        $this->pref->updateBit($folder["id"], $res, true);
+        $this->getAccount($folder["id_account"], true);
       }
+
+      return $res;
     }
 
     return null;
   }
 
-  public function getInfoFolder(string $id)
+  public function getInfoFolder(string $id): ?array
   {
-    $folder = $this->getFolder($id, true);
-    if ($folder) {
-      $mb = $this->getMailbox($folder["id_account"]);
-      if ($mb) {
-        return $mb->getInfoFolder($folder["uid"]);
-      }
+    if (($folder = $this->getFolder($id, true))
+      && !empty($folder["uid"])
+      && !empty($folder["id_account"])
+      && ($mb = $this->getMailbox($folder["id_account"]))
+    ) {
+      return $mb->getInfoFolder($folder["uid"]);
     }
+
     return null;
   }
 
@@ -881,7 +891,8 @@ class Email extends Basic
   public function syncEmails(
     string|array $folder,
     int $limit = 0
-  ) {
+  ): Generator
+  {
     if (Str::isUid($folder)) {
       $folder = $this->getFolder($folder);
     }
@@ -908,7 +919,7 @@ class Email extends Basic
         ];
         $mb = $this->getMailbox($folder["id_account"]);
         $info = $mb->getInfoFolder($folder["uid"]);
-        if ($info->Nmsgs === 0) {
+        if ($info['nmsgs'] === 0) {
           if (!empty($folder["db_num_msg"])) {
             $this->setFolderSync($folder["id"]);
             $ret['deleted'] += $db->delete($this->class_table, [$this->fields["id_folder"] => $folder["id"]]);
@@ -927,7 +938,242 @@ class Email extends Basic
           if (($folder["db_uid_min"] == $first_uid)
             && ($folder["db_uid_max"] == $last_uid)
           ) {
-            if ($info->Nmsgs != $folder["db_num_msg"]) {
+            if ($info['nmsgs'] != $folder["db_num_msg"]) {
+              $this->setFolderSync($folder["id"]);
+              $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"])) ?: 0;
+              $this->setFolderSync($folder["id"], false);
+            }
+
+            $ret['flagged'] = $this->syncFlags($folder["id"]);
+            return $ret;
+          }
+
+          if ($folder["db_uid_max"] != $last_uid) {
+            $start = $last_uid;
+            $real_end = $mb->getNextUid($folder["db_uid_max"]);
+          }
+          elseif ($folder["db_uid_min"] != $first_uid) {
+            $start = $folder["db_uid_min"];
+            if (!empty($limit)) {
+              $nstart = $mb->getMsgNo($start);
+              $nstart -= $limit;
+              if ($nstart < 1) {
+                $real_end = $first_uid;
+              }
+              else {
+                $real_end = $mb->getMsgUid($nstart);
+              }
+            }
+            else {
+              $real_end = $first_uid;
+            }
+          }
+        }
+        else {
+          $start = $last_uid;
+          if (!empty($limit)) {
+            $nstart = $mb->getMsgNo($start);
+            $nstart -= $limit;
+            if ($nstart < 1) {
+              $real_end = $first_uid;
+            }
+            else {
+              $real_end = $mb->getMsgUid($nstart);
+            }
+          }
+          else {
+            $real_end = $first_uid;
+          }
+        }
+
+        try {
+          $start = $mb->getMsgNo($start);
+          $real_end = $mb->getMsgNo($real_end < 1 ? $first_uid : $real_end);
+        }
+        catch (\Exception $e) {
+          $start = $mb->getMsgNo($last_uid);
+          $real_end = $mb->getMsgNo($first_uid);
+          if ($folder["db_uid_min"]
+            && ($folder["db_uid_max"] == $last_uid)
+          ) {
+            $start = $folder["db_uid_min"];
+          }
+          elseif ($folder["db_uid_max"] != $last_uid) {
+            $start = $last_uid;
+            $real_end = $mb->getNextUid($folder["db_uid_max"]);
+          }
+        }
+
+        if (!$start || !$real_end) {
+          if ($info['nmsgs'] != $folder["db_num_msg"]) {
+            $this->setFolderSync($folder["id"]);
+            $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"]));
+            $this->setFolderSync($folder["id"], false);
+          }
+
+          $ret['flagged'] = $this->syncFlags($folder["id"]);
+          return $ret;
+        }
+
+        $end = $start;
+        $this->setFolderSync($folder['id']);
+        $all = $mb->getEmailsList($folder['uid'], $start, $real_end);
+        if ($all) {
+          foreach ($all as $i => $a) {
+            if ($this->insertEmail($folder, $a)) {
+              $ret['added']++;
+              yield 'added' => 1;
+            }
+            else {
+              //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
+              $this->log(X::_("Impossible to insert the email with ID %s", $a["message_id"]));
+            }
+          }
+        }
+        else {
+          $err = X::_(
+            "Impossible to get the emails for folder %s from %s to %s (%s)",
+            $folder["uid"],
+            $start,
+            $end,
+            $real_end
+          );
+          X::log($err, "user_email_error");
+          throw new \Exception($err);
+        }
+
+        $this->setFolderSync($folder["id"]);
+        $deleted = count($this->checkAndDeleteEmails($folder["id"]));
+        $this->setFolderSync($folder["id"], false);
+        yield 'deleted' => $deleted;
+        $ret['deleted'] += $deleted;
+        $flags = $this->syncFlags($folder["id"]);
+        yield 'flagged' => $flags;
+        $ret['flagged'] += $flags;
+        $this->setFolderSync($folder["id"], false);
+        if (!empty($ret['added'])) {
+          $this->syncThreads($folder["id_account"]);
+        }
+
+        return $ret;
+      }
+    }
+
+    return null;
+  }
+
+  public function syncEmails2(
+    string|array $folder,
+    int $limit = 0
+  ): Generator
+  {
+    if (Str::isUid($folder)) {
+      $folder = $this->getFolder($folder);
+    }
+
+    if (X::hasProps($folder, ["id", "id_account", "last_uid", "uid"])) {
+      $this->setFolderSync($folder["id"]);
+      try {
+        $check = $this->checkFolder($folder);
+      }
+      catch (\Exception $e) {
+        X::log($e->getMessage(), "user_email_error");
+        $check = false;
+      }
+
+      if ($check) {
+        $isLocale = $this->pref->isLocale(
+          $folder["id"],
+          $this->pref->getClassCfg()["tables"]["user_options_bits"]
+        );
+        $db = $isLocale ? $this->getLocaleDb() : $this->db;
+        $ret = [
+          "added" => 0,
+          "deleted" => 0,
+          "flagged" => 0
+        ];
+        $mb = $this->getMailbox($folder["id_account"]);
+        $info = $mb->getInfoFolder($folder["uid"]);
+        if (($info['uidvalidity'] !== $folder['uidvalidity'])
+          || ($info['nmsgs'] === 0)
+        ) {
+          if (!empty($folder["db_num_msg"])) {
+            $ret['deleted'] += $db->delete($this->class_table, [$this->fields["id_folder"] => $folder["id"]]);
+          }
+
+          if ($info['uidvalidity'] !== $folder['uidvalidity']) {
+            $this->setUidValidity($folder["id"], $info['uidvalidity']);
+          }
+
+          if ($info['nmsgs'] === 0) {
+            $this->setFolderSync($folder["id"], false);
+            return $ret;
+          }
+        }
+
+        // Force a full sync if the last sync start is empty
+        if (empty($folder["last_sync_start"])) {
+          $start = 1;
+          $end = !empty($limit) && ($info['nmsgs'] > $limit) ? $limit : $info['nmsgs'];
+        }
+        // If the last sync start is not empty, we can use the modseq to get the changed messages
+        else if (!empty($folder['highestmodseq'])) {
+          if ($folder['highestmodseq'] === $info['highestmodseq']) {
+            $this->setFolderSync($folder["id"], false);
+            return $ret;
+          }
+
+          if ($msgs = $mb->getMsgChangedSinceModseq($folder['uid'], $folder['highestmodseq'])) {
+            foreach ($msgs as $msg) {
+              $existingId = $db->selectOne($this->class_table, $this->fields["id"], [
+                $this->fields["id_user"] => $this->user->getId(),
+                $this->fields["msg_uid"] => $msg["uid"],
+                $this->fields["id_folder"] => $folder["id"],
+              ]);
+              if (empty($existingId)) {
+                if (($m = $mb->getMsg($msg["uid"], true))
+                  && $this->insertEmail($folder, $m)
+                ) {
+                  $ret['added']++;
+                  yield 'added' => 1;
+                }
+                else {
+                  $this->log(X::_("Impossible to insert the email with ID %s", $m["message_id"]));
+                }
+              }
+              else if ($this->setFlags($existingId, $msg["flags"])) {
+                $this->setSeen($existingId, in_array("\\Seen", $msg["flags"]));
+                $this->setDraft($existingId, in_array("\\Draft", $msg["flags"]));
+                $ret['flagged']++;
+                yield 'flagged' => 1;
+              }
+            }
+          }
+
+          $this->setHighestmodseq($folder["id"], $info['highestmodseq']);
+          $deleted = count($this->checkAndDeleteEmails($folder["id"]));
+          yield 'deleted' => $deleted;
+          $ret['deleted'] += $deleted;
+          $this->setFolderSync($folder["id"], false);
+          return $ret;
+        }
+        else {
+
+        }
+
+
+
+
+        $first_uid = $mb->getFirstUid();
+        $last_uid = $mb->getLastUid();
+        $start = null;
+        $real_end = null;
+
+        if (isset($folder["db_uid_min"], $folder["db_uid_max"])) {
+          if (($folder["db_uid_min"] == $first_uid)
+            && ($folder["db_uid_max"] == $last_uid)
+          ) {
+            if ($info['nmsgs'] != $folder["db_num_msg"]) {
               $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"])) ?: 0;
             }
 
@@ -992,7 +1238,7 @@ class Email extends Basic
         }
 
         if (!$start || !$real_end) {
-          if ($info->Nmsgs != $folder["db_num_msg"]) {
+          if ($info['nmsgs'] != $folder["db_num_msg"]) {
             $ret['deleted'] = count($this->checkAndDeleteEmails($folder["id"]));
           }
 
@@ -1001,7 +1247,6 @@ class Email extends Basic
         }
 
         $end = $start;
-        $this->setFolderSync($folder['id']);
         $all = $mb->getEmailsList($folder['uid'], $start, $real_end);
         if ($all) {
           foreach ($all as $i => $a) {
@@ -1033,11 +1278,11 @@ class Email extends Basic
         $flags = $this->syncFlags($folder["id"]);
         yield 'flagged' => $flags;
         $ret['flagged'] += $flags;
-        $this->setFolderSync($folder["id"], false);
         if (!empty($ret['added'])) {
           $this->syncThreads($folder["id_account"]);
         }
 
+        $this->setFolderSync($folder["id"], false);
         return $ret;
       }
     }
@@ -2050,10 +2295,13 @@ class Email extends Basic
             "uid" => $prefix . $ele,
             "items" => [],
             "subscribed" => in_array($prefix . $ele, $subscribed),
-            "num_msg" => $info->Nmsgs,
-            "last_uid" => !empty($info->Nmsgs)
-              ? $mb->getMsgUid($info->Nmsgs)
+            "num_msg" => $info['nmsgs'],
+            "last_uid" => !empty($info['nmsgs'])
+              ? $mb->getMsgUid($info['nmsgs'])
               : null,
+            "uidvalidity" => $info['uidvalidity'] ?? null,
+            "uidnext" => $info['uidnext'] ?? null,
+            "highestmodseq" => $info['highestmodseq'] ?? null
           ];
         }
 
@@ -2539,6 +2787,7 @@ class Email extends Basic
 
                   break;
                 case 'mailDeleted':
+                  $this->setFolderSync($folder['id']);
                   if ($deleted = $this->checkAndDeleteEmails($folder['id'])) {
                     $toCallbackData = [
                       'ids' => $deleted,
@@ -2546,6 +2795,7 @@ class Email extends Basic
                     ];
                   }
 
+                  $this->setFolderSync($folder['id'], false);
                   break;
                 case 'mailFlagged':
                   if (isset($subdata['flags'])
@@ -2719,10 +2969,10 @@ class Email extends Basic
   }
 
 
-  protected function setFlagsHighestmodseq(string $idFolder, int $highestmodseq): bool
+  protected function setHighestmodseq(string $idFolder, int $highestmodseq): bool
   {
     if ($bit = $this->pref->getBit($idFolder)) {
-      $bit['flags_highestmodseq'] = $highestmodseq;
+      $bit['highestmodseq'] = $highestmodseq;
       $bit['id_parent'] = !empty($bit['id_parent']) ? $bit['id_parent'] :  null;
       return (bool)$this->pref->updateBit($idFolder, $bit);
     }
@@ -2731,10 +2981,32 @@ class Email extends Basic
   }
 
 
-  protected function getFlagsHighestmodseq(string $idFolder): ?int
+  protected function getHighestmodseq(string $idFolder): ?int
   {
     if ($bitCfg = $this->pref->getBitCfg($idFolder)) {
-      return $bitCfg['flags_highestmodseq'] ?? null;
+      return $bitCfg['highestmodseq'] ?? null;
+    }
+
+    return null;
+  }
+
+
+  protected function setUidValidity(string $idFolder, int $uidvalidity): bool
+  {
+    if ($bit = $this->pref->getBit($idFolder)) {
+      $bit['uidvalidity'] = $uidvalidity;
+      $bit['id_parent'] = !empty($bit['id_parent']) ? $bit['id_parent'] :  null;
+      return (bool)$this->pref->updateBit($idFolder, $bit);
+    }
+
+    return false;
+  }
+
+
+  protected function getUidValidity(string $idFolder): ?int
+  {
+    if ($bitCfg = $this->pref->getBitCfg($idFolder)) {
+      return $bitCfg['uidvalidity'] ?? null;
     }
 
     return null;
@@ -2772,7 +3044,6 @@ class Email extends Basic
       }
 
       $emailsFound = $mb->search('UID ' . implode(',', array_keys($emailsUids))) ?: [];
-      $this->setFolderSync($idFolder);
       foreach ($emailsUids as $uid => $id) {
         if (!in_array($uid, $emailsFound)
           && $db->delete($emailsTable, [$emailsFields['id'] => $id])
@@ -2781,7 +3052,6 @@ class Email extends Basic
         }
       }
 
-      $this->setFolderSync($idFolder, false);
       if (!empty($deleted)) {
         $this->checkFolder($folder);
       }
@@ -2800,7 +3070,7 @@ class Email extends Basic
       && ($mb = $this->getMailbox($folder['id_account']))
       && ($hms = $mb->getFolderHighestmodseq($folder['uid']))
     ) {
-      $last = $folder['flags_highestmodseq'] ?? null;
+      $last = $folder['highestmodseq'] ?? null;
       if (is_null($last) || ($hms > $last)) {
         if (($uids = $mb->getMsgUidsChangedSinceModseq($folder['uid'], $last ?: 0))
           && ($allFlags = $mb->getMsgFlags($uids, true))
@@ -2831,7 +3101,7 @@ class Email extends Basic
           }
         }
 
-        $this->setFlagsHighestmodseq($idFolder, $hms);
+        $this->setHighestmodseq($idFolder, $hms);
       }
     }
 
@@ -2863,7 +3133,9 @@ class Email extends Basic
       "synchronizing" => $folder["synchronizing"] ?? false,
       "last_sync_start" => $folder["last_sync_start"] ?? null,
       "last_sync_end" => $folder["last_sync_end"] ?? null,
-      "flags_highestmodseq" => $folder["flags_highestmodseq"] ?? null,
+      "highestmodseq" => $folder["highestmodseq"] ?? null,
+      "uidvalidity" => $folder["uidvalidity"] ?? null,
+      "uidnext" => $folder["uidnext"] ?? null,
     ];
     if (!$lite) {
       $res += [
@@ -3102,6 +3374,202 @@ class Email extends Basic
       foreach ($files as $f) {
         $fs->delete($f["name"]);
       }
+    }
+  }
+
+
+
+
+  public function getQueueDb(){
+    if (($user = User::getInstance())
+      && ($mainDataPath = $user->getDataPath('appui-email'))
+      && ($cfg = Mvc::getPluginPath('appui-email') . 'cfg/webmailqueue.json')
+      && is_file($cfg)
+      && ($cfg = json_decode(file_get_contents($cfg), true))
+    ) {
+      $path = $mainDataPath . 'webmail/';
+      $dbName = 'queue.sqlite';
+      if (!is_dir($path)) {
+        $fs = new System();
+        $fs->createPath($path);
+      }
+
+      if (is_dir($path)
+        && !is_file($path . $dbName)
+        && Sqlite::createDatabaseOnHost($dbName, $path)
+      ) {
+        $db = new Db([
+          'engine' => 'sqlite',
+          'host' => $path,
+          'db' => $dbName,
+        ]);
+        foreach ($cfg as $table => $c) {
+          $c = $this->db->convert($c, 'sqlite');
+          $db->createTable($table, $c);
+        }
+      }
+    }
+
+    return $db ?? null;
+  }
+
+  public function addQueue(array $data): ?string
+  {
+    if (X::hasProps($data, ['id_folder', 'action'], true)
+      && ($db = $this->getQueueDb())
+    ) {
+      if ($db->insert('queue', [
+        'id_folder' => $data['id_folder'],
+        'action' => $data['action'],
+        'date_added' => X::microtime(),
+        'date_started' => null,
+        'date_ping' => null,
+        'priority' => $data['priority'] ?? 1
+      ])) {
+        return $db->lastId();
+      }
+    }
+
+    return null;
+  }
+
+  public function getQueue(): ?array
+  {
+    if ($db = $this->getQueueDb()) {
+      return $db->rselectAll('queue',
+        [],
+        [],
+        [
+          'priority' => 'DESC',
+          'date_added' => 'ASC'
+        ]
+      );
+    }
+
+    return null;
+  }
+
+  public function getQueueFirst(): ?array
+  {
+    if ($db = $this->getQueueDb()) {
+      return $db->rselect(
+        'queue',
+        [],
+        [
+          'date_started' => null
+        ],
+        [
+          'priority' => 'DESC',
+          'date_added' => 'ASC'
+        ]
+      );
+    }
+
+    return null;
+  }
+
+  public function removeQueue(string $id): bool
+  {
+    if ($db = $this->getQueueDb()) {
+      return (bool)$db->delete('queue', ['id' => $id]);
+    }
+
+    return false;
+  }
+
+  public function updateQueue(string $id, array $data): bool
+  {
+    if ($db = $this->getQueueDb()) {
+      return (bool)$db->update('queue', $data, ['id' => $id]);
+    }
+
+    return false;
+  }
+
+  public function startProcessQueue(callable $callback)
+  {
+    if (!$this->processingQueue) {
+      set_time_limit(0);
+      ignore_user_abort(true);
+      $this->queueCallback = $callback;
+      $this->queueCallbackLastPing = time();
+      $this->processingQueue = true;
+      $queue = array_map(
+        fn($item) => $this->processQueueItem($item),
+        $this->getQueue() ?: []
+      );
+      while ($this->processingQueue && $queue) {
+        foreach ($queue as $key => $item) {
+          if (((time() - $this->queueCallbackLastPing) > $this->queueCallbackPingFrequency)
+            && !$this->pingQueueCallback()
+          ) {
+            $this->processingQueue = false;
+            break;
+          }
+
+          if (!$this->processingQueue) {
+            break;
+          }
+
+          if (!$item->valid()) {
+            unset($queue[$key]);
+            continue;
+          }
+
+          $item->next();
+          if (!$item->valid()) {
+            unset($queue[$key]);
+          }
+        }
+
+        if ($this->processingQueue) {
+          $queue = array_map(
+            fn($item) => $this->processQueueItem($item),
+            $this->getQueue() ?: []
+          );
+        }
+      }
+
+      $this->stopProcessQueue();
+    }
+  }
+
+  public function stopProcessQueue(){
+    $this->processingQueue = false;
+  }
+
+  protected function pingQueueCallback(): bool
+  {
+    if (empty($this->queueCallback)) {
+      $this->stopProcessQueue();
+      return false;
+    }
+
+    $this->queueCallbackLastPing = time();
+    $ping = ($this->queueCallback)(['action' => 'ping']);
+    if (empty($ping)) {
+      $this->stopProcessQueue();
+      return false;
+    }
+
+    return true;
+  }
+
+  protected function processQueueItem(array $item): Generator
+  {
+    $this->updateQueue($item['id'], ['date_started' => X::microtime()]);
+    if ($item['action']) {
+      $sync = $this->syncEmails2($item['id_folder']);
+      $count = 0;
+      foreach ($sync as $i => $s) {
+        $count++;
+        if ($count >= 10) {
+          $count = 0;
+          yield;
+        }
+      }
+
+      return $sync->getReturn();
     }
   }
 }
