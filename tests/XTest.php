@@ -277,8 +277,8 @@ class XTest extends TestCase
     $log_file = constant('BBN_DATA_PATH') . 'logs/_php_error.json';
 
     X::logError(
-      $err_no = '123',
       $err_message = 'This should create a new log file',
+      $err_no = '123',
       $err_file = 'foo.php',
       $err_line = '33'
     );
@@ -336,8 +336,8 @@ class XTest extends TestCase
     file_put_contents($log_file, json_encode($array_content));
 
     X::logError(
-      $err_no = '123',
       $err_message = 'This should increment the count to 2',
+      $err_no = '123',
       $err_file = 'foo.php',
       $err_line = '33'
     );

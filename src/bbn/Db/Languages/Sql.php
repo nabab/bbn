@@ -57,11 +57,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   public static $aggr_functions = [];
 
 
-  /**
-   * @var array
-   */
-  protected array $cfg;
-
   /** @var string The connection code as it would be stored in option */
   protected $connection_code;
 
@@ -252,7 +247,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
    * @param array $cfg
    * @throws Exception
    */
-  public function __construct(array $cfg)
+  public function __construct(protected array $cfg)
   {
     if (!extension_loaded('pdo_mysql')) {
       throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
@@ -266,26 +261,30 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
 
-      $this->pdo = new PDO(...$cfg['args']);
-      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-      $this->cfg = $cfg;
-      $this->setHash($cfg['args']);
-
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
+      $this->createPDO(...$cfg['args']);
+      if ($this->pdo) {
+        $this->setHash($cfg['args']);
+        $this->cfg = $cfg;
+        if (isset($cfg['on_error'])) {
+          $this->on_error = $cfg['on_error'];
+        }
       }
-
-      unset($cfg['pass']);
     }
     catch (PDOException $e) {
       $err = X::_("Impossible to create the connection") .
         " $cfg[engine] ".X::_("to")." {$this->host} "
         . X::_("with the following error") . " " . $e->getMessage();
-        X::log($cfg);
       throw new Exception($err);
     }
+  }
+
+  private function createPDO(...$args): PDO
+  {
+    $this->pdo = new PDO(...$args);
+    $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+    return $this->pdo;
   }
 
   /**
@@ -301,6 +300,28 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     return $this->pdo;
   }
 
+  public function ping(): bool
+  {
+    try {
+      $this->pdo->query('SELECT 1');
+      return true;
+    }
+    catch (\PDOException $e) {
+      return false;
+    }
+  }
+
+
+  public function reconnect(): bool
+  {
+    try {
+      $this->createPDO(...$this->cfg['args']);
+      return true;
+    }
+    catch (\PDOException $e) {
+      return false;
+    }
+  }
 
   /**
    * Returns the list of operators in the current language
@@ -651,6 +672,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $switch_to_fancy = true;
     }
 
+    $result = null;
     try {
       $result = $this->pdo->query(...func_get_args());
     }

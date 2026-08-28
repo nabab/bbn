@@ -286,9 +286,6 @@ class User extends DbCls implements Implementor
   /** @var mixed */
   public $prev_time;
 
-  /** @var array $class_cfg */
-  protected array $class_cfg;
-
   /** @var string */
   protected $cache_path;
 

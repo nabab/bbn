@@ -237,7 +237,7 @@ final class Output extends Basic {
         break;
 
       case 'js':
-        header('Content-type: text/javascript');
+        header('Content-type: application/javascript');
         echo $this->obj->content;
         break;
 
@@ -278,7 +278,23 @@ final class Output extends Basic {
 
       default:
         header('Content-type: text/html; charset=utf-8');
+        header(
+          "Content-Security-Policy: " .
+          "default-src 'self'; " .
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
+          "style-src 'self' 'unsafe-inline'; " .
+          "img-src 'self' data:; " .
+          "font-src 'self'; " .
+          "worker-src 'self'; " .
+          "connect-src 'self'; " .
+          "object-src 'none'; " .
+          "base-uri 'self'; " .
+          "frame-ancestors 'none'; " .
+          "form-action 'self';"
+          //" 'nonce-$nonce';"
+        );
         echo isset($this->obj->content) ? $this->obj->content : '';
+
     }
   }
 }

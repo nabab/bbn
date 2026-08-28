@@ -1033,8 +1033,7 @@ final class Mvc implements Api
         try {
           eval(' ?>' . $bbn_inc_content);
         } catch (Exception $e) {
-          error_log("Error for $bbn_inc_file: ". $e->getMessage());
-          X::logError($e->getCode(), $e->getMessage(), $bbn_inc_file, $e->getLine());
+          X::logError($e);
         }
       }
 

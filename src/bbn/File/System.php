@@ -1522,10 +1522,12 @@ class System extends Basic
       $res = $fn();
     }
     catch (Exception $e) {
-      X::logError($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+      X::logError($e);
+    }
+    finally {
+      restore_error_handler();
     }
 
-    restore_error_handler();
 
     return $res;
   }

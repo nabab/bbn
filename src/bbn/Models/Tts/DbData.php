@@ -167,6 +167,4 @@ trait DbData
 
     return $res;
   }
-
-
 }

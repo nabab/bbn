@@ -59,8 +59,15 @@ class Session
       $id = session_id();
     }
 
-    if (!$id) {
+    if ($id === '') {
+      return;
+    }
+
+    if ($id === false) {
       $save_path = session_save_path();
+      if (!str_starts_with($save_path, '/')) {
+        throw new Exception(X::_("The cache doesn't seem to be ready at %s", $save_path));
+      }
       if (!is_dir($save_path)) {
         throw new Exception(X::_("The session path %s doesn't exist", $save_path));
       }

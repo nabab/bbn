@@ -6,6 +6,7 @@
 
 namespace bbn\Cron;
 
+use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Basic;
 use bbn\Cron;
@@ -19,9 +20,9 @@ class Launcher extends Basic {
   use Config;
   use Filesystem;
 
-  protected $exe_path;
+  protected string $exe_path;
 
-  protected $cron;
+  protected Cron $cron;
 
   /**
    * Constructor

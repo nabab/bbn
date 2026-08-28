@@ -568,7 +568,7 @@ class Entity
         try {
           $d = $identity->pickOne($id, $this->getId(), true);
           if (!$d) {
-            throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
           }
           $res[$id] = [
             'state' => Cache::makeHash($d),
@@ -576,7 +576,7 @@ class Entity
           ];
         }
         catch (Exception $e) {
-          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class'] ?? ''));
+          X::log(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
         }
       }
     }
@@ -585,7 +585,7 @@ class Entity
         try {
           $d = $address->pickOne($id, $this->getId());
           if (!$d) {
-            throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
           }
           $res[$id] = [
             'state' => Cache::makeHash($d),
@@ -593,7 +593,7 @@ class Entity
           ];
         }
         catch (Exception $e) {
-          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+          X::logError($e);
         }
       }
     }
@@ -602,7 +602,7 @@ class Entity
         try {
           $d = $medias->getMediaInfo($id);
           if (!$d) {
-            throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
           }
           $res[$id] = [
             'state' => Cache::makeHash($d),
@@ -610,7 +610,7 @@ class Entity
           ];
         }
         catch (Exception $e) {
-          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+          X::log(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table), 'missing_rows');
         }
       }
     }
@@ -624,7 +624,8 @@ class Entity
             ];
           }
           if (!$d) {
-            throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            $e = new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+            throw $e;
           }
         }
         catch (Exception $e) {

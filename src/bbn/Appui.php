@@ -1514,7 +1514,8 @@ class Appui
           'text' => $this->_current['app_name'],
           'code' => $this->_current['app_name'],
         ]);
-        X::log(debug_backtrace());
+        X::logError($e);
+
         throw $e;
       }
 

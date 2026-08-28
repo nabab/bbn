@@ -56,11 +56,17 @@ class Cache extends Basic implements CacheInterface
 
   protected static string $sep = '/';
 
-  protected static $engine;
+  protected static string $instance;
 
   protected string $path;
 
   protected mixed $obj;
+
+  protected array $cfg;
+
+  protected string $engine;
+
+  protected int $ttl;
 
   protected $prefix;
 
@@ -74,7 +80,7 @@ class Cache extends Basic implements CacheInterface
    */
   public static function _file(string $key, string $path): string
   {
-    return self::_dir($key, $path).'/'.self::_sanitize(X::basename($key)).'.bbn.cache';
+    return self::_dir($key, $path) . '/' . self::_sanitize(X::basename($key)) . '.bbn.cache';
   }
 
   private static function setMaxTtl(): void
@@ -96,7 +102,7 @@ class Cache extends Basic implements CacheInterface
    */
   public static function makeHash($value): string
   {
-    if (is_object($value) || is_array($value)) {
+    if (is_object($value) || is_array($value) || !$value) {
       $value = serialize($value);
     }
 
@@ -125,8 +131,9 @@ class Cache extends Basic implements CacheInterface
     return self::$sep;
   }
 
-  public function getObj() {
-    return $this->obj;
+  public function getObj()
+  {
+    return $this->obj ?? null;
   }
 
 
@@ -143,7 +150,7 @@ class Cache extends Basic implements CacheInterface
     }
 
     if (Str::isInteger($ttl)) {
-      return (int)$ttl;
+      return (int) $ttl;
     }
 
     if (is_string($ttl)) {
@@ -178,7 +185,7 @@ class Cache extends Basic implements CacheInterface
   public static function getCache(?string $engine = null): static
   {
     self::_init($engine);
-    return self::$engine;
+    return self::$instance;
   }
 
 
@@ -194,22 +201,27 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-    /**
-     * Constructor - this is a singleton: it can't be called more then once.
-     *
-     * @param null|string $engine The type of engine to use
-     *
-     * @throws Exception
-     */
+  /**
+   * Constructor - this is a singleton: it can't be called more then once.
+   *
+   * @param null|string $engine The type of engine to use
+   *
+   * @throws Exception
+   */
+
+
+
   public function __construct(null|array|string $engine = null)
   {
     self::setMaxTtl();
+
     /** @todo APC doesn't work */
     $cfg = [];
+
+    // Determine engine and config
     if (!$engine) {
       $engine = defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files';
-    }
-    elseif (is_array($engine)) {
+    } elseif (is_array($engine)) {
       $cfg = $engine;
       $engine = $cfg['engine'] ?? (defined('BBN_CACHE_ENGINE') ? constant('BBN_CACHE_ENGINE') : 'files');
     }
@@ -220,58 +232,206 @@ class Cache extends Basic implements CacheInterface
       );
     }
 
-    if ((($engine === 'apc')) && function_exists('apcu_clear_cache')) {
+    // Store engine type for later use in reconnect/isConnected
+    $this->engine = $engine;
+    $this->cfg = $cfg;
+
+    // Attempt to initialize connection based on engine
+    if ($engine === 'apc' && function_exists('apcu_clear_cache')) {
       self::_set_type('apc');
-    }
-    elseif ((($engine === 'redis')) && class_exists("\\Redis")) {
+      // APC is local, no network connection needed. 
+      // We consider it "connected" if the extension exists.
+      $this->obj = true; // Placeholder to indicate success
+    } elseif ($engine === 'redis' && class_exists("\\Redis")) {
       self::setSeparator(':');
+
+      // Prepare Redis config
       $this->host = $cfg['host'] ?? (defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1');
       if (substr($this->host, 0, 1) === '[') {
         $this->host = json_decode($this->host);
       }
-      $this->port = $cfg['port'] ?? (defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('REDIS_PORT') ?: 6379)));
-      if (is_array($this->host)) {
-        $this->obj = new \RedisCluster(null, $this->host);
-      }
-      else {
-        $tmp = new \Redis();
-        try {
-          if ($tmp->connect($this->host, $this->port, 2.5)) {
-            $this->obj = $tmp;
-            $dbIndex = (int)(getenv('REDIS_DB') ?: 0);
-            $this->obj->select($dbIndex);
-          }
-        }
-        catch (Exception $e) {
-          X::log(X::_("Error while connecting to Redis server %s:%d: %s", $this->host, $this->port, $e->getMessage()), 'cache_connection');
-        }
+      $this->port = $cfg['port'] ?? (defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int) (getenv('REDIS_PORT') ?: 6379)));
+
+      // Try to connect
+      if (!$this->_connectRedis()) {
+        throw new Exception(X::_("Failed to connect to Redis. No fallback allowed."));
       }
 
-      if ($this->obj) {
-        $this->prefix = $cfg['prefix'] ?? (getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX'));
-        if (substr($this->prefix, -1) !== self::$sep) {
-          $this->prefix .= self::$sep;
-        }
-
-        if ($this->prefix) {
-          $this->obj->setOption(\Redis::OPT_PREFIX, $this->prefix);
-        }
-        self::_set_type('redis');
-      }
-    }
-    elseif ((($engine === 'memcache')) && class_exists("Memcached")) {
-      $this->obj = new \Memcached();
+    } elseif ($engine === 'memcache' && class_exists("Memcached")) {
       $this->host = defined('BBN_CACHE_HOST') ? constant('BBN_CACHE_HOST') : '127.0.0.1';
-      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int)(getenv('MEMCACHED_PORT') ?: 11211));
-      if ($this->obj->addServer($this->host, $this->port)) {
-        self::_set_type('memcache');
+      $this->port = defined('BBN_CACHE_PORT') ? constant('BBN_CACHE_PORT') : ((int) (getenv('MEMCACHED_PORT') ?: 11211));
+
+      // Try to connect
+      if (!$this->_connectMemcache()) {
+        throw new Exception(X::_("Failed to connect to Memcached. No fallback allowed."));
       }
+
+    } elseif ($engine === 'files' || $engine === null) {
+      // Files engine: check if path is valid
+      $path = Mvc::getCachePath();
+      if ($path && is_dir($path)) {
+        self::_set_type('files');
+        $this->obj = new \bbn\File\System();
+      } else {
+        throw new Exception(X::_("Invalid cache path for files engine. No fallback allowed."));
+      }
+    } else {
+      // Unknown engine or missing extension
+      throw new Exception(X::_("Unsupported or unavailable cache engine: %s", $engine));
     }
-    elseif ($this->path = Mvc::getCachePath()) {
-      self::_set_type('files');
-      $this->obj = new \bbn\File\System();
+
+    self::$is_init = true;
+  }
+
+  /**
+   * Checks if the current cache instance is connected and ready.
+   */
+  public function isConnected(): bool
+  {
+    if ($this->obj === null) {
+      return false;
+    }
+
+    switch (self::getType()) { // Assuming getType() returns the string type set by _set_type
+      case 'redis':
+        // For Redis, we can check if the object is still valid.
+        // A simple ping or checking if obj is an instance of Redis/RedisCluster
+        return $this->obj instanceof \Redis || $this->obj instanceof \RedisCluster;
+
+      case 'memcache':
+        return $this->obj instanceof \Memcached && count($this->obj->getServerList()) > 0;
+
+      case 'apc':
+        // APC is always "connected" if the extension is loaded
+        return function_exists('apcu_clear_cache');
+
+      case 'files':
+        return $this->obj instanceof \bbn\File\System && is_dir(Mvc::getCachePath());
+
+      default:
+        return false;
     }
   }
+
+  /**
+   * Attempts to reconnect the cache engine.
+   * Returns true on success, false on failure.
+   */
+  public function reconnect(): bool
+  {
+    if ($this->isConnected()) {
+      return true; // Already connected
+    }
+
+    switch ($this->engine) {
+      case 'redis':
+        return $this->_connectRedis();
+
+      case 'memcache':
+        return $this->_connectMemcache();
+
+      case 'apc':
+        // APC doesn't need reconnection, just check if available
+        return function_exists('apcu_clear_cache');
+
+      case 'files':
+        // Files don't "disconnect", but we can re-instantiate the object
+        $path = Mvc::getCachePath();
+        if ($path && is_dir($path)) {
+          self::_set_type('files');
+          $this->obj = new \bbn\File\System();
+          return true;
+        }
+        return false;
+
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Private helper to handle Redis connection logic.
+   */
+  private function _connectRedis(): bool
+  {
+    try {
+      if (is_array($this->host)) {
+        // Cluster mode
+        $this->obj = new \RedisCluster(null, $this->host);
+
+        // Optional: Verify cluster is reachable
+        if ($this->obj->getServers() === false) {
+          return false;
+        }
+      } else {
+        // Single node
+        $tmp = new \Redis();
+        if (!$tmp->connect($this->host, $this->port, 2.5)) {
+          X::log(X::_("Error while connecting to Redis server %s:%d", $this->host, $this->port), 'cache_connection');
+          return false;
+        }
+
+        $dbIndex = (int) (getenv('REDIS_DB') ?: 0);
+        $tmp->select($dbIndex);
+        $this->obj = $tmp;
+      }
+
+      // Set prefix if configured
+      $prefix = $this->cfg['prefix'] ?? (getenv('REDIS_PREFIX') ?: constant('BBN_APP_PREFIX'));
+      if ($prefix) {
+        if (substr($prefix, -1) !== self::$sep) {
+          $prefix .= self::$sep;
+        }
+        $this->obj->setOption(\Redis::OPT_PREFIX, $prefix);
+      }
+
+      self::_set_type('redis');
+      return true;
+
+    } catch (Exception $e) {
+      X::log(X::_("Error while connecting to Redis server %s:%d: %s", $this->host, $this->port, $e->getMessage()), 'cache_connection');
+      return false;
+    }
+  }
+
+  /**
+   * Private helper to handle Memcached connection logic.
+   */
+  private function _connectMemcache(): bool
+  {
+    try {
+      $this->obj = new \Memcached();
+
+      // Clear existing servers if reconnecting
+      $this->obj->resetServerList();
+
+      if (!$this->obj->addServer($this->host, $this->port)) {
+        X::log(X::_("Error while adding Memcached server %s:%d", $this->host, $this->port), 'cache_connection');
+        return false;
+      }
+
+      // Optional: Verify connection by getting a simple key or checking stats
+      // For simplicity, we assume addServer success means it's ready.
+      // You can uncomment below for stricter check:
+      /*
+      if ($this->obj->getStats() === false) {
+          return false;
+      }
+      */
+
+      self::_set_type('memcache');
+      return true;
+
+    } catch (Exception $e) {
+      X::log(X::_("Error while connecting to Memcached: %s", $e->getMessage()), 'cache_connection');
+      return false;
+    }
+  }
+
+
+
+
+
 
   public function getNumHosts(): int
   {
@@ -282,25 +442,20 @@ class Cache extends Basic implements CacheInterface
   {
     if (self::$type === 'files') {
       return $this->obj->isDir($this->path);
-    }
-    elseif (self::$type === 'redis') {
+    } elseif (self::$type === 'redis') {
       try {
         return is_array($this->host) ? $this->obj->ping($this->host[0]) : $this->obj->ping();
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         return false;
       }
-    }
-    elseif (self::$type === 'memcache') {
+    } elseif (self::$type === 'memcache') {
       try {
         $stats = $this->obj->getStats();
         return is_array($stats) && count($stats) > 0;
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         return false;
       }
-    }
-    elseif (self::$type === 'apc') {
+    } elseif (self::$type === 'apc') {
       return function_exists('\\apcu_store');
     }
 
@@ -320,22 +475,21 @@ class Cache extends Basic implements CacheInterface
     if (array_key_exists($key, $this->localCache)) {
       if (time() < $this->localCache[$key]['expire']) {
         return true;
-      }
-      else {
+      } else {
         unset($this->localCache[$key]);
       }
     }
 
     if (self::$type) {
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
-          return (bool)call_user_func('\\apcu_exists', $key);
+          return (bool) call_user_func('\\apcu_exists', $key);
 
         case 'redis':
           return $this->obj->exists($key);
 
         case 'memcache':
-          return (bool)$this->obj->get($key);
+          return (bool) $this->obj->get($key);
 
         case 'files':
           $file = self::_file($key, $this->path);
@@ -351,11 +505,10 @@ class Cache extends Basic implements CacheInterface
   {
     $t = $this->info($key);
     if ($t) {
-      $newKey = "{$key}".self::$sep."{$t['version']}";
+      $newKey = "{$key}" . self::$sep . "{$t['version']}";
       if ($this->hasRaw($newKey)) {
         return true;
-      }
-      else {
+      } else {
         $this->delete($key);
       }
     }
@@ -381,19 +534,16 @@ class Cache extends Basic implements CacheInterface
       $this->localCache = [];
       if (self::$type === 'apc') {
         return call_user_func('\\apcu_clear_cache');
-      }
-      elseif (self::$type === 'redis') {
+      } elseif (self::$type === 'redis') {
         return $this->obj->flushDB(true);
-      }
-      elseif (self::$type === 'memcache') {
+      } elseif (self::$type === 'memcache') {
         return $this->obj->flush();
-      }
-      elseif (self::$type === 'files') {
+      } elseif (self::$type === 'files') {
         return $this->obj->delete($this->path, true);
       }
     }
 
-    $st = rtrim(trim((string)$start), '*') . '*';
+    $st = rtrim(trim((string) $start), '*') . '*';
     $count = 0;
     foreach ($this->find($st) as $keys) {
       if ($this->deleteRaw(...$keys)) {
@@ -418,7 +568,7 @@ class Cache extends Basic implements CacheInterface
    */
   public function clear(): bool
   {
-    return (bool)$this->deleteAll();
+    return (bool) $this->deleteAll();
   }
 
 
@@ -461,10 +611,13 @@ class Cache extends Basic implements CacheInterface
     if (array_key_exists($key, $this->localCache)) {
       if (time() < $this->localCache[$key]['expire']) {
         return $this->localCache[$key]['value'];
-      }
-      else {
+      } else {
         unset($this->localCache[$key]);
       }
+    }
+
+    if (!isset(self::$type)) {
+      throw new Exception(X::_("The cache engine is not set"));
     }
 
     switch (self::$type) {
@@ -476,8 +629,7 @@ class Cache extends Basic implements CacheInterface
         if (call_user_func('\\apcu_exists', $key)) {
           try {
             $t = call_user_func('\\apcu_fetch', $key);
-          }
-          catch (Exception $e) {
+          } catch (Exception $e) {
             return null;
           }
         }
@@ -485,8 +637,7 @@ class Cache extends Basic implements CacheInterface
       case 'redis':
         try {
           $tmp = $this->obj->get($key);
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
           return null;
         }
         if ($tmp) {
@@ -498,8 +649,7 @@ class Cache extends Basic implements CacheInterface
         try {
           $tmp = $this->obj->get($key);
           $rc = $this->obj->getResultCode();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
           $this->log(X::_("Error while fetching cache for key %s: %s", $key, $e->getMessage()));
           return null;
         }
@@ -534,7 +684,7 @@ class Cache extends Basic implements CacheInterface
    * @param mixed  $notFoundValue What to return if the value is not found
    * @return mixed
    */
-  public function get(string $key, $notFoundValue = null): mixed
+  public function get($key, $notFoundValue = null): mixed
   {
     if ($notFoundValue && \is_int($notFoundValue)) {
       throw new Exception(X::_("The not found value shouldn't be an integer, you must have forgotten to unset the ttl parameter on get"));
@@ -555,7 +705,7 @@ class Cache extends Basic implements CacheInterface
       $this->delete($key);
       return $notFoundValue;
     }
-    
+
     return $this->getRaw($payloadKey) ?? $notFoundValue;
   }
 
@@ -586,13 +736,11 @@ class Cache extends Basic implements CacheInterface
       $resPayload = $this->deleteRaw($payloadKey);
       $resInfo = $this->deleteRaw($infoKey);
       $this->removeKey($key);
-      return (bool)($resPayload || $resInfo);
-    }
-    catch (Exception $e) {
+      return (bool) ($resPayload || $resInfo);
+    } catch (Exception $e) {
       $this->log(X::_("Error while setting cache for key %s: %s", $key, $e->getMessage()));
       return false;
-    }
-    finally {
+    } finally {
       $this->releaseLock($key);
     }
   }
@@ -617,7 +765,7 @@ class Cache extends Basic implements CacheInterface
     $ret = false;
 
     if (self::$type) {
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
           $ret = call_user_func('\\apcu_delete', $keys);
           break;
@@ -634,10 +782,10 @@ class Cache extends Basic implements CacheInterface
             $file = self::_file($key, $this->path);
             if ($this->obj->isFile($file) && $this->obj->delete($file)) {
               $num++;
-            }   
+            }
           }
 
-          $ret = (bool)$num;
+          $ret = (bool) $num;
           break;
       }
 
@@ -668,7 +816,7 @@ class Cache extends Basic implements CacheInterface
           'ttl' => $ttl
         ];
       }
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
           if (!function_exists('\\apcu_store')) {
             throw new Exception(X::_("The APC extension doesn't seem to be installed"));
@@ -683,7 +831,9 @@ class Cache extends Basic implements CacheInterface
           break;
         case 'memcache':
           $ret = $this->obj->set(
-            $key, serialize($val), $ttl ?: self::$max_ttl
+            $key,
+            serialize($val),
+            $ttl ?: self::$max_ttl
           );
           break;
         case 'files':
@@ -719,12 +869,10 @@ class Cache extends Basic implements CacheInterface
     $res = false;
     if ($isFree = $this->setLock($key)) {
       try {
-        $res = (bool)$this->commit($key, $val, $ttl);
-      }
-      catch (Exception $e) {
+        $res = (bool) $this->commit($key, $val, $ttl);
+      } catch (Exception $e) {
         $this->log(X::_("Error while setting cache for key %s: %s", $key, $e->getMessage()));
-      }
-      finally {
+      } finally {
         $this->releaseLock($key);
       }
     }
@@ -767,12 +915,10 @@ class Cache extends Basic implements CacheInterface
           $data = $fn();
           $this->commit($key, $data, $ttl);
           return $data;
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
           $this->log(X::_("Error while building cache for key %s: %s", $key, $e->getMessage()));
           return null;
-        }
-        finally {
+        } finally {
           $this->releaseLock($key);
         }
       }
@@ -872,7 +1018,7 @@ class Cache extends Basic implements CacheInterface
   public function stat()
   {
     if (self::$type) {
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
           return call_user_func('\\apcu_cache_info');
         case 'memcache':
@@ -890,16 +1036,16 @@ class Cache extends Basic implements CacheInterface
    * @param string $dir
    * @return array
    */
-  public function items(?string $dir = null): array 
+  public function items(?string $dir = null): array
   {
     if (self::$type) {
       $emptyDir = empty($dir);
       $sep = self::$sep;
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
-          $all  = call_user_func('\\apcu_cache_info');
+          $all = call_user_func('\\apcu_cache_info');
           $list = [];
-          foreach ($all['cache_list'] as $a){
+          foreach ($all['cache_list'] as $a) {
             array_push($list, $a['info']);
           }
 
@@ -908,16 +1054,16 @@ class Cache extends Basic implements CacheInterface
         case 'redis':
           $list = [];
           $arr_keys = $this->getKeys($dir ?: '');
-          foreach($arr_keys as $str_key) {
-            $list[] = $dir ? $dir.$sep.$str_key : $str_key;
+          foreach ($arr_keys as $str_key) {
+            $list[] = $dir ? $dir . $sep . $str_key : $str_key;
           }
 
           return $list;
 
         case 'memcache':
           $list = [];
-          $arr  = $this->getAllKeysMemCache();
-          foreach ($arr as $key){
+          $arr = $this->getAllKeysMemCache();
+          foreach ($arr as $key) {
             if ($emptyDir || (mb_strpos($key, $dir) === 0)) {
               $list[] = $key;
             }
@@ -928,22 +1074,23 @@ class Cache extends Basic implements CacheInterface
 
         case 'files':
           $cache =& $this;
-          $list  = array_filter(
+          $list = array_filter(
             array_map(
               function ($a) use ($dir) {
-                return ( $dir ? "$dir/" : '' ).X::basename($a, '.bbn.cache');
-              }, $this->obj->getFiles($this->path.($dir ? "/$dir" : ''))
+                return ($dir ? "$dir/" : '') . X::basename($a, '.bbn.cache');
+              },
+              $this->obj->getFiles($this->path . ($dir ? "/$dir" : ''))
             ),
             function ($a) use ($cache) {
               // Only gives valid cache
               return $cache->has($a);
             }
           );
-          $dirs  = $this->obj->getDirs($this->path.($dir ? "/$dir" : ''));
+          $dirs = $this->obj->getDirs($this->path . ($dir ? "/$dir" : ''));
           if (count($dirs)) {
-            foreach ($dirs as $d){
-              $res = $this->items($dir ? $dir.self::$sep.X::basename($d) : X::basename($d));
-              foreach ($res as $r){
+            foreach ($dirs as $d) {
+              $res = $this->items($dir ? $dir . self::$sep . X::basename($d) : X::basename($d));
+              foreach ($res as $r) {
                 array_push($list, $r);
               }
             }
@@ -983,7 +1130,7 @@ class Cache extends Basic implements CacheInterface
     $nowSec = time();
     $now = microtime(true);
     $next = "{$nowSec}|1";
-    $ttl  = self::ttl($ttl);
+    $ttl = self::ttl($ttl);
     $realTtl = $ttl ?: self::$max_ttl;
     $mvc->getTimer()->start("cache_multiple_prepare");
     foreach ($values as $key => $val) {
@@ -1042,9 +1189,8 @@ class Cache extends Basic implements CacheInterface
         $this->obj->mSet($batch);
       }
 
-      $res = (bool)$this->obj->exec();
-    }
-    else {
+      $res = (bool) $this->obj->exec();
+    } else {
       foreach ($todo as $k => $v) {
         $this->setRaw($k, unserialize($v), 0);
       }
@@ -1056,7 +1202,7 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  public function deleteMultiple(iterable $keys): bool
+  public function deleteMultiple($keys): bool
   {
     $sep = self::$sep;
     $all = [];
@@ -1104,11 +1250,11 @@ class Cache extends Basic implements CacheInterface
   public function browse(string $path = ''): array
   {
     if (self::$type) {
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
-          $all  = call_user_func('\\apcu_cache_info');
+          $all = call_user_func('\\apcu_cache_info');
           $list = [];
-          foreach ($all['cache_list'] as $a){
+          foreach ($all['cache_list'] as $a) {
             array_push($list, $a['info']);
           }
 
@@ -1117,17 +1263,15 @@ class Cache extends Basic implements CacheInterface
           $keys = $this->getKeys($path);
           $list = [];
           $done = [];
-          foreach ($keys as $i => $k){
+          foreach ($keys as $i => $k) {
             $bits = X::split($k, self::$sep);
             $idx = 0;
             if (empty($path)) {
               $name = $bits[0];
-            }
-            elseif (mb_strpos($k, $path) === 0) {
+            } elseif (mb_strpos($k, $path) === 0) {
               $idx = count(X::split(trim($path, self::$sep), self::$sep));
               $name = $bits[$idx];
-            }
-            else {
+            } else {
               continue;
             }
 
@@ -1148,10 +1292,10 @@ class Cache extends Basic implements CacheInterface
                 $subdone = [];
                 $num += $isFolder ? count(array_filter(
                   $keys,
-                  function($a, $j) use ($i, $fullName, $idx, &$subdone) {
+                  function ($a, $j) use ($i, $fullName, $idx, &$subdone) {
                     if (($i !== $j) && (strpos($a, $fullName) === 0)) {
                       $bits = X::split($a, self::$sep);
-                      $subname = $bits[$idx+1];
+                      $subname = $bits[$idx + 1];
                       if (!in_array($subname, $subdone)) {
                         $subdone[] = $subname;
                         return true;
@@ -1160,7 +1304,7 @@ class Cache extends Basic implements CacheInterface
 
                     return false;
                   },
-                  ARRAY_FILTER_USE_BOTH 
+                  ARRAY_FILTER_USE_BOTH
                 )) : 0;
               }
 
@@ -1168,7 +1312,7 @@ class Cache extends Basic implements CacheInterface
                 'text' => $name,
                 'key' => $k,
                 'nodePath' => $fullName,
-                'items'=> [],
+                'items' => [],
                 'num' => $num,
                 'path' => array_slice(X::split($fullName, self::$sep), 0, -1),
                 'folder' => $isFolder
@@ -1181,17 +1325,15 @@ class Cache extends Basic implements CacheInterface
           $keys = $this->getAllKeysMemCache();
           $list = [];
           $done = [];
-          foreach ($keys as $i => $k){
+          foreach ($keys as $i => $k) {
             $bits = X::split($k, self::$sep);
             $idx = 0;
             if (empty($path)) {
               $name = $bits[0];
-            }
-            elseif (mb_strpos($k, $path) === 0) {
+            } elseif (mb_strpos($k, $path) === 0) {
               $idx = count(X::split(trim($path, self::$sep), self::$sep));
               $name = $bits[$idx];
-            }
-            else {
+            } else {
               continue;
             }
 
@@ -1212,10 +1354,10 @@ class Cache extends Basic implements CacheInterface
                 $subdone = [];
                 $num += $isFolder ? count(array_filter(
                   $keys,
-                  function($a, $j) use ($i, $fullName, $idx, &$subdone) {
+                  function ($a, $j) use ($i, $fullName, $idx, &$subdone) {
                     if (($i !== $j) && (strpos($a, $fullName) === 0)) {
                       $bits = X::split($a, self::$sep);
-                      $subname = $bits[$idx+1];
+                      $subname = $bits[$idx + 1];
                       if (!in_array($subname, $subdone)) {
                         $subdone[] = $subname;
                         return true;
@@ -1224,7 +1366,7 @@ class Cache extends Basic implements CacheInterface
 
                     return false;
                   },
-                  ARRAY_FILTER_USE_BOTH 
+                  ARRAY_FILTER_USE_BOTH
                 )) : 0;
               }
 
@@ -1232,7 +1374,7 @@ class Cache extends Basic implements CacheInterface
                 'text' => $name,
                 'key' => $k,
                 'nodePath' => $fullName,
-                'items'=> [],
+                'items' => [],
                 'num' => $num,
                 'path' => X::split(dirname($fullName), self::$sep),
                 'folder' => $isFolder
@@ -1249,16 +1391,16 @@ class Cache extends Basic implements CacheInterface
             foreach ($content as $nodePath) {
               $arr = X::split($nodePath, '/');
               $element = array_last($arr);
-              $ele =  [
+              $ele = [
                 'text' => $element,
                 //'path' => [],
                 'nodePath' => $nodePath,
-                'items'=> [],
+                'items' => [],
                 'num' => $this->obj->isDir($nodePath) ? count($this->obj->getFiles($nodePath, true)) : 0,
                 'folder' => $this->obj->isDir($nodePath)
               ];
-        
-        
+
+
               if ($this->obj->isDir($nodePath)) {
                 $paths = $element !== $nodePath ? X::split($nodePath, '/') : [];
                 $ele['path'] = count($paths) ? array_splice($paths, 0, count($paths) - 1) : $paths;
@@ -1269,7 +1411,7 @@ class Cache extends Basic implements CacheInterface
           }
 
           $this->obj->back();
-          return $this->obj->getFiles($this->path.($path ? "/$path" : ''));
+          return $this->obj->getFiles($this->path . ($path ? "/$path" : ''));
       }
     }
 
@@ -1279,7 +1421,7 @@ class Cache extends Basic implements CacheInterface
   protected function commit($key, $val, $ttl): ?string
   {
     $this->addKey($key);
-    $ttl  = self::ttl($ttl);
+    $ttl = self::ttl($ttl);
     $realTtl = $ttl ?: self::$max_ttl;
     $sep = self::$sep;
     $infoKey = "{$key}{$sep}__info";
@@ -1291,16 +1433,15 @@ class Cache extends Basic implements CacheInterface
     $oldVersion = null;
     $num = 0;
     if ($current) {
-      $num = (int)($current['num'] ?? 0);
+      $num = (int) ($current['num'] ?? 0);
       if (($current['hash'] ?? null) === $hash && !empty($current['version'])) {
         // Same value, keep same version but refresh actual payload TTL too
         $next = $current['version'];
-      }
-      else {
+      } else {
         $oldVersion = $current['version'] ?? null;
         if ($oldVersion) {
           [$oldTime, $oldNum] = X::split($oldVersion, '|');
-          $versionNum = ((int)$oldNum) + (($oldTime == $nowSec) ? 1 : 0);
+          $versionNum = ((int) $oldNum) + (($oldTime == $nowSec) ? 1 : 0);
           $next = "{$nowSec}|{$versionNum}";
         }
       }
@@ -1363,15 +1504,15 @@ class Cache extends Basic implements CacheInterface
    * @param string $pattern
    * @return Generator
    */
-  public function find(?string $pattern): Generator 
+  public function find(?string $pattern): Generator
   {
     if (self::$type) {
       $emptyDir = empty($pattern);
-      switch (self::$type){
+      switch (self::$type) {
         case 'apc':
-          $all  = call_user_func('\\apcu_cache_info');
+          $all = call_user_func('\\apcu_cache_info');
           $list = [];
-          foreach ($all['cache_list'] as $a){
+          foreach ($all['cache_list'] as $a) {
             array_push($list, $a['info']);
           }
 
@@ -1388,7 +1529,7 @@ class Cache extends Basic implements CacheInterface
 
             // Redis may return empty results, so protect against that
             if (!empty($arr_keys)) {
-              foreach($arr_keys as $str_key) {
+              foreach ($arr_keys as $str_key) {
                 $currentList[] = mb_substr($str_key, $prefixLength);
               }
             }
@@ -1400,8 +1541,8 @@ class Cache extends Basic implements CacheInterface
 
         case 'memcache':
           $list = [];
-          $arr  = $this->getAllKeysMemCache();
-          foreach ($arr as $key){
+          $arr = $this->getAllKeysMemCache();
+          foreach ($arr as $key) {
             if ($emptyDir || (mb_strpos($key, $pattern) === 0)) {
               $list[] = $key;
             }
@@ -1412,22 +1553,23 @@ class Cache extends Basic implements CacheInterface
 
         case 'files':
           $cache =& $this;
-          $list  = array_filter(
+          $list = array_filter(
             array_map(
               function ($a) use ($pattern) {
-                return ( $pattern ? "$pattern/" : '' ).X::basename($a, '.bbn.cache');
-              }, $this->obj->getFiles($this->path.($pattern ? "/$pattern" : ''))
+                return ($pattern ? "$pattern/" : '') . X::basename($a, '.bbn.cache');
+              },
+              $this->obj->getFiles($this->path . ($pattern ? "/$pattern" : ''))
             ),
             function ($a) use ($cache) {
               // Only gives valid cache
               return $cache->has($a);
             }
           );
-          $dirs  = $this->obj->getDirs($this->path.($pattern ? "/$pattern" : ''));
+          $dirs = $this->obj->getDirs($this->path . ($pattern ? "/$pattern" : ''));
           if (count($dirs)) {
-            foreach ($dirs as $d){
-              $res = $this->items($pattern ? $pattern.self::$sep.X::basename($d) : X::basename($d));
-              foreach ($res as $r){
+            foreach ($dirs as $d) {
+              $res = $this->items($pattern ? $pattern . self::$sep . X::basename($d) : X::basename($d));
+              foreach ($res as $r) {
                 array_push($list, $r);
               }
             }
@@ -1569,12 +1711,10 @@ class Cache extends Basic implements CacheInterface
         if (count($indexes)) {
           $this->setRaw($indexKey, array_values($indexes), 0);
           break;
-        }
-        else {
+        } else {
           $this->deleteRaw($indexKey);
         }
-      }
-      else {
+      } else {
         break;
       }
     }
@@ -1586,8 +1726,7 @@ class Cache extends Basic implements CacheInterface
       array_splice($rootIndexes, $pos, 1);
       if (count($rootIndexes)) {
         $this->setRaw('__keys', array_values($rootIndexes), 0);
-      }
-      else {
+      } else {
         $this->deleteRaw('__keys');
       }
     }
@@ -1622,61 +1761,62 @@ class Cache extends Basic implements CacheInterface
   }
 
 
-  private function getAllKeysMemCache() {
+  private function getAllKeysMemCache()
+  {
     $allKeys = [];
     $sock = fsockopen($this->host, $this->port, $errno, $errstr);
     if ($sock === false) {
-        throw new Exception("Error connection to server {$this->host} on port {$this->port}: ({$errno}) {$errstr}");
+      throw new Exception("Error connection to server {$this->host} on port {$this->port}: ({$errno}) {$errstr}");
     }
 
     if (fwrite($sock, "stats items\n") === false) {
-        throw new Exception("Error writing to socket");
+      throw new Exception("Error writing to socket");
     }
 
     $slabCounts = [];
     while (($line = fgets($sock)) !== false) {
-        $line = trim($line);
-        if ($line === 'END') {
-            break;
-        }
+      $line = trim($line);
+      if ($line === 'END') {
+        break;
+      }
 
-        // STAT items:8:number 3
-        if (preg_match('!^STAT items:(\d+):number (\d+)$!', $line, $matches)) {
-            $slabCounts[$matches[1]] = (int)$matches[2];
-        }
+      // STAT items:8:number 3
+      if (preg_match('!^STAT items:(\d+):number (\d+)$!', $line, $matches)) {
+        $slabCounts[$matches[1]] = (int) $matches[2];
+      }
     }
 
     foreach ($slabCounts as $slabNr => $slabCount) {
-        if (fwrite($sock, "lru_crawler metadump {$slabNr}\n") === false) {
-            throw new Exception('Error writing to socket');
+      if (fwrite($sock, "lru_crawler metadump {$slabNr}\n") === false) {
+        throw new Exception('Error writing to socket');
+      }
+
+      $count = 0;
+      while (($line = fgets($sock)) !== false) {
+        $line = trim($line);
+        if ($line === 'END') {
+          break;
         }
 
-        $count = 0;
-        while (($line = fgets($sock)) !== false) {
-            $line = trim($line);
-            if ($line === 'END') {
-                break;
-            }
-
-            // key=foobar exp=1596440293 la=1596439293 cas=8492 fetch=no cls=24 size=14908
-            if (preg_match('!^key=(\S+)!', $line, $matches)) {
-                $name = urldecode($matches[1]);
-                if ($this->has($name)) {
-                  $allKeys[] = $name;
-                  $count++;
-                }
-            }
+        // key=foobar exp=1596440293 la=1596439293 cas=8492 fetch=no cls=24 size=14908
+        if (preg_match('!^key=(\S+)!', $line, $matches)) {
+          $name = urldecode($matches[1]);
+          if ($this->has($name)) {
+            $allKeys[] = $name;
+            $count++;
+          }
         }
+      }
 
-//        if ($count !== $slabCount) {
+      //        if ($count !== $slabCount) {
 //            throw new Exception("Surprise, got {$count} keys instead of {$slabCount} keys");
 //        }
     }
 
     if (fclose($sock) === false) {
-        throw new Exception('Error closing socket');
+      throw new Exception('Error closing socket');
     }
-    
+
     return $allKeys;
   }
 
@@ -1687,7 +1827,7 @@ class Cache extends Basic implements CacheInterface
   private static function _init(?string $engine = null): int
   {
     if (!self::$is_init) {
-      self::$engine  = new Cache($engine);
+      self::$instance = new Cache($engine);
       self::$is_init = 1;
     }
 
@@ -1727,8 +1867,7 @@ class Cache extends Basic implements CacheInterface
 
     if (empty($dir)) {
       return $path;
-    }
-    elseif (Str::sub($dir, -1) === '/') {
+    } elseif (Str::sub($dir, -1) === '/') {
       $dir = Str::sub($dir, 0, -1);
     }
 
@@ -1739,7 +1878,7 @@ class Cache extends Basic implements CacheInterface
         str_replace(
           '\\',
           '/',
-          str_replace('//', '/', $path.$dir)
+          str_replace('//', '/', $path . $dir)
         )
       )
     );

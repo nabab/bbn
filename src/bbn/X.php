@@ -3,6 +3,7 @@
 namespace bbn;
 
 use Exception;
+use Error;
 use InvalidArgumentException;
 use Throwable;
 use stdClass;
@@ -221,125 +222,267 @@ class X
   /**
    * Puts the PHP errors into a JSON file.
    *
-   * @param string  $errno  The text to save.
-   * @param string  $errstr The file's name, default: "misc".
-   * @param $errfile
-   * @param $errline
+   * @param int|Exception|Error $errno   The error number, default: 0.
+   * @param string              $errstr     The error text.
+   * @param ?string             $errfile The file in which the error occurred.
+   * @param ?int                $errline The line number where the error occurred.
    * @return void
    */
-  public static function logError($errno, $errstr, $errfile, $errline): void
-  {
-    if (is_dir(Mvc::getTmpPath() . 'logs')) {
-      $file      = Mvc::getTmpPath() . 'logs/_php_error.json';
-      $lock      = Mvc::getTmpPath() . 'logs/_php_error.lock';
-      $units      = Mvc::getTmpPath() . 'logs/bits';
-      if (!is_dir($units)) {
-        @mkdir($units, 0777, true);
-      }
-      $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
-      foreach ($backtrace as &$b) {
-        if (!empty($b['file'])) {
-          $b['file'] = str_replace(constant('BBN_APP_PATH'), '', $b['file']);
+public static function logError(int|Exception|Error $errno, string $errstr = '', ?string $errfile = null, ?int $errline = null): void
+{
+    // Respect error_reporting level
+    if ($errno instanceof \Exception || $errno instanceof \Error) {
+        $code = (int)$errno->getCode();
+        if (!(error_reporting() & $code)) {
+            return;
         }
-      }
-
-      $r = false;
-      $mic = microtime(true);
-      $unitFile = $units.'/'.((string)$mic).'.txt';
-      file_put_contents($unitFile, serialize([
-        $errno,
-        $errstr,
-        str_replace(constant('BBN_APP_PATH'), '', $errfile),
-        $errline,
-        $mic,
-        $backtrace
-      ]));
-
-      $fp = @fopen($lock, 'x');
-      if ($fp !== false) {
-        fwrite($fp, '1');
-        fclose($fp);
-        if (is_file($file)) {
-          $r = json_decode(file_get_contents($file), 1);
-        }
-  
-        if (!$r) {
-          $r = [];
-        }
-
-        if ($all = scandir($units)) {
-          $corresp = [];
-          foreach ($all as $f) {
-            if ($f === '.' || $f === '..') {
-              continue;
-            }
-
-            [$errno, $errstr, $errfile, $errline, $time, $backtrace] = unserialize(file_get_contents($units.'/'.$f));
-            $t = date('Y-m-d H:i:s', round($time));
-            if (isset($corresp["$errno|$errstr|$errfile|$errline"])) {
-              $idx = $corresp["$errno|$errstr|$errfile|$errline"];
-            }
-            else {
-              $idx     = self::search(
-                $r,
-                [
-                  'type' => $errno,
-                  'error' => $errstr,
-                  'file' => $errfile,
-                  'line' => $errline
-                ]
-              );
-            }
-            if ($idx !== null) {
-              $r[$idx]['count']++;
-              $r[$idx]['last_date'] = $t;
-              $r[$idx]['backtrace'] = $backtrace;
-            } else {
-              $idx = count($r);
-              $r[] = [
-                'first_date' => $t,
-                'last_date' => $t,
-                'count' => 1,
-                'type' => $errno,
-                'error' => $errstr,
-                'file' => $errfile,
-                'line' => $errline,
-                'backtrace' => $backtrace,
-                'request' => ''
-                //'context' => $context
-              ];
-            }
-            $corresp["$errno|$errstr|$errfile|$errline"] = $idx;
-            unlink($units.'/'.$f);
-          }
-    
-    
-          self::sortBy($r, 'last_date', 'DESC');
-          file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
-          unlink($lock);
-        }
-      }
+        $errfile = $errno->getFile();
+        $errline = $errno->getLine();
+        $errstr  = $errno->getMessage();
+        $errno   = $code;
     } else {
-      throw new Exception(X::_("Impossible to write the error log file in %s", Mvc::getTmpPath() . 'logs'));
+        if (!(error_reporting() & $errno)) {
+            return;
+        }
     }
-  }
 
-  public static function logException(Throwable $err, bool $throw = true): void
+    // Build backtrace (strip app path prefix for readability)
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
+    foreach ($backtrace as &$b) {
+        if (!empty($b['file'])) {
+            $b['file'] = str_replace(constant('BBN_APP_PATH'), '', $b['file']);
+        }
+    }
+    unset($b);
+
+    // Generate a unique microtimestamp-based filename component
+    [$micro, $tst] = X::split(microtime(), ' ');
+    $mic = $tst . substr($micro, 2, -2); // e.g., "1700000000" + "123456"
+
+    $logsDir   = Mvc::getDataPath() . 'logs';
+    $bitsDir   = Mvc::getTmpPath() . 'logs/bits';
+    $lockFile  = Mvc::getTmpPath() . 'logs/_php_error.lock';
+    $summaryFile = $logsDir . '/_php_error.json';
+
+    // Ensure directories exist
+    if (!is_dir($bitsDir)) {
+        @mkdir($bitsDir, 0777, true);
+    }
+    if (!is_dir(dirname($lockFile))) {
+        @mkdir(dirname($lockFile), 0777, true);
+    }
+
+    // --- Step 1: Write the individual error "bit" file ---
+    $unitNum = 1;
+    $unitFileMask = $bitsDir . '/' . $mic . '-%d.json';
+    $fp = null;
+
+    do {
+        $unitFile = sprintf($unitFileMask, $unitNum);
+        $fp = @fopen($unitFile, 'x'); // exclusive create — fails if exists
+        if ($fp === false) {
+            $unitNum++;
+            // Safety: don't loop forever
+            if ($unitNum > 1000) {
+                error_log("logError: could not allocate unit file after 1000 attempts");
+                return;
+            }
+        }
+    } while ($fp === false);
+
+    $bitData = [
+        'errno'     => $errno,
+        'errstr'    => $errstr,
+        'errfile'   => str_replace(constant('BBN_APP_PATH'), '', (string)$errfile),
+        'errline'   => $errline,
+        'time'      => $mic,           // full microtimestamp string for ordering
+        'backtrace' => $backtrace,
+    ];
+
+    fwrite($fp, json_encode($bitData, JSON_UNESCAPED_SLASHES));
+    fclose($fp);
+
+    // --- Step 2: Acquire lock and synthesize bits into summary file ---
+    self::synthesizeBits($bitsDir, $summaryFile, $lockFile);
+}
+
+/**
+ * Acquires an exclusive lock, processes all bit files in the bits directory,
+ * merges them into the summary JSON, then releases the lock.
+ */
+private static function synthesizeBits(string $bitsDir, string $summaryFile, string $lockFile): void
+{
+    // Open (or create) the lock file for exclusive locking
+    $lockFp = @fopen($lockFile, 'c'); // 'c' = open/create without truncating
+    if ($lockFp === false) {
+        error_log("logError: failed to open lock file: " . $lockFile);
+        return;
+    }
+
+    // Try to acquire exclusive non-blocking lock first
+    $acquired = flock($lockFp, LOCK_EX | LOCK_NB);
+
+    if (!$acquired) {
+        // Another process holds the lock. 
+        // Option A: Just leave the bit file for that process to pick up (preferred).
+        // The other process will scan all bits when it finishes.
+        fclose($lockFp);
+        return;
+    }
+
+    try {
+        // Write our PID + timestamp into the lock file for stale detection
+        fwrite($lockFp, json_encode([
+            'pid'      => getmypid(),
+            'time'     => time(),
+            'hostname' => gethostname(),
+        ]));
+        fflush($lockFp);
+
+        // Load existing summary (if any)
+        $summary = null;
+        if (is_file($summaryFile)) {
+            $raw = @file_get_contents($summaryFile);
+            if ($raw !== false && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded) && isset($decoded['data'], $decoded['order'])) {
+                    $summary = $decoded;
+                }
+            }
+        }
+
+        if (!is_array($summary)) {
+            $summary = ['data' => [], 'order' => []];
+        }
+
+        // Scan all bit files
+        $files = scandir($bitsDir);
+        if ($files === false) {
+            return;
+        }
+
+        foreach ($files as $filename) {
+            if ($filename === '.' || $filename === '..') {
+                continue;
+            }
+            if (!str_ends_with($filename, '.json')) {
+                continue;
+            }
+
+            $bitPath = $bitsDir . '/' . $filename;
+            $rawBit  = @file_get_contents($bitPath);
+            if ($rawBit === false || $rawBit === '') {
+                // Empty or unreadable — remove it to avoid reprocessing
+                @unlink($bitPath);
+                continue;
+            }
+
+            $bit = json_decode($rawBit, true);
+            if (!is_array($bit) || !isset(
+                $bit['errno'], $bit['errstr'], $bit['errfile'], 
+                $bit['errline'], $bit['time'], $bit['backtrace']
+            )) {
+                // Malformed bit — remove it
+                @unlink($bitPath);
+                continue;
+            }
+
+            // Compute a stable hash for deduplication
+            $hash = md5(implode('|', [
+                (string)$bit['errno'],
+                $bit['errstr'],
+                $bit['errfile'],
+                (string)$bit['errline'],
+            ]));
+
+            // Convert microtimestamp to human-readable date
+            $timeStr  = $bit['time'];           // e.g., "1700000000123456"
+            $unixSecs = (int)substr($timeStr, 0, -6); // first 10 chars ≈ seconds
+            $dateStr  = date('Y-m-d H:i:s', $unixSecs);
+
+            if (isset($summary['data'][$hash])) {
+                // Update existing entry
+                $entry = &$summary['data'][$hash];
+                $entry['last_date']   = $dateStr;
+                $entry['count']       = ($entry['count'] ?? 0) + 1;
+                $entry['backtrace']   = $bit['backtrace']; // latest backtrace
+
+                // Update order: move to most recent position if newer
+                $existingTimeKey = null;
+                foreach ($summary['order'] as $timeKey => $h) {
+                    if ($h === $hash) {
+                        $existingTimeKey = $timeKey;
+                        break;
+                    }
+                }
+
+                if ($existingTimeKey !== null && (string)$timeStr > (string)$existingTimeKey) {
+                    unset($summary['order'][$existingTimeKey]);
+                    $summary['order'][(string)$timeStr] = $hash;
+                } elseif ($existingTimeKey === null) {
+                    // Hash exists in data but not in order — add it
+                    $summary['order'][(string)$timeStr] = $hash;
+                }
+            } else {
+                // New entry
+                $summary['data'][$hash] = [
+                    'first_date' => $dateStr,
+                    'last_date'  => $dateStr,
+                    'time'       => (string)$timeStr,
+                    'count'      => 1,
+                    'type'       => $bit['errno'],
+                    'error'      => $bit['errstr'],
+                    'file'       => $bit['errfile'],
+                    'line'       => $bit['errline'],
+                    'backtrace'  => $bit['backtrace'],
+                ];
+                $summary['order'][(string)$timeStr] = $hash;
+            }
+
+            // Remove the bit file — it has been processed
+            @unlink($bitPath);
+        }
+
+        // Rebuild ordered data array (sorted by time descending)
+        krsort($summary['order']);
+        $orderedData = [];
+        foreach ($summary['order'] as $timeKey => $hash) {
+            if (isset($summary['data'][$hash])) {
+                $orderedData[$hash] = $summary['data'][$hash];
+            }
+        }
+        $summary['data'] = $orderedData;
+
+        // Write summary atomically: write to temp, then rename
+        $tmpSummary = $summaryFile . '.tmp.' . getmypid();
+        if (file_put_contents($tmpSummary, json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+            error_log("logError: failed to write temp summary file");
+            @unlink($tmpSummary);
+            return;
+        }
+
+        // Atomic rename (on POSIX systems)
+        if (!rename($tmpSummary, $summaryFile)) {
+            error_log("logError: failed to rename temp summary to final");
+            @unlink($tmpSummary);
+        }
+
+    } catch (\Throwable $e) {
+        // Never die() in an error handler — log and continue
+        error_log('logError synthesis failed: ' . $e->getMessage());
+    } finally {
+        // Release lock and close file handle
+        flock($lockFp, LOCK_UN);
+        fclose($lockFp);
+
+        // Optionally remove the lock file (not strictly necessary with flock)
+        @unlink($lockFile);
+    }
+}
+
+  public static function logException(Throwable $err): void
   {
-    if ($err->getFile() === __FILE__) {
-      return;
-    }
-
-    self::logError(
-      $err->getCode(),
-      $err->getMessage(),
-      $err->getFile(),
-      $err->getLine()
-    );
-
-    if ($throw) {
-      throw $err;
-    }
+    self::logError($err);
   }
 
   public static function percent(float | int $val, float | int $total, int $decimals = 2)
@@ -1295,6 +1438,10 @@ class X
     $backtrace = debug_backtrace();
     $st = '';
     foreach ($backtrace as $b) {
+      if (!isset($b['file'])) {
+        continue;
+      }
+
       if (isset($b['class']) && $b['file'] !== __FILE__) {
         $st = $b['file'] . ';' . $b['line'] . PHP_EOL;
         break;
@@ -3126,7 +3273,7 @@ class X
     $r     = [];
     $lines = explode($sep, $st);
     foreach ($lines as $line) {
-      $r[] = str_getcsv($line, $del, $enc);
+      $r[] = str_getcsv($line, $del, $enc, "\\");
     }
 
     return $r;

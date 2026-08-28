@@ -901,7 +901,7 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
 
   public function getSinglePrimary(string $table): ?string
   {
-    return $this->subStructure()->getSinglePrimary($table);
+    return $this->subStructure()->getSinglePrimary($table) ?: null;
   }
 
   public function getUniquePrimary(string $table): ?string
@@ -1079,6 +1079,33 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     return $this->subWrite()->truncate($table);
   }
 
+  public function resetConnection(array $cfg = []): Engines
+  {
+    if (empty($cfg)) {
+      $cfg = $this->getCfg();
+    }
+
+    if (isset($this->language)) {
+      unset($this->language);
+    }
+
+    if ($cfg['engine'] instanceof Engines) {
+      $this->language = $cfg['engine'];
+    }
+    else {
+      $engine = $cfg['engine'];
+      $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
+
+      if (!class_exists($cls)) {
+        throw new Exception(X::_("The database engine %s is not recognized", $engine));
+      }
+
+      $this->language = new $cls($cfg);
+    }
+
+    return $this->language;
+  }
+
   /**
    * Constructor
    *
@@ -1096,19 +1123,7 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     }
 
     if (isset($cfg['engine'])) {
-      if ($cfg['engine'] instanceof Engines) {
-        $this->language = $cfg['engine'];
-      }
-      else {
-        $engine = $cfg['engine'];
-        $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
-
-        if (!class_exists($cls)) {
-          throw new Exception(X::_("The database engine %s is not recognized", $engine));
-        }
-
-        $this->language = new $cls($cfg);
-      }
+      $this->resetConnection($cfg);
 
       self::retrieverInit($this);
 
@@ -1334,6 +1349,16 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
   public function getConnectionParams(array $cfg = []): ?array
   {
     return $this->language->getConnectionParams($cfg);
+  }
+
+  public function ping(): bool
+  {
+    return $this->language->ping();
+  }
+
+  public function reconnect(): bool
+  {
+    return $this->language->reconnect();
   }
 
   private function ensureLanguageMethodExists(string $method)

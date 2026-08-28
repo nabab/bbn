@@ -292,4 +292,15 @@ class Cron extends Basic
 
     return null;
   }
+
+  public function launchSocketServer()
+  {
+    X::log('Launch socket server', 'socket-start');
+    if ($launcher = $this->getLauncher()) {
+      X::log('Launching socket server', 'socket-start');
+      return $launcher->launch(['type' => 'socket']);
+    }
+
+    return null;
+  }
 }

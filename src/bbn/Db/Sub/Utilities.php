@@ -245,5 +245,4 @@ class Utilities extends Sub implements ItfUtilities
     return $this->language->countQueries();
   }
 
-
 }

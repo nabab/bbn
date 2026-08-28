@@ -1,0 +1,5120 @@
+This is my User class:
+
+```php
+<?php
+
+
+/**
+ * @package user
+ */
+
+
+namespace bbn;
+
+
+use AllowDynamicProperties;
+use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\File\System;
+use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\DbOps;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\User\Common;
+use bbn\User\Implementor;
+use bbn\User\Manager;
+use bbn\Models\Tts\DbUauth;
+use bbn\User\Session;
+use bbn\Appui\Option;
+use bbn\Db;
+use bbn\Appui\Database;
+use bbn\Db\Languages\Sqlite;
+use bbn\Cache;
+
+
+/**
+ * A user authentication Class
+ *
+ *
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright BBN Solutions
+ * @since Apr 4, 2011, 23:23:55 +0000
+ * @category  Authentication
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @version 0.2r89
+ * @todo Groups and hotlinks features
+ * @todo Implement Cache for session requests' results?
+ */
+
+
+#[AllowDynamicProperties]
+class User extends DbCls implements Implementor
+{
+use Retriever;
+use DbOps;
+use Common;
+
+
+/** @var array */
+protected static $default_class_cfg = [
+"errors" => [
+0 => "login failed",
+2 => "password sent",
+3 => "no email such as",
+4 => "too many attempts",
+5 => "impossible to create the user",
+6 => "wrong user and/or password",
+7 => "different passwords",
+8 => "less than 5 mn between emailing password",
+9 => "user already exists",
+10 => "problem during user creation",
+11 => "no salt in session",
+12 => "login and password are mandatory",
+13 => "impossible to save the session",
+14 => "impossible to retrieve the session",
+15 => "no session in memory",
+16 => "impossible to add session in the database",
+17 => "non matching salt",
+18 => "incorrect magic string",
+19 => "wrong fingerprint",
+20 => "invalid token",
+21 => "invalid phone number",
+22 => "impossible to update the phone number or the verification code",
+23 => "unknown phone number",
+24 => "invalid verification code",
+25 => "you have exhausted the number of hotlinks sent, try again later",
+26 => "An email has been sent in order to reset your password",
+27 => "The hotlink is expired",
+    ],
+"table" => "bbn_users",
+"tables" => [
+"groups" => "bbn_users_groups",
+"hotlinks" => "bbn_users_hotlinks",
+"passwords" => "bbn_users_passwords",
+"sessions" => "bbn_users_sessions",
+"tokens" => "bbn_users_tokens",
+"api_tokens" => "bbn_users_api_tokens", // String because array_flip() in DbActions only works with integers and string
+"access_tokens" => "bbn_users_access_tokens",
+"users" => "bbn_users",
+"permission_accounts" => "bbn_users_permission_accounts",
+"permission_tokens" => "bbn_users_permission_account_tokens",
+    ],
+"arch" => [
+"groups" => [
+"id" => "id",
+"group" => "group",
+"type" => "type",
+"code" => "code",
+"home" => "home",
+"cfg" => "cfg",
+      ],
+"hotlinks" => [
+"id" => "id",
+"id_user" => "id_user",
+"magic" => "magic",
+"expire" => "expire",
+      ],
+"passwords" => [
+"id_user" => "id_user",
+"pass" => "pass",
+"added" => "added",
+      ],
+"sessions" => [
+"id" => "id",
+"id_user" => "id_user",
+"sess_id" => "sess_id",
+"ip_address" => "ip_address",
+"user_agent" => "user_agent",
+"opened" => "opened",
+"creation" => "creation",
+"last_activity" => "last_activity",
+"cfg" => "cfg",
+      ],
+"tokens" => [
+"id" => "id",
+"id_session" => "id_session",
+"content" => "content",
+"creation" => "creation",
+"dt_creation" => "dt_creation",
+"last" => "last",
+"dt_last" => "dt_last",
+      ],
+"api_tokens" => [
+"id" => "id",
+"id_user" => "id_user",
+"token" => "token",
+"creation" => "creation",
+"last" => "last",
+"device_uid" => "device_uid",
+"device_platform" => "device_platform",
+"device_lang" => "device_lang",
+"notifications_token" => "notifications_token",
+      ],
+"access_tokens" => [
+"id_user" => "id_user",
+"token" => "token",
+"pass" => "pass",
+"validity" => "validity",
+      ],
+"users" => [
+"id" => "id",
+"id_group" => "id_group",
+"email" => "email",
+"username" => "username",
+"phone" => "phone",
+"login" => "login",
+"admin" => "admin",
+"dev" => "dev",
+"theme" => "theme",
+"cfg" => "cfg",
+"active" => "active",
+"enckey" => "enckey",
+//'phone_verification_code' => 'phone_verification_code'
+      ],
+"permission_accounts" => [
+"id" => "id",
+"id_user" => "id_user",
+"name" => "name", // The combination of 'name' and 'id_user' should be unique.
+      ],
+"permission_tokens" => [
+"id" => "id",
+"id_account" => "id_account",
+"access_token" => "access_token",
+"refresh_token" => "refresh_token",
+"expire" => "expire",
+      ],
+    ],
+"fields" => [
+"user" => "user",
+"pass" => "pass",
+"salt" => "appui_salt",
+"key" => "key",
+"id" => "id",
+"pass1" => "pass1",
+"pass2" => "pass2",
+"action" => "action",
+"token" => "appui_token",
+"access_token" => "appui_access_token",
+"access_token_pass" => "appui_access_token_pass",
+"device_uid" => "device_uid",
+"device_lang" => "device_lang",
+"phone_number" => "phone_number",
+"phone_verification_code" => "phone_verification_code",
+    ],
+/**
+     * Password saving encryption
+     * @var string
+     */
+"encryption" => "sha1",
+/**
+     * Additional conditions when querying the users' table
+     * @var array
+     */
+"conditions" => [],
+/**
+     * Number of times a user can try to log in the period
+     * @var integer
+     */
+"max_attempts" => 10,
+/**
+     * Number of times a user can try to log in the period
+     * @var integer
+     */
+"verification_code_length" => 4,
+/**
+     * User ban's length in minutes after max attempts is reached
+     * @var integer
+     */
+"max_sessions" => 5,
+/**
+     * Sets if the hotlinks features should be in used
+     * @var bool
+     */
+"hotlinks" => false,
+"show" => "username",
+"mailer" => "\\bbn\\Mail",
+"ip_address" => true,
+  ];
+
+
+/** @var bool Will be true when the user has just logged in. */
+private $_just_login = false;
+
+
+private $_encryption_key = null;
+
+
+private $fakeUser = null;
+
+
+/** @var string The name of the session index in for session data */
+protected $sessIndex = "bbn_session";
+
+
+/** @var string The name of the session index in for user data */
+protected $userIndex = "bbn_user";
+
+
+protected $password_reset = false;
+
+
+/** @var User\Session */
+protected $session = null;
+
+
+/** @var string */
+protected $user_agent;
+
+
+/** @var string */
+protected $ip_address;
+
+
+/** @var string */
+protected $email;
+
+
+/** @var string */
+protected $accept_lang;
+
+
+/** @var string */
+protected $sql;
+
+
+/** @var int */
+protected $id;
+
+
+/** @var array */
+protected $data = [];
+
+
+/** @var int */
+protected $id_group;
+
+
+/** @var array */
+protected $group;
+
+
+/** @var mixed */
+protected $alert;
+
+
+/** @var array */
+protected $cfg;
+
+
+/** @var array */
+protected $sess_cfg;
+
+
+/** @var Db */
+protected Db $db;
+
+
+/** @var mixed */
+public $prev_time;
+
+
+/** @var array $class_cfg */
+protected array $class_cfg;
+
+
+/** @var string */
+protected $cache_path;
+
+
+const MAX_EMPTY_ATTEMPTS = 5;
+
+
+/**
+   * User constructor.
+   *
+   * @param Db    $db
+   * @param array $cfg
+   * @param array $params
+   */
+public function __construct(Db $db, array $params = [])
+  {
+// Setting up the class configuration
+$this->initClassCfg();
+// The database connection
+parent::__construct($db);
+
+
+
+$f = &$this->class_cfg["fields"];
+self::retrieverInit($this);
+
+
+if ($this->isToken() && !empty($params[$f["token"]])) {
+if (!isset($this->class_cfg["tables"]["api_tokens"])) {
+throw new Exception(
+X::_(
+"The class %s is not configured properly to work with API tokens",
+get_class($this),
+          ),
+        );
+      }
+
+
+if ($this->isPhoneNumberCodeSendingRequest($params)) {
+// Verify that the received token is associated with the device uid
+if (
+          !($user_id = $this->getUserByTokenAndDeviceUid(
+$params[$f["token"]],
+$params[$f["device_uid"]],
+          ))
+        ) {
+$this->setError(20);
+$this->api_request_output = [
+"success" => false,
+"error" => X::_("Invalid token"),
+"errorCode" => 20,
+          ];
+return;
+        }
+
+
+// Check if the phone number is already registered
+if (
+          ($exUser = $this->findByPhoneNumber($params[$f["phone_number"]])) &&
+$exUser[$f["id"]] !== $user_id &&
+$this->updateApiTokenUserByTokenDevice(
+$params[$f["token"]],
+$params[$f["device_uid"]],
+$exUser[$f["id"]],
+            !empty($params[$f["device_lang"]])
+              ? str_replace('"', "", $params[$f["device_lang"]])
+              : "",
+          )
+        ) {
+if (
+            !$this->db->selectOne(
+$this->class_cfg["table"],
+$this->class_cfg["arch"]["users"]["login"],
+              [
+$this->class_cfg["arch"]["users"]["id"] => $user_id,
+              ],
+            )
+          ) {
+$this->db->delete($this->class_cfg["table"], [
+$this->class_cfg["arch"]["users"]["id"] => $user_id,
+            ]);
+          }
+$user_id = $exUser[$f["id"]];
+        }
+
+
+$this->id = $user_id;
+// Generate a code
+$code = random_int(1001, 9999);
+
+
+try {
+$phone = \Brick\PhoneNumber\PhoneNumber::parse(
+$params[$f["phone_number"]],
+          );
+        } catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+$this->setError(21);
+$this->api_request_output = [
+"success" => false,
+"error" => X::_("Invalid phone number"),
+"errorCode" => 21,
+          ];
+return;
+        }
+
+
+if (!$this->hasSkipVerification() && !$phone->isValidNumber()) {
+$this->setError(21);
+$this->api_request_output = [
+"success" => false,
+"error" => X::_("Invalid phone number"),
+"errorCode" => 21,
+          ];
+return;
+        }
+
+
+// Save it
+if (
+$this->updatePhoneVerificationCode($params[$f["phone_number"]], $code)
+        ) {
+// Send the sms with code here
+$this->api_request_output = [
+"success" => true,
+"phone_verification_code" => $code,
+          ];
+return;
+        } else {
+$this->setError(22);
+return;
+        }
+      } elseif ($this->isVerifyPhoneNumberRequest($params)) {
+// Verify that the received token is associated to the device uid
+if (
+          !$this->verifyTokenAndDeviceUid(
+$params[$f["device_uid"]],
+$params[$f["token"]],
+          )
+        ) {
+$this->setError(20);
+return;
+        }
+
+
+// find the user using phone_number in db
+$user = $this->findByPhoneNumber($params[$f["phone_number"]]);
+
+
+if (!$user) {
+$this->setError(23);
+return;
+        }
+
+
+$this->id = $user[$this->class_cfg["arch"]["users"]["id"]];
+$this->id_group = $user[$this->class_cfg["arch"]["users"]["id_group"]];
+
+
+if (!$this->hasSkipVerification()) {
+// Verify that the code is correct
+$user_cfg = json_decode(
+$user[$this->class_cfg["arch"]["users"]["cfg"]],
+true,
+          );
+
+
+if (
+            !$user_cfg ||
+            !isset($user_cfg["phone_verification_code"]) ||
+            (string) $user_cfg["phone_verification_code"] !==
+              (string) $params[$f["phone_verification_code"]]
+          ) {
+$this->setError(24);
+return;
+          }
+        }
+
+
+// Update verification code to null
+$this->updatePhoneVerificationCode($params[$f["phone_number"]], null);
+
+
+// Generate a new token
+$new_token = Str::genpwd(32, 16);
+
+
+// Update user id and the new token in the row with the old token and device uid.
+$this->db->update(
+$this->class_cfg["tables"]["api_tokens"],
+          [
+$this->class_cfg["arch"]["api_tokens"]["id_user"] =>
+$user[$this->class_cfg["arch"]["users"]["id"]],
+$this->class_cfg["arch"]["api_tokens"]["token"] => $new_token,
+          ],
+          [
+$this->class_cfg["arch"]["api_tokens"]["token"] =>
+$params[$f["token"]],
+$this->class_cfg["arch"]["api_tokens"]["device_uid"] =>
+$params[$f["device_uid"]],
+          ],
+        );
+
+
+// Send the new token here
+$this->api_request_output = [
+"token" => $new_token,
+"success" => true,
+        ];
+      } elseif ($this->isTokenLoginRequest($params)) {
+// Find the token associated to the device uid in db then get it's associated user.
+if (
+          !($user = $this->findUserByApiTokenAndDeviceUid(
+$params[$f["token"]],
+$params[$f["device_uid"]],
+          ))
+        ) {
+$this->setError(20);
+$this->api_request_output = [
+"success" => false,
+"error" => X::_("Invalid token"),
+"errorCode" => 20,
+          ];
+return;
+        }
+
+
+// Update device_lang and last
+$toUdp = [
+$this->class_cfg["arch"]["api_tokens"]["last"] => date("Y-m-d H:i:S"),
+        ];
+if (isset($params[$f["device_lang"]])) {
+$toUdp[$this->class_cfg["arch"]["api_tokens"]["device_lang"]] =
+$params[$f["device_lang"]];
+        }
+$this->db->update($this->class_cfg["tables"]["api_tokens"], $toUdp, [
+$this->class_cfg["arch"]["api_tokens"]["token"] =>
+$params[$f["token"]],
+$this->class_cfg["arch"]["api_tokens"]["device_uid"] =>
+$params[$f["device_uid"]],
+        ]);
+
+
+// Now the user is authenticated
+$this->auth = true;
+$this->id = $user[$this->class_cfg["arch"]["users"]["id"]];
+$this->id_group = $user[$this->class_cfg["arch"]["users"]["id_group"]];
+
+
+$this->api_request_output = [
+"token" => $params[$f["token"]],
+"success" => true,
+        ];
+      }
+    } else {
+// The client environment variables
+$this->user_agent =
+$_SERVER["HTTP_USER_AGENT"] ??
+        (isset($_SERVER["argv"][1]) ? "CLI" : "Unknown");
+$this->ip_address =
+$this->class_cfg["ip_address"] && isset($_SERVER["REMOTE_ADDR"])
+          ? $_SERVER["REMOTE_ADDR"]
+          : (isset($_SERVER["shell"])
+            ? "127.0.0.1"
+            : "");
+$this->accept_lang =
+$_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ($_SERVER["LANG"] ?? "");
+// Creating the session's variables if they don't exist yet
+$this->_init_session();
+
+
+// CLI user
+if (x::isCli() && isset($params["id"])) {
+$this->id = $params["id"];
+$this->auth = true;
+      }
+
+
+// The user logs in
+if ($this->isLoginRequest($params)) {
+/** @todo separate credentials and salt checking */
+if (
+          !empty($this->sess_cfg["fingerprint"]) &&
+$this->getPrint($this->_get_session("fingerprint")) ===
+$this->sess_cfg["fingerprint"]
+        ) {
+/** @todo separate credentials and salt checking */
+$this->_check_credentials($params);
+        } else {
+$this->setError(19);
+$this->session->destroy();
+        }
+      }
+
+
+/** @todo revise the process: dying is not the solution! */
+// The user is not known yet
+elseif ($this->isResetPasswordRequest($params)) {
+if (
+$id = $this->getIdFromMagicString(
+$params[$f["id"]],
+$params[$f["key"]],
+          )
+        ) {
+$this->password_reset = true;
+if ($params[$f["pass1"]] === $params[$f["pass2"]]) {
+$this->expireHotlink($params[$f["id"]]);
+$this->id = $id;
+$this->forcePassword($params[$f["pass2"]]);
+$this->session->set([]);
+          } else {
+$this->setError(7);
+          }
+        } elseif ($this->check()) {
+$this->setError(18);
+        }
+      } elseif (
+        !empty($params[$f["access_token"]]) &&
+        !empty($params[$f["access_token_pass"]]) &&
+        ($idUser = $this->getIdByAccessToken(
+$params[$f["access_token"]],
+$params[$f["access_token_pass"]],
+        ))
+      ) {
+$this->id = $idUser;
+$this->id_group = $this->db->selectOne(
+$this->class_cfg["tables"]["users"],
+$this->class_cfg["arch"]["users"]["id_group"],
+          [$this->class_cfg["arch"]["users"]["id"] => $idUser],
+        );
+$this->auth = true;
+      } else {
+$this->checkSession();
+      }
+    }
+  }
+
+
+public function destruct(): void
+  {
+$this->session?->destruct();
+self::retrieverRemove($this);
+  }
+
+
+/**
+   * Checks if the it's a login request.
+   *
+   * @param array $params
+   * @return bool
+   */
+protected function isLoginRequest(array $params)
+  {
+$f = $this->class_cfg["fields"];
+
+
+return isset($params[$f["user"]], $params[$f["pass"]], $params[$f["salt"]]);
+  }
+
+
+/**
+   * Checks if it's a reset password request.
+   *
+   * @param array $params
+   * @return bool
+   */
+protected function isResetPasswordRequest(array $params)
+  {
+$f = $this->class_cfg["fields"];
+
+
+return isset(
+$params[$f["key"]],
+$params[$f["id"]],
+$params[$f["pass1"]],
+$params[$f["pass2"]],
+$params[$f["action"]],
+    ) && $params[$f["action"]] === "init_password";
+  }
+
+
+public function isReset(): bool
+  {
+return $this->password_reset;
+  }
+
+
+public function isFake(): bool
+  {
+return (bool)$this->fakeUser;
+  }
+
+
+/**
+   * Returns the salt string kept in session.
+   *
+   * @return null|string
+   */
+public function getSalt(): ?string
+  {
+return $this->_get_session("salt");
+  }
+
+
+/**
+   * Confronts the given string with the salt string kept in session.
+   *
+   * @return bool
+   */
+public function checkSalt(string $salt): bool
+  {
+return $this->getSalt() === $salt;
+  }
+
+
+public function getLastActivity(?string $id_session = null): ?string
+  {
+if ($this->checkSession() && $id_session) {
+$filter = [
+$this->class_cfg["arch"]["sessions"]["id_user"] => $this->getId(),
+      ];
+if ($id_session) {
+$filter[$this->class_cfg["arch"]["sessions"]["sess_id"]] = $id_session;
+      }
+
+
+$last = $this->db->selectOne(
+$this->class_cfg["tables"]["sessions"],
+"MAX(" . $this->class_cfg["arch"]["sessions"]["last_activity"] . ")",
+$filter,
+      );
+
+
+return $last ?: null;
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Returns the current user's configuration.
+   *
+   * @param string $attr
+   * @return mixed
+   */
+public function getCfg($attr = "")
+  {
+if ($this->check()) {
+if (!$this->cfg) {
+$this->cfg = $this->session->get("cfg");
+      }
+
+
+if (empty($attr)) {
+return $this->cfg;
+      }
+
+
+if (isset($this->cfg[$attr])) {
+return $this->cfg[$attr];
+      }
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Stores or deletes data in the object for the current authenticated user.
+   *
+   * @param string|array $index The name of the index to set, or an associative array of key/values
+   * @param mixed        $data  The data to store; if null the given index will be unset
+   *
+   * @return self Chainable
+   */
+public function setData($index, $data = null): static
+  {
+if (!$this->auth) {
+throw new Exception(
+X::_("Impossible to store data on an unauthenticated user"),
+      );
+    }
+
+
+if (is_array($index) && X::isAssoc($index)) {
+foreach ($index as $k => $v) {
+// Unsetting if null
+if (is_null($v) && array_key_exists($k, $this->data)) {
+unset($this->data[$k]);
+        } else {
+$this->data[$k] = $v;
+        }
+      }
+    } elseif (is_string($index)) {
+$this->data[$index] = $data;
+    } else {
+throw new Exception(
+X::_("Invalid parameters for function setData in user class"),
+      );
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Changes the data in the user's table.
+   *
+   * @param array $d The new data
+   * @return bool
+   */
+public function updateInfo(array $d): bool
+  {
+if ($this->checkSession()) {
+$update = [];
+foreach ($d as $key => $val) {
+if (
+$key !== $this->fields["id"] &&
+$key !== $this->fields["cfg"] &&
+$key !== "auth" &&
+$key !== "admin" &&
+$key !== "dev" &&
+$key !== "pass" &&
+$key !== "res"
+        ) {
+$update[$key] = $val;
+        }
+      }
+
+
+if (\count($update) > 0) {
+$r = (bool) $this->dbTraitUpdate($this->getId(), $update);
+/** @todo Why did I do this?? */
+if ($r) {
+/** @todo WTF?? */
+$this->setSession(["cfg" => false]);
+$this->_user_info();
+        }
+      }
+return $r ?? false;
+    }
+
+
+return false;
+  }
+
+
+/**
+   * Encrypts the given string to match the password.
+   *
+   * @param string $st
+   * @return string
+   */
+public function getPassword(string $st): string
+  {
+return $this->_hash($st);
+  }
+
+
+/**
+   * Returns true after the log in moment.
+   *
+   * @return bool
+   */
+public function isJustLogin(): bool
+  {
+return (bool) $this->_just_login;
+  }
+
+
+/**
+   * Sets the given attribute(s) in the user's session.
+   *
+   * @return self
+   */
+public function setSession($attr): static
+  {
+if ($this->session->has($this->userIndex)) {
+$args = \func_get_args();
+if (\count($args) === 2 && \is_string($args[0])) {
+$attr = [$args[0] => $args[1]];
+      }
+
+
+if (is_array($attr)) {
+foreach ($attr as $key => $val) {
+if (\is_string($key)) {
+$this->session->set($val, $this->userIndex, $key);
+          }
+        }
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Unsets the given attribute(s) in the user's session if exists.
+   *
+   * @return self
+   */
+public function unsetSession(): static
+  {
+$args = \func_get_args();
+array_unshift($args, $this->userIndex);
+if ($this->session->has(...$args)) {
+$this->session->uset(...$args);
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Returns session property from the session's user array (userIndex).
+   *
+   * @param null|string The property to get
+   * @return mixed
+   */
+public function getSession($attr = null)
+  {
+if ($this->session && $this->session->has($this->userIndex)) {
+return $attr
+        ? $this->session->get($this->userIndex, $attr)
+        : $this->session->get($this->userIndex);
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Gets an attribute or the whole the "session" part of the session  (sessIndex).
+   *
+   * @param string|null $attr Name of the attribute to get.
+   * @return mixed|null
+   */
+public function getOsession($attr = null)
+  {
+return $this->_get_session($attr);
+  }
+
+
+/**
+   * Sets an attribute the "session" part of the session (sessIndex).
+   *
+   * @return self
+   */
+public function setOsession(): static
+  {
+return $this->_set_session(...func_get_args());
+  }
+
+
+/**
+   * Checks if the given attribute exists in the user's session.
+   *
+   * @return bool
+   */
+public function hasSession($attr): bool
+  {
+return $this->session->has($this->userIndex, $attr);
+  }
+
+
+/**
+   * Updates last activity value for the session in database.
+   *
+   * @return self
+   */
+public function updateActivity(): static
+  {
+if (X::isCli()) {
+return $this;
+    }
+
+
+if (($id_session = $this->getSessionDbId()) && $this->check()) {
+$p = &$this->class_cfg["arch"]["sessions"];
+$this->db->update(
+$this->class_cfg["tables"]["sessions"],
+        [$p["last_activity"] => date("Y-m-d H:i:s")],
+        [$p["id"] => $id_session],
+      );
+    } else {
+$this->setError(13);
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Saves the session config in the database.
+   *
+   * @todo Use it only when needed!
+   * @return self
+   */
+public function saveSession(bool $force = false): static
+  {
+$id_session = $this->getSessionDbId();
+if ($this->check()) {
+if ($id_session) {
+$p = &$this->class_cfg["arch"]["sessions"];
+// It is normal this is sometimes not changing as different actions can happen in the same
+$time = time();
+if (
+$force ||
+empty($this->sess_cfg["last_renew"]) ||
+$time - $this->sess_cfg["last_renew"] >= 2
+        ) {
+$this->sess_cfg["last_renew"] = $time;
+$this->db->update(
+$this->class_cfg["tables"]["sessions"],
+            [
+$p["id_user"] => $this->id,
+$p["sess_id"] => $this->session->getId(),
+$p["ip_address"] => $this->ip_address,
+$p["user_agent"] => $this->user_agent,
+$p["opened"] => 1,
+$p["last_activity"] => date("Y-m-d H:i:s", $time),
+$p["cfg"] => json_encode($this->sess_cfg),
+            ],
+            [$p["id"] => $id_session],
+          );
+        }
+      } else {
+$this->setError(13);
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Closes the session in the database.
+   *
+   * @param bool $with_session If true deletes also the session information
+   * @return self
+   */
+public function closeSession($with_session = false): static
+  {
+if ($this->id && !X::isCli()) {
+if ($this->session) {
+$p = &$this->class_cfg["arch"]["sessions"];
+$this->db->update(
+$this->class_cfg["tables"]["sessions"],
+          [
+$p["ip_address"] => $this->ip_address,
+$p["user_agent"] => $this->user_agent,
+$p["opened"] => 0,
+$p["last_activity"] => date("Y-m-d H:i:s"),
+$p["cfg"] => json_encode($this->sess_cfg),
+          ],
+          [
+$p["id_user"] => $this->id,
+$p["sess_id"] => $this->session->getId(),
+          ],
+        );
+if ($with_session) {
+$this->session->set([]);
+        }
+
+
+$this->session->set([], $this->userIndex);
+      }
+
+
+$this->auth = false;
+$this->id = null;
+$this->sess_cfg = null;
+$this->session->destruct();
+$this->session = null;
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Returns false if the max number of connections attempts has been reached
+   * @return bool
+   */
+public function checkAttempts(): bool
+  {
+if (!isset($this->cfg)) {
+return true;
+    }
+
+
+if (
+isset($this->cfg["num_attempts"]) &&
+$this->cfg["num_attempts"] > $this->class_cfg["max_attempts"]
+    ) {
+return false;
+    }
+
+
+return true;
+  }
+
+
+/**
+   * Saves the user's config in the cfg field of the users' table.
+   *
+   * return self
+   */
+public function saveCfg(): static
+  {
+if ($this->check()) {
+$this->db->update(
+$this->class_cfg["tables"]["users"],
+        [$this->fields["cfg"] => json_encode($this->cfg)],
+        [$this->fields["id"] => $this->id],
+      );
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Saves the attribute(s) values into the session config.
+   *
+   * return self
+   */
+public function setCfg($attr): static
+  {
+if (null !== $this->cfg) {
+$args = \func_get_args();
+if (\count($args) === 2 && \is_string($attr)) {
+/** @var array $attr */
+$attr = [$args[0] => $args[1]];
+      }
+
+
+if (is_array($attr)) {
+foreach ($attr as $key => $val) {
+if (\is_string($key)) {
+$this->cfg[$key] = $val;
+          }
+        }
+
+
+$this->setSession(["cfg" => $this->cfg]);
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Unsets the attribute(s) in the session config.
+   *
+   * @param $attr
+   * @return self
+   */
+public function unsetCfg($attr): static
+  {
+if (null !== $this->cfg) {
+if (\is_string($attr)) {
+/** @var array $attr */
+$attr = [$attr];
+      }
+
+
+if (is_array($attr)) {
+foreach ($attr as $key) {
+if (isset($key)) {
+unset($this->cfg[$key]);
+          }
+        }
+
+
+$this->setSession(["cfg" => $this->cfg]);
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Regathers information from the database.
+   *
+   * @return self
+   */
+public function refreshInfo(): static
+  {
+if ($this->check()) {
+$this->_user_info();
+$this->_sess_info();
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Retrieves user's info from session if needed and checks if authenticated.
+   *
+   * @return bool
+   */
+public function checkSession(): bool
+  {
+if ($this->check()) {
+$this->_retrieve_session();
+return $this->auth;
+    }
+
+
+return false;
+  }
+
+
+/**
+   * Checks whether the user is an admin or not.
+   *
+   * @return bool
+   */
+public function isAdmin(): bool
+  {
+return (bool) $this->getSession("admin");
+  }
+
+
+/**
+   * Checks whether the user is an (admin or developer) or not.
+   *
+   * @return bool
+   */
+public function isDev(): bool
+  {
+return (bool) ($this->isAdmin() || (bool) $this->getSession("dev"));
+  }
+
+
+/**
+   * Gets a bbn\User\Manager instance.
+   *
+   * @return User\Manager
+   */
+public function getManager()
+  {
+return new User\Manager($this);
+  }
+
+
+/**
+   * Change the password in the database after checking the current one.
+   *
+   * @param string $old_pass The current password
+   * @param string $new_pass The new password
+   * @return bool
+   */
+public function setPassword(string $old_pass, string $new_pass): bool
+  {
+if ($this->auth) {
+$pwt = $this->class_cfg["tables"]["passwords"];
+$pwa = $this->class_cfg["arch"]["passwords"];
+$stored_pass = $this->db->selectOne(
+$pwt,
+$pwa["pass"],
+        [
+$this->class_cfg["arch"]["passwords"]["id_user"] => $this->id,
+        ],
+        [
+$this->class_cfg["arch"]["passwords"]["added"] => "DESC",
+        ],
+      );
+if ($this->_check_password($old_pass, $stored_pass)) {
+return $this->forcePassword($new_pass);
+      }
+    }
+
+
+return false;
+  }
+
+
+/**
+   * Returns the full name of the given user or the current one.
+   *
+   * @return string|null
+   */
+public function getName($usr = null): ?string
+  {
+if ($this->auth) {
+if (\is_null($usr)) {
+$usr = $this->getSession();
+      } elseif (str::isUid($usr)) {
+$mgr = $this->getManager();
+$usr = $mgr->getUser($usr);
+      }
+
+
+if (isset($this->class_cfg["show"], $usr[$this->class_cfg["show"]])) {
+return $usr[$this->class_cfg["show"]];
+      }
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Generates and insert a token in database.
+   *
+   * @return string|null
+   */
+public function addToken(): ?string
+  {
+if ($this->auth) {
+$token = Str::genpwd(32, 16);
+$f = &$this->class_cfg["arch"]["tokens"];
+if (
+$this->db->insert($this->class_cfg["tables"]["tokens"], [
+$f["id_session"] => $this->getSessionDbId(),
+$f["content"] => $token,
+$f["creation"] => X::microtime(),
+$f["last"] => X::microtime(),
+        ])
+      ) {
+return $token;
+      }
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Returns the email of the given user or the current one.
+   *
+   * @return string|null
+   */
+public function getEmail($usr = null): ?string
+  {
+if ($this->auth) {
+if (\is_null($usr)) {
+$usr = $this->getSession();
+      } elseif (Str::isUid($usr) && ($mgr = $this->getManager())) {
+$usr = $mgr->getUser($usr);
+      }
+
+
+if (isset($this->fields["email"], $usr[$this->fields["email"]])) {
+return $usr[$this->fields["email"]];
+      }
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Returns the latest created connection, ie the current user's object.
+   * @return self
+   */
+public static function getUser(): ?self
+  {
+return self::getInstance();
+  }
+
+
+public function getDataPath(string|null $plugin = null): ?string
+  {
+if ($this->check()) {
+return Mvc::getUserDataPath($this->id, $plugin);
+    }
+
+
+return null;
+  }
+
+
+public function getTmpPath(string|null $plugin = null): ?string
+  {
+if ($this->check()) {
+return Mvc::getUserTmpPath($this->id, $plugin);
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Gets the cache path for the user.
+   *
+   * @return string|null
+   */
+public function getCachePath()
+  {
+if (empty($this->cache_path)) {
+$this->cacheInit();
+    }
+
+
+return $this->cache_path;
+  }
+
+
+/**
+   * Checks if a cache file exists for the user.
+   *
+   * @param string $path The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+public function hasCache(string $path): bool
+  {
+return $this->cacheInit() && (bool) $this->getCache($path, true);
+  }
+
+
+/**
+   * Gets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return mixed
+   */
+public function getCache(string $key, bool $raw = false): mixed
+  {
+if ($file = Cache::_file($key, $this->getCachePath())) {
+$fs = new System();
+if (
+$fs->isFile($file) &&
+        ($t = $fs->getContents($file)) &&
+        ($t = json_decode($t, true))
+      ) {
+if (empty($t["ttl"]) || empty($t["expire"]) || $t["expire"] > time()) {
+return $raw ? $t : $t["value"];
+        } else {
+$this->deleteCache($key);
+        }
+      }
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Sets a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @param mixed  $val The value to store
+   * @param int    $ttl Time to live in seconds (0 for infinite)
+   * @return bool
+   */
+public function setCache(string $key, $val, int $ttl = 0): bool
+  {
+$fs = new System();
+if (
+      ($file = Cache::_file($key, $this->getCachePath())) &&
+$fs->createPath(X::dirname($file))
+    ) {
+$ttl = Cache::ttl($ttl);
+$value = [
+"timestamp" => microtime(1),
+"hash" => Cache::makeHash($val),
+"expire" => $ttl ? time() + $ttl : 0,
+"ttl" => $ttl,
+"value" => $val,
+      ];
+return (bool) $fs->putContents(
+$file,
+json_encode($value, JSON_PRETTY_PRINT),
+      );
+    }
+
+
+return false;
+  }
+
+
+/**
+   * Deletes a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+public function deleteCache(string $key): bool
+  {
+return ($file = Cache::_file($key, $this->getCachePath())) &&
+      ($fs = new System()) &&
+$fs->delete($file);
+  }
+
+
+/**
+   * Deletes a cache file for the user.
+   *
+   * @param string $key The path of the cache file, relative to the user's cache folder
+   * @return bool
+   */
+public function deleteAllCache(): bool
+  {
+return ($path = $this->getCachePath()) &&
+      ($fs = new System()) &&
+$fs->delete($path, false);
+  }
+
+
+public function getLocaleDatabase(
+    ?string $idUser = null,
+bool $createIfNotExists = true,
+  ): ?Db {
+/** @var Option $options */
+$options = Option::getInstance();
+if (empty($options)) {
+throw new Exception(X::_("Impossible to get the options class instance"));
+    }
+
+
+$idHost = $options->fromCode(
+"BBN_USER_PATH",
+"connections",
+"sqlite",
+"engines",
+"database",
+"appui",
+    );
+if (empty($idHost)) {
+throw new Exception(
+X::_('Impossible to find the SQLite host for user\'s database'),
+      );
+    }
+
+
+$dbName = "locale_" . $this->id . ".sqlite";
+if (!empty($idUser) && Str::isUid($idUser) && $idUser !== $this->id) {
+$dbName = "locale_" . $idUser . ".sqlite";
+$idHost = str_replace($this->id, $idUser, Sqlite::getHostPath($idHost));
+    }
+
+
+if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+if (!$createIfNotExists) {
+return null;
+      }
+
+
+Sqlite::createDatabaseOnHost($dbName, $idHost);
+    }
+
+
+if (!Sqlite::hasHostDatabase($idHost, $dbName)) {
+throw new Exception(X::_('Impossible to find the user\'s database'));
+    }
+
+
+$d = new Database($this->db);
+return $d->connection($idHost, "sqlite", $dbName);
+  }
+
+
+/**
+   * Completes the steps for a full authentication of the user.
+   *
+   * @param string $id
+   * @return self
+   */
+protected function logIn($id): static
+  {
+$this->error = null;
+if ($this->check() && $id) {
+if (X::isCli()) {
+$this->fakeUser = true;
+      }
+
+
+$this->_authenticate($id);
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Returns a "print" based on the user agent + the fingerprint.
+   *
+   * @param null|string $fp
+   * @return null|string
+   */
+protected function getPrint(string|null $fp = null): ?string
+  {
+if (!$fp) {
+$fp = $this->_get_session("fingerprint");
+    }
+
+
+if ($fp) {
+return sha1($this->user_agent . $this->accept_lang . $fp);
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Returns the database ID for the session's row if it is in the session.
+   *
+   * @return null|string
+   */
+protected function getSessionDbId(): ?string
+  {
+return $this->_get_session("id_session");
+  }
+
+
+/**
+   * Increments the num_attempt variable (after unsuccessful login attempt).
+   *
+   * @return self
+   */
+protected function recordAttempt(): static
+  {
+$this->cfg["num_attempts"] = isset($this->cfg["num_attempts"])
+      ? $this->cfg["num_attempts"] + 1
+      : 1;
+$this->_set_session("num_attempts", $this->cfg["num_attempts"]);
+$this->saveSession();
+return $this;
+  }
+
+
+/**
+   * Returns the user's ID from the magic string.
+   */
+protected function getIdByAccessToken(
+string $accessToken,
+string $accessTokenPass,
+  ): ?string {
+return $this->db->selectOne([
+"table" => $this->class_cfg["tables"]["access_tokens"],
+"fields" => $this->class_cfg["arch"]["access_tokens"]["id_user"],
+"where" => [
+        [
+"field" => $this->class_cfg["arch"]["access_tokens"]["token"],
+"value" => $accessToken,
+        ],
+        [
+"field" => $this->class_cfg["arch"]["access_tokens"]["pass"],
+"value" => \bbn\Util\Enc::decrypt64($accessTokenPass),
+        ],
+        [
+"logic" => "OR",
+"conditions" => [
+            [
+"field" => $this->class_cfg["arch"]["access_tokens"]["validity"],
+"operator" => "isnull",
+            ],
+            [
+"field" => $this->class_cfg["arch"]["access_tokens"]["validity"],
+"operator" => "<=",
+"value" => date("Y-m-d H:i:s"),
+            ],
+          ],
+        ],
+      ],
+    ]);
+  }
+
+
+/**
+   * Gets or creates (also in database) the user's session for the first time.
+   *
+   * @return self
+   */
+protected function _init_session($defaults = []): static
+  {
+// Getting or creating the session is it doesn't exist yet
+/** @var User\Session */
+$this->session = User\Session::getInstance();
+if (!$this->session) {
+$session_cls =
+defined("BBN_SESSION") &&
+is_string(constant("BBN_SESSION")) &&
+class_exists(constant("BBN_SESSION"))
+          ? constant("BBN_SESSION")
+          : "\\bbn\\User\\Session";
+$this->session = new $session_cls($defaults);
+    }
+
+
+/** @var int $id_session The ID of the session row in the DB */
+if (
+      !($id_session = $this->getSessionDbId()) ||
+      !($tmp = $this->db->selectOne(
+$this->class_cfg["tables"]["sessions"],
+$this->class_cfg["arch"]["sessions"]["cfg"],
+        [$this->class_cfg["arch"]["sessions"]["id"] => $id_session],
+      ))
+    ) {
+/** @var string $salt */
+$salt = self::makeFingerprint();
+
+
+/** @var string $fingerprint */
+$fingerprint = self::makeFingerprint();
+
+
+/** @var array $p The fields of the sessions table */
+$p = &$this->class_cfg["arch"]["sessions"];
+
+
+$this->sess_cfg = [
+"fingerprint" => $this->getPrint($fingerprint),
+"last_renew" => time(),
+      ];
+
+
+$id_session = $this->session->getId();
+
+
+// Inserting the session in the database
+if (
+$id_session &&
+$this->db->insert($this->class_cfg["tables"]["sessions"], [
+$p["sess_id"] => $id_session,
+$p["ip_address"] => $this->ip_address,
+$p["user_agent"] => $this->user_agent,
+$p["opened"] => 1,
+$p["last_activity"] => date("Y-m-d H:i:s"),
+$p["creation"] => date("Y-m-d H:i:s"),
+$p["cfg"] => json_encode($this->sess_cfg),
+        ])
+      ) {
+// Setting the session with its ID
+$id = $this->db->lastId();
+if (!$id) {
+throw new Exception(
+X::_(
+"No session ID, check if your tables have the indexes defined",
+            ),
+          );
+        }
+
+
+$this->session->set(
+          [
+"fingerprint" => $fingerprint,
+"tokens" => [],
+"id_session" => $id,
+"salt" => $salt,
+          ],
+$this->sessIndex,
+        );
+
+
+$this->saveSession();
+      } else {
+$this->setError(16);
+      }
+    } else {
+$this->sess_cfg = json_decode($tmp, true);
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Gets an attribute or the whole the "session" part of the session (sessIndex).
+   *
+   * @param string|null $attr Name of the attribute to get.
+   * @return mixed
+   */
+protected function _get_session(string|null $attr = null)
+  {
+if ($this->session && $this->session->has($this->sessIndex)) {
+return $attr
+        ? $this->session->get($this->sessIndex, $attr)
+        : $this->session->get($this->sessIndex);
+    }
+
+
+return null;
+  }
+
+
+/**
+   * Checks the credentials of a user.
+   *
+   * @param array $params Credentials
+   * @return bool
+   */
+protected function _check_credentials($params, bool $makeHotlink = true): bool
+  {
+if ($this->check()) {
+/** @var array $f The form fields sent to identify the users */
+$f = &$this->class_cfg["fields"];
+
+
+if (!isset($params[$f["salt"]])) {
+$this->setError(11);
+      } else {
+if (!$this->checkSalt($params[$f["salt"]])) {
+$this->setError(17);
+$this->session->destroy();
+        }
+      }
+
+
+if ($this->check()) {
+if (isset($params[$f["user"]], $params[$f["pass"]])) {
+// Table structure
+$arch = &$this->class_cfg["arch"];
+
+
+$this->_just_login = 1;
+if (!$this->check()) {
+$this->setError(19);
+//$this->session->destroy();
+//$this->_init_session();
+          }
+
+
+// Database Query
+elseif (
+$id = $this->db->selectOne(
+$this->class_cfg["tables"]["users"],
+$this->fields["id"],
+X::mergeArrays(
+$this->class_cfg["conditions"],
+                [$arch["users"]["active"] => 1],
+                [
+$arch["users"]["login"] ?? $arch["users"]["email"] => $params[
+$f["user"]
+                  ],
+                ],
+              ),
+            )
+          ) {
+$numPasses = $this->db->count(
+$this->class_cfg["tables"]["passwords"],
+              [$arch["passwords"]["id_user"] => $id],
+            );
+// If no password is recorded we send a connection link
+if (!$numPasses) {
+$cfg = json_decode(
+$this->db->selectOne(
+$this->class_cfg["tables"]["users"],
+$this->fields["cfg"],
+                  [$arch["users"]["id"] => $id],
+                ) ?:
+"[]",
+true,
+              );
+if (empty($cfg["attempts"])) {
+$cfg["attempts"] = [
+"num" => 0,
+"last" => time(),
+                ];
+              }
+if ($cfg["attempts"]["num"] >= self::MAX_EMPTY_ATTEMPTS) {
+if ($cfg["attempts"]["last"] > time() - 3 * 3600) {
+$this->setError(25);
+                } else {
+$cfg["attempts"]["num"] = 0;
+$cfg["attempts"]["last"] = time();
+                }
+              }
+
+
+if ($this->check()) {
+$cfg["attempts"]["num"]++;
+$this->db->update(
+$this->class_cfg["tables"]["users"],
+                  [$this->fields["cfg"] => json_encode($cfg)],
+                  [$arch["users"]["id"] => $id],
+                );
+if ($makeHotlink) {
+$this->getManager()->makeHotlink($id);
+$this->setError(26);
+                }
+              }
+            } else {
+$pass = $this->db->selectOne(
+$this->class_cfg["tables"]["passwords"],
+$arch["passwords"]["pass"],
+                [$arch["passwords"]["id_user"] => $id],
+                [$arch["passwords"]["added"] => "DESC"],
+              );
+if ($this->_check_password($params[$f["pass"]], $pass)) {
+$this->_login($id);
+              } else {
+$this->recordAttempt();
+// Canceling authentication if num_attempts > max_attempts
+$this->setError($this->checkAttempts() ? 6 : 4);
+              }
+            }
+          } else {
+$this->setError(6);
+          }
+        } else {
+$this->setError(12);
+        }
+      }
+    }
+
+
+return $this->auth;
+  }
+
+
+/**
+   * Initializes the cache path for the user.
+   * @return self
+   */
+protected function cacheInit(): bool
+  {
+if (!empty($this->id)) {
+$this->cache_path = Mvc::getUserTmpPath($this->id) . "cache/";
+$fs = new System();
+if (!$fs->isDir($this->cache_path)) {
+$fs->mkdir($this->cache_path);
+      }
+
+
+return $fs->isDir($this->cache_path);
+    }
+
+
+return false;
+  }
+
+
+/**
+   * Initialize and saves the session after authentication.
+   *
+   * @param string $id The user's ID (as stored in the database).
+   * @return self
+   */
+private function _login($id): static
+  {
+if ($this->check() && $id) {
+$this->_authenticate($id)->_user_info()->_init_dir(true)->saveSession();
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Gathers the user's data from the database and puts it in the session.
+   *
+   * @return self
+   */
+private function _user_info(bool $force = false): static
+  {
+if ($this->getId()) {
+// Removing the encryption key to prevent it being saved in the session
+if (isset($this->fields["enckey"])) {
+unset($this->fields["enckey"]);
+      }
+
+
+if (!empty($this->getSession("id_group") && !$force)) {
+$this->cfg = $this->getSession("cfg");
+$this->id_group = $this->getSession("id_group");
+$this->group = $this->getSession("group");
+      } elseif (
+$d = $this->db->rselect(
+$this->class_cfg["tables"]["users"],
+array_unique(array_values($this->fields)),
+X::mergeArrays(
+$this->class_cfg["conditions"],
+            [$this->fields["active"] => 1],
+            [$this->fields["id"] => $this->id],
+          ),
+        )
+      ) {
+$r = [];
+foreach ($d as $key => $val) {
+$this->$key = $val;
+$r[$key] =
+$key === $this->fields["cfg"] && $val
+              ? json_decode($val, true)
+              : $val;
+        }
+
+
+$this->cfg = $r["cfg"] ?? [];
+// Group
+$this->id_group = $r["id_group"];
+$this->group = $this->getFullGroup();
+$r["group"] = $this->group;
+$this->session->set($r, $this->userIndex);
+$this->saveSession();
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Gathers all the information about the user's session.
+   *
+   * @param string $id_session The session's table data or its ID
+   * @return self
+   */
+private function _sess_info(string|null $id_session = null): static
+  {
+if (!Str::isUid($id_session)) {
+$id_session = $this->getSessionDbId();
+    } else {
+$cfg = $this->_get_session("cfg");
+    }
+
+
+if (
+empty($cfg) &&
+Str::isUid($id_session) &&
+      ($id = $this->getSession("id")) &&
+      ($d = $this->db->rselect(
+$this->class_cfg["tables"]["sessions"],
+$this->class_cfg["arch"]["sessions"],
+        [
+$this->class_cfg["arch"]["sessions"]["id"] => $id_session,
+$this->class_cfg["arch"]["sessions"]["id_user"] => $id,
+$this->class_cfg["arch"]["sessions"]["opened"] => 1,
+        ],
+      ))
+    ) {
+$cfg = json_decode($d["cfg"], true);
+    }
+
+
+if (isset($cfg) && \is_array($cfg)) {
+$this->sess_cfg = $cfg;
+    } else {
+if (isset($id_session, $id)) {
+$this->_init_session();
+$new_id_session = $this->getSessionDbId();
+//var_dump('isdiff', $id_session, $new_id_session, $id_session !== $new_id_session);
+if ($id_session !== $new_id_session) {
+return $this->_sess_info($new_id_session);
+        }
+      }
+
+
+$this->setError(14);
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Checks the conformity of a given string with a hash.
+   *
+   * @param string $pass_given  The password to check
+   * @param string $pass_stored The stored encrypted password to check against
+   * @return bool
+   */
+private function _check_password(
+string $pass_given,
+string $pass_stored,
+  ): bool {
+return $this->_hash($pass_given) === $pass_stored;
+  }
+
+
+/**
+   * Retrieves all user info from its session and populates the object.
+   *
+   * @param bool $force
+   * @return self
+   */
+private function _retrieve_session(bool $force = false): static
+  {
+// $id mustn't be already defined
+if (!$this->id || $force) {
+// The user ID must be in the session
+$id_session = $this->getSessionDbId();
+$id = $this->getSession("id");
+if ($id_session && $id) {
+$this->_sess_info($id_session);
+if (
+isset($this->sess_cfg["fingerprint"]) &&
+$this->getPrint($this->_get_session("fingerprint")) ===
+$this->sess_cfg["fingerprint"]
+        ) {
+$this->_authenticate($id)->_user_info()->_init_dir()->saveSession();
+        } else {
+$this->setError(19);
+        }
+      } else {
+$this->setError(15);
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Sets an attribute the "session" part of the session (sessIndex).
+   *
+   * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
+   * @return self
+   */
+private function _set_session($attr): static
+  {
+if ($this->session->has($this->sessIndex)) {
+$args = \func_get_args();
+if (\count($args) === 2 && \is_string($args[0])) {
+$attr = [$args[0] => $args[1]];
+      }
+
+
+if (is_array($attr)) {
+foreach ($attr as $key => $val) {
+if (\is_string($key)) {
+$this->session->set($val, $this->sessIndex, $key);
+          }
+        }
+      }
+    }
+
+
+return $this;
+  }
+
+
+/**
+   * Sets a user as authenticated ($this->auth = true).
+   *
+   * @param string $id
+   * @return self
+   */
+private function _authenticate(string $id): static
+  {
+if ($this->check() && $id) {
+$this->id = $id;
+$this->auth = true;
+if (!X::isCli() && !$this->isFake()) {
+$update = [
+$this->class_cfg["arch"]["sessions"]["id_user"] => $id,
+        ];
+if ($this->isJustLogin()) {
+$newId = $this->session->regenerate();
+$update[$this->class_cfg["arch"]["sessions"]["sess_id"]] = $newId;
+if (
+$this->getLastActivity() <
+date(
+"Y-m-d H:i:s",
+strtotime("-" . constant("BBN_SESS_LIFETIME") . " seconds"),
+            )
+          ) {
+$fs = new System();
+$fs->delete($this->getTmpPath(), false);
+          }
+        }
+$this->db->update($this->class_cfg["tables"]["sessions"], $update, [
+$this->class_cfg["arch"]["sessions"]["id"] => $this->getSessionDbId(),
+        ]);
+      }
+    }
+
+
+return $this;
+  }
+}
+```
+
+These are the parent classes:
+
+```php
+<?php
+namespace bbn\Models\Cls;
+
+
+use bbn\Db as dbClass;
+
+
+/**
+ * Base class for objects requiring a database connection.
+ *
+ * This class extends {@see Basic} and provides a protected database
+ * instance to child classes.
+ */
+abstract class Db extends Basic
+{
+/**
+   * Constructor.
+   *
+   * @param dbClass $db Database connection instance.
+   */
+public function __construct(protected dbClass $db)
+  {
+  }
+}
+```
+
+```php
+<?php
+/**
+ * @package bbn
+ */
+namespace bbn\Models\Cls;
+
+
+use bbn\Str;
+use bbn\X;
+
+
+/**
+ * Base class providing error handling, debug state and logging helpers.
+ *
+ * This class is intended to be extended by most framework/service classes
+ * needing a minimal shared API for:
+ * - error registration
+ * - error retrieval
+ * - debug mode handling
+ * - debug logging
+ *
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright BBN Solutions
+ * @license http://www.opensource.org/licenses/mit-license.php MIT
+ * @since Apr 4, 2011
+ */
+abstract class Basic
+{
+/**
+   * List of registered errors.
+   *
+   * Each error entry contains:
+   * - `time` (int): UNIX timestamp
+   * - `msg` (string): error message
+   * - `code` (mixed, optional): error code
+   *
+   * @var array<int, array<string, mixed>>
+   */
+protected array $errors = [];
+
+
+/**
+   * Timestamp of last error.
+   *
+   * @var float|null
+   */
+protected ?float $errorTime = null;
+
+
+/**
+   * Last error message.
+   *
+   * @var string|null
+   */
+protected ?string $error = null;
+
+
+/**
+   * Last error code.
+   *
+   * @var int|string|null
+   */
+protected int|string|null $errorCode = null;
+
+
+/**
+   * Reserved list of available error codes.
+   *
+   * @var array<int|string, mixed>
+   */
+protected array $errorCodes = [];
+
+
+/**
+   * Whether debug mode is enabled for the current instance.
+   *
+   * @var bool
+   */
+protected bool $debug = false;
+
+
+/**
+   * Internal log storage.
+   *
+   * @var array<int, mixed>
+   */
+protected array $log = [];
+
+
+/**
+   * Checks whether the current object is in a valid state.
+   *
+   * Returns `false` if at least one error has been set.
+   *
+   * @return bool
+   */
+public function check(): bool
+  {
+return !$this->error;
+  }
+
+
+/**
+   * Registers an error on the current object.
+   *
+   * The error is stored as the current error and appended to the error stack.
+   *
+   * @param string $err  Error message.
+   * @param mixed  $code Optional error code.
+   * @return static
+   */
+protected function setError(string $err, $code = null): static
+  {
+$this->error = $err;
+$this->errorCode = $code;
+$this->errorTime = microtime(true);
+
+
+$entry = [
+'time' => $this->errorTime,
+'msg' => $err,
+'code' => $code
+    ];
+
+
+$this->errors[] = $entry;
+return $this;
+  }
+
+
+/**
+   * Returns the last error message.
+   *
+   * @return string|null
+   */
+public function getError(): ?string
+  {
+return $this->error;
+  }
+
+
+/**
+   * Returns the last error message.
+   *
+   * @return array<string, mixed>|null
+   */
+public function getFullError(): ?array
+  {
+return [
+'code' => $this->errorCode,
+'text' => $this->error,
+'time' => $this->errorTime,
+    ];
+  }
+
+
+/**
+   * Returns the last error code.
+   *
+   * @return int|string|false|null
+   */
+public function getErrorCode(): int|string|false|null
+  {
+return $this->errorCode;
+  }
+
+
+/**
+   * Returns the full list of registered errors.
+   *
+   * @return array<int, array<string, mixed>>
+   */
+public function getErrors(): array
+  {
+return $this->errors;
+  }
+
+
+/**
+   * Writes one or more values to the debug log when debug mode is enabled.
+   *
+   * The log filename is based on the current class name.
+   *
+   * @param mixed ...$args Values to log.
+   * @return void
+   */
+public function log(...$args): void
+  {
+if ($this->isDebug()) {
+$cn = Str::encodeFilename(str_replace('\\', '_', static::class));
+foreach ($args as $a) {
+X::log($a, $cn);
+      }
+    }
+  }
+
+
+/**
+   * Indicates whether debug mode is enabled.
+   *
+   * Debug is enabled if either:
+   * - the instance debug flag is set
+   * - the `BBN_IS_DEV` constant is truthy
+   *
+   * @return bool
+   */
+public function isDebug(): bool
+  {
+return $this->debug || constant('BBN_IS_DEV');
+  }
+
+
+/**
+   * Sets the instance debug flag.
+   *
+   * @param bool $debug
+   * @return void
+   */
+public function setDebug(bool $debug): void
+  {
+$this->debug = $debug;
+  }
+}
+```
+
+This is the Implementor interface:
+
+```php
+<?php
+
+namespace bbn\User;
+
+use bbn\User\Manager;
+
+interface Implementor
+{
+  public function isReset(): bool;
+
+  public function getSalt(): ?string;
+
+  public function checkSalt(string $salt): bool;
+
+  public function getCfg($attr = '');
+
+  public function isJustLogin(): bool;
+
+  public function getPassword(string $st): string;
+
+  public function setSession($attr): static;
+
+  public function unsetSession(): static;
+
+  public function getSession($attr = null);
+
+  public function getOsession($attr = null);
+
+  public function setOsession(): static;
+
+  public function hasSession($attr): bool;
+
+  public function updateActivity(): static;
+
+  public function saveSession(bool $force = false): static;
+
+  public function closeSession($with_session = false): static;
+
+  public function checkAttempts(): bool;
+
+  public function saveCfg(): static;
+
+  public function setCfg($attr): static;
+
+  public function unsetCfg($attr): static;
+
+  public function refreshInfo(): static;
+
+  public function checkSession(): bool;
+
+  public function isAdmin(): bool;
+
+  public function isDev(): bool;
+
+  public function getManager();
+
+  public function setPassword(string $old_pass, string $new_pass): bool;
+
+  public function addToken(): ?string;
+
+  public function getName($usr = null): ?string;
+
+  public function setData($index, $data = null): static;
+
+  public function updateInfo(array $d): bool;
+
+
+}
+```
+
+A trait:
+```php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: BBN
+ * Date: 01/11/2016
+ * Time: 17:41
+ */
+namespace bbn\Models\Tts;
+
+/**
+ * Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.
+ */
+trait Retriever
+{
+  /**
+   * @var self An instance of the current class.
+   */
+  protected static $retriever_instance;
+
+  /**
+   * @var bool Will be true from the moment an instance exists.
+   */
+  protected static $retriever_exists = false;
+
+  /**
+   * Initialize the retriever by putting its own instance as static property.
+   *
+   * @param self $instance The instance object.
+   * @return void
+   */
+  protected static function retrieverInit(self $instance): void
+  {
+    self::$retriever_exists = true;
+    if (!self::$retriever_instance) {
+      self::$retriever_instance = $instance;
+    }
+  }
+
+
+  /**
+   * Removes the retriever.
+   *
+   * @param self $instance The instance object.
+   * @return void
+   */
+  protected static function retrieverRemove(self $instance): void
+  {
+    if (self::$retriever_instance === $instance) {
+      self::$retriever_exists = false;
+      self::$retriever_instance = null;
+    }
+  }
+
+  /**
+   * Returns the instance of the singleton or null.
+   * 
+   * @return self
+   */
+  public static function getInstance(): ?self
+  {
+    return self::$retriever_instance;
+  }
+
+  /**
+   * Returns true if an instance as been initiated.
+   *
+   * @return bool
+   */
+  public static function retrieverExists(): bool
+  {
+    return self::$retriever_exists;
+  }
+
+  /**
+   * Constructor.
+   */
+  public function __construct()
+  {
+    self::retrieverInit($this);
+  }
+
+}
+```
+
+Another trait: 
+
+```php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: BBN
+ * Date: 05/11/2016
+ * Time: 02:47
+ */
+
+namespace bbn\Models\Tts;
+/**
+ * Database operations trait for regular (non-junction) tables.
+ *
+ * This trait provides generic CRUD and selection helpers on top of the
+ * configuration exposed by the DB-related traits/classes.
+ *
+ * Expected requirements on the consuming class:
+ * - a database connection in `$this->db`
+ * - a resolved DB config through `getClassCfg()`
+ * - initialized `$this->class_table`, `$this->class_table_index`, `$this->fields`
+ * - support methods from `DbTrait`
+ * - event dispatching through `emit()`
+ *
+ * Main features:
+ * - CRUD operations
+ * - single and multiple row selections
+ * - existence and count checks
+ * - search filter generation
+ * - relation lookup helpers
+ * - JSON partial update support for `cfg` columns
+ */
+trait DbOps
+{
+  use DbConfig;
+  use DbFiltering;
+  use DbStructure;
+  use DbData;
+  use DbSelection;
+  use DbWrite;
+}
+<?php
+/**
+ * Created by PhpStorm.
+ * User: BBN
+ * Date: 05/11/2016
+ * Time: 02:47
+ */
+
+namespace bbn\Models\Tts;
+/**
+ * Database operations trait for regular (non-junction) tables.
+ *
+ * This trait provides generic CRUD and selection helpers on top of the
+ * configuration exposed by the DB-related traits/classes.
+ *
+ * Expected requirements on the consuming class:
+ * - a database connection in `$this->db`
+ * - a resolved DB config through `getClassCfg()`
+ * - initialized `$this->class_table`, `$this->class_table_index`, `$this->fields`
+ * - support methods from `DbTrait`
+ * - event dispatching through `emit()`
+ *
+ * Main features:
+ * - CRUD operations
+ * - single and multiple row selections
+ * - existence and count checks
+ * - search filter generation
+ * - relation lookup helpers
+ * - JSON partial update support for `cfg` columns
+ */
+trait DbOps
+{
+  use DbConfig;
+  use DbFiltering;
+  use DbStructure;
+  use DbData;
+  use DbSelection;
+  use DbWrite;
+}
+
+```
+
+Another trait: 
+
+```php
+<?php
+namespace bbn\Models\Tts;
+
+use Exception;
+use bbn\X;
+use bbn\Db;
+use bbn\Models\Internal\DbConfigRegistryBuilder;
+
+use function count;
+use function is_array;
+
+/**
+ * Provides declarative database configuration handling for table classes.
+ *
+ * Classes using this trait are expected to define a static
+ * `$default_class_cfg` property containing at least:
+ *
+ * - `table`  : main table name
+ * - `tables` : indexed list of tables
+ * - `arch`   : table structures indexed by table aliases
+ *
+ * The trait is responsible for:
+ * - building and caching the merged class configuration
+ * - exposing the main table and fields
+ * - building a cache of configured table classes and their dependencies
+ */
+trait DbConfig
+{
+  use Event;
+
+  /**
+   * Tracks which classes have already had their DB config initialized.
+   *
+   * @var array<string, bool>
+   */
+  protected static array $_isInitClassCfg = [];
+
+  /**
+   * Cached map of table names to class metadata.
+   *
+   * Example:
+   * [
+   *   'bbn_members' => [
+   *     'class' => '...',
+   *     'cache' => true,
+   *     'deps' => ['bbn_members_entities']
+   *   ]
+   * ]
+   *
+   * @var array<string, array<string, mixed>>
+   */
+  protected static array $dbConfigTableClasses;
+
+  /**
+   * Fields of the main table for the current class.
+   *
+   * @var array<string, string>
+   */
+  protected array $fields;
+
+  /**
+   * Fully resolved class configuration.
+   *
+   * @var array<string, mixed>
+   */
+  protected array $class_cfg;
+
+  /**
+   * Main table name for the current class.
+   *
+   * @var string
+   */
+  protected string $class_table;
+
+  /**
+   * Index of the main table in the `tables` / `arch` configuration.
+   *
+   * @var string
+   */
+  protected string $class_table_index;
+
+  /**
+   * Cached resolved configuration by class name.
+   *
+   * @var array<string, array<string, mixed>>
+   */
+  protected static array $dbConfigCfg = [];
+
+  /**
+   * Indicates whether the DB config has already been initialized for the class.
+   *
+   * @return bool
+   */
+  public static function isDbConfigInit(): bool
+  {
+    return !empty(self::$_isInitClassCfg[static::class]);
+  }
+
+  /**
+   * Returns the raw default class configuration declared on the class.
+   *
+   * @return array<string, mixed>|null
+   */
+  public static function getDefaultClassCfg(): ?array
+  {
+    return static::$default_class_cfg ?? [];
+  }
+
+  /**
+   * Returns the resolved class configuration for the current instance.
+   *
+   * @return array<string, mixed>
+   */
+  public function getClassCfg(): array
+  {
+    return $this->class_cfg;
+  }
+
+  /**
+   * Returns the list of fields for the main table.
+   *
+   * @return array<string, string>
+   */
+  public function getFields(): array
+  {
+    return $this->fields;
+  }
+
+  /**
+   * Returns the main table name for the current instance.
+   *
+   * @return string
+   */
+  public function getClassTable(): string
+  {
+    return $this->class_table;
+  }
+
+  /**
+   * Returns the main table index for the current instance.
+   *
+   * @return string
+   */
+  public function getClassTableIndex(): string
+  {
+    return $this->class_table_index;
+  }
+
+  /**
+   * Builds and caches the resolved class configuration for the current class.
+   *
+   * The configuration is built by traversing the class inheritance chain and
+   * merging every available `default_class_cfg`.
+   *
+   * Special handling:
+   * - `table_index` is automatically resolved from `tables` and `table`
+   * - array field definitions are normalized into `props`
+   *
+   * @param array<string, mixed>|null $cfg Optional external configuration.
+   * @return array<string, mixed>
+   * @throws Exception If the configuration is missing or invalid.
+   */
+  private static function dbConfigInit(?array $cfg = null): array
+  {
+    if (static::isDbConfigInit()) {
+      return static::$dbConfigCfg[static::class];
+    }
+
+    $arr = [];
+    $parent = get_parent_class(static::class);
+
+    while ($parent && method_exists($parent, 'getDefaultClassCfg')) {
+      if ($tmp = $parent::getDefaultClassCfg()) {
+        array_unshift($arr, $tmp);
+      }
+
+      $parent = get_parent_class($parent);
+    }
+
+    if (isset(static::$default_class_cfg)) {
+      $arr[] = static::$default_class_cfg;
+    }
+
+    if (!count($arr)) {
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: no configuration available",
+          static::class
+        )
+      );
+    }
+
+    $cfg = count($arr) === 1 ? $arr[0] : array_merge(...$arr);
+
+    if (!isset($cfg['tables'])) {
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: no tables",
+          static::class
+        )
+      );
+    }
+
+    $table_index = array_flip($cfg['tables'])[$cfg['table']] ?? null;
+    if (
+      !$table_index
+      || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])
+    ) {
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly to work with trait DbActions: invalid table configuration",
+          static::class
+        )
+      );
+    }
+
+    // We completely replace the table structure, no merge.
+    $props = [];
+    foreach ($cfg['arch'] as $t => &$fields) {
+      if (empty($cfg['table_index']) && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table'])) {
+        $cfg['table_index'] = $t;
+      }
+
+      foreach ($fields as $f => $it) {
+        if (is_array($it)) {
+          $props[$t][$f] = $it;
+          $fields[$f] = $it['name'] ?? $f;
+        }
+      }
+    }
+    unset($fields);
+
+    if (!empty($props)) {
+      $cfg['props'] = $props;
+    }
+
+    static::$dbConfigCfg[static::class] = $cfg;
+    static::$_isInitClassCfg[static::class] = true;
+
+    return $cfg;
+  }
+
+  /**
+   * Initializes the instance configuration from the static class config.
+   *
+   * Sets:
+   * - `$this->class_cfg`
+   * - `$this->fields`
+   * - `$this->class_table_index`
+   * - `$this->class_table`
+   *
+   * @return static
+   */
+  protected function initClassCfg(): static
+  {
+    if (!isset($this->class_cfg)) {
+      $this->class_cfg = static::dbConfigInit();
+      $cfg = $this->class_cfg;
+      $this->fields = $cfg['arch'][$cfg['table_index']];
+      $this->class_table_index = $cfg['table_index'];
+      $this->class_table = $cfg['table'];
+    }
+
+    return $this;
+  }
+
+  /**
+   * Indicates whether the current class has already been initialized.
+   *
+   * @return bool
+   */
+  public function isInitClassCfg(): bool
+  {
+    return static::$_isInitClassCfg[static::class] ?? false;
+  }
+
+  /**
+   * Ensures that the current instance configuration has been initialized.
+   *
+   * @return void
+   * @throws Exception If the configuration has not been initialized.
+   */
+  public function dbConfigCheck(): void
+  {
+    if (!$this->isInitClassCfg()) {
+      throw new Exception(
+        X::_(
+          "The class %s is not configured properly has not been initiated for trait DbConfig",
+          static::class
+        )
+      );
+    }
+  }
+
+  /**
+   * Returns the map of configured table classes and their dependency metadata.
+   *
+   * The result is built by scanning the Composer class map and collecting all
+   * classes exposing a static `default_class_cfg` property and an
+   * `initClassCfg()` method.
+   *
+   * Returned metadata may contain:
+   * - `class`     : fully qualified class name
+   * - `cache`     : whether the table class has row cache enabled
+   * - `junctions` : declared table junctions
+   * - `deps`      : reverse dependencies computed from junctions
+   *
+   * @return array<string, array<string, mixed>>
+   * @throws Exception If the Composer class map cannot be loaded.
+   */
+  public static function dbConfigGetTableClasses(Db $db): array
+  {
+    if (isset(self::$dbConfigTableClasses)) {
+      return self::$dbConfigTableClasses;
+    }
+
+    $builder = new DbConfigRegistryBuilder($db);
+    self::$dbConfigTableClasses = $builder->getRegistry();
+
+    return self::$dbConfigTableClasses;
+  }
+}
+
+```
+
+Another trait: 
+
+```php
+<?php
+namespace bbn\Models\Tts;
+
+use bbn\Util\InternalEvent;
+
+use function is_object;
+
+trait Event
+{
+  /** @var array<string, array<int, callable>> */
+  private array $listeners = [];
+
+  /** @var bool $eventsDisabled */
+  private bool $eventsDisabled = false;
+
+  public function disableEvents(): void
+  {
+    $this->eventsDisabled = true;
+  }
+
+  public function enableEvents(): void
+  {
+    $this->eventsDisabled = false;
+  }
+
+  public function areEventsDisabled(): bool
+  {
+    return $this->eventsDisabled;
+  }
+
+
+
+  public function on(string $event, callable $listener): void
+  {
+    if (!\in_array($listener, $this->listeners[$event] ?? [], true)) {
+      $this->listeners[$event][] = $listener;
+    }
+  }
+
+  public function off(string $event, ?callable $listener = null): void
+  {
+    if (!isset($this->listeners[$event])) {
+      return;
+    }
+
+    if ($listener === null) {
+      unset($this->listeners[$event]);
+      return;
+    }
+
+    $this->listeners[$event] = array_values(array_filter(
+      $this->listeners[$event],
+      fn($l) => $l !== $listener
+    ));
+
+    if ($this->listeners[$event] === []) {
+      unset($this->listeners[$event]);
+    }
+  }
+
+  public function emit(string $event, mixed ...$args): ?InternalEvent
+  {
+    if ($this->eventsDisabled) {
+      return null;
+    }
+
+    $last = array_last($args);
+    if (is_object($last) && is_a($last, InternalEvent::class)) {
+      $o = array_pop($args);
+      $o->setData($args);
+    }
+    else {
+      $o = new InternalEvent($event, $args);
+    }
+    foreach ($this->listeners[$event] ?? [] as $listener) {
+      $listener($o);
+    }
+
+    return $o;
+  }
+}
+
+```
+
+Another trait: 
+
+```php
+<?php
+
+namespace bbn\Models\Tts;
+
+use Exception;
+use bbn\X;
+use bbn\Str;
+
+use function count;
+
+trait DbFiltering
+{
+  /**
+   * @var array Configuration for the root filter.
+   */
+  protected $rootFilterCfg = [];
+
+  protected $dbTraitFilterCfg = [];
+
+  /**
+   * Sets the filter configuration for database queries.
+   *
+   * @param array $cfg The filter configuration.
+   */
+  protected function dbTraitSetFilterCfg(array $cfg): void
+  {
+    $this->dbTraitFilterCfg = $cfg;
+  }
+
+  /**
+   * Resets the filter configuration for database queries.
+   */
+  protected function dbTraitResetFilterCfg(): void
+  {
+    $this->dbTraitFilterCfg = [];
+  }
+
+  /**
+   * Combines multiple filter configurations into a single array.
+   *
+   * @param array $cfg Additional filter configuration.
+   *
+   * @return array The combined filter configuration.
+   */
+  protected function dbTraitGetFilterCfg(array $cfg): array
+  {
+    $conditions = [];
+    $todo = [$this->rootFilterCfg ?? [], $this->dbTraitFilterCfg ?? [], $cfg];
+    foreach ($todo as $c) {
+      if (!empty($c)) {
+        if (X::isAssoc($c)) {
+          if (isset($c['logic']) && $c['logic'] === 'OR') {
+            $conditions[] = $c;
+          }
+          elseif (isset($c['conditions']) && \is_array($c['conditions'])) {
+            foreach ($c['conditions'] as $key => $cond) {
+              if (is_string($key)) {
+                $conditions[$key] = $cond;
+              }
+              else {
+                $conditions[] = $cond;
+              }
+            }
+          }
+          else {
+            X::extendOut($conditions, $c);
+          }
+        }
+        else {
+          array_push($conditions, ...array_values($c));
+        }
+      }
+    }
+
+    // Return empty array if no conditions exist
+    if (empty($conditions)) {
+      return [];
+    }
+
+    // Combine all conditions with 'AND' logic
+    return [
+      'logic' => 'AND',
+      'conditions' => $conditions
+    ];
+  }
+
+  /**
+   * Builds a search filter configuration from a simple scalar term.
+   *
+   * If `$cols` is empty, searchable columns are inferred from the table model:
+   * - text/char-like columns are included
+   * - integer-like columns are also included if the filter looks numeric
+   *
+   * The returned filter uses OR logic across all selected columns.
+   *
+   * @param string|int         $filter Search term.
+   * @param array<int, string> $cols   Columns to search on. If empty, columns are inferred.
+   * @param bool               $strict Whether to use `=` instead of `contains`.
+   * @return array<string, mixed> Search filter configuration.
+   */
+  protected function dbTraitGetSearchFilter(
+    string|int $filter,
+    array $cols = [],
+    bool $strict = false,
+  ): array {
+    $cfg = $this->getClassCfg();
+    $isNumber = Str::isNumber($filter);
+
+    $finalFilter = [
+      "logic" => "OR",
+      "conditions" => [],
+    ];
+
+    if (empty($cols)) {
+      $tableCols = $this->db->modelize($cfg["table"])["fields"];
+      foreach ($tableCols as $col => $colCfg) {
+        if (
+          Str::pos($colCfg["type"], "text") !== false ||
+          Str::pos($colCfg["type"], "char") !== false
+        ) {
+          $cols[] = $col;
+        }
+        elseif ($isNumber && Str::pos($colCfg["type"], "int") !== false) {
+          $cols[] = $col;
+        }
+      }
+    }
+
+    foreach ($cols as $col) {
+      $finalFilter["conditions"][] = [
+        "field" => $this->db->cfn($col, $cfg["table"]),
+        "operator" => $strict ? "=" : "contains",
+        "value" => $filter,
+      ];
+    }
+
+    return $finalFilter;
+  }
+
+  /**
+   * Prepares the request configuration for a database query.
+   *
+   * @param array $filter Filter conditions.
+   * @param string|array $orderOrder by conditions.
+   * @param int $limit Maximum number of rows to return.
+   * @param int $start Offset of the first row to return.
+   * @param array $fields Fields to select.
+   *
+   * @return array The request configuration.
+   * @throws Exception If the table index is not defined or a field does not exist.
+   */
+  protected function dbTraitGetRequestCfg(
+    array $filter,
+    array $order,
+    int $limit,
+    int $start,
+    array $fields = []
+  ): array
+  {
+    // Ensure table index is defined
+    if (!$this->class_table_index) {
+      throw new Exception(X::_("The table index parameter should be defined"));
+    }
+
+    // Validate fields
+    if (!empty($fields)) {
+      foreach (array_values($fields) as $f) {
+        if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {
+          throw new Exception(X::_("The field %s does not exist", $f));
+        }
+      }
+
+      $properFields = $fields;
+    }
+    else {
+      $fields = $this->class_cfg['arch'][$this->class_table_index];
+    }
+
+    $ccfg = $this->getClassCfg();
+    if (isset($fields['cfg']) && !empty($ccfg['cfg'])) {
+      $cfgCol = $fields['cfg'];
+      unset($fields['cfg']);
+      if (!isset($properFields)) {
+        $properFields = array_values($fields);
+      }
+
+      foreach ($ccfg['cfg'] as $v) {
+        if ($v['field'] && !in_array($v['field'], $properFields)) {
+          $properFields[$v['field']] = "IF(JSON_EXTRACT("
+              . $this->db->csn($cfgCol, true) . ", '\$." . $v['field']
+              . "') = 'null', NULL, JSON_UNQUOTE(JSON_EXTRACT("
+              . $this->db->csn($cfgCol, true) . ", '\$." . $v['field']
+              ."')))";
+        }
+      }
+    }
+    elseif (!isset($properFields)) {
+      $properFields = array_values($fields);
+    }
+
+    // Build the request configuration
+    $req = [
+      'table' => $this->class_table,
+      'fields' => $properFields,
+      'where' => $this->dbTraitGetFilterCfg($filter),
+      'order' => $order
+    ];
+
+    if ($limit) {
+      $req['limit'] = $limit;
+      $req['start'] = $start;
+    }
+
+    return $req;
+  }
+
+}
+
+
+```
+
+Another trait: 
+
+```php
+<?php
+
+namespace bbn\Models\Tts;
+
+use bbn\X;
+
+use function count;
+
+trait DbStructure
+{
+  /**
+   * @var array Cached relations for the current table.
+   */
+  private $dbTraitRelations = [];
+
+  /**
+   * @var array Cached structure for the current table.
+   */
+  private $dbTraitStructure = [];
+
+  /**
+   * Gets the structure of the specified table.
+   *
+   * @param string|null $table The table name (optional).
+   *
+   * @return array The structure of the table.
+   */
+  protected function dbTraitGetStructure(string|null $table = null): array
+  {
+    if (!$table) {
+      $cfg = $this->getClassCfg();
+      $table = $cfg['table'];
+    }
+
+    if (!isset($this->dbTraitStructure[$table])) {
+      $this->dbTraitStructure[$table] = $this->db->modelize($table);
+    }
+
+    return $this->dbTraitStructure[$table];
+  }
+
+  /**
+   * Retrieves the relations for a given table.
+   *
+   * @param string|null $table The table name (optional).
+   *
+   * @return array An array of relations.
+   */
+  protected function dbTraitGetTableRelations(string|null $table = null): array
+  {
+    $cfg = $this->getClassCfg();
+    if (!$table) {
+      $table = $cfg['table'];
+    }
+    $idx = array_flip($cfg['tables'])[$table];
+    if ($idx && !isset($this->dbTraitRelations[$table])) {
+      $arc = &$cfg['arch'][$idx];
+      $this->dbTraitRelations[$table] = [];
+      if (!empty($arc['id'])) {
+        $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));
+        foreach ($refs as $ref) {
+          [$db, $tab, $col] = X::split($ref, '.');
+          $model = $this->db->modelize($tab);
+          $this->dbTraitRelations[$table][] = [
+            'db' => $db,
+            'table' => $tab,
+            'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,
+            'col' => $col,
+            'model' => $model
+          ];
+        }
+      }
+    }
+
+    return $this->dbTraitRelations[$table];
+  }
+
+
+}
+```
+
+Another trait: 
+
+```php
+<?php
+
+namespace bbn\Models\Tts;
+
+use Exception;
+use StdClass;
+use bbn\X;
+
+use function array_key_exists;
+
+trait DbData
+{
+  /**
+   * Prepares data before inserting or updating in the database.
+   *
+   * @param array $data The data to be prepared.
+   *
+   * @return array The prepared data.
+   * @throws Exception If the class config has not been initialized or is incorrect.
+   */
+  protected function dbTraitPrepare(array $data): array
+  {
+    // Ensure that the class configuration is initialized
+    $this->dbConfigCheck();
+    $ccfg = $this->getClassCfg();
+    // Get the table index from the class configuration
+    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
+    if (!$table_index) {
+      throw new Exception(X::_("The class config is not correct as the main table doesn't have an arch"));
+    }
+
+    $f = $ccfg['arch'][$table_index];
+    $res = [];
+
+    // Handle 'cfg' field if present in the table configuration
+    if (!empty($ccfg['cfg'])) {
+      if (array_key_exists($f['cfg'], $data)) {
+        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
+        unset($data[$f['cfg']]);
+      }
+      else {
+        $cfg = [];
+        foreach ($ccfg['cfg'] as $v) {
+          if (array_key_exists($v['field'], $data)) {
+            $cfg[$v['field']] = $data[$v['field']] ?? null;
+            unset($data[$v['field']]);
+          }
+        }
+        if (!empty($cfg)) {
+          $res[$f['cfg']] = $cfg;
+        }
+      }
+    }
+
+    $structure = $this->dbTraitGetStructure();
+    foreach ($data as $k => $v) {
+      if (in_array($k, $f)) {
+        // Set the value to null if it's empty and not 0 and the field allows null
+        if (empty($v)
+          && ($v !== 0)
+          && isset($structure['fields'][$k])
+          && $structure['fields'][$k]['null']
+        ) {
+          $v = null;
+        }
+
+        $res[$k] = $v;
+      }
+    }
+
+    return $res;
+  }
+
+  protected function dbTraitTreat(array ...$rows): array
+  {
+    // Ensure that the class configuration is initialized
+    $this->dbConfigCheck();
+    $ccfg = $this->getClassCfg();
+    // Get the table index from the class configuration
+    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
+    if (!$table_index) {
+      throw new Exception(X::_("The class config is not correct as the main table doesn't have an arch"));
+    }
+
+    $f = $ccfg['arch'][$table_index];
+    $res = [];
+    // Handle 'cfg' field if present in the table configuration
+    if (empty($f['cfg'])) {
+      return [...$rows];
+    }
+    foreach ($rows as &$data) {
+      if (array_key_exists($f['cfg'], $data)) {
+        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
+        if (!empty($ccfg['cfg'])) {
+          foreach ($ccfg['cfg'] as $v) {
+            if (isset($v['field']) 
+                && array_key_exists($v['field'], $data[$f['cfg']])
+                && !array_key_exists($v['field'], $data)) {
+              $data[$v['field']] = $data[$f['cfg']][$v['field']];
+            }
+          }
+          unset($data[$f['cfg']]);
+        }
+      }
+
+      $res[] = $data;
+    }
+
+    unset($data);
+    return $res;
+  }
+
+  protected function dbTraitTransformData(array|stdClass $res): array | stdClass
+  {
+    return self::transformData($res, $this);
+  }
+
+
+  public static function transformData(array $res, $obj): array | stdClass
+  {
+    $classCfg = $obj->getClassCfg();
+    $f = $classCfg['arch'][$obj->getClassTableIndex()];
+    if (!empty($f['cfg'])) {
+      foreach ($res as &$r) {
+        if (\is_array($res)) {
+          if (!empty($r[$f['cfg']])) {
+            if (is_string($r[$f['cfg']])) {
+              $r[$f['cfg']] = json_decode($r[$f['cfg']], true);
+            }
+
+            if (!empty($classCfg['cfg'])) {
+              foreach ($classCfg['cfg'] as $v) {
+                if (isset($v['field'])
+                  && !array_key_exists($v['field'], $r)
+                ) {
+                  $r[$v['field']] = !empty($r[$f['cfg']])
+                    ? ($r[$f['cfg']][$v['field']] ?? null)
+                    : null;
+                }
+              }
+
+              unset($r[$f['cfg']]);
+            }
+
+          }
+        }
+        elseif (!empty($res->{$f['cfg']})) {
+          $res->{$f['cfg']} = json_decode($res->{$f['cfg']});
+          if (!empty($classCfg['cfg'])) {
+            foreach ($classCfg['cfg'] as $v) {
+              if (isset($v['field'])
+                && !property_exists($res, $v['field'])
+              ) {
+                $res->{$v['field']} = !empty($res->{$f['cfg']})
+                  ? ($res->{$f['cfg']}->{$v['field']} ?? null)
+                  : null;
+              }
+            }
+
+            unset($res->{$f['cfg']});
+          }
+        }
+
+        unset($r);
+      }
+    }
+
+    return $res;
+  }
+
+
+}
+```
+
+Another trait: 
+
+```php
+<?php
+
+namespace bbn\Models\Tts;
+
+use Exception;
+use stdClass;
+use bbn\X;
+
+use function is_array;
+use function is_string;
+use function count;
+
+trait DbSelection
+{
+  /**
+   * Returns the IDs matching the given filter.
+   *
+   * Fast paths:
+   * - if `$filter` is a string, it is assumed to already be the row ID
+   * - if `$filter` is an array containing only the table ID field, that ID is returned directly
+   *
+   * @param string|array<string, mixed> $filter Filter configuration or a single row ID.
+   * @return array<int, string> List of matching row IDs.
+   */
+  protected function dbTraitGetIds(string|array $filter = []): array
+  {
+    if (is_string($filter)) {
+      return [$filter];
+    }
+
+    $cfg = $this->getClassCfg();
+    $f = $cfg["arch"][$this->class_table_index];
+
+    // If the filter is exactly "id = X", return it directly without a DB call.
+    if (isset($filter[$f['id']]) && count($filter) === 1) {
+      return [$filter[$f['id']]];
+    }
+
+    $filter = $this->dbTraitGetFilterCfg($filter);
+
+    /** @var array<int, string> $res */
+    $res = $this->db->getColumnValues(
+      $this->class_table,
+      $f['id'],
+      $filter,
+      [$f['id'] => "ASC"]
+    );
+
+    return $res;
+  }
+
+  /**
+   * Checks whether at least one row exists for the given filter.
+   *
+   * If `$filter` is a string, it is treated as the row ID.
+   *
+   * Emits:
+   * - `beforeselect`
+   *
+   * If the event prevents default, its response is cast to bool and returned.
+   *
+   * @param string|array<string, mixed> $filter Row ID or filter configuration.
+   * @return bool True if at least one row exists, false otherwise.
+   * @throws Exception If the table index is not defined.
+   */
+  protected function dbTraitExists(string|array $filter): bool
+  {
+    if (!$this->class_table_index) {
+      throw new Exception(X::_("The table index parameter should be defined"));
+    }
+
+    $f = $this->class_cfg["arch"][$this->class_table_index];
+
+    if (is_array($filter) && isset($filter[$f['id']]) && count($filter) === 1) {
+      $filter = $filter[$f['id']];
+    }
+
+    $ev = $this->emit("beforeselect", $filter);
+    if ($ev && $ev->isDefaultPrevented()) {
+      return (bool)$ev->getResponse();
+    }
+
+    if (is_string($filter)) {
+      $cfg = [$f['id'] => $filter];
+    }
+    elseif (is_array($filter)) {
+      $cfg = $filter;
+    }
+
+    return !empty($cfg)
+      && (bool)$this->db->count(
+        $this->class_table,
+        $this->dbTraitGetFilterCfg($cfg)
+      );
+  }
+
+  /**
+   * Selects a single field value from the first matching row.
+   *
+   * @param string                    $field  Field name to return.
+   * @param string|array<string,mixed> $filter Row ID or filter configuration.
+   * @param array<string, string>     $order  Order configuration.
+   * @return mixed|null Field value, or null if no row matches.
+   */
+  protected function dbTraitSelectOne(
+    string $field,
+    string|array $filter = [],
+    string|array $order= [],
+  ) {
+    if ($res = $this->dbTraitSingleSelection($filter, $order, "array", [$field])) {
+      return $res[$field] ?? null;
+    }
+
+    return null;
+  }
+
+  /**
+   * Selects the first matching row and returns it as an object.
+   *
+   * @param string|array<string, mixed> $filter Row ID or filter configuration.
+   * @param array<string, string>       $order  Order configuration.
+   * @param array<int, string>          $fields Optional list of fields to return.
+   * @return stdClass|null Matching row as object, or null if not found.
+   */
+  protected function dbTraitSelect(
+    string|array $filter = [],
+    string|array $order= [],
+    array $fields = [],
+  ): ?stdClass {
+    return $this->dbTraitSingleSelection($filter, $order, "object", $fields);
+  }
+
+  /**
+   * Selects the first matching row and returns it as an array.
+   *
+   * @param string|array<string, mixed> $filter Row ID or filter configuration.
+   * @param array<string, string>       $order  Order configuration.
+   * @param array<int, string>          $fields Optional list of fields to return.
+   * @return array<string, mixed>|null Matching row as array, or null if not found.
+   */
+  protected function dbTraitRselect(
+    string|array $filter = [],
+    string|array $order= [],
+    array $fields = [],
+  ): ?array {
+    return $this->dbTraitSingleSelection($filter, $order, "array", $fields);
+  }
+
+  /**
+   * Returns the values of a single field for all matching rows.
+   *
+   * @param string                $field  Field name to return.
+   * @param array<string, mixed>  $filter Filter configuration.
+   * @param array<string, string> $order  Order configuration.
+   * @param int                   $limit  Maximum number of rows to return.
+   * @param int                   $start  Result offset.
+   * @return array<int, mixed>
+   */
+  protected function dbTraitSelectValues(
+    string $field,
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+  ): array {
+    return $this->dbTraitSelection($filter, $order, $limit, $start, "value", [$field]);
+  }
+
+  /**
+   * Returns the number of rows matching the given filter.
+   *
+   * @param array<string, mixed> $filter Filter configuration.
+   * @return int Number of matching rows.
+   * @throws Exception If the table index is not defined.
+   */
+  protected function dbTraitCount(array $filter = []): int
+  {
+    if (!$this->class_table_index) {
+      throw new Exception(X::_("The table index parameter should be defined"));
+    }
+
+    $req = $this->dbTraitGetRequestCfg($filter, [], 1, 0, [
+      $this->fields["id"],
+    ]);
+
+    return $this->db->count($req);
+  }
+
+  /**
+   * Returns all matching rows as objects.
+   *
+   * @param array<string, mixed>  $filter Filter configuration.
+   * @param array<string, string> $order  Order configuration.
+   * @param int                   $limit  Maximum number of rows to return.
+   * @param int                   $start  Result offset.
+   * @param array<int, string>    $fields Optional list of fields to return.
+   * @return array<int, stdClass>
+   */
+  protected function dbTraitSelectAll(
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+    $fields = [],
+  ): array {
+    return $this->dbTraitSelection(
+      $filter,
+      $order,
+      $limit,
+      $start,
+      "object",
+      $fields,
+    );
+  }
+
+  /**
+   * Returns all matching rows as arrays.
+   *
+   * @param array<string, mixed>  $filter Filter configuration.
+   * @param array<string, string> $order  Order configuration.
+   * @param int                   $limit  Maximum number of rows to return.
+   * @param int                   $start  Result offset.
+   * @param array<int, string>    $fields Optional list of fields to return.
+   * @return array<int, array<string, mixed>>
+   */
+  protected function dbTraitRselectAll(
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+    $fields = [],
+  ): array {
+    return $this->dbTraitSelection(
+      $filter,
+      $order,
+      $limit,
+      $start,
+      "array",
+      $fields,
+    );
+  }
+
+  /**
+   * Returns related rows references for a given row ID.
+   *
+   * The method inspects relations returned by `dbTraitGetTableRelations()`
+   * and gathers the related row primary keys from each relation table.
+   *
+   * Result format:
+   * [
+   *   'table_name' => [
+   *     'col' => 'foreign_key_column',
+   *     'primary' => 'primary_key_column',
+   *     'values' => [...]
+   *   ]
+   * ]
+   *
+   * @param string      $id    Source row ID.
+   * @param string|null $table Optional relation table name to restrict the lookup.
+   * @return array<string, array<string, mixed>>|null Related references, or null if the row does not exist.
+   */
+  protected function dbTraitGetRelations(string $id, ?string $table = null): ?array
+  {
+    if ($this->dbTraitExists($id)) {
+      $db = &$this->db;
+      $res = [];
+
+      foreach ($this->dbTraitGetTableRelations($table) as $rel) {
+        if (
+          $all = $db->getColumnValues($rel["table"], $rel["primary"], [
+            $rel["col"] => $id,
+          ])
+        ) {
+          $res[$rel["table"]] = [
+            "col" => $rel["col"],
+            "primary" => $rel["primary"],
+            "values" => $all,
+          ];
+        }
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+  /**
+   * Executes a search and returns matching rows as arrays.
+   *
+   * If `$filter` is a string, it is converted through `dbTraitGetSearchFilter()`.
+   * If `$filter` is already an array, it is assumed to be a full filter configuration.
+   *
+   * @param array<string, mixed>|string $filter Search term or full filter configuration.
+   * @param array<int, string>          $cols   Search columns when `$filter` is scalar.
+   * @param array<int, string>          $fields Fields to return.
+   * @param array<string, string>       $order  Order configuration.
+   * @param bool                        $strict Whether to use strict equality in generated search filters.
+   * @param int                         $limit  Maximum number of rows to return.
+   * @param int                         $start  Result offset.
+   * @return array<int, array<string, mixed>>
+   */
+  protected function dbTraitSearch(
+    array|string $filter,
+    array $cols = [],
+    array $fields = [],
+    string|array $order= [],
+    bool $strict = false,
+    int $limit = 0,
+    int $start = 0,
+  ): array {
+    if (is_array($filter)) {
+      $finalFilter = $filter;
+      if (empty($fields) && !empty($cols)) {
+        $fields = $cols;
+      }
+    }
+    else {
+      $finalFilter = $this->dbTraitGetSearchFilter($filter, $cols, $strict);
+    }
+
+    return $this->dbTraitRselectAll(
+      $finalFilter,
+      $order,
+      $limit,
+      $start,
+      $fields,
+    );
+  }
+
+  /**
+   * Returns an array of rows from the table for the given conditions.
+   *
+   * @param array $filter Filter conditions.
+   * @param string|array $orderOrder by conditions.
+   * @param int $limit Maximum number of rows to return.
+   * @param int $start Offset of the first row to return.
+   * @param string $mode The mode of result ('array', 'object', 'value').
+   * @param array $fields Fields to select.
+   *
+   * @return array The result set.
+   */
+  protected function dbTraitSelection(
+    array $filter,
+    array $order,
+    int $limit,
+    int $start,
+    string $mode = 'array',
+    array $fields = []
+  ): array
+  {
+    $returnObject = $mode === 'object';
+    $go = true;
+    if (isset($filter['id']) && (count($filter) === 1)) {
+      $o = $this->emit('beforeselect', $filter);
+      if ($o && $res = $o->getResponse()) {
+        if (!empty($fields)) {
+          foreach ($res as $k => $v) {
+            if (!in_array($k, $fields)) {
+              unset($res[$k]);
+            }
+          }
+        }
+
+        $go = !$o->isDefaultPrevented();
+        if ($returnObject) {
+          $res = (object)$res;
+        }
+      }
+    }
+
+    if ($go) {
+      $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);
+      $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');
+      $res = $this->db->$method($req);
+    }
+
+    if ($res) {
+      return $this->dbTraitTransformData($res);
+    }
+
+    return [];
+  }
+
+  /**
+   * Selects the first matching row using `dbTraitSelection()`.
+   *
+   * @param string|array<string, mixed> $filter Row ID or filter configuration.
+   * @param array<string, string>       $order  Order configuration.
+   * @param string                      $mode   Selection mode, typically `array` or `object`.
+   * @param array<int, string>          $fields Fields to return.
+   * @return mixed First matching row, or null if none found.
+   */
+  protected function dbTraitSingleSelection(
+    string|array $filter,
+    array $order,
+    string $mode = "array",
+    array $fields = [],
+  ): mixed {
+    $f = $this->class_cfg["arch"][$this->class_table_index];
+
+    if (is_string($filter)) {
+      $cfg = [$f['id'] => $filter];
+    }
+    elseif (is_array($filter)) {
+      $cfg = $filter;
+    }
+
+    if (
+      isset($cfg) &&
+      ($res = $this->dbTraitSelection($cfg, $order, 1, 0, $mode, $fields))
+    ) {
+      return $res[0];
+    }
+
+    return null;
+  }
+}
+
+```
+
+Another trait: 
+
+```php
+<?php
+
+namespace bbn\Models\Tts;
+
+use Exception;
+use bbn\Str;
+use bbn\X;
+
+use function is_string;
+use function array_key_exists;
+
+trait DbWrite
+{
+  /**
+   * Inserts a new row into the current table.
+   *
+   * The input data is first normalized through `dbTraitPrepare()`.
+   * If a `cfg` field exists in the table architecture and is present in `$data`,
+   * it is JSON-encoded before insertion.
+   *
+   * Emits:
+   * - `beforeinsert`
+   * - `afterinsert`
+   *
+   * @param array<string, mixed> $data   Row data to insert.
+   * @param bool                 $ignore Whether to use `insertIgnore()` instead of `insert()`.
+   * @return string|null Inserted row ID, or null if insertion failed.
+   */
+  protected function dbTraitInsert(array $data, bool $ignore = false): ?string
+  {
+    if ($data = $this->dbTraitPrepare($data)) {
+      $ccfg = $this->getClassCfg();
+
+      // Encode "cfg" column as JSON if configured.
+      if (!empty($ccfg["arch"][$this->class_table_index]["cfg"])) {
+        $col = $ccfg["arch"][$this->class_table_index]["cfg"];
+        if (isset($data[$col])) {
+          $data[$col] = json_encode($data[$col]);
+        }
+      }
+
+      $o = $this->emit("beforeinsert", $data);
+
+      if ($o &&
+        !$o->isDefaultPrevented() &&
+        $this->db->{$ignore ? "insertIgnore" : "insert"}($this->class_table, $data)
+      ) {
+        $id = $this->db->lastId();
+        $this->emit("afterinsert", $id);
+        return $id;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Deletes row(s) from the current table.
+   *
+   * Accepts either:
+   * - a row ID as string
+   * - a filter array
+   *
+   * When `$cascade` is true, related rows returned by `dbTraitGetTableRelations()`
+   * are deleted after the main delete operation.
+   *
+   * Emits:
+   * - `beforedelete`
+   * - `afterdelete`
+   *
+   * @param string|array<string, mixed> $filter  Row ID or filter configuration.
+   * @param bool                        $cascade Whether to cascade delete declared related rows.
+   * @return int Number of deleted rows.
+   */
+  protected function dbTraitDelete(string|array $filter, bool $cascade = false): int
+  {
+    if ($this->dbTraitExists($filter)) {
+      $cfg = $this->getClassCfg();
+      $f = $cfg["arch"][$this->class_table_index];
+
+      if (!is_array($filter) && !empty($f["id"])) {
+        $filter = [$f["id"] => $filter];
+      }
+
+      $o = $this->emit("beforedelete", [$filter, $cascade]);
+
+      if ($o && $o->isDefaultPrevented()) {
+        return $o->getResponse() ?? 0;
+      }
+      if ($res = $this->db->delete(
+        $this->class_table,
+        $this->dbTraitGetFilterCfg($filter)
+      )) {
+        if ($cascade) {
+          foreach ($this->dbTraitGetTableRelations() as $rel) {
+            $this->db->delete($rel["table"], [
+              $rel["col"] => is_array($filter) ? $filter[$f["id"]] : $filter,
+            ]);
+          }
+        }
+
+        $this->emit("afterdelete", [$filter, $cascade, $o]);
+        $res2 = $o ? $o->getResponse() : null;
+        return \is_int($res2) ? $res2 : $res;
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Updates row(s) in the current table.
+   *
+   * Accepts either:
+   * - a row ID as string
+   * - a filter array
+   *
+   * The input data is normalized through `dbTraitPrepare()`.
+   *
+   * If the table architecture defines a `cfg` field and corresponding data is
+   * provided, a partial JSON update expression is generated with `JSON_SET()`.
+   *
+   * Emits:
+   * - `beforeupdate`
+   * - `afterupdate`
+   *
+   * @param string|array<string, mixed> $filter Row ID or filter configuration.
+   * @param array<string, mixed>        $data   Data to update.
+   * @return int Number of updated rows.
+   * @throws Exception If the target row cannot be found.
+   */
+  protected function dbTraitUpdate(string|array $filter, array $data): int
+  {
+    $ccfg = $this->getClassCfg();
+    $f = $ccfg["arch"][$this->class_table_index];
+
+    if (!is_array($filter)) {
+      $filter = [$f["id"] => $filter];
+    }
+
+    if (!$this->dbTraitExists($filter)) {
+      throw new Exception(X::_("Impossible to find the given row"));
+    }
+
+    if ($data = $this->dbTraitPrepare($data)) {
+      // JSON cfg partial update support.
+      if (!empty($f["cfg"])) {
+        $col = $f["cfg"];
+        if (!empty($data[$col])) {
+          if (is_string($data[$col]) && Str::isJson($data[$col])) {
+            $data[$col] = json_decode($data[$col], true);
+          }
+
+          $jsonUpdate = "JSON_SET(IFNULL(" . $this->db->csn($col, true) . ' ,"{}")';
+          foreach ($data[$col] as $k => $v) {
+            $jsonUpdate .= ', "$.' . $k . '", ' . (
+              is_iterable($v)
+                ? "JSON_EXTRACT('" . Str::escapeSquotes(json_encode($v)) . "', '$')"
+                : '"' . Str::escapeDquotes($v) . '"'
+            );
+          }
+
+          $jsonUpdate .= ")";
+          $data[$col] = [null, $jsonUpdate];
+        }
+      }
+
+      $f = $this->dbTraitGetFilterCfg($filter);
+      $o = $this->emit("beforeupdate", $f, $data);
+      if ($o && $o->isDefaultPrevented()) {
+        $res = $o->getResponse();
+        return \is_int($res) ? $res : 0;
+      }
+
+      $res = $this->db->update($this->class_table, $data, $f);
+      $this->emit("afterupdate", $f, $data, $res, $o);
+      $res2 = $o ? $o->getResponse() : null;
+      return \is_int($res2) ? $res2 : $res;
+    }
+
+    return 0;
+  }
+
+  /**
+   * Inserts or updates a row depending on the presence of a matching unique key.
+   *
+   * The method inspects the table's unique keys. If all columns of one unique
+   * key are present and non-null in `$data`, it attempts to locate an existing
+   * row and updates it; otherwise it inserts a new row.
+   *
+   * @param array<string, mixed> $data Row data.
+   * @return string|null Existing or newly inserted row ID, or null on failure.
+   */
+  protected function dbTraitInsertUpdate(array $data): ?string
+  {
+    $cfg = $this->getClassCfg();
+    $keys = $this->db->getUniqueKeys($this->class_table);
+    $update = false;
+
+    if (!empty($keys)) {
+      foreach ($keys as $columns) {
+        $checked = array_filter(
+          $columns,
+          fn($col) => !array_key_exists($col, $data) || is_null($data[$col]),
+        );
+
+        if (empty($checked)) {
+          $update = $this->db->selectOne(
+            $this->class_table,
+            $cfg["arch"][$this->class_table_index]["id"],
+            array_intersect_key($data, array_flip($columns)),
+          );
+          break;
+        }
+      }
+    }
+
+    if ($update) {
+      $this->dbTraitUpdate($update, $data);
+      return $update;
+    }
+
+    return $this->dbTraitInsert($data);
+  }
+
+}
+
+
+```
+
+A last trait:
+
+```php
+<?php
+
+namespace bbn\User;
+
+use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
+use bbn\Db;
+use bbn\Mail;
+use bbn\File\Dir;
+use bbn\File\System;
+use bbn\User\Manager;
+use bbn\Util\Enc;
+use Brick\PhoneNumber\PhoneNumber;
+use Brick\PhoneNumber\PhoneNumberParseException;
+use Brick\PhoneNumber\PhoneNumberFormat;
+
+trait Common
+{
+  /** @var Mail */
+  private $_mailer;
+
+  /** @var bool */
+  protected $auth = false;
+
+  /** @var string */
+  protected $path;
+
+  /** @var string */
+  protected $tmp_path;
+
+  /** @var string */
+  protected $id;
+
+  /** @var array */
+  protected $data = [];
+
+  /** @var int */
+  protected $id_group;
+
+  /** @var null */
+  protected $group = null;
+
+  /** @var mixed */
+  protected $alert;
+
+  /** @var mixed */
+  public $prev_time;
+
+  /** @var array $class_cfg */
+  protected array $class_cfg;
+
+  /**
+   * An output string to be returned when in api requests.
+   * Will be mainly used to return tokens response in api request.
+   *
+   * @var mixed
+   */
+  protected $api_request_output;
+
+
+  /**
+   * Retrieves data stored in the data property of the user, only if authenticated.
+   *
+   * @param string $idx
+   *
+   * @return void
+   */
+  public function getData(string $idx)
+  {
+    if (!$this->auth) {
+      throw new Exception(X::_("Impossible to retrieve data for an authenticated user"));
+    }
+
+    return $this->data[$idx] ?? null;
+  }
+
+
+  /**
+   * Returns the directory path for the user.
+   *
+   * @return string
+   */
+  public function getPath(): ?string
+  {
+    return $this->path;
+  }
+
+
+  /**
+   * Returns the tmp directory path for the user.
+   *
+   * @return string
+   */
+  public function getTmpDir(): ?string
+  {
+    return $this->tmp_path;
+  }
+
+
+  /**
+   * Returns true if authenticated false otherwise.
+   *
+   * @return bool
+   */
+  public function isAuth()
+  {
+    return $this->auth;
+  }
+
+
+  /**
+   * Returns the user's ID if there is no error.
+   *
+   * @return null|string
+   */
+  public function getId(): ?string
+  {
+    if ($this->check()) {
+      return $this->id;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the user's group's ID if there is no error.
+   *
+   * @return null|string
+   */
+  public function getFullGroup(?string $idGroup = null): ?array
+  {
+    if ($this->check()) {
+      if (!$this->group) {
+        $this->group = $this->db->rselect(
+          $this->class_cfg['tables']['groups'],
+          $this->class_cfg['arch']['groups'],
+          [$this->class_cfg['arch']['groups']['id'] => $idGroup ?: $this->id_group]
+        );
+      }
+
+      return $this->group;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the user's group's ID if there is no error.
+   *
+   * @return null|string
+   */
+  public function getIdGroup(): ?string
+  {
+    if ($this->check()) {
+      return $this->id_group;
+    }
+
+    return null;
+  }
+
+
+  public function getGroup(): ?array
+  {
+    if ($this->check()) {
+      return $this->group;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Expires an hotlink by setting the expire column to now.
+   *
+   * @return int
+   */
+  public function expireHotlink($id): int
+  {
+    if ($this->check()) {
+      return $this->db->update(
+        $this->class_cfg['tables']['hotlinks'],
+        [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
+        [$this->class_cfg['arch']['hotlinks']['id'] => $id]
+      );
+    }
+
+    return 0;
+  }
+
+
+  /**
+   * Retrieves a user's ID from the hotlink's magic string.
+   *
+   * @param string $id
+   * @param string $key
+   * @return null|string
+   */
+  public function getIdFromMagicString(string $id, string $key): ?string
+  {
+    if ($val = $this->db->rselect(
+      $this->class_cfg['tables']['hotlinks'], [
+      'magic' => $this->class_cfg['arch']['hotlinks']['magic'],
+      'id_user' => $this->class_cfg['arch']['hotlinks']['id_user'],
+      'expire' => $this->class_cfg['arch']['hotlinks']['expire'],
+      ],[
+      $this->class_cfg['arch']['hotlinks']['id'] => $id
+      ]
+    )
+    ) {
+      if ($val['expire'] < date('Y-m-d H:i:s')) {
+        if (method_exists($this, 'setError')) {
+          $this->setError(27);
+        }
+      }
+      elseif (self::isMagicString($key, $val['magic'])) {
+        return $val['id_user'];
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if an error has been thrown or not.
+   *
+   * @return bool
+   */
+  public function check(): bool
+  {
+    return !$this->getError();
+  }
+
+
+  /**
+   * Unauthenticates, resets the config and destroys the session.
+   *
+   * @return void
+   */
+  public function logout()
+  {
+    $this->auth = false;
+    $this->closeSession(true);
+  }
+
+
+  /**
+   * Returns an instance of the mailer class.
+   *
+   * @return Mail
+   * @throws Exception
+   */
+  public function getMailer(): Mail
+  {
+    if (!$this->_mailer) {
+      if (class_exists($this->class_cfg['mailer'])) {
+        $this->_mailer = new $this->class_cfg['mailer']();
+      }
+      else {
+        throw new Exception(X::_("Impossible to find the mailer class %s", (string)$this->class_cfg['mailer']));
+      }
+    }
+
+    return $this->_mailer;
+  }
+
+
+  /**
+   * Changes the password in the database.
+   *
+   * @return bool
+   */
+  public function forcePassword($pass): bool
+  {
+    if ($this->id) {
+      return (bool)$this->db->insert(
+        $this->class_cfg['tables']['passwords'], [
+        $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),
+        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,
+        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
+        ]
+      );
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns the email of the given user or the current one.
+   *
+   * @return string|null
+   */
+  public function getEmail($usr = null): ?string
+  {
+    if ($this->auth) {
+      if (\is_null($usr)) {
+        $usr = $this->getSession();
+      }
+      elseif (str::isUid($usr) && ($mgr = $this->getManager())) {
+        $usr = $mgr->getUser($usr);
+      }
+
+      if (isset($this->fields['email'], $usr[$this->fields['email']])) {
+        return $usr[$this->fields['email']];
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Adds a file to the tmp folder of the user and returns its path.
+   *
+   * @param string $file
+   * @param string $name
+   * @param bool   $move
+   * @return string|null
+   */
+  public function addToTmp(string $file, string|null $name = null, $move = true):? string
+  {
+    if ($this->auth) {
+      $fs   = new System();
+      $path = $this->getTmpDir().microtime(true).'/';
+      if ($fs->isFile($file) && $fs->createPath($path)) {
+        $dest = $path.($name ?: X::basename($file));
+        if ($move) {
+          if ($fs->move($file, X::dirname($dest)) && $fs->rename(X::dirname($dest).'/'.X::basename($file), X::basename($dest))) {
+            return $dest;
+          }
+        }
+        elseif ($fs->copy($file, $dest)) {
+          return $dest;
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Encrypts the given string.
+   *
+   * @param string $st
+   * @return string|null
+   */
+  public function crypt(string $st): ?string
+  {
+    if ($enckey = $this->_get_encryption_key()) {
+      return Enc::crypt($st, $enckey) ?: null;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Decrypts the given string.
+   *
+   * @param string $st
+   * @return string|null
+   */
+  public function decrypt(string $st): ?string
+  {
+    if ($enckey = $this->_get_encryption_key()) {
+      return Enc::decrypt($st, $enckey) ?: null;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Generates a random long string (16-32 chars) used as unique fingerprint.
+   * @return string
+   */
+  public static function makeFingerprint(): string
+  {
+    return Str::genpwd(32, 16);
+  }
+
+
+  /**
+   * Returns an array with a key and a magic string used for making hotlinks.
+   *
+   * @return array
+   */
+  public static function makeMagicString(): array
+  {
+    $key = self::makeFingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
+  }
+
+
+  /**
+   * Checks if a given string corresponds to the given hash.
+   *
+   * @param string $key  The key
+   * @param string $hash The corresponding hash
+   * @return bool
+   */
+  public static function isMagicString(string $key, string $hash): bool
+  {
+    return hash('sha256', $key) === $hash;
+  }
+
+
+  /**
+   * Sets the error property once and for all.
+   *
+   * @param int $err error code
+   * @return self
+   */
+  protected function setError(string $err, $code = null): static
+  {
+    $this->log([$err, $this->class_cfg['errors'][$err] ?? null], 'userError');
+    if (!$this->error) {
+      $this->error = $err;
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * Returns the first error in an array with the code and description.
+   *
+   * @return null|array
+   */
+  public function getFullError(): ?array
+  {
+    if ($this->error) {
+      return [
+        'code' => $this->error,
+        'text' => $this->class_cfg['errors'][$this->error]
+      ];
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @param string $access_token
+   * @param string $refresh_token
+   * @param int $expires_in
+   * @param string $account_name
+   * @return bool
+   * @throws Exception
+   */
+  public function saveNewPermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name): bool
+  {
+    if ($this->id) {
+      $account_exists = $this->db->count(
+        $this->class_cfg['tables']['permission_accounts'],
+        [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      );
+      
+      if ($account_exists > 0 ){
+        throw new Exception(X::_('Account already exists!'));
+      }
+      
+      if ($this->db->insert(
+          $this->class_cfg['tables']['permission_accounts'], [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      )) {
+        return (bool)$this->db->insert(
+          $this->class_cfg['tables']['permission_tokens'], [
+            $this->class_cfg['arch']['permission_tokens']['id_account']    => $this->db->lastId(),
+            $this->class_cfg['arch']['permission_tokens']['access_token']  => $access_token,
+            $this->class_cfg['arch']['permission_tokens']['refresh_token'] => $refresh_token,
+            $this->class_cfg['arch']['permission_tokens']['expire']        => time() + $expires_in,
+          ]
+        );
+      }
+    }
+
+    return false;
+  }
+
+  public function getPermissionAccountFromName(string $account_name)
+  {
+    if ($this->id) {
+      return $this->db->rselect(
+        $this->class_cfg['tables']['permission_accounts'],
+        $this->class_cfg['arch']['permission_accounts'],
+        [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      );
+    }
+
+    return false;
+  }
+
+  /**
+   * @param string $account_name
+   * @return array|false|null
+   */
+  public function getPermissionTokensFromAccountName(string $account_name)
+  {
+    if ($this->id) {
+      if ($account = $this->getPermissionAccountFromName($account_name)) {
+        return $this->db->rselect(
+          $this->class_cfg['tables']['permission_tokens'],
+          $this->class_cfg['arch']['permission_tokens'],
+          [
+            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']],
+          ]
+        ); 
+      }
+    }
+    
+    return false;
+  }
+
+  public function updatePermissionTokens(string $account_name, string $access_token, string $refresh_token, int $expire_in)
+  {
+    if ($this->id && $account = $this->getPermissionAccountFromName($account_name)) {
+        return $this->db->update(
+          $this->class_cfg['tables']['permission_tokens'], [
+          $this->class_cfg['arch']['permission_tokens']['access_token']   => $access_token,
+          $this->class_cfg['arch']['permission_tokens']['refresh_token']  => $refresh_token,
+          $this->class_cfg['arch']['permission_tokens']['expire']         => time() + $expire_in,
+        ], [
+            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']]
+          ]
+        );
+    }
+
+    return false;
+  }
+
+  public function getApiRequestOutput()
+  {
+    return $this->api_request_output;
+  }
+
+  public function getApiNotificationsToken(string $idUser = ''): ?string
+  {
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->selectOne([
+      'table' => $this->class_cfg['tables']['api_tokens'],
+      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
+      'where' => [ 
+        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id
+      ],
+      'order' => [[
+        'field' => $this->class_cfg['arch']['api_tokens']['last'],
+        'dir' => 'DESC'
+      ]]
+    ]) : null;
+  }
+
+  public function getPhoneNumber(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
+      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
+    ]);
+  }
+
+
+  public function hasSkipVerification(string $id = ''): bool
+  {
+    if ($cfg = $this->db->selectOne(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['cfg'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id
+      ]
+    )) {
+      $cfg = json_decode($cfg);
+      return !empty($cfg->skip_verification);
+    }
+    return false;
+  }
+
+  /**
+   * @return Db db
+   */
+  public function getDbInstance(): Db
+  {
+    return $this->db;
+  }
+
+  protected function isVerifyPhoneNumberRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])
+      && $params[$f['action']] === 'verifyCode';
+  }
+
+  protected function isPhoneNumberCodeSendingRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])
+      && $params[$f['action']] === 'sendSmsCode';
+  }
+
+  protected function isTokenLoginRequest(array $params): bool
+  {
+    $f = $this->class_cfg['fields'];
+    return X::hasProps($params, [$f['token'], $f['device_uid']], true);
+  }
+
+  protected function isToken(): bool
+  {
+    return !empty($this->class_cfg['tables']['api_tokens']);
+  }
+
+
+  /**
+   * @param string $phone_number
+   * @return array|null
+   */
+  protected function findByPhoneNumber(string $phone_number)
+  {
+    try {
+      $phone = PhoneNumber::parse($phone_number);
+    }
+    catch (PhoneNumberParseException $e) {
+      return false;
+    }
+    $phone_number = $phone->format(PhoneNumberFormat::E164);
+    $id_user = $this->db->selectOne(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['id'],
+      [
+        $this->class_cfg['arch']['users']['login'] => $phone_number
+      ]
+    );
+    $user = $id_user ? $this->getInfo($id_user) : null;
+    return !empty($user) && !$this->hasSkipVerification($user[$this->class_cfg['arch']['users']['id']]) && !$phone->isValidNumber() ? false : $user;
+  }
+
+
+  /**
+   * @param string $token
+   * @return array|null
+   */
+  protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
+  {
+    if ($user_id = $this->getUserByTokenAndDeviceUid($token, $device_uid)) {
+      return $this->getInfo($user_id);
+    }
+
+    return null;
+  }
+
+  protected function getInfo(string $idUser): ?array
+  {
+    $info = $this->db->rselect(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $idUser
+      ]
+    ) ?: null;
+    if ($info) {
+      $info['group'] = $this->getFullGroup($info['id_group']);
+    }
+
+    return $info;
+  }
+
+  /**
+   * @param string|null $code
+   * @return int|null
+   */
+  protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
+  {
+    if ($oldCfg = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['cfg'], [
+      $this->class_cfg['arch']['users']['id'] => $this->id
+    ])) {
+      $oldCfg = json_decode($oldCfg, true);
+    }
+    else {
+      $oldCfg = [];
+    }
+    $cfg = json_encode(\array_merge($oldCfg, ['phone_verification_code' => $code]));
+    try {
+      $phone = PhoneNumber::parse($phone_number);
+    }
+    catch (PhoneNumberParseException $e) {
+      return false;
+    }
+    
+    if (!$this->hasSkipVerification() && !$phone->isValidNumber()) {
+      return false;
+    }
+
+
+    $number = $phone->format(PhoneNumberFormat::E164);
+
+    return (bool)$this->db->update(
+      $this->class_cfg['tables']['users'],
+      [
+        $this->class_cfg['arch']['users']['login'] => $number,
+        $this->class_cfg['arch']['users']['phone'] => $number,
+        $this->class_cfg['arch']['users']['cfg'] => $cfg
+      ],
+      [$this->class_cfg['arch']['users']['id'] => $this->id]
+    );
+  }
+
+
+
+  protected function verifyTokenAndDeviceUid($device_uid, $token)
+  {
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->count(
+      $this->class_cfg['tables']['api_tokens'],
+      [
+        $this->class_cfg['arch']['api_tokens']['token']      => $token,
+        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
+      ]
+    ) : null;
+  }
+
+  protected function getUserByTokenAndDeviceUid($token, $device_uid)
+  {
+    return !empty($this->class_cfg['tables']['api_tokens']) ? $this->db->selectOne(
+      $this->class_cfg['tables']['api_tokens'],
+      $this->class_cfg['arch']['api_tokens']['id_user'],
+      [
+        $this->class_cfg['arch']['api_tokens']['token']      => $token,
+        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
+      ]
+    ) : null;
+  }
+
+  protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool
+  {
+    if (!empty($this->class_cfg['tables']['api_tokens'])
+      && !empty($token)
+      && !empty($deviceUid)
+      && !empty($idUser)
+    ) {
+      return (bool)$this->db->update(
+        $this->class_cfg['tables']['api_tokens'],
+        [
+          $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser,
+          $this->class_cfg['arch']['api_tokens']['device_lang'] => $deviceLang
+        ],
+        [
+          $this->class_cfg['arch']['api_tokens']['token'] => $token,
+          $this->class_cfg['arch']['api_tokens']['device_uid'] => $deviceUid
+        ]
+      );
+    }
+    return false;
+  }
+
+  /**
+   * Retrieves the encryption key from database if not defined and saves it.
+   *
+   * @return string|null
+   */
+  private function _get_encryption_key(): ?string
+  {
+    if (is_null($this->_encryption_key)) {
+      if ($this->auth) {
+        $this->_encryption_key = $this->db->selectOne(
+          $this->class_cfg['table'],
+          $this->class_cfg['arch']['users']['enckey'],
+          ['id' => $this->id]
+        );
+        if (!$this->_encryption_key) {
+          $this->_encryption_key = Str::genpwd(32, 16);
+          $this->db->update(
+            $this->class_cfg['table'],
+            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],
+            ['id' => $this->id]
+          );
+        }
+      }
+    }
+
+    return $this->_encryption_key;
+  }
+
+
+   /**
+    * Use the configured hash function to encrypt a password string.
+    *
+    * @param string $st The string to crypt
+    * @return string
+    */
+  private function _hash(string $st): string
+  {
+    if (empty($this->class_cfg['encryption']) || !function_exists($this->class_cfg['encryption'])) {
+      return hash('sha256', $st);
+    }
+
+    return $this->class_cfg['encryption']($st);
+  }
+
+
+   /**
+    * Defines user's directory and constant BBN_USER_PATH if not done yet.
+    *
+    * @param bool $create If true creates it and remove temp files if any
+    * @return self
+    */
+  private function _init_dir(bool $create = false): static
+  {
+    if (\defined('BBN_DATA_PATH') && $this->getId()) {
+      $this->path     = Mvc::getUserDataPath($this->getId());
+      $this->tmp_path = Mvc::getUserTmpPath($this->getId());
+      if (!\defined('BBN_USER_PATH')) {
+        define('BBN_USER_PATH', $this->path);
+      }
+
+      if ($create && !empty($this->path) && !empty($this->tmp_path)) {
+        Dir::createPath($this->path);
+        Dir::createPath($this->tmp_path);
+        Dir::delete($this->tmp_path, false);
+      }
+    }
+
+    return $this;
+  }
+}
+
+```
+
+How would you rebuild this User class in order to make it a whole package with some subclasses in order to lighten this class?
