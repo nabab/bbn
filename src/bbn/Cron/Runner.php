@@ -512,7 +512,6 @@ class Runner extends Basic
   public function runSocketServer()
   {
     X::log('Run socket server', 'socket-start');
-    sleep(10);
     $socket = new Websocket();
     $socket->on(
       'ping',

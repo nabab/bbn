@@ -56,7 +56,7 @@ class Cache extends Basic implements CacheInterface
 
   protected static string $sep = '/';
 
-  protected static string $instance;
+  protected static $instance;
 
   protected string $path;
 
@@ -185,7 +185,7 @@ class Cache extends Basic implements CacheInterface
   public static function getCache(?string $engine = null): static
   {
     self::_init($engine);
-    return self::$instance;
+    return self::$instance ?? null;
   }
 
 
@@ -1824,14 +1824,24 @@ class Cache extends Basic implements CacheInterface
    * @param ?string $engine
    * @return int
    */
-  private static function _init(?string $engine = null): int
+  private static function _init(?string $engine = null): bool
   {
     if (!self::$is_init) {
-      self::$instance = new Cache($engine);
-      self::$is_init = 1;
+      $tmp = false;
+      try {
+        $tmp = new Cache($engine);
+      }
+      catch (Exception $e) {
+        X::logError($e);
+      }
+
+      if ($tmp) {
+        self::$is_init = 1;
+        self::$instance = $tmp;
+      }
     }
 
-    return 1;
+    return (bool)self::$is_init;
   }
 
 
