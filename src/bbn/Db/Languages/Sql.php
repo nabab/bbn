@@ -2952,6 +2952,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       }
 
       if (count($cfg['values']) !== count($cfg['values_desc'])) {
+        $this->log(json_encode($cfg, JSON_PRETTY_PRINT));
         $this->error(X::_('Database error in values count'));
       }
 
