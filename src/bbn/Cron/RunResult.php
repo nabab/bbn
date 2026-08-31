@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace bbn\Cron;
 
+
+use bbn\X;
 /**
  * Represents the outcome of a Runner execution.
  *
@@ -34,6 +36,7 @@ final class RunResult
       $code = 1;
     }
 
+    X::log([$code, $message], 'cron_error');
     return new self($code, $message);
   }
 

@@ -2904,7 +2904,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
     // Inserting a row without primary when primary is needed and no auto-increment
     if (!empty($cfg['primary'])
       && empty($cfg['auto_increment'])
-      && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
+      && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) !== false)
       && (count($cfg['values']) === (count($cfg['fields']) - 1))
     ) {
       $val = false;
