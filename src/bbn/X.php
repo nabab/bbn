@@ -7,6 +7,7 @@ use Error;
 use InvalidArgumentException;
 use Throwable;
 use stdClass;
+use ZipArchive;
 use function dgettext;
 use function floatval;
 use function array_key_exists;
@@ -174,49 +175,325 @@ class X
   }
 
 
-  /**
-   * Saves logs to a file.
-   *
-   * ```php
-   * X::log('My text', 'FileName');
-   * ```
-   *
-   * @param mixed  $st   Item to log.
-   * @param string $file Filename, default: "misc".
-   * @return void
-   */
-  public static function log($st, string $file = 'misc'): void
-  {
-    if (!defined('BBN_X_MAX_LOG_FILE')) {
-      define('BBN_X_MAX_LOG_FILE', 1048576);
-    }
-    if (defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH') . 'logs')) {
-      $log_file  = constant('BBN_DATA_PATH') . 'logs/' . $file . '.log';
-      $backtrace = array_filter(
-        debug_backtrace(),
-        function ($a) {
-          return $a['function'] === 'log';
-        }
-      );
-      $i         = end($backtrace);
-      $r         = "[" . date('d/m/Y H:i:s') . "]\t" . $i['file'] . " - line " . $i['line'] .
-        self::getDump($st) . PHP_EOL;
+/**
+ * Saves logs to a file.
+ *
+ * @param mixed  $st   Item to log.
+ * @param string $file Filename, default: "misc".
+ * @return void
+ */
+public static function log($st, string $file = 'misc'): void
+{
+  if (!defined('BBN_DATA_PATH')) {
+    return;
+  }
 
-      if (php_sapi_name() === 'cli') {
-        global $argv;
-        if (isset($argv[2]) && ($argv[2] === 'log')) {
-          echo self::getDump($st) . PHP_EOL;
-        }
+  $basePath = rtrim(constant('BBN_DATA_PATH'), '/\\') . '/logs/';
+
+  if (!is_dir($basePath)) {
+    return;
+  }
+
+  $maxLen = defined('BBN_X_MAX_LOG_FILE')
+    ? (int)constant('BBN_X_MAX_LOG_FILE')
+    : 1048576;
+
+  $logFile  = $basePath . $file . '.log';
+  $oldFile  = $basePath . $file . '.old';
+  $lockFile = $basePath . $file . '.lock';
+
+  /*
+   * Get the caller.
+   *
+   * debug_backtrace()[0] is this method itself;
+   * [1] normally contains the actual caller.
+   */
+  $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+  $caller = $backtrace[1] ?? $backtrace[0];
+
+  $r = sprintf(
+    "[%s]\t%s - line %s%s%s",
+    date('d/m/Y H:i:s'),
+    $caller['file'] ?? 'unknown',
+    $caller['line'] ?? 'unknown',
+    self::getDump($st),
+    PHP_EOL
+  );
+
+  // CLI output
+  if (PHP_SAPI === 'cli') {
+    global $argv;
+
+    if (($argv[2] ?? null) === 'log') {
+      echo self::getDump($st) . PHP_EOL;
+    }
+  }
+
+  /*
+   * Always use the same lock for writing + rotation.
+   *
+   * Otherwise a process can append while another process is reading,
+   * truncating or zipping the files.
+   */
+  $fp = fopen($lockFile, 'c');
+
+  if (!$fp) {
+    // Last-resort logging.
+    file_put_contents($logFile, $r, FILE_APPEND);
+    return;
+  }
+
+  try {
+    if (!flock($fp, LOCK_EX)) {
+      file_put_contents($logFile, $r, FILE_APPEND);
+      return;
+    }
+
+    /*
+     * filesize() is cached by PHP.
+     * Always clear it before checking files modified in this request.
+     */
+    clearstatcache(true, $logFile);
+
+    $logSize = is_file($logFile) ? filesize($logFile) : 0;
+
+    if (($logSize !== false) && ($logSize >= $maxLen)) {
+      /*
+       * Move the existing log into .old.
+       *
+       * Appending directly from one file to the other avoids loading
+       * potentially large log files entirely into memory.
+       */
+      $source = fopen($logFile, 'rb');
+      $dest   = fopen($oldFile, 'ab');
+
+      if ($source && $dest) {
+        stream_copy_to_stream($source, $dest);
       }
 
-      if (file_exists($log_file) && filesize($log_file) > BBN_X_MAX_LOG_FILE) {
-        file_put_contents($log_file . '.old', file_get_contents($log_file), FILE_APPEND);
-        file_put_contents($log_file, $r);
-      } else {
-        file_put_contents($log_file, $r, FILE_APPEND);
+      if ($source) {
+        fclose($source);
+      }
+
+      if ($dest) {
+        fclose($dest);
+      }
+
+      /*
+       * Truncate/start the current log with the current entry.
+       */
+      file_put_contents($logFile, $r, LOCK_EX);
+
+      /*
+       * Important: clear the stat cache after modifying .old.
+       */
+      clearstatcache(true, $oldFile);
+
+      self::rotateOldLogToZip($file, $maxLen * 10);
+    }
+    else {
+      file_put_contents($logFile, $r, FILE_APPEND);
+    }
+  }
+  finally {
+    flock($fp, LOCK_UN);
+    fclose($fp);
+  }
+}
+
+
+/**
+ * Handles zipping and rotating zip files for the .old log.
+ *
+ * Must be called while holding the log lock.
+ *
+ * @param string $file          Base filename
+ * @param int    $zipThreshold  Size at which .old is compressed
+ * @return void
+ */
+private static function rotateOldLogToZip(
+  string $file,
+  int $zipThreshold
+): void
+{
+  if (!defined('BBN_DATA_PATH')) {
+    return;
+  }
+
+  $basePath = rtrim(constant('BBN_DATA_PATH'), '/\\') . '/logs/';
+  $oldFile  = $basePath . $file . '.old';
+
+  /*
+   * CRITICAL:
+   *
+   * filesize() uses PHP's stat cache, so without this it may return
+   * the size from before the latest append.
+   */
+  clearstatcache(true, $oldFile);
+
+  if (!is_file($oldFile)) {
+    return;
+  }
+
+  $size = filesize($oldFile);
+
+  if (($size !== false) && ($size >= $zipThreshold)) {
+    self::performZipRotation($basePath, $file, $oldFile);
+  }
+}
+
+
+/**
+ * Compresses the current .old log and rotates existing ZIP archives.
+ *
+ * Must be called while holding the log lock.
+ *
+ * @param string $basePath Base logs directory
+ * @param string $file     Base filename
+ * @param string $oldFile  Full path to .old file
+ * @return void
+ */
+private static function performZipRotation(
+  string $basePath,
+  string $file,
+  string $oldFile
+): void
+{
+  if (!class_exists(ZipArchive::class)) {
+    error_log(
+      'Cannot rotate log: ZipArchive extension is not installed'
+    );
+    return;
+  }
+
+  if (!is_file($oldFile)) {
+    return;
+  }
+
+  $maxZips = 5;
+
+  /*
+   * Create the ZIP under a temporary name FIRST.
+   *
+   * Do not rotate/delete existing ZIPs until we know compression
+   * succeeded.
+   */
+  $tmpZip = $basePath . $file . '-new.zip';
+
+  if (file_exists($tmpZip)) {
+    unlink($tmpZip);
+  }
+
+  $zip = new ZipArchive();
+
+  $result = $zip->open(
+    $tmpZip,
+    ZipArchive::CREATE | ZipArchive::OVERWRITE
+  );
+
+  if ($result !== true) {
+    error_log(
+      "Failed to create ZIP archive {$tmpZip}; ZipArchive error: {$result}"
+    );
+    return;
+  }
+
+  /*
+   * Store it inside the archive as <file>.log.
+   */
+  if (!$zip->addFile($oldFile, $file . '.log')) {
+    $zip->close();
+    @unlink($tmpZip);
+
+    error_log(
+      "Failed to add {$oldFile} to ZIP archive"
+    );
+
+    return;
+  }
+
+  /*
+   * close() is what actually finishes writing the ZIP.
+   */
+  if (!$zip->close()) {
+    @unlink($tmpZip);
+
+    error_log(
+      "Failed to finalize ZIP archive {$tmpZip}"
+    );
+
+    return;
+  }
+
+  /*
+   * Verify that we really got a ZIP before touching old archives.
+   */
+  clearstatcache(true, $tmpZip);
+
+  if (!is_file($tmpZip) || !filesize($tmpZip)) {
+    @unlink($tmpZip);
+
+    error_log(
+      "ZIP archive {$tmpZip} was not created correctly"
+    );
+
+    return;
+  }
+
+  /*
+   * Compression succeeded.
+   *
+   * Now rotate:
+   *
+   * file-5.zip -> deleted
+   * file-4.zip -> file-5.zip
+   * ...
+   * file-1.zip -> file-2.zip
+   * file-new.zip -> file-1.zip
+   */
+
+  $oldestZip = $basePath . $file . '-' . $maxZips . '.zip';
+
+  if (is_file($oldestZip)) {
+    if (!unlink($oldestZip)) {
+      @unlink($tmpZip);
+      error_log("Failed to delete {$oldestZip}");
+      return;
+    }
+  }
+
+  for ($i = $maxZips - 1; $i >= 1; $i--) {
+    $src = $basePath . $file . '-' . $i . '.zip';
+    $dst = $basePath . $file . '-' . ($i + 1) . '.zip';
+
+    if (is_file($src)) {
+      if (!rename($src, $dst)) {
+        @unlink($tmpZip);
+        error_log("Failed to rotate {$src} to {$dst}");
+        return;
       }
     }
   }
+
+  $newZip = $basePath . $file . '-1.zip';
+
+  if (!rename($tmpZip, $newZip)) {
+    @unlink($tmpZip);
+    error_log("Failed to rename {$tmpZip} to {$newZip}");
+    return;
+  }
+
+  /*
+   * Delete .old ONLY after the completed ZIP has been installed.
+   */
+  if (!unlink($oldFile)) {
+    error_log(
+      "ZIP {$newZip} created successfully but could not delete {$oldFile}"
+    );
+  }
+
+  clearstatcache(true, $oldFile);
+}
 
 
   /**

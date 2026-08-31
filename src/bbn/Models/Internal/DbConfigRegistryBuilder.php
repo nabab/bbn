@@ -323,7 +323,6 @@ class DbConfigRegistryBuilder
     $keys = array_keys($classmap);
     $local = X::filter($keys, fn($a) => Str::startsWith($a, constant('BBN_APP_PREFIX')));
     $bbn = X::filter($keys, fn($a) => Str::startsWith($a, 'bbn\\'));
-
     return [...$local, ...$bbn];
   }
 
@@ -405,23 +404,17 @@ class DbConfigRegistryBuilder
               $hasCache = (bool)$value['cache'];
             }
 
-            if (!$table && !empty($value['table']) && is_string($value['table'])) {
+            if (!$table && !empty($value['table']) && is_string($value['table']) && $this->db->tableExists($value['table'])) {
               $table = $value['table'];
             }
 
             if (!$primary && !empty($table)) {
-              try {
-                if ($this->db->tableExists($table)) {
-                  $model = $this->db->modelize($table);
-                  if (!empty($model['keys']['PRIMARY']['columns'])) {
-                    $primary = $model['keys']['PRIMARY']['columns'];
-                  }
-                  elseif (!empty($model['primary'])) {
-                    $primary = $model['primary'];
-                  }
-                }
+              $model = $this->db->modelize($table);
+              if (!empty($model['keys']['PRIMARY']['columns'])) {
+                $primary = $model['keys']['PRIMARY']['columns'];
               }
-              catch (\Throwable) {
+              elseif (!empty($model['primary'])) {
+                $primary = $model['primary'];
               }
             }
 

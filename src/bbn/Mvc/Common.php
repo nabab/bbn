@@ -352,9 +352,4 @@ trait Common
   {
     Mvc::setGlobal($name, $value);
   }
-
-
-
-
-
 }
