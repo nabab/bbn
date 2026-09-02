@@ -739,6 +739,7 @@ class Mailbox extends Basic
       $res = [];
       while ($start >= $end) {
         try {
+          $this->selectFolder($folder);
           $tmp = $this->getMsgBySeqOrUid($start, false);
           if (!$tmp) {
             $start--;
@@ -1719,7 +1720,6 @@ class Mailbox extends Basic
   {
     try {
       $lines = $this->rawCommand(
-        //($uid ? "UID " : "") . "FETCH $msgno (UID FLAGS RFC822.SIZE BODYSTRUCTURE BODY.PEEK[HEADER] INTERNALDATE ENVELOPE)",
         ($uid ? "UID " : "") . "FETCH $msgno (BODYSTRUCTURE UID FLAGS RFC822.SIZE BODY.PEEK[HEADER])",
         true
       );
@@ -1743,7 +1743,7 @@ class Mailbox extends Basic
         $msg['subject'] = '';
       }
 
-      $msg['references'] = $this->parser->references($msg['references']);
+      $msg['references'] = !empty($msg['references']) ? $this->parser->references($msg['references']) : [];
       $msg['message_id'] = !empty($msg['message_id'])
         ? trim($msg['message_id'], '<>')
         : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
