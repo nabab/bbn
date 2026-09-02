@@ -62,7 +62,7 @@ class Notification extends DbCls
     $this->opt = Option::getInstance();
     $this->user = User::getInstance();
     $this->pref = new Preferences($this->db);
-    $this->perms = new Permissions();
+    $this->perms = new Permissions($this->db);
   }
 
   public function create(

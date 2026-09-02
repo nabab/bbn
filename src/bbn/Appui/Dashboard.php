@@ -18,7 +18,7 @@ use bbn\User\Preferences;
 use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
 use bbn\Appui\Option;
-use bbn\Models\Cls\Basic;
+use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\Timer;
 
@@ -28,7 +28,7 @@ use function array_values;
 use function array_filter;
 use function is_null;
 
-class Dashboard extends Basic
+class Dashboard extends DbCls
 {
 
   use Optional;
@@ -45,9 +45,6 @@ class Dashboard extends Basic
 
   /** @var Preferences */
   protected Preferences $pref;
-
-  /** @var Db */
-  protected Db $db;
 
   /** @var array */
   protected array $archOpt;
@@ -107,13 +104,12 @@ class Dashboard extends Basic
   /**
    * dashboard constructor.
    */
-  public function __construct(string $id = '')
+  public function __construct(protected Db $db, string $id = '')
   {
-    $this->opt      = Option::getInstance();
+    $this->opt      = new Option($this->db);
     $this->user     = User::getInstance();
     $this->perm     = Permissions::getInstance();
     $this->pref     = Preferences::getInstance();
-    $this->db       = Db::getInstance();
     $this->cfgPref  = $this->pref->getClassCfg();
     $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];
     $this->archPref = $this->cfgPref['arch']['user_options'];

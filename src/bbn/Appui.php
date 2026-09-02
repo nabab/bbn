@@ -306,24 +306,15 @@ class Appui
   public function getDb(): ?Db
   {
     if (!$this->_currentDb) {
-      if (!$this->_is_installer && X::isDefined('BBN_DB_HOST', 'BBN_DB_ENGINE', 'BBN_DB_USER')
-          && ($this->_current['db_host'] == constant('BBN_DB_HOST'))
-          && ($this->_current['db_engine'] == constant('BBN_DB_ENGINE'))
-          && ($this->_current['db_user'] == constant('BBN_DB_USER'))
-      ) {
-        $db = Db::getInstance();
-      }
-      else {
-        $db = new Db(
-          [
-            'engine' => $this->_current['db_engine'],
-            'host' => $this->_current['db_host'] ?? '',
-            'user' => $this->_current['db_user'] ?? '',
-            'pass' => $this->_current['db_pass'] ?? '',
-            'error_mode' => 'continue'
-          ]
-        );
-      }
+      $db = new Db(
+        [
+          'engine' => $this->_current['db_engine'],
+          'host' => $this->_current['db_host'] ?? '',
+          'user' => $this->_current['db_user'] ?? '',
+          'pass' => $this->_current['db_pass'] ?? '',
+          'error_mode' => 'continue'
+        ]
+      );
 
       if ($db->check()) {
         if (!empty($this->_current['database'])) {
@@ -432,7 +423,7 @@ class Appui
       $routes             = $this->getRoutes();
       $user               = $this->getUser();
       $preferences        = $this->getPreferences();
-      $this->_currentPerm = new Permissions($routes);
+      $this->_currentPerm = new Permissions($this->getDb(), $routes);
     }
 
     return $this->_currentPerm;
@@ -2159,7 +2150,7 @@ class Appui
     $optClass   = $this->getOption();
     $prefClass  = $this->getPreferences();
     $prefCfg = $prefClass->getClassCfg();
-    $dashClass   = new Dashboard();
+    $dashClass   = new Dashboard($db);
     $adminGroup = $this->getUserGroup('admin', 'Administrators');
     $devGroup   = $this->getUserGroup('dev', 'Developers');
     $numChanges = 0;

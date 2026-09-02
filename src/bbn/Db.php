@@ -31,7 +31,6 @@ use bbn\Db\Models\Itf\Types as itfTypes;
 use bbn\Db\Models\Itf\Utilities as itfUtilities;
 use bbn\Db\Models\Itf\Write as itfWrite;
 use bbn\Models\Tts\Cache;
-use bbn\Models\Tts\Retriever;
 
 /**
  * Half ORM half DB management, the simplest class for data queries.
@@ -50,7 +49,6 @@ use bbn\Models\Tts\Retriever;
 class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itfRead, itfShortcuts, itfStructure, itfTriggers, itfTypes, itfUtilities, itfWrite, Db\Actions
 {
   use Cache;
-  use Retriever;
 
   /**
    * @var Sql Can be other driver
@@ -64,6 +62,8 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
    * @var string $engine
    */
   protected $engine;
+
+  protected string $signature;
 
   /** @var array The database engines allowed */
   protected static $engines = [
@@ -1125,8 +1125,6 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
     if (isset($cfg['engine'])) {
       $this->resetConnection($cfg);
 
-      self::retrieverInit($this);
-
       if ($cfg = $this->getCfg()) {
         $this->postCreation();
         $this->engine = (string)$cfg['engine'];
@@ -1140,6 +1138,13 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
       $this->log(X::_("Impossible to create the connection for").' '.$connection);
       throw new Exception(X::_("Impossible to create the connection for").' '.$connection);
     }
+
+    $this->signature = Str::genpwd();
+  }
+
+  public function getSignature(): string
+  {
+    return $this->signature;
   }
 
 
@@ -1155,8 +1160,6 @@ class Db implements itfActions, itfEngine, itfInternal, itfNative, itfQuery, itf
       $this->setErrorMode('continue');
       unset($this->language);
     }
-
-    self::retrieverRemove($this);
   }
 
 

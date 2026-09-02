@@ -6,9 +6,9 @@ namespace bbn\Net;
 use RuntimeException;
 use Throwable;
 use JsonException;
-use OpenSwoole\Http\Request;
-use OpenSwoole\WebSocket\Frame;
-use OpenSwoole\WebSocket\Server;
+use Swoole\Http\Request;
+use Swoole\WebSocket\Frame;
+use Swoole\WebSocket\Server;
 
 final class Websocket
 {

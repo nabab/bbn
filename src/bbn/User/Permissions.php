@@ -13,7 +13,7 @@ use bbn\Mvc;
 use bbn\User\Preferences;
 use bbn\Appui\Option;
 use bbn\File\System;
-use bbn\Models\Cls\Basic;
+use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\Retriever;
 use bbn\Models\Tts\Current;
 /**
@@ -35,7 +35,7 @@ use bbn\Models\Tts\Current;
  * @todo Store the deleted preferences? And restore them if the a permission is re-given
  */
 
-class Permissions extends Basic
+class Permissions extends DbCls
 {
   use Retriever;
   use Current;
@@ -48,9 +48,6 @@ class Permissions extends Basic
 
   /** @var User */
   protected $user;
-
-  /** @var Db */
-  protected $db;
 
   /** @var array */
   protected $plugins = [];
@@ -67,7 +64,7 @@ class Permissions extends Basic
    *
    * @param array $routes An array of routes to the plugins
    */
-  public function __construct(array|null $routes = null)
+  public function __construct(protected Db $db, array|null $routes = null)
   {
     if (!($this->opt = Option::getInstance())) {
       throw new Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));
@@ -105,7 +102,6 @@ class Permissions extends Basic
     }
 
     self::retrieverInit($this);
-    $this->db = Db::getInstance();
   }
 
   /**

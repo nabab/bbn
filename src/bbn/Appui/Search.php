@@ -116,7 +116,7 @@ class Search extends Basic
     $this->initClassCfg();
     $this->ctrl = $ctrl;
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
-    $this->db = Db::getInstance();
+    $this->db = $ctrl->db;
     $this->user = User::getInstance();
     $this->perm = Permissions::getInstance();
 

@@ -142,7 +142,7 @@ class Imessages extends DbCls
     $cfg = &$this->class_cfg;
     // Get default page if it isn't set
     if (empty($imess["id_option"])) {
-      $perm = new Permissions();
+      $perm = new Permissions($this->db);
       $imess["id_option"] = $perm->is(self::BBN_DEFAULT_PERM);
     }
     if (

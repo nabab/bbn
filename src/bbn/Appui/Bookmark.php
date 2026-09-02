@@ -7,11 +7,12 @@
 namespace bbn\Appui;
 
 use bbn;
-use bbn\X;
+use bbn\Db;
 use bbn\Str;
 use Exception;
+use bbn\Models\Cls\Db as DbCls;
 
-class Bookmark
+class Bookmark extends DbCls
 {
 
   use bbn\Models\Tts\Optional;
@@ -28,21 +29,17 @@ class Bookmark
   /** @var \bbn\User\Preferences */
   protected $pref;
 
-  /** @var \bbn\Db */
-  protected $db;
-
-
 
   /**
    * dashboard constructor.
    */
-  public function __construct(string $id = '')
+  public function __construct(protected Db $db, string $id = '')
   {
-    $this->opt      = bbn\Appui\Option::getInstance();
+    $this->db       = $db;
+    $this->opt      = new bbn\Appui\Option($db);
     $this->user     = bbn\User::getInstance();
     $this->perm     = bbn\User\Permissions::getInstance();
     $this->pref     = bbn\User\Preferences::getInstance();
-    $this->db       = bbn\Db::getInstance();
     $this->cfgPref  = $this->pref->getClassCfg();
     $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];
     $this->archPref = $this->cfgPref['arch']['user_options'];

@@ -15,7 +15,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Db;
 use bbn\File\Dir;
-use bbn\Models\Cls\Basic;
+use bbn\Models\Cls\Db as DbCls;
 
 use function is_array;
 use function in_array;
@@ -31,7 +31,7 @@ use function defined;
  * @license  https://opensource.org/licenses/mit-license.php MIT
  * @link     https://bbnio2.thomas.lan/bbn-php/doc/class/cdn/library
  */
-class Config extends Basic
+class Config extends DbCls
 {
   use Common;
 
@@ -44,7 +44,6 @@ class Config extends Basic
    * @var array The configuration array
    */
   protected $cfg = [];
-  protected ?Db $db;
   protected string $mode;
 
   /**
@@ -59,20 +58,13 @@ class Config extends Basic
    * @param string      $request A request string
    * @param Db|null $db      A DB connection to the libraries' tables (if needed)
    */
-  public function __construct(string|null $request = null, ?Db $db = null)
+  public function __construct(protected Db $db, string|null $request = null)
   {
     // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if (!defined('BBN_PUBLIC')) {
       $this->error = 'You must define the constant BBN_PUBLIC as the root of your public document';
     }
     $this->_set_prefix();
-    if (!$db) {
-      $db = Db::getInstance();
-    }
-    if (!$db) {
-      die(X::_('Impossible to initialize the CDN without a DB connection'));
-    }
-    $this->db = $db;
     if ($request) {
       $this->setCfgFromRequest($request);
     }

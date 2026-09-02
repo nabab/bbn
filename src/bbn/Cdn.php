@@ -197,17 +197,13 @@ class Cdn extends Models\Cls\Basic
 
     /** @todo Remove? */
     $this->_set_prefix();
-    if (!$db) {
-      $db = Db::getInstance();
-    }
-
     if ($db) {
       $this->db = $db;
     }
 
     $this->request = $request;
     // Creation of a config object
-    $config = new Cdn\Config($request, $this->db);
+    $config = new Cdn\Config($this->db, $request);
     // Checking request validity
     if ($config->check()) {
       // Getting a configuration array

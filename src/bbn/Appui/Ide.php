@@ -2747,7 +2747,7 @@ class Ide
    */
   private function _superior_sctrl(string $tab, string $path = '')
   {
-    if (($pos = Str::pos($tab, '_super')) > -1) {
+    if (($pos = Str::pos($tab, '_super')) !== false) {
       if (($pos === 0)) {
         $path = '';
       } else {

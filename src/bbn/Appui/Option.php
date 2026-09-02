@@ -10,7 +10,7 @@ use Exception;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
-use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\DbRetriever;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\DbOps;
 use bbn\Models\Cls\Db as DbCls;
@@ -32,7 +32,7 @@ use bbn\Models\Cls\Db as DbCls;
 class Option extends DbCls
 {
   // Traits used in this class
-  use Retriever;
+  use DbRetriever;
   use Cache;
   use DbOps;
   use Option\Internal\Alias;
@@ -93,9 +93,9 @@ class Option extends DbCls
    *
    * @return self
    */
-  public static function getOptions(): static
+  public static function getOptions(?Db $db = null): static
   {
-    return self::getInstance();
+    return self::getInstance($db);
   }
 
   /**
