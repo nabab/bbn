@@ -182,6 +182,13 @@ class Email extends Basic
     }
   }
 
+  public function __destruct()
+  {
+    if ($this->processingQueue) {
+      $this->stopProcessingQueue();
+    }
+  }
+
   public function getMailbox(string $id_account): ?Mailbox
   {
     if (!isset($this->mboxes[$id_account])) {
@@ -592,7 +599,7 @@ class Email extends Basic
       "id_option" => X::getField($types, ["code" => "folders"], "id"),
       "text" => $name,
       "uid" => $name,
-      "subscribed" => true,
+      "subscribed" => 1,
     ];
 
     if ($id_parent) {
@@ -888,7 +895,7 @@ class Email extends Basic
     return $mb->getNextUid($uid);
   }
 
-  public function syncEmails(
+  /* public function syncEmails(
     string|array $folder,
     int $limit = 0
   ): Generator
@@ -1060,9 +1067,9 @@ class Email extends Basic
     }
 
     return null;
-  }
+  } */
 
-  public function syncEmails2(
+  public function syncEmails(
     string|array $folder,
     int $limit = 0
   ): Generator
@@ -1135,11 +1142,8 @@ class Email extends Basic
           $limit = !empty($limit) && ($limit > $info['nmsgs']) ? $info['nmsgs'] : $limit;
           $real_end = !empty($limit) && ($info['nmsgs'] > $limit) ? $mb->getMsgUid($mb->getMsgNo($last_uid) - $limit) : $first_uid;
         }
-        else if (!empty($folder['last_sync_start']) && empty($folder['last_sync_end'])) {
-          
-        }
         // If the last sync start is not empty, we can use the modseq to get the changed messages
-        else if (!empty($folder['highestmodseq'])) {
+        else if (!empty($folder['highestmodseq']) && !empty($folder['last_sync_end'])) {
           if ($folder['highestmodseq'] === $info['highestmodseq']) {
             $this->setFolderSync($folder["id"], false);
             return $ret;
@@ -1944,38 +1948,41 @@ class Email extends Basic
       $db = $isLocale ? $this->getLocaleDb() : $this->db;
       $cfg = $this->class_cfg["arch"]["users_emails"];
       $table = $this->class_cfg["tables"]["users_emails"];
-      $existing = $db->selectOne($table, $cfg["id"], [
+      if ($existing = $db->selectOne($table, $cfg["id"], [
         $cfg["id_user"] => $this->user->getId(),
         $cfg["msg_uid"] => $email["uid"],
         $cfg["id_folder"] => $folder["id"],
-      ]);
-      $uid = $email["uid"];
+      ])) {
+        return $existing;
+      }
+
+      $sentOpt = X::getField(self::getFolderTypes(), ["code" => "sent"], "id");
+      $idSender = null;
       foreach (Mailbox::getDestFields() as $df) {
         if (!empty($email[$df])) {
+          $tid = null;
           foreach ($email[$df] as &$dest) {
-            if ($id = $this->retrieveEmail($dest["email"], $isLocale)) {
-              $sent_opt = X::getField(self::getFolderTypes(), ["code" => "sent"], "id");
-              if ($sent_opt === $folder["id_option"]) {
+            if ($tid = $this->retrieveEmail($dest["email"], $isLocale)) {
+              if ($sentOpt === $folder["id_option"]) {
                 $this->addSentToLink($id, date("Y-m-d H:i:s", strtotime($email["date"])));
               }
-            } elseif (
-              !($id = $this->addContactFromMail($dest, false, $isLocale))
-            ) {
+            }
+            elseif (!($tid = $this->addContactFromMail($dest, false, $isLocale))) {
               X::log(X::_("Impossible to add contact from mail %s", $dest["email"]), "user_email_error");
             }
 
-            $dest["id"] = $id;
+            $dest["id"] = $tid;
           }
 
           if ($df === "from") {
-            $id_sender = $id;
+            $idSender = $tid;
           }
         }
       }
 
-      if (!empty($id_sender)) {
-        $id_parent = null;
-        $id_thread = null;
+      if (!empty($idSender)) {
+        $idParent = null;
+        $idThread = null;
         $external = null;
         if (!empty($email["in_reply_to"]) || !empty($email["references"])) {
           $external = [
@@ -2009,7 +2016,7 @@ class Email extends Basic
           $cfg["msg_uid"] => $email["uid"],
           $cfg["msg_unique_id"] => Str::toUtf8($email["message_id"]),
           $cfg["date"] => date("Y-m-d H:i:s", strtotime($email["date"])),
-          $cfg["id_sender"] => $id_sender,
+          $cfg["id_sender"] => $idSender,
           $cfg["subject"] => $email["subject"] ?: "",
           $cfg["size"] => $email["size"] ?? 0,
           $cfg["attachments"] => empty($email["attachments"])
@@ -2019,15 +2026,12 @@ class Email extends Basic
           $cfg['is_read'] => in_array("\\Seen", $flags) ? 1 : 0,
           $cfg["is_draft"] => in_array("\\Draft", $flags) ? 1 : 0,
           $cfg['priority'] => $email['priority'] ?? 3,
-          $cfg["id_parent"] => $id_parent,
-          $cfg["id_thread"] => $id_thread,
+          $cfg["id_parent"] => $idParent,
+          $cfg["id_thread"] => $idThread,
           $cfg["external_uids"] => $external ? json_encode($external) : null,
           $cfg["excerpt"] => $excerpt
         ];
-        if ($existing) {
-          $id = $existing;
-        }
-        elseif ($db->insert($table, $ar)) {
+        if ($db->insert($table, $ar)) {
           $id = $db->lastId();
           foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ["to", "cc", "bcc"]) && !empty($email[$df])) {
@@ -2146,7 +2150,8 @@ class Email extends Basic
       if (!$date) {
         $date = date("Y-m-d H:i:s");
       }
-      if ($link["last_sent"] && $link["last_sent"] > $date) {
+
+      if (!empty($link["last_sent"]) && $link["last_sent"] > $date) {
         $date = $link["last_sent"];
       }
 
@@ -2157,7 +2162,7 @@ class Email extends Basic
           $cfg["last_sent"] => $date,
         ],
         [
-          "id" => $id_link,
+          $cfg["id"] => $id_link,
         ],
       );
     }
@@ -2181,16 +2186,16 @@ class Email extends Basic
             "table" => $contacts,
             "on" => [
               [
-                "field" => $linksFields["id_contact"],
+                "field" => $db->cfn($linksFields["id_contact"], $links),
                 "exp" => $db->cfn($contactsFields["id"], $contacts),
               ],
             ],
           ],
         ],
         "where" => [
-          "value" => $email,
-          "id_user" => $this->user->getId(),
-          "type" => "email",
+          $db->cfn($contactsFields["id_user"], $contacts) => $this->user->getId(),
+          $db->cfn($linksFields["value"], $links) => $email,
+          $db->cfn($linksFields["type"], $links) => "email",
         ],
       ]);
     }
@@ -2313,7 +2318,7 @@ class Email extends Basic
             "text" => $ele,
             "uid" => $prefix . $ele,
             "items" => [],
-            "subscribed" => in_array($prefix . $ele, $subscribed),
+            "subscribed" => in_array($prefix . $ele, $subscribed) ? 1 : 0,
             "num_msg" => $info['nmsgs'],
             "last_uid" => !empty($info['nmsgs'])
               ? $mb->getMsgUid($info['nmsgs'])
@@ -2819,6 +2824,7 @@ class Email extends Basic
                 case 'mailFlagged':
                   if (isset($subdata['flags'])
                     && !empty($msgn)
+                    && $mb->selectFolder($folder['uid'])
                     && ($emailUid = $mb->getMsgUid($msgn))
                     && ($emailId = $this->getEmailIdByUid($emailUid, $folder['id']))
                   ) {
@@ -2978,7 +2984,7 @@ class Email extends Basic
   protected function setFolderSync(string $idFolder, bool $synchronizing = true): bool
   {
     if ($bit = $this->pref->getBit($idFolder)) {
-      $bit['synchronizing'] = $synchronizing;
+      $bit['synchronizing'] = !empty($synchronizing) ? 1 : 0;
       $bit['last_sync_' . ($synchronizing ? 'start' : 'end')] = microtime(true);
       $bit['id_parent'] = !empty($bit['id_parent']) ? $bit['id_parent'] :  null;
       return (bool)$this->pref->updateBit($idFolder, $bit);
@@ -3148,9 +3154,9 @@ class Email extends Basic
       "last_uid" => $folder["last_uid"] ?? null,
       "last_check" => $folder["last_check"] ?? null,
       "hash" => $folder["hash"] ?? null,
-      "subscribed" => $folder["subscribed"] ?? false,
+      "subscribed" => !empty($folder["subscribed"]) ? 1 : 0,
       "icon" => $folderType['icon'] ?? null,
-      "synchronizing" => $folder["synchronizing"] ?? false,
+      "synchronizing" => !empty($folder["synchronizing"]) ? 1 : 0,
       "last_sync_start" => $folder["last_sync_start"] ?? null,
       "last_sync_end" => $folder["last_sync_end"] ?? null,
       "highestmodseq" => $folder["highestmodseq"] ?? null,
@@ -3401,9 +3407,7 @@ class Email extends Basic
 
 
   public function getQueueDb(){
-    if (($user = User::getInstance())
-      && ($mainDataPath = $user->getDataPath('appui-email'))
-    ) {
+    if ($mainDataPath = $this->user->getDataPath('appui-email')) {
       $path = $mainDataPath . 'webmail/';
       $dbName = 'queue.sqlite';
       if (!is_dir($path)) {
@@ -3527,7 +3531,7 @@ class Email extends Basic
     return false;
   }
 
-  public function startProcessQueue(string|array $action, callable $callback)
+  public function startProcessingQueue(string|array $action, callable $callback)
   {
     if ($this->processingQueue) {
       return;
@@ -3543,7 +3547,12 @@ class Email extends Basic
     $queue = [];
     while ($this->processingQueue) {
       $dbQueue = $this->getQueue(['action' => $action]) ?: [];
+      $priority = 1;
       foreach ($dbQueue as $item) {
+        if ($item['priority'] > $priority) {
+          $priority = $item['priority'];
+        }
+
         if (!isset($currentQueue[$item['id']])) {
           $currentQueue[$item['id']] = [
             'generator' => $this->processQueueItem($item),
@@ -3565,23 +3574,27 @@ class Email extends Basic
       ]);
 
       if (empty($currentQueue)) {
-        $this->stopProcessQueue();
+        $this->stopProcessingQueue();
         break;
       }
 
-      //X::sortBy($currentQueue, 'priority', 'desc');
-      //$maxPriority = $currentQueue[array_key_first($currentQueue)]['priority'];
-      //$currentQueue = array_filter($currentQueue, fn($w) => $w['priority'] === $maxPriority);
       foreach ($currentQueue as $id => &$worker) {
-        if (((time() - $this->queueCallbackLastPing) > $this->queueCallbackPingFrequency)
-          && !$this->pingQueueCallback()
-        ) {
-          $this->stopProcessQueue();
-          break;
+        if ((time() - $this->queueCallbackLastPing) > $this->queueCallbackPingFrequency) {
+          if ($this->pingQueueCallback()) {
+            $this->updateQueue($id, ['date_ping' => X::microtime()]);
+          }
+          else {
+            $this->stopProcessingQueue();
+            break;
+          }
         }
 
         if (!$this->processingQueue) {
           break;
+        }
+
+        if ($worker['priority'] < $priority) {
+          continue;
         }
 
         /** @var Generator $generator */
@@ -3601,6 +3614,7 @@ class Email extends Basic
             'action' => 'queue',
             'data' => array_values($queue)
           ]);
+          $this->removeQueue($id);
           unset($currentQueue[$id]);
         }
       }
@@ -3608,24 +3622,24 @@ class Email extends Basic
       unset($worker);
     }
 
-    $this->stopProcessQueue();
+    $this->stopProcessingQueue();
   }
 
-  public function stopProcessQueue(){
+  public function stopProcessingQueue(){
     $this->processingQueue = false;
   }
 
   protected function pingQueueCallback(): bool
   {
     if (empty($this->queueCallback)) {
-      $this->stopProcessQueue();
+      $this->stopProcessingQueue();
       return false;
     }
 
     $this->queueCallbackLastPing = time();
     $ping = ($this->queueCallback)(['action' => 'ping']);
     if (empty($ping)) {
-      $this->stopProcessQueue();
+      $this->stopProcessingQueue();
       return false;
     }
 
@@ -3641,31 +3655,36 @@ class Email extends Basic
       switch ($item['action']) {
         case 'sync':
           $count = 0;
-          $sync = $this->syncEmails2($item['id_folder']);
+          $sync = $this->syncEmails($item['id_folder']);
           foreach ($sync as $i => $s) {
             $count++;
             if ($this->queueCallback) {
-              ($this->queueCallback)([
+              $d = [
                 'action' => 'sync',
                 'synchronizing' => true,
-                'folder' => $item['id_folder'],
+                'id_folder' => $item['id_folder'],
                 'data' => [$i => $s]
-              ]);
+              ];
+              if ($count === 10) {
+                $d['folder'] = $this->getFolder($item['id_folder']);
+              }
+
+              ($this->queueCallback)($d);
             }
 
-            if ($count >= 5) {
+            if ($count === 10) {
               $count = 0;
               yield;
             }
           }
 
-          $this->removeQueue($item['id']);
           $ret = $sync->getReturn();
           if ($this->queueCallback) {
             ($this->queueCallback)([
               'action' => 'sync',
               'completed' => true,
-              'folder' => $item['id_folder'],
+              'id_folder' => $item['id_folder'],
+              'folder' => $this->getFolder($item['id_folder']),
               'data' => $ret
             ]);
           }

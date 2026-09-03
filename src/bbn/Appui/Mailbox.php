@@ -926,8 +926,8 @@ class Mailbox extends Basic
         );
 
         foreach ($lines as $line) {
-          if (preg_match('/UID\s+(\d+)/i', $line, $m)) {
-            return (int)$m[1];
+          if ($uid = $this->parser->uid($line)) {
+            return (int)$uid;
           }
         }
       }
