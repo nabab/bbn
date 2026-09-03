@@ -280,6 +280,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
   private function createPDO(...$args): PDO
   {
+    $this->_fancy = 0;
     $this->pdo = new PDO(...$args);
     $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -306,7 +307,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $this->pdo->query('SELECT 1');
       return true;
     }
-    catch (\PDOException $e) {
+    catch (PDOException $e) {
       return false;
     }
   }
@@ -316,9 +317,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
   {
     try {
       $this->createPDO(...$this->cfg['args']);
+      $this->startFancyStuff();
+      $this->queries = [];
+      $this->list_queries = [];
       return true;
     }
-    catch (\PDOException $e) {
+    catch (PDOException $e) {
       return false;
     }
   }
@@ -745,7 +749,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       $num_types = in_array($cfg['kind'], ['INSERT', 'UPDATE']) && !empty($cfg['values_types']) ? count($cfg['values_types']) : 0;
       foreach ($cfg['values'] as $i => $v) {
         if (!isset($cfg['values_desc'][$i])) {
-          X::log([$i, $cfg['values_desc'], $v], 'no_desc_in_sql');
+          $this->log([$i, $cfg['values_desc'], $v]);
         }
         if ($num_types && ($i < $num_types) && ($cfg['values_desc'][$i]['type'] === 'exp')) {
           continue;
@@ -915,7 +919,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         ) {
           foreach ($cfg['tables'] as $t => $o) {
             if (!$this->colFullName($c['field'], $t)) {
-              X::log([$c, $t], 'field_not_found_in_sql');
+              $this->log([$c, $t]);
             }
             elseif (isset($cfg['available_fields'][$this->colFullName($c['field'], $t)])) {
               $c['field'] = $this->colFullName($c['field'], $t);
@@ -2363,7 +2367,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         }
 
         if (!isset($r)) {
-          X::log($q, 'no_r_in_sql');
+          $this->log($q, 'no_r_in_sql');
           return false;
         }
 
@@ -2507,8 +2511,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
       ) {
         $num--;
         if (!is_string($this->list_queries[0]['hash'])) {
-          X::log($this->list_queries);
-          X::log(count($this->list_queries));
+          $this->log($this->list_queries);
+          $this->log(count($this->list_queries));
         }
 
         $this->_remove_query($this->list_queries[0]['hash']);
@@ -2517,7 +2521,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
 
       if (empty($this->queries)) {
         $debug = debug_backtrace();
-        X::log($debug, 'db_explained');
+        $this->log($debug);
         throw new Exception(X::_("The queries object is empty!"));
       }
     }
@@ -3258,7 +3262,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
           }
           if (isset($res['values'][$i]) && is_array($res['values'][$i])) {
             if ((count($res['values'][$i]) !== 2) || !$res['values'][$i][1]) {
-              X::log([$res['tables'], $res['values']], 'arrays_in_db_write');
+              $this->log([$res['tables'], $res['values']]);
               throw new Exception(X::_("Using an array for insert/update value is allowed only for expressions with a 2 value array, the second value being the expression"));
             }
 
@@ -3492,7 +3496,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters, Ty
         }
         else {
           if (!is_string($t)) {
-            X::log([$cfg, debug_backtrace()], 'db_explained');
+             $this->log([$cfg, debug_backtrace()]);
             throw new Exception("Impossible to identify the tables, check the log");
           }
   
