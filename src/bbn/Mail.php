@@ -453,12 +453,24 @@ TEMPLATE;
     if ($this->makeMail($cfg)) {
       try {
         $r = $this->mailer->send();
+        /* if (constant('BBN_IS_DEV')) {
+          $r = mail(
+            constant('BBN_ADMIN_EMAIL'),
+            $this->mailer->Subject,
+            self::$_content,
+            "Content-type: text/html; charset=".$this->mailer->CharSet
+          );
+        }
+        else {
+          $r = $this->mailer->send();
+        } */
       }
       catch (Exception $e) {
         $this->log($e->getMessage());
       }
 
       if ($r) {
+      //if ($r && !constant('BBN_IS_DEV')) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!empty($this->imap_php)
           && !empty($this->imap_string)

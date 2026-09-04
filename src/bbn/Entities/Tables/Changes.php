@@ -713,32 +713,38 @@ class Changes extends EntityTable
     $cfgField = $this->fields['cfg'];
     return array_map(
       function ($change) use($cfgField) {
-        if (!empty($change[$cfgField]) && ($cfg = json_decode($change[$cfgField], true))) {
-          if (!empty($cfg['data'])) {
-            $cfg['data'] = array_map(
-              function ($d) {
-                if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::cryptCode($d['email']);
-                }
-
-                return $d;
-              }, $cfg['data']
-            );
+        if (!empty($change[$cfgField])) {
+          if (Str::isJson($change[$cfgField])) {
+            $change[$cfgField] = json_decode($change[$cfgField], true);
           }
 
-          if (!empty($cfg['subdata']) && !empty($cfg['subdata']['data'])) {
-            $cfg['subdata']['data'] = array_map(
-              function ($d) {
-                if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::cryptCode($d['email']);
-                }
+          if ($cfg = $change[$cfgField]) {
+            if (!empty($cfg['data'])) {
+              $cfg['data'] = array_map(
+                function ($d) {
+                  if (array_key_exists('email', $d) && ($d['email'] !== true)) {
+                    $d['email'] = static::cryptCode($d['email']);
+                  }
 
-                return $d;
-              }, $cfg['subdata']['data']
-            );
+                  return $d;
+                }, $cfg['data']
+              );
+            }
+
+            if (!empty($cfg['subdata']) && !empty($cfg['subdata']['data'])) {
+              $cfg['subdata']['data'] = array_map(
+                function ($d) {
+                  if (array_key_exists('email', $d) && ($d['email'] !== true)) {
+                    $d['email'] = static::cryptCode($d['email']);
+                  }
+
+                  return $d;
+                }, $cfg['subdata']['data']
+              );
+            }
+
+            $change[$cfgField] = json_encode($cfg);
           }
-
-          $change[$cfgField] = json_encode($cfg);
         }
 
         return $change;
@@ -1104,10 +1110,16 @@ class Changes extends EntityTable
       $linksFields = $cCfg['arch']['links'];
       $linksTable = $cCfg['tables']['links'];
       $res = [];
-      $cfg = json_decode($change[$this->fields['cfg']], true);
+      $cfg = is_array($change[$this->fields['cfg']])
+        ? $change[$this->fields['cfg']]
+        : json_decode($change[$this->fields['cfg']], true);
       $all = array_map(function ($f) {
           if (!empty($f['code'])) {
             $f['code'] = (string)$f['code'];
+          }
+
+          if (!empty($f['files'])) {
+            $f['files'] = json_decode($f['files']);
           }
 
           return $f;
@@ -1177,7 +1189,7 @@ class Changes extends EntityTable
               ) {
                 $res[] = [
                   'code' => (string)$c,
-                  'files' => json_decode($all[$idx][$filesFields['files']]),
+                  'files' => $all[$idx][$filesFields['files']],
                   'mandatory' => !!$all[$idx][$linksFields['mandatory']]
                 ];
                 $found = true;
@@ -1205,7 +1217,7 @@ class Changes extends EntityTable
               if (($idx = X::search($all, ['code' => (string)$code])) !== null) {
                 $res[] = [
                   'code' => (string)$code,
-                  'files' => json_decode($all[$idx][$filesFields['files']]),
+                  'files' => $all[$idx][$filesFields['files']],
                   'mandatory' => !!$all[$idx][$linksFields['mandatory']]
                 ];
               }

@@ -165,13 +165,16 @@ trait TmpFiles
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
-      return $this->db->insertIgnore(
-        $cCfg['tables']['links'], [
-          $cCfg['arch']['links']['id_link'] => $id_link,
-          $cCfg['arch']['links']['id_file'] => $id_file,
-          $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1
-        ]
-      );
+      $d = [
+        $cCfg['arch']['links']['id_link'] => $id_link,
+        $cCfg['arch']['links']['id_file'] => $id_file,
+        $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1
+      ];
+      if (isset($cCfg['arch']['links']['id_entity'])) {
+        $d[$cCfg['arch']['links']['id_entity']] = $this->getId();
+      }
+
+      return $this->db->insertIgnore($cCfg['tables']['links'], $d);
     }
 
     return null;
@@ -300,9 +303,12 @@ trait TmpFiles
         ]
       );
     }
+
+    return null;
   }
 
-  public function hasLinks(string $id_file){
+  public function hasLinks(string $id_file): bool
+  {
     if (Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
       return !!$this->db->selectAll([
@@ -316,6 +322,7 @@ trait TmpFiles
         ]
       ]);
     }
+
     return false;
   }
 
