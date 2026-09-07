@@ -520,6 +520,7 @@ class Address extends DbCls
       if (!$changed) {
         return $id;
       } else if ((count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id])) {
+        $this->cDelete($id);
         return $id;
       }
     }
