@@ -304,11 +304,10 @@ class Identity extends DbCls
    *
    * @param mixed $id The ID of the person to update.
    * @param mixed $fn The new data for the person.
-   * @return string|null The ID of the updated person.
+   * @return int The ID of the updated person.
    */
   public function update($id, $fn): int
   {
-    $arc = &$this->class_cfg['arch']['identities'];
     $ok = 0;
     if ($info = $this->getInfo($id)) {
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
@@ -332,6 +331,10 @@ class Identity extends DbCls
         $ok += (int)$this->dbTraitUpdate($id, $fn);
       }
 
+    }
+
+    if ($ok) {
+      $this->cDelete($id);
     }
 
     return (int)$ok;
