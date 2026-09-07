@@ -543,11 +543,9 @@ class Changes extends EntityTable
 
       return empty($error)
         && $this->deleteFileAndLink($id)
-        && $this->db->update($this->class_table, [
+        && $this->dbTraitUpdate($id, [
           $this->fields['state'] => static::$states['accepted'],
           $this->fields['cfg'] => json_encode($cfg)
-        ], [
-          $this->fields['id'] => $id
         ]);
     }
 
@@ -557,7 +555,6 @@ class Changes extends EntityTable
 
   /**
    * @param string   $id
-   * @param null|int
    */
   public function refuse(string $id): ?int
   {
@@ -566,10 +563,8 @@ class Changes extends EntityTable
       && $this->get($id, [$this->fields['id_entity'] => $this->getId()])
       && $this->deleteFileAndLink($id)
     ) {
-      return $this->db->update($this->class_table, [
+      return $this->dbTraitUpdate($id, [
         $this->fields['state'] => static::$states['refused']
-      ], [
-        $this->fields['id'] => $id
       ]);
     }
 
@@ -577,10 +572,10 @@ class Changes extends EntityTable
   }
 
 
-  public function forceState(string $id, $state): bool
+  public function forceState(string $id, ?int $state): bool
   {
     if (\in_array($state, array_values(static::$states), true)) {
-      return !!$this->db->update($this->class_table, [$this->fields['state'] => $state], [$this->fields['id'] => $id]);
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['state'] => $state]);
     }
 
     return false;
@@ -593,7 +588,9 @@ class Changes extends EntityTable
    */
   public function getState(string $id)
   {
-    return Str::isUid($id) ? $this->db->selectOne($this->class_table, $this->fields['state'], [$this->fields['id'] => $id]) : false;
+    return Str::isUid($id)
+      ? $this->db->selectOne($this->class_table, $this->fields['state'], [$this->fields['id'] => $id])
+      : false;
   }
 
 
@@ -969,15 +966,7 @@ class Changes extends EntityTable
         }
       }
 
-      return !!$this->db->update(
-        $this->class_table,
-        [
-          $this->fields['state'] => $state
-        ],
-        [
-          $this->fields['id'] => $id
-        ]
-      );
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['state'] => $state]);
     }
 
     return false;
@@ -992,15 +981,7 @@ class Changes extends EntityTable
   protected function _setMoment(string $id, string $moment = ''): bool
   {
     if (Str::isUid($id)) {
-      return !!$this->db->update(
-        $this->class_table,
-        [
-          $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s')
-        ],
-        [
-          $this->fields['id'] => $id
-        ]
-      );
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['moment'] => $moment ?: date('Y-m-d H:i:s')]);
     }
 
     return false;
@@ -1026,16 +1007,10 @@ class Changes extends EntityTable
       if (($idx = X::search($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata, $cfg['type']));
         $cfg['subdata']    = $subdata;
-        if ($this->db->update(
-          $this->class_table,
-          [
-            $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
-            $this->fields['cfg'] => \json_encode($cfg)
-          ],
-          [
-            $this->fields['id'] => $id
-          ]
-        )) {
+        if ($this->dbTraitUpdate($id, [
+          $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
+          $this->fields['cfg'] => \json_encode($cfg)
+        ])) {
           $this->setRequiredFiles($id);
           $this->_setState($id, $this->getCurrentState($id, $cfg));
           return 1;
