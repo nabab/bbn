@@ -640,6 +640,11 @@ class Permissions extends DbCls
       if (is_array($p) && isset($p['write']) && $p['write']) {
         return true;
       }
+
+      $f = $this->getFull($id_perm);
+      if ($p = X::getRow($f, ['code' => 'write'])) {
+        return $this->pref->has($p['id'], $force);
+      }
     }
 
     return false;
