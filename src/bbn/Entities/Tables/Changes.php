@@ -588,9 +588,15 @@ class Changes extends EntityTable
    */
   public function getState(string $id)
   {
-    return Str::isUid($id)
-      ? $this->db->selectOne($this->class_table, $this->fields['state'], [$this->fields['id'] => $id])
-      : false;
+    if (!Str::isUid($id)) {
+      return false;
+    }
+
+    if ($r = $this->getOne([$this->fields['id'] => $id])) {
+      return $r[$this->fields['state']];
+    }
+
+    return false;
   }
 
 
@@ -639,7 +645,7 @@ class Changes extends EntityTable
 
   public function get(string $id, array $filters = []): ?array
   {
-    return $this->db->rselect($this->class_table, [], X::mergeArrays([
+    return $this->getOne(X::mergeArrays([
       $this->fields['id'] => $id
     ], $filters));
   }
@@ -926,19 +932,17 @@ class Changes extends EntityTable
    */
   protected function _insert(string $moment, array $cfg): ?string
   {
-    if ($id_adh = $this->getId()) {
-      if ($this->db->insert($this->class_table, [
-          $this->fields['id_entity'] => $id_adh,
-          $this->fields['moment'] => $moment,
-          $this->fields['state'] => null,
-          $this->fields['cfg'] => \json_encode($cfg)
-        ])
-        && ($id = $this->db->lastId())
-      ) {
-        $this->setRequiredFiles($id);
-        $this->_setState($id, $this->getCurrentState($id, $cfg));
-        return $id;
-      }
+    if (($idAdh = $this->getId())
+      && ($id = $this->dbTraitInsert([
+        $this->fields['id_entity'] => $idAdh,
+        $this->fields['moment'] => $moment,
+        $this->fields['state'] => null,
+        $this->fields['cfg'] => \json_encode($cfg)
+      ]))
+    ) {
+      $this->setRequiredFiles($id);
+      $this->_setState($id, $this->getCurrentState($id, $cfg));
+      return $id;
     }
 
     return null;
@@ -1303,83 +1307,60 @@ class Changes extends EntityTable
   /**
    * @param string $table
    * @param string $id
-   * @param array  $data
-   * @return string
+   * @param array $data
+   * @return string|false
    */
-  protected function checkExists(string $table, string $id, array $data, string $type = 'update')
+  protected function checkExists(
+    string $table,
+    string $id,
+    array $data,
+    string $type = 'update'
+  ): string|false
   {
     switch ($type){
       case 'update':
         if (!empty($data['field'])) {
-        $conditions = [[
-          'field' => $this->fields['id_entity'],
-          'value' => $this->getId()
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
-          'value' => 'update'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
-          'value' => $table
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
-          empty($id) ? 'operator' : 'value' => $id ?: 'isnull'
-        ], [
-          'field' => "JSON_SEARCH(".$this->fields['cfg'].", 'all', '$data[field]', null, '$.data[*].field')",
-          'operator' => 'isnotnull'
-        ], [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $this->fields['state'],
-            'value' => static::$states['untreated']
-          ], [
-            'field' => $this->fields['state'],
-            'value' => static::$states['email']
-          ], [
-            'field' => $this->fields['state'],
-            'operator' => 'isnull'
-          ]]
-        ]];
+          $records = $this->getRecords($this->class_table);
+          return X::getField(
+            $records,
+            fn($r) => !empty($r[$this->fields['cfg']]['type'])
+              && ($r[$this->fields['cfg']]['type'] === $type)
+              && !empty($r[$this->fields['cfg']]['table'])
+              && ($r[$this->fields['cfg']]['table'] === $table)
+              && (empty($id)
+                || (!empty($r[$this->fields['cfg']]['table'])
+                  && ($r[$this->fields['cfg']]['id'] === $id)))
+              && !empty($r[$this->fields['cfg']]['data'])
+              && !empty($data['field'])
+              && X::getRow($r[$this->fields['cfg']]['data'], ['field' => $data['field']])
+              && (($r[$this->fields['state']] === static::$states['untreated'])
+                || ($r[$this->fields['state']] === static::$states['email'])
+                || is_null($r[$this->fields['state']])),
+            $this->fields['id']
+          ) ?: false;
         }
+
         break;
 
       case 'delete':
-        $conditions = [[
-          'field' => $this->fields['id_entity'],
-          'value' => $this->getId()
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
-          'value' => 'delete'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
-          'value' => $table
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
-          'value' => $id
-        ], [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $this->fields['state'],
-            'value' => static::$states['untreated']
-          ], [
-            'field' => $this->fields['state'],
-            'value' => static::$states['email']
-          ], [
-            'field' => $this->fields['state'],
-            'operator' => 'isnull'
-          ]]
-        ]];
-        break;
+        $records = $this->getRecords($this->class_table);
+        return X::getField(
+            $records,
+            fn($r) => !empty($r[$this->fields['cfg']]['type'])
+              && ($r[$this->fields['cfg']]['type'] === $type)
+              && !empty($r[$this->fields['cfg']]['table'])
+              && ($r[$this->fields['cfg']]['table'] === $table)
+              && !empty($id)
+              && !empty($r[$this->fields['cfg']]['id'])
+              && ($r[$this->fields['cfg']]['id'] === $id)
+              && (($r[$this->fields['state']] === static::$states['untreated'])
+                || ($r[$this->fields['state']] === static::$states['email'])
+                || is_null($r[$this->fields['state']])),
+            $this->fields['id']
+          ) ?: false;
     }
 
-    return isset($conditions) ? $this->db->selectOne(
-      [
-        'table' => $this->class_table,
-        'fields' => [$this->fields['id']],
-        'where' => [
-          'conditions' => $conditions
-        ]
-      ]
-    ) : false;
+    return false;
   }
 
 
