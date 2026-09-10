@@ -121,6 +121,11 @@ trait Tagger
     ];
     if ($this->taggerEntity) {
       $where[$this->taggerCols['id_entity']] = $this->taggerEntity;
+      if (!empty($this->entity)) {
+        if ($record = X::getRow($this->entity->getRecords($this->taggerTable), $where)) {
+          $this->entity->deleteRecord($this->taggerTable, $record['id']);
+        }
+      }
     }
 
     return $this->db->delete($this->taggerTable, $where);
@@ -135,6 +140,13 @@ trait Tagger
     ];
     if ($this->taggerEntity) {
       $where[$this->taggerCols['id_entity']] = $this->taggerEntity;
+      if (!empty($this->entity)) {
+        if ($records = X::getRows($this->entity->getRecords($this->taggerTable), $where)) {
+          foreach ($records as $record) {
+            $this->entity->deleteRecord($this->taggerTable, $record['id']);
+          }
+        }
+      }
     }
 
     return $this->db->delete($this->taggerTable, $where);
