@@ -853,7 +853,7 @@ class Changes extends EntityTable
     return array_map(
       function ($change) use($cfgField) {
         if (!empty($change[$cfgField])
-          && ($cfg = json_decode($change[$cfgField], true))
+          && ($cfg = is_string($change[$cfgField]) ? json_decode($change[$cfgField], true) : $change[$cfgField])
         ) {
           if (!empty($cfg['data'])) {
             $cfg['data'] = array_map(
