@@ -189,7 +189,6 @@ class Identity extends DbCls
   {
     $res = $this->dbTraitRselect($id);
     if (!empty($res)) {
-      $arc = &$this->class_cfg['arch']['identities'];
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
         $arr = $this->dbUauthRetrieve($id, $mode);
         if (in_array($this->class_cfg['uauth_system'], ['one-to-many', 'many-to-many'])) {

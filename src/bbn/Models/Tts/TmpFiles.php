@@ -161,7 +161,7 @@ trait TmpFiles
    * @param bool   $mandatory
    * @return nul|int
    */
-  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?int
+  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?string
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
@@ -174,7 +174,9 @@ trait TmpFiles
         $d[$cCfg['arch']['links']['id_entity']] = $this->getId();
       }
 
-      return $this->db->insertIgnore($cCfg['tables']['links'], $d);
+      if ($this->db->insert($cCfg['tables']['links'], $d)) {
+        return $this->db->lastId();
+      }
     }
 
     return null;
@@ -242,6 +244,7 @@ trait TmpFiles
         'table' => $cCfg['tables']['links'],
         'fields' => X::mergeArrays(
           [
+            $this->db->cfn($cCfg['arch']['links']['id'], $cCfg['tables']['links']),
             $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
             $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),
             'other_link' => 'IF(l.'.$cCfg['arch']['links']['id_link'].' IS NULL, false, true)'
