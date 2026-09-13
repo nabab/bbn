@@ -295,6 +295,7 @@ class Mailbox extends Basic
     return $this->login;
   }
 
+
   public function getPort(): int
   {
     return $this->port;
@@ -1197,37 +1198,6 @@ class Mailbox extends Basic
 
 
   /**
-   * Gets the flags of the message.
-   * @param int $msgno No of the message
-   * @return array|null
-   */
-  public function getMsgFlags(int $msgno): ?array
-  {
-    $flags = null;
-    if ($overview = $this->getMsgOverview($msgno)) {
-      $flags = [];
-      $toCheck = ['seen', 'answered', 'flagged', 'deleted', 'draft', 'recent'];
-      foreach ($toCheck as $flag) {
-        if (!empty($overview[0]->$flag)) {
-          $flags[] = '\\' . ucfirst($flag);
-        }
-      }
-
-      if (!empty($overview[0]->flags)) {
-        $keywords = preg_split('/\s+/', trim($overview[0]->flags)) ?: [];
-        foreach ($keywords as $kw) {
-          if (!in_array($kw, $toCheck)) {
-            $flags[] = $kw;
-          }
-        }
-      }
-    }
-
-    return $flags ?: null;
-  }
-
-
-  /**
    * Sets or removes flag/s on message/s. (Test: ok)
    * The flags which you can set are \\Seen, \\Answered, \\Flagged, \\Deleted, and \\Draft. (Test: ok)
    *
@@ -1291,36 +1261,6 @@ class Mailbox extends Basic
     }
 
     return null;
-  }
-
-
-  public function getMsgPriority(int $msgno): ?int
-  {
-    $priority = null;
-    if ($msgHeader = $this->getMsgHeader($msgno)) {
-      // X-Priority
-      if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
-        $priority = (int)$m[1];
-      }
-
-      // Importance
-      if (is_null($priority) &&
-        preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
-      ) {
-        $map = ['high' => 1, 'normal' => 3, 'low' => 5];
-        $priority = $map[strtolower($m[1])] ?? null;
-      }
-
-      // Priority
-      if (is_null($priority)
-        && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
-      ) {
-        $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
-        $priority = $map[strtolower($m[1])] ?? null;
-      }
-    }
-
-    return $priority;
   }
 
 
