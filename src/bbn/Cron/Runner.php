@@ -6,9 +6,9 @@ use bbn\Str;
 use bbn\X;
 use bbn\Db;
 use bbn\Cron;
-use bbn\User;
-use bbn\File\Dir;
+use bbn\Mvc\Controller;
 use bbn\Util\Timer;
+use bbn\Net\Websocket;
 use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
 use function count;
@@ -33,7 +33,7 @@ class Runner extends Basic
   use Config;
   use Filesystem;
 
-  protected $controller;
+  protected Controller $controller;
 
   protected Db $db;
   /**
@@ -41,7 +41,7 @@ class Runner extends Basic
    *
    * @var Timer
    */
-  protected $timer;
+  protected Timer $timer;
 
   /**
    * @var Cron
@@ -51,83 +51,13 @@ class Runner extends Basic
   /**
    * @var string|null
    */
-  protected $log_file;
+  protected ?string $log_file;
 
   /**
    * @var string
    */
-  protected $type;
+  protected string $type;
 
-  /**
-   * The script as executed by the CLI in which the real task will come executed.
-   */
-  private function _run(): RunResult
-  {
-    if (!$this->check() || empty($this->data['type'])) {
-      return RunResult::error(1, 'Invalid runner configuration');
-    }
-
-    if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
-      call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
-    }
-
-    $type = Type::fromString($this->data['type']);
-    clearstatcache();
-    $pid_file = $this->getPidPath($this->data);
-
-    // Manual files check
-  if (!$this->isActive() || ($type->isCron() && !$this->isCronActive()) || ($type->isPoll() && !$this->isPollActive())) {
-      $message = "GETTING OUT of {$this->data['type']} BECAUSE one of the manual files is missing";
-      $this->log($message);
-
-      if ($this->isTestingEnvironment()) {
-        throw new Exception($message);
-      }
-
-      // Instead of exit($message), just return it
-      return RunResult::success($message); // same semantics as exit($message)
-    }
-
-    // Existing PID check, etc...
-    if (is_file($pid_file)
-      && ($file_content = file_get_contents($pid_file))
-    ) {
-      [$pid, $time] = explode('|', $file_content);
-      if (file_exists("/proc/$pid")) {
-        $message = "There is already a process running with PID " . $pid;
-        $this->log($message);
-        // Previously: exit(); → here, we just stop normally
-        return RunResult::error();
-      }
-
-      $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
-      $this->output(X::_('Dead process'), $pid);
-      @unlink($pid_file);
-    }
-
-    // Create PID
-    if (!is_dir(dirname($pid_file))) {
-      mkdir(dirname($pid_file), 0777, true);
-    }
-
-    if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
-      register_shutdown_function([$this, 'shutdown']);
-
-      if ($type === 'poll') {
-        $this->poll();
-      }
-      elseif (array_key_exists('id', $this->data)) {
-        $this->runTask($this->data);
-      }
-      else {
-        $this->runTaskSystem();
-      }
-
-      return RunResult::success();
-    }
-
-    return RunResult::error(2, "Couldn't create PID file");
-  }
 
   /**
    * Runner constructor.
@@ -156,33 +86,29 @@ class Runner extends Basic
    * @param string|bool $name
    * @param mixed $log
    */
-  public function output(string | bool $name = '', $log = ''): void
+  public function output(string $name, $log = ''): void
   {
-    $output = '';
-    if ($name === false) {
-      $output = '}' . PHP_EOL;
+    if (empty($name)) {
+      return;
     }
-    else if ($name === true) {
-      $output = '{' . PHP_EOL;
-    }
-    else if ($name) {
-      $is_number = Str::isNumber($log);
-      $is_boolean = is_bool($log);
-      $is_string = is_string($log);
-      if (!$is_number && !$is_boolean && !$is_string) {
-        $log = X::getDump($log);
-      }
-      else if ($is_boolean) {
-        $log = $log ? 'true' : 'false';
-      }
 
-      $output = '  "' .
-        Str::escapeDquotes($name) .
-        '": ' . ($is_string ? '"' : '') .
-        ($is_string ? Str::escapeDquotes($log) : $log) .
-        ($is_string ? '"' : '') . ',' .
-        PHP_EOL;
+    $output = '';
+    $is_number = Str::isNumber($log);
+    $is_boolean = is_bool($log);
+    $is_string = is_string($log);
+    if (!$is_number && !$is_boolean && !$is_string) {
+      $log = X::getDump($log);
     }
+    else if ($is_boolean) {
+      $log = $log ? 'true' : 'false';
+    }
+
+    $output = '  "' .
+      Str::escapeDquotes($name) .
+      '": ' . ($is_string ? '"' : '') .
+      ($is_string ? Str::escapeDquotes($log) : $log) .
+      ($is_string ? '"' : '') . ',' .
+      PHP_EOL;
 
     if (!empty($output)) {
       echo $output;
@@ -223,6 +149,11 @@ class Runner extends Basic
         ($data['type'] === 'poll')
       ) {
         $this->cron->launchPoll();
+      }
+      elseif (
+        ($data['type'] === 'socket')
+      ) {
+        $this->cron->launchSocketServer();
       }
       else if ($data['type'] === 'cron') {
         if (array_key_exists('id', $data) && Str::isUid($data['id'])) {
@@ -269,7 +200,9 @@ class Runner extends Basic
    */
   public function poll(?Observer $observer = null)
   {
+    X::log('inside poll function  from runner', 'poller');
     if ($this->check()) {
+      X::log('inside poll function: checked', 'poller');
       $this->timer->start('timeout');
       $this->timer->start('users');
       $this->timer->start('cron_check');
@@ -283,10 +216,65 @@ class Runner extends Basic
           echo '-';
         }
       }
-      */
+      $host = '0.0.0.0';
+      $port = 9000;
+
+      $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
+      socket_set_option($server, SOL_SOCKET, SO_REUSEADDR, 1);
+      socket_bind($server, $host, $port);
+      socket_listen($server);
+      X::log("TCP server listening on {$host}:{$port}", 'poller');
+      $clients = [];
       while ($this->isPollActive()) {
+        echo '+';
         // The only centralized action are the observers
-        $res = $obs->observe();
+        //$res = $obs->observe();
+        X::log('observed', 'poller');
+
+        // Watch server socket + all connected clients
+        $read = array_merge([$server], $clients);
+        $write = null;
+        $except = null;
+
+        socket_select($read, $write, $except, 1);
+        // New connection?
+        if (in_array($server, $read, true)) {
+          $client = socket_accept($server);
+          $clients[] = $client;
+          socket_write($client, "Connected to PHP server!\n");
+          echo "Client connected\n";
+
+          $key = array_search($server, $read, true);
+          unset($read[$key]);
+        }
+
+        // Process data from connected clients
+        foreach ($read as $client) {
+          $data = @socket_read($client, 2048, PHP_BINARY_READ);
+
+          if ($data === '') {
+            continue;
+          }
+          if ($data === false) {
+            echo "Client disconnected\n";
+            socket_close($client);
+            $key = array_search($client, $clients, true);
+            if ($key !== false) {
+              unset($clients[$key]);
+            }
+
+            continue;
+          }
+
+          $message = trim($data);
+          echo "Received: {$message}\n";
+
+          // Connection stays open after this response
+          socket_write($client, "Server received: {$message}\n");
+        }
+        */
+        /*
         if (is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
@@ -306,25 +294,46 @@ class Runner extends Basic
               }
             }
           }
+        }*/
+          /*
+        if ($this->timer->measure('timeout') > self::$poll_timeout) {
+          //$this->output(X::_('Timeout'), Date('Y-m-d H:i:s'));
+          echo '*';
         }
-        sleep(1);
         if ($this->timer->measure('users') > self::$user_timeout) {
           echo '?';
           //$admin->clean_tokens();
           $this->timer->stop('users');
           $this->timer->start('users');
         }
-        if ($this->timer->measure('timeout') > self::$poll_timeout) {
-          //$this->output(X::_('Timeout'), Date('Y-m-d H:i:s'));
-          echo '.';
-        }
         if ($this->timer->measure('cron_check') > self::$cron_check_timeout) {
+          echo '-';
           $this->cron->getManager()->notifyFailed();
           $this->timer->stop('cron_check');
           $this->timer->start('cron_check');
         }
+
+        sleep(1);
       }
+
+      foreach ($clients as $client) {
+          socket_close($client);
+      }
+
+      socket_close($server);
       $this->output(X::_('Ending poll process'), date('Y-m-d H:i:s'));
+      */
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Application
+        |--------------------------------------------------------------------------
+        */
+
+
+
+
     }
   }
 
@@ -500,6 +509,25 @@ class Runner extends Basic
     exit();
   }
 
+  public function runSocketServer()
+  {
+    X::log('Run socket server', 'socket-start');
+    $socket = new Websocket();
+    $socket->on(
+      'ping',
+      fn(mixed $data, int $fd, Websocket $socket)
+        => $socket->send($fd, 'pong', ['time' => time()])
+    );
+
+    $socket->on(
+      'message',
+      fn(mixed $data, int $fd, Websocket $socket)
+        => $socket->send($fd, 'message', $data)
+    );
+
+    $socket->start();
+    X::log('socket ended', 'socket-end');
+  }
 
   /**
    * @return int
@@ -525,5 +553,98 @@ class Runner extends Basic
   private function isTestingEnvironment(): bool
   {
     return !defined('BBN_IS_PROD') || (BBN_IS_PROD === false);
+  }
+
+  /**
+   * The script as executed by the CLI in which the real task will come executed.
+   */
+  private function _run(): RunResult
+  {
+    if (!$this->check() || empty($this->data['type'])) {
+      return RunResult::error(1, 'Invalid runner configuration');
+    }
+
+    X::log('inside _run with type ' . $this->data['type'], 'poller');
+    if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\Appui\\History')) {
+      call_user_func(['\\bbn\\Appui\\History', 'setUser'], BBN_EXTERNAL_USER_ID);
+    }
+
+    $type = Type::fromString($this->data['type']);
+    clearstatcache();
+    $pid_file = $this->getPidPath($this->data);
+
+    X::log('inside _run2 with socket? ' . $type->isSocket(), 'poller');
+    // Manual files check
+    // X::log(['PARAMS', $this->isActive(), $type->isCron(), $this->isCronActive(), $type->isPoll(), $this->isPollActive()], 'poller');
+    if ((!$this->isActive() && !$type->isSocket()) || ($type->isCron() && !$this->isCronActive()) || ($type->isPoll() && !$this->isPollActive())) {
+      $message = "GETTING OUT of {$this->data['type']} BECAUSE one of the manual files is missing";
+      $this->log($message);
+
+      if ($this->isTestingEnvironment()) {
+        throw new Exception($message);
+      }
+
+      // Instead of exit($message), just return it
+      return RunResult::success($message); // same semantics as exit($message)
+    }
+
+    // Existing PID check, etc...
+    if (is_file($pid_file)
+      && ($file_content = file_get_contents($pid_file))
+    ) {
+      [$pid, $time] = explode('|', $file_content);
+      if (file_exists("/proc/$pid")) {
+        $message = "There is already a process running with PID " . $pid;
+        $this->log($message);
+        // Previously: exit(); → here, we just stop normally
+        if ($this->isTestingEnvironment()) {
+          throw new Exception($message);
+        }
+
+        return RunResult::error();
+      }
+
+      $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
+      $this->output(X::_('Dead process'), $pid);
+      @unlink($pid_file);
+    }
+
+    // Create PID
+    if (!is_dir(dirname($pid_file))) {
+      mkdir(dirname($pid_file), 0777, true);
+    }
+
+    if ($type->isSocket()) {
+      X::log("Starting socket server $pid_file", 'socket-start');
+    }
+
+    if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
+      register_shutdown_function([$this, 'shutdown']);
+
+      if ($type->isPoll()) {
+        $poller = new Poller($this->cron, $this->data);
+        X::log('calling poll', 'poller');
+        $poller->poll();
+      }
+      elseif ($type->isSocket()) {
+        $this->runSocketServer();
+      }
+      elseif (array_key_exists('id', $this->data)) {
+        $this->runTask($this->data);
+      }
+      else {
+        $this->runTaskSystem();
+      }
+
+      return RunResult::success();
+    }
+
+
+    $message = "Couldn't create PID file at $pid_file";
+    $this->log($message);
+    if ($this->isTestingEnvironment()) {
+      throw new Exception($message);
+    }
+    return RunResult::error(2, $message);
   }
 }

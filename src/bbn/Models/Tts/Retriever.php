@@ -36,6 +36,21 @@ trait Retriever
     }
   }
 
+
+  /**
+   * Removes the retriever.
+   *
+   * @param self $instance The instance object.
+   * @return void
+   */
+  protected static function retrieverRemove(self $instance): void
+  {
+    if (self::$retriever_instance === $instance) {
+      self::$retriever_exists = false;
+      self::$retriever_instance = null;
+    }
+  }
+
   /**
    * Returns the instance of the singleton or null.
    * 

@@ -407,7 +407,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Compares two dates\n   *\n   * @param String|Object $date the string of the date to compare or an object of this class\n   * @param string $comparator allowed comparators '>','>=', '<','<=', '='\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Compares two dates\n   *\n   * @param String|Object $date the string of the date to compare or an object of this class\n   * @param string $comparator allowed comparators '>','>=', '<','<=', '='\n   * @return bool\n   *\/"
         },
         "isBefore": {
             "name": "isBefore",

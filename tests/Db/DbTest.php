@@ -71,7 +71,7 @@ class DbTest extends TestCase
 
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $db_cfg = self::getDbConfig();
 
@@ -87,7 +87,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_when_engine_is_not_provided()
+  public function testConstructorThrowsAnExceptionWhenEngineIsNotProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -99,7 +99,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function isEngineSupported_method_checks_if_the_given_db_engine_is_supported_or_not()
+  public function testIsenginesupportedMethodChecksIfTheGivenDbEngineIsSupportedOrNot()
   {
     $this->assertTrue(Db::isEngineSupported('mysql'));
     $this->assertTrue(Db::isEngineSupported('pgsql'));
@@ -108,7 +108,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getEngineIcon_method_returns_the_icon_for_the_given_db_engine()
+  public function testGetengineiconMethodReturnsTheIconForTheGivenDbEngine()
   {
     foreach ($this->getNonPublicProperty('engines') as $engine => $icon) {
       $this->assertSame($icon, Db::getEngineIcon($engine));
@@ -118,7 +118,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCfg_method_returns_the_config()
+  public function testGetcfgMethodReturnsTheConfig()
   {
     $this->mysql_mock->shouldReceive('getCfg')
       ->once()
@@ -129,13 +129,13 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getEngine_method_returns_the_engine_used_by_the_current_connection()
+  public function testGetengineMethodReturnsTheEngineUsedByTheCurrentConnection()
   {
     $this->assertSame('mysql', $this->db->getEngine());
   }
 
   /** @test */
-  public function getHost_method_returns_the_host_of_the_current_connection()
+  public function testGethostMethodReturnsTheHostOfTheCurrentConnection()
   {
     $this->mysql_mock->shouldReceive('getHost')
       ->once()
@@ -146,7 +146,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCurrent_method_returns_the_current_database_of_the_current_connection()
+  public function testGetcurrentMethodReturnsTheCurrentDatabaseOfTheCurrentConnection()
   {
     $this->mysql_mock->shouldReceive('getCurrent')
       ->once()
@@ -157,7 +157,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastError_method_returns_the_last_error()
+  public function testGetlasterrorMethodReturnsTheLastError()
   {
     $this->mysql_mock->shouldReceive('getLastError')
       ->once()
@@ -168,7 +168,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function to_string_method_returns_a_string_when_the_object_is_used_as_a_string()
+  public function testToStringMethodReturnsAStringWhenTheObjectIsUsedAsAString()
   {
     $db_config = self::getDbConfig();
 
@@ -184,7 +184,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getConnectionCode_returns_connection_code()
+  public function testGetconnectioncodeReturnsConnectionCode()
   {
     $db_cfg = self::getDbConfig();
 
@@ -200,7 +200,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getHash_method_returns_the_created_hash()
+  public function testGethashMethodReturnsTheCreatedHash()
   {
     $this->mysql_mock->shouldReceive('getHash')
       ->withNoArgs()
@@ -214,7 +214,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function replaceTableInConditions_method_test()
+  public function testReplacetableinconditionsMethodTest()
   {
     // TODO: How this should work?
     $data = [
@@ -251,7 +251,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function treatConditions_method_test()
+  public function testTreatconditionsMethodTest()
   {
     $this->mysql_mock->shouldReceive('treatConditions')
       ->with(['foo' => 'bar'], true)
@@ -265,7 +265,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function reprocessCfg_method_test()
+  public function testReprocesscfgMethodTest()
   {
     $this->mysql_mock->shouldReceive('reprocessCfg')
       ->once()
@@ -276,7 +276,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function processCfg_method_test()
+  public function testProcesscfgMethodTest()
   {
     $this->mysql_mock->shouldReceive('processCfg')
       ->once()
@@ -287,7 +287,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function check_method_checks_if_the_database_is_ready_to_process_a_query()
+  public function testCheckMethodChecksIfTheDatabaseIsReadyToProcessAQuery()
   {
     $this->mysql_mock->shouldReceive('check')
       ->once()
@@ -298,7 +298,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function setErrorMode_method_sets_the_error_mode()
+  public function testSeterrormodeMethodSetsTheErrorMode()
   {
     $this->mysql_mock->shouldReceive('setErrorMode')
       ->once()
@@ -311,7 +311,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getErrorMode_method_returns_the_current_error_mode()
+  public function testGeterrormodeMethodReturnsTheCurrentErrorMode()
   {
     $this->mysql_mock->shouldReceive('getErrorMode')
       ->once()
@@ -322,7 +322,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function clearCache_method_deletes_a_specific_item_from_cache_when_exists()
+  public function testClearcacheMethodDeletesASpecificItemFromCacheWhenExists()
   {
     $this->cache_mock->shouldReceive('get')
       ->once()
@@ -340,7 +340,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function clearCache_method_does_noe_delete_a_specific_item_from_cache_when_not_exists()
+  public function testClearcacheMethodDoesNoeDeleteASpecificItemFromCacheWhenNotExists()
   {
     $this->cache_mock->shouldReceive('get')
       ->once()
@@ -355,7 +355,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function clearAllCache_method_clears_all_cache()
+  public function testClearallcacheMethodClearsAllCache()
   {
     $this->cache_mock->shouldReceive('deleteAll')
       ->once()
@@ -368,7 +368,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function stopFancyStuff_method_calls_stopFancyStuff_on_language_class()
+  public function testStopfancystuffMethodCallsStopfancystuffOnLanguageClass()
   {
     $this->mysql_mock->shouldReceive('stopFancyStuff')
       ->once()
@@ -381,7 +381,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function startFancyStuff_method_calls_startFancyStuff_on_language_class()
+  public function testStartfancystuffMethodCallsStartfancystuffOnLanguageClass()
   {
     $this->mysql_mock->shouldReceive('startFancyStuff')
       ->once()
@@ -394,7 +394,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function enableTrigger_method_enables_trigger_functions()
+  public function testEnabletriggerMethodEnablesTriggerFunctions()
   {
     $this->mysql_mock->shouldReceive('enableTrigger')
       ->once()
@@ -407,7 +407,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function disableTrigger_method_disable_the_trigger_functions()
+  public function testDisabletriggerMethodDisableTheTriggerFunctions()
   {
     $this->mysql_mock->shouldReceive('disableTrigger')
       ->once()
@@ -420,7 +420,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function isTriggerEnabled_method_checks_if_trigger_enabled()
+  public function testIstriggerenabledMethodChecksIfTriggerEnabled()
   {
     $this->mysql_mock->shouldReceive('isTriggerEnabled')
       ->once()
@@ -432,7 +432,7 @@ class DbTest extends TestCase
 
 
   /** @test */
-  public function isTriggerDisabled_method_checks_if_trigger_disabled()
+  public function testIstriggerdisabledMethodChecksIfTriggerDisabled()
   {
     $this->mysql_mock->shouldReceive('isTriggerDisabled')
       ->once()
@@ -443,7 +443,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function setTrigger_method_applies_a_function_each_time_the_given_methods_are_called()
+  public function testSettriggerMethodAppliesAFunctionEachTimeTheGivenMethodsAreCalled()
   {
     $callback = function () {
     };
@@ -459,7 +459,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getTriggers_method_returns_the_current_triggers()
+  public function testGettriggersMethodReturnsTheCurrentTriggers()
   {
     $this->mysql_mock->shouldReceive('getTriggers')
       ->once()
@@ -470,7 +470,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getFieldsList_method_test_returns_an_array_with_fields_for_the_given_table()
+  public function testGetfieldslistMethodTestReturnsAnArrayWithFieldsForTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('getFieldsList')
       ->once()
@@ -481,7 +481,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getForeignKeys_method_returns_an_array_with_table_and_fields_related_to_the_searched_foreign_ket()
+  public function testGetforeignkeysMethodReturnsAnArrayWithTableAndFieldsRelatedToTheSearchedForeignKet()
   {
     $this->mysql_mock->shouldReceive('getForeignKeys')
       ->once()
@@ -492,7 +492,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function hasIdIncrement_method_returns_true_if_the_table_has_an_auto_increment_field()
+  public function testHasidincrementMethodReturnsTrueIfTheTableHasAnAutoIncrementField()
   {
     $this->mysql_mock->shouldReceive('hasIdIncrement')
       ->once()
@@ -503,7 +503,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function modelize_method_returns_table_structure_as_an_array()
+  public function testModelizeMethodReturnsTableStructureAsAnArray()
   {
     $this->mysql_mock->shouldReceive('modelize')
       ->once()
@@ -522,7 +522,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function fmodelize_method_test()
+  public function testFmodelizeMethodTest()
   {
     $this->mysql_mock->shouldReceive('fmodelize')
       ->once()
@@ -535,7 +535,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function findReferences_method_test()
+  public function testFindreferencesMethodTest()
   {
     $this->mysql_mock->shouldReceive('findReferences')
       ->once()
@@ -546,7 +546,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function findRelations_method_test()
+  public function testFindrelationsMethodTest()
   {
     $this->mysql_mock->shouldReceive('findRelations')
       ->once()
@@ -557,7 +557,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getPrimary_method_returns_primary_keys_of_the_given_table_as_array()
+  public function testGetprimaryMethodReturnsPrimaryKeysOfTheGivenTableAsArray()
   {
     $this->mysql_mock->shouldReceive('getPrimary')
       ->once()
@@ -568,7 +568,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUniquePrimary_method_returns_the_unique_primary_for_the_given_table()
+  public function testGetuniqueprimaryMethodReturnsTheUniquePrimaryForTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('getUniquePrimary')
       ->once()
@@ -579,7 +579,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUniqueKeys_method_return_the_unique_keys_of_the_given_table_as_array()
+  public function testGetuniquekeysMethodReturnTheUniqueKeysOfTheGivenTableAsArray()
   {
     $this->mysql_mock->shouldReceive('getUniqueKeys')
       ->once()
@@ -590,14 +590,14 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function escapeValue_method_escapes_the_given_string()
+  public function testEscapevalueMethodEscapesTheGivenString()
   {
     $this->assertSame("Foo \' bar", $this->db->escapeValue("Foo ' bar"));
     $this->assertSame('Foo \" bar', $this->db->escapeValue('Foo " bar', '"'));
   }
 
   /** @test */
-  public function setLastInsertId_method_changes_the_value_of_the_last_insert_id()
+  public function testSetlastinsertidMethodChangesTheValueOfTheLastInsertId()
   {
     $this->mysql_mock->shouldReceive('setLastInsertId')
       ->once()
@@ -608,7 +608,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function last_method_returns_the_last_query_for_the_current_connection()
+  public function testLastMethodReturnsTheLastQueryForTheCurrentConnection()
   {
     $this->mysql_mock->shouldReceive('last')
       ->once()
@@ -619,7 +619,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function lastId_method_returns_the_last_inserted_id()
+  public function testLastidMethodReturnsTheLastInsertedId()
   {
     $this->mysql_mock->shouldReceive('lastId')
       ->once()
@@ -630,7 +630,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function flush_method_deleted_all_recorded_queries_and_returns_their_number()
+  public function testFlushMethodDeletedAllRecordedQueriesAndReturnsTheirNumber()
   {
     $this->mysql_mock->shouldReceive('flush')
       ->once()
@@ -641,7 +641,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function countQueries_method_returns_number_of_queries()
+  public function testCountqueriesMethodReturnsNumberOfQueries()
   {
     $this->mysql_mock->shouldReceive('countQueries')
       ->once()
@@ -652,7 +652,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getOne_method_executes_the_given_query_and_returns_the_first_cell_result()
+  public function testGetoneMethodExecutesTheGivenQueryAndReturnsTheFirstCellResult()
   {
     $this->mysql_mock->shouldReceive('getOne')
       ->once()
@@ -663,7 +663,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getVar_method_executes_the_given_query_and_returns_the_first_cell_result()
+  public function testGetvarMethodExecutesTheGivenQueryAndReturnsTheFirstCellResult()
   {
     $this->mysql_mock->shouldReceive('getOne')
       ->once()
@@ -674,7 +674,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getKeyVal_method_returns_an_indexed_array_of_the_first_field_of_the_request()
+  public function testGetkeyvalMethodReturnsAnIndexedArrayOfTheFirstFieldOfTheRequest()
   {
     $this->mysql_mock->shouldReceive('getKeyVal')
       ->once()
@@ -689,7 +689,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getColArray_method_return_an_array_with_the_values_of_single_field_resulting_from_the_query()
+  public function testGetcolarrayMethodReturnAnArrayWithTheValuesOfSingleFieldResultingFromTheQuery()
   {
     $this->mysql_mock->shouldReceive('getColArray')
       ->once()
@@ -700,7 +700,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function select_method_returns_the_first_row_resulting_from_the_query_as_object()
+  public function testSelectMethodReturnsTheFirstRowResultingFromTheQueryAsObject()
   {
     $this->mysql_mock->shouldReceive('select')
       ->once()
@@ -719,7 +719,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function selectAll_method_returns_table_rows_resulting_from_the_query_as_an_array_of_objects()
+  public function testSelectallMethodReturnsTableRowsResultingFromTheQueryAsAnArrayOfObjects()
   {
     $this->mysql_mock->shouldReceive('selectAll')
       ->once()
@@ -738,7 +738,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function iselect_method_returns_the_first_row_resulting_from_the_query_as_an_array()
+  public function testIselectMethodReturnsTheFirstRowResultingFromTheQueryAsAnArray()
   {
     $this->mysql_mock->shouldReceive('iselect')
       ->once()
@@ -752,7 +752,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function iselectAll_method_returns_the_searched_rows_as_an_array_of_numeric_arrays()
+  public function testIselectallMethodReturnsTheSearchedRowsAsAnArrayOfNumericArrays()
   {
     $this->mysql_mock->shouldReceive('iselectAll')
       ->once()
@@ -769,7 +769,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function rselect_method_returns_the_first_row_resulting_from_the_query_as_an_indexed_array()
+  public function testRselectMethodReturnsTheFirstRowResultingFromTheQueryAsAnIndexedArray()
   {
     $this->mysql_mock->shouldReceive('rselect')
       ->once()
@@ -786,7 +786,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function rselectAll_method_returns_table_rows_as_an_array_of_indexed_array()
+  public function testRselectallMethodReturnsTableRowsAsAnArrayOfIndexedArray()
   {
     $this->mysql_mock->shouldReceive('rselectAll')
       ->once()
@@ -803,7 +803,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function selectOne_method_returns_a_single_value()
+  public function testSelectoneMethodReturnsASingleValue()
   {
     $this->mysql_mock->shouldReceive('selectOne')
       ->once()
@@ -817,7 +817,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function count_method_returns_number_of_records_in_the_table_corresponding_to_the_where_condition()
+  public function testCountMethodReturnsNumberOfRecordsInTheTableCorrespondingToTheWhereCondition()
   {
     $this->mysql_mock->shouldReceive('count')
       ->once()
@@ -831,7 +831,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function selectAllByKeys_method_returns_an_array_of_the_first_field_of_the_request()
+  public function testSelectallbykeysMethodReturnsAnArrayOfTheFirstFieldOfTheRequest()
   {
     $this->mysql_mock->shouldReceive('selectAllByKeys')
       ->once()
@@ -849,7 +849,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function stat_method_returns_an_array_with_the_count_of_values_corresponding_the_where_condition()
+  public function testStatMethodReturnsAnArrayWithTheCountOfValuesCorrespondingTheWhereCondition()
   {
     $this->mysql_mock->shouldReceive('stat')
       ->once()
@@ -865,7 +865,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getFieldValues_method_returns_the_unique_values_of_a_column_as_a_numeric_indexed_array()
+  public function testGetfieldvaluesMethodReturnsTheUniqueValuesOfAColumnAsANumericIndexedArray()
   {
     $this->mysql_mock->shouldReceive('getColumnValues')
       ->once()
@@ -879,7 +879,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getColumnValues_method_returns_a_numeric_array_with_the_values_of_the_unique_column_for_the_given_table()
+  public function testGetcolumnvaluesMethodReturnsANumericArrayWithTheValuesOfTheUniqueColumnForTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('getColumnValues')
       ->once()
@@ -893,7 +893,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function countFieldValues_method_returns_count_of_identical_values_in_a_field_as_array()
+  public function testCountfieldvaluesMethodReturnsCountOfIdenticalValuesInAFieldAsArray()
   {
     $this->mysql_mock->shouldReceive('countFieldValues')
       ->once()
@@ -907,7 +907,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-//  public function getValuesCount_method_returns_a_string_of_the_sql_query_to_count_values_in_a_field_of_the_table()
+//  public function testGetvaluescountMethodReturnsAStringOfTheSqlQueryToCountValuesInAFieldOfTheTable()
 //  {
 //    $this->mysql_mock->shouldReceive('countFieldValues')
 //      ->once()
@@ -925,7 +925,7 @@ class DbTest extends TestCase
 //  }
 
   /** @test */
-  public function insert_method_inserts_rows_in_database()
+  public function testInsertMethodInsertsRowsInDatabase()
   {
     $this->mysql_mock->shouldReceive('insert')
       ->with(
@@ -945,7 +945,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function insertUpdate_method_insert_new_row_if_not_exists_and_update_otherwise()
+  public function testInsertupdateMethodInsertNewRowIfNotExistsAndUpdateOtherwise()
   {
     $this->mysql_mock->shouldReceive('insertUpdate')
       ->once()
@@ -959,7 +959,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function update_method_updated_rows_in_database()
+  public function testUpdateMethodUpdatedRowsInDatabase()
   {
     $this->mysql_mock->shouldReceive('update')
       ->once()
@@ -973,7 +973,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function updateIgnore_method_updates_rows_in_database_if_not_exist_otherwise_ignore()
+  public function testUpdateignoreMethodUpdatesRowsInDatabaseIfNotExistOtherwiseIgnore()
   {
     $this->mysql_mock->shouldReceive('update')
       ->once()
@@ -987,7 +987,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_deletes_rows_in_database()
+  public function testDeleteMethodDeletesRowsInDatabase()
   {
     $this->mysql_mock->shouldReceive('delete')
       ->once()
@@ -1001,7 +1001,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function deleteIgnore_method_deletes_rows_in_database_if_exists_otherwise_ignore()
+  public function testDeleteignoreMethodDeletesRowsInDatabaseIfExistsOtherwiseIgnore()
   {
     $this->mysql_mock->shouldReceive('delete')
       ->once()
@@ -1015,7 +1015,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function insertIgnore_method_inserts_row_in_database_if_not_exist_othewise_ignore()
+  public function testInsertignoreMethodInsertsRowInDatabaseIfNotExistOthewiseIgnore()
   {
     $this->mysql_mock->shouldReceive('insert')
       ->once()
@@ -1029,7 +1029,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function truncate_method_deletes_all_records_from_database()
+  public function testTruncateMethodDeletesAllRecordsFromDatabase()
   {
     $this->mysql_mock->shouldReceive('delete')
       ->once()
@@ -1040,7 +1040,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function fetch_method_returns_an_indexed_array_with_the_first_result_of_query_or_false_if_no_results()
+  public function testFetchMethodReturnsAnIndexedArrayWithTheFirstResultOfQueryOrFalseIfNoResults()
   {
     $this->mysql_mock->shouldReceive('fetch')
       ->once()
@@ -1054,7 +1054,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function fetchAll_method_returns_an_indexed_array_of_all_results_of_the_query_of_false_if_no_results()
+  public function testFetchallMethodReturnsAnIndexedArrayOfAllResultsOfTheQueryOfFalseIfNoResults()
   {
     $this->mysql_mock->shouldReceive('fetchAll')
       ->once()
@@ -1069,7 +1069,7 @@ class DbTest extends TestCase
 
   
   /** @test */
-  public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_a_result_set()
+  public function testFetchcolumnMethodReturnsASingleColumnFromTheNextRowOfAResultSet()
   {
     $this->mysql_mock->shouldReceive('fetchColumn')
       ->once()
@@ -1081,7 +1081,7 @@ class DbTest extends TestCase
 
   
   /** @test */
-  public function fetchObject_method_()
+  public function testFetchobjectMethod()
   {
     $this->mysql_mock->shouldReceive('fetchObject')
       ->once()
@@ -1095,7 +1095,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function query_method_executes_a_writing_stmt_and_return_the_number_of_affected_rows_or_return_a_query_object_for_reading_stmts()
+  public function testQueryMethodExecutesAWritingStmtAndReturnTheNumberOfAffectedRowsOrReturnAQueryObjectForReadingStmts()
   {
     $this->mysql_mock->shouldReceive('query')
       ->once()
@@ -1111,7 +1111,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function query_method_does_executes_a_writing_stmt_when_check_returns_false()
+  public function testQueryMethodDoesExecutesAWritingStmtWhenCheckReturnsFalse()
   {
     $this->mysql_mock->shouldNotReceive('query');
 
@@ -1126,7 +1126,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function tfn_method_returns_table_full_name()
+  public function testTfnMethodReturnsTableFullName()
   {
     $this->mysql_mock->shouldReceive('tableFullName')
       ->once()
@@ -1137,7 +1137,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function tsn_method_returns_table_simple_name()
+  public function testTsnMethodReturnsTableSimpleName()
   {
     $this->mysql_mock->shouldReceive('tableSimpleName')
       ->once()
@@ -1148,7 +1148,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function cfn_method_returns_column_full_name()
+  public function testCfnMethodReturnsColumnFullName()
   {
     $this->mysql_mock->shouldReceive('colFullName')
       ->once()
@@ -1159,7 +1159,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function csn_method_returns_column_simple_name()
+  public function testCsnMethodReturnsColumnSimpleName()
   {
     $this->mysql_mock->shouldReceive('colSimpleName')
       ->once()
@@ -1170,7 +1170,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function postCreation_method_does_actions_once_connection_is_created_and_engine_is_not_defined_yet()
+  public function testPostcreationMethodDoesActionsOnceConnectionIsCreatedAndEngineIsNotDefinedYet()
   {
     $this->mysql_mock->shouldReceive('postCreation')
       ->once()
@@ -1183,7 +1183,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function postCreation_method_does_not_forward_the_call_to_language_if_engine_is_defined()
+  public function testPostcreationMethodDoesNotForwardTheCallToLanguageIfEngineIsDefined()
   {
     $this->mysql_mock->shouldNotReceive('postCreation');
 
@@ -1192,7 +1192,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function change_method_changes_the_database_to_the_given_one()
+  public function testChangeMethodChangesTheDatabaseToTheGivenOne()
   {
     $this->mysql_mock->shouldNotReceive('change')
       ->once()
@@ -1206,7 +1206,7 @@ class DbTest extends TestCase
 
 
   /** @test */
-  public function escape_method_escapes_names_with_appropriate_quotes()
+  public function testEscapeMethodEscapesNamesWithAppropriateQuotes()
   {
     $this->mysql_mock->shouldReceive('escape')
       ->once()
@@ -1217,7 +1217,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function tableFullName_method_returns_table_full_name()
+  public function testTablefullnameMethodReturnsTableFullName()
   {
     $this->mysql_mock->shouldReceive('tableFullName')
       ->once()
@@ -1228,7 +1228,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function isTableFullName_method_returns_true_if_the_given_string_is_a_full_name_of_a_table()
+  public function testIstablefullnameMethodReturnsTrueIfTheGivenStringIsAFullNameOfATable()
   {
     $this->mysql_mock->shouldReceive('isTableFullName')
       ->once()
@@ -1239,7 +1239,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function isColFullName_method_returns_true_if_the_given_string_is_a_full_name_of_a_column()
+  public function testIscolfullnameMethodReturnsTrueIfTheGivenStringIsAFullNameOfAColumn()
   {
     $this->mysql_mock->shouldReceive('isColFullName')
       ->once()
@@ -1250,7 +1250,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function tableSimpleName_method_returns_table_simple_name()
+  public function testTablesimplenameMethodReturnsTableSimpleName()
   {
     $this->mysql_mock->shouldReceive('tableSimpleName')
       ->once()
@@ -1261,7 +1261,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function colFullName_method_returns_column_full_name()
+  public function testColfullnameMethodReturnsColumnFullName()
   {
     $this->mysql_mock->shouldReceive('colFullName')
       ->once()
@@ -1272,7 +1272,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function colSimpleName_method_returns_column_simple_name()
+  public function testColsimplenameMethodReturnsColumnSimpleName()
   {
     $this->mysql_mock->shouldReceive('colSimpleName')
       ->once()
@@ -1283,7 +1283,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function disableKeys_method_disable_foreign_key_constraints()
+  public function testDisablekeysMethodDisableForeignKeyConstraints()
   {
     $this->mysql_mock->shouldReceive('disableKeys')
       ->once()
@@ -1294,7 +1294,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function enableKeys_method_enable_foreign_key_constraints()
+  public function testEnablekeysMethodEnableForeignKeyConstraints()
   {
     $this->mysql_mock->shouldReceive('enableKeys')
       ->once()
@@ -1305,7 +1305,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getDatabases_method_returns_databases_names_as_array()
+  public function testGetdatabasesMethodReturnsDatabasesNamesAsArray()
   {
     $this->mysql_mock->shouldReceive('getDatabases')
       ->once()
@@ -1316,7 +1316,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getTables_method_returns_tables_names_of_the_database_as_an_array()
+  public function testGettablesMethodReturnsTablesNamesOfTheDatabaseAsAnArray()
   {
     $this->mysql_mock->shouldReceive('getTables')
       ->once()
@@ -1327,7 +1327,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getColumns_method_returns_columns_structure_of_a_table_as_an_array_indexed_with_fields_names()
+  public function testGetcolumnsMethodReturnsColumnsStructureOfATableAsAnArrayIndexedWithFieldsNames()
   {
     $this->mysql_mock->shouldReceive('getColumns')
       ->once()
@@ -1348,7 +1348,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getKeys_method_returns_tables_keys_as_an_array_indexed_with_fields_names()
+  public function testGetkeysMethodReturnsTablesKeysAsAnArrayIndexedWithFieldsNames()
   {
     $this->mysql_mock->shouldReceive('getKeys')
       ->once()
@@ -1374,7 +1374,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getConditions_method_returns_a_string_with_the_conditions_for_any_filter_clause()
+  public function testGetconditionsMethodReturnsAStringWithTheConditionsForAnyFilterClause()
   {
     $this->mysql_mock->shouldReceive('getConditions')
       ->once()
@@ -1393,7 +1393,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getSelect_method_returns_sql_string_for_select_statement()
+  public function testGetselectMethodReturnsSqlStringForSelectStatement()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1409,7 +1409,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getSelect_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetselectMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1421,7 +1421,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getInsert_method_returns_sql_string_for_insert_statement()
+  public function testGetinsertMethodReturnsSqlStringForInsertStatement()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1442,7 +1442,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getInsert_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetinsertMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1454,7 +1454,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUpdate_method_returns_sql_string_for_update_statement()
+  public function testGetupdateMethodReturnsSqlStringForUpdateStatement()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1475,7 +1475,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUpdate_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetupdateMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1487,7 +1487,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getDelete_method_returns_sql_string_for_delete_statement()
+  public function testGetdeleteMethodReturnsSqlStringForDeleteStatement()
   {
     $cfg = [
       'tables' => ['users']
@@ -1507,7 +1507,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getDelete_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetdeleteMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1519,7 +1519,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getJoin_method_returns_sql_string_for_join_clause_if_exists_and_empty_otherwise()
+  public function testGetjoinMethodReturnsSqlStringForJoinClauseIfExistsAndEmptyOtherwise()
   {
     $cfg = [
       'join' => [
@@ -1545,7 +1545,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getJoin_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetjoinMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1557,7 +1557,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getWhere_method_returns_sql_string_for_where_clause()
+  public function testGetwhereMethodReturnsSqlStringForWhereClause()
   {
     $cfg = [
       'tables' => ['users'],
@@ -1573,7 +1573,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getWhere_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetwhereMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1585,7 +1585,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getGroupBy_method_returns_sql_string_for_group_by_clause_if_exists_and_empty_otherwise()
+  public function testGetgroupbyMethodReturnsSqlStringForGroupByClauseIfExistsAndEmptyOtherwise()
   {
     $cfg = [
       'group_by' => ['id', 'name'],
@@ -1601,7 +1601,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getGroupBy_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetgroupbyMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1613,7 +1613,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getHaving_method_returns_sql_string_for_having_clause_if_exists_()
+  public function testGethavingMethodReturnsSqlStringForHavingClauseIfExists()
   {
     $cfg = [
       'group_by' => ['id', 'name'],
@@ -1630,7 +1630,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getHaving_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGethavingMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1642,7 +1642,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getOrder_method_returns_sql_string_for_order_clause()
+  public function testGetorderMethodReturnsSqlStringForOrderClause()
   {
     $cfg = [
       'order' => ['id' => 'desc'],
@@ -1659,7 +1659,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getOrder_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetorderMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1671,7 +1671,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLimit_method_returns_sql_string_for_limit_clause()
+  public function testGetlimitMethodReturnsSqlStringForLimitClause()
   {
     $cfg = ['limit' => 12, 'start' => 0];
 
@@ -1684,7 +1684,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLimit_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetlimitMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1696,7 +1696,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreate_method_return_sql_string_for_table_creation()
+  public function testGetcreateMethodReturnSqlStringForTableCreation()
   {
     $this->mysql_mock->shouldReceive('getCreate')
       ->once()
@@ -1707,7 +1707,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreate_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetcreateMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1719,7 +1719,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateTable_method_return_sql_string_for_table_creation()
+  public function testGetcreatetableMethodReturnSqlStringForTableCreation()
   {
     $this->mysql_mock->shouldReceive('getCreateTable')
       ->once()
@@ -1730,7 +1730,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateTable_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetcreatetableMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1742,7 +1742,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateKeys_method_returns_sql_string_for_creating_keys()
+  public function testGetcreatekeysMethodReturnsSqlStringForCreatingKeys()
   {
     $this->mysql_mock->shouldReceive('getCreateKeys')
       ->once()
@@ -1753,7 +1753,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateKeys_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetcreatekeysMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1765,7 +1765,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateConstraints_method_returns_sql_string_for_creating_constraints()
+  public function testGetcreateconstraintsMethodReturnsSqlStringForCreatingConstraints()
   {
     $this->mysql_mock->shouldReceive('getCreateConstraints')
       ->once()
@@ -1776,7 +1776,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getCreateConstraints_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetcreateconstraintsMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1788,7 +1788,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function createIndex_method_creates_index_for_given_table_and_column()
+  public function testCreateindexMethodCreatesIndexForGivenTableAndColumn()
   {
     $this->mysql_mock->shouldReceive('createIndex')
       ->once()
@@ -1801,7 +1801,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function createIndex_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testCreateindexMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1813,7 +1813,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function deleteIndex_method_deletes_index_for_given_table_and_column()
+  public function testDeleteindexMethodDeletesIndexForGivenTableAndColumn()
   {
     $this->mysql_mock->shouldReceive('deleteIndex')
       ->once()
@@ -1826,7 +1826,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function deleteIndex_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testDeleteindexMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1838,7 +1838,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  public function testGetaltertableMethodReturnsSqlStringForAlterStatement()
   {
     $this->mysql_mock->shouldReceive('getAlterTable')
       ->with('user', [])
@@ -1849,7 +1849,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterTable_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetaltertableMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1861,7 +1861,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterColumn_method_returns_sql_string_for_alter_statement()
+  public function testGetaltercolumnMethodReturnsSqlStringForAlterStatement()
   {
     $this->mysql_mock->shouldReceive('getAlterColumn')
       ->with('user', [])
@@ -1872,7 +1872,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterColumn_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetaltercolumnMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1884,7 +1884,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterKey_method_returns_sql_string_for_alter_statement()
+  public function testGetalterkeyMethodReturnsSqlStringForAlterStatement()
   {
     $this->mysql_mock->shouldReceive('getAlterKey')
       ->with('user', [])
@@ -1895,7 +1895,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlterKey_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetalterkeyMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1907,7 +1907,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function alter_method_alters_the_given_table()
+  public function testAlterMethodAltersTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('alter')
       ->once()
@@ -1918,7 +1918,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function createUser_method_creates_a_db_user()
+  public function testCreateuserMethodCreatesADbUser()
   {
     $this->mysql_mock->shouldReceive('createUser')
       ->once()
@@ -1929,7 +1929,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function createUser_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testCreateuserMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1941,7 +1941,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function deleteUser_method_deletes_a_db_user()
+  public function testDeleteuserMethodDeletesADbUser()
   {
     $this->mysql_mock->shouldReceive('deleteUser')
       ->once()
@@ -1952,7 +1952,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function deleteUser_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testDeleteuserMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1964,7 +1964,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUsers_method_returns_an_array_of_privileges_for_the_given_user_of_all_users()
+  public function testGetusersMethodReturnsAnArrayOfPrivilegesForTheGivenUserOfAllUsers()
   {
     $this->mysql_mock->shouldReceive('getUsers')
       ->with('john', '')
@@ -1978,7 +1978,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getUsers_method_throws_an_exception_if_method_not_found_on_language_class()
+  public function testGetusersMethodThrowsAnExceptionIfMethodNotFoundOnLanguageClass()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -1990,7 +1990,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function dbSize_method_returns_the_size_of_the_database()
+  public function testDbsizeMethodReturnsTheSizeOfTheDatabase()
   {
     $this->mysql_mock->shouldReceive('dbSize')
       ->once()
@@ -2001,7 +2001,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function tableSize_method_returns_the_size_of_the_given_table()
+  public function testTablesizeMethodReturnsTheSizeOfTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('tableSize')
       ->once()
@@ -2012,7 +2012,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function status_method_returns_the_status_of_a_table()
+  public function testStatusMethodReturnsTheStatusOfATable()
   {
     $this->mysql_mock->shouldReceive('status')
       ->once()
@@ -2029,7 +2029,7 @@ class DbTest extends TestCase
 
   
   /** @test */
-  public function getUid_method_returns_a_uid()
+  public function testGetuidMethodReturnsAUid()
   {
     $this->mysql_mock->shouldReceive('getUid')
       ->once()
@@ -2040,7 +2040,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getRow_method_returns_the_first_row_resulting_from_the_query_as_an_array_indexed_with_fields_name()
+  public function testGetrowMethodReturnsTheFirstRowResultingFromTheQueryAsAnArrayIndexedWithFieldsName()
   {
     $this->mysql_mock->shouldReceive('getRow')
       ->once()
@@ -2051,7 +2051,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getRows_method_returns_an_array_of_indexed_arrays_for_every_row_resulted_from_the_query()
+  public function testGetrowsMethodReturnsAnArrayOfIndexedArraysForEveryRowResultedFromTheQuery()
   {
     $this->mysql_mock->shouldReceive('getRows')
       ->once()
@@ -2065,7 +2065,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getIrow_method_returns_a_row_as_a_numeric_indexed_array()
+  public function testGetirowMethodReturnsARowAsANumericIndexedArray()
   {
     $this->mysql_mock->shouldReceive('getIrow')
       ->once()
@@ -2076,7 +2076,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getIrows_method_returns_an_array_of_numeric_indexed_rows()
+  public function testGetirowsMethodReturnsAnArrayOfNumericIndexedRows()
   {
     $this->mysql_mock->shouldReceive('getIrows')
       ->once()
@@ -2087,7 +2087,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getByColumns_method_returns_an_array_indexed_on_the_searched_field_in_which_there_are_all_the_values_of_the_column()
+  public function testGetbycolumnsMethodReturnsAnArrayIndexedOnTheSearchedFieldInWhichThereAreAllTheValuesOfTheColumn()
   {
     $this->mysql_mock->shouldReceive('getByColumns')
       ->once()
@@ -2105,7 +2105,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getObj_method_returns_the_first_row_resulting_from_a_query_as_an_object()
+  public function testGetobjMethodReturnsTheFirstRowResultingFromAQueryAsAnObject()
   {
     $this->mysql_mock->shouldReceive('getObject')
       ->once()
@@ -2119,7 +2119,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getObject_method_returns_the_first_row_resulting_from_a_query_as_an_object()
+  public function testGetobjectMethodReturnsTheFirstRowResultingFromAQueryAsAnObject()
   {
     $this->mysql_mock->shouldReceive('getObject')
       ->once()
@@ -2133,7 +2133,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getObjects_method_returns_an_array_of_objects_resulting_from_a_query()
+  public function testGetobjectsMethodReturnsAnArrayOfObjectsResultingFromAQuery()
   {
     $this->mysql_mock->shouldReceive('getObjects')
       ->once()
@@ -2147,7 +2147,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function createDatabase_method_created_a_database()
+  public function testCreatedatabaseMethodCreatedADatabase()
   {
     $this->mysql_mock->shouldReceive('createDatabase')
       ->with('bbn_test_2', 'utf8mb4')
@@ -2158,7 +2158,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function dropDatabase_method_drops_the_given_database()
+  public function testDropdatabaseMethodDropsTheGivenDatabase()
   {
     $this->mysql_mock->shouldReceive('dropDatabase')
       ->with('bbn_test_2')
@@ -2169,7 +2169,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function enableLast_method_sets_last_enabled_to_true()
+  public function testEnablelastMethodSetsLastEnabledToTrue()
   {
     $this->mysql_mock->shouldReceive('enableLast')
       ->withNoArgs()
@@ -2181,7 +2181,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function enableLast_method_does_not_forward_the_call_to_language_if_method_does_not_exist()
+  public function testEnablelastMethodDoesNotForwardTheCallToLanguageIfMethodDoesNotExist()
   {
     $this->mysql_mock->shouldNotReceive('enableLast');
 
@@ -2194,7 +2194,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function disableLast_method_sets_last_enabled_to_false()
+  public function testDisablelastMethodSetsLastEnabledToFalse()
   {
     $this->mysql_mock->shouldReceive('disableLast')
       ->withNoArgs()
@@ -2205,7 +2205,7 @@ class DbTest extends TestCase
     $this->assertTrue(true);
   }
 
-  public function disableLast_method_does_not_forward_the_call_to_language_if_method_does_not_exist()
+  public function testDisablelastMethodDoesNotForwardTheCallToLanguageIfMethodDoesNotExist()
   {
     $this->mysql_mock->shouldNotReceive('disableLast');
 
@@ -2218,7 +2218,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getRealLastParams_method_returns_last_real_params()
+  public function testGetreallastparamsMethodReturnsLastRealParams()
   {
     $this->mysql_mock->shouldReceive('getRealLastParams')
       ->once()
@@ -2229,7 +2229,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getRealLastParams_method_throws_an_exception_if_method_does_not_exist_in_language_object()
+  public function testGetreallastparamsMethodThrowsAnExceptionIfMethodDoesNotExistInLanguageObject()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -2240,7 +2240,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function realLast_method_returns_last_query()
+  public function testReallastMethodReturnsLastQuery()
   {
     $this->mysql_mock->shouldReceive('realLast')
       ->once()
@@ -2251,7 +2251,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function realLast_method_throws_an_exception_if_method_does_not_exist_in_language_object()
+  public function testReallastMethodThrowsAnExceptionIfMethodDoesNotExistInLanguageObject()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -2263,7 +2263,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastParams_method_returns_last_params()
+  public function testGetlastparamsMethodReturnsLastParams()
   {
     $this->mysql_mock->shouldReceive('getLastParams')
       ->once()
@@ -2274,7 +2274,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastParams_method_throws_an_exception_if_method_does_not_exist_in_language_object()
+  public function testGetlastparamsMethodThrowsAnExceptionIfMethodDoesNotExistInLanguageObject()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -2286,7 +2286,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastValues_method_returns_last_params()
+  public function testGetlastvaluesMethodReturnsLastParams()
   {
     $this->mysql_mock->shouldReceive('getLastValues')
       ->once()
@@ -2297,7 +2297,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastValues_method_throws_an_exception_if_method_does_not_exist_in_language_object()
+  public function testGetlastvaluesMethodThrowsAnExceptionIfMethodDoesNotExistInLanguageObject()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -2309,7 +2309,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getQueryValues_method_returns_query_values_for_the_given_array()
+  public function testGetqueryvaluesMethodReturnsQueryValuesForTheGivenArray()
   {
     $this->mysql_mock->shouldReceive('getQueryValues')
       ->once()
@@ -2320,7 +2320,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getQueryValues_method_throws_an_exception_if_method_does_not_exist_in_language_object()
+  public function testGetqueryvaluesMethodThrowsAnExceptionIfMethodDoesNotExistInLanguageObject()
   {
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
@@ -2332,7 +2332,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  public function testGetlastcfgMethodReturnsTheLastConfigForTheConnection()
   {
     $this->mysql_mock->shouldReceive('getLastCfg')
       ->once()
@@ -2343,18 +2343,18 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getConnection_method_returns_connection_configuration()
+  public function testGetconnectionMethodReturnsConnectionConfiguration()
   {
     $this->mysql_mock->shouldReceive('getConnection')
       ->once()
       ->with(['a' => 'b'])
       ->andReturn(['c' => 'd']);
 
-    $this->assertSame(['c' => 'd'], $this->db->getConnection(['a' => 'b']));
+    $this->assertSame(['c' => 'd'], $this->db->getConnectionParams(['a' => 'b']));
   }
 
   /** @test */
-  public function renameTable_method_rename_the_given_table_to_the_given_new_name()
+  public function testRenametableMethodRenameTheGivenTableToTheGivenNewName()
   {
     $this->mysql_mock->shouldReceive('renameTable')
       ->once()
@@ -2365,7 +2365,7 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getTableComment_method_returns_the_comment_for_the_given_table()
+  public function testGettablecommentMethodReturnsTheCommentForTheGivenTable()
   {
     $this->mysql_mock->shouldReceive('getTableComment')
       ->once()

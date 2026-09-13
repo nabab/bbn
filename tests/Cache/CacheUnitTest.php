@@ -28,7 +28,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_makes_a_unique_hash_of_strings()
+  public function testItMakesAUniqueHashOfStrings()
   {
       $hash = Cache::makeHash('foo');
 
@@ -37,7 +37,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_makes_a_unique_hash_of_arrays()
+  public function testItMakesAUniqueHashOfArrays()
   {
       $hash   = Cache::makeHash(
         $data = ['foo' => 'bar']
@@ -48,7 +48,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_makes_a_unique_hash_of_objects()
+  public function testItMakesAUniqueHashOfObjects()
   {
       $hash   = Cache::makeHash(
         $data = (object)['foo' => 'bar']
@@ -59,7 +59,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_ttl_as_is_if_parameter_is_integer()
+  public function testItReturnsTheTtlAsIsIfParameterIsInteger()
   {
       $ttl = Cache::ttl(12);
 
@@ -68,7 +68,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_ttl_in_seconds_if_parameter_is_string()
+  public function testItReturnsTheTtlInSecondsIfParameterIsString()
   {
       $options = [
         'xxs' => 30,
@@ -89,7 +89,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_throws_exception_when_ttl_is_not_valid()
+  public function testItThrowsExceptionWhenTtlIsNotValid()
   {
       $this->expectException(\Exception::class);
 
@@ -98,14 +98,14 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_type_of_cache_engine()
+  public function testItReturnsTheTypeOfCacheEngine()
   {
       $this->assertSame('files', Cache::getType());
   }
 
 
     /** @test */
-  public function it_cannot_be_created_with_the_new_keyword_if_an_instance_was_already_created()
+  public function testItCannotBeCreatedWithTheNewKeywordIfAnInstanceWasAlreadyCreated()
   {
       $this->expectException(Exception::class);
 
@@ -115,7 +115,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_timestamp_of_the_given_item()
+  public function testItReturnsTheTimestampOfTheGivenItem()
   {
       $this->cache->set('foo', 'bar', 30);
       $file = $this->invokeGetRawMethod('foo');
@@ -125,7 +125,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_hash_of_the_given_item()
+  public function testItReturnsTheHashOfTheGivenItem()
   {
       $this->cache->set('foo', 'bar');
       $file = $this->invokeGetRawMethod('foo');
@@ -135,23 +135,23 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_checks_whether_or_not_the_given_item_is_more_recent_than_the_given_timestamp()
+  public function testItChecksWhetherOrNotTheGivenItemIsMoreRecentThanTheGivenTimestamp()
   {
       $this->cache->set('foo', 'bar');
       $file = $this->invokeGetRawMethod('foo');
 
       $this->assertTrue(
-        $this->cache->isNew('foo', $file['timestamp'] - 10)
+        $this->cache->isAfter('foo', $file['timestamp'] - 10)
       );
 
       $this->assertFalse(
-        $this->cache->isNew('foo', $file['timestamp'] + 10)
+        $this->cache->isAfter('foo', $file['timestamp'] + 10)
       );
   }
 
 
     /** @test */
-  public function it_checks_if_the_value_of_the_item_corresponds_to_the_given_hash()
+  public function testItChecksIfTheValueOfTheItemCorrespondsToTheGivenHash()
   {
       $this->cache->set('foo', 'bar');
 

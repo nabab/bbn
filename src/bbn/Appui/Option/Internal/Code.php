@@ -178,6 +178,7 @@ trait Code
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
+        $this->cacheSet($id_parent, $cache_name, $rightValue);
         if (\count($codes)) {
           $codes[] = $rightValue;
           return $this->_fromCode($codes, $real, $depth + 1);

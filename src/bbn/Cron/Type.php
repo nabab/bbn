@@ -13,6 +13,7 @@ enum Type: string
 {
   case Poll = 'poll';
   case Cron = 'cron';
+  case Socket = 'socket';
 
   /**
    * Normalizes an arbitrary string into a Type.
@@ -21,10 +22,11 @@ enum Type: string
    *  - "poll" (any case) => Type::Poll
    *  - anything else     => Type::Cron
    */
-  public static function fromString(string $type): self
+  public static function fromString(string $type): static
   {
     return match (strtolower($type)) {
       'poll' => self::Poll,
+      'socket' => self::Socket,
       default => self::Cron,
     };
   }
@@ -43,5 +45,13 @@ enum Type: string
   public function isCron(): bool
   {
     return $this === self::Cron;
+  }
+
+  /**
+   * Convenience check.
+   */
+  public function isSocket(): bool
+  {
+    return $this === self::Socket;
   }
 }

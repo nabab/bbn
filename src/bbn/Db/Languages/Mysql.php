@@ -174,7 +174,7 @@ class Mysql extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     $numParams = count(array_keys($cfg));
     if (($numParams > 1) && empty($cfg['host'])) {
@@ -254,12 +254,25 @@ class Mysql extends Sql
     return $this->cfg;
   }
 
+
+  /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    $this->query('SET SESSION time_zone = ?', $tz);
+  }
+
+
   /**
    * Disables foreign keys check.
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -272,7 +285,7 @@ class Mysql extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
 
@@ -1191,12 +1204,22 @@ MYSQL
       $keys = [];
       foreach ($cfg['keys'] as $a) {
         if (!empty($a['columns'])
-          && !empty($a['constraint'])
           && !empty($a['ref_table'])
           && !empty($a['ref_column'])
-          && is_null(X::search($keys, ['constraint' => $a['constraint']]))
         ) {
-          $keys[] = $a;
+          if (empty($a['constraint'])) {
+            $a['constraint'] = $table . '_' . implode('_', $a['columns']) . '_fk';
+            $i = 1;
+            while (!is_null(X::search($keys, ['constraint' => $a['constraint']]))) {
+              $a['constraint'] = $table . '_' . implode('_', $a['columns']) . '_fk'.$i;
+              $i++;
+            }
+
+            $keys[] = $a;
+          }
+          elseif (count(X::filter($keys, ['constraint' => $a['constraint']])) < 2) {
+            $keys[] = $a;
+          }
         }
       }
 

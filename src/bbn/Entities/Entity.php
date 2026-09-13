@@ -1,21 +1,26 @@
 <?php
 namespace bbn\Entities;
 
+use bbn\Appui\History;
 use Exception;
+use BadMethodCallException;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
+use bbn\Cache;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Tables\Link;
-use bbn\Entities\Tables\Options as EntityOptions;
+use bbn\Entities\Models\Internals\EntityObjects;
 use bbn\Appui\Option;
 use bbn\Appui\Uauth;
-use bbn\Models\Tts\Cache;
+use bbn\Appui\Medias;
+use bbn\Models\Tts\Cache as CacheTts;
 
+use function in_array;
 
 class Entity
 {
-  use Cache;
+  use CacheTts;
 
   protected array $class_cfg;
 
@@ -26,14 +31,28 @@ class Entity
 
   protected array $where;
 
-  /** @var null|bool Adherent verification status. */
-  private $checked = null;
+  protected array $records;
 
   protected array $info = [];
 
   protected ?Link $links;
 
-  protected $easyId = null;
+  protected ?int $easyId = null;
+
+  protected array $objects = [];
+
+  public function __call(string $method, array $args)
+  {
+    if ($this->objects[$method] ?? null) {
+      return $this->objects[$method];
+    }
+    
+    $res = $this->entities->$method($this, ...$args);
+    if ($res) {
+      $this->objects[$method] = $res;
+      return $res;
+    }
+  }
 
   /**
    * Constructor.
@@ -50,7 +69,7 @@ class Entity
     $this->props = $this->class_cfg['props']['entities'];
     if ($this->fields['easy_id']) {
       if (Str::isInteger($id)) {
-        $this->easyId = $id;
+        $this->easyId = (int)$id;
         if ($uid = $this->entities->selectOne($this->fields['id'], [$this->fields['easy_id'] => $id])) {
           $this->id = $uid;
         }
@@ -77,19 +96,12 @@ class Entity
     $this->where = [
       $this->db->cfn($this->fields['id'], $this->table) => $this->id
     ];
-
-    $this->cacheInit();
 	}
 
   public function check(): bool
   {
-    if ($this->checked === null) {
-      $this->checked = (bool)$this->db->count($this->class_cfg['tables']['entities'], $this->where);
-    }
-
-    return $this->checked;
+    return (bool)$this->id;
   }
-
 
   public function getId(): string
   {
@@ -269,11 +281,6 @@ class Entity
     return $this->entities->options();
   }
   
-  public function entityOptions(): EntityOptions
-  {
-    return $this->entities->entityOptions($this);
-  }
-
   public function getParent(): ?Entity
   {
     if ($this->check()
@@ -345,4 +352,470 @@ class Entity
     return $res;
   }
 
+
+
+  public function getAllRelatedIds(array $excluded = [], ?callable $filter = null): array
+  {
+    $sr = "relatedIds";
+    if ($this->cacheHas($this->getId(), $sr)) {
+      $res = $this->cacheGet($this->getId(), $sr);
+      if (!empty($excluded)) {
+        foreach ($excluded as $e) {
+          unset($res[$e]);
+        }
+      }
+      return $res;
+    }
+
+    $res = [$this->table => [$this->getId()]];
+    $checked = [$this->table];
+    $ocfg = $this->options()->getClassCfg();
+    $excluded[] = History::$table_uids;
+    $excluded[] = $ocfg['table'];
+    if ($filter) {
+      foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
+        if (!in_array($table, $checked)) {
+          $checked[] = $table;
+          if (!$filter($table)) {
+            $excluded[] = $table;
+            continue;
+          }
+        }
+      }
+    }
+
+    foreach (Entities::getEntityKeys($this->db, $this->entities) as $table => $col) {
+      if (in_array($table, $excluded)) {
+        continue;
+      }
+
+      $dbModel = $this->db->modelize($table);
+      if ($dbModel['primary'] && (count($dbModel['primary']) === 1)) {
+        $tableUids = $this->db->getColumnValues($table, 'DISTINCT '.$dbModel['primary'][0], [
+          $col[0] => $this->getId(),
+          [$dbModel['primary'][0], 'isnotnull'],
+          [$dbModel['primary'][0] => 'ASC']
+        ]);
+        if (!isset($res[$table])) {
+          $res[$table] = [];
+        }
+
+        array_push($res[$table], ...$tableUids);
+      }
+    }
+
+    /*
+    $tableCfgs = Entities::dbConfigGetTableClasses($this->db);
+    foreach ($tableCfgs as $table => $cfg) {
+      if (!empty($cfg['deps'])) {
+        foreach ($cfg['deps'] as $dep) {
+          if (isset($res[$dep], $tableCfgs[$dep]['junctions'])) {
+            $junction = X::getRow($tableCfgs[$dep]['junctions'], ['table' => $table]);
+            if (!$junction) {
+              throw new Exception(X::_("The table %s is linked to %s through a junction but the junction configuration is missing", $table, $dep)); 
+            }
+
+            $rels = $this->db->getColumnValues($dep, $junction['field'], [
+              'id' => $res[$dep]
+            ], ['id' => 'ASC']);
+            if (!isset($res[$table])) {
+              $res[$table] = [];
+            }
+            array_push($res[$table], ...$rels);
+          }
+        }
+      }
+    }
+      */
+
+    foreach ($res as $table => $ids) {
+      $res[$table] = array_unique($ids);
+    }
+
+    if (!empty($res['bbn_entities_links']) && !in_array('bbn_entities_links', $excluded)) {
+      $identities = null;
+      if (!in_array('bbn_identities', $excluded)) {
+        $res['bbn_identities'] = [];
+        if ($idAdmin = $this->db->selectOne($this->table, 'id_admin', ['id' => $this->getId()])) {
+          $res['bbn_identities'][] = $idAdmin;
+        }
+
+        $identities =& $res['bbn_identities'];
+      }
+
+      $addresses = null;
+      if (!in_array('bbn_addresses', $excluded)) {
+        $res['bbn_addresses'] = [];
+        $addresses =& $res['bbn_addresses'];
+      }
+
+      foreach ($res['bbn_entities_links'] as $linkId) {
+        if ($link = $this->db->rselect('bbn_entities_links', ['id_identity', 'id_address'], [
+          'id' => $linkId
+        ])) {
+          if ($link['id_identity'] && isset($identities) && !in_array($link['id_identity'], $identities)) {
+            $identities[] = $link['id_identity'];
+          }
+
+          if ($link['id_address'] && isset($addresses) && !in_array($link['id_address'], $addresses)) {
+            $addresses[] = $link['id_address'];
+          }
+        }
+      }
+
+      if (!empty($identities)) {
+        foreach ($identities as $idIdentity) {
+          if (!in_array('bbn_identities_links', $excluded)) {
+            if ($links = $this->db->getColumnValues('bbn_identities_links', 'id', [
+              'id_parent' => $idIdentity
+            ], [
+              'id_identity' => 'ASC'
+            ])) {
+              if (!isset($res['bbn_identities_links'])) {
+                $res['bbn_identities_links'] = [];
+              }
+
+              array_push($res['bbn_identities_links'], ...$links);
+            }
+
+            if ($links = $this->db->getColumnValues('bbn_identities_links', 'id', [
+              'id_child' => $idIdentity
+            ], [
+              'id_identity' => 'ASC'
+            ])) {
+              if (!isset($res['bbn_identities_links'])) {
+                $res['bbn_identities_links'] = [];
+              }
+
+              array_push($res['bbn_identities_links'], ...$links);
+            }
+          }
+
+          if (!in_array('bbn_identities_uauth', $excluded)) {
+            if ($iuauths = $this->db->getColumnValues('bbn_identities_uauth', 'id', [
+              'id_identity' => $idIdentity,
+            ], ['id' => 'ASC'])) {
+              if (!isset($res['bbn_identities_uauth'])) {
+                $res['bbn_identities_uauth'] = [];
+              }
+
+              array_push($res['bbn_identities_uauth'], ...$iuauths);
+            }
+
+            if ($uauths = $this->db->getColumnValues('bbn_identities_uauth', 'DISTINCT id_uauth', [
+              'id_identity' => $idIdentity,
+              ['id_uauth', 'isnotnull'],
+              ['id_uauth' => 'ASC']
+            ])) {
+              if (!isset($res['bbn_uauth'])) {
+                $res['bbn_uauth'] = [];
+              }
+
+              array_push($res['bbn_uauth'], ...$uauths);
+            }
+          }
+        }
+      }
+    }
+
+    foreach ($res as $table => $ids) {
+      $res[$table] = array_values(array_unique(array_filter($ids, fn ($v) => (bool)$v)));
+    }
+
+    ksort($res);
+    $this->cacheSet($this->getId(), $sr, $res);
+    return $res;
+  }
+
+  public function createRecords(string $table, array $ids): array
+  {
+    $identity = $this->identity();
+    $address = $this->address();
+    $medias = new Medias($this->db);
+    $linkedTables = [$this->table, 'bbn_identities_uauth', ...array_keys(Entities::getEntityKeys($this->db, $this->entities))];
+    $res = [];
+    if (in_array($table, $linkedTables)) {
+      $cfg = Entities::dbConfigGetTableClasses($this->db);
+      $obj = match(true) {
+        $table === $this->table => $this->entities,
+        $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
+        true => $this->entities->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
+      };
+      if (method_exists($obj, 'dbCacheGetSet')) {
+        foreach ($ids as $i => $id) {
+          try {
+            $tmp = $obj->dbCacheGetSet($id);
+            if (!$tmp) {
+              $tmp = $obj->dbCacheSet($id);
+            }
+            if (!$tmp) {
+              throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+            }
+            $res[$id] = [
+              'state' => $obj->dbCacheHash($id),
+              'data' => $tmp
+            ];
+          }
+          catch (Exception $e) {
+            X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+            //throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
+          }
+        }
+      }
+    }
+    elseif ($table === 'bbn_identities') {
+      foreach ($ids as $id) {
+        try {
+          $d = $identity->pickOne($id, $this->getId(), true);
+          if (!$d) {
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+          }
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+        }
+      }
+    }
+    elseif ($table === 'bbn_addresses') {
+      foreach ($ids as $id) {
+        try {
+          $d = $address->pickOne($id, $this->getId());
+          if (!$d) {
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+          }
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+        catch (Exception $e) {
+          X::logError($e);
+        }
+      }
+    }
+    elseif ($table === 'bbn_medias') {
+      foreach ($ids as $id) {
+        try {
+          $d = $medias->getMediaInfo($id);
+          if (!$d) {
+            throw new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+          }
+          $res[$id] = [
+            'state' => Cache::makeHash($d),
+            'data' => $d
+          ];
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table), 'missing_rows');
+        }
+      }
+    }
+    else {
+      foreach ($ids as $id) {
+        try {
+          if ($d = $this->db->rselect($table, [], ['id' => $id])) {
+            $res[$id] = [
+              'state' => Cache::makeHash($d),
+              'data' => $d
+            ];
+          }
+          if (!$d) {
+            $e = new Exception(X::_("The record with id %s in table %s does not exist or is unreachable", $id, $table));
+            throw $e;
+          }
+        }
+        catch (Exception $e) {
+          X::log(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']), 'missing_rows');
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  public function getAllRelatedRecords(): array
+  {
+    $res = $this->getAllRelatedIds();
+    $sr = "relatedRecords";
+    if ($this->cacheHas($this->getId(), $sr) && ($cached = $this->cacheGet($this->getId(), $sr))) {
+      return $cached;
+    }
+
+    $final = [];
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
+    foreach ($res as $table => $ids) {
+      if (isset($cfg[$table])) {
+        $final[$table] = $this->createRecords($table, $ids);
+      }
+    }
+
+    /*
+    foreach ($junc as $table => $cfgs) {
+      foreach ($cfgs as $cfg) {
+        X::ddump($cfg);
+        if (isset($res[$table]) && isset($final[$cfg['table']])) {
+          $obj = new $cfg['class']($this->db, Option::getInstance());
+          $ids = $res[$table];
+          if (!isset($final[$cfg['table']])) {
+            $final[$cfg['table']] = [];
+          }
+
+          X::ddump($cfg['table'], $ids);
+          foreach ($ids as $id) {
+            if (!X::getRow($final[$cfg['table']], fn ($a) => $a['data']['id'] === $id)) {
+              $final[$cfg['table']][] = $obj->rselect($id);
+            }
+          }
+        }
+      }
+    }*/
+
+    $this->cacheSet($this->getId(), $sr, $final);
+    return $final;
+  }
+
+  public function getRecordsHash(): ?string
+  {
+    $sr = "relatedRecords";
+    return $this->cacheHash($this->getId(), $sr);
+  }
+
+  public function getRecords(?string $idx = null): array
+  {
+    if (empty($this->records)) {
+      $this->records = $this->getAllRelatedRecords();
+    }
+
+    if ($idx) {
+      if (!\is_array($this->records[$idx] ?? null)) {
+        return [];
+        X::ddump($idx, $this->records[$idx], array_keys($this->records));
+        throw new Exception(X::_("The table %s is not related to the entity", $idx));
+      }
+
+      return array_values(array_map(fn($a) => $a['data'], $this->records[$idx] ?? []));
+    }
+
+    return array_map(
+      fn($a) => array_values(array_map(
+        fn($b) => $b['data'],
+        $a ?: []
+      )), $this->records);
+  }
+
+  public function updateRecord(string $table, string $id): bool
+  {
+    $sr = "relatedRecords";
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
+    if (!isset($cfg[$table])) {
+      throw new Exception(X::_("The table %s is not configured", $table));
+    }
+    $this->getRecords($table);
+    if (!isset($this->records[$table][$id])) {
+      $sr2 = "relatedIds";
+      if ($this->cacheHas($this->getId(), $sr2)) {
+        $cached = $this->cacheGet($this->getId(), $sr2);
+        $cached[$table][] = $id;
+        $this->cacheSet($this->getId(), $sr2, $cached);
+      }
+    }
+
+    $res = $this->createRecords($table, [$id]);
+    $this->records[$table][$id] = $res[$id] ?? null;
+    $this->cacheSet($this->getId(), $sr, $this->records);
+    return true;
+  }
+
+  public function deleteRecord(string $table, string $id): bool
+  {
+    $sr = "relatedRecords";
+    $cfg = Entities::dbConfigGetTableClasses($this->db);
+    if (!isset($cfg[$table])) {
+      throw new Exception(X::_("The table %s is not configured", $table));
+    }
+    $this->getRecords($table);
+    $sr2 = "relatedIds";
+    if ($this->cacheHas($this->getId(), $sr2)) {
+      $cached = $this->cacheGet($this->getId(), $sr2);
+      $idx = array_search($id, $cached[$table]);
+      if ($idx !== false) {
+        array_splice($cached[$table], $idx, 1);
+      }
+
+      $this->cacheSet($this->getId(), $sr2, $cached);
+    }
+
+    unset($this->records[$table][$id]);
+    $this->cacheSet($this->getId(), $sr, $this->records);
+    return true;
+  }
+
+  public function cDelete(): self
+  {
+    $this->records = [];
+    $table = $this->class_cfg['table'];
+    $cached = $this->getField('cached');
+    if ($cached) {
+      $this->info['cached'] = null;
+      $this->db->query("UPDATE $table SET cached = NULL WHERE id = ?", hex2bin($this->getId()));
+    }
+
+    return $this->cacheDelete($this->getId());
+  }
+
+
+  /**
+   * Return adherent's cache.
+   *
+   * @param string $method
+   * @return mixed
+   */
+  public function cGet($method = '')
+  {
+    return $this->cacheGet($this->getId(), $method);
+  }
+
+
+  /**
+   * Sets adherent cache.
+   *
+   * @param string $method
+   * @param $data
+   * @return string|null
+   */
+  public function cSet($method, $data): ?string
+  {
+    if ($this->cacheSet($this->getId(), $method, $data, 0)) {
+      return $this->cacheHash($this->getId(), $method);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if the given cache method exists.
+   *
+   * @param string $method
+   *
+   * @return bool
+   */
+  public function cHas($method = '')
+  {
+    if (!$this->getField('cached')) {
+      return false;
+    }
+
+    return $this->cacheHas($this->getId(), $method);
+  }
+
+
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
+  }
 }

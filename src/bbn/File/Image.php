@@ -246,7 +246,7 @@ class Image extends bbn\File
      * Construct
      * @return void
      */
-  public function __construct($file, System $fs = null)
+  public function __construct($file, ?System $fs = null)
   {
     parent::__construct($file, $fs);
     if (!\in_array($this->ext, bbn\File\Image::$allowed_extensions)) {
@@ -442,16 +442,16 @@ class Image extends bbn\File
         header('Content-Type: image/'.$this->ext2);
       }
 
-      if (class_exists('\\Imagick')) {
-          echo $this;
-          $this->img->clear();
-          $this->img->destroy();
+      if (self::isImagick()) {
+        echo $this;
+        $this->img->clear();
+        $this->img->destroy();
       }
       else{
-          \call_user_func('image'.$this->ext2, $this->img);
-            imagedestroy($this->img);
+        \call_user_func('image'.$this->ext2, $this->img);
       }
     }
+
     return $this;
   }
 
@@ -585,7 +585,7 @@ class Image extends bbn\File
    * @param int|bool $max_h The maximum valure for new height.
    * @return Image
    */
-  public function resize($w = null, ?int $h = null, bool $crop = false, ?int $max_w = null, ?int $max_h = null): self
+  public function resize($w = null, ?int $h = null, bool $crop = false, ?int $max_w = null, ?int $max_h = null): static
   {
     if (!$this->test()) {
       throw new Exception(X::_("The image is not valid"));
@@ -745,7 +745,7 @@ class Image extends bbn\File
    * @param integer $y Y coordinate
    * @return image|false
      */
-  public function crop($w, $h, $x, $y): self
+  public function crop($w, $h, $x, $y): static
   {
     if ($this->test()) {
         $args = \func_get_args();

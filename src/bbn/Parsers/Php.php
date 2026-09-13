@@ -6,10 +6,12 @@ use bbn;
 use bbn\X;
 use bbn\Str;
 use bbn\File\System;
+use bbn\Parsers\Doc;
 use Exception;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
+use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 
 class Php extends bbn\Models\Cls\Basic
@@ -17,7 +19,7 @@ class Php extends bbn\Models\Cls\Basic
 
   protected $docParser;
 
-  /** @var phpDocumentor\Reflexion\DocBlock */
+  /** @var DocBlock */
   protected $parser;
   
   /**
@@ -362,12 +364,12 @@ class Php extends bbn\Models\Cls\Basic
               'file' => $file,
               'class' => $class
             ];
-            if (class_exists($class, true)) {
+            if (class_exists($class)) {
               $res['type'] = 'class';
-            } elseif (interface_exists($class, true)) {
-              $res['type'] = 'interface';
-            } elseif (trait_exists($class, true)) {
+            } elseif (trait_exists($class)) {
               $res['type'] = 'trait';
+            } elseif (interface_exists($class)) {
+              $res['type'] = 'interface';
             }
             if (!empty($res['type'])) {
               $arr[] = $res;

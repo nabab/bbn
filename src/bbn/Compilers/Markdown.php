@@ -18,12 +18,11 @@ class Markdown extends Basic
 		$res = '';
 		try {
       
-			$parser = new Mardown();
-			$less->parse($str);
-			$res = $less->getCss();
+			$parser = new MD();
+			$res = $parser->transform($str);
 		}
 		catch (Exception $e) {
-			X::logError($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+			X::logError($e);
 		}
 
 		return $res;

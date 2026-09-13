@@ -5,6 +5,7 @@ use bbn\Db;
 use bbn\X;
 use bbn\Str;
 use bbn\Appui\History;
+use Closure;
 
 class Sync
 {
@@ -15,7 +16,7 @@ class Sync
   protected static $current_connection = false;
 
   /**
-   * @var array The sync connection information
+   * @var Db The sync connection information
    */
   protected static $sync_connection;
 
@@ -84,12 +85,12 @@ class Sync
    * @todo
    *
    * @param string   $name
-   * @param callable $fn
+   * @param Closure $fn
    * @return void
    */
-  final public static function addMethod(string $name, callable $fn): void
+  final public static function addMethod(string $name, Closure $fn): void
   {
-    self::$methods[$name] = \Closure::bind($fn, null, __CLASS__);
+    self::$methods[$name] = Closure::bind($fn, null, __CLASS__);
   }
 
   /**
@@ -187,7 +188,7 @@ class Sync
     }
     /** @todo Replace with DB functions */
     if (self::$sync_connection->getEngine() === 'sqlite') {
-      self::$sync_connection->exec(
+      self::$sync_connection->query(
         sprintf(
           'CREATE TABLE "%s" (
             "id" INTEGER PRIMARY KEY  NOT NULL ,
@@ -203,12 +204,12 @@ class Sync
           CREATE INDEX "chrono" "dbsync" ("chrono");
           CREATE INDEX "action" "dbsync" ("action");
           CREATE INDEX "state" "dbsync" ("state");',
-          self::$table_sync
+          self::$sync_table
         )
       );
     }
     elseif (self::$sync_connection->getEngine() === 'mysql') {
-      self::$sync_connection->exec(
+      self::$sync_connection->query(
         sprintf(
           "CREATE TABLE IF NOT EXISTS `%s` (
             `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -227,7 +228,7 @@ class Sync
             ADD KEY `chrono` (`chrono`),
             ADD KEY `action` (`action`),
             ADD KEY `state` (`state`);",
-            self::$table_sync
+            self::$sync_table
         )
       );
     }
@@ -315,17 +316,17 @@ class Sync
     return $cfg;
   }
 
-  public static function callback1(callable $f)
+  public static function callback1(Closure $f)
   {
     self::addMethod('cbf1', $f);
   }
 
-  public static function callback2(callable $f)
+  public static function callback2(Closure $f)
   {
     self::addMethod('cbf2', $f);
   }
 
-  public static function deleteCompleted(float $start = null)
+  public static function deleteCompleted(?float $start = null)
   {
     if (!self::isInit()) {
       die("DB sync is not initiated");
@@ -352,12 +353,12 @@ class Sync
 
   public static function currentRowCfg($row): array
   {
-
+    return [];
   }
 
   public static function destRowCfg($row): array
   {
-
+    return [];
   }
 
   // Looking at the rows from the other DB with status = 0 and setting them to 1

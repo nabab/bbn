@@ -6,6 +6,7 @@
 
 namespace bbn\Cron;
 
+use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Basic;
 use bbn\Cron;
@@ -19,9 +20,9 @@ class Launcher extends Basic {
   use Config;
   use Filesystem;
 
-  protected $exe_path;
+  protected string $exe_path;
 
-  protected $cron;
+  protected Cron $cron;
 
   /**
    * Constructor
@@ -48,7 +49,14 @@ class Launcher extends Basic {
       $cfg['exe_path'] = $this->exe_path;
       $log = $this->cron->getLogPath($cfg).date('Y-m-d-H-i-s').'.txt';
       $cfg['log_file'] = $log;
-      exec(sprintf('php -f router.php %s "%s" > %s 2>&1 &',
+      if ($cfg['type'] === 'socket') {
+        X::log(\sprintf('php -f router.php %s "%s" > %s 2>&1 &',
+        $this->exe_path,
+        Str::escapeDquotes(json_encode($cfg)),
+        $log
+      ), 'socket-start');
+      }
+      exec(\sprintf('php -f router.php %s "%s" > %s 2>&1 &',
         $this->exe_path,
         Str::escapeDquotes(json_encode($cfg)),
         $log

@@ -27,15 +27,21 @@ class Timer
    * Starts a timer for a given key
    *
    * @param string $key
-   * @param null $from
+   * @param null|float $from
+   * @param null|string $uid
    * @return bool
    */
-  public function start(string $key = 'default', $from = null): bool
+  public function start(string $key = 'default', ?float $from = null, ?string $uid = null): bool
   {
     if (!isset($this->_measures[$key])) {
       $this->_measures[$key] = [
         'num' => 0,
         'sum' => 0,
+        $uid ? 'subs' : 'start' => $uid ? [] : ($from ?: microtime(1))
+      ];
+    }
+    if ($uid) {
+      $this->_measures[$key]['subs'][$uid] = [
         'start' => $from ?: microtime(1)
       ];
     }
@@ -51,10 +57,16 @@ class Timer
    * Returns true is the timer has started for the given key
    *
    * @param string $key
+   * @param null|string $uid
    * @return bool
    */
-  public function hasStarted(string $key = 'default'): bool
+  public function hasStarted(string $key = 'default', ?string $uid = null): bool
   {
+    $mes = $this->_measures[$key] ?? null;
+    if ($uid) {
+      return isset($mes['subs'][$uid]) && ($mes['subs'][$uid]['start'] > 0);
+    }
+
     return isset($this->_measures[$key], $this->_measures[$key]['start']) &&
       ($this->_measures[$key]['start'] > 0);
   }
@@ -95,19 +107,25 @@ class Timer
    *
    * @param string $key
    * @return float
-   * @throws \Exception
    */
-  public function stop(string $key = 'default')
+  public function stop(string $key = 'default', ?string $uid = null): float
   {
-    if ($this->hasStarted($key)) {
+    if ($this->hasStarted($key, $uid)) {
       $this->_measures[$key]['num']++;
-      $time                          = $this->measure($key);
+      $time                          = $this->measure($key, $uid);
       $this->_measures[$key]['sum'] += $time;
-      unset($this->_measures[$key]['start']);
+      if ($uid) {
+        unset($this->_measures[$key]['subs'][$uid]);
+      }
+      else {
+        unset($this->_measures[$key]['start']);
+      }
+
       return $time;
     }
 
-    throw new \Exception(X::_("Missing a start declaration for timer")." $key");
+    X::log("Trying to stop a timer that hasn't been started for key $key", 'warning');
+    return 0;
   }
 
 
@@ -115,9 +133,13 @@ class Timer
    * @param string $key
    * @return mixed|void
    */
-  public function measure(string $key = 'default')
+  public function measure(string $key = 'default', ?string $uid = null)
   {
-    if ($this->hasStarted($key)) {
+    if ($this->hasStarted($key, $uid)) {
+      if ($uid) {
+        return microtime(1) - $this->_measures[$key]['subs'][$uid]['start'];
+      }
+
       return microtime(1) - $this->_measures[$key]['start'];
     }
   }
@@ -127,11 +149,11 @@ class Timer
    * @param string $key
    * @return array
    */
-  public function current(string $key = 'default'): array
+  public function current(string $key = 'default', ?string $uid = null): array
   {
     if (isset($this->_measures[$key])) {
       return \array_merge(
-        ['current' => $this->hasStarted($key) ? $this->measure($key) : 0],
+        ['current' => $this->hasStarted($key, $uid) ? $this->measure($key, $uid) : 0],
         $this->_measures[$key]
       );
     }
@@ -163,9 +185,13 @@ class Timer
    * @return array
    * @throws \Exception
    */
-  public function result(string $key = 'default')
+  public function result(string $key = 'default'): ?array
   {
     if (isset($this->_measures[$key])) {
+      if (!empty($this->_measures[$key]['subs'])) {
+        array_map(fn($a) => $this->hasStarted($key, $a) ? $this->stop($key, $a) : 0, array_keys($this->_measures[$key]['subs']));
+      }
+
       if ($this->hasStarted($key)) {
         $this->stop($key);
       }
@@ -180,6 +206,8 @@ class Timer
         )
       ];
     }
+
+    return null;
   }
 
 
@@ -189,12 +217,12 @@ class Timer
    */
   public function results(): array
   {
-    $r = [];
-    foreach ($this->_measures as $key => $val){
-      $r[$key] = $this->result($key);
+    $res = [];
+    foreach (array_keys($this->_measures) as $k) {
+      $res[$k] = $this->result($k);
     }
 
-    return $r;
+    return $res;
   }
 
 
@@ -202,9 +230,16 @@ class Timer
    * @param string $key
    * @return bool
    */
-  public function remove(string $key = 'default'): bool
+  public function remove(string $key = 'default', ?string $uid = null): bool
   {
     if (isset($this->_measures[$key])) {
+      if ($uid) {
+        if (isset($this->_measures[$key]['subs'][$uid])) {
+          unset($this->_measures[$key]['subs'][$uid]);
+          return true;
+        }
+        return false;
+      }
       unset($this->_measures[$key]);
       return true;
     }

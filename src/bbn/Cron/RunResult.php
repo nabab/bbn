@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace bbn\Cron;
 
+
+use bbn\X;
 /**
  * Represents the outcome of a Runner execution.
  *
@@ -20,7 +22,7 @@ final class RunResult
   /**
    * Convenience factory for a successful run.
    */
-  public static function success(?string $message = null): self
+  public static function success(?string $message = null): static
   {
     return new self(0, $message);
   }
@@ -28,12 +30,13 @@ final class RunResult
   /**
    * Convenience factory for a failed run.
    */
-  public static function error(int $code = 1, ?string $message = null): self
+  public static function error(int $code = 1, ?string $message = null): static
   {
     if ($code === 0) {
       $code = 1;
     }
 
+    X::log([$code, $message], 'cron_error');
     return new self($code, $message);
   }
 

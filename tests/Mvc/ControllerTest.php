@@ -90,7 +90,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_info_and_data_params_are_provided()
+  public function testConstructorTestWhenInfoAndDataParamsAreProvided()
   {
     $this->assertInstanceOf(
       Mvc::class,
@@ -119,7 +119,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_info_param_is_empty()
+  public function testConstructorTestWhenInfoParamIsEmpty()
   {
     $this->init([], $this->data['controller_data']);
 
@@ -150,7 +150,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_data_param_is_false()
+  public function testConstructorTestWhenDataParamIsFalse()
   {
     $this->setMvcMockExpectations();
     $this->init($this->info, false);
@@ -160,7 +160,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function addAuthorizedRoute_method_adds_to_authorized_methods()
+  public function testAddauthorizedrouteMethodAddsToAuthorizedMethods()
   {
     $this->mvc_mock->shouldReceive('addAuthorizedRoute')->with('route_1')->once()->andReturn(1);
 
@@ -169,7 +169,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function isAuthorizedRoute_method_checks_if_a_route_is_authorized()
+  public function testIsauthorizedrouteMethodChecksIfARouteIsAuthorized()
   {
     $this->mvc_mock->shouldReceive('isAuthorizedRoute')->with('route_2')->once()->andReturnTrue();
 
@@ -178,7 +178,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getRoot_method_returns_the_root_of_the_application_in_the_base_url()
+  public function testGetrootMethodReturnsTheRootOfTheApplicationInTheBaseUrl()
   {
     $this->mvc_mock->shouldReceive('getRoot')->once()->andReturn('root/');
 
@@ -187,7 +187,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function setRoot_method_sets_the_root_of_the_application()
+  public function testSetrootMethodSetsTheRootOfTheApplication()
   {
     $this->mvc_mock->shouldReceive('setRoot')->with('root2/')->once()->andReturnSelf();
 
@@ -196,7 +196,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getUrl_method_returns_the_request_url()
+  public function testGeturlMethodReturnsTheRequestUrl()
   {
     // Expectation was set in the init function that execute before every test
     $this->assertSame($this->data['url'], $this->controller->getUrl());
@@ -204,7 +204,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getPath_method_returns_the_internal_path_of_the_controller()
+  public function testGetpathMethodReturnsTheInternalPathOfTheController()
   {
     // Expectation was set in the init function that execute before every test
     $this->assertSame($this->info['path'], $this->controller->getPath());
@@ -212,21 +212,21 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getRequest_method_returns_the_current_controller_route()
+  public function testGetrequestMethodReturnsTheCurrentControllerRoute()
   {
     $this->assertSame($this->info['request'], $this->controller->getRequest());
   }
 
 
   /** @test */
-  public function exists_method_returns_true_if_the_internal_path_of_the_controller_exists()
+  public function testExistsMethodReturnsTrueIfTheInternalPathOfTheControllerExists()
   {
     $this->assertTrue($this->controller->exists());
   }
 
 
   /** @test */
-  public function exists_method_returns_false_if_the_internal_path_of_the_controller_does_not_exist()
+  public function testExistsMethodReturnsFalseIfTheInternalPathOfTheControllerDoesNotExist()
   {
     $this->setNonPublicPropertyValue('_path', '');
     $this->assertFalse($this->controller->exists());
@@ -234,7 +234,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_the_parent_dir()
+  public function testGetcurrentdirMethodReturnsTheCurrentControllerDirNameIfPathExistsAndIsTheParentDir()
   {
     // When dirname of the _$path property  is '.'
     $this->setNonPublicPropertyValue('_path', 'form');
@@ -244,7 +244,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_with_a_prepath_removed()
+  public function testGetcurrentdirMethodReturnsTheCurrentControllerDirNameIfPathExistsAndIsNotTheParentDirWithAPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_path', 'prepath/parent/form');
 
@@ -256,7 +256,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_and_no_prepath_removed()
+  public function testGetcurrentdirMethodReturnsTheCurrentControllerDirNameIfPathExistsAndIsNotTheParentDirAndNoPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_path', 'parent/form');
 
@@ -268,7 +268,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_method_returns_null_if_path_does_not_exists()
+  public function testGetcurrentdirMethodReturnsNullIfPathDoesNotExists()
   {
     $this->setNonPublicPropertyValue('_path', '');
     $this->assertNull($this->controller->getCurrentDir());
@@ -276,7 +276,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalPath_method_returns_the_current_controller_path_with_a_prepath_removed()
+  public function testGetlocalpathMethodReturnsTheCurrentControllerPathWithAPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_path', 'prepath/parent/form');
 
@@ -287,7 +287,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalPath_method_returns_the_current_controller_path_with_no_prepath_removed()
+  public function testGetlocalpathMethodReturnsTheCurrentControllerPathWithNoPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_path', 'parent/form');
 
@@ -298,7 +298,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalRoute_method_returns_the_current_controller_route_with_prepath_removed()
+  public function testGetlocalrouteMethodReturnsTheCurrentControllerRouteWithPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_request', 'prepath/parent/form');
 
@@ -309,7 +309,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalRoute_method_returns_the_current_controller_route_with_no_prepath_removed()
+  public function testGetlocalrouteMethodReturnsTheCurrentControllerRouteWithNoPrepathRemoved()
   {
     $this->setNonPublicPropertyValue('_request', 'parent/form');
 
@@ -320,7 +320,7 @@ class ControllerTest extends TestCase
 
 
     /** @test */
-  public function getAll_method_returns_info_of_the_controller()
+  public function testGetallMethodReturnsInfoOfTheController()
   {
     // Let's mock the methods `getPrepath` & `getRoot`
     // Since they depends on other classes and will be used in the `getAll` method
@@ -343,28 +343,28 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function sayRoot_method_returns_the_current_controller_root_dir()
+  public function testSayrootMethodReturnsTheCurrentControllerRootDir()
   {
     $this->assertSame($this->info['root'], $this->controller->sayRoot());
   }
 
 
   /** @test  */
-  public function getController_method_returns_current_controller_file_name()
+  public function testGetcontrollerMethodReturnsCurrentControllerFileName()
   {
     $this->assertSame($this->info['file'], $this->controller->getController());
   }
 
 
   /** @test */
-  public function getPlugin_method_returns()
+  public function testGetpluginMethodReturns()
   {
     $this->assertSame($this->info['plugin'], $this->controller->getPlugin());
   }
 
 
   /** @test */
-  public function render_method_renders_content_using_Tpl_class_if_model_data_not_empty()
+  public function testRenderMethodRendersContentUsingTplClassIfModelDataNotEmpty()
   {
     // Cannot test it in this case since it depend on `bbn\Tpl`
     // And it uses it directly in the class and it's a static method
@@ -374,7 +374,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function render_method_return_the_view_directly_if_model_data_id_empty_and_data_property_is_empty_too()
+  public function testRenderMethodReturnTheViewDirectlyIfModelDataIdEmptyAndDataPropertyIsEmptyToo()
   {
     $this->controller->data = [];
     $this->assertSame('view', $this->controller->render('view'));
@@ -382,7 +382,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function isCli_method_checks_if_the_request_is_called_from_cli_or_not()
+  public function testIscliMethodChecksIfTheRequestIsCalledFromCliOrNot()
   {
     $this->mvc_mock->shouldReceive('isCli')->once()->andReturnTrue();
 
@@ -391,7 +391,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function reroute_method_reroutes_a_controller_to_another_one_if_it_not_has_been_rerouted_before()
+  public function testRerouteMethodReroutesAControllerToAnotherOneIfItNotHasBeenReroutedBefore()
   {
     $this->mvc_mock->shouldReceive('reroute')->twice();
     $this->controller->reroute('new/path');
@@ -423,7 +423,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function incl_method_includes_a_php_file_within_the_controller_path()
+  public function testInclMethodIncludesAPhpFileWithinTheControllerPath()
   {
     $file_stub = '<?php 
   namespace bbn\tests\foo;
@@ -452,7 +452,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function addScript_method_adds_the_given_string_to_script_property()
+  public function testAddscriptMethodAddsTheGivenStringToScriptProperty()
   {
     $result = $this->controller->addScript($script = '<script>let test = "test"</script>');
 
@@ -468,7 +468,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function registerPluginClasses_method_register_a_class_using_spl_autoload()
+  public function testRegisterpluginclassesMethodRegisterAClassUsingSplAutoload()
   {
     // Will create php files with classes defined to test files inclusion
     $file_stub = "<?php
@@ -499,7 +499,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function control_method_encloses_controller_inclusion()
+  public function testControlMethodEnclosesControllerInclusion()
   {
     // Will create a plugin file with a class defined to test plugin class is registered
     $file_stub = "<?php
@@ -534,7 +534,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function control_method_returns_false_when_a_checker_file_returns_false()
+  public function testControlMethodReturnsFalseWhenACheckerFileReturnsFalse()
   {
     $this->mvc_mock->shouldReceive('pluginName')->with($this->info['plugin'])->andReturn('plugin_name');
     $this->mvc_mock->shouldReceive('pluginPath')->with('plugin_name', false)->andReturn(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
@@ -554,7 +554,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function control_method_does_not_include_when_its_been_already_controlled_and_the_file_property_is_truthy()
+  public function testControlMethodDoesNotIncludeWhenItsBeenAlreadyControlledAndTheFilePropertyIsTruthy()
   {
     $this->setNonPublicPropertyValue('_is_controlled', 1);
     $this->setNonPublicPropertyValue('_file', 'path/to/file');
@@ -568,7 +568,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function process_method_launches_the_controller()
+  public function testProcessMethodLaunchesTheController()
   {
     // The process method calls the control method
     // So let's mock the Mvc calls inside it like we did in the previous two tests.
@@ -592,7 +592,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function hasBeenRerouted_method_checks_if_controller_has_been_rerouted()
+  public function testHasbeenreroutedMethodChecksIfControllerHasBeenRerouted()
   {
     $this->assertFalse($this->controller->hasBeenRerouted());
 
@@ -603,7 +603,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getJs_method_gets_a_js_view_from_a_path_to_file_encapsulated_in_an_anonymous_function()
+  public function testGetjsMethodGetsAJsViewFromAPathToFileEncapsulatedInAnAnonymousFunction()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -634,7 +634,7 @@ let data = {
 
 
   /** @test */
-  public function getJs_method_gets_a_js_view_from_a_path_to_file_not_encapsulated_in_an_anonymous_function()
+  public function testGetjsMethodGetsAJsViewFromAPathToFileNotEncapsulatedInAnAnonymousFunction()
   {
     // Notice the Mvc::getView should be called with the third param default to the data property
     // Since we set the data to null in Controller::getJs()
@@ -652,7 +652,7 @@ let data = {
 
 
   /** @test */
-  public function getJs_method_returns_false_when_mvc_getView_returns_empty_string()
+  public function testGetjsMethodReturnsFalseWhenMvcGetviewReturnsEmptyString()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -666,7 +666,7 @@ let data = {
 
 
   /** @test */
-  public function getJsGroup_method_gets_a_js_view_from_a_path_to_dir_encapsulated_in_an_anonymous_function()
+  public function testGetjsgroupMethodGetsAJsViewFromAPathToDirEncapsulatedInAnAnonymousFunction()
   {
     $this->mvc_mock->shouldReceive('fetchDir')->once()->andReturn(['path/to/file']);
     $this->mvc_mock->shouldReceive('getView')
@@ -688,7 +688,7 @@ let data = {
 
 
   /** @test */
-  public function getJsGroup_method_gets_a_js_view_from_an_array_of_files_not_encapsulated_in_an_anonymous_function()
+  public function testGetjsgroupMethodGetsAJsViewFromAnArrayOfFilesNotEncapsulatedInAnAnonymousFunction()
   {
     // Here the Mvc::fetchDir is not called like it did in the previous test since it's an array of files.
     // And the Mvc::getView will be called twice in the array loop as array count is two.
@@ -716,7 +716,7 @@ let data = {
 
 
   /** @test */
-  public function getJsGroup_method_throws_an_exception_when_it_fails_to_fetch_files_from_a_dir()
+  public function testGetjsgroupMethodThrowsAnExceptionWhenItFailsToFetchFilesFromADir()
   {
     $this->expectException(\Exception::class);
     $this->mvc_mock->shouldReceive('fetchDir')
@@ -729,7 +729,7 @@ let data = {
 
 
   /** @test */
-  public function getJsGroup_method_throws_an_exception_when_the_dir_is_empty()
+  public function testGetjsgroupMethodThrowsAnExceptionWhenTheDirIsEmpty()
   {
     $this->expectException(\Exception::class);
     $this->mvc_mock->shouldReceive('fetchDir')
@@ -741,7 +741,7 @@ let data = {
   }
 
   /** @test */
-  public function getViewGroup_method_returns_a_view_from_a_dir_path()
+  public function testGetviewgroupMethodReturnsAViewFromADirPath()
   {
     $this->mvc_mock->shouldReceive('fetchDir')
       ->andReturn(['file1', 'file2', 'file3'])
@@ -768,7 +768,7 @@ let data = {
   }
 
   /** @test */
-  public function getViewGroup_method_returns_a_view_from_an_array_of_files()
+  public function testGetviewgroupMethodReturnsAViewFromAnArrayOfFiles()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -786,7 +786,7 @@ let data = {
   }
 
   /** @test */
-  public function getViewGroup_method_throws_an_exception_if_it_fails_to_fetch_files_from_dir()
+  public function testGetviewgroupMethodThrowsAnExceptionIfItFailsToFetchFilesFromDir()
   {
     $this->expectException(\Exception::class);
 
@@ -799,7 +799,7 @@ let data = {
   }
 
   /** @test */
-  public function getViewGroup_method_throws_an_exception_when_dir_is_empty()
+  public function testGetviewgroupMethodThrowsAnExceptionWhenDirIsEmpty()
   {
     $this->expectException(\Exception::class);
 
@@ -812,7 +812,7 @@ let data = {
   }
 
   /** @test */
-  public function getCss_method_returns_a_css_encapsulated_in_scoped_style_tag()
+  public function testGetcssMethodReturnsACssEncapsulatedInScopedStyleTag()
   {
     // This method cannot be tested in this case as it depend on \CssMin::minify($r)
     // Which is not injected and a static method so  cannot be tested
@@ -820,7 +820,7 @@ let data = {
   }
 
   /** @test */
-  public function getCss_method_returns_false_when_it_cannot_get_the_view()
+  public function testGetcssMethodReturnsFalseWhenItCannotGetTheView()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -831,7 +831,7 @@ let data = {
   }
 
   /** @test */
-  public function getLess_method_returns_a_compiled_less_view_encapsulated_in_a_style_tag()
+  public function testGetlessMethodReturnsACompiledLessViewEncapsulatedInAStyleTag()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -842,7 +842,7 @@ let data = {
   }
 
   /** @test */
-  public function getLess_method_returns_false_when_it_cannot_get_the_view()
+  public function testGetlessMethodReturnsFalseWhenItCannotGetTheView()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -853,7 +853,7 @@ let data = {
   }
 
   /** @test */
-  public function addCss_method_will_add_a_css_view_to_the_output_object_if_it_has_content()
+  public function testAddcssMethodWillAddACssViewToTheOutputObjectIfItHasContent()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -866,7 +866,7 @@ let data = {
   }
 
   /** @test */
-  public function addCss_method_will_not_add_a_css_view_to_the_output_object_if_has_no_content()
+  public function testAddcssMethodWillNotAddACssViewToTheOutputObjectIfHasNoContent()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -880,7 +880,7 @@ let data = {
   }
 
   /** @test */
-  public function addLess_method_will_add_a_less_view_to_the_output_object_if_it_has_content()
+  public function testAddlessMethodWillAddALessViewToTheOutputObjectIfItHasContent()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -906,7 +906,7 @@ let data = {
   }
 
   /** @test */
-  public function addLess_method_will_not_add_a_less_view_to_the_output_object_if_it_has_no_content()
+  public function testAddlessMethodWillNotAddALessViewToTheOutputObjectIfItHasNoContent()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -920,7 +920,7 @@ let data = {
   }
 
   /** @test */
-  public function addJs_method_will_add_a_js_view_from_a_file_path_to_the_output_object()
+  public function testAddjsMethodWillAddAJsViewFromAFilePathToTheOutputObject()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -970,7 +970,7 @@ let data = {
   }
 
   /** @test */
-  public function addJsGroup_method_will_add_a_js_view_from_a_directory_to_the_output_object()
+  public function testAddjsgroupMethodWillAddAJsViewFromADirectoryToTheOutputObject()
   {
     $this->mvc_mock->shouldReceive('fetchDir')
       ->once()
@@ -995,7 +995,7 @@ let data = {
   }
 
   /** @test */
-  public function addJsGroup_method_will_add_a_js_view_from_an_array_of_files_to_output_object()
+  public function testAddjsgroupMethodWillAddAJsViewFromAnArrayOfFilesToOutputObject()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -1015,7 +1015,7 @@ let data = {
   }
 
   /** @test */
-  public function addJsGroup_method_will_throw_an_exception_if_it_fails_to_fetch_files_from_dir()
+  public function testAddjsgroupMethodWillThrowAnExceptionIfItFailsToFetchFilesFromDir()
   {
     $this->expectException(\Exception::class);
 
@@ -1030,7 +1030,7 @@ let data = {
   }
 
   /** @test */
-  public function addJsGroup_method_will_throw_an_exception_if_the_files_array_are_empty()
+  public function testAddjsgroupMethodWillThrowAnExceptionIfTheFilesArrayAreEmpty()
   {
     $this->expectException(\Exception::class);
 
@@ -1040,7 +1040,7 @@ let data = {
   }
 
   /** @test */
-  public function setObj_method_will_add_to_the_output_object_from_an_array()
+  public function testSetobjMethodWillAddToTheOutputObjectFromAnArray()
   {
     $result = $this->controller->setObj(['key_1' => 'value_1', 'key_2' => 'value_2']);
 
@@ -1050,7 +1050,7 @@ let data = {
   }
 
   /** @test */
-  public function setUrl_method_will_set_the_url_in_the_output_object()
+  public function testSeturlMethodWillSetTheUrlInTheOutputObject()
   {
     $result = $this->controller->setUrl($url = 'path/to');
 
@@ -1065,7 +1065,7 @@ let data = {
   }
 
   /** @test */
-  public function setTitle_method_sets_the_title_on_the_output_object()
+  public function testSettitleMethodSetsTheTitleOnTheOutputObject()
   {
     $result = $this->controller->setTitle('foo');
 
@@ -1079,7 +1079,7 @@ let data = {
   }
 
   /** @test */
-  public function setIcon_method_sets_the_icon_on_the_output_object()
+  public function testSeticonMethodSetsTheIconOnTheOutputObject()
   {
     $result = $this->controller->setIcon('icon_1');
 
@@ -1093,7 +1093,7 @@ let data = {
   }
 
   /** @test */
-  public function setColor_method_sets_background_and_font_colors_on_the_output_object()
+  public function testSetcolorMethodSetsBackgroundAndFontColorsOnTheOutputObject()
   {
     $result = $this->controller->setColor('red', 'blue');
 
@@ -1110,7 +1110,7 @@ let data = {
   }
 
   /** @test */
-  public function routeComponent_method_returns_component_from_the_given_name_if_exists()
+  public function testRoutecomponentMethodReturnsComponentFromTheGivenNameIfExists()
   {
     $this->mvc_mock->shouldReceive('routeComponent')
       ->once()
@@ -1132,7 +1132,7 @@ let data = {
   }
 
   /** @test */
-  public function getComponent_method_returns_a_component_with_content_from_a_given_name()
+  public function testGetcomponentMethodReturnsAComponentWithContentFromAGivenName()
   {
     // Cannot test this method in this case since it depends on the View class
     // and initialize it in the method itself
@@ -1140,7 +1140,7 @@ let data = {
   }
 
   /** @test */
-  public function getComponent_method_returns_null_if_the_returned_component_has_no_js_in_it()
+  public function testGetcomponentMethodReturnsNullIfTheReturnedComponentHasNoJsInIt()
   {
     $this->mvc_mock->shouldReceive('routeComponent')
       ->once()
@@ -1161,7 +1161,7 @@ let data = {
   }
 
   /** @test */
-  public function getComponent_method_returns_null_if_a_component_cannot_be_found()
+  public function testGetcomponentMethodReturnsNullIfAComponentCannotBeFound()
   {
     $this->mvc_mock->shouldReceive('routeComponent')
       ->once()
@@ -1172,7 +1172,7 @@ let data = {
   }
 
   /** @test */
-  public function jsData_method_sets_the_output_object_data_property_from_an_array()
+  public function testJsdataMethodSetsTheOutputObjectDataPropertyFromAnArray()
   {
     $result = $this->controller->jsData($data = ['key_1' => 'value_1', 'key_2' => 'value_2']);
 
@@ -1182,7 +1182,7 @@ let data = {
   }
 
   /** @test */
-  public function jsData_method_dont_sets_the_output_object_data_property_if_the_array_is_not_assoc()
+  public function testJsdataMethodDontSetsTheOutputObjectDataPropertyIfTheArrayIsNotAssoc()
   {
     $result = $this->controller->jsData(['value_1', 'value_2']);
 
@@ -1192,7 +1192,7 @@ let data = {
   }
 
   /** @test */
-  public function jsData_method_adds_to_the_output_object_data_property_if_already_exists()
+  public function testJsdataMethodAddsToTheOutputObjectDataPropertyIfAlreadyExists()
   {
     $this->controller->obj->data = $existing_data = ['existing_key' => 'existing_value'];
 
@@ -1203,7 +1203,7 @@ let data = {
   }
 
   /** @test */
-  public function getArguments_method_parses_arguments_from_an_array()
+  public function testGetargumentsMethodParsesArgumentsFromAnArray()
   {
     $method = $this->getNonPublicMethod('getArguments');
 
@@ -1295,7 +1295,7 @@ let data = {
   }
 
   /** @test */
-  public function getView_method_will_get_a_view()
+  public function testGetviewMethodWillGetAView()
   {
     $this->mvc_mock->shouldReceive('getView')
       ->once()
@@ -1312,7 +1312,7 @@ let data = {
   }
 
   /** @test */
-  public function getView_method_will_get_a_html_view_if_mode_is_not_specified()
+  public function testGetviewMethodWillGetAHtmlViewIfModeIsNotSpecified()
   {
     $this->mvc_mock->shouldReceive('getView')
     ->once()
@@ -1329,7 +1329,7 @@ let data = {
   }
 
   /** @test */
-  public function getExternalView_method_gets_a_view_from_different_root()
+  public function testGetexternalviewMethodGetsAViewFromDifferentRoot()
   {
     $this->mvc_mock->shouldReceive('getExternalView')
       ->once()
@@ -1342,7 +1342,7 @@ let data = {
   }
 
   /** @test */
-  public function customPluginView_method_retrieves_a_view_from_custom_plugin()
+  public function testCustompluginviewMethodRetrievesAViewFromCustomPlugin()
   {
     $this->mvc_mock->shouldReceive('customPluginView')
       ->once()
@@ -1355,7 +1355,7 @@ let data = {
   }
 
   /** @test */
-  public function customPluginView_method_retrieves_a_view_from_current_plugin_if_plugin_is_not_provided()
+  public function testCustompluginviewMethodRetrievesAViewFromCurrentPluginIfPluginIsNotProvided()
   {
     $this->mvc_mock->shouldReceive('customPluginView')
       ->once()
@@ -1368,7 +1368,7 @@ let data = {
   }
 
   /** @test */
-  public function customPluginView_method_returns_null_when_plugin_is_not_set()
+  public function testCustompluginviewMethodReturnsNullWhenPluginIsNotSet()
   {
     $this->setNonPublicPropertyValue('_plugin', null);
 
@@ -1380,7 +1380,7 @@ let data = {
   }
 
   /** @test */
-  public function getPluginView_method_retrieves_a_view()
+  public function testGetpluginviewMethodRetrievesAView()
   {
     $this->mvc_mock->shouldReceive('getPluginView')
       ->once()
@@ -1393,7 +1393,7 @@ let data = {
   }
 
   /** @test */
-  public function getPluginViews_method_returns_an_array_of_views()
+  public function testGetpluginviewsMethodReturnsAnArrayOfViews()
   {
     $path   = 'foo/bar';
     $data   = ['foo' => 'bar'];
@@ -1414,7 +1414,7 @@ let data = {
   }
 
   /** @test */
-  public function getPluginModel_method_returns_a_mode_of_the_provided_plugin()
+  public function testGetpluginmodelMethodReturnsAModeOfTheProvidedPlugin()
   {
    $this->mvc_mock->shouldReceive('getPluginModel')
      ->once()
@@ -1439,7 +1439,7 @@ let data = {
   }
 
   /** @test */
-  public function getPluginModel_method_returns_a_mode_of_the_current_plugin_if_no_plugin_provided()
+  public function testGetpluginmodelMethodReturnsAModeOfTheCurrentPluginIfNoPluginProvided()
   {
     $this->mvc_mock->shouldReceive('getPluginModel')
       ->once()
@@ -1464,7 +1464,7 @@ let data = {
   }
 
   /** @test */
-  public function getSubpluginModel_method_returns_a_sub_plugin_model()
+  public function testGetsubpluginmodelMethodReturnsASubPluginModel()
   {
     $this->mvc_mock->shouldReceive('getSubpluginModel')
       ->once()
@@ -1490,7 +1490,7 @@ let data = {
   }
 
   /** @test */
-  public function getSubpluginModel_method_returns_a_sub_plugin_model_of_the_current_plugin_if_no_plugin_provided()
+  public function testGetsubpluginmodelMethodReturnsASubPluginModelOfTheCurrentPluginIfNoPluginProvided()
   {
     $this->mvc_mock->shouldReceive('getSubpluginModel')
       ->once()
@@ -1516,7 +1516,7 @@ let data = {
   }
 
   /** @test */
-  public function hasSubpluginModel_method_returns_true_if_the_sub_plugin_model_exists()
+  public function testHassubpluginmodelMethodReturnsTrueIfTheSubPluginModelExists()
   {
     $this->mvc_mock->shouldReceive('hasSubpluginModel')
       ->once()
@@ -1529,7 +1529,7 @@ let data = {
   }
 
   /** @test */
-  public function retrieveVar_method_()
+  public function testRetrievevarMethod()
   {
     $retrieve_var_method = $this->getNonPublicMethod('retrieveVar');
 
@@ -1543,7 +1543,7 @@ let data = {
   }
 
   /** @test */
-  public function action_method_merges_post_data_and_result_data_with_the_current_data_and_sets_the_output_object()
+  public function testActionMethodMergesPostDataAndResultDataWithTheCurrentDataAndSetsTheOutputObject()
   {
     $this->mvc_mock->shouldReceive('getModel')->once()->andReturn(['foo' => 'bar']);
 
@@ -1563,7 +1563,7 @@ let data = {
   }
 
   /** @test */
-  public function action_method_returns_a_default_result_if_get_model_fails()
+  public function testActionMethodReturnsADefaultResultIfGetModelFails()
   {
     $this->controller = Mockery::mock(Controller::class)->makePartial();
     $this->controller->shouldReceive('getModel')->once()->andReturnFalse();
@@ -1574,7 +1574,7 @@ let data = {
   }
   
   /** @test */
-  public function cachedAction_method_merges_post_data_and_result_data_with_the_current_data_and_sets_the_output_object()
+  public function testCachedactionMethodMergesPostDataAndResultDataWithTheCurrentDataAndSetsTheOutputObject()
   {
     $expected_data = array_merge(
       array_merge($this->data['controller_data'], ['res' => ['success' => false]]),
@@ -1594,7 +1594,7 @@ let data = {
   }
   
   /** @test */
-  public function combo_method_compiles_and_echoes_all_the_views_with_the_given_data()
+  public function testComboMethodCompilesAndEchoesAllTheViewsWithTheGivenData()
   {
     $this->mvc_mock->shouldReceive('getRoute')
       ->once()
@@ -1629,7 +1629,7 @@ let data = {
   }
 
   /** @test */
-  public function getContent_method_returns_the_content_of_a_file_located_within_the_data_path()
+  public function testGetcontentMethodReturnsTheContentOfAFileLocatedWithinTheDataPath()
   {
     $file_path = self::createFile('test.txt',  'Hello world!', 'controllers');
     $file_path = str_replace(BBN_APP_PATH . BBN_DATA_PATH, '',$file_path);
@@ -1640,13 +1640,13 @@ let data = {
   }
 
   /** @test */
-  public function getContent_method_returns_false_if_path_is_not_valid()
+  public function testGetcontentMethodReturnsFalseIfPathIsNotValid()
   {
     $this->assertFalse($this->controller->getContent('foo/bar'));
   }
 
   /** @test */
-  public function getDir_method_returns_the_path_to_the_directory_of_the_current_controller()
+  public function testGetdirMethodReturnsThePathToTheDirectoryOfTheCurrentController()
   {
     $this->assertSame(
       $this->getNonPublicProperty('_dir'),
@@ -1655,7 +1655,7 @@ let data = {
   }
 
   /** @test */
-  public function getPrepath_method_returns_pre_path_from_mvc_object()
+  public function testGetprepathMethodReturnsPrePathFromMvcObject()
   {
     $this->mvc_mock->shouldReceive('getPrepath')
       ->once()
@@ -1665,7 +1665,7 @@ let data = {
   }
 
   /** @test */
-  public function getPrepath_method_returns_empty_string_if_path_property_is_empty()
+  public function testGetprepathMethodReturnsEmptyStringIfPathPropertyIsEmpty()
   {
     $this->setNonPublicPropertyValue('_path', '');
 
@@ -1673,7 +1673,7 @@ let data = {
   }
 
   /** @test */
-  public function setPrepath_method_sets_the_prepath()
+  public function testSetprepathMethodSetsThePrepath()
   {
     $this->mvc_mock->shouldReceive('setPrepath')
       ->once()
@@ -1698,7 +1698,7 @@ let data = {
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_when_the_path_property_is_empty()
+  public function testSetprepathMethodThrowsAnExceptionWhenThePathPropertyIsEmpty()
   {
     $this->expectException(\Exception::class);
 
@@ -1708,7 +1708,7 @@ let data = {
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_when_setPrepath_on_mvc_object_throws_exception()
+  public function testSetprepathMethodThrowsAnExceptionWhenSetprepathOnMvcObjectThrowsException()
   {
     $this->expectException(\Exception::class);
 
@@ -1721,7 +1721,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_using_controller_data_and_path_when_no_arguments_provided()
+  public function testGetmodelMethodReturnsTheModelUsingControllerDataAndPathWhenNoArgumentsProvided()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -1737,7 +1737,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_using_the_provided_path()
+  public function testGetmodelMethodReturnsTheModelUsingTheProvidedPath()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -1752,7 +1752,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_using_the_provided_data()
+  public function testGetmodelMethodReturnsTheModelUsingTheProvidedData()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -1767,7 +1767,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_using_the_provided_path_and_data()
+  public function testGetmodelMethodReturnsTheModelUsingTheProvidedPathAndData()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -1785,7 +1785,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_when_path_is_not_provided_and_mode_is_dom()
+  public function testGetmodelMethodReturnsTheModelWhenPathIsNotProvidedAndModeIsDom()
   {
     $this->setNonPublicPropertyValue('mode', 'dom');
 
@@ -1805,7 +1805,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  public function testGetmodelMethodReturnsTheModelWhenPathIsProvidedAndItStartsWithADotAndABackslash()
   {
     $this->mvc_mock->shouldReceive('getmodel')
       ->once()
@@ -1826,7 +1826,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_when_the_returned_model_is_an_object()
+  public function testGetmodelMethodReturnsTheModelWhenTheReturnedModelIsAnObject()
   {
     $this->mvc_mock->shouldReceive('getmodel')
       ->once()
@@ -1845,7 +1845,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_throws_an_exception_when_true_is_provided_and_returned_model_is_not_an_array()
+  public function testGetmodelMethodThrowsAnExceptionWhenTrueIsProvidedAndReturnedModelIsNotAnArray()
   {
     $this->expectException(\Exception::class);
 
@@ -1857,7 +1857,7 @@ let data = {
   }
 
   /** @test */
-  public function getModel_method_returns_an_empty_array_when_false_is_provided_and_returned_model_is_not_an_array()
+  public function testGetmodelMethodReturnsAnEmptyArrayWhenFalseIsProvidedAndReturnedModelIsNotAnArray()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -1870,7 +1870,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_using_controller_data_and_path_and_zero_ttl_when_no_arguments_provided()
+  public function testGetcachedmodelMethodReturnsTheCachedModelUsingControllerDataAndPathAndZeroTtlWhenNoArgumentsProvided()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1886,7 +1886,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_using_the_provided_path()
+  public function testGetcachedmodelMethodReturnsTheCachedModelUsingTheProvidedPath()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1902,7 +1902,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_using_the_provided_data()
+  public function testGetcachedmodelMethodReturnsTheCachedModelUsingTheProvidedData()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1918,7 +1918,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_using_the_ttl()
+  public function testGetcachedmodelMethodReturnsTheCachedModelUsingTheTtl()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1934,7 +1934,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_model_using_the_provided_path_and_data_and_ttl()
+  public function testGetcachedmodelMethodReturnsTheModelUsingTheProvidedPathAndDataAndTtl()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1953,7 +1953,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  public function testGetcachedmodelMethodReturnsTheCachedModelWhenPathIsProvidedAndItStartsWithADotAndABackslash()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1975,7 +1975,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_when_the_returned_model_is_an_object()
+  public function testGetcachedmodelMethodReturnsTheCachedModelWhenTheReturnedModelIsAnObject()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -1995,7 +1995,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_throws_an_exception_when_true_is_provided_and_returned_cached_model_is_not_an_array()
+  public function testGetcachedmodelMethodThrowsAnExceptionWhenTrueIsProvidedAndReturnedCachedModelIsNotAnArray()
   {
     $this->expectException(\Exception::class);
 
@@ -2007,7 +2007,7 @@ let data = {
   }
 
   /** @test */
-  public function getCachedModel_method_returns_an_empty_array_when_false_is_provided_and_returned_cached_model_is_not_an_array()
+  public function testGetcachedmodelMethodReturnsAnEmptyArrayWhenFalseIsProvidedAndReturnedCachedModelIsNotAnArray()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -2020,7 +2020,7 @@ let data = {
   }
 
   /** @test */
-  public function deleteCachedModel_method_will_delete_the_cached_model_using_controller_data_and_path_when_no_arguments_provided()
+  public function testDeletecachedmodelMethodWillDeleteTheCachedModelUsingControllerDataAndPathWhenNoArgumentsProvided()
   {
     $this->mvc_mock->shouldReceive('deleteCachedModel')
       ->once()
@@ -2036,7 +2036,7 @@ let data = {
   }
 
   /** @test */
-  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_path()
+  public function testDeletecachedmodelMethodWillDeleteTheCachedModelUsingTheProvidedPath()
   {
     $this->mvc_mock->shouldReceive('deleteCachedModel')
       ->once()
@@ -2052,7 +2052,7 @@ let data = {
   }
 
   /** @test */
-  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_data()
+  public function testDeletecachedmodelMethodWillDeleteTheCachedModelUsingTheProvidedData()
   {
     $this->mvc_mock->shouldReceive('deleteCachedModel')
       ->once()
@@ -2068,7 +2068,7 @@ let data = {
   }
 
   /** @test */
-  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_path_and_data()
+  public function testDeletecachedmodelMethodWillDeleteTheCachedModelUsingTheProvidedPathAndData()
   {
     $this->mvc_mock->shouldReceive('deleteCachedModel')
       ->once()
@@ -2084,7 +2084,7 @@ let data = {
   }
 
   /** @test */
-  public function deleteCachedModel_method_will_delete_the_cached_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  public function testDeletecachedmodelMethodWillDeleteTheCachedModelWhenPathIsProvidedAndItStartsWithADotAndABackslash()
   {
     $this->mvc_mock->shouldReceive('deleteCachedModel')
       ->once()
@@ -2102,7 +2102,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_using_controller_path_and_data_if_no_arguments_provided()
+  public function testSetcachedmodelMethodSetsTheCachedModelUsingControllerPathAndDataIfNoArgumentsProvided()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2117,7 +2117,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_using_the_provided_path()
+  public function testSetcachedmodelMethodSetsTheCachedModelUsingTheProvidedPath()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2132,7 +2132,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_using_the_provided_data()
+  public function testSetcachedmodelMethodSetsTheCachedModelUsingTheProvidedData()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2147,7 +2147,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_using_the_provided_ttl()
+  public function testSetcachedmodelMethodSetsTheCachedModelUsingTheProvidedTtl()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2162,7 +2162,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_using_the_provided_path_and_data_and_ttl()
+  public function testSetcachedmodelMethodSetsTheCachedModelUsingTheProvidedPathAndDataAndTtl()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2180,7 +2180,7 @@ let data = {
   }
 
   /** @test */
-  public function setCachedModel_method_sets_the_cached_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  public function testSetcachedmodelMethodSetsTheCachedModelWhenPathIsProvidedAndItStartsWithADotAndABackslash()
   {
     $this->mvc_mock->shouldReceive('setCachedModel')
       ->once()
@@ -2197,7 +2197,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_the_model()
+  public function testGetobjectmodelMethodReturnsTheModel()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -2211,7 +2211,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_the_cached_model()
+  public function testGetobjectmodelMethodReturnsTheCachedModel()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -2225,7 +2225,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_an_empty_stdClass_object_when_model_result_is_empty()
+  public function testGetobjectmodelMethodReturnsAnEmptyStdclassObjectWhenModelResultIsEmpty()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -2238,7 +2238,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_an_empty_stdClass_object_when_cached_model_result_is_empty()
+  public function testGetobjectmodelMethodReturnsAnEmptyStdclassObjectWhenCachedModelResultIsEmpty()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -2251,7 +2251,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_throws_an_exception_when_the_model_result_is_not_an_array_and_true_is_provided()
+  public function testGetobjectmodelMethodThrowsAnExceptionWhenTheModelResultIsNotAnArrayAndTrueIsProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -2263,7 +2263,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_throws_an_exception_when_the_cached_model_result_is_not_an_array_and_true_is_provided()
+  public function testGetobjectmodelMethodThrowsAnExceptionWhenTheCachedModelResultIsNotAnArrayAndTrueIsProvided()
   {
     $this->expectException(\Exception::class);
 
@@ -2275,7 +2275,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_an_empty_stdClass_object_when_the_model_result_is_not_an_array_and_false_is_provided()
+  public function testGetobjectmodelMethodReturnsAnEmptyStdclassObjectWhenTheModelResultIsNotAnArrayAndFalseIsProvided()
   {
     $this->mvc_mock->shouldReceive('getModel')
       ->once()
@@ -2288,7 +2288,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_an_empty_stdClass_object_when_the_cached_model_result_is_not_an_array_and_false_is_provided()
+  public function testGetobjectmodelMethodReturnsAnEmptyStdclassObjectWhenTheCachedModelResultIsNotAnArrayAndFalseIsProvided()
   {
     $this->mvc_mock->shouldReceive('getCachedModel')
       ->once()
@@ -2301,7 +2301,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_null_when_the_model_result_is_not_an_object()
+  public function testGetobjectmodelMethodReturnsNullWhenTheModelResultIsNotAnObject()
   {
     $this->controller = Mockery::mock(Controller::class)->makePartial();
 
@@ -2313,7 +2313,7 @@ let data = {
   }
 
   /** @test */
-  public function getObjectModel_method_returns_null_when_the_cached_model_result_is_not_an_object()
+  public function testGetobjectmodelMethodReturnsNullWhenTheCachedModelResultIsNotAnObject()
   {
     $this->controller = Mockery::mock(Controller::class)->makePartial();
 
@@ -2325,7 +2325,7 @@ let data = {
   }
 
   /** @test */
-  public function addInc_method_adds_a_property_to_the_mvc_object_inc_if_it_has_not_been_declared()
+  public function testAddincMethodAddsAPropertyToTheMvcObjectIncIfItHasNotBeenDeclared()
   {
     $this->mvc_mock->shouldReceive('addInc')
       ->once()
@@ -2335,7 +2335,7 @@ let data = {
   }
 
   /** @test */
-  public function hasArguments_method_test()
+  public function testHasargumentsMethodTest()
   {
     $this->setNonPublicPropertyValue('arguments', ['foo', 'bar']);
     $arguments = $this->getNonPublicProperty('arguments');
@@ -2350,7 +2350,7 @@ let data = {
   }
 
   /* @test */
-  public function get_method_returns_the_output_object()
+  public function testGetMethodReturnsTheOutputObject()
   {
     $this->assertSame(
       $this->controller->obj,
@@ -2359,7 +2359,7 @@ let data = {
   }
 
   /** @test */
-  public function transform_method_transforms_the_output_object_using_a_callback()
+  public function testTransformMethodTransformsTheOutputObjectUsingACallback()
   {
     $this->controller->obj->foo = 'bar';
 
@@ -2373,7 +2373,7 @@ let data = {
   }
 
   /** @test */
-  public function hasData_method_checks_if_data_exists_or_a_specific_index_exists()
+  public function testHasdataMethodChecksIfDataExistsOrASpecificIndexExists()
   {
     $this->controller->data = [
       'foo'       => 'bar',
@@ -2386,7 +2386,7 @@ let data = {
   }
 
   /** @test */
-  public function hasData_method_checks_if_the_given_index_and_not_empty()
+  public function testHasdataMethodChecksIfTheGivenIndexAndNotEmpty()
   {
     $this->controller->data = [
       'empty_key' => ''
@@ -2397,7 +2397,7 @@ let data = {
   }
 
   /** @test */
-  public function hasData_method_returns_false_when_data_is_empty()
+  public function testHasdataMethodReturnsFalseWhenDataIsEmpty()
   {
     $this->controller->data = [];
 
@@ -2405,7 +2405,7 @@ let data = {
   }
 
   /** @test */
-  public function hasData_method_checks_if_data_is_empty_or_not_when_the_provided_index_is_null()
+  public function testHasdataMethodChecksIfDataIsEmptyOrNotWhenTheProvidedIndexIsNull()
   {
     $this->controller->data = ['foo' => 'bar'];
     $this->assertTrue($this->controller->hasData(null));
@@ -2415,7 +2415,7 @@ let data = {
   }
 
   /** @test */
-  public function hasContent_method_checks_if_the_object_has_any_html_content()
+  public function testHascontentMethodChecksIfTheObjectHasAnyHtmlContent()
   {
     $this->controller->obj->content = 'html_content';
     $this->assertTrue($this->controller->hasContent());
@@ -2434,27 +2434,27 @@ let data = {
   }
 
   /** @test */
-  public function getRendered_method_returns_the_rendered_results_from_the_current_mvc_if_successfully_processed()
+  public function testGetrenderedMethodReturnsTheRenderedResultsFromTheCurrentMvcIfSuccessfullyProcessed()
   {
     $this->controller->obj->content = 'html_content';
     $this->assertSame('html_content', $this->controller->getRendered());
   }
 
   /** @test */
-  public function getRendered_method_returns_the_rendered_false_if_the_html_content_does_not_exists()
+  public function testGetrenderedMethodReturnsTheRenderedFalseIfTheHtmlContentDoesNotExists()
   {
     unset($this->controller->obj->content);
     $this->assertFalse($this->controller->getRendered());
   }
 
   /** @test */
-  public function getMode_method_return_the_current_mode()
+  public function testGetmodeMethodReturnTheCurrentMode()
   {
     $this->assertSame($this->getNonPublicProperty('mode'), $this->controller->getMode());
   }
 
   /** @test */
-  public function setMode_method_sets_the_current_mode()
+  public function testSetmodeMethodSetsTheCurrentMode()
   {
     $this->mvc_mock->shouldReceive('setMode')
       ->once()
@@ -2466,7 +2466,7 @@ let data = {
   }
 
   /** @test */
-  public function setMode_method_does_not_set_the_current_mode_if_mode_does_not_exist()
+  public function testSetmodeMethodDoesNotSetTheCurrentModeIfModeDoesNotExist()
   {
     $this->mvc_mock->shouldReceive('setMode')
       ->once()
@@ -2478,21 +2478,21 @@ let data = {
   }
 
   /** @test */
-  public function getScript_method_returns_the_rendered_script_result_form_the_current_mvc_if_successfully_processed()
+  public function testGetscriptMethodReturnsTheRenderedScriptResultFormTheCurrentMvcIfSuccessfullyProcessed()
   {
     $this->controller->obj->script = 'script_content';
     $this->assertSame('script_content', $this->controller->getScript());
   }
 
   /** @test */
-  public function getScript_method_returns_an_empty_string_if_the_script_content_does_not_exists()
+  public function testGetscriptMethodReturnsAnEmptyStringIfTheScriptContentDoesNotExists()
   {
     unset($this->controller->obj->script);
     $this->assertSame('', $this->controller->getScript());
   }
 
   /** @test */
-  public function setData_method_sets_the_data()
+  public function testSetdataMethodSetsTheData()
   {
     $this->controller->data = [];
 
@@ -2503,7 +2503,7 @@ let data = {
   }
 
   /** @test */
-  public function addData_method_merges_the_given_data_with_the_existing_one()
+  public function testAdddataMethodMergesTheGivenDataWithTheExistingOne()
   {
     $this->controller->data  = [];
 
@@ -2526,7 +2526,7 @@ let data = {
   }
 
   /** @test */
-  public function addData_method_does_not_merge_the_given_data_with_the_existing_one_if_it_is_not_an_array()
+  public function testAdddataMethodDoesNotMergeTheGivenDataWithTheExistingOneIfItIsNotAnArray()
   {
     $this->controller->data  = [];
 
@@ -2537,7 +2537,7 @@ let data = {
   }
 
   /** @test */
-  public function add_method_returns_a_new_controller_instance_with_the_given_arguments_and_mode_is_public()
+  public function testAddMethodReturnsANewControllerInstanceWithTheGivenArgumentsAndModeIsPublic()
   {
     $this->mvc_mock->shouldReceive('getRoute')
       ->once()
@@ -2586,7 +2586,7 @@ let data = {
   }
 
   /** @test */
-  public function add_method_returns_a_new_controller_instance_with_the_given_arguments_and_mode_is_private()
+  public function testAddMethodReturnsANewControllerInstanceWithTheGivenArgumentsAndModeIsPrivate()
   {
     $this->mvc_mock->shouldReceive('getRoute')
       ->once()
@@ -2639,7 +2639,7 @@ let data = {
   }
 
   /** @test */
-  public function add_method_returns_a_new_controller_instance_with_the_given_arguments_with_altering_the_path_if_it_contains_a_dot_and_backslash_at_the_beginning()
+  public function testAddMethodReturnsANewControllerInstanceWithTheGivenArgumentsWithAlteringThePathIfItContainsADotAndBackslashAtTheBeginning()
   {
     $this->mvc_mock->shouldReceive('getRoute')
       ->once()
@@ -2696,7 +2696,7 @@ let data = {
   }
 
   /** @test */
-  public function add_method_returns_false_if_getRoute_on_mvc_object_returns_null()
+  public function testAddMethodReturnsFalseIfGetrouteOnMvcObjectReturnsNull()
   {
     $this->mvc_mock->shouldReceive('getRoute')
       ->once()
@@ -2707,7 +2707,7 @@ let data = {
   }
 
   /** @test */
-  public function addToObj_method_creates_a_new_controller_instance_with_the_given_arguments_and_merges_its_object_with_the_existing_one_and_mode_is_public()
+  public function testAddtoobjMethodCreatesANewControllerInstanceWithTheGivenArgumentsAndMergesItsObjectWithTheExistingOneAndModeIsPublic()
   {
     $this->controller->obj->css = 'css_content';
 
@@ -2766,7 +2766,7 @@ let data = {
   }
 
   /** @test */
-  public function addToObj_method_creates_a_new_controller_instance_with_the_given_arguments_and_merges_its_object_with_the_existing_one_and_mode_is_private()
+  public function testAddtoobjMethodCreatesANewControllerInstanceWithTheGivenArgumentsAndMergesItsObjectWithTheExistingOneAndModeIsPrivate()
   {
     $this->controller->obj->css = 'css_content';
 
@@ -2825,7 +2825,7 @@ let data = {
   }
 
   /** @test */
-  public function addToObj_method_creates_a_new_controller_instancewith_the_given_arguments_and_merges_its_object_with_the_existing_one_with_altering_the_path_if_it_contains_a_dot_and_backslash_at_the_beginning()
+  public function testAddtoobjMethodCreatesANewControllerInstancewithTheGivenArgumentsAndMergesItsObjectWithTheExistingOneWithAlteringThePathIfItContainsADotAndBackslashAtTheBeginning()
   {
     $this->controller->obj->css = 'css_content';
 
@@ -2886,7 +2886,7 @@ let data = {
   }
 
   /** @test */
-  public function addToObj_method_throws_an_exception_when_getRoute_on_mvc_object_returns_null()
+  public function testAddtoobjMethodThrowsAnExceptionWhenGetrouteOnMvcObjectReturnsNull()
   {
     $this->expectException(\Error::class);
 
@@ -2899,7 +2899,7 @@ let data = {
   }
 
   /** @test */
-  public function getResult_method_returns_the_output_object()
+  public function testGetresultMethodReturnsTheOutputObject()
   {
     $this->assertSame(
       $this->controller->obj,
@@ -2908,7 +2908,7 @@ let data = {
   }
 
   /** @test */
-  public function viewExists_method_checks_whether_the_given_view_exsits_or_not()
+  public function testViewexistsMethodChecksWhetherTheGivenViewExsitsOrNot()
   {
     $this->mvc_mock->shouldReceive('viewExists')
       ->once()
@@ -2919,7 +2919,7 @@ let data = {
   }
 
   /** @test */
-  public function modelExists_method_checks_whether_the_given_model_exists_or_not()
+  public function testModelexistsMethodChecksWhetherTheGivenModelExistsOrNot()
   {
     $this->mvc_mock->shouldReceive('modelExists')
       ->once()
@@ -2930,7 +2930,7 @@ let data = {
   }
 
   /** @test */
-  public function includeController_method_includes_a_controller_and_returns_boolean_when_called_from_cli()
+  public function testIncludecontrollerMethodIncludesAControllerAndReturnsBooleanWhenCalledFromCli()
   {
     $this->mvc_mock->shouldReceive('isCli')->andReturnTrue();
 
@@ -2947,7 +2947,7 @@ let data = {
   }
 
   /** @test */
-  public function includeController_includes_a_controller_and_returns_its_content_when_not_called_from_cli()
+  public function testIncludecontrollerIncludesAControllerAndReturnsItsContentWhenNotCalledFromCli()
   {
     $this->mvc_mock->shouldReceive('isCli')->andReturnFalse();
 
@@ -2964,7 +2964,7 @@ let data = {
   }
 
   /** @test */
-  public function includeController_includes_a_controller_and_returns_boolean_when_not_called_from_cli_and_is_super_is_true()
+  public function testIncludecontrollerIncludesAControllerAndReturnsBooleanWhenNotCalledFromCliAndIsSuperIsTrue()
   {
     $this->mvc_mock->shouldReceive('isCli')->andReturnFalse();
 

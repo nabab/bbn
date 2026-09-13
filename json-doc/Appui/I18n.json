@@ -2230,7 +2230,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the path to explore relative to the given id_option\n   * It only works if i18n class is constructed by giving the id_project\n   *\n   * @param string $id_option\n   * @return String|null\n   *\/"
+            "comments": "  \/**\n   * Returns the path to explore relative to the given id_option\n   * It only works if i18n class is constructed by giving the id_project\n   *\n   * @param string $id_option\n   * @return string|null\n   *\/"
         },
         "getLocaleDirPath": {
             "name": "getLocaleDirPath",
@@ -2288,7 +2288,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the path of the locale dir of the given $id_option\n   *\n   * @param string $id_option\n   * @return String\n   *\/"
+            "comments": "  \/**\n   * Returns the path of the locale dir of the given $id_option\n   *\n   * @param string $id_option\n   * @return string\n   *\/"
         },
         "getIndexPath": {
             "name": "getIndexPath",

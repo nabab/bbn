@@ -161,17 +161,22 @@ trait TmpFiles
    * @param bool   $mandatory
    * @return nul|int
    */
-  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?int
+  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?string
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
-      return $this->db->insertIgnore(
-        $cCfg['tables']['links'], [
-          $cCfg['arch']['links']['id_link'] => $id_link,
-          $cCfg['arch']['links']['id_file'] => $id_file,
-          $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1
-        ]
-      );
+      $d = [
+        $cCfg['arch']['links']['id_link'] => $id_link,
+        $cCfg['arch']['links']['id_file'] => $id_file,
+        $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1
+      ];
+      if (isset($cCfg['arch']['links']['id_entity'])) {
+        $d[$cCfg['arch']['links']['id_entity']] = $this->getId();
+      }
+
+      if ($this->db->insert($cCfg['tables']['links'], $d)) {
+        return $this->db->lastId();
+      }
     }
 
     return null;
@@ -239,6 +244,7 @@ trait TmpFiles
         'table' => $cCfg['tables']['links'],
         'fields' => X::mergeArrays(
           [
+            $this->db->cfn($cCfg['arch']['links']['id'], $cCfg['tables']['links']),
             $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
             $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),
             'other_link' => 'IF(l.'.$cCfg['arch']['links']['id_link'].' IS NULL, false, true)'
@@ -300,9 +306,12 @@ trait TmpFiles
         ]
       );
     }
+
+    return null;
   }
 
-  public function hasLinks(string $id_file){
+  public function hasLinks(string $id_file): bool
+  {
     if (Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
       return !!$this->db->selectAll([
@@ -316,6 +325,7 @@ trait TmpFiles
         ]
       ]);
     }
+
     return false;
   }
 

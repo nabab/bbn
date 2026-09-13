@@ -25,16 +25,12 @@ trait Config {
   private $path;
 
   /**
-   * @var Controller The controller
-   */
-  protected $ctrl;
-  /**
    * @todo The class shouldn't send emails directly
    * @var string
    */
   protected $mail;
   /**
-   * @var array This corresponds to the post property from $ctrl
+   * @var array This corresponds to the post property
    */
   protected $data;
   /**

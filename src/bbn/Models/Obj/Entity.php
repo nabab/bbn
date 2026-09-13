@@ -2,19 +2,19 @@
 
 namespace bbn\Models\Obj;
 
-use bbn;
+use bbn\Db;
 
 abstract class Entity {
 
-  private $is_checked = false;
+  private bool $is_checked = false;
 
-  protected $db;
+  protected Db $db;
 
-  protected $table_name;
+  protected string $table_name;
 
-  protected $id_field = 'id';
+  protected string $id_field = 'id';
 
-  public function __construct(\bbn\Db $db, $id)
+  public function __construct(Db $db, $id)
   {
     if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){
       $this->is_checked = true;
@@ -22,7 +22,7 @@ abstract class Entity {
     }
   }
 
-  public function check(): boolean
+  public function check(): bool
   {
     return $this->is_checked;
   }

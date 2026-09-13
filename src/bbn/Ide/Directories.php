@@ -9,6 +9,8 @@ use bbn\Util\Timer;
 use bbn\File\Dir;
 use bbn\Appui\Option;
 use bbn\Models\Tts\Optional;
+use bbn\User\Preferences;
+use bbn\User\Session;
 
 class Directories {
 
@@ -514,6 +516,7 @@ class Directories {
     $data['position'] = $this->db->getOne('
       SELECT MAX(position) AS pos
       FROM bbn_ide_directories') + 1;
+    /*
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
       'path' => Str::parsePath($data['path']),
@@ -525,7 +528,7 @@ class Directories {
     ]) ){
       $data['id'] = $this->db->lastId();
       return $data;
-    }
+    }*/
     return $this->error('Error: Add.');
   }
 
@@ -534,6 +537,7 @@ class Directories {
    * @return array|int
    */
   public function edit($data){
+    /*
     if ( $this->db->update('bbn_ide_directories', [
       'name' => $data['name'],
       'path' => Str::parsePath($data['path']),
@@ -545,6 +549,7 @@ class Directories {
     ], ['id' => $data['id']]) ){
       return 1;
     }
+      */
     return $this->error('Error: Edit.');
   }
 
@@ -699,10 +704,10 @@ class Directories {
    * @param string $file
    * @param string|array $dir
    * @param string $tab
-   * @param bbn\User\Preferences|null $pref
+   * @param Preferences|null $pref
    * @return array|bool
    */
-  public function load($file, $dir, $tab, bbn\User\Preferences $pref = null){
+  public function load($file, $dir, $tab, ?Preferences $pref = null){
     /** @var boolean|array $res */
     $res = false;
     $file = Str::parsePath($file);
@@ -741,10 +746,10 @@ class Directories {
    * @param string $dir
    * @param string $tab
    * @param array $cfg
-   * @param bbn\User\Preferences|null $pref
+   * @param Preferences|null $pref
    * @return array
    */
-  protected function getFile($file, $dir, $tab, array $cfg, bbn\User\Preferences $pref = null){
+  protected function getFile($file, $dir, $tab, array $cfg, ?Preferences $pref = null){
     if ( isset($cfg['title'], $cfg['bcolor'], $cfg['fcolor']) ){
       /** @var string $name The file's name - without path and extension */
       $name = Str::fileExt($file, 1)[0];
@@ -890,10 +895,10 @@ class Directories {
    * @param string $file The file's URL
    * @param string $code The file's content
    * @param array|null $cfg The user preferences
-   * @param bbn\User\Preferences|null $pref
+   * @param Preferences|null $pref
    * @return array|void
    */
-  public function save($file, $code, array|null $cfg = null, bbn\User\Preferences $pref = null){
+  public function save($file, $code, array|null $cfg = null, ?Preferences $pref = null){
     die(var_dump($file, $code, $cfg ));
     if ( ($file = Str::parsePath($file)) &&
       ($real = $this->urlToReal($file)) &&
@@ -903,7 +908,7 @@ class Directories {
       $id_file = $this->realToId($real);
       $ext = Str::fileExt($real, 1);
       $id_user = false;
-      if ( $session = bbn\User\Session::getInstance() ){
+      if ( $session = Session::getInstance() ){
         $id_user = $session->get('user', 'id');
       }
       // We delete the file if code is empty and we aren't in a _super file
@@ -958,10 +963,10 @@ class Directories {
    * @param string $id_file The file's id
    * @param string $md5 The file's md5
    * @param array|null $cfg
-   * @param bbn\User\Preferences|null $pref
+   * @param Preferences|null $pref
    * @return bool
    */
-  public function setPreferences($id_user, $id_file, $md5, array|null $cfg = null, bbn\User\Preferences $pref = null){
+  public function setPreferences($id_user, $id_file, $md5, array|null $cfg = null, ?Preferences $pref = null){
     if ( !empty($id_user) && !empty($id_file) && !empty($pref) ){
       $change['md5'] = $md5;
       if ( !empty($cfg['selections']) ){

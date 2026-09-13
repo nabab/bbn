@@ -162,7 +162,8 @@ class Statistic extends DbCls
     }
 
     // History config retrieved
-    if ($this->hcfg = History::getTableCfg($cfg['table'])) {
+    if ($tmp = History::getTableCfg($cfg['table'])) {
+      $this->hcfg = $tmp;
       // For sum and avg types field is mandatory
       if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
         throw new Exception(X::_("The field parameter is mandatory for sum and avg types"));
@@ -278,6 +279,8 @@ class Statistic extends DbCls
 
       return $res;
     }
+
+    return null;
   }
 
 

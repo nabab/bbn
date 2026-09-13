@@ -8,370 +8,539 @@
 
 namespace bbn\Models\Tts;
 
-use bbn\X;
-use bbn\Str;
-use bbn\Cache;
-use stdClass;
 use Exception;
-use function array_key_exists;
-use function is_string;
-use function is_array;
+use bbn\Cache;
+use bbn\Db;
+use bbn\X;
+use bbn\Util\InternalEvent;
+use Mpdf\Tag\A;
 
+use function array_key_exists;
+use function count;
+use function is_array;
+use function in_array;
+
+
+/**
+ * Provides Cache helpers built on top of DbActions, with row-level caching:
+ * - Row cache: table/<table_name>/<id> -> full row array
+ *
+ * Notes:
+ * - The cache is designed to reduce repeated SELECTs, especially in long-lived workers.
+ * - Query results are cached as lists of ids, then rows are cached by id.
+
+ */
 trait DbCache
 {
-  use DbActions;
+  use DbOps;
+  private bool $dbCacheIsInit = false;
 
-  /** @var Cache */
-  protected static $dbCacheEngine;
+  /** @var Cache The cache engine used by this trait (shared across instances). */
+  protected static Cache $dbTraitCache;
 
-  protected static function dbCacheInit(): void
+  /**
+   * Ensures the cache engine is initialized.
+   *
+   * @return void
+   */
+  protected static function dbTraitGlobalCacheInit(): void
   {
-    if (!isset(self::$dbCacheEngine)) {
-      self::$dbCacheEngine = Cache::getEngine();
+    if (!isset(self::$dbTraitCache)) {
+      self::$dbTraitCache = Cache::getEngine();
     }
   }
 
-  protected function dbCacheName($id)
+  protected function dbCacheOnAfterInsert(InternalEvent $o): InternalEvent
   {
-    return 'dbCache/' . $this->getClassCfg()['table'] . '/' . $id;
+    $id = $o->getData()[0];
+    $this->dbTraitCacheSet($id);
+    return $o;
   }
 
-  /**
-   * @param array|string $id
-   * @return bool
-   */
-  protected function dbCacheExists(string $id): bool
+  protected function dbCacheOnBeforeUpdate(InternalEvent $o): InternalEvent
   {
-    return self::$dbCacheEngine->has($this->dbCacheName($id));
+    $filter = $o->getData()[0];
+    $ids = $this->dbTraitGetIds($filter);
+    $o->setResponse($ids);
+    return $o;
   }
 
-  /**
-   * Inserts a new row in the table.
-   *
-   * @param array $data
-   *
-   * @return string|null
-   */
-  protected function dbCacheInsert(array $data, bool $ignore = false): ?string
+  protected function dbCacheOnAfterUpdate(InternalEvent $o): InternalEvent
   {
-    if ($res = $this->dbTraitInsert($data, $ignore)) {
-      $data = $this->dbTraitSelect($res);
-      self::$dbCacheEngine->set($this->dbCacheName($res), $data);
-      return $res;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Deletes a single row from the table through its id.
-   *
-   * @param string $id
-   *
-   * @return bool
-   */
-  protected function dbCacheDelete(string $id): bool
-  {
-    if ($res = $this->dbTraitDelete($id, $cascade)) {
-      $this->dbCacheDeleteCache($id);
-      if (is_string($filter)) {
-        $id = $filter;
+    X::log(['passing by'], 'dbTraitCache-afterupdate-ids');
+    if ($ids = $o->getResponse()) {
+      foreach ($ids as $id) {
+        $this->dbTraitCacheSet($id);
       }
-      elseif (is_array($filter)) {
-        $cfg = $this->getClassCfg();
-        $f = $cfg['arch'][$this->class_table_index];
-        if (!empty($f['id']) && isset($filter[$f['id']])) {
-          $id = $filter[$f['id']];
+      $res = $o->getData()[2] ?? null;
+      $o->setResponse($res);
+    }
+
+    return $o;
+  }
+
+  protected function dbCacheOnBeforeDelete(InternalEvent $o): InternalEvent
+  {
+    $filter = $o->getData()[0];
+    $ids =
+      $this->class_cfg["cache"] ?? false
+        ? $this->dbTraitGetIds($filter)
+        : [];
+    foreach ($ids as $id) {
+      $this->dbTraitCacheDelete($id);
+    }
+    return $o;
+  }
+
+  protected function dbTraitCacheInit(): void
+  {
+    $this->dbTraitGlobalCacheInit();
+    if (!$this->dbCacheIsInit && ($this->class_cfg["cache"] ?? false)) {
+      $this->dbCacheIsInit = true;
+      /*
+      $this->on("beforeselect", function (InternalEvent $o): InternalEvent {
+        $filter = $o->getData()[0];
+        X::ddump($filter, "cache beforeselect filter");
+        if (is_string($filter) && $this->dbTraitCacheGet($filter)) {
+          $o->setResponse($this->dbTraitCacheGet($filter));
+          $o->preventDefault();
         }
-      }
 
-      if (isset($id)) {
-        self::$dbCacheEngine->delete($this->dbCacheName($id));
-      }
+        return $o;
+      });
+      */
+      $this->on("afterinsert", fn(InternalEvent $o) => $this->dbCacheOnAfterInsert($o));
+      $this->on("beforeupdate", fn(InternalEvent $o) => $this->dbCacheOnBeforeUpdate($o));
+      $this->on("afterupdate", fn(InternalEvent $o) => $this->dbCacheOnAfterUpdate($o));
+      $this->on("beforedelete", fn(InternalEvent $o) => $this->dbCacheOnBeforeDelete($o));
     }
-    if ($this->dbTraitExists($filter)) {
+  }
+
+  /**
+   * Returns the cache key for a row.
+   *
+   * @param string $id The row's id.
+   * @return string
+   */
+  protected function dbTraitRowCacheKey(string $id): string
+  {
+    static::dbTraitGlobalCacheInit();
+    $sep = Cache::getSeparator();
+    $num_hosts = self::$dbTraitCache->getNumHosts();
+    if (!isset($this->class_table)) {
+      $cfg = self::getDefaultClassCfg();
+      while ($cfg && empty($cfg['table'])) {
+        $cls = get_parent_class($this);
+        if (!$cls) {
+          throw new Exception(X::_("Impossible to find a table for class %s", self::class));
+        }
+
+        $cfg = $cls::getDefaultClassCfg();
+      }
+      $shard = $num_hosts > 1 ? '{table-' . (crc32($cfg['table']) % $num_hosts) . '}' : 'table';
+      return "$shard{$sep}{$cfg['table']}{$sep}".substr($id, 0, 3) . $sep . substr($id, 3, 3) . $sep . substr($id, 6);
+    }
+
+    $shard = $num_hosts > 1 ? '{table-' . (crc32($this->class_table) % $num_hosts) . '}' : 'table';
+    return "$shard{$sep}{$this->class_table}{$sep}".substr($id, 0, 3) . $sep . substr($id, 3, 3) . $sep . substr($id, 6);
+  }
+
+  /**
+   * Retrieves a row from cache.
+   *
+   * If $fields is provided, returns only the requested fields (with optional aliases).
+   *
+   * @param string $id The row's id.
+   * @param array  $fields List of fields to return. Can be:
+   *                       - ['col1', 'col2']
+   *                       - ['alias1' => 'col1', 'alias2' => 'col2']
+   * @return array|null The cached row (possibly projected), or null if missing.
+   */
+  protected function dbTraitCacheGet(
+    string $id,
+    array $fields = [],
+    bool $autoExclude = false,
+  ): ?array {
+    static::dbTraitGlobalCacheInit();
+    $res = null;
+    if ($res = self::$dbTraitCache->get($this->dbTraitRowCacheKey($id))) {
       $cfg = $this->getClassCfg();
-      $f = $cfg['arch'][$this->class_table_index];
+      $todo = [];
+      if (
+        $excluded =
+          !$autoExclude &&
+          is_array($cfg["cache"]) &&
+          isset($cfg["cache"]["excluded"])
+            ? $cfg["cache"]["excluded"]
+            : []
+      ) {
+        if (empty($fields)) {
+          $fields = $cfg["arch"][$this->class_table_index];
+        }
 
-      if (!is_array($filter) && !empty($f['id'])) {
-        $filter = [$f['id'] => $filter];
+        foreach ($fields as $alias => $field) {
+          if (in_array($field, $excluded)) {
+            $todo[$alias] = $field;
+          }
+        }
+
+        if (!empty($todo)) {
+          $res = X::mergeArrays(
+            $res,
+            $this->dbTraitSingleSelection($id, [], "array", $todo),
+          );
+        }
       }
 
-      return (bool)$this->db->delete($cfg['table'], $this->dbTraitGetFilterCfg($filter));
+      if (count($fields)) {
+        $arr = [];
+        foreach ($fields as $alias => $field) {
+          if (array_key_exists($field, $res)) {
+            $arr[is_int($alias) ? $field : $alias] = $res[$field];
+          }
+        }
+
+        return $arr;
+      }
     }
 
-    return false;
+    return $res ?: null;
   }
 
+  protected function dbTraitCacheRetrieveRecord(string $id): ?array
+  {
+    static::dbTraitGlobalCacheInit();
+    $cfg = $this->getClassCfg();
+    $f = array_values($cfg["arch"][$this->class_table_index]);
+    $tableCfg = self::dbConfigGetTableClasses($this->db);
+    if (is_array($cfg["cache"]) && isset($cfg["cache"]["excluded"])) {
+      $excluded = $cfg["cache"]["excluded"];
+      foreach ($excluded as $col) {
+        if (in_array($col, $f)) {
+          unset($f[array_search($col, $f)]);
+        }
+      }
+    }
+    if (
+      $data = $this->dbTraitSingleSelection(
+        ["id" => $id],
+        [],
+        "array",
+        array_values($f),
+      )
+    ) {
+      if (!empty($tableCfg[$this->class_table]['junctions'])) {
+        $this->dbTraitCacheApplyJunctions(
+          $data,
+          $tableCfg[$this->class_table]['junctions'],
+          $tableCfg
+        );
+      }
+
+      return $data;
+    }
+
+    return null;
+  }
 
   /**
-   * Updates a single row in the table through its id.
+   * Loads a row from DB and stores it into cache.
+   *
+   * If $fields is provided, returns only the requested fields (with optional aliases).
+   *
+   * @param string $id The row's id.
+   * @param array  $fields List of fields to return (same format as dbTraitCacheGet()).
+   * @return array|null The row fetched from DB (possibly projected), or null if not found.
+   */
+  protected function dbTraitCacheSet(string $id, array $fields = []): ?array
+  {
+    static::dbTraitGlobalCacheInit();
+    if (!isset($this->class_table)) {
+      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", self::class));
+    }
+
+    if ($data = $this->dbTraitCacheRetrieveRecord($id)) {
+      self::$dbTraitCache->set($this->dbTraitRowCacheKey($id), $data);
+      return $this->dbTraitCacheGet($id, $fields);
+    }
+
+    return null;
+  }
+
+  /**
+   * Applies junction enrichment recursively to a row.
+   *
+   * Each junction can:
+   * - fetch one linked row from another table
+   * - attach it under `property`
+   * - or merge it into the current row if no property is given
+   * - recursively apply nested junctions through `junctions`
+   *
+   * Supported junction config keys:
+   * - table      : linked table name
+   * - field      : local field containing the linked row id
+   * - property   : optional property name for embedding
+   * - filter     : optional extra filter
+   * - fields     : optional selected fields
+   * - mode       : optional, defaults to 'one'
+   * - junctions  : optional nested junction definitions
    *
    * @param array $data
-   * @param string|array $filter
-   * @param bool $addCfg
-   *
-   * @return bool
+   * @param array $junctions
+   * @param array $tableCfg
+   * @return array
    */
-  protected function dbTraitUpdate(string|array $filter, array $data): int
-  {
-    $ccfg = $this->getClassCfg();
-    $f = $ccfg['arch'][$this->class_table_index];
-    if (!is_array($filter)) {
-      $filter = [$f['id'] => $filter];
-    }
+  protected function dbTraitCacheApplyJunctions(
+    array &$data,
+    array $junctions,
+    array $tableCfg
+  ): array {
+    foreach ($junctions as $j) {
+      if (
+        !X::hasProps($j, ['table', 'field'], true) ||
+        (!is_array($j['field']) && empty($data[$j['field']]))
+      ) {
+        continue;
+      }
 
-    if (!$this->dbTraitExists($filter)) {
-      throw new Exception(X::_("Impossible to find the given row"));
-    }
-
-    if ($data = $this->dbTraitPrepare($data)) {
-      if (!empty($f['cfg'])) {
-        $col = $f['cfg'];
-        if (!empty($data[$col])) {
-          if (is_string($data[$col])) {
-            $data[$col] = json_decode($data[$col], true);
+      if (is_array($j['field']) && X::isAssoc($j['field'])) {
+        $isValid = true;
+        foreach ($j['field'] as $f => $df) {
+          if (empty($data[$df])) {
+            $isValid = false;
+            break;
           }
+        }
 
-          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
-          foreach ($data[$col] as $k => $v) {
-            $jsonUpdate .= ', "$.' . $k . '", ' . (is_iterable($v) ? "JSON_EXTRACT('".Str::escapeSquotes(json_encode($v))."', '$')" : ('"'.Str::escapeDquotes($v).'"'));
-          }
-
-          $jsonUpdate .= ")";
-          $data[$col] = [null, $jsonUpdate];
+        if (!$isValid) {
+          continue;
         }
       }
 
-      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
-    }
+      $mode = $j['mode'] ?? 'one';
 
-    return 0;
-  }
+      // Not implemented yet, kept here for later extension
+      if ($mode === 'many') {
+        continue;
+      }
 
-  protected function dbTraitInsertUpdate(array $data): ?string
-  {
-    $cfg = $this->getClassCfg();
-    $keys = $this->db->getUniqueKeys($this->class_cfg['table']);
-    $update = false;
-    if (!empty($keys)) {
-      foreach ($keys as $key => $columns) {
-        $checked = array_filter($columns, fn($col) => !array_key_exists($col, $data) || is_null($data[$col]));
-        if (empty($checked)) {
-          $update = $this->db->selectOne($cfg['table'], $cfg['arch'][$this->class_table_index]['id'], array_intersect_key($data, array_flip($columns)));
-          break;
+      $where = $j['filter'] ?? [];
+
+      if (is_array($j['field'])  && X::isAssoc($j['field'])) {
+        foreach ($j['field'] as $df => $f) {
+          $where[$f] = $data[$df];
         }
       }
-    }
-    if ($update) {
-      $this->dbTraitUpdate($update, $data);
-      return $update;
-    }
-    else {
-      return $this->dbTraitInsert($data);
-    }
-  }
+      elseif (isset($tableCfg[$j['table']]['primary'][0])) {
+        $where[$tableCfg[$j['table']]['primary'][0]] = $data[$j['field']];
+      }
 
+      if (empty($where)) {
+        continue;
+      }
+
+      $jdata = $this->db->rselect(
+        $j['table'],
+        $j['fields'] ?? [],
+        $where
+      );
+
+      if (!$jdata) {
+        continue;
+      }
+
+      // Apply nested junctions on the fetched row
+      if (!empty($j['junctions']) && is_array($j['junctions'])) {
+        $this->dbTraitCacheApplyJunctions(
+          $jdata,
+          $j['junctions'],
+          $tableCfg
+        );
+      }
+
+      if (!empty($j['property'])) {
+        $data[$j['property']] = $jdata;
+      }
+      else {
+        X::extendOut($data, $jdata);
+      }
+    }
+
+    return $data;
+  }
 
   /**
-   * Retrieves a row as an object from the table through its id.
+   * Deletes a row from cache.
    *
-   * @param string|array $filter
-   * @param array $order
-   *
-   * @return mixed
+   * @param string $id The row's id.
+   * @return void
    */
-  protected function dbTraitSelectOne(string $field, string|array $filter = [], array $order = [])
+  protected function dbTraitCacheDelete(string $id): void
   {
-    if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {
-      return $res[$field] ?? null;
+    static::dbTraitGlobalCacheInit();
+    self::$dbTraitCache->delete($this->dbTraitRowCacheKey($id));
+  }
+
+
+  protected function dbTraitCacheHash(string $id): ?string
+  {
+    static::dbTraitGlobalCacheInit();
+    if ($r = $this->dbTraitCacheInfo($id)) {
+      return $r['hash'] ?? null;
     }
 
     return null;
   }
 
-
-  /**
-   * Retrieves a row as an object from the table through its id.
-   *
-   * @param string|array $filter
-   * @param array $order
-   *
-   * @return stdClass|null
-   */
-  protected function dbTraitSelect(string|array $filter = [], array $order = [], array $fields = []): ?stdClass
+  protected function dbTraitCacheInfo(string $id): ?array
   {
-    return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);
+    static::dbTraitGlobalCacheInit();
+    $cn = $this->dbTraitRowCacheKey($id);
+    return self::$dbTraitCache->info($cn);
   }
 
-
-  /**
-   * Retrieves a row as an array from the table through its id.
-   *
-   * @param string|array $filter
-   * @param array $order
-   *
-   * @return array|null
-   */
-  protected function dbTraitRselect(string|array $filter = [], array $order = [], array $fields = []): ?array
+  protected function dbTraitCacheImport(int $limit = 10000): ?int
   {
-    return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);
-  }
-
-  protected function dbTraitSelectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
-  {
-    return $this->dbTraitSelection($filter, $order, $limit, $start, 'value', [$field]);
-  }
-
-
-  /**
-   * Returns the number of rows from the table for the given conditions.
-   *
-   * @param array $filter
-   *
-   * @return int
-   */
-  protected function dbTraitCount(array $filter = []): int
-  {
-    if (!$this->class_table_index) {
-      throw new Exception(X::_("The table index parameter should be defined"));
+    static::dbTraitGlobalCacheInit();
+    if (!isset($this->class_table)) {
+      throw new Exception(X::_("The class %s is not properly configured for DbCache: missing table", static::class));
     }
 
-    $req = $this->dbTraitGetRequestCfg($filter, [], 1, 0, [$this->fields['id']]);
-    return $this->db->count($req);
-  }
-
-
-  /**
-   * Returns an array of rows as objects from the table for the given conditions.
-   *
-   * @param array $filter
-   * @param array $order
-   * @param int $limit
-   * @param int $start
-   *
-   * @return array
-   */
-  protected function dbTraitSelectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
-  {
-    return $this->dbTraitSelection($filter, $order, $limit, $start, 'object', $fields);
-  }
-
-
-  /**
-   * Returns an array of rows as arrays from the table for the given conditions.
-   *
-   * @param array $filter
-   * @param array $order
-   * @param int $limit
-   * @param int $start
-   *
-   * @return array
-   */
-  protected function dbTraitRselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
-  {
-    return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);
-  }
-
-  protected function dbTraitGetRelations(string $id, string|null $table = null): ?array
-  {
-    if ($this->dbTraitExists($id)) {
-      $db =& $this->db;
-      $res = [];
-      foreach ($this->dbTraitGetTableRelations($table) as $rel) {
-        if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {
-          $res[$rel['table']] = [
-            'col' => $rel['col'],
-            'primary' => $rel['primary'],
-            'values' => $all
-          ];
-        }
-      }
-
-      return $res;
+    $hasEvents = method_exists($this, "disableEvents");
+    if ($hasEvents) {
+      $this->disableEvents();
     }
-
-    return null;
-  }
-
-  protected function dbTraitGetSearchFilter(string|int $filter, array $cols = [], bool $strict = false): array
-  {
     $cfg = $this->getClassCfg();
-    $isNumber = Str::isNumber($filter);
-    $finalFilter = [
-      'logic' => 'OR',
-      'conditions' => []
-    ];
-    if (empty($cols)) {
-      $tableCols = $this->db->modelize($cfg['table'])['fields'];
-      foreach ($tableCols as $col => $colCfg) {
-        if ((Str::pos($colCfg['type'], 'text') !== false) || (Str::pos($colCfg['type'], 'char') !== false)) {
-          $cols[] = $col;
-        }
-        elseif ($isNumber && (Str::pos($colCfg['type'], 'int') !== false)) {
-          $cols[] = $col;
+    $cacheFn = $cfg["cache"]["fn"] ?? null;
+    $f = array_values($cfg["arch"][$this->class_table_index]);
+    $tableCfg = self::dbConfigGetTableClasses($this->db);
+    if (is_array($cfg["cache"]) && isset($cfg["cache"]["excluded"])) {
+      $excluded = $cfg["cache"]["excluded"];
+      foreach ($excluded as $col) {
+        if (in_array($col, $f)) {
+          unset($f[array_search($col, $f)]);
         }
       }
     }
-
-    foreach ($cols as $col) {
-      $finalFilter['conditions'][] = [
-        'field' => $this->db->cfn($col, $cfg['table']),
-        'operator' => $strict ? '=' : 'contains',
-        'value' => $filter
-      ];
-    }
-
-    return $finalFilter;
-  }
-
-  protected function dbTraitSearch(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
-  {
-    if (is_array($filter)) {
-      $finalFilter = $filter;
-      if (empty($fields) && !empty($cols)) {
-        $fields = $cols;
-      }
-    }
-    else {
-      $finalFilter = $this->dbTraitGetSearchFilter($filter, $cols);
-    }
-
-    return $this->dbTraitRselectAll($finalFilter, $order, $limit, $start, $fields);
-  }
-
-  /**
-   * Gets a single row and returns it
-   *
-   * @param string|array $filter
-   * @param array $order
-   * @param string $mode
-   * @return mixed
-   */
-  private function dbTraitSingleSelection(
-    string|array $filter,
-    array $order,
-    string $mode = 'array',
-    array $fields = []
-  ): mixed
-  {
-    $f = $this->class_cfg['arch'][$this->class_table_index];
-    if (is_string($filter)) {
-      $cfg = [$f['id'] => $filter];
-    }
-    elseif (is_array($filter)) {
-      $cfg = $filter;
-    }
-
-    if (isset($cfg)
-        && ($res = $this->dbTraitSelection($cfg, $order, 1, 0, $mode, $fields))
+    $start = 0;
+    $num = 0;
+    $cache = self::$dbTraitCache;
+    $idCol = $tableCfg[$this->class_table]['primary'][0];
+    $key = null;
+    if (
+      $data = $this->dbTraitSelection(
+        [],
+        [$idCol => 'ASC'],
+        $limit,
+        $start,
+        "array",
+        array_values($f),
+      )
     ) {
-      return $res[0];
+      if ($cacheFn && method_exists($this, $cacheFn)) {
+        foreach ($data as &$d) {
+          $d = $this->$cacheFn($d);
+        }
+      }
+
+      if (!empty($tableCfg[$this->class_table]['junctions'])) {
+        foreach ($data as &$row) {
+          $this->dbTraitCacheApplyJunctions(
+            $row,
+            $tableCfg[$this->class_table]['junctions'],
+            $tableCfg
+          );
+        }
+      }
+
+      $toCache = [];
+      foreach ($data as $d) {
+        if (\is_null($key)) {
+          $key = substr($this->dbTraitRowCacheKey($d[$idCol]), 0, - (\strlen($d[$idCol]) + 2));
+        }
+
+        $toCache[$key.substr($d[$idCol], 0, 3).':'.substr($d[$idCol], 3, 3).':'.substr($d[$idCol], 6)] = $d;
+      }
+
+      if ($cache->setMultiple($toCache, 0)) {
+        $num += count($data);
+        $start += $limit;
+      }
     }
 
-    return null;
+    if ($hasEvents) {
+      $this->enableEvents();
+    }
 
+    return $num;
   }
 
+  protected function dbTraitCacheGetSet(string $id, array $fields = []): ?array
+  {
+    static::dbTraitGlobalCacheInit();
+    $cn = $this->dbTraitRowCacheKey($id);
+    $cache = self::$dbTraitCache;
+    $data = $cache->getSet(
+      fn () => $this->dbTraitCacheRetrieveRecord($id),
+      $cn
+    );
+    if (!$data) {
+      return null;
+    }
+    if (count($fields)) {
+      $arr = [];
+      foreach ($fields as $alias => $field) {
+        if (array_key_exists($field, $data)) {
+          $arr[is_int($alias) ? $field : $alias] = $data[$field];
+        }
+      }
+
+      return $arr;
+    }
+
+    return $data;
+  }
+
+ 
+  public static function dbTraitCacheInitTrigger(Db $db): void {
+    if (!defined("BBN_DBACTIONS_CACHE_INIT")) {
+      define("BBN_DBACTIONS_CACHE_INIT", true);
+      $cache = Cache::getEngine();
+      $sep = Cache::getSeparator();
+      $arr = self::dbConfigGetTableClasses($db);
+      $db->setTrigger(function ($cfg) use ($cache, $db, $arr, $sep) {
+        if (!empty($cfg["write"]) && $cfg["moment"] === "after") {
+          $ids = [];
+          $table = $db->tsn(array_values($cfg["tables"])[0]);
+          if (isset($arr[$table])) {
+            if (!empty($arr[$table]['cache'])) {
+              if ($cfg["kind"] === "INSERT") {
+              } else {
+                $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
+                if ($idx1 !== null) {
+                  $ids[] = $cfg['values'][$idx1];
+                  //$cache->delete("table{$sep}{$table}{$sep}{$id}");
+                }
+              }
+            }
+            elseif (isset($arr[$table]['deps'])) {
+              foreach ($arr[$table]['deps'] as $dep) {
+                $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
+                if ($idx1 !== null) {
+                  $id = $cfg['values'][$idx1];
+                  array_push($ids, ...$db->getColumnValues($dep['table'], 'id', [$dep['field'] => $id]));
+                }
+              }
+            }
+
+            if (!empty($ids)) {
+              $cache->deleteMultiple($ids);
+            }
+          }
+        }
+
+        return $cfg;
+      });
+    }
+  }
 }

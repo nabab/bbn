@@ -73,7 +73,6 @@ class CmsTest extends TestCase
     $cfg = $this->getClassCgf();
 
     $this->cms = \Mockery::mock(Cms::class)->makePartial();
-    $this->cms->cacheInit();
 
     $this->setNonPublicPropertyValue('db', $this->db_mock);
     $this->setNonPublicPropertyValue('note', $this->notes_mock);
@@ -98,7 +97,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertInstanceOf(Event::class, $this->getNonPublicProperty('event'));
     $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('opt'));
@@ -108,7 +107,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function check_date_method_checks_if_the_provided_end_date_is_after_the_start_date()
+  public function testCheckDateMethodChecksIfTheProvidedEndDateIsAfterTheStartDate()
   {
     $method = $this->getNonPublicMethod('_check_date');
 
@@ -142,7 +141,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_the_note_with_its_url_start_and_end_date_of_publication()
+  public function testGetMethodReturnsTheNoteWithItsUrlStartAndEndDateOfPublication()
   {
     $this->partiallyMockCmsInstance();
 
@@ -193,7 +192,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_empty_array_when_no_not_id_found_for_the_given_url()
+  public function testGetMethodReturnsEmptyArrayWhenNoNotIdFoundForTheGivenUrl()
   {
     $this->notes_mock->shouldReceive('urlToId')
       ->once()
@@ -204,7 +203,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_empty_array_when_note_does_not_exist()
+  public function testGetMethodReturnsEmptyArrayWhenNoteDoesNotExist()
   {
     $this->notes_mock->shouldReceive('urlToId')
       ->once()
@@ -220,7 +219,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getAll_method_returns_all_notes_of_type_pages()
+  public function testGetallMethodReturnsAllNotesOfTypePages()
   {
     $this->partiallyMockCmsInstance();
 
@@ -289,7 +288,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getByUrl_method_returns_note_id_for_the_given_url_if_published()
+  public function testGetbyurlMethodReturnsNoteIdForTheGivenUrlIfPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -307,7 +306,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getByUrl_method_returns_null_if_no_note_found_for_the_given_url()
+  public function testGetbyurlMethodReturnsNullIfNoNoteFoundForTheGivenUrl()
   {
     $this->notes_mock->shouldReceive('urlToId')
       ->once()
@@ -318,7 +317,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getByUrl_method_returns_null_if_the_fetched_note_is_not_published()
+  public function testGetbyurlMethodReturnsNullIfTheFetchedNoteIsNotPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -336,7 +335,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_deletes_the_given_note_and_un_publish_it_if_published()
+  public function testDeleteMethodDeletesTheGivenNoteAndUnPublishItIfPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -371,7 +370,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_if_fails_to_delete_the_note()
+  public function testDeleteMethodReturnsFalseIfFailsToDeleteTheNote()
   {
     $this->partiallyMockCmsInstance();
 
@@ -406,7 +405,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_returns_false_if_the_given_note_does_not_exist()
+  public function testDeleteMethodReturnsFalseIfTheGivenNoteDoesNotExist()
   {
     $this->notes_mock->shouldReceive('get')
       ->once()
@@ -417,7 +416,7 @@ class CmsTest extends TestCase
   }
   
   /** @test */
-  public function setUrl_method_inserts_the_url_for_the_note_if_not_exists_otherwise_update_it_if_the_given_url_does_not_exist_to_a_published_note()
+  public function testSeturlMethodInsertsTheUrlForTheNoteIfNotExistsOtherwiseUpdateItIfTheGivenUrlDoesNotExistToAPublishedNote()
   {
     $this->partiallyMockCmsInstance();
 
@@ -444,7 +443,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setUrl_method_throws_an_exception_when_the_given_url_belongs_to_a_published_note()
+  public function testSeturlMethodThrowsAnExceptionWhenTheGivenUrlBelongsToAPublishedNote()
   {
     $this->expectException(\Exception::class);
 
@@ -468,7 +467,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setUrl_method_returns_false_the_the_given_note_does_not_exist()
+  public function testSeturlMethodReturnsFalseTheTheGivenNoteDoesNotExist()
   {
     $this->partiallyMockCmsInstance();
 
@@ -490,7 +489,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function removeUrl_method_removes_the_url_corresponding_to_the_given_note_id_from_bbn_notes_url_table_and_un_publish_the_url_if_published()
+  public function testRemoveurlMethodRemovesTheUrlCorrespondingToTheGivenNoteIdFromBbnNotesUrlTableAndUnPublishTheUrlIfPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -518,7 +517,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function removeUrl_method_removes_the_url_corresponding_to_the_given_note_id_from_bbn_notes_url_table_and_does_not_un_publish_the_url_if_note_published()
+  public function testRemoveurlMethodRemovesTheUrlCorrespondingToTheGivenNoteIdFromBbnNotesUrlTableAndDoesNotUnPublishTheUrlIfNotePublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -541,7 +540,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function removeUrl_returns_false_when_fails_to_find_the_given_note_id()
+  public function testRemoveurlReturnsFalseWhenFailsToFindTheGivenNoteId()
   {
     $this->partiallyMockCmsInstance();
 
@@ -559,7 +558,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function removeUrl_returns_false_when_fails_to_remove_the_url()
+  public function testRemoveurlReturnsFalseWhenFailsToRemoveTheUrl()
   {
     $this->partiallyMockCmsInstance();
 
@@ -582,7 +581,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEvent_method_returns_the_object_event_of_the_given_note()
+  public function testGeteventMethodReturnsTheObjectEventOfTheGivenNote()
   {
     $this->notes_mock->shouldReceive('getEventIdFromNote')
       ->once()
@@ -621,7 +620,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEvent_method_return_null_when_the_event_id_for_the_given_note_does_not_exist()
+  public function testGeteventMethodReturnNullWhenTheEventIdForTheGivenNoteDoesNotExist()
   {
     $this->notes_mock->shouldReceive('getEventIdFromNote')
       ->once()
@@ -650,7 +649,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEvent_method_return_null_when_the_note_id_does_not_have_event()
+  public function testGeteventMethodReturnNullWhenTheNoteIdDoesNotHaveEvent()
   {
     $this->notes_mock->shouldReceive('getEventIdFromNote')
       ->once()
@@ -663,7 +662,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_relative_to_the_given_note_when_start_and_end_dates_dont_match()
+  public function testUpdateeventMethodUpdatesTheEventRelativeToTheGivenNoteWhenStartAndEndDatesDontMatch()
   {
     $this->partiallyMockCmsInstance();
 
@@ -691,7 +690,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_relative_to_the_given_note_with_default_id_type_if_not_provided()
+  public function testUpdateeventMethodUpdatesTheEventRelativeToTheGivenNoteWithDefaultIdTypeIfNotProvided()
   {
     $this->partiallyMockCmsInstance();
 
@@ -719,7 +718,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_does_not_update_the_event_if_both_start_and_end_dates_match_but_still_returns_true()
+  public function testUpdateeventMethodDoesNotUpdateTheEventIfBothStartAndEndDatesMatchButStillReturnsTrue()
   {
     $this->partiallyMockCmsInstance();
 
@@ -738,7 +737,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_if_start_dates_matches_but_end_dates_dont_match()
+  public function testUpdateeventMethodUpdatesTheEventIfStartDatesMatchesButEndDatesDontMatch()
   {
     $this->partiallyMockCmsInstance();
 
@@ -766,7 +765,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_if_end_dates_matches_but_start_dates_dont_match()
+  public function testUpdateeventMethodUpdatesTheEventIfEndDatesMatchesButStartDatesDontMatch()
   {
     $this->partiallyMockCmsInstance();
 
@@ -794,7 +793,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_relative_to_the_given_note_when_the_given_start_and_end_dates_are_null()
+  public function testUpdateeventMethodUpdatesTheEventRelativeToTheGivenNoteWhenTheGivenStartAndEndDatesAreNull()
   {
     $this->partiallyMockCmsInstance();
 
@@ -822,7 +821,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_relative_to_the_given_note_when_the_given_end_date_is_null()
+  public function testUpdateeventMethodUpdatesTheEventRelativeToTheGivenNoteWhenTheGivenEndDateIsNull()
   {
     $this->partiallyMockCmsInstance();
 
@@ -850,7 +849,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_updates_the_event_relative_to_the_given_note_when_the_given_start_date_is_null()
+  public function testUpdateeventMethodUpdatesTheEventRelativeToTheGivenNoteWhenTheGivenStartDateIsNull()
   {
     $this->partiallyMockCmsInstance();
 
@@ -878,7 +877,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_returns_false_when_start_or_end_dates_are_missing()
+  public function testUpdateeventMethodReturnsFalseWhenStartOrEndDatesAreMissing()
   {
     $this->assertFalse(
       $this->cms->updateEvent($this->id_note)
@@ -894,7 +893,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function updateEvent_method_returns_false_when_the_given_dates_are_not_valid()
+  public function testUpdateeventMethodReturnsFalseWhenTheGivenDatesAreNotValid()
   {
     $this->assertFalse(
       $this->cms->updateEvent($this->id_note, ['end' => '2021-07-07', 'start' => 'foo'])
@@ -914,7 +913,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getStart_method_returns_start_date_for_the_given_note_when_a_linked_event_exists()
+  public function testGetstartMethodReturnsStartDateForTheGivenNoteWhenALinkedEventExists()
   {
     $this->partiallyMockCmsInstance();
 
@@ -927,7 +926,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getStart_method_returns_null_when_start_date_does_not_exist()
+  public function testGetstartMethodReturnsNullWhenStartDateDoesNotExist()
   {
     $this->partiallyMockCmsInstance();
 
@@ -942,7 +941,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getStart_method_returns_null_when_the_given_note_has_no_linked_event()
+  public function testGetstartMethodReturnsNullWhenTheGivenNoteHasNoLinkedEvent()
   {
     $this->partiallyMockCmsInstance();
 
@@ -957,7 +956,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEnd_method_returns_end_date_for_the_given_note_when_a_linked_event_exists()
+  public function testGetendMethodReturnsEndDateForTheGivenNoteWhenALinkedEventExists()
   {
     $this->partiallyMockCmsInstance();
 
@@ -970,7 +969,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEnd_method_returns_null_when_end_date_does_not_exist()
+  public function testGetendMethodReturnsNullWhenEndDateDoesNotExist()
   {
     $this->partiallyMockCmsInstance();
 
@@ -985,7 +984,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getEnd_method_returns_null_when_the_given_note_has_no_linked_event()
+  public function testGetendMethodReturnsNullWhenTheGivenNoteHasNoLinkedEvent()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1000,7 +999,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_method_creates_an_event_for_the_given_note_id_if_does_not_have_an_event()
+  public function testSeteventMethodCreatesAnEventForTheGivenNoteIdIfDoesNotHaveAnEvent()
   {
     $this->partiallyMockCmsInstance();
     $cf = $this->getClassCgf();
@@ -1037,7 +1036,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_method_creates_an_event_for_the_given_note_id_with_default_values_when_dont_exist()
+  public function testSeteventMethodCreatesAnEventForTheGivenNoteIdWithDefaultValuesWhenDontExist()
   {
     $this->partiallyMockCmsInstance();
     $cf = $this->getClassCgf();
@@ -1076,7 +1075,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_method_does_not_insert_in_bbn_notes_events_table_if_failed_to_create_the_event()
+  public function testSeteventMethodDoesNotInsertInBbnNotesEventsTableIfFailedToCreateTheEvent()
   {
     $this->partiallyMockCmsInstance();
     $cf = $this->getClassCgf();
@@ -1107,7 +1106,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_method_updates_the_event_for_the_given_note_id_when_it_has_an_event()
+  public function testSeteventMethodUpdatesTheEventForTheGivenNoteIdWhenItHasAnEvent()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1134,7 +1133,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_method_return_null_when_start_date_does_not_provided()
+  public function testSeteventMethodReturnNullWhenStartDateDoesNotProvided()
   {
     $this->assertNull(
       $this->cms->setEvent($this->id_note, ['end' => '2021-08-08'])
@@ -1142,7 +1141,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_return_null_when_the_given_note_does_not_exist()
+  public function testSeteventReturnNullWhenTheGivenNoteDoesNotExist()
   {
     $this->notes_mock->shouldReceive('get')
       ->once()
@@ -1155,7 +1154,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_return_null_when_the_provided_end_date_is_equal_the_start_data()
+  public function testSeteventReturnNullWhenTheProvidedEndDateIsEqualTheStartData()
   {
     $this->notes_mock->shouldReceive('get')
       ->once()
@@ -1168,7 +1167,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function setEvent_return_null_when_the_provided_end_date_is_before_the_start_data()
+  public function testSeteventReturnNullWhenTheProvidedEndDateIsBeforeTheStartData()
   {
     $this->notes_mock->shouldReceive('get')
       ->once()
@@ -1181,7 +1180,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getFullPublished_method_returns_an_array_containing_all_published_notes()
+  public function testGetfullpublishedMethodReturnsAnArrayContainingAllPublishedNotes()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1201,7 +1200,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getFullPublished_method_returns_empty_array_when_no_results_found()
+  public function testGetfullpublishedMethodReturnsEmptyArrayWhenNoResultsFound()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1217,7 +1216,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function isPublished_method_return_true_when_the_given_note_is_published()
+  public function testIspublishedMethodReturnTrueWhenTheGivenNoteIsPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1241,7 +1240,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function isPublished_method_return_false_when_start_date_is_null()
+  public function testIspublishedMethodReturnFalseWhenStartDateIsNull()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1260,7 +1259,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function isPublished_method_return_false_when_end_date_is_before_the_current_date()
+  public function testIspublishedMethodReturnFalseWhenEndDateIsBeforeTheCurrentDate()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1279,7 +1278,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function isPublished_method_returns_false_when_the_note_has_not_url()
+  public function testIspublishedMethodReturnsFalseWhenTheNoteHasNotUrl()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1303,7 +1302,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function isPublished_method_returns_false_when_the_given_note_does_not_exist()
+  public function testIspublishedMethodReturnsFalseWhenTheGivenNoteDoesNotExist()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1318,7 +1317,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_publishes_a_note_by_inserting_a_new_one_if_not_exists()
+  public function testPublishMethodPublishesANoteByInsertingANewOneIfNotExists()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1363,7 +1362,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_publishes_a_note_by_inserting_a_new_one_with_using_default_values_when_not_provided()
+  public function testPublishMethodPublishesANoteByInsertingANewOneWithUsingDefaultValuesWhenNotProvided()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1404,7 +1403,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_publishes_a_note_by_updating_existing_one_if_exists()
+  public function testPublishMethodPublishesANoteByUpdatingExistingOneIfExists()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1449,7 +1448,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_publishes_a_note_by_updating_existing_one_with_using_default_values_when_not_provided()
+  public function testPublishMethodPublishesANoteByUpdatingExistingOneWithUsingDefaultValuesWhenNotProvided()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1490,7 +1489,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_returns_false_when_the_given_note_has_an_url()
+  public function testPublishMethodReturnsFalseWhenTheGivenNoteHasAnUrl()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1515,7 +1514,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_returns_an_array_of_error_when_the_url_is_provided_and_failed_to_save_it()
+  public function testPublishMethodReturnsAnArrayOfErrorWhenTheUrlIsProvidedAndFailedToSaveIt()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1541,7 +1540,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_returns_false_when_the_given_note_is_published()
+  public function testPublishMethodReturnsFalseWhenTheGivenNoteIsPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1561,7 +1560,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function publish_method_returns_false_when_the_given_note_does_not_exist()
+  public function testPublishMethodReturnsFalseWhenTheGivenNoteDoesNotExist()
   {
     $this->notes_mock->shouldReceive('get')
       ->once()
@@ -1574,7 +1573,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function unpublish_method_unpunlish_the_given_note_when_it_is_published()
+  public function testUnpublishMethodUnpunlishTheGivenNoteWhenItIsPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1604,7 +1603,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function unpublish_method_retuns_false_when_fails_to_update_the_related_event()
+  public function testUnpublishMethodRetunsFalseWhenFailsToUpdateTheRelatedEvent()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1629,7 +1628,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function unpublish_method_retuns_false_when_the_given_note_is_not_published()
+  public function testUnpublishMethodRetunsFalseWhenTheGivenNoteIsNotPublished()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1649,7 +1648,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function unpublish_method_returns_false_when_the_given_note_has_no_linked_event()
+  public function testUnpublishMethodReturnsFalseWhenTheGivenNoteHasNoLinkedEvent()
   {
     $this->partiallyMockCmsInstance();
 
@@ -1664,7 +1663,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getFull_method_returns_all_notes_that_has_a_link_with_bbn_events_table()
+  public function testGetfullMethodReturnsAllNotesThatHasALinkWithBbnEventsTable()
   {
     $cfg = $this->getClassCgf();
     $this->partiallyMockCmsInstance();
@@ -1752,7 +1751,7 @@ class CmsTest extends TestCase
   }
 
   /** @test */
-  public function getFull_method_returns_empty_array_if_no_events_found()
+  public function testGetfullMethodReturnsEmptyArrayIfNoEventsFound()
   {
     $cfg = $this->getClassCgf();
 

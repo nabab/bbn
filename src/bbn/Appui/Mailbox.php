@@ -2,37 +2,20 @@
 
 namespace bbn\Appui;
 
-use utf8;
 use Exception;
+use stdClass;
+use bbn\Models\Cls\Basic;
 use bbn\Mail;
 use bbn\X;
 use bbn\Str;
 use bbn\Appui\Mailbox\Idle;
-use bbn\Appui\Mailbox\RawClient;
-use HTMLPurifier_Config;
-use HTMLPurifier_URIScheme;
-use HTMLPurifier;
-use HTMLPurifier_HTML5Config;
-use IMAP\Connection;
-use bbn\Models\Cls\Basic;
-use Generator;
-use bbn\User;
-use bbn\File\Dir;
+use bbn\Appui\Mailbox\Client;
+use bbn\Appui\Mailbox\Parser;
+use bbn\Appui\Mailbox\Encoder;
 use DOMDocument;
 use DOMXPath;
 use DOMNode;
-
-/*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
-
-  public $default_port = null;
-  public $browsable = false;
-  public $hierarchical = true;
-
-  public function validate(&$uri, $config, $context) {
-    return true;
-  }
-
-}*/
+use Generator;
 
 class Mailbox extends Basic
 {
@@ -40,12 +23,21 @@ class Mailbox extends Basic
   /**
    * @var int The default delay between each ping
    */
-  private static $_default_ping_interval = 2;
+  private static $defaultPingInterval = 2;
 
   /**
    * @var array The possible address fields
    */
-  private static $_dest_fields = ['to', 'from', 'cc', 'bcc', 'reply_to'];
+  private static $destFields = ['to', 'from', 'cc', 'bcc', 'reply_to'];
+
+  private static $flags = [
+    'seen' => '\\Seen',
+    'answered' => '\\Answered',
+    'flagged' => '\\Flagged',
+    'deleted' => '\\Deleted',
+    'draft' => '\\Draft',
+    'recent' => '\\Recent'
+  ];
 
   /**
    * @var float Last time server was pinged
@@ -65,9 +57,19 @@ class Mailbox extends Basic
   private $_inline_files = [];
 
   /**
+   * @var Parser The mailbox parser
+   */
+  private $parser;
+
+  /**
+   * @var Encoder The mailbox encoder
+   */
+  private $encoder;
+
+  /**
    * @var int The minimum delay between each ping for the current connection
    */
-  private $_ping_interval;
+  private $pingInterval;
 
   /**
    * @var string The host address
@@ -115,21 +117,6 @@ class Mailbox extends Basic
   protected $status = '';
 
   /**
-   * @var int The last UID in the mailbox
-   */
-  protected $last_uid;
-
-  /**
-   * @var int The number of messages ion the current mailbox
-   */
-  protected $num_msg;
-
-  /**
-   * @var Connection The stream object
-   */
-  protected $stream;
-
-  /**
    * @var array The mail folders
    */
   protected $folders = [];
@@ -139,6 +126,9 @@ class Mailbox extends Basic
    */
   protected $foldersIdle = [];
 
+  /**
+   * @var Mail The mailer object
+   */
   protected $mailer;
 
   /**
@@ -152,90 +142,72 @@ class Mailbox extends Basic
   protected $validateCertificate = false;
 
   /**
-   * @var RawClient|null The raw IMAP client
+   * @var ?Client The raw IMAP client
    */
-  protected RawClient|null $rawClient = null;
+  protected ?Client $client = null;
 
 
   public static function setDefaultPingInterval(int $val): void
   {
-    self::$_default_ping_interval = $val;
+    self::$defaultPingInterval = $val;
   }
 
 
   public static function getDefaultPingInterval(int $val): int
   {
-    return self::$_default_ping_interval;
+    return self::$defaultPingInterval;
   }
 
 
   public static function getDestFields(): array
   {
-    return self::$_dest_fields;
+    return self::$destFields;
   }
 
 
-  public function __construct($cfg)
+  public function __construct(array $cfg)
   {
-    if (\is_array($cfg)) {
+    if (is_array($cfg) && !empty($cfg)) {
+      $this->parser = new Parser();
+      $this->encoder = new Encoder();
       if (!empty($cfg['type'])) {
         $this->type = $cfg['type'];
       }
 
-      $this->host = $cfg['host'] ?? null;
+      $this->host = !empty($cfg['host']) ? $cfg['host'] : 'localhost';
+      $this->port = !empty($cfg['port']) ? (int)$cfg['port'] : 143;
       $this->login = $cfg['login'];
       $this->pass = $cfg['pass'];
-      $this->folder = $cfg['dir'] ?? 'INBOX';
-      $this->_ping_interval = self::$_default_ping_interval;
+      $this->pingInterval = self::$defaultPingInterval;
       $this->encryption = !empty($cfg['encryption']);
       $this->validateCertificate = !empty($cfg['validatecert']);
-      $this->port = $cfg['port'] ?? null;
 
-      switch ($this->type){
+      switch ($this->type) {
         case 'hotmail':
-          $this->port = 993;
-          $this->mbParam = '{imap-mail.outlook.com:' . $this->port . '/imap/ssl}';
+          $this->host = 'imap-mail.outlook.com';
+          $this->port = !empty($cfg['port']) ? (int)$cfg['port'] : 993;
           break;
         case 'gmail':
-          $this->port = 993;
-          $this->mbParam = '{imap.googlemail.com:' . $this->port . '/imap/ssl}';
-          break;
-        case 'imap':
-        case 'local':
-          $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap';
-          if ($this->encryption) {
-            $this->mbParam .= '/ssl';
-            $this->mbParam .= $this->validateCertificate ? '/validate-cert' : '/novalidate-cert';
-          }
-          else {
-            $this->mbParam .= '/notls';
-          }
-          $this->mbParam .= '}';
+          $this->host = 'imap.googlemail.com';
+          $this->port = !empty($cfg['port']) ? (int)$cfg['port'] : 993;
           break;
       }
 
+      $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap' . ($this->encryption ? '/ssl' : '/notls') . '}';
       $this->hash = md5($this->mbParam . '-' . $this->login);
-      $this->connect();
+      if ($this->connect()) {
+        $this->selectFolder($cfg['dir'] ?? 'INBOX');
+      }
     }
   }
 
 
-
-  /**
-   *  Closes the imap stream.
-   *
-   */
   public function __destruct()
   {
-    if ($this->stream) {
-      imap_close($this->stream);
+    if ($this->client && !$this->client->isDisconnecting()) {
+      $this->client->disconnect();
+      $this->client = null;
     }
-  }
-
-
-  public function getError(): ?string
-  {
-    return imap_last_error() ?: null;
   }
 
 
@@ -250,12 +222,10 @@ class Mailbox extends Basic
         'name'  => $cfg['name'] ?? null,
         'template' => $cfg['template'] ?? '',
       ];
-      if (array_key_exists('encryption', $cfg)) {
-        if (is_array($cfg['encryption'])) {
-          $c = X::mergeArrays($c, $cfg['encryption']);
-        }
+      if (array_key_exists('encryption', $cfg) && is_array($cfg['encryption'])) {
+        $c = X::mergeArrays($c, $cfg['encryption']);
       }
-      else if ($this->encryption) {
+      elseif ($this->encryption) {
         $c['ssl'] = [
           'verify_peer' => $this->validateCertificate,
           'verify_peer_name' => false,
@@ -264,7 +234,7 @@ class Mailbox extends Basic
         ];
       }
 
-      if (in_array($this->type, ['imap', 'local'])) {
+      if (in_array($this->type, ['imap', 'local'], true)) {
         $c['imap'] = true;
         $c['imap_host'] = $this->host;
         $c['imap_port'] = $this->port;
@@ -289,9 +259,9 @@ class Mailbox extends Basic
   }
 
 
-  public function setPingInterval(int $val): self
+  public function setPingInterval(int $val): static
   {
-    $this->_ping_interval = $val;
+    $this->pingInterval = $val;
     return $this;
   }
 
@@ -333,6 +303,7 @@ class Mailbox extends Basic
 
   public function getParams(): string
   {
+    return '';
     return $this->mbParam;
   }
 
@@ -345,67 +316,73 @@ class Mailbox extends Basic
 
   public function getLastUid(): ?int
   {
-    if (!$this->stream)
-      return null;
-    $msg_nums = imap_search($this->stream, 'ALL');
-
-    if ($msg_nums) {
-      $last_msg_num = max($msg_nums);
-      return imap_uid($this->stream, $last_msg_num);
-    }
-
-    return null;
+    $uids = $this->search('ALL');
+    return !empty($uids) ? max($uids) : null;
   }
 
   public function getFirstUid(): ?int
   {
-    if (!$this->stream)
-      return null;
-    $msg_nums = imap_search($this->stream, 'ALL');
+    $uids = $this->search('ALL');
+    return !empty($uids) ? min($uids) : null;
+  }
 
-    if ($msg_nums) {
-      $first_msg_num = min($msg_nums);
-      return imap_uid($this->stream, $first_msg_num);
+  public function getNextUid(int|string $uid): ?int
+  {
+    if (!Str::isNumber($uid)) {
+      return null;
+    }
+
+    $uids = $this->search('UID ' . ((int)$uid + 1) . ':*');
+    if ($uids) {
+      sort($uids);
+      return $uids[0] ?? (int)$uid;
     }
 
     return null;
   }
 
-  public function getNextUid(int $uid): ?int
+  public function getNumMsg(?string $dir = null): ?int
   {
-    if (!$this->stream)
+    if (!($dir = $this->selectFolder($dir))) {
       return null;
-    $emails = imap_search($this->stream, 'ALL');
+    }
 
-    if ($emails) {
-      $emails = array_filter($emails, function($val) use ($uid){
-        return $val > $uid;
-      });
-      if ($emails) {
-        return min($emails);
-      } else {
-        return $uid;
+    try {
+      $lines = $this->rawCommand(
+        'STATUS ' . $this->escapeString($dir) . ' (MESSAGES)',
+        true
+      );
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+STATUS\s+.+\s+\((.+)\)$/i', $line, $m)) {
+          $pairs = preg_split('/\s+/', trim($m[1])) ?: [];
+          for ($i = 0; $i < count($pairs); $i += 2) {
+            $k = strtoupper($pairs[$i] ?? '');
+            $v = (int)($pairs[$i + 1] ?? 0);
+            if ($k === 'MESSAGES') {
+              return (int)$v;
+            }
+          }
+        }
       }
+
+      return null;
     }
-
-    return null;
-  }
-
-  public function getNumMsg(): int
-  {
-    return $this->num_msg;
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
   }
 
 
   public function getStream()
   {
-    return $this->stream;
+    return $this->client?->getStreamResource() ?: null;
   }
 
 
   public function check(): bool
   {
-    return $this->_is_connected();
+    return $this->isConnected();
   }
 
 
@@ -423,28 +400,20 @@ class Mailbox extends Basic
   /**
    * Gets IMAP essential info (Test: ok)
    *
-   * @return object|bool
+   * @return null|array
    */
-  public function update(string|null $dir = null)
+  public function update(string|null $dir = null): ?array
   {
     if (($dir = $this->selectFolder($dir))
-      && ($imap = imap_check($this->stream))
+      && ($info = $this->getInfoFolder($dir))
     ) {
-      if ($imap->Nmsgs > 0) {
-        $this->folders[$dir]['last_uid']   = $this->getMsgUid($imap->Nmsgs);
-        $this->folders[$dir]['num_msg']    = $imap->Nmsgs;
-        $this->folders[$dir]['last_check'] = microtime(true);
-      }
-      else {
-        $this->folders[$dir]['last_uid']   = 0;
-        $this->folders[$dir]['num_msg']    = 0;
-        $this->folders[$dir]['last_check'] = microtime(true);
-      }
-
-      return $imap;
+      $this->folders[$dir]['last_uid'] = $this->getLastUid() ?: 0;
+      $this->folders[$dir]['num_msg'] = $info['nmsgs'] ?? 0;
+      $this->folders[$dir]['last_check'] = microtime(true);
+      return $info;
     }
 
-    return false;
+    return null;
   }
 
 
@@ -456,14 +425,15 @@ class Mailbox extends Basic
    */
   public function createMbox($mbox)
   {
-    if ($this->_is_connected()) {
-      if(imap_createmailbox($this->stream, $this->mbParam. $mbox)) {
-        return true;
-      }
-      X::log(imap_errors(), "imap");
+    try {
+      $this->rawCommand('CREATE ' . $this->escapeString($mbox));
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -475,15 +445,15 @@ class Mailbox extends Basic
    */
   public function deleteMbox($mbox)
   {
-    if ($this->_is_connected()) {
-      if (imap_deletemailbox($this->stream, $this->mbParam . $mbox)) {
-        return true;
-      }
-
-      X::ddump($this->getError());
+    try {
+      $this->rawCommand('DELETE ' . $this->escapeString($mbox));
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -496,17 +466,17 @@ class Mailbox extends Basic
    */
   public function renameMbox($old, $new)
   {
-    if ($this->_is_connected()) {
-      if (imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new)) {
-        return true;
-      } else {
-        X::ddump(imap_last_error());
-      }
-    } else {
-      X::ddump("Not connected");
+    try {
+      $this->rawCommand(
+        'RENAME ' . $this->escapeString($old) . ' ' . $this->escapeString($new)
+      );
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -518,13 +488,15 @@ class Mailbox extends Basic
    */
   public function subscribeFolder($folder)
   {
-    if ($this->_is_connected()) {
-      if (imap_subscribe($this->stream, $this->mbParam . $folder)) {
-        return true;
-      }
+    try {
+      $this->rawCommand('SUBSCRIBE ' . $this->escapeString($folder));
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -536,13 +508,15 @@ class Mailbox extends Basic
    */
   public function unsubscribeFolder($folder)
   {
-    if ($this->_is_connected()) {
-      if (imap_unsubscribe($this->stream, $this->mbParam . $folder)) {
-        return true;
-      }
+    try {
+      $this->rawCommand('UNSUBSCRIBE ' . $this->escapeString($folder));
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -553,7 +527,7 @@ class Mailbox extends Basic
    */
   public function listAllSubscribed()
   {
-    return $this->_list_subscribed('*');
+    return $this->_listSubscribed('*');
   }
 
 
@@ -563,9 +537,9 @@ class Mailbox extends Basic
    * @param string $dir Current mailbox folder
    * @return bool|array
    */
-  public function listCurlevSubscribed($dir='')
+  public function listCurlevSubscribed(string $dir = '')
   {
-    return $this->_list_subscribed($dir . '%');
+    return $this->_listSubscribed($dir . '%');
   }
 
 
@@ -576,7 +550,7 @@ class Mailbox extends Basic
    */
   public function listAllFolders()
   {
-    return $this->_list_folders('*');
+    return $this->_listFolders('*');
   }
 
 
@@ -586,9 +560,9 @@ class Mailbox extends Basic
    * @param string $dir Current mailbox folder
    * @return bool|array
    */
-  public function listCurlevFolders($dir='')
+  public function listCurlevFolders(string $dir = '')
   {
-    return $this->_list_folders($dir . '%');
+    return $this->_listFolders($dir . '%');
   }
 
 
@@ -599,7 +573,7 @@ class Mailbox extends Basic
    */
   public function getAllFolders()
   {
-    return $this->_get_folders('*');
+    return $this->_getFolders('*');
   }
 
 
@@ -609,9 +583,9 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return array|bool
    */
-  public function getCurlevFolders($dir='')
+  public function getCurlevFolders(string $dir = '')
   {
-    return $this->_get_folders($dir . '%');
+    return $this->_getFolders($dir . '%');
   }
 
 
@@ -622,7 +596,7 @@ class Mailbox extends Basic
    */
   public function getAllNamesFolders()
   {
-    return $this->_get_names_folders('*');
+    return $this->_getNamesFolders('*');
   }
 
 
@@ -632,9 +606,9 @@ class Mailbox extends Basic
    * @param string $dir Current mailbox folder
    * @return array
    */
-  public function getCurlevNamesFolders($dir='')
+  public function getCurlevNamesFolders(string $dir = '')
   {
-    return $this->_get_names_folders($dir . '%');
+    return $this->_getNamesFolders($dir . '%');
   }
 
 
@@ -645,169 +619,140 @@ class Mailbox extends Basic
    * @param null|string $folder Simple/full mailbox name
    * @return null|string
    */
-  public function selectFolder(string|null $folder = null): ?string
+  public function selectFolder(?string $folder = null): ?string
   {
-    if ($this->_is_connected()) {
-      if (!$folder || ($this->folder === $folder)) {
-        return $folder ?: $this->folder;
-      }
-
-      if (\in_array($folder, $this->getAllNamesFolders())) {
-        $res = imap_reopen($this->stream, $this->mbParam . $folder);
-      }
-      else {
-        $res = imap_reopen($this->stream, $folder);
-      }
-
-      if ($res) {
-        if (!isset($this->folders[$folder])) {
-          $this->folders[$folder] = [
-            'last_uid' => null,
-            'num_msg'  => null,
-            'last_check' => null
-          ];
-        }
-
-        $this->folder = $folder;
-        return $folder;
-      }
+    if (empty($folder) || ($this->folder === $folder)) {
+      return $folder ?: $this->folder;
     }
 
-    return null;
+    try {
+      $this->rawCommand('SELECT ' . $this->escapeString($folder));
+      $this->folders[$folder] ??= [
+        'last_uid' => null,
+        'num_msg' => null,
+        'last_check' => null
+      ];
+      $this->folder = $folder;
+      return $folder;
+    }
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
   }
 
 
   /**
-   * Returns an object containing the current mailbox info. (Test: ok)
+   * Returns an object containing the current mailbox info.
    *
-   * @return bool|object
+   * @return array|null
    */
-  public function getInfoFolder(string|null $dir = null)
+  public function getInfoFolder(?string $dir = null): ?array
   {
-    if ($this->_is_connected()) {
-      if (!$dir || $this->selectFolder($dir)) {
-        return imap_mailboxmsginfo($this->stream);
-      }
+    if (!($dir = $this->selectFolder($dir))) {
+      return null;
     }
 
-    return false;
+    try {
+      $info = [
+        'date' => date('d-M-Y H:i:s O'),
+        'mailbox' => $dir,
+        'nmsgs' => 0,
+        'recent' => 0,
+        'unread' => 0,
+        'deleted' => 0,
+        'size' => 0,
+        'uidnext' => null,
+        'uidvalidity' => null,
+        'highestmodseq' => null
+      ];
+      $hasImap4rev2 = $this->getClient()->hasCapability('IMAP4rev2');
+      $hasSize = $this->getClient()->hasCapability('STATUS=SIZE') || $hasImap4rev2;
+      $cmd = 'STATUS ' . $this->escapeString($dir) . ' (UIDNEXT UIDVALIDITY MESSAGES RECENT UNSEEN';
+      if ($hasSize) {
+        $cmd .= ' SIZE';
+      }
+
+      if ($this->getClient()->hasCapability('CONDSTORE')) {
+        $cmd .= ' HIGHESTMODSEQ';
+      }
+
+      if ($hasImap4rev2) {
+        $cmd .= ' DELETED';
+      }
+
+      $cmd .= ')';
+      $lines = $this->rawCommand($cmd, true);
+      if (!$hasSize) {
+        if ($this->getClient()->hasCapability('QUOTA')) {
+          $quota = $this->rawCommand('GETQUOTA ' . $this->escapeString($dir));
+          if (preg_match('/STORAGE\s+(\d+)/i', $quota, $m)) {
+            $info['size'] = (int)$m[1];
+          }
+        }
+        else {
+          $sizes = $this->rawCommand('FETCH 1:* (RFC822.SIZE)', true);
+          foreach ($sizes as $s) {
+            if (preg_match('/^\*\s+\d+\s+FETCH\s+\((?:.*\s)?RFC822\.SIZE\s+(\d+)/i', $s, $m)) {
+              $info['size'] += (int)$m[1];
+            }
+          }
+        }
+      }
+
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+STATUS\s+.+\s+\((.+)\)$/i', $line, $m)) {
+          $pairs = preg_split('/\s+/', trim($m[1])) ?: [];
+          for ($i = 0; $i < count($pairs); $i += 2) {
+            $k = strtoupper($pairs[$i] ?? '');
+            $v = (int)($pairs[$i + 1] ?? 0);
+            match ($k) {
+              'MESSAGES' => $info['nmsgs'] = $v,
+              'RECENT' => $info['recent'] = $v,
+              'UNSEEN' => $info['unread'] = $v,
+              'DELETED' => $info['deleted'] = $v,
+              'SIZE' => $info['size'] = $v,
+              'UIDNEXT' => $info['uidnext'] = $v,
+              'UIDVALIDITY' => $info['uidvalidity'] = $v,
+              'HIGHESTMODSEQ' => $info['highestmodseq'] = $v
+            };
+          }
+        }
+      }
+
+      return $info;
+    }
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
   }
 
-  public function getEmailsList(array $folder, int $start, int $end)
+  public function getEmailsList(string $folder, int $start, int $end): ?Generator
   {
-    if (isset($this->folders[$folder['uid']])
-      && $this->selectFolder($folder['uid'])
+    if (isset($this->folders[$folder])
+      && $this->selectFolder($folder)
     ) {
       $res = [];
       while ($start >= $end) {
         try {
-          $msgHeaderInfo = $this->getMsgHeaderinfo($start);
-          if (empty($msgHeaderInfo)) {
+          $this->selectFolder($folder);
+          $tmp = $this->getMsgBySeqOrUid($start, false);
+          if (!$tmp) {
             $start--;
             continue;
-          }
-
-          $tmp = (array)$this->decode_encoded_words_deep($msgHeaderInfo);
-          // imap decode the subject
-          if (!empty($tmp['subject'])
-            && is_string($tmp['subject'])
-            && ($tmps = imap_mime_header_decode($tmp['subject']))
-          ) {
-            $tmp['subject'] = $tmps[0]->text;
-          }
-
-          // for each string in the array decode quoted printable
-          foreach ($tmp as $key => $value) {
-            if (is_string($value)) {
-              $tmp[$key] = quoted_printable_decode($value);
-            }
-          }
-
-          $structure = $this->getMsgStructure($start);
-          if (!$tmp || !$structure) {
-            $start--;
-            continue;
-          }
-
-          $tmp['priority'] = $this->getMsgPriority($start) ?: 3;
-          $tmp['flags'] = $this->getMsgFlags($start);
-          $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
-          $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
-          $tmp['uid'] = $this->getMsgUid($start);
-          unset(
-            $tmp['Date'],
-            $tmp['MailDate'],
-            $tmp['Subject'],
-            $tmp['sender'],
-            $tmp['toaddress'],
-            $tmp['fromaddress'],
-            $tmp['senderaddress'],
-            $tmp['reply_toaddress']
-          );
-          foreach ($tmp as $k => $v) {
-            if (is_string($v)) {
-              $tmp[$k] = Str::toUtf8(trim($v));
-              if (empty($v)) {
-                $tmp[$k] = false;
-              } elseif (Str::isNumber($v)) {
-                $tmp[$k] = (int)$v;
-              } elseif ($k === 'subject') {
-                $tmp[$k] = $this->decode_encoded_words_deep($v);
-                if (mb_detect_encoding($v) !== 'UTF-8') {
-                  $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
-                }
-                if (Str::len($tmp[$k]) > 1000) {
-                  $tmp[$k] = Str::cut($tmp[$k], 1000);
-                }
-              }
-            }
-          }
-
-          foreach (self::getDestFields() as $df) {
-            if (!empty($tmp[$df])) {
-              $ads = [];
-              foreach ($tmp[$df] as $a) {
-                if (isset($a->host)) {
-                  $ads[] = [
-                    'name' => empty($a->personal) ? null : mb_convert_encoding(iconv_mime_decode($a->personal, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8"),
-                    'email' => strtolower($a->mailbox . '@' . $a->host),
-                    'host' => $a->host
-                  ];
-                } else {
-                  $this->log((array)$a);
-                }
-              }
-
-              $tmp[$df] = $ads;
-            }
-          }
-
-          $tmp['references'] = empty($tmp['references']) ? [] : X::split(Str::sub($tmp['references'], 1, -1), '> <');
-          if (!isset($tmp['subject'])) {
-            $tmp['subject'] = '';
-          }
-          $tmp['message_id'] = isset($tmp['message_id']) ? Str::sub($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.solutions';
-
-          $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : Str::sub($tmp['in_reply_to'], 1, -1);
-          $tmp['attachments'] = [];
-          $tmp['inline'] = [];
-          $tmp['is_html'] = false;
-          if (empty($structure->parts)) {
-            $tmp['is_html'] = $structure->subtype === 'HTML';
-          }
-          else {
-            $this->analyzeEmailParts($structure->parts, $tmp);
           }
 
           $res[] = $tmp;
           $start--;
           yield $tmp;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
           X::log([
             'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
-            'tmp' => $tmp,
             'start' => $start,
-            'header' => $this->getMsgHeader($start),
           ], 'poller_email_error');
           $start--;
         }
@@ -815,6 +760,8 @@ class Mailbox extends Basic
 
       return $res;
     }
+
+    return null;
   }
 
 
@@ -823,120 +770,14 @@ class Mailbox extends Basic
    *
    * @param int $msgno
    */
-  public function getMsg($msgno)
+  public function getMsg(string|int $msgno, bool $uid = false)
   {
-    // input $mbox = IMAP stream, $msgno = message id
-    // output all the following:
-    $this->_htmlmsg     = '';
-    $this->_plainmsg    = '';
-    $this->_charset     = '';
+    $this->_htmlmsg = '';
+    $this->_plainmsg = '';
+    $this->_charset = '';
     $this->_attachments = [];
     $this->_inline_files = [];
-
-
-
-    // check if "BBN_USER_PATH . 'tmp_mail'" directory exists
-
-
-    // HEADER
-    $res = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($msgno));
-    // add code here to get date, from, to, cc, subject...
-    // BODY STRUCTURE
-
-    // decode the subject
-    if (!empty($res['subject'])
-      && is_string($res['subject'])
-      && ($tmps = imap_mime_header_decode($res['subject']))
-    ) {
-      $res['subject'] = $tmps[0]->text;
-    }
-
-    // decode quoted printable
-    foreach ($res as $key => $value) {
-      if (is_string($value)) {
-        $res[$key] = quoted_printable_decode($value);
-      }
-    }
-
-    $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
-    if (empty($structure->parts)) {  // simple
-      $this->_get_msg_part($msgno, $structure, 0);  // pass 0 as part-number
-    }
-    else {  // multipart: cycle through each part
-     // X::ddump($structure);
-      foreach ($structure->parts as $partno0 => $p){
-        $this->_get_msg_part($msgno, $p, $partno0 + 1);
-      }
-    }
-
-    if ($res['html'] = $this->_htmlmsg) {
-      // replace cid links by name
-      $res['html'] = preg_replace_callback(
-        '/src="cid:(.*?)"/',
-        function ($m) use($msgno) {
-          $res = $m[0];
-          $cid = $m[1];
-          // get the name of the file with the cid in inline array
-          if (($att = X::getRow($this->_inline_files, ['id' => $cid]))
-            && ($att = $this->getAttachments($msgno, $att['name']))
-          ) {
-            $ext = Str::fileExt($att['name']);
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])
-              || in_array($att['type'], ['jpeg', 'png', 'gif'])
-            ) {
-              $type = 'image/'.($ext ?: $att['type']);
-              $base64 = 'src="data:'.$type.';base64,'.base64_encode($att['data']).'"';
-              if ($att) {
-                $res = $base64;
-              }
-            }
-          }
-
-          return $res;
-        },
-        $res['html']
-      );
-
-      if ($res['html']) {
-        $save = $res['html'];
-        try {
-          /*$config = HTMLPurifier_HTML5Config::createDefault();
-          $config->set('URI.AllowedSchemes', [
-            'http' => true,
-            'https' => true,
-            'mailto' => true,
-            'ftp' => true,
-            'nntp' => true,
-            'news' => true,
-            'tel' => true,
-          ]);
-          //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
-          $purifier    = new HTMLPurifier($config);
-          $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));*/
-          $res['html'] = Str::toUtf8($res['html']);
-        } catch (Exception $e) {
-          X::log([
-            'error' => $e->getMessage(),
-            'html' => $save
-          ], 'htmlpurifier');
-          $res['html'] = '';
-        }
-      }
-    }
-
-    $res['plain']      = Str::toUtf8($this->_plainmsg);
-    $res['charset']    = $this->_charset;
-    $res['attachment'] = $this->_attachments;
-    $res['inline']     = $this->_inline_files;
-
-    // set res to string and quoted printable decode
-    foreach ($res as $k => $v) {
-      if (is_string($v) && ($k !== 'html')) {
-        $res[$k] = Str::toUtf8(quoted_printable_decode($v));
-      }
-    }
-
-    return $res;
+    return $this->getMsgBySeqOrUid((int)$msgno, $uid);
   }
 
 
@@ -957,20 +798,43 @@ class Mailbox extends Basic
    */
   public function sortFolder($criteria, $reverse = 0)
   {
-    if ($this->_is_connected() && !empty($criteria)) {
-      return imap_sort($this->stream, constant(strtoupper($criteria)), $reverse, SE_NOPREFETCH);
-    }
+    try {
+      $lines = $this->rawCommand(
+        'SORT (' . strtoupper($criteria) . ') UTF-8 ALL',
+        true
+      );
 
-    return false;
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+SORT\s*(.*)$/i', $line, $m)) {
+          $list = trim($m[1]);
+          if ($list === '') {
+            return [];
+          }
+
+          $res = array_map('intval', preg_split('/\s+/', $list) ?: []);
+          return $reverse ? array_reverse($res) : $res;
+        }
+      }
+
+      return [];
+    }
+    catch (Exception $e) {
+      return false;
+    }
   }
 
   public function getThreads()
   {
-    if ($this->_is_connected()) {
-      return imap_thread($this->stream);
+    try {
+      $lines = $this->rawCommand(
+        'THREAD REFERENCES UTF-8 ALL',
+        true
+      );
+      return $lines;
     }
-
-    return false;
+    catch (Exception $e) {
+      return false;
+    }
   }
 
 
@@ -984,22 +848,18 @@ class Mailbox extends Basic
    */
   public function reopenMbox(string $mbox): bool
   {
-    return $this->selectFolder($mbox);
+    return (bool)$this->selectFolder($mbox);
   }
 
 
   /**
-   * Returns an object containing the current mailbox info. (Test: ok)
+   * Returns an array containing the current mailbox info.
    *
-   * @return bool|object
+   * @return null|array
    */
-  public function getInfoMbox()
+  public function getInfoMbox(): ?array
   {
-    if ($this->_is_connected()) {
-      return imap_mailboxmsginfo($this->stream);
-    }
-
-    return false;
+    return $this->getInfoFolder();
   }
 
 
@@ -1020,68 +880,83 @@ class Mailbox extends Basic
    */
   public function sortMbox($criteria, $reverse = 0)
   {
-    if ($this->_is_connected() && !empty($criteria)) {
-      return imap_sort($this->stream, constant(strtoupper($criteria)), $reverse, SE_NOPREFETCH);
-    }
-
-    return false;
+    return $this->sortFolder($criteria, $reverse);
   }
 
 
   /**
-   * Retrieves the header's message info. (Test: ok)
+   * Retrieves the header's message info.
    *
-   * @param int $msgnum
-   * @return bool|object
+   * @param int|string $msgUid
+   * @return object|null
    */
-  public function getMsgHeaderinfo(int $msgnum)
+  public function getMsgHeaderinfo(int|string $msgUid): ?object
   {
-    if ($msgnum && $this->_is_connected()) {
+    if (!Str::isNumber($msgUid)) {
+      return null;
+    }
+
+    $raw = $this->getMsgHeader($msgUid, true);
+    if (!$raw) {
+      return null;
+    }
+
+    if ($parsed = $this->parser->headerInfo($raw)) {
+      $parsed->size = $this->getMsgSize($msgUid, true);
+    }
+
+    return $parsed;
+  }
+
+
+  /**
+   * Gets the UID of the message.
+   *
+   * @param int|string $msgNo No of the message
+   * @return int|null
+   */
+  public function getMsgUid(int|string $msgNo): ?int
+  {
+    if (Str::isNumber($msgNo)) {
       try {
-        $res = imap_headerinfo($this->stream, $msgnum);
-      }
-      catch (Exception $e) {
-        $this->log($e->getMessage().' '.(string)$msgnum);
-      }
+        $lines = $this->rawCommand(
+          'FETCH ' . (int)$msgNo . ' (UID)',
+          true
+        );
 
-      if (!$res) {
-        X::log($msgnum, 'bad_numbers');
+        foreach ($lines as $line) {
+          if ($uid = $this->parser->uid($line)) {
+            return (int)$uid;
+          }
+        }
       }
+      catch (Exception $e) {}
     }
 
-    return $res ?? null;
+    return null;
   }
 
 
   /**
-   * Gets the UID of the message. (Test: ok)
+   * Gets the NO of the message.
    *
-   * @param int $msgnum
-   * @return bool|int
+   * @param int|string $msgUid UID of the message
+   * @return int|null
    */
-  public function getMsgUid($msgnum)
+  public function getMsgNo(int|string $msgUid): ?int
   {
-    if ($msgnum && $this->_is_connected()) {
-      return imap_uid($this->stream, $msgnum);
+    if (!Str::isNumber($msgUid)) {
+      return null;
     }
 
-    return false;
-  }
-
-
-  /**
-   * Gets the NO of the message. (Test: ok)
-   *
-   * @param int $msguid UID of the message
-   * @return bool|int
-   */
-  public function getMsgNo(int $msguid)
-  {
-    if ($this->_is_connected()) {
-      return imap_msgno($this->stream, $msguid);
+    $uids = $this->search('ALL');
+    if (!$uids) {
+      return null;
     }
 
-    return false;
+    $uids = array_values($uids);
+    $idx = array_search((int)$msgUid, $uids, true);
+    return ($idx === false) ? null : ($idx + 1);
   }
 
 
@@ -1089,22 +964,21 @@ class Mailbox extends Basic
    * Fetches the message structure. (Test: ok)
    *
    * @param int $msgnum No of the message
-   * @return bool|object
+   * @return bool|array
    */
-  public function getMsgStructure(int $msgnum)
+  public function getMsgStructure(int $msgnum, bool $uid = false): ?array
   {
-    if ($this->_is_connected()) {
-      try {
-        $res = imap_fetchstructure($this->stream, $msgnum);
-      }
-      catch (Exception $e) {
-        $this->log($e->getMessage().' '.(string)$msgnum);
-      }
-
-      return $res ?: null;
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? "UID " : "") . "FETCH $msgnum (BODYSTRUCTURE)",
+        true
+      );
+      $raw = implode("\r\n", $lines);
+      return $this->parser->bodyStructure($raw);
     }
-
-    return null;
+    catch (Exception $e) {
+      return null;
+    }
   }
 
 
@@ -1117,21 +991,47 @@ class Mailbox extends Basic
    */
   public function getMsgHeader(int $msgnum, bool $uid = false): ?string
   {
-    if ($this->_is_connected()) {
-      return imap_fetchheader($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
-    }
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? 'UID FETCH ' : 'FETCH ') . (int)$msgnum . ' (BODY.PEEK[HEADER])',
+        true
+      );
 
-    return null;
+      return $this->parser->extractLiteralBlock($lines);
+    }
+    catch (Exception $e) {
+      return null;
+    }
   }
 
 
-  public function getMsgOverview(int $msgnum, bool $uid = false): ?array
+  public function getMsgOverview(int $msgnum, bool $uid = false, ?string $raw = null): ?array
   {
-    if ($this->_is_connected()) {
-      return imap_fetch_overview($this->stream, $msgnum, $uid ? FT_UID : 0) ?: null;
-    }
+    try {
+      if (is_null($raw)) {
+        $lines = $this->rawCommand(
+          ($uid ? 'UID FETCH ' : 'FETCH ') . (int)$msgnum . ' (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID)',
+          true
+        );
+        $raw = implode("\r\n", $lines);
+      }
 
-    return null;
+      $overview = [];
+      $flags = $this->parser->flags($raw);
+      $overview['flags'] = implode(' ', $flags);
+      foreach (self::$flags as $f => $imapFlag) {
+        $overview[$f] = in_array($imapFlag, $flags, true);
+      }
+
+      $overview['size'] = $this->parser->size($raw);
+      $overview['uid'] = $this->parser->uid($raw);
+
+      return $overview;
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
   }
 
 
@@ -1143,11 +1043,7 @@ class Mailbox extends Basic
    */
   public function deleteMsg($uid): bool
   {
-    if ($this->_is_connected()) {
-      return imap_delete($this->stream, $this->getMsgNo($uid));
-    }
-
-    return false;
+    return (bool)$this->setMsgFlag((string)$uid, self::$flags['deleted'], false, true);
   }
 
 
@@ -1160,11 +1056,22 @@ class Mailbox extends Basic
    */
   public function moveMsg($uid, $tombox)
   {
-    if ($this->_is_connected()) {
-      return imap_mail_move($this->stream, $uid, $tombox, CP_UID);
+    try {
+      $this->rawCommand('UID MOVE ' . (int)$uid . ' ' . $this->escapeString($tombox));
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      try {
+        $this->rawCommand('UID COPY ' . (int)$uid . ' ' . $this->escapeString($tombox));
+        $this->setMsgFlag((string)$uid, self::$flags['deleted'], false, true);
+        return true;
+      }
+      catch (Exception $e2) {
+        $this->status = $e2->getMessage();
+        $this->setError($e2->getMessage(), $e2->getCode());
+        return false;
+      }
+    }
   }
 
 
@@ -1175,11 +1082,15 @@ class Mailbox extends Basic
    */
   public function expunge(): bool
   {
-    if ($this->_is_connected()) {
-      return imap_expunge($this->stream);
+    try {
+      $this->rawCommand('EXPUNGE');
+      return true;
     }
-
-    return false;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -1192,15 +1103,96 @@ class Mailbox extends Basic
    */
   public function getMsgBody($msgno, $part)
   {
-    if ($this->_is_connected()) {
-      if (empty($part)) {
-        return imap_body($this->stream, $msgno, FT_PEEK);
-      }
-
-      return imap_fetchbody($this->stream, $msgno, $part, FT_PEEK);
+    $uid = $this->getMsgUid((int)$msgno);
+    if (!$uid) {
+      return false;
     }
 
-    return false;
+    try {
+      $section = empty($part) ? 'TEXT' : $part;
+      $lines = $this->rawCommand(
+        'UID FETCH ' . (int)$uid . ' (BODY.PEEK[' . $section . '])',
+        true
+      );
+
+      return $this->parser->extractLiteralBlock($lines);
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
+  }
+
+
+  /**
+   * Gets the flags of the message.
+   * @param int $msgno No of the message
+   * @return array|null
+   */
+  public function getMsgFlags(int|array $msgno, bool $uid = false, ?string $raw = null): ?array
+  {
+    $multi = true;
+    if (!is_array($msgno)) {
+      $msgno = [(int)$msgno];
+      $multi = false;
+    }
+
+    $msgno = array_filter(
+      array_values(array_unique(array_map('intval', $msgno))),
+      fn($n) => $n > 0
+    );
+    if (empty($msgno)) {
+      return null;
+    }
+
+    $flags = [];
+    try {
+      if (is_null($raw)) {
+        $command = (!empty($uid) ? 'UID FETCH ' : 'FETCH ') . implode(',', $msgno) . ' (FLAGS)';
+        $lines = $this->rawCommand($command, true);
+        $raw = implode("\r\n", $lines);
+      }
+
+      $lines = preg_split('/\R/', $raw) ?: [];
+      foreach ($lines as $line) {
+        if (!preg_match('/^\*\s+(\d+)\s+FETCH\s+\(/i', $line, $messageMatch)) {
+          continue;
+        }
+
+        $messageNumber = (int)$messageMatch[1];
+        if (!preg_match('/\bFLAGS\s+\(([^)]*)\)/i', $line, $flagsMatch)) {
+          continue;
+        }
+
+        $flagsString = trim($flagsMatch[1]);
+        $mflags = $flagsString === ''
+            ? []
+            : preg_split('/\s+/', $flagsString);
+        if ($mflags === false) {
+          $mflags = [];
+        }
+
+        $mflags = array_values(array_unique(array_map('trim', $mflags)));
+        $key = $uid ? false : $messageNumber;
+        if (preg_match('/\bUID\s+(\d+)/i', $line, $uidMatch)) {
+          $key = (int)$uidMatch[1];
+        }
+
+        if ($key !== false) {
+          $flags[$key] = $mflags;
+        }
+      }
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return null;
+    }
+
+    if (!empty($flags) && !$multi) {
+      $flags = reset($flags);
+    }
+
+    return $flags ?: null;
   }
 
 
@@ -1244,13 +1236,61 @@ class Mailbox extends Basic
    * @param bool   $remove Set this to true to remove flag/s
    * @return bool
    */
-  public function setMsgFlag($seq, $flg, $remove=false)
+  public function setMsgFlag($seq, $flg, $remove = false, bool $asUid = false)
   {
-    if ($this->_is_connected()) {
-      return $remove ? imap_clearflag_full($this->stream, $seq, $flg) : imap_setflag_full($this->stream, $seq, $flg);
+    try {
+      $cmd = ($asUid ? 'UID ' : '') . 'STORE ' . $seq . ' ' . ($remove ? '-FLAGS.SILENT ' : '+FLAGS.SILENT ') . '(' . $flg . ')';
+      $this->rawCommand($cmd);
+      return true;
+    }
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      return false;
+    }
+  }
+
+
+  public function getMsgPriority(int $msgno, bool $uid = false, ?string $msgHeader = null): ?int
+  {
+    $priority = null;
+    if (is_null($msgHeader)) {
+      $msgHeader = $this->getMsgHeader($msgno, $uid);
     }
 
-    return false;
+    if (!empty($msgHeader)) {
+      // X-Priority
+      if (preg_match('/^X-Priority:\s*(\d)/mi', $msgHeader, $m)) {
+        $priority = (int)$m[1];
+      }
+
+      // Importance
+      if (is_null($priority) &&
+        preg_match('/^Importance:\s*(high|normal|low)/mi', $msgHeader, $m)
+      ) {
+        $map = ['high' => 1, 'normal' => 3, 'low' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+
+      // Priority
+      if (is_null($priority)
+        && preg_match('/^Priority:\s*(urgent|normal|non-urgent)/mi', $msgHeader, $m)
+      ) {
+        $map = ['urgent' => 1, 'normal' => 3, 'non-urgent' => 5];
+        $priority = $map[strtolower($m[1])] ?? null;
+      }
+    }
+
+    return $priority;
+  }
+
+
+  public function getMsgSize(int $msgno, bool $uid = false, ?string $raw = null): ?int
+  {
+    if ($overview = $this->getMsgOverview($msgno, $uid, $raw)) {
+      return $overview['size'] ?? null;
+    }
+
+    return null;
   }
 
 
@@ -1319,8 +1359,28 @@ class Mailbox extends Basic
    */
   public function search($criteria)
   {
-    if ($this->_is_connected()) {
-      return imap_search($this->stream, $criteria, SE_UID);
+    try {
+      $lines = $this->rawCommand(
+        'UID SEARCH ' . $criteria,
+        true
+      );
+
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+SEARCH\s*(.*)$/i', $line, $m)) {
+          $list = trim($m[1]);
+          if ($list === '') {
+            return [];
+          }
+
+          $uids = array_map('intval', preg_split('/\s+/', $list) ?: []);
+          sort($uids);
+          return $uids;
+        }
+      }
+    }
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
     }
 
     return false;
@@ -1337,11 +1397,32 @@ class Mailbox extends Basic
    */
   public function append(string $mbox, string $msg, ?string $opt = null)
   {
-    if ($this->_is_connected()) {
-      return @imap_append($this->stream, $this->mbParam. $mbox, $msg, $opt);
-    }
+    try {
+      $cmd = 'APPEND ' . $this->escapeString($mbox);
+      if (!empty($opt)) {
+        $cmd .= ' (' . trim($opt) . ')';
+      }
 
-    return false;
+      $cmd .= ' {' . strlen($msg) . '}';
+      $this->rawCommand($cmd, false, false, false);
+      $client = $this->getClient();
+      $resp = $client->readCommandResponseLine();
+      if (preg_match('/^\+\s/', $resp ?? '')) {
+        $client->write($msg, false);
+        $client->write("\r\n", false, true);
+        $client->readCommandResponse($client->getLastTag(), true);
+        return true;
+      }
+
+      $this->getClient()->closeCommunication();
+      return false;
+    }
+    catch (Exception $e) {
+      $this->getClient()->closeCommunication();
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -1353,9 +1434,9 @@ class Mailbox extends Basic
    */
   public function mboxExists($name)
   {
-    if ($this->_is_connected() && !empty($name)) {
+    if (!empty($name)) {
       $names = $this->getAllNamesFolders();
-      if (!empty($names) && \in_array($name, $names)) {
+      if (!empty($names) && \in_array($name, $names, true)) {
         return true;
       }
     }
@@ -1364,23 +1445,31 @@ class Mailbox extends Basic
   }
 
 
-  public function getAttachments(int $msgNum, ?string $filename = null): ?array
+  public function getAttachments(int $msgNum, ?string $filename = null, bool $uid = false): ?array
   {
-    if ($structure = $this->getMsgStructure($msgNum)) {
-      $attachments = [];
-      if (!empty($structure->parts)) {
-        foreach ($structure->parts as $np => $part) {
-          $this->analyzeAttachmentPart($part, $attachments, $msgNum, $np + 1, $filename);
-          if (!empty($filename) && count($attachments)) {
-            return $attachments[0];
-          }
-        }
-      }
-
-      return $attachments;
+    $msg = $this->getMsg($msgNum, $uid);
+    if (empty($msg['attachments'])) {
+      return null;
     }
 
-    return null;
+    $attachments = [];
+    foreach ($msg['attachments'] as $a) {
+      if ((empty($filename) || ($a['name'] === $filename))
+        && !is_null($data = $this->getMsgBodyPartData($msgNum, $a['section'], $a['encoding'], $uid))
+      ) {
+        $attachments[] = [
+          'type' => $a['type'] ?? '',
+          'name' => $a['name'] ?? '',
+          'size' => $a['size'] ?? 0,
+          'data' => $data
+        ];
+        if (!empty($filename)) {
+          return $attachments[0];
+        }
+      }
+    }
+
+    return $attachments;
   }
 
 
@@ -1440,51 +1529,19 @@ class Mailbox extends Basic
 
   public function connect(): bool
   {
-    if (isset($this->mbParam)) {
-      $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
-      if ($this->stream) {
-        $this->folders[$this->folder] = [
-          'last_uid' => null,
-          'num_msg'  => null,
-          'last_check' => null
-        ];
-        $this->status = 'ok';
-        return true;
+    try {
+      $this->getClient()->connect();
+      if (!empty($this->folder)) {
+        $this->selectFolder($this->folder);
       }
-      else {
-        $this->status = imap_last_error();
-        return false;
-      }
+
+      $this->status = 'ok';
+      return true;
     }
-
-    return false;
-  }
-
-
-  /**
-   * Decodes message. (Test: ok)
-   *
-   * @param string $message Messate to decode
-   * @param int    $coding  Type of encoding
-   * @return string
-   */
-  public function _get_decode_value($message, $coding)
-  {
-    switch ($coding) {
-      case 0:
-        return $message;
-      case 1:
-        return imap_8bit($message);
-      case 2:
-        return imap_binary($message);
-      case 3:
-        return imap_base64($message);
-      case 4:
-        return imap_qprint($message);
-      case 5:
-        return imap_base64($message);
-      default:
-        return $message;
+    catch (Exception $e) {
+      $this->status = $e->getMessage();
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
     }
   }
 
@@ -1494,186 +1551,54 @@ class Mailbox extends Basic
    */
   public function splitQuoteFromEmail(string $html): ?array
   {
-    $html = trim($html);
-    if (empty($html)) {
-      return null;
-    }
-
-    libxml_use_internal_errors(true);
-    $dom = new DOMDocument();
-    $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    $xpath = new DOMXPath($dom);
-    $outerHTML = fn(DOMNode $node) => $dom->saveHTML($node);
-
-    /** -------------------------------
-     *  1) Strong HTML markers
-     *  ------------------------------- */
-    $queries = [[
-      '//div[contains(concat(" ", normalize-space(@class), " "), " gmail_quote ")]',
-      'gmail_quote_div'
-    ], [
-      '//blockquote[contains(concat(" ", normalize-space(@class), " "), " gmail_quote ")]',
-      'gmail_quote_blockquote'
-    ], [
-      '//blockquote[translate(@type,"CITE","cite")="cite"]',
-      'blockquote_type_cite'
-    ], [
-      '//div[contains(concat(" ", normalize-space(@class), " "), " moz-cite-prefix ")]',
-      'moz_cite_prefix'
-    ]];
-
-    foreach ($queries as [$q, $method]) {
-      $nodes = $xpath->query($q);
-      if ($nodes && $nodes->length > 0) {
-        $quoteNode = $nodes->item(0);
-        $quoteHtml = $outerHTML($quoteNode);
-        $replyDom = $this->cloneDomDocument($dom);
-        $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
-        return [
-          'text' => trim($replyDom->saveHTML()),
-          'quote' => $quoteHtml,
-          'method' => $method,
-        ];
-      }
-    }
-
-    /** -------------------------------
-     *  2) Textual fallback (multi-lang)
-     *  ------------------------------- */
-    $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-    $patterns = [
-      // ---------- English ----------
-      '/\ROn\s.+?\swrote:\R/i',
-      '/\R-{2,}\s*Original Message\s*-{2,}\R/i',
-      '/\RFrom:\s.+\R/i',
-      '/\RSent:\s.+\R/i',
-      '/\RSubject:\s.+\R/i',
-
-      // ---------- Italian ----------
-      '/\RIl\s.+?\sha scritto:\R/i',
-      '/\R-{2,}\s*Messaggio originale\s*-{2,}\R/i',
-      '/\RDa:\s.+\R/i',
-      '/\RInviato:\s.+\R/i',
-      '/\ROggetto:\s.+\R/i',
-
-      // ---------- French ----------
-      '/\RLe\s.+?\sa écrit\s*:\R/i',
-      '/\R-{2,}\s*Message d\'origine\s*-{2,}\R/i',
-      '/\RDe\s*:\s.+\R/i',
-      '/\REnvoyé\s*:\s.+\R/i',
-      '/\RObjet\s*:\s.+\R/i',
-
-      // ---------- Spanish ----------
-      '/\REl\s.+?\sescribió\s*:\R/i',
-      '/\R-{2,}\s*Mensaje original\s*-{2,}\R/i',
-      '/\RDe\s*:\s.+\R/i',
-      '/\REnviado\s*:\s.+\R/i',
-      '/\RAsunto\s*:\s.+\R/i',
-
-      // ---------- German ----------
-      '/\RAm\s.+?\schrieb\s.+?\s*:\R/i',
-      '/\R-{2,}\s*Ursprüngliche Nachricht\s*-{2,}\R/i',
-      '/\RVon\s*:\s.+\R/i',
-      '/\RGesendet\s*:\s.+\R/i',
-      '/\RBetreff\s*:\s.+\R/i',
-
-      // ---------- Russian ----------
-      '/\R.+?\sнаписал\(а\)\s*:\R/iu',
-      '/\R-{2,}\s*Исходное сообщение\s*-{2,}\R/iu',
-      '/\RОт\s*:\s.+\R/iu',
-      '/\RОтправлено\s*:\s.+\R/iu',
-      '/\RТема\s*:\s.+\R/iu',
-    ];
-
-    foreach ($patterns as $p) {
-      if (preg_match($p, $text, $m, PREG_OFFSET_CAPTURE)) {
-        $needle = trim($m[0][0]);
-        $htmlPos = mb_stripos($html, $needle);
-        if ($htmlPos !== false) {
-          return [
-            'text' => trim(mb_substr($html, 0, $htmlPos)),
-            'quote' => trim(mb_substr($html, $htmlPos)),
-            'method' => 'text_separator',
-            'separator_regex' => $p,
-          ];
-        }
-
-        return [
-          'text' => $html,
-          'quote' => '',
-          'method' => 'text_separator_found_but_not_split_in_html',
-          'separator_regex' => $p,
-        ];
-      }
-    }
-
-    /** -------------------------------
-     *  3) Last resort: first blockquote
-     *  ------------------------------- */
-    $bq = $xpath->query('//blockquote');
-    if ($bq && $bq->length > 0) {
-      $quoteHtml = $outerHTML($bq->item(0));
-      $replyDom = $this->cloneDomDocument($dom);
-      $this->removeFirstNodeByOuterHTML($replyDom, $quoteHtml);
-
-      return [
-        'text' => trim($replyDom->saveHTML()),
-        'quote' => $quoteHtml,
-        'method' => 'first_blockquote',
-      ];
-    }
-
-    return [
-      'text' => $html,
-      'quote' => '',
-      'method' => 'no_quote_detected',
-    ];
+    return $this->parser->quote($html);
   }
 
 
   /**
-   * Returns a RawClient instance for executing raw IMAP commands.
-   * @return RawClient
+   * Returns a Client instance for executing raw IMAP commands.
+   * @return Client
    */
-  public function getRawClient(): RawClient
+  public function getClient(): Client
   {
-    if (!$this->rawClient) {
-      $this->rawClient = new RawClient(
-        $this->getHost(),
-        $this->getPort(),
+    if (!$this->client) {
+      $this->client = new Client(
+        $this->host,
+        $this->port,
         $this->encryption,
         $this->login,
         $this->pass
       );
     }
 
-    if (!$this->rawClient->isConnected()) {
-      $this->rawClient->connect();
+    if (!$this->client->isCommunicating() && !$this->client->isConnected()) {
+      $this->client->connect();
     }
 
-    return $this->rawClient;
+    return $this->client;
   }
 
 
   /**
-   * Executes a raw IMAP command and returns the response as a string.
+   * Executes a raw IMAP command and returns the response as a string or an array.
    * @param string $command The raw IMAP command to execute
-   * @param bool $disconnectAfter Whether to disconnect the client after executing the command (default: true)
-   * @return string|null The response from the IMAP server
+   * @param bool $response Set to true to return the server response, false to return an empty string
+   * @param bool $allResponse Set to true to return the full response as an array, false to return only the last line as a string
+   * @return string|array The response from the IMAP server
    */
-  public function rawCommand(string $command, bool $disconnectAfter = true): ?string
+  public function rawCommand(
+    string $command,
+    bool $allResponse = false,
+    bool $response = true,
+    bool $closeCommunication = false
+  ): string|array
   {
-    if ($client = $this->getRawClient()) {
-      $res = $client->sendCommand($command, true);
-      if ($disconnectAfter) {
-        $client->disconnect();
-      }
-
-      return $res;
-    }
-
-    return null;
+    return $this->getClient()->sendCommand(
+      $command,
+      $allResponse,
+      $response,
+      $closeCommunication
+    );
   }
 
 
@@ -1684,10 +1609,10 @@ class Mailbox extends Basic
    */
   public function getFolderHighestmodseq(string $folderUid): ?int
   {
-    if (($client = $this->getRawClient())
+    if (($client = $this->getClient())
       && $client->hasCapability('CONDSTORE')
     ) {
-      $res = $this->rawCommand('STATUS ' . $folderUid . ' (HIGHESTMODSEQ)');
+      $res = $this->rawCommand('STATUS ' . $this->escapeString($folderUid) . ' (HIGHESTMODSEQ)');
       if (preg_match('/HIGHESTMODSEQ\s+(\d+)/i', $res, $m)) {
         return (int)$m[1];
       }
@@ -1705,12 +1630,12 @@ class Mailbox extends Basic
    */
   public function getMsgUidsChangedSinceModseq(string $folderUid, int $lastModseq): array
   {
-    if (($client = $this->getRawClient())
+    if (($client = $this->getClient())
       && $client->hasCapability('CONDSTORE')
     ) {
-      $this->rawCommand('SELECT ' . $folderUid . ' (CONDSTORE)', false);
-      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq + 1));
-      if (preg_match('/^\*\s+SEARCH\s*(.*)$/i', $res, $m)) {
+      $this->rawCommand('SELECT ' . $this->escapeString($folderUid) . ' (CONDSTORE)');
+      $res = $this->rawCommand('UID SEARCH MODSEQ ' . max(1, $lastModseq));
+      if (preg_match('/^\*\s+SEARCH\s*(.*)\s+\(.*\)$/mi', $res, $m)) {
         $list = trim($m[1]);
         if ($list === '') {
           return [];
@@ -1726,120 +1651,279 @@ class Mailbox extends Basic
     return [];
   }
 
-
-  private function analyzeAttachmentPart($part, &$attachments, $msgNum, $partNum, $filename){
-    if (!empty($part->ifdisposition)
-      && !empty($part->disposition)
-      && !empty($part->ifparameters)
-      && ((strtolower($part->disposition) === 'attachment')
-        || (strtolower($part->disposition) === 'inline'))
-      && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
-      && (empty($filename) || ($filename === $nameParam->value))
+  public function getMsgChangedSinceModseq(string $folderUid, int $lastModseq)
+  {
+    $ret = [];
+    if (($client = $this->getClient())
+      && $client->hasCapability('CONDSTORE')
     ) {
-      if ($data = $this->getMsgBody($msgNum, $partNum)) {
-        $attachments[] = [
-          'type' => Str::fileExt($nameParam->value) ?: strtolower($part->subtype),
-          'name' => $nameParam->value,
-          'size' => $part->bytes,
-          'data' => $this->_get_decode_value($data, $part->encoding)
-        ];
+      $this->rawCommand('SELECT ' . $this->escapeString($folderUid) . ' (CONDSTORE)');
+      $lines = $this->rawCommand("UID FETCH 1:* (UID FLAGS) (CHANGEDSINCE $lastModseq)", true);
+      foreach ($lines as $line) {
+        foreach ($this->parser->fetch($line) as $match) {
+          $ret[] = [
+            'msgnum' => (int)$match[1],
+            'uid' => $this->parser->uid($match[2]),
+            'flags' => $this->parser->flags($match[2])
+          ];
+        }
       }
     }
 
-    if (!empty($part->parts)
-      && (empty($filename) || !count($attachments))
+    return $ret;
+  }
+
+  public function getMsgBodyPartData(
+    int $msgNum,
+    string|array $part,
+    string|array $encoding,
+    bool $uid = true
+  ): null|array|string
+  {
+    if (empty($part)
+      || empty($encoding)
+      || (is_array($part)
+        && (!is_array($encoding)
+          || (count($part) !== count($encoding))))
     ) {
-      foreach ($part->parts as $np2 => $p) {
-        $this->analyzeAttachmentPart($p, $attachments, $msgNum, $partNum . '.' . ($np2 + 1), $filename);
-        if (!empty($filename) && count($attachments)) {
-          break;
+      return null;
+    }
+
+    $multi = is_array($part);
+    if (!$multi) {
+      $part = [$part];
+    }
+
+    if (!is_array($encoding)) {
+      $encoding = [$part[0] => $encoding];
+    }
+
+    try {
+      $command = ($uid ? "UID " : "") . "FETCH $msgNum (";
+      foreach ($part as $i => $p) {
+        $command .= 'BODY.PEEK[' . $p . ']' . (isset($part[$i + 1]) ? ' ' : '');
+      }
+
+      $command .= ')';
+      $partsContent = $this->rawCommand($command, true);
+      $bodyParts = $this->parser->bodyParts(implode("\r\n", $partsContent));
+      $res = [];
+      if (!empty($bodyParts['parts'])) {
+        foreach ($bodyParts['parts'] as $s => $p) {
+          if (!isset($encoding[$s])) {
+            continue;
+          }
+
+          $res[$s] = $this->encoder->decodeBodyByEncoding($p, $encoding[$s]);
         }
       }
+
+      return $multi ? $res : ($res[$part[0]] ?? null);
+    }
+    catch (Exception $e) {
+      return null;
     }
   }
 
 
-  private function transformString($string) {
-    // Use the md5 hash function to generate a 32-character hexadecimal string
+  private function escapeString(string $str): string
+  {
+    return Client::escapeString($str);
+  }
+
+  private function getFullMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
+  {
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? "UID " : "") . "FETCH $msgno (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE UID BODY.PEEK[])",
+        true
+      );
+      $raw = $this->parser->extractLiteralBlock($lines);
+      $headers = $this->parser->headerInfo(preg_split("/\R\R/", $raw, 2)[0] ?? '');
+      if (!$headers) {
+        return null;
+      }
+
+      $msg = (array)$this->encoder->decodeEncodedWordsDeep($headers);
+      $msg['priority'] = $this->getMsgPriority($msgno, false, $lines[0]) ?: 3;
+      $msg['flags'] = $this->getMsgFlags($msgno, false, $lines[0]) ?: [];
+      $msg['uid'] = $this->parser->uid($lines[0]);
+      $msg['size'] = $this->parser->size($lines[0]);
+      $msg['date_sent'] = !empty($msg['date'])
+        ? date('Y-m-d H:i:s', strtotime($msg['date']))
+        : null;
+      $msg['date_server'] = $msg['date_sent'];
+      if (!isset($msg['subject'])) {
+        $msg['subject'] = '';
+      }
+
+      $msg['references'] = $this->parser->references($msg['references']);
+      $msg['message_id'] = !empty($msg['message_id'])
+        ? trim($msg['message_id'], '<>')
+        : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
+      $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
+      $parsedMime = $this->parser->mimeMessage($raw);
+      $msg['html'] = $parsedMime['html'] ?? '';
+      $msg['plain'] = $parsedMime['plain'] ?? '';
+      $msg['charset'] = $parsedMime['charset'] ?? '';
+      $msg['attachments'] = $parsedMime['attachments'] ?? [];
+      $msg['inline'] = $parsedMime['inline'] ?? [];
+      $msg['is_html'] = !empty($msg['html']);
+      return $msg;
+    }
+    catch (Exception $e) {
+      return null;
+    }
+  }
+
+  private function getMsgBySeqOrUid(int $msgno, bool $uid = false): ?array
+  {
+    try {
+      $lines = $this->rawCommand(
+        ($uid ? "UID " : "") . "FETCH $msgno (BODYSTRUCTURE UID FLAGS RFC822.SIZE BODY.PEEK[HEADER])",
+        true
+      );
+      $raw = $this->parser->extractLiteralBlock($lines);
+      $fullLines = implode("\r\n", $lines);
+      $headers = $this->parser->headerInfo(preg_split("/\R\R/", $raw, 2)[0] ?? '');
+      if (!$headers) {
+        return null;
+      }
+
+      $msg = (array)$this->encoder->decodeEncodedWordsDeep($headers);
+      $msg['priority'] = $this->getMsgPriority($msgno, false, $fullLines) ?: 3;
+      $msg['flags'] = $this->getMsgFlags($msgno, false, $fullLines) ?: [];
+      $msg['uid'] = $this->parser->uid($fullLines);
+      $msg['size'] = $this->parser->size($fullLines);
+      $msg['date_sent'] = !empty($msg['date'])
+        ? date('Y-m-d H:i:s', strtotime($msg['date']))
+        : null;
+      $msg['date_server'] = $msg['date_sent'];
+      if (!isset($msg['subject'])) {
+        $msg['subject'] = '';
+      }
+
+      $msg['references'] = !empty($msg['references']) ? $this->parser->references($msg['references']) : [];
+      $msg['message_id'] = !empty($msg['message_id'])
+        ? trim($msg['message_id'], '<>')
+        : $this->transformString(($msg['uid'] ?? '') . ($msg['date_sent'] ?? '') . ($msg['subject'] ?? '')) . '@bbn.solutions';
+      $msg['in_reply_to'] = empty($msg['in_reply_to']) ? false : trim($msg['in_reply_to'], '<>');
+      $parts = $this->parser->bodyStructureParts($fullLines);
+      $partsToFetch = [];
+      $msg['plain'] = '';
+      $msg['html'] = '';
+      $bodyCommand = '';
+      foreach ($parts as $p) {
+        if ($p['type'] === 'text'
+          && ($p['subtype'] === 'plain'
+            || $p['subtype'] === 'html')
+        ) {
+          $partsToFetch[] = $p;
+          $bodyCommand .= (empty($bodyCommand) ? "" : " ") . "BODY.PEEK[" . $p['section'] . "]";
+        }
+      }
+
+      if (!empty($bodyCommand)) {
+        $partsContent = $this->rawCommand(
+          ($uid ? "UID " : "") . "FETCH $msgno ($bodyCommand)",
+          true
+        );
+        $bodyParts = $this->parser->bodyParts(implode("\r\n", $partsContent));
+        if (!empty($bodyParts['parts'])) {
+          foreach ($partsToFetch as $p) {
+            if (isset($bodyParts['parts'][$p['section']])) {
+              $msg[$p['subtype']] .= $this->encoder->decodeBodyByEncoding(
+                $bodyParts['parts'][$p['section']],
+                $p['encoding']
+              );
+            }
+          }
+        }
+      }
+
+      $msg['is_html'] = !empty($msg['html']);
+      $attachmentsParts = array_filter(
+        $parts,
+        static fn (array $part): bool => ($part['isAttachment'] ?? false) === true
+      );
+      $contentType = $this->parser->contentType($headers->{'Content-Type'} ?? $headers->{'content-type'} ?? 'text/plain');
+      $msg['charset'] = $contentType['charset'] ?? '';
+      $attFnc = static fn(array $p): array => [
+        'id' => $p['contentId'],
+        'type' => $p['subtype'] ?: 'bin',
+        'name' => $p['filename'],
+        'size' => $p['size'],
+        'encoding' => $p['encoding'],
+        'section' => $p['section'],
+      ];
+      $msg['inline'] = array_values(
+        array_map(
+          $attFnc,
+          array_filter(
+            $attachmentsParts,
+            static fn(array $p): bool => ($p['disposition'] === 'inline') && !empty($p['contentId'])
+          )
+        )
+      );
+      $msg['attachments'] = array_values(
+        array_map(
+          $attFnc,
+          array_filter(
+            $attachmentsParts,
+            static fn(array $p): bool => empty($p['contentId'])
+          )
+        )
+      );
+      return $msg;
+    }
+    catch (Exception $e) {
+      return null;
+    }
+  }
+
+  private function getAttachmentDataByPart(int $msgNum, ?string $part, int $encoding): ?string
+  {
+    if (!$part) {
+      return null;
+    }
+
+    $body = $this->getMsgBody($msgNum, $part);
+    if ($body === false || $body === null) {
+      return null;
+    }
+
+    return $this->encoder->getDecodedValue($body, $encoding);
+  }
+
+  private function transformString(string $string): string
+  {
     $hash = md5($string);
-
-    // Initialize an empty result variable
     $result = '';
-
-    // Loop through the characters of the hash string
     for ($i = 0; $i < strlen($hash); $i++) {
-      // Get the current character
       $char = $hash[$i];
-
-      // Append the current character to the result string
       $result .= $char;
-
-      // If the current position is a multiple of 4, append a dash
       if (($i + 1) % 4 == 0 && $i != 31) {
         $result .= '-';
       }
     }
 
-    // Return the final result
     return $result;
   }
-
-
-  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
-  private function decode_encoded_words($string) {
-
-    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
-    if (!empty($matches)) {
-      for ($i = 0; $i < count($matches[0]); $i++) {
-        $encoding = $matches[2][$i];
-        $encoded_text = $matches[3][$i];
-        if (strtolower($encoding) == "q") {
-          $decoded_text = quoted_printable_decode(Str::replace("_", " ", $encoded_text));
-        } else {
-          $decoded_text = base64_decode($encoded_text);
-        }
-        $string = Str::replace($matches[0][$i], $decoded_text, $string);
-      }
-    }
-
-    return $string;
-  }
-
-  private function decode_encoded_words_array(array $array) {
-    for($i = 0; $i < count($array); $i++) {
-      $array[$i] = $this->decode_encoded_words($array[$i]);
-    }
-    return $array;
-  }
-
-  private function decode_encoded_words_deep($obj) {
-    if (is_string($obj)) {
-      $obj = $this->decode_encoded_words($obj);
-    }
-    elseif (is_object($obj)) {
-      foreach ($obj as $idx => $val) {
-        $obj->$idx = $this->decode_encoded_words_deep($val);
-      }
-    }
-
-    return $obj;
-  }
-
 
   /**
    * Checks if we are connected  (Test: ok)
    *
    * @return bool
    */
-  private function _is_connected()
+  private function isConnected(): bool
   {
-    if ($this->stream) {
+    if ($this->client) {
       $now = microtime(true);
-      if ($now - $this->_last_ping < $this->_ping_interval) {
+      if ($now - $this->_last_ping < $this->pingInterval) {
         return true;
       }
 
-      if (imap_ping($this->stream)) {
+      if ($this->client->isConnected()) {
         $this->_last_ping = $now;
         return true;
       }
@@ -1855,13 +1939,27 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return bool|array
    */
-  private function _list_subscribed($dir)
+  private function _listSubscribed($dir)
   {
-    if ($this->_is_connected()) {
-      return imap_lsub($this->stream, $this->mbParam, $dir);
-    }
+    try {
+      $lines = $this->rawCommand(
+        'LSUB "" ' . $this->escapeString($dir),
+        true
+      );
 
-    return false;
+      $res = [];
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+LSUB\s+\([^\)]*\)\s+"([^"]*)"\s+(.+)$/i', $line, $m)) {
+          $res[] = trim($m[2], '"');
+        }
+      }
+
+      return $res;
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -1871,13 +1969,27 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return bool|array
    */
-  private function _list_folders($dir)
+  private function _listFolders($dir)
   {
-    if ($this->_is_connected()) {
-      return imap_list($this->stream, $this->mbParam, $dir);
-    }
+    try {
+      $lines = $this->rawCommand(
+        'LIST "" ' . $this->escapeString($dir),
+        true
+      );
 
-    return false;
+      $res = [];
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+LIST\s+\([^\)]*\)\s+"([^"]*)"\s+(.+)$/i', $line, $m)) {
+          $res[] = trim($m[2], '"');
+        }
+      }
+
+      return $res;
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -1887,13 +1999,31 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return array|bool
    */
-  private function _get_folders($dir)
+  private function _getFolders($dir)
   {
-    if ($this->_is_connected()) {
-      return imap_getmailboxes($this->stream, $this->mbParam, $dir);
-    }
+    try {
+      $lines = $this->rawCommand(
+        'LIST "" ' . $this->escapeString($dir),
+        true
+      );
 
-    return false;
+      $res = [];
+      foreach ($lines as $line) {
+        if (preg_match('/^\*\s+LIST\s+\(([^)]*)\)\s+"([^"]*)"\s+(.+)$/i', $line, $m)) {
+          $o = new stdClass();
+          $o->attributes = trim($m[1]);
+          $o->delimiter = $m[2];
+          $o->name = trim($m[3], '"');
+          $res[] = $o;
+        }
+      }
+
+      return $res;
+    }
+    catch (Exception $e) {
+      $this->setError($e->getMessage(), $e->getCode());
+      return false;
+    }
   }
 
 
@@ -1903,21 +2033,17 @@ class Mailbox extends Basic
    * @param string $dir Mailbox folder
    * @return array
    */
-  private function _get_names_folders($dir)
+  private function _getNamesFolders($dir)
   {
-    if ($folders = $this->_get_folders($dir)) {
-      $i   = 0;
+    if ($folders = $this->_getFolders($dir)) {
       $ret = [];
-      foreach($folders as $val) {
-        $name      = imap_utf7_decode($val->name);
-        $name_arr  = explode('}', $name);
-        $j         = \count($name_arr) - 1;
-        $mbox_name = $name_arr[$j];
-        if($mbox_name == "") {
-          continue; // the folder itself
+      foreach ($folders as $val) {
+        $mbox_name = $val->name;
+        if ($mbox_name === "") {
+          continue;
         }
 
-        $ret[$i++] = $mbox_name;
+        $ret[] = $mbox_name;
       }
 
       sort($ret);
@@ -1925,174 +2051,6 @@ class Mailbox extends Basic
     }
 
     return false;
-  }
-
-
-  /**
-   *
-   *
-   * @param $msgno
-   * @param $structure
-   * @param string|false $partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
-   */
-  private function _get_msg_part($msgno, $structure, $partno)
-  {
-    // PARAMETERS
-    // get all parameters, like charset, Filenames of attachments, etc.
-    $params = [];
-    if (!empty($structure->parameters)) {
-      foreach ($structure->parameters as $x){
-        $params[strtolower($x->attribute)] = $x->value;
-      }
-    }
-
-    if (!empty($structure->dparameters)) {
-      foreach ($structure->dparameters as $x){
-        $params[strtolower($x->attribute)] = $x->value;
-      }
-    }
-
-    // ATTACHMENT
-    // Any part with a filename is an attachment,
-    // so an attached text file (type 0) is not mistaken as the message.
-    if (!empty($params['filename']) || !empty($params['name'])) {
-      // filename may be given as 'Filename' or 'Name' or both
-      if (($filename = empty($params['filename']) ? $params['name'] : $params['filename'])
-        && isset($structure->ifdisposition)
-        && isset($structure->disposition)
-      ) {
-        $a = [
-          'id' => !empty($structure->id) ? Str::sub($structure->id, 1, -1) : null,
-          'type' => Str::fileExt($filename) ?: strtolower($structure->subtype),
-          'name' => $filename,
-          'size' => $params['size'] ?? $structure->bytes ?? 0
-        ];
-        if (strtolower($structure->disposition) === 'inline') {
-          $this->_inline_files[] = $a;
-          $this->_attachments[] = $a;
-          $this->_htmlmsg .= '<a href="" cid="'. $filename . '">'. $filename . '</a>';
-        }
-        else if (strtolower($structure->disposition) === 'attachment') {
-          $this->_attachments[] = $a;
-        }
-      }
-    }
-    else {
-      // DECODE DATA
-      $data = $this->getMsgBody($msgno, $partno);
-      // Any part may be encoded, even plain text messages, so check everything.
-      $data = $this->_get_decode_value($data, $structure->encoding);
-    }
-
-    // TEXT
-    if (($structure->type === 0) && !empty($data)) {
-      // Messages may be split in different parts because of inline attachments,
-      // so append parts together with blank row.
-      $this->_charset = $params['charset'];  // assume all parts are same charset
-      if (strtolower($structure->subtype) === 'plain') {
-        $this->_plainmsg .= trim(Str::toUtf8($data)).PHP_EOL;
-      }
-      else {
-        $htmlmsg = trim(Str::toUtf8($data));
-        if (!empty($htmlmsg)) {
-          $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
-          preg_match($body_pattern, $htmlmsg, $body);
-          if (!empty($body[2])) {
-            $this->_htmlmsg .= $body[2];
-          }
-
-          $img_pattern          = "/<img([^>]+)>/smi";
-          $this->_htmlmsg_noimg = preg_replace($img_pattern, '', $this->_htmlmsg);
-        }
-      }
-    }
-    // EMBEDDED MESSAGE
-    // Many bounce notifications embed the original message as type 2,
-    // but AOL uses type 1 (multipart), which is not handled here.
-    // There are no PHP functions to parse embedded messages,
-    // so this just appends the raw source to the main message.
-    elseif (($structure->type === 2)
-      && !empty($data)
-      && (strtolower($structure->subtype) === 'plain')
-    ) {
-      if (stripos($this->_charset, 'ISO') !== false) {
-        $utfConverter     = new utf8($this->_charset);
-        $this->_plainmsg .= $utfConverter->loadCharset($this->_charset) ? $utfConverter->strToUtf8(trim($data)) . PHP_EOL : $this->_plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
-      }
-      else {
-        $this->_plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
-      }
-    }
-
-    // SUBPART RECURSION
-    if (!empty($structure->parts)) {
-      foreach ($structure->parts as $partno0 => $p2){
-        $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1));  // 1.2, 1.2.1, etc.
-      }
-    }
-  }
-
-
-  /**
-   * Clones a DOMDocument
-   */
-  private function cloneDomDocument(DOMDocument $dom): DOMDocument
-  {
-    $clone = new DOMDocument();
-    $clone->loadHTML($dom->saveHTML(), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    return $clone;
-  }
-
-
-  /**
-   * Removes the first node matching the given outer HTML from the DOMDocument
-   */
-  private function removeFirstNodeByOuterHTML(DOMDocument $dom, string $targetOuterHtml): void
-  {
-    $xpath = new DOMXPath($dom);
-    $nodes = $xpath->query('//*');
-    if (!$nodes) {
-      return;
-    }
-
-    foreach ($nodes as $node) {
-      if ($dom->saveHTML($node) === $targetOuterHtml) {
-        $node->parentNode?->removeChild($node);
-        return;
-      }
-    }
-  }
-
-
-  /**
-   * Analyzes email parts recursively.
-   */
-  private function analyzeEmailParts($parts, &$t) {
-    foreach ($parts as $part) {
-      if ($part->ifdisposition
-        && ((strtolower($part->disposition) === 'attachment')
-          || (strtolower($part->disposition) === 'inline'))
-        && $part->ifparameters
-        && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
-      ) {
-        $a = [
-          'id' => !empty($part->id) ? Str::sub($part->id, 1, -1) : null,
-          'name' => $name_row->value,
-          'size' => $part->bytes,
-          'type' => Str::fileExt($name_row->value) ?: strtolower($part->subtype)
-        ];
-        $t['attachments'][] = $a;
-        if ((strtolower($part->disposition) === 'inline')) {
-          $t['inline'][] = $a;
-        }
-      }
-      elseif (!empty($part->parts)) {
-        $this->analyzeEmailParts($part->parts, $t);
-      }
-      elseif ($part->subtype === 'HTML') {
-        $t['is_html'] = true;
-      }
-    }
   }
 
 }

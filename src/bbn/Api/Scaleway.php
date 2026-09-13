@@ -52,7 +52,6 @@ class Scaleway
       throw new \Error(_('The API token is mandatory'));
     }
 
-    self::cacheInit();
     $this->_token = $token;
     $this->_testmode = $testmode;
     if (class_exists('\\bbn\\Cache')) {

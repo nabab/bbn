@@ -18,33 +18,33 @@ interface Implementor
 
   public function getPassword(string $st): string;
 
-  public function setSession($attr): self;
+  public function setSession($attr): static;
 
-  public function unsetSession(): self;
+  public function unsetSession(): static;
 
   public function getSession($attr = null);
 
   public function getOsession($attr = null);
 
-  public function setOsession(): self;
+  public function setOsession(): static;
 
   public function hasSession($attr): bool;
 
-  public function updateActivity(): self;
+  public function updateActivity(): static;
 
-  public function saveSession(bool $force = false): self;
+  public function saveSession(bool $force = false): static;
 
-  public function closeSession($with_session = false): self;
+  public function closeSession($with_session = false): static;
 
   public function checkAttempts(): bool;
 
-  public function saveCfg(): self;
+  public function saveCfg(): static;
 
-  public function setCfg($attr): self;
+  public function setCfg($attr): static;
 
-  public function unsetCfg($attr): self;
+  public function unsetCfg($attr): static;
 
-  public function refreshInfo(): self;
+  public function refreshInfo(): static;
 
   public function checkSession(): bool;
 
@@ -60,7 +60,7 @@ interface Implementor
 
   public function getName($usr = null): ?string;
 
-  public function setData($index, $data = null): self;
+  public function setData($index, $data = null): static;
 
   public function updateInfo(array $d): bool;
 

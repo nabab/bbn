@@ -47,7 +47,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->init();
 
@@ -63,7 +63,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_check_method_returns_false()
+  public function testConstructorTestWhenCheckMethodReturnsFalse()
   {
     $this->cron_mock->shouldReceive('check')
       ->once()
@@ -82,7 +82,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launch_method_launches_a_parallel_process()
+  public function testLaunchMethodLaunchesAParallelProcess()
   {
     $this->init();
 
@@ -101,7 +101,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launch_method_returns_null_when_exe_path_is_not_set()
+  public function testLaunchMethodReturnsNullWhenExePathIsNotSet()
   {
     $this->init();
 
@@ -113,7 +113,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launchPoll_method_launches_a_poll_type_process()
+  public function testLaunchpollMethodLaunchesAPollTypeProcess()
   {
     $this->launcher = \Mockery::mock(Launcher::class)->makePartial();
 
@@ -130,7 +130,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launchPoll_method_returns_null_if_the_poll_file_does_not_exist()
+  public function testLaunchpollMethodReturnsNullIfThePollFileDoesNotExist()
   {
     $this->launcher = \Mockery::mock(Launcher::class)->makePartial();
 
@@ -144,7 +144,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launchTaskSystem_method_launches_a_cron_type_process()
+  public function testLaunchtasksystemMethodLaunchesACronTypeProcess()
   {
     $this->launcher = \Mockery::mock(Launcher::class)->makePartial();
 
@@ -161,7 +161,7 @@ class LauncherTest extends TestCase
   }
 
   /** @test */
-  public function launchTaskSystem_method_returns_null_when_cron_file_does_not_exist()
+  public function testLaunchtasksystemMethodReturnsNullWhenCronFileDoesNotExist()
   {
     $this->launcher = \Mockery::mock(Launcher::class)->makePartial();
 

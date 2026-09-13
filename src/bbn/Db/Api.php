@@ -30,7 +30,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
    * @return null|\stdClass
 	 */
-	public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass;
+	public function select($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?\stdClass;
 
 	/**
 	 * Fetches a given table and returns an array of text-indexed rows as objects
@@ -43,7 +43,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
    * @return null|array
 	 */
-	public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+	public function selectAll($table, $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array;
 
   /**
    * Return the first row resulting from the query as a numeric array.
@@ -56,7 +56,7 @@ interface Api
    * @return array
    */
 
-  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;
+  public function iselect($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?array;
 
   /**
    * Return the searched rows as an array of numeric arrays.
@@ -69,7 +69,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
    * @return array
    */
-  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+  public function iselectAll($table, $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array;
 
   /**
 	 * Fetches a given table and returns an array of a single row text-indexed
@@ -81,7 +81,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
 	 * @return false|array
 	 */
-	public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;
+	public function rselect($table, $fields = [], array $where = [], string|array $order= [], int $start = 0): ?array;
 
 	/**
 	 * Fetches a given table and returns an array of an array of text-indexed rows as arrays
@@ -94,7 +94,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+	public function rselectAll($table, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array;
 
 	/**
 	 * Fetches a given array of tables and returns an array of text-indexed rows as objects
@@ -107,7 +107,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+	public function selectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array;
 
 	/**
 	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
@@ -120,7 +120,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+	public function rselectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array;
 
 	/**
 	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
@@ -133,7 +133,7 @@ interface Api
    * @param int $start The "start" condition, default: 0
 	 * @return null|array
 	 */
-	public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+	public function iselectUnion(array $union, $fields = [], array $where = [], string|array $order= [], $limit = 0, $start = 0): ?array;
 
 	/**
 	 * Fetches a given table and returns an array of a single row text-indexed
@@ -141,11 +141,11 @@ interface Api
 	 * @param string $table The table name.
 	 * @param string $field The field's name.
 	 * @param array $where  The "where" condition.
-	 * @param string|array $order The "order" condition, default: false.
+	 * @param string|string|array $orderThe "order" condition, default: false.
 	 * @param int $start The "start" condition, default: 0.
 	 * @return mixed
 	 */
-	public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);
+	public function selectOne($table, $field = null, array $where = [], string|array $order= [], int $start = 0);
 
   /**
    * Return the number of records in the table corresponding to the $where condition (non mandatory).
@@ -169,7 +169,7 @@ interface Api
    * @param int $start The $limit condition, default: 0
    * @return null|array
    */
-  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+  public function selectAllByKeys($table, array $fields = [], array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array;
 
   /**
    * Return an array with the count of values corresponding to the where conditions.
@@ -177,10 +177,10 @@ interface Api
    * @param string|array $table The table's name or a configuration array.
    * @param string $column The field's name.
    * @param array $where The "where" condition.
-   * @param array $order The "order" condition.
+   * @param string|array $orderThe "order" condition.
    * @return null|array
    */
-  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;
+  public function stat(string $table, string $column, array $where = [], string|array $order= []): ?array;
 
 	/**
 	 * Inserts/Updates rows in the a given table

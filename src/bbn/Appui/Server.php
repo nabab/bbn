@@ -4,13 +4,14 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\Cache;
+use bbn\Db;
 use bbn\Api\Virtualmin;
 use bbn\Api\Cloudmin;
 use bbn\Api\Webmin;
 use bbn\Appui\Passwords;
 use bbn\X;
 use bbn\Appui\Option;
-use bbn\Db;
+use bbn\Models\Cls\Db as DbCls;
 use SQLite3;
 
 /**
@@ -21,7 +22,7 @@ use SQLite3;
  * @license http://www.opensource.org/licenses/mit-license.html MIT License
  * @link https://bbn.io/bbn-php/doc/class/Appui/Server
  */
-class Server
+class Server extends DbCls
 {
   use bbn\Models\Tts\Cache;
   use bbn\Models\Tts\Optional;
@@ -37,47 +38,44 @@ class Server
   /** @var string Hostname */
   private $hostname;
 
-  private $opt;
+  protected $opt;
 
   /** @var bbn\Api\Virtualmin Virtualmin instance */
-  private $virtualmin;
+  protected $virtualmin;
 
   /** @var bbn\Api\Cloudmin|null Cloudmin instance */
-  private $cloudmin = null;
+  protected $cloudmin = null;
 
   /** @var bbn\Api\Webmin Webmin instance */
-  private $webmin;
+  protected $webmin;
 
   /** @var string The server cache name prefix */
-  private $cacheNamePrefix;
+  protected $cacheNamePrefix;
 
   /** @var string The data path of the appui-server plugin */
-  private $mainDataPath;
+  protected $mainDataPath;
 
   /** @var string The data path of the server inside the appui-server plugin */
-  private $dataPath;
-
-  /** @var string The internal SQLite database */
-  private $db;
+  protected $dataPath;
 
   /** @var string The last error */
-  private $lastError = '';
+  protected $lastError = '';
 
   /** @var bool Indicates whether the class should connect to the server when needed */
-  private $online = true;
+  protected $online = true;
 
 
   /**
    * Constructor.
+   * @param Db $db
    * @param array $cfg
    */
-  public function __construct($cfg)
+  public function __construct(protected Db $db, $cfg)
   {
-    $this->cacheInit();
     self::optionalInit();
     if (\is_string($cfg)) {
       $opt = self::getOption($cfg, 'servers');
-      $psw = new Passwords(Db::getInstance());
+      $psw = new Passwords($db);
       $cfg = [
         'user' => $opt['user'] ?? null,
         'pass' => !empty($opt['id']) ? $psw->get($opt['id']) : null,
@@ -100,7 +98,7 @@ class Server
     $this->cacheNamePrefix = $this->hostname . '/';
     $this->mainDataPath    = self::getMainDataPath();
     $this->dataPath        = $this->mainDataPath . $this->hostname . '/';
-    $this->db         = self::getDb();
+    $this->db         = $db;
     $this->virtualmin = new Virtualmin([
       'user' => $this->user,
       'pass' => $this->pass,

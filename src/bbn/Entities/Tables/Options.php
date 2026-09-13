@@ -36,8 +36,8 @@ class Options extends EntityTable
     protected Entity|Nullall $entity = new Nullall()
   )
   {
+    $this->initClassCfg();
     parent::__construct($db, $entities, $entity);
-    $this->initClassCfg(self::$default_class_cfg);
     self::optionalInit(['types', 'apst_adherent', 'entity', 'appui']);
   }
 
@@ -69,14 +69,12 @@ class Options extends EntityTable
         throw new Exception(X::_("The option already exists for this entity"));
       }
 
-      if ($this->dbTraitInsert([
+      return $this->dbTraitInsert([
           $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type,
           $f['id_option'] => $id_option
         ], true
-      )) {
-        return $this->db->lastId();
-      }
+      );
     }
 
     return null;
@@ -132,12 +130,17 @@ class Options extends EntityTable
   {
     if ($this->check()) {
       $f = $this->class_cfg['arch']['entities_options'];
+      $where = [
+        $f['id_type'] => $id_type
+      ];
+      if (!empty($id_entity)) {
+        $where[$f['id_entity']] = $id_entity;
+      }
+
       return $this->db->rselectAll(
         $this->class_cfg['table'],
         [],
-        [
-          $f['id_type'] => $id_type
-        ]
+        $where
       );
     }
 

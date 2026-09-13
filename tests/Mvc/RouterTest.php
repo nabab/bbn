@@ -96,7 +96,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertInstanceOf(Mvc::class, $this->getNonPublicProperty('_mvc'));
     $this->assertSame($this->routes, $this->getNonPublicProperty('_routes'));
@@ -105,7 +105,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_app_path_does_not_exist()
+  public function testConstructorTestWhenAppPathDoesNotExist()
   {
     $this->resetRetriever();
     $this->resetKnownProperty();
@@ -119,7 +119,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function isMode_method_checks_if_the_given_string_is_a_valid_mode()
+  public function testIsmodeMethodChecksIfTheGivenStringIsAValidMode()
   {
     $this->assertTrue(Router::isMode('image'));
     $this->assertTrue(Router::isMode('file'));
@@ -136,13 +136,13 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function parse_method_removes_trailing_slashes()
+  public function testParseMethodRemovesTrailingSlashes()
   {
     $this->assertSame('./foo/bar/baz/', Router::parse('.//foo//bar//baz//'));
   }
 
   /** @test */
-  public function reset_method_resets_the_full_path_of_a_plugin()
+  public function testResetMethodResetsTheFullPathOfAPlugin()
   {
    $result = $this->router->reset();
 
@@ -151,7 +151,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_sets_pre_path_when_mode_is_not_defined()
+  public function testSetprepathMethodSetsPrePathWhenModeIsNotDefined()
   {
     $result = $this->router->setPrepath('/prepath/');
     $this->assertTrue($result);
@@ -167,7 +167,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_sets_pre_path_when_mode_defined()
+  public function testSetprepathMethodSetsPrePathWhenModeDefined()
   {
     $this->setNonPublicPropertyValue('_mode', 'html');
 
@@ -193,7 +193,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_when_path_is_not_valid()
+  public function testSetprepathMethodThrowsAnExceptionWhenPathIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -207,7 +207,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function getPrepath_method_returns_the_pre_path_when_exists()
+  public function testGetprepathMethodReturnsThePrePathWhenExists()
   {
     $this->setNonPublicPropertyValue('_prepath' ,'/prepath/');
 
@@ -216,7 +216,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function getPrepath_method_returns_empty_string_if_not_exists()
+  public function testGetprepathMethodReturnsEmptyStringIfNotExists()
   {
     $this->setNonPublicPropertyValue('_prepath' ,'');
 
@@ -224,7 +224,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function getLocaleDomain_method_returns_text_domains_for_the_given_name_or_for_the_main_if_not_given()
+  public function testGetlocaledomainMethodReturnsTextDomainsForTheGivenNameOrForTheMainIfNotGiven()
   {
     $this->setNonPublicPropertyValue('_textdomains', ['main' => 'main_result', 'plugin' => 'plugin_result']);
 
@@ -233,7 +233,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function getPluginFromComponent_method_retrieves_plugin_name_from_component_name_if_any()
+  public function testGetpluginfromcomponentMethodRetrievesPluginNameFromComponentNameIfAny()
   {
     $this->mvc_mock->shouldReceive('getPlugins')
       ->twice()
@@ -263,7 +263,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeComponent_method_returns_route_component_when_the_given_plugin_exists_and_dir_exists()
+  public function testRoutecomponentMethodReturnsRouteComponentWhenTheGivenPluginExistsAndDirExists()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -334,7 +334,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeComponent_method_returns_null_when_plugin_exists_and_dir_does_not_exist()
+  public function testRoutecomponentMethodReturnsNullWhenPluginExistsAndDirDoesNotExist()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -355,7 +355,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeComponent_method_returns_route_component_when_the_given_plugin_does_not_exist_and_plugin_dir_exists()
+  public function testRoutecomponentMethodReturnsRouteComponentWhenTheGivenPluginDoesNotExistAndPluginDirExists()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -424,7 +424,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeComponent_method_returns_null_when_the_given_plugin_does_not_exist_and_plugin_dir_does_not_exist()
+  public function testRoutecomponentMethodReturnsNullWhenTheGivenPluginDoesNotExistAndPluginDirDoesNotExist()
   {
     // Set app path to the testing dir which is returned from appPath() method
     $this->setAppPath($this->getTestingDirName() . 'plugin_path/');
@@ -442,7 +442,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeCustomPlugin_method_returns_custom_plugins_data_from_the_given_arguments()
+  public function testRoutecustompluginMethodReturnsCustomPluginsDataFromTheGivenArguments()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -465,7 +465,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeCustomPlugin_method_returns_null_when_mode_does_not_exist_in_filetypes()
+  public function testRoutecustompluginMethodReturnsNullWhenModeDoesNotExistInFiletypes()
   {
     $this->assertNull(
       $this->router->routeCustomPlugin('app', 'foo', 'plugin_name')
@@ -473,7 +473,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeSubplugin_method_returns_sub_plugin_data_from_given_arguments()
+  public function testRoutesubpluginMethodReturnsSubPluginDataFromGivenArguments()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -506,7 +506,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function routeSubplugin_method_returns_null_when_mode_does_not_exists_in_filetypes()
+  public function testRoutesubpluginMethodReturnsNullWhenModeDoesNotExistsInFiletypes()
   {
     $this->assertNull(
       $this->router->routeSubplugin('app', 'foo', 'plugin_name', 'sub_plugin_name')
@@ -514,7 +514,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function route_method_returns_controller_file_info_from_the_given_path()
+  public function testRouteMethodReturnsControllerFileInfoFromTheGivenPath()
   {
     // Alter the known property so that the _find_controller returns it.
     $known = $this->getNonPublicProperty('_known');
@@ -538,7 +538,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function route_method_returns_controller_file_info_from_the_given_path_with_a_pre_path()
+  public function testRouteMethodReturnsControllerFileInfoFromTheGivenPathWithAPrePath()
   {
     // Alter the known property so that the _find_controller returns it.
     $known = $this->getNonPublicProperty('_known');
@@ -564,7 +564,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function route_method_returns_model_view_info_from_the_given_path()
+  public function testRouteMethodReturnsModelViewInfoFromTheGivenPath()
   {
     // Alter the known property so that the _find_controller returns it.
     $known = $this->getNonPublicProperty('_known');
@@ -586,7 +586,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function route_method_returns_model_view_info_from_the_given_path_with_a_prepath()
+  public function testRouteMethodReturnsModelViewInfoFromTheGivenPathWithAPrepath()
   {
     // Alter the known property so that the _find_controller returns it.
     $known = $this->getNonPublicProperty('_known');
@@ -610,7 +610,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function route_method_returns_null_when_mode_does_not_exists()
+  public function testRouteMethodReturnsNullWhenModeDoesNotExists()
   {
     $this->assertNull(
       $this->router->route('app', 'foo')
@@ -618,7 +618,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function fetchDir_method_fetches_dir_content_for_model_and_views_when_dir_exists()
+  public function testFetchdirMethodFetchesDirContentForModelAndViewsWhenDirExists()
   {
     $this->mvc_mock->shouldReceive('getPlugins')
       ->once()
@@ -634,7 +634,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function fetchDir_method_fetches_dir_content_for_model_and_views_when_dir_does_not_exist_and_plugin_exists_and_has_an_alt_root()
+  public function testFetchdirMethodFetchesDirContentForModelAndViewsWhenDirDoesNotExistAndPluginExistsAndHasAnAltRoot()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -668,7 +668,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function fetchDir_method_fetches_dir_content_for_model_and_views_when_dir_does_not_exist_and_plugin_does_not_exist_and_alt_root_is_defined()
+  public function testFetchdirMethodFetchesDirContentForModelAndViewsWhenDirDoesNotExistAndPluginDoesNotExistAndAltRootIsDefined()
   {
     $testing_dir_path = $this->getTestingDirName();
 
@@ -699,7 +699,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function fetchDir_method_returns_null_when_dir_does_not_exist_and_alt_root_is_not_defined()
+  public function testFetchdirMethodReturnsNullWhenDirDoesNotExistAndAltRootIsNotDefined()
   {
     $this->mvc_mock->shouldReceive('getPlugins')
       ->once()
@@ -712,13 +712,13 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function getRoutes_method_returns_the_registered_routes()
+  public function testGetroutesMethodReturnsTheRegisteredRoutes()
   {
     $this->assertSame($this->routes, $this->router->getRoutes());
   }
 
   /** @test */
-  public function get_root_method_returns_the_full_path_in_the_mvc_of_the_main_app()
+  public function testGetRootMethodReturnsTheFullPathInTheMvcOfTheMainApp()
   {
     $get_root_method = $this->getNonPublicMethod('_get_root');
     $root            = $this->getNonPublicProperty('_root');
@@ -737,7 +737,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_root_method_returns_null_when_mode_does_not_exist()
+  public function testGetRootMethodReturnsNullWhenModeDoesNotExist()
   {
     $get_root_method = $this->getNonPublicMethod('_get_root');
 
@@ -747,7 +747,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_mode_path_method_returns_the_mode_path()
+  public function testGetModePathMethodReturnsTheModePath()
   {
     $method = $this->getNonPublicMethod('_get_mode_path');
 
@@ -759,7 +759,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_mode_path_method_throws_an_exception_when_mode_does_not_exist()
+  public function testGetModePathMethodThrowsAnExceptionWhenModeDoesNotExist()
   {
     $this->expectException(\Exception::class);
 
@@ -768,7 +768,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_alt_root_method_returns_full_path_in_the_mvc_of_an_external_app_from_the_provided_mode_and_path()
+  public function testGetAltRootMethodReturnsFullPathInTheMvcOfAnExternalAppFromTheProvidedModeAndPath()
   {
     $method = $this->getNonPublicMethod('_get_alt_root');
 
@@ -796,7 +796,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_alt_root_method_returns_null_when_mode_does_not_exists()
+  public function testGetAltRootMethodReturnsNullWhenModeDoesNotExists()
   {
     $this->assertNull(
       $this->getNonPublicMethod('_get_alt_root')
@@ -805,7 +805,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_alt_root_method_returns_null_when_its_not_registered_in_routes()
+  public function testGetAltRootMethodReturnsNullWhenItsNotRegisteredInRoutes()
   {
     $this->setNonPublicPropertyValue('_routes', []);
 
@@ -816,7 +816,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_alt_root_method_returns_null_when_path_is_not_provided_and_alt_root_property_is_not_defined()
+  public function testGetAltRootMethodReturnsNullWhenPathIsNotProvidedAndAltRootPropertyIsNotDefined()
   {
     $this->setNonPublicPropertyValue('alt_root', null);
 
@@ -827,7 +827,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function is_alias_method_checks_if_a_path_is_part_of_alias_in_the_routes_array()
+  public function testIsAliasMethodChecksIfAPathIsPartOfAliasInTheRoutesArray()
   {
     $method = $this->getNonPublicMethod('_is_alias');
 
@@ -849,7 +849,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_alias_method_returns_the_alias_of_the_given_path_if_it_is_part_of_the_alias_in_the_routes_array()
+  public function testGetAliasMethodReturnsTheAliasOfTheGivenPathIfItIsPartOfTheAliasInTheRoutesArray()
   {
     $method = $this->getNonPublicMethod('_get_alias');
 
@@ -873,7 +873,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function is_known_method_checks_if_the_given_path_is_known_for_its_corresponding_mode()
+  public function testIsKnownMethodChecksIfTheGivenPathIsKnownForItsCorrespondingMode()
   {
     $method = $this->getNonPublicMethod('_is_known');
     $known  = $this->getNonPublicProperty('_known');
@@ -896,7 +896,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_known_method_retrieves_a_route_from_a_given_path_in_a_given_mode()
+  public function testGetKnownMethodRetrievesARouteFromAGivenPathInAGivenMode()
   {
     $method = $this->getNonPublicMethod('_get_known');
 
@@ -944,7 +944,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function set_known_method_sets_and_stores_a_given_route()
+  public function testSetKnownMethodSetsAndStoresAGivenRoute()
   {
     $method = $this->getNonPublicMethod('_set_known');
 
@@ -962,7 +962,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function set_known_method_sets_and_stores_a_given_route_and_adds_the_corresponding_controller_checker()
+  public function testSetKnownMethodSetsAndStoresAGivenRouteAndAddsTheCorrespondingControllerChecker()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_set_known');
@@ -1032,7 +1032,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function set_known_method_sets_and_stores_a_given_route_and_adds_the_corresponding_css_checker()
+  public function testSetKnownMethodSetsAndStoresAGivenRouteAndAddsTheCorrespondingCssChecker()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_set_known');
@@ -1104,7 +1104,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function set_known_method_sets_and_stores_a_given_route_and_adds_the_corresponding_model_checker()
+  public function testSetKnownMethodSetsAndStoresAGivenRouteAndAddsTheCorrespondingModelChecker()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_set_known');
@@ -1176,7 +1176,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function set_known_method_returns_null_when_required_data_are_missing()
+  public function testSetKnownMethodReturnsNullWhenRequiredDataAreMissing()
   {
     $method = $this->getNonPublicMethod('_set_known');
 
@@ -1206,7 +1206,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_the_actual_controller_file_corresponding_to_a_given_path_if_result_is_known()
+  public function testFindControllerMethodReturnsTheActualControllerFileCorrespondingToAGivenPathIfResultIsKnown()
   {
     $method = $this->getNonPublicMethod('_find_controller');
 
@@ -1229,7 +1229,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_the_actual_controller_file_corresponding_to_a_given_path_if_alt_root_does_not_exist()
+  public function testFindControllerMethodReturnsTheActualControllerFileCorrespondingToAGivenPathIfAltRootDoesNotExist()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_find_controller');
@@ -1279,7 +1279,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_the_actual_controller_file_corresponding_to_a_given_path_if_alt_root_exists()
+  public function testFindControllerMethodReturnsTheActualControllerFileCorrespondingToAGivenPathIfAltRootExists()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_find_controller');
@@ -1344,7 +1344,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_the_actual_controller_file_corresponding_to_a_given_path_if_mode_is_dom_and_alt_root_does_not_exists()
+  public function testFindControllerMethodReturnsTheActualControllerFileCorrespondingToAGivenPathIfModeIsDomAndAltRootDoesNotExists()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_find_controller');
@@ -1398,7 +1398,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_the_actual_controller_file_corresponding_to_a_given_path_if_mode_is_dom_and_alt_root_exists()
+  public function testFindControllerMethodReturnsTheActualControllerFileCorrespondingToAGivenPathIfModeIsDomAndAltRootExists()
   {
     $testing_dir_path = $this->getTestingDirName();
     $method           = $this->getNonPublicMethod('_find_controller');
@@ -1444,7 +1444,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_controller_method_returns_null_when_file_does_not_exists()
+  public function testFindControllerMethodReturnsNullWhenFileDoesNotExists()
   {
     $method = $this->getNonPublicMethod('_find_controller');
 
@@ -1457,7 +1457,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_plugin_method_returns_plugin_info_from_given_path_if_exists()
+  public function testFindPluginMethodReturnsPluginInfoFromGivenPathIfExists()
   {
     $method = $this->getNonPublicMethod('_find_plugin');
 
@@ -1482,7 +1482,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_plugin_method_returns_null_if_plugin_from_the_given_path_does_not_exists()
+  public function testFindPluginMethodReturnsNullIfPluginFromTheGivenPathDoesNotExists()
   {
     $method = $this->getNonPublicMethod('_find_plugin');
 
@@ -1503,7 +1503,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_plugin_method_returns_null_if_no_plugins_are_registered()
+  public function testFindPluginMethodReturnsNullIfNoPluginsAreRegistered()
   {
     $method = $this->getNonPublicMethod('_find_plugin');
 
@@ -1518,7 +1518,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_translation_method_returns_translation_file_path_to_the_given_plugin()
+  public function testFindTranslationMethodReturnsTranslationFilePathToTheGivenPlugin()
   {
     $method      = $this->getNonPublicMethod('_find_translation');
     $testing_dir = $this->getTestingDirName();
@@ -1542,7 +1542,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_translation_method_returns_translation_file_path_when_no_plugin_is_provided()
+  public function testFindTranslationMethodReturnsTranslationFilePathWhenNoPluginIsProvided()
   {
     $method      = $this->getNonPublicMethod('_find_translation');
     $testing_dir = $this->getTestingDirName();
@@ -1566,7 +1566,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_translation_method_returns_null_when_no_locale_found()
+  public function testFindTranslationMethodReturnsNullWhenNoLocaleFound()
   {
     $method = $this->getNonPublicMethod('_find_translation');
 
@@ -1581,7 +1581,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_translation_method_returns_null_locale_file_does_not_exist()
+  public function testFindTranslationMethodReturnsNullLocaleFileDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_find_translation');
 
@@ -1601,7 +1601,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_classic_root_method_returns_the_full_path_in_the_mvc_of_the_main_app()
+  public function testGetClassicRootMethodReturnsTheFullPathInTheMvcOfTheMainApp()
   {
     $method = $this->getNonPublicMethod('_get_classic_root');
     $root   = $this->getNonPublicProperty('_root');
@@ -1620,7 +1620,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_classic_root_method_returns_null_when_mode_does_not_exist()
+  public function testGetClassicRootMethodReturnsNullWhenModeDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_get_classic_root');
 
@@ -1630,7 +1630,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_plugin_root_method_returns_plugin_root_from_the_given_mode_and_plugin()
+  public function testGetPluginRootMethodReturnsPluginRootFromTheGivenModeAndPlugin()
   {
     $method = $this->getNonPublicMethod('_get_plugin_root');
 
@@ -1645,7 +1645,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_plugin_root_method_returns_null_when_the_provided_mode_does_not_exists()
+  public function testGetPluginRootMethodReturnsNullWhenTheProvidedModeDoesNotExists()
   {
     $method = $this->getNonPublicMethod('_get_plugin_root');
 
@@ -1655,7 +1655,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_subplugin_root_method_returns_sub_plugin_for_the_provided_mode_and_plugin()
+  public function testGetSubpluginRootMethodReturnsSubPluginForTheProvidedModeAndPlugin()
   {
     $method = $this->getNonPublicMethod('_get_subplugin_root');
 
@@ -1670,7 +1670,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_subplugin_root_returns_null_when_the_provided_mode_does_not_exist()
+  public function testGetSubpluginRootReturnsNullWhenTheProvidedModeDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_get_subplugin_root');
 
@@ -1688,7 +1688,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_custom_root_method_returns_custom_root_for_the_given_mode_and_plugin()
+  public function testGetCustomRootMethodReturnsCustomRootForTheGivenModeAndPlugin()
   {
     $method = $this->getNonPublicMethod('_get_custom_root');
 
@@ -1701,7 +1701,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function get_custom_root_method_returns_null_when_mode_does_not_exist()
+  public function testGetCustomRootMethodReturnsNullWhenModeDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_get_custom_root');
 
@@ -1719,7 +1719,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_mv_method_returns_model_view_info_from_the_given_path_and_mode_when_result_is_known()
+  public function testFindMvMethodReturnsModelViewInfoFromTheGivenPathAndModeWhenResultIsKnown()
   {
     $method = $this->getNonPublicMethod('_find_mv');
     $known  = $this->getNonPublicProperty('_known');
@@ -1741,7 +1741,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_mv_method_returns_model_view_info_from_the_given_path_when_alt_root_does_not_exist()
+  public function testFindMvMethodReturnsModelViewInfoFromTheGivenPathWhenAltRootDoesNotExist()
   {
     $method      = $this->getNonPublicMethod('_find_mv');
     $testing_dir = $this->getTestingDirName();
@@ -1773,7 +1773,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_mv_method_returns_model_view_info_from_the_given_path_when_alt_root_exists()
+  public function testFindMvMethodReturnsModelViewInfoFromTheGivenPathWhenAltRootExists()
   {
     $method      = $this->getNonPublicMethod('_find_mv');
     $testing_dir = $this->getTestingDirName();
@@ -1827,7 +1827,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_mv_method_returns_null_when_file_does_not_exist()
+  public function testFindMvMethodReturnsNullWhenFileDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_find_mv');
 
@@ -1842,7 +1842,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function find_mv_method_returns_null_when_mode_does_not_exist()
+  public function testFindMvMethodReturnsNullWhenModeDoesNotExist()
   {
     $method = $this->getNonPublicMethod('_find_mv');
 
@@ -1852,7 +1852,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function registerLocaleDomain_method_sets_up_the_locale_for_the_given_plugin()
+  public function testRegisterlocaledomainMethodSetsUpTheLocaleForTheGivenPlugin()
   {
     $method       = $this->getNonPublicMethod('_registerLocaleDomain');
     $testing_dir  = $this->getTestingDirName();
@@ -1879,7 +1879,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function registerLocaleDomain_method_sets_up_the_locale_when_no_plugin_is_provided()
+  public function testRegisterlocaledomainMethodSetsUpTheLocaleWhenNoPluginIsProvided()
   {
     $method       = $this->getNonPublicMethod('_registerLocaleDomain');
     $testing_dir  = $this->getTestingDirName();
@@ -1899,7 +1899,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function registerLocaleDomain_method_sets_up_the_locale_for_the_given_plugin_and_file_does_not_exist_but_dir_exists()
+  public function testRegisterlocaledomainMethodSetsUpTheLocaleForTheGivenPluginAndFileDoesNotExistButDirExists()
   {
     $method       = $this->getNonPublicMethod('_registerLocaleDomain');
     $testing_dir  = $this->getTestingDirName();
@@ -1925,7 +1925,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function registerLocaleDomain_method_returns_text_domain_for_the_given_plugin_when_text_domain_already_exists()
+  public function testRegisterlocaledomainMethodReturnsTextDomainForTheGivenPluginWhenTextDomainAlreadyExists()
   {
     $method       = $this->getNonPublicMethod('_registerLocaleDomain');
     $testing_dir  = $this->getTestingDirName();
@@ -1953,7 +1953,7 @@ class RouterTest extends TestCase
   }
 
   /** @test */
-  public function registerLocaleDomain_method_returns_null_when_dir_does_not_exist()
+  public function testRegisterlocaledomainMethodReturnsNullWhenDirDoesNotExist()
   {
     $method       = $this->getNonPublicMethod('_registerLocaleDomain');
     $testing_dir  = $this->getTestingDirName();

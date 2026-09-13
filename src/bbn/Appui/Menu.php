@@ -33,7 +33,6 @@ class Menu extends bbn\Models\Cls\Basic
     $this->options = bbn\Appui\Option::getInstance();
     $this->pref    = bbn\User\Preferences::getInstance();
     $this->perm    = bbn\User\Permissions::getInstance();
-    $this->cacheInit();
     self::optionalInit();
   }
 

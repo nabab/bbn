@@ -2,12 +2,20 @@
 namespace bbn\Appui;
 
 use Exception;
+use Generator;
 use bbn\X;
 use bbn\Appui\Database;
 use bbn\Str;
 use bbn\Db;
 use bbn\Cache;
 use bbn\Models\Tts\Report;
+
+use function count;
+use function in_array;
+use function array_key_exists;
+use function is_string;
+use function is_null;
+
 
 class History
 {
@@ -89,7 +97,7 @@ class History
   {
     /** @var string $hash Unique hash for this DB connection (so we don't init twice a same connection) */
     $hash = $db->getHash();
-    if (!\in_array($hash, self::$dbs, true) && $db->check()) {
+    if (!in_array($hash, self::$dbs, true) && $db->check()) {
       // Adding the connection to the list of connections
       self::$dbs[] = $hash;
       /** @var Db db */
@@ -108,7 +116,8 @@ class History
       self::$ok = true;
       self::$is_used = true;
       self::$cache = Cache::getEngine();
-      self::$cache_prefix = Str::encodeFilename(str_replace('\\', '/', self::class), true).'/';
+      $sep = Cache::getSeparator();
+      self::$cache_prefix = str_replace('\\', $sep, self::class).$sep;
       self::$links = self::$db->getForeignKeys('bbn_uid', self::$prefix . 'history_uids', self::$admin_db);
       self::$db->setTrigger('\\bbn\\Appui\\History::trigger');
     }
@@ -124,14 +133,14 @@ class History
   public static function getCache($id)
   {
     if (self::$cache) {
-      return self::$cache->get(self::$cache_prefix . $id, 3600);
+      return self::$cache->get(self::$cache_prefix . $id);
     }
   }
 
   public static function deleteCache($id)
   {
     if (self::$cache) {
-      return self::$cache->get(self::$cache_prefix . $id, 3600);
+      return self::$cache->delete(self::$cache_prefix . $id);
     }
   }
 
@@ -204,7 +213,7 @@ class History
   public static function hasHistory(Db $db): bool
   {
     $hash = $db->getHash();
-    return \in_array($hash, self::$dbs, true);
+    return in_array($hash, self::$dbs, true);
   }
 
   /**
@@ -599,7 +608,7 @@ MYSQL;
         $r = null;
       } else {
         // No columns = All columns
-        if (\count($columns) === 0) {
+        if (count($columns) === 0) {
           $columns = array_keys($cfg['fields']);
         }
         $r = [];
@@ -883,6 +892,7 @@ MYSQL;
     ) {
       if ($force || !isset(self::$structures[$table])) {
         if (!$force && ($data = self::getCache($table))) {
+
           self::$structures[$table] = $data;
           if (!empty(self::$structures[$table]['history'])) {
             return self::$structures[$table];
@@ -906,7 +916,7 @@ MYSQL;
           if (
             self::isLinked($table) &&
             isset($model['keys']['PRIMARY']) &&
-            (\count($model['keys']['PRIMARY']['columns']) === 1) &&
+            (count($model['keys']['PRIMARY']['columns']) === 1) &&
             ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
             !empty($model['fields'][$primary])
           ) {
@@ -1207,37 +1217,320 @@ MYSQL;
     return (bool)$num;
   }
 
-  private static $cachedTables = [
-    'apst_adherents',
-    'bbn_identities',
-    'bbn_addresses',
-    'bbn_options',    
-    'bbn_entities_links',
-    'apst_clotures',
-    'apst_documents',
-    'apst_cotisations_annuelles',
-    'apst_cotisations',
-    'apst_adherents_notes',
-    'apst_adherents_tasks',
-    'apst_attestations'
-  ];
-
-  private static function get_primary_value(array $cfg): ?string
+  public static function upgrade(string $table, ?string $idUser = null, null|int|string $date = null, bool $allRows = false): Generator
   {
-    $primary = null;
-    $idx = X::search($cfg['values_desc'], ['primary' => true]);
-    if ($idx !== null) {
-      $primary = $cfg['values'][$idx];
-    }
+    $res = ['success' => false, 'total' => 0, 'updated' => 0, 'inserted' => 0];
+    if ($db = self::_get_db()) {
+      if (!$idUser) {
+        $idUser = constant('BBN_EXTERNAL_USER_ID');
+      }
+      if (!$date) {
+        $date = time();
+      }
 
-    if (isset($cfg['primary'], $cfg['fields'])) {
-      $idx = array_search($cfg['primary'], $cfg['fields'], true);
-      if (($idx !== false) && isset($cfg['values'][$idx])) {
-        $primary = $cfg['values'][$idx];
+      $database = self::$database_obj;
+      $structure = $db->modelize($table, true);
+      $ostructure = $database->modelize($table);
+      if ($ostructure['id_option']) {
+        $areTriggerEnabled = $db->isTriggerEnabled();
+        self::setUser($idUser);
+        self::setDate($date);
+        $dbId = $database->dbIdFromTable($ostructure['id_option']);
+        $fields = [];
+        $primary = null;
+        if (isset($structure['keys']['PRIMARY'])) {
+          $fields = $structure['keys']['PRIMARY']['columns'];
+          if (count($fields) > 1) {
+            $structure = [
+              'keys' => [
+                X::join($fields, '_') => [
+                  'columns' => $fields,
+                  'unique' => 1
+                ]
+              ]
+            ];
+            try {
+              $ckres = $db->createKeys($table, $structure);
+              if (!$ckres) {
+                $res['error'] = X::_("Impossible to create the new key");
+              }
+            }
+            catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+
+            try {
+              $structure = $db->modelize($table, true);
+              $dropres = $db->dropKey($table, 'PRIMARY');
+              if (!$dropres) {
+                $res['error'] = X::_("Impossible to drop the primary key");
+              }
+            }
+            catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+
+            $structure = $db->modelize($table, true);
+          }
+          else {
+            $primary = $fields[0];
+          }
+        }
+        else {
+          foreach ($structure['keys'] as $key) {
+            if (!empty($key['unique'])) {
+              $fields = $key['columns'];
+              break;
+            }
+          }
+        }
+
+        if (empty($res['error'])) {
+          if (!isset($primary)) {
+            $primary = 'id';
+          }
+
+          if ($areTriggerEnabled) {
+            $db->disableTrigger();
+          }
+          $data = $db->rselectAll($table, $fields, isset($structure['keys']['PRIMARY']) && !$allRows ? [$primary => null] : []);
+          $res['total'] = count($data);
+          if ($areTriggerEnabled) {
+            $db->enableTrigger();
+          }
+          if (!isset($structure['keys']['PRIMARY'])) {
+            $primary = 'id';
+            if (!isset($structure['fields']['id'])) {
+              $db->alter($table, [
+                [
+                  'alter_type' => 'add',
+                  'name' => 'id',
+                  'type' => 'binary',
+                  'maxlength' => 16,
+                  'null' => true,
+                  'defaultExp' => 'NULL',
+                  'first' => true
+                ]
+              ]);
+              $structure = $db->modelize($table, true);
+            }
+            $database->importTable($table, $dbId);
+            $ostructure = $database->modelize($table);
+
+            if (!empty($data)) {
+              if ($areTriggerEnabled) {
+                $db->disableTrigger();
+              }
+
+              $ids = [];
+              $count = count($data);
+              $pdo = $db->getPDO();
+              $id = X::makeUid();
+              $success = $db->update($table, ['id' => $id], $data[0]);
+              $pdo->beginTransaction();
+              $prepared = $pdo->prepare($db->last());
+
+              $toCommit = false;
+              foreach ($data as $i => &$d) {
+                $id = X::makeUid();
+                while (isset($ids[$id]) || $db->count('bbn_history_uids', ['bbn_uid' => $id])) {
+                  $id = X::makeUid();
+                }
+
+                $bid = hex2bin($id);
+                $success = $prepared->execute([$bid, ...array_values(array_map(fn($v) => Str::isUid($v) ? hex2bin($v) : $v, $d))]);
+                $ids[$id] = 1;
+                $d[$primary] = $id;
+                $res['updated'] += $success ? 1 : 0;
+                if ($res['updated'] % 10000 === 0) {
+                  $pdo->commit();
+                  $pdo->beginTransaction();
+                }
+                else {
+                  $toCommit = true;
+                }
+
+                yield [
+                  'success' => $success,
+                  'type' => 'update',
+                  'id' => $id,
+                  'num' => $i,
+                  'count' => $count,
+                  'total' => $res['updated']
+                ];
+              }
+  
+              unset($d);
+
+              if ($toCommit) {
+                $pdo->commit();
+              }
+
+              if ($areTriggerEnabled) {
+                $db->enableTrigger();
+              }
+            }
+
+            $structure['fields']['id']['key'] = 'PRI';
+            $structure['keys'] = [
+              'PRIMARY' => [
+                'columns' => ['id'],
+                'unique' => 1
+              ]
+            ];
+            try {
+              $ckres = $db->createKeys($table, $structure);
+              if (!$ckres) {
+                $res['error'] = X::_("Impossible to create the new key");
+              }
+
+              $structure = $db->modelize($table, true);
+              $impres = $database->importTable($table, $dbId);
+              if (!$impres) {
+                $res['error'] = X::_("Impossible to import the table in the options");
+              }
+
+              $ostructure = $database->modelize($table);
+            }
+            catch (Exception $e) {
+              $res['error'] = $e->getMessage();
+            }
+          }
+          if (empty($res['error']) && $structure['keys']['PRIMARY']['ref_table'] !== History::$table_uids) {
+            $loop = History::insertUid($table, array_map(fn($d) => $d['id'], $data), true, $ostructure['fields'][$primary]['id_option']);
+            foreach ($loop as $l) {
+              $res['inserted'] += $l['success'] ? 1 : 0;
+              yield [
+                'success' => $l['success'],
+                'type' => 'insert',
+                'id' => $l['id'],
+                'count' => $l['count'],
+                'total' => $res['inserted']
+              ];
+            }
+            $structure = $db->modelize($table, true);
+            $structure['keys'] = [
+              'PRIMARY' => [
+                'columns' => [$primary],
+                'ref_table' => self::$table_uids,
+                'ref_column' => 'bbn_uid',
+                'update' => "CASCADE",
+                'delete' => "CASCADE",
+                'unique' => 1
+              ]
+            ];
+            try {
+              $db->createConstraints($table, $structure);
+              $structure = $db->modelize($table, true);
+              $database->importTable($table, $dbId);
+              $res['success'] = true;
+            }
+            catch (Exception $e) {
+              $res['deleted'] = 0;
+              foreach ($data as $d) {
+                if ($db->deleteIgnore(self::$table, ['uid' => $d[$primary]])
+                  || $db->deleteIgnore(self::$table_uids, ['bbn_uid' => $d[$primary]])
+                ) {
+                  $res['deleted']++;
+                }
+              }
+  
+              $res['error'] = $e->getMessage();
+            }
+          }
+          else {
+            $res['error'] = !empty($res['error']) ? $res['error'] : X::_("The table already has a primary key linked to the history table");
+          }
+        }
       }
     }
-    return $primary;
+
+    return $res;
   }
+
+  public static function insertUid(string $table, array|string $ids, bool $withInsert = true, ?string $idCol = null): Generator
+  {
+    $res = 0;
+    if (($db = self::_get_db())
+      && ($dbc = self::_get_database())
+      && ($id_table = $dbc->tableId($table))
+      && ($primary = $db->getPrimary($table))
+      && (count($primary) === 1)
+    ) {
+      $bid_table = hex2bin($id_table);
+      if (is_string($ids)) {
+        $ids = [$ids];
+      }
+      $col = false;
+      $bcol = false;
+      if (!empty($ids)) {
+        if ($withInsert) {
+          $col = $idCol ?: $dbc->columnId($primary[0], $table);
+          $bcol = hex2bin($col);
+        }
+        $user = self::getUser();
+        $date = self::getDate();
+        $buser = hex2bin($user);
+        $tot = 0;
+        $count = count($ids);
+        $db->insertIgnore(self::$table_uids, [
+          'bbn_uid' => $ids[0],
+          'bbn_table' => $id_table,
+          'bbn_active' => 1
+        ]);
+        $r1 = $db->last();
+        $r2 = false;
+        if ($col) {
+          $db->insertIgnore(self::$table, [
+            'uid' => $ids[0],
+            'col' => $col,
+            'opr' => 'INSERT',
+            'tst' => $date,
+            'usr' => $user
+          ]);
+          $r2 = $db->last();
+        }
+        $pdo = $db->getPDO();
+        $pdo->beginTransaction();
+        $s1 = $pdo->prepare($r1);
+        $s2 = false;
+        if ($r2) {
+          $s2 = $pdo->prepare($r2);
+        }
+        $toCommit = false;
+        foreach ($ids as $i => $id) {
+          $bid = hex2bin($id);
+          $res = 0;
+          $res += (int)$s1->execute([$bid, $bid_table, 1]);
+          if ($col) {
+            $res += (int)$s2->execute([$bid, $bcol, 'INSERT', $date, $buser]);
+          }
+
+          $tot += $res;
+          if ($tot % 10000 === 0) {
+            $pdo->commit();
+            $pdo->beginTransaction();
+          }
+          else {
+            $toCommit = true;
+          }
+          yield [
+            'success' => $res,
+            'type' => 'insert',
+            'id' => $id,
+            'num' => $i,
+            'count' => $count,
+            'total' => $tot
+          ];
+        }
+
+        if ($toCommit) {
+          $pdo->commit();
+        }
+      }
+    }
+  }
+
   /**
    * The function used by the db trigger
    * This will basically execute the history query if it's configured for.
@@ -1337,33 +1630,70 @@ MYSQL;
         }
 
         foreach ($cfg['tables'] as $alias => $table) {
-          $model = $db->modelize($table);
-          if (
-            isset($model['keys']['PRIMARY']['ref_table']) &&
-            ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
-          ) {
-            $change++;
-            $new_join[] = [
-              'table' => self::$table_uids,
-              'alias' => $db->tsn(self::$table_uids) . $change,
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
-                    'operator' => 'eq',
-                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], \is_string($alias) ? $alias : $table, true)
-                  ],
-                  [
-                    'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
-                    'operator' => '=',
-                    'exp' => '1'
+          if (\is_array($table)) {
+            foreach ($table['tables'] as $alias2 => $table2) {
+              $model = $db->modelize($table2);
+              if (
+                isset($model['keys']['PRIMARY']['ref_table']) &&
+                ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
+              ) {
+                if (!isset($table['tables'][$alias2]['join'])) {
+                  $cfg['tables'][$alias]['tables'][$alias2]['join'] = [];
+                }
+
+                $cfg['tables'][$alias]['tables'][$alias2]['join'][] = [
+                  'table' => self::$table_uids,
+                  'alias' => $db->tsn(self::$table_uids) . $change,
+                  'on' => [
+                    'conditions' => [
+                      [
+                        'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
+                        'operator' => 'eq',
+                        'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
+                      ],
+                      [
+                        'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
+                        'operator' => '=',
+                        'exp' => '1'
+                      ]
+                    ],
+                    'logic' => 'AND'
                   ]
-                ],
-                'logic' => 'AND'
-              ]
-            ];
+                ];
+                $cfg['tables'][$alias]['tables'][$alias2] = $db->reprocessCfg($cfg['tables'][$alias]['tables'][$alias2]);
+              }
+            }
+          }
+          else {
+            $model = $db->modelize($table);
+            if (
+              isset($model['keys']['PRIMARY']['ref_table']) &&
+              ($db->tfn($model['keys']['PRIMARY']['ref_db'] . '.' . $model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
+            ) {
+              $change++;
+              $new_join[] = [
+                'table' => self::$table_uids,
+                'alias' => $db->tsn(self::$table_uids) . $change,
+                'on' => [
+                  'conditions' => [
+                    [
+                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_uid'),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], is_string($alias) ? $alias : $table, true)
+                    ],
+                    [
+                      'field' => $db->cfn(self::$table_uids . $change . '.bbn_active'),
+                      'operator' => '=',
+                      'exp' => '1'
+                    ]
+                  ],
+                  'logic' => 'AND'
+                ]
+              ];
+            }
           }
         }
+
         if ($change) {
           $cfg['join'] = $new_join;
           $cfg['where'] = $cfg['filters'];
@@ -1404,7 +1734,7 @@ MYSQL;
                 $exit = false;
                 foreach ($key['columns'] as $col) {
                   $col_idx = array_search($col, $cfg['fields'], true);
-                  if (($col_idx === false) || \is_null($cfg['values'][$col_idx])) {
+                  if (($col_idx === false) || is_null($cfg['values'][$col_idx])) {
                     $exit = true;
                     break;
                   } else {
@@ -1508,7 +1838,7 @@ MYSQL;
                 // Without this the record won't be write in bbn_history. Added by Mirko 
                 $cfg['trig'] = true;
                 // --------
-                if (\count($update) > 0) {
+                if (count($update) > 0) {
                   self::enable();
                   self::$db->update($table, $update, [
                     $s['primary'] => $primary_value
@@ -1764,6 +2094,24 @@ MYSQL;
     return $cfg;
   }
 
+  private static function get_primary_value(array $cfg): ?string
+  {
+    $primary = null;
+    $idx = X::search($cfg['values_desc'], ['primary' => true]);
+    if ($idx !== null) {
+      $primary = $cfg['values'][$idx];
+    }
+
+    if (isset($cfg['primary'], $cfg['fields'])) {
+      $idx = array_search($cfg['primary'], $cfg['fields'], true);
+      if (($idx !== false) && isset($cfg['values'][$idx])) {
+        $primary = $cfg['values'][$idx];
+      }
+    }
+    return $primary;
+  }
+
+
   /**
    * Returns the database connection object.
    *
@@ -1778,7 +2126,7 @@ MYSQL;
   }
 
   /**
-   * Returns an instance of the Appui\Database class.
+   * Returns an instance of the Database class.
    *
    * @return Database
    */

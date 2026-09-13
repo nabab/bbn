@@ -61,7 +61,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_with_controller()
+  public function testConstructorTestWithController()
   {
     $this->init();
 
@@ -97,7 +97,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_without_controller()
+  public function testConstructorTestWithoutController()
   {
     $this->db_mock->shouldReceive('check')
       ->once()
@@ -143,7 +143,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_db_check_returns_false()
+  public function testConstructorTestWhenDbCheckReturnsFalse()
   {
     $this->db_mock->shouldReceive('check')
       ->once()
@@ -181,7 +181,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLauncher_method_creates_and_returns_an_instance_of_launcher_class()
+  public function testGetlauncherMethodCreatesAndReturnsAnInstanceOfLauncherClass()
   {
     $this->db_mock->shouldReceive('check')
       ->times(2)
@@ -196,7 +196,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLauncher_method_returns_an_existing_launcher_class_when_exists()
+  public function testGetlauncherMethodReturnsAnExistingLauncherClassWhenExists()
   {
     $this->init();
 
@@ -212,7 +212,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLauncher_method_returns_null_when_controller_is_null()
+  public function testGetlauncherMethodReturnsNullWhenControllerIsNull()
   {
     $this->init();
 
@@ -232,7 +232,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLauncher_method_returns_null_when_exe_path_is_null()
+  public function testGetlauncherMethodReturnsNullWhenExePathIsNull()
   {
     $this->init();
 
@@ -252,7 +252,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLauncher_method_returns_null_when_db_check_returns_false()
+  public function testGetlauncherMethodReturnsNullWhenDbCheckReturnsFalse()
   {
     $this->init();
 
@@ -270,7 +270,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getRunner_method_creates_and_returns_an_instance_of_runner_class()
+  public function testGetrunnerMethodCreatesAndReturnsAnInstanceOfRunnerClass()
   {
     $this->init();
 
@@ -285,7 +285,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getRunner_method_returns_null_when_controller_is_null()
+  public function testGetrunnerMethodReturnsNullWhenControllerIsNull()
   {
     $this->init();
 
@@ -301,7 +301,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getRunner_method_returns_null_when_check_method_returns_false()
+  public function testGetrunnerMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -315,7 +315,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getController_method_returns_the_controller_instance()
+  public function testGetcontrollerMethodReturnsTheControllerInstance()
   {
     $this->init();
 
@@ -330,7 +330,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getController_method_returns_null_when_controller_is_null()
+  public function testGetcontrollerMethodReturnsNullWhenControllerIsNull()
   {
     $this->init();
 
@@ -346,7 +346,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getController_method_returns_null_when_check_method_returns_false()
+  public function testGetcontrollerMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -360,7 +360,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getManager_method_creates_returns_an_instance_of_manager_class()
+  public function testGetmanagerMethodCreatesReturnsAnInstanceOfManagerClass()
   {
     $this->init();
 
@@ -380,7 +380,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getManager_method_returns_null_when_controller_is_null()
+  public function testGetmanagerMethodReturnsNullWhenControllerIsNull()
   {
     $this->init();
 
@@ -396,7 +396,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getManager_method_returns_null_when_check_method_returns_false()
+  public function testGetmanagerMethodReturnsNullWhenCheckMethodReturnsFalse()
   {
     $this->init();
 
@@ -410,7 +410,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getManager_method_returns_the_existing_manager_instance()
+  public function testGetmanagerMethodReturnsTheExistingManagerInstance()
   {
     $this->init();
 
@@ -426,7 +426,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function check_method_checks_if_the_database_is_ready_to_perform_a_query()
+  public function testCheckMethodChecksIfTheDatabaseIsReadyToPerformAQuery()
   {
     $this->init();
 
@@ -440,7 +440,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getExePath_method_reruns_exe_path()
+  public function testGetexepathMethodRerunsExePath()
   {
     $this->init();
 
@@ -451,7 +451,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogFile_method_returns_log_file_path()
+  public function testGetlogfileMethodReturnsLogFilePath()
   {
     $this->init();
 
@@ -462,7 +462,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getPath_method_returns_the_path_of_the_plugin()
+  public function testGetpathMethodReturnsThePathOfThePlugin()
   {
     $this->init();
 
@@ -473,7 +473,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function launchPoll_method_launches_a_parallel_poll_process()
+  public function testLaunchpollMethodLaunchesAParallelPollProcess()
   {
     $this->init();
 
@@ -490,7 +490,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function launchPoll_method_returns_null_when_launcher_instance_could_not_be_created()
+  public function testLaunchpollMethodReturnsNullWhenLauncherInstanceCouldNotBeCreated()
   {
     $this->init();
 
@@ -504,7 +504,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function launchTaskSystem_method_launches_a_parallel_cron_process()
+  public function testLaunchtasksystemMethodLaunchesAParallelCronProcess()
   {
     $this->init();
 
@@ -522,7 +522,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function launchTaskSystem_method_returns_null_when_launcher_instance_could_not_be_created()
+  public function testLaunchtasksystemMethodReturnsNullWhenLauncherInstanceCouldNotBeCreated()
   {
     $this->init();
 
@@ -536,7 +536,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getStatusPath_method_returns_status_path()
+  public function testGetstatuspathMethodReturnsStatusPath()
   {
     $this->init();
 
@@ -547,7 +547,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getStatusPath_method_returns_null_when_the_provided_type_is_empty_or_path_is_not_set()
+  public function testGetstatuspathMethodReturnsNullWhenTheProvidedTypeIsEmptyOrPathIsNotSet()
   {
     $this->init();
 
@@ -563,7 +563,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getPidPath_method_returns_pid_path()
+  public function testGetpidpathMethodReturnsPidPath()
   {
     $this->init();
 
@@ -579,7 +579,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getPidPath_method_returns_null_when_no_id_or_type_is_provided()
+  public function testGetpidpathMethodReturnsNullWhenNoIdOrTypeIsProvided()
   {
     $this->init();
 
@@ -595,7 +595,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogPath_method_creates_and_returns_log_path_when_type_is_provided_having_error_and_no_path_as_false()
+  public function testGetlogpathMethodCreatesAndReturnsLogPathWhenTypeIsProvidedHavingErrorAndNoPathAsFalse()
   {
     $this->init();
 
@@ -609,7 +609,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogPath_method_returns_log_path_when_type_is_provided_having_error_and_no_path_as_true()
+  public function testGetlogpathMethodReturnsLogPathWhenTypeIsProvidedHavingErrorAndNoPathAsTrue()
   {
     $this->init();
 
@@ -643,7 +643,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogPath_method_returns_log_path_when_type_is_provided_having_error_as_false_and_no_path_equal_as_true()
+  public function testGetlogpathMethodReturnsLogPathWhenTypeIsProvidedHavingErrorAsFalseAndNoPathEqualAsTrue()
   {
     $this->init();
 
@@ -677,7 +677,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogPath_method_returns_null_when_the_given_cfg_missing_type_and_id()
+  public function testGetlogpathMethodReturnsNullWhenTheGivenCfgMissingTypeAndId()
   {
     $this->init();
 
@@ -687,7 +687,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function getLogPath_method_returns_null_when_path_is_not_set()
+  public function testGetlogpathMethodReturnsNullWhenPathIsNotSet()
   {
     $this->init();
 
@@ -699,7 +699,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function isActive_method_returns_true_if_the_active_file_exists_and_false_otherwise()
+  public function testIsactiveMethodReturnsTrueIfTheActiveFileExistsAndFalseOtherwise()
   {
     $this->init();
 
@@ -719,7 +719,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function isCronActive_method_returns_true_if_the_cron_file_exists_and_false_otherwise()
+  public function testIscronactiveMethodReturnsTrueIfTheCronFileExistsAndFalseOtherwise()
   {
     $this->init();
 
@@ -739,7 +739,7 @@ class CronTest extends TestCase
   }
 
   /** @test */
-  public function isPollActive_method_returns_true_if_the_poll_file_exists_and_false_otherwise()
+  public function testIspollactiveMethodReturnsTrueIfThePollFileExistsAndFalseOtherwise()
   {
     $this->init();
 

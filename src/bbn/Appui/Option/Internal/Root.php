@@ -3,6 +3,7 @@
 namespace bbn\Appui\Option\Internal;
 
 use Exception;
+use bbn\X;
 use bbn\Appui\Option;
 
 trait Root
@@ -87,7 +88,7 @@ trait Root
    * @return Option
    * @throws Exception
    */
-  public function setDefault($uid): self
+  public function setDefault($uid): static
   {
     if ($this->check() && $this->exists($uid)) {
       $this->default = $uid;
@@ -112,46 +113,34 @@ trait Root
   public function init(): bool
   {
     if (!$this->is_init) {
-      $this->cacheInit();
       $t          =& $this;
-      $this->root = $this->cacheGetSet(
-        function () use (&$t) {
-          return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [
-            ['field' => $t->fields['id_parent'], 'exp'  => $t->fields['id']], ['field' => $t->fields['code'], 'value' => 'root']
-          ]);
-        },
-        'root',
-        'root',
-        60
-      );
+      $this->root = $this->cacheGet('root');
       if (!$this->root) {
-        return false;
+        $this->root = $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [
+          ['field' => $t->fields['id_parent'], 'exp'  => $t->fields['id']], ['field' => $t->fields['code'], 'value' => 'root']
+        ]);
+        $this->setCache('root', '', $this->root);
       }
 
-      if (\defined('BBN_APP_NAME')) {
-        $this->default = $this->cacheGetSet(
-          function () use (&$t) {
-            $res = $t->db->selectOne(
-              $t->class_cfg['table'],
-              $t->fields['id'],
-              [
-                $t->fields['id_parent'] => $this->root,
-                $t->fields['code'] => BBN_APP_NAME
-              ]
-            );
-            if (!$res) {
-              $res = $t->root;
-            }
+      if (!$this->root) {
+        throw new Exception(X::_("The root option is not defined"));
+      }
 
-            return $res;
-          },
-          BBN_APP_NAME,
-          BBN_APP_NAME,
-          60
+      if (!defined('BBN_APP_NAME')) {
+        throw new Exception(X::_("The application name is not defined"));
+      }
+
+      $this->default = $this->cacheGet(constant('BBN_APP_NAME'));
+      if (!$this->default) {
+        $this->default = $this->db->selectOne(
+          $t->class_cfg['table'],
+          $t->fields['id'],
+          [
+            $t->fields['id_parent'] => $this->root,
+            $t->fields['code'] => BBN_APP_NAME
+          ]
         );
-      }
-      else {
-        $this->default = $this->root;
+        $this->setCache(constant('BBN_APP_NAME'), '', $this->default);
       }
 
       $this->is_init = true;

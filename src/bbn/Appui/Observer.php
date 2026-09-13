@@ -89,7 +89,7 @@ class Observer extends bbn\Models\Cls\Db
   private function _exec_string(string $request, $params = null): ?string
   {
     if ( $this->check() ){
-      $res = !empty($params) ? $this->db->getOne($request, array_map('base64_decode', Json_decode($params))) : $this->db->getOne($request);
+      $res = !empty($params) ? $this->db->getOne($request, array_map('base64_decode', json_decode($params))) : $this->db->getOne($request);
       return md5((string)$res);
     }
     return null;

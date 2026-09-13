@@ -255,7 +255,8 @@ trait LocaleDatabase
   {
     if ($tableIdx = array_search($table, $this->class_cfg['tables'])) {
       $table = $this->class_cfg['tables'][$tableIdx];
-      $optCfg = Option::getInstance()->getClassCfg();
+      $optCls = Option::getInstance();
+      $optCfg = $optCls->getClassCfg();
       $usrCls = User::getInstance();
       $usrCfg = $usrCls->getClassCfg();
       $modelize = $this->db->modelize($table);
@@ -284,7 +285,7 @@ trait LocaleDatabase
           && !empty($value)
           && !Str::isUid($value)
         ) {
-          $value = $this->opt->fromPath($value);
+          $value = $optCls->fromPath($value);
         }
 
         if (in_array($field, $usr)

@@ -8,24 +8,29 @@
 
 namespace bbn\Models\Tts;
 
-use bbn\X;
-use bbn\Str;
+use ReflectionProperty;
 use stdClass;
 use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
 
 trait DbJunction
 {
-  use DbTrait;
+  use DbConfig;
+  use DbFiltering;
+  use DbStructure;
+  use DbData;
+  use DbSelection;
+  use DbWrite;
 
+  private static array $_isInitJunction = [];
   protected $rootFilterCfg = [];
 
-  private $dbJunctionStructure = [];
-
-  private $dbTraitRelations = [];
-
+  private static array $dbJunctionCfg = [];
 
   /**
-   * @param array|string $id
+   * @param array $filter
    * @return bool
    */
   public function dbTraitExists(array $filter): bool
@@ -50,9 +55,9 @@ trait DbJunction
    *
    * @param array $data
    *
-   * @return array|null
+   * @return string|null
    */
-  public function dbTraitInsert(array $data, bool $ignore = false): ?array
+  public function dbTraitInsert(array $data, bool $ignore = false): ?string
   {
     if ($data = $this->dbTraitPrepare($data)) {
       $ccfg = $this->getClassCfg();
@@ -63,9 +68,7 @@ trait DbJunction
         }
       }
 
-      if ($this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data)) {
-        return $this->dbTraitRselect($data);
-      }
+      return $this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data);
     }
 
     return null;
@@ -75,11 +78,11 @@ trait DbJunction
   /**
    * Deletes a single row from the table through its id.
    *
-   * @param string $id
+   * @param string|array $filter
    *
    * @return int
    */
-  public function dbTraitDelete(array $filter, bool $cascade = false): int
+  public function dbTraitDelete(array|string $filter): int
   {
     if ($this->dbTraitExists($filter)) {
       $cfg = $this->getClassCfg();
@@ -95,12 +98,12 @@ trait DbJunction
   /**
    * Updates a single row in the table through its id.
    *
-   * @param string $id
+   * @param string|array $filter
    * @param array $data
    *
    * @return int
    */
-  public function dbTraitUpdate(array $filter, array $data, bool $addCfg = false): int
+  public function dbTraitUpdate(array|string $filter, array $data): int
   {
     if (!$this->dbTraitExists($filter)) {
       throw new Exception(X::_("Impossible to find the given row"));
@@ -137,7 +140,7 @@ trait DbJunction
    *
    * @return mixed
    */
-  public function dbTraitSelectOne(string $field, array $filter = [], array $order = [])
+  public function dbTraitSelectOne(string $field, array $filter = [], string|array $order= [])
   {
     if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {
       return $res[$field] ?? null;
@@ -155,7 +158,7 @@ trait DbJunction
    *
    * @return stdClass|null
    */
-  public function dbTraitSelect(array $filter = [], array $order = [], array $fields = []): ?stdClass
+  public function dbTraitSelect(array $filter = [], string|array $order= [], array $fields = []): ?stdClass
   {
     return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);
   }
@@ -169,12 +172,12 @@ trait DbJunction
    *
    * @return array|null
    */
-  public function dbTraitRselect(array $filter = [], array $order = [], array $fields = []): ?array
+  public function dbTraitRselect(array $filter = [], string|array $order= [], array $fields = []): ?array
   {
     return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);
   }
 
-  public function dbTraitSelectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
+  public function dbTraitSelectValues(string $field, array $filter = [], string|array $order= [], int $limit = 0, int $start = 0): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'value', [$field]);
   }
@@ -209,7 +212,7 @@ trait DbJunction
    *
    * @return array
    */
-  public function dbTraitSelectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function dbTraitSelectAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'object', $fields);
   }
@@ -226,9 +229,71 @@ trait DbJunction
    *
    * @return array
    */
-  public function dbTraitRselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function dbTraitRselectAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);
+  }
+
+  protected static function dbJunctionSetup(array $linkedClasses = [])
+  {
+    if (!static::isDbConfigInit()) {
+      throw new Exception(X::_("The class %s should be configured before using it as a junction", static::class));
+    }
+
+    static::$dbJunctionCfg[static::class] = [];
+    foreach ($linkedClasses as $table => $cls) {
+      if (empty($table) || empty($cls)) {
+        throw new Exception(X::_("Each junction defined in the class %s configuration should have a table and a class defined", static::class));
+      }
+
+      if (!class_exists($cls)) {
+        throw new Exception(X::_("The class %s defined in the junction configuration of the class %s does not exist", $cls, static::class));
+      }
+
+      static::$dbJunctionCfg[static::class][$table] = $cls;
+    } 
+
+
+  }
+
+  protected function dbJunctionInit()
+  {
+    if (isset(self::$_isInitJunction[static::class])) {
+      return;
+    }
+
+    /*
+    $keys = $this->db->getKeys($this->class_cfg['table']);
+    $tcs = self::dbConfigGetTableClasses($this->db)['tables'];
+    $linkedClasses = [];
+    foreach ($keys["keys"] as $n => $v) {
+      if (
+        $n !== "PRIMARY" &&
+        count($v["columns"]) === 1 &&
+        !empty($v["ref_table"]) &&
+        isset($tcs[$v["ref_table"]])
+      ) {
+        $cls = $tcs[$v["ref_table"]];
+        $property = "default_class_cfg";
+        if (
+          property_exists($cls, $property) &&
+          method_exists($cls, "initClassCfg")
+        ) {
+          $cfg = $cls::getDefaultClassCfg();
+          if (!empty($cfg['junctions'])) {
+            foreach ($cfg['junctions'] as $j) {
+              if (isset($j['table']) && $j['table'] === $this->class_cfg['table']) {
+                $linkedClasses[$this->db->tsn($v['ref_table'])] = $cls;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    self::dbJunctionSetup($linkedClasses);
+    */
   }
 
   /**

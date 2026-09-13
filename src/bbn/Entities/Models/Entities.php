@@ -3,16 +3,20 @@
 namespace bbn\Entities\Models;
 
 use Exception;
+use BadMethodCallException;
 use stdClass;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
+use bbn\Models\Tts\DbPublicCache;
+use bbn\Models\Tts\DbPublicOps;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Identity;
 use bbn\Entities\Address;
 use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Models\Internals\EntitiesObjects;
 use bbn\Entities\Junctions\Consultation;
 use bbn\Entities\Tables\Document;
 use bbn\Entities\Tables\Options as EntityOptions;
@@ -24,7 +28,7 @@ use bbn\Appui\Option;
 use bbn\Appui\Uauth;
 use bbn\Appui\History;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Nullall;
 
 use function is_int;
 
@@ -35,58 +39,59 @@ use function is_int;
  */
 abstract class Entities extends DbCls
 {
-  use DbActions;
+  use DbPublicCache;
+  use DbPublicOps;
 
   /**
    * Default class configuration.
-   * 
+   *
    * @var array
    */
   protected static $default_class_cfg = [
-    'classes' => [
-      'link' => false,
-      'identities' => false,
-      'address' => false,
-      'entity' => false,
-      'consultation' => false,
-      'mail' => false,
-      'document' => false,
-      'document_request' => false,
-      'note' => false,
-      'entity_options' => false,
-      'masks' => false,
-      'uauth' => false,
+    "classes" => [
+      "link" => false,
+      "identities" => false,
+      "address" => false,
+      "entity" => false,
+      "consultation" => false,
+      "mail" => false,
+      "document" => false,
+      "document_request" => false,
+      "note" => false,
+      "entity_options" => false,
+      "masks" => false,
+      "uauth" => false,
     ],
-    'table' => 'bbn_entities',
-    'tables' => [
-      'entities' => 'bbn_entities',
-      'identities' => 'bbn_identities',
-      'address' => 'bbn_addresses',
-      'links' => 'bbn_entities_links',
+    "table" => "bbn_entities",
+    "tables" => [
+      "entities" => "bbn_entities",
+      "identities" => "bbn_identities",
+      "address" => "bbn_addresses",
+      "links" => "bbn_entities_links",
     ],
-    'arch' => [
-      'entities' => [
-        'id' => [
-          'name' => 'id',
-          'type' => 'primary',
+    "arch" => [
+      "entities" => [
+        "id" => [
+          "name" => "id",
+          "type" => "primary",
         ],
-        'easy_id' => [
-          'name' => 'easy_id',
-          'type' => 'primary',
-          'maxlength' => 5
+        "easy_id" => [
+          "name" => "easy_id",
+          "type" => "primary",
+          "maxlength" => 5,
         ],
-        'identity' => [
-          'name' => 'identity',
-          'type' => 'string',
-          'maxlength' => 32
+        "identity" => [
+          "name" => "identity",
+          "type" => "string",
+          "maxlength" => 32,
         ],
-        'id_parent' => [
-          'name' => 'id_parent',
-          'type' => 'string',
-          'maxlength' => 100,
-          'alias' => 'parent'
+        "id_parent" => [
+          "name" => "id_parent",
+          "type" => "string",
+          "maxlength" => 100,
+          "alias" => "parent",
         ],
-        "cached" =>  [
+        "cached" => [
           "name" => "cached",
           "nullable" => true,
           "type" => "datetime",
@@ -101,7 +106,7 @@ abstract class Entities extends DbCls
           "nullable" => true,
           "type" => "int",
         ],
-      ]
+      ],
     ],
   ];
 
@@ -129,11 +134,12 @@ abstract class Entities extends DbCls
   private $linkCls;
 
   private $links;
+
+  private static $entityKeys;
   /**
    * Entities constructor.
    *
    * @param Db $db The database instance.
-   * @param array|null $cfg Configuration options.
    * @param Option|null $options Option object.
    * @param Mail|null $mail Mail object.
    * @param Identity|null $identity Identity object.
@@ -147,7 +153,6 @@ abstract class Entities extends DbCls
    */
   public function __construct(
     Db $db,
-    array|null $cfg = null,
     protected Option|null $options = null,
     protected Mail|null $mail = null,
     private Identity|null $identity = null,
@@ -161,41 +166,42 @@ abstract class Entities extends DbCls
   ) {
     parent::__construct($db);
     // Setting up the class configuration
-    $this->initClassCfg($cfg);
-    $cls = $this->class_cfg['classes'];
-    if (!empty($cls['link'])) {
-      $this->linkCls = $cls['link'];
+    $this->initClassCfg();
+    $this->dbTraitCacheInit();
+    $cls = $this->class_cfg["classes"];
+    if (!empty($cls["link"])) {
+      $this->linkCls = $cls["link"];
     }
   }
 
   /**
    * Magic method to handle dynamic method calls.
-   * 
+   *
    * @param string $method Method name.
    * @param array $args Arguments for the method.
-   * 
+   *
    * @return mixed
    * @throws Exception If the method does not exist.
    */
   public function __call($method, $args)
   {
-    $path = '\\' . get_class($this) . '\\';
+    $path = static::class . "\\";
     $cls = ucfirst($method);
     $entity = $args[0] ?? null;
 
-    if (class_exists($path . 'Tables\\' . $cls)) {
-      return $this->getClass($path . 'Tables\\' . $cls, $method, $entity);
-    } else if (class_exists($path . 'Junctions\\' . $cls)) {
-      return $this->getClass($path . 'Junctions\\' . $cls, $method, $entity);
-    } else if (class_exists($path . $cls)) {
+    if (class_exists($path . "Tables\\" . $cls)) {
+      return $this->getClass($path . "Tables\\" . $cls, $method, $entity);
+    } elseif (class_exists($path . "Junctions\\" . $cls)) {
+      return $this->getClass($path . "Junctions\\" . $cls, $method, $entity);
+    } elseif (class_exists($path . $cls)) {
       return $this->getClass($path . $cls, $method, $entity);
-    } else if (class_exists($path . 'Links\\' . $cls)) {
-      return $this->getLink($path . 'Links\\' . $cls, $entity);
-    } else if (class_exists($path . 'Documents\\' . $cls)) {
-      return $this->getClass($path . 'Documents\\' . $cls, $method, $entity);
+    } elseif (class_exists($path . "Links\\" . $cls)) {
+      return $this->getLink($path . "Links\\" . $cls, $entity);
+    } elseif (class_exists($path . "Documents\\" . $cls)) {
+      return $this->getClass($path . "Documents\\" . $cls, $method, $entity);
     }
 
-    throw new Exception(X::_("The method %s does not exist", $method));
+    throw new BadMethodCallException(X::_("The method %s does not exist", $method));
   }
 
   public function getDefaultCountry(): ?string
@@ -207,7 +213,7 @@ abstract class Entities extends DbCls
    * Deletes records based on the given condition.
    *
    * @param string|array $where Condition for deletion.
-   * 
+   *
    * @return bool
    */
   public function delete(string|array $where)
@@ -220,7 +226,7 @@ abstract class Entities extends DbCls
    *
    * @param string|array $where Condition for update.
    * @param array $data Data to update.
-   * 
+   *
    * @return bool
    */
   public function update(string|array $where, array $data)
@@ -233,18 +239,23 @@ abstract class Entities extends DbCls
    *
    * @param string|array $where Condition for update.
    * @param array $data Data to update.
-   * 
+   *
    * @return bool
    */
   public function getNewEasyId(): ?int
   {
-    $arc = $this->class_cfg['props']['entities'];
-    if (isset($arc['easy_id'])) {
-      $num = random_int(1, pow(10, ($arc['easy_id']['max_length'] ?? 5)) - 1);
+    $arc = $this->class_cfg["props"]["entities"];
+    if (isset($arc["easy_id"])) {
+      $num = random_int(1, pow(10, $arc["easy_id"]["max_length"] ?? 5) - 1);
       $max = 100;
       $i = 0;
-      while ($this->dbTraitSelectOne($arc['easy_id']['name'], [$arc['easy_id']['name'] => $num]) && ($i < $max)) {
-        $num = random_int(1, pow(10, ($arc['easy_id']['max_length'] ?? 5)) - 1);
+      while (
+        $this->dbTraitSelectOne($arc["easy_id"]["name"], [
+          $arc["easy_id"]["name"] => $num,
+        ]) &&
+        $i < $max
+      ) {
+        $num = random_int(1, pow(10, $arc["easy_id"]["max_length"] ?? 5) - 1);
         $i++;
       }
 
@@ -258,7 +269,7 @@ abstract class Entities extends DbCls
    * Checks if a record exists based on the given condition.
    *
    * @param string|array $where Condition for existence check.
-   * 
+   *
    * @return bool
    */
   public function exists(string|array $where)
@@ -271,11 +282,11 @@ abstract class Entities extends DbCls
    *
    * @param string $field The field to select.
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
-   * 
+   * @param string|array $orderOrder for sorting results.
+   *
    * @return mixed
    */
-  public function selectOne(string $field, $filter = [], array $order = [])
+  public function selectOne(string $field, $filter = [], string|array $order= [])
   {
     return $this->dbTraitSelectOne($field, $filter, $order);
   }
@@ -284,13 +295,16 @@ abstract class Entities extends DbCls
    * Selects a row as an object from the table through its condition.
    *
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param array $fields Fields to select.
    *
    * @return stdClass|null
    */
-  public function select($filter = [], array $order = [], array $fields = []): ?stdClass
-  {
+  public function select(
+    $filter = [],
+    string|array $order= [],
+    array $fields = [],
+  ): ?stdClass {
     return $this->dbTraitSelect($filter, $order, $fields);
   }
 
@@ -298,13 +312,16 @@ abstract class Entities extends DbCls
    * Selects a row as an array from the table through its condition.
    *
    * @param string|array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param array $fields Fields to select.
    *
    * @return array|null
    */
-  public function rselect($filter = [], array $order = [], array $fields = []): ?array
-  {
+  public function rselect(
+    $filter = [],
+    string|array $order= [],
+    array $fields = [],
+  ): ?array {
     return $this->dbTraitRselect($filter, $order, $fields);
   }
 
@@ -313,14 +330,19 @@ abstract class Entities extends DbCls
    *
    * @param string $field The field to select.
    * @param array $filter Condition for selection.
-   * @param array $order Order for sorting results.
+   * @param string|array $orderOrder for sorting results.
    * @param int $limit Maximum number of results.
    * @param int $start Starting point for results.
-   * 
+   *
    * @return array
    */
-  public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
-  {
+  public function selectValues(
+    string $field,
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+  ): array {
     return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
   }
 
@@ -336,7 +358,6 @@ abstract class Entities extends DbCls
     return $this->dbTraitCount($filter);
   }
 
-
   /**
    * Returns an array of rows as objects from the table for the given conditions.
    *
@@ -348,11 +369,15 @@ abstract class Entities extends DbCls
    *
    * @return array
    */
-  public function selectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, array $fields = []): array
-  {
+  public function selectAll(
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+    array $fields = [],
+  ): array {
     return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
   }
-
 
   /**
    * Returns an array of rows as arrays from the table for the given conditions.
@@ -364,8 +389,13 @@ abstract class Entities extends DbCls
    * @param array $fields
    * @return array
    */
-  public function rselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, array $fields = []): array
-  {
+  public function rselectAll(
+    array $filter = [],
+    string|array $order= [],
+    int $limit = 0,
+    int $start = 0,
+    array $fields = [],
+  ): array {
     return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
   }
 
@@ -385,16 +415,20 @@ abstract class Entities extends DbCls
     return $this->options()->text($cid);
   }
 
+  public function getFilterCfg(array $cfg): array
+  {
+    return $this->dbTraitGetFilterCfg($cfg);
+  }
 
   public function get($id): Entity
   {
-    $cls = $this->class_cfg['classes'];
-    return new $cls['entity']($this->db, $id, $this);
+    $cls = $this->class_cfg["classes"];
+    return new ($cls["entity"])($this->db, $id, $this);
   }
 
   public function masks(): ?Masks
   {
-    $cls = $this->class_cfg['classes'];
+    $cls = $this->class_cfg["classes"];
     if (!$this->masks) {
       $this->masks = new Masks($this->db);
     }
@@ -404,20 +438,19 @@ abstract class Entities extends DbCls
 
   public function identity(): ?Identity
   {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->identity && $cls['identities']) {
-      $this->identity = new $cls['identities']($this->db, $this);
+    $cls = $this->class_cfg["classes"];
+    if (!$this->identity && $cls["identities"]) {
+      $this->identity = new ($cls["identities"])($this->db, $this);
     }
 
     return $this->identity;
   }
 
-
   public function uauth(): ?Uauth
   {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->uauth && $cls['uauth']) {
-      $this->uauth = new $cls['uauth']($this->db);
+    $cls = $this->class_cfg["classes"];
+    if (!$this->uauth && $cls["uauth"]) {
+      $this->uauth = new ($cls["uauth"])($this->db);
     }
 
     return $this->uauth;
@@ -425,101 +458,22 @@ abstract class Entities extends DbCls
 
   public function address(): ?Address
   {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->address && $cls['address']) {
-      $this->address = new $cls['address']($this->db, $this);
+    $cls = $this->class_cfg["classes"];
+    if (!$this->address && $cls["address"]) {
+      $this->address = new ($cls["address"])($this->db, $this);
     }
 
     return $this->address;
   }
-  
+
   public function options(): ?Option
   {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->options && $cls['option']) {
-      $this->options = new $cls['option']($this->db);
+    $cls = $this->class_cfg["classes"];
+    if (!$this->options && $cls["option"]) {
+      $this->options = new ($cls["option"])($this->db);
     }
 
     return $this->options;
-  }
-
-
-  public function consultation(): ?Consultation
-  {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->consultation && $cls['consultation']) {
-      $this->consultation = new $cls['consultation']($this->db);
-    }  
-    
-    return $this->consultation;
-  }  
-
-
-  public function mail(): ?Option
-  {
-    $cls = $this->class_cfg['classes'];
-    if (!$this->mail && $cls['mail']) {
-      $this->mail = new $cls['mail']($this->db);
-    }
-
-    return $this->mail;
-  }
-
-
-  public function document(Entity|null $entity = null): ?Document
-  {
-    $cls = $this->class_cfg['classes'];
-    if (!empty($cls['document'])) {
-      if ($entity) {
-        return new $cls['document']($this->db, $this, $entity);
-      }
-
-      if (!$this->document) {
-        $this->document = new $cls['document']($this->db);
-      }
-
-      return $this->document;
-    }
-    
-    return null;
-  }
-
-
-  public function request(Entity|null $entity = null): ?DocumentRequest
-  {
-    $cls = $this->class_cfg['classes'];
-    if (!empty($cls['request'])) {
-      if ($entity) {
-        return new $cls['request']($this->db, $this, $entity);
-      }
-
-      if (!$this->request) {
-        $this->request = new $cls['request']($this->db);
-      }
-      
-      return $this->request;
-    }
-    
-    return null;
-  }
-
-
-  public function entityOptions(Entity|null $entity = null): ?EntityOptions
-  {
-    $cls = $this->class_cfg['classes'];
-    if (!empty($cls['entity_options'])) {
-      if ($entity) {
-        return new $cls['entity_options']($this->db, $this, $entity);
-      }
-
-      if (!$this->entityOptions) {
-        $this->entityOptions = new $cls['entity_options']($this->db);
-      }
-      
-      return $this->entityOptions;
-    }
-    
-    return null;
   }
 
 
@@ -538,7 +492,6 @@ abstract class Entities extends DbCls
     return new $linkCls($this->db, $this, $entity);
   }
 
-
   public function getGlobalLink(Entity|null $entity = null): ?Link
   {
     if (!$entity) {
@@ -553,41 +506,131 @@ abstract class Entities extends DbCls
   }
 
 
-  protected function getClass(string $clsName, string $index, Entity|null $entity = null): EntityJunction|EntityTable
+  public static function getEntityKeys(Db $db, Entities $ent): array
   {
-    if (!$entity) {
-      if (!isset(self::$classes[$index])) {
-        $cls = new $clsName($this->db, $this);
-        self::setClass($index, $cls);
+    if (!self::$entityKeys) {
+      $keys = [];
+      $cfg = $ent->getClassCfg();
+      foreach ($db->getForeignKeys($cfg['arch']['entities']['id'], $cfg['tables']['entities']) as $tfn => $col) {
+        $keys[$db->tsn($tfn)] = $col;
       }
-
-      return self::$classes[$index];
+  
+      self::$entityKeys = $keys;
     }
 
-    return new $clsName($this->db, $this, $entity);
+    return self::$entityKeys;
   }
 
+  public static function getDbObject(string $table, array $cfg, Db $db, Entities $entities, ?Entity $entity = null)
+  {
+    $keys = Entities::getEntityKeys($db, $entities);
+    if (empty($cfg['class'])) {
+      return null;
+    }
+
+    try {
+      if (isset($keys[$table])) {
+        $cls = new $cfg['class']($db, $entities, $entity ?: new Nullall());
+      }
+      else {
+        $cls = new $cfg['class']($db);
+      }
+    }
+    catch (Exception $e) {
+      throw new Exception(X::_("The class %s for table %s cannot be instantiated", $cfg['class'], $cfg['table']));
+    }
+
+    return $cls;
+  }
+
+
+
+  protected function factorEntityObject(string $method, string $clsName, ?Entity $entity = null): object
+  {
+    if (!$entity) {
+      if (!isset(self::$classes[$method])) {
+        try {
+          $cls = new $clsName($this->db, $this);
+          self::setClass($method, $cls);
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The method %s cannot create the instance of %s", $method, $clsName));
+        }
+      }
+      else {
+        $cls = self::$classes[$method];
+      }
+    }
+    else {
+      try {
+        $cls = new $clsName($this->db, $this, $entity);
+      }
+      catch (Exception $e) {
+        throw new Exception(X::_("The method %s cannot create the instance of %s", $method, $clsName));
+      }
+    }
+
+    return $cls;
+  }
+
+
+  protected function getClass(
+    string $clsName,
+    string $index,
+    Entity|null $entity = null,
+  ): EntityJunction|EntityTable|DbCls {
+    if (!$entity) {
+      if (!isset(self::$classes[$index])) {
+        try {
+          $cls = new $clsName($this->db, $this);
+          self::setClass($index, $cls);
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+        }
+      }
+      else {
+        try {
+          $cls = self::$classes[$index];
+        }
+        catch (Exception $e) {
+          throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+        }
+      }
+
+    }
+    else {
+      try {
+        $cls = new $clsName($this->db, $this, $entity);
+      }
+      catch (Exception $e) {
+        throw new Exception(X::_("The class %s for table %s cannot be instantiated", $clsName, $this->class_cfg["table"]));
+      }
+    }
+
+    return $cls;
+  }
 
   protected function treatWhere(string|array $where): string|array
   {
     $cfg = $this->getClassCfg();
     if (is_int($where)) {
-      $where = [$cfg['arch'][$this->class_table_index]['easy_id'] => $where];
+      $where = [$cfg["arch"][$this->class_table_index]["easy_id"] => $where];
     }
 
     return $where;
   }
-
 
   private static function setLink(string $id, Link $link): void
   {
     self::$linksCache[$id] = $link;
   }
 
-
-  private static function setClass(string $index, EntityJunction|EntityTable $cls): void
-  {
+  protected static function setClass(
+    string $index,
+    //EntityJunction|EntityTable $cls,
+    $cls,
+  ): void {
     self::$classes[$index] = $cls;
   }
-
 }

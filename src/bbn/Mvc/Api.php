@@ -11,7 +11,7 @@ namespace bbn\Mvc;
 
 interface Api {
 
-  function reroute($path='', $post = false, $arguments = false);
+  function reroute(string $path = '', ?array $post = null, ?array $arguments = null);
 
   function isCli();
 

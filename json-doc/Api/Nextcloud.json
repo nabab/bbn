@@ -202,7 +202,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Deletes the given file or folder\n   *\n   * @param string $file\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Deletes the given file or folder\n   *\n   * @param string $file\n   * @return bool\n   *\/"
         },
         "getProps": {
             "name": "getProps",
@@ -326,7 +326,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns true if the given $path exists\n   *\n   * @param string $path\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Returns true if the given $path exists\n   *\n   * @param string $path\n   * @return bool\n   *\/"
         },
         "mkdir": {
             "name": "mkdir",
@@ -378,7 +378,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Creates a dir at the given path\n   *\n   * @param string $dir\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Creates a dir at the given path\n   *\n   * @param string $dir\n   * @return bool\n   *\/"
         },
         "copy": {
             "name": "copy",
@@ -453,7 +453,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Copies the given file or folder to the given destination, if the given destination already exists throws an error.\n   * @param string $source\n   * @param string $dest\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Copies the given file or folder to the given destination, if the given destination already exists throws an error.\n   * @param string $source\n   * @param string $dest\n   * @return bool\n   *\/"
         },
         "rename": {
             "name": "rename",
@@ -528,7 +528,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Renames files or folder from the $old name to the $new name-\n   * @param string $old\n   * @param string $new\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Renames files or folder from the $old name to the $new name-\n   * @param string $old\n   * @param string $new\n   * @return bool\n   *\/"
         },
         "isFile": {
             "name": "isFile",
@@ -584,7 +584,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns true if the given $path corresponds to a file.\n   * @param string $path\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Returns true if the given $path corresponds to a file.\n   * @param string $path\n   * @return bool\n   *\/"
         },
         "isDir": {
             "name": "isDir",
@@ -640,7 +640,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns true if the given $path corresponds to a directory.\n   * @param string $path\n   * @return Boolean\n   *\/"
+            "comments": "  \/**\n   * Returns true if the given $path corresponds to a directory.\n   * @param string $path\n   * @return bool\n   *\/"
         },
         "filemtime": {
             "name": "filemtime",
@@ -964,7 +964,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the real path. \n   * @param string $path\n   * @return String\n   *\/"
+            "comments": "  \/**\n   * Returns the real path. \n   * @param string $path\n   * @return string\n   *\/"
         },
         "getSystemPath": {
             "name": "getSystemPath",
@@ -1041,7 +1041,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the system path. \n   * @param string $path\n   * @param Boolean $is_absolute\n   * @return String\n   *\/"
+            "comments": "  \/**\n   * Returns the system path. \n   * @param string $path\n   * @param Boolean $is_absolute\n   * @return string\n   *\/"
         },
         "getContents": {
             "name": "getContents",
@@ -1095,7 +1095,7 @@
                 ],
                 "return": ""
             },
-            "comments": "  \/**\n   * Returns the content of the given file\n   *\n   * @param string $file\n   * @return String\n   *\/"
+            "comments": "  \/**\n   * Returns the content of the given file\n   *\n   * @param string $file\n   * @return string\n   *\/"
         },
         "getFiles": {
             "name": "getFiles",

@@ -29,10 +29,10 @@ trait Common
   private $asJson = true;
 
   /** @var string The last action to have been performed */
-  public $lastAction = false;
+  public $lastAction = null;
 
   /** @var */
-  public $error = false;
+  public $error = null;
 
   /**
    * Virtualmin constructor.
@@ -41,7 +41,6 @@ trait Common
   public function __construct(array $cfg)
   {
     if (isset($cfg['user'], $cfg['pass'])) {
-      $this->cacheInit();
       $this->user     = $cfg['user'];
       $this->pass     = $cfg['pass'];
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';

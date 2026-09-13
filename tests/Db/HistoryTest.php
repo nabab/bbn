@@ -119,7 +119,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $class_cfg = $this->history->getClassCfg();
 
@@ -156,7 +156,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function instantiate_an_object_with_the_same_config_does_not_added_to_the_list_of_instances()
+  public function testInstantiateAnObjectWithTheSameConfigDoesNotAddedToTheListOfInstances()
   {
     // Instantiate another object
     $this->init();
@@ -165,7 +165,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function instantiate_an_object_with_the_different_config_adds_to_the_list_of_instances()
+  public function testInstantiateAnObjectWithTheDifferentConfigAddsToTheListOfInstances()
   {
     // Instantiate another object with different configurations
     $this->init(['foo' => 'bar']);
@@ -180,7 +180,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getInstanceFromHash_static_method_returns_a_history_instance_from_the_hash_if_registered()
+  public function testGetinstancefromhashStaticMethodReturnsAHistoryInstanceFromTheHashIfRegistered()
   {
     // Instantiate another object with different configurations
     $this->init(['foo' => 'bar']);
@@ -193,13 +193,13 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getInstanceFromHash_static_method_returns_null_if_hash_is_not_registered()
+  public function testGetinstancefromhashStaticMethodReturnsNullIfHashIsNotRegistered()
   {
     $this->assertNull(History::getInstanceFromHash('foo'));
   }
 
   /** @test */
-  public function getInstanceFromHash_static_method_returns_null_if_the_instance_is_not_history()
+  public function testGetinstancefromhashStaticMethodReturnsNullIfTheInstanceIsNotHistory()
   {
     // Get the current instances and add a srdClass instance to the array.
     $current_instances        = $this->getNonPublicProperty('instances');
@@ -212,13 +212,13 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getHash_method_returns_the_hash_of_the_object()
+  public function testGethashMethodReturnsTheHashOfTheObject()
   {
     $this->assertSame($this->getNonPublicProperty('hash'), $this->history->getHash());
   }
 
   /** @test */
-  public function get_db_method_returns_the_db_instance()
+  public function testGetDbMethodReturnsTheDbInstance()
   {
     $method = $this->getNonPublicMethod('_get_db');
 
@@ -226,7 +226,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function get_database_method_returns_the_database_instance()
+  public function testGetDatabaseMethodReturnsTheDatabaseInstance()
   {
     $method = $this->getNonPublicMethod('_get_database');
 
@@ -234,7 +234,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_no_old_ref_param()
+  public function testInsertMethodAddsARowInHistoryTableWhenProvidedConfigHasNoOldRefParam()
   {
     $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
     $this->db_mock->shouldReceive('disableLast')->once();
@@ -273,7 +273,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_a_valid_old_ref_param()
+  public function testInsertMethodAddsARowInHistoryTableWhenProvidedConfigHasAValidOldRefParam()
   {
     $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
     $this->db_mock->shouldReceive('disableLast')->once();
@@ -314,7 +314,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_a_not_valid_old_ref_param()
+  public function testInsertMethodAddsARowInHistoryTableWhenProvidedConfigHasANotValidOldRefParam()
   {
     $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
     $this->db_mock->shouldReceive('disableLast')->once();
@@ -354,7 +354,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_returns_zero_when_required_config_are_not_provided()
+  public function testInsertMethodReturnsZeroWhenRequiredConfigAreNotProvided()
   {
     $method = $this->getNonPublicMethod('_insert');
 
@@ -366,7 +366,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_throws_an_exception_if_the_user_is_not_set()
+  public function testInsertMethodThrowsAnExceptionIfTheUserIsNotSet()
   {
     $this->expectException(\Exception::class);
 
@@ -388,7 +388,7 @@ class HistoryTest extends TestCase
   }
   
   /** @test */
-  public function get_table_where_method_returns_a_string_for_the_where_in_the_query_for_the_provided_table()
+  public function testGetTableWhereMethodReturnsAStringForTheWhereInTheQueryForTheProvidedTable()
   {
     $method = $this->getNonPublicMethod('_get_table_where');
 
@@ -404,7 +404,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function get_table_where_method_returns_null_if_the_provided_table_name_is_not_valid()
+  public function testGetTableWhereMethodReturnsNullIfTheProvidedTableNameIsNotValid()
   {
     $method = $this->getNonPublicMethod('_get_table_where');
 
@@ -412,7 +412,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function get_table_where_method_returns_null_if_database_model_returns_null()
+  public function testGetTableWhereMethodReturnsNullIfDatabaseModelReturnsNull()
   {
     $method = $this->getNonPublicMethod('_get_table_where');
 
@@ -425,7 +425,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getIdColumn_method_returns_the_column_corresponding_options_id()
+  public function testGetidcolumnMethodReturnsTheColumnCorrespondingOptionsId()
   {
     $this->db_mock->shouldReceive('tfn')->once()->with('table')->andReturn('db.table');
     $this->db_obj_mock->shouldReceive('columnId')
@@ -437,7 +437,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getIdColumn_method_returns_false_when_full_table_cannot_be_retrieved()
+  public function testGetidcolumnMethodReturnsFalseWhenFullTableCannotBeRetrieved()
   {
     $this->db_mock->shouldReceive('tfn')->once()->with('table')->andReturnNull();
 
@@ -445,7 +445,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function disable_method_test()
+  public function testDisableMethodTest()
   {
     $this->setNonPublicPropertyValue('enabled', true);
 
@@ -455,7 +455,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function isEnabled_method_checks_if_enabled_is_true()
+  public function testIsenabledMethodChecksIfEnabledIsTrue()
   {
     $this->setNonPublicPropertyValue('enabled', true);
     $this->assertTrue($this->history->isEnabled());
@@ -465,7 +465,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function validDate_method_returns_a_valid_date_from_the_given_argument_or_null_if_not_valid()
+  public function testValiddateMethodReturnsAValidDateFromTheGivenArgumentOrNullIfNotValid()
   {
     $this->assertSame((float)12345, $this->history->validDate(12345));
     $this->assertSame((float)strtotime('2021-06-11'), $this->history->validDate('2021-06-11'));
@@ -474,7 +474,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function check_method_checks_if_all_history_parameters_are_set_in_order_to_read_write()
+  public function testCheckMethodChecksIfAllHistoryParametersAreSetInOrderToReadWrite()
   {
     $this->setNonPublicPropertyValue('user', null);
     $this->assertFalse($this->history->check());
@@ -484,7 +484,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function delete_method_deletes_a_history_row_in_db()
+  public function testDeleteMethodDeletesAHistoryRowInDb()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -501,7 +501,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function setColumn_method_sets_the_active_column_name()
+  public function testSetcolumnMethodSetsTheActiveColumnName()
   {
     $this->history->setColumn('foo');
     $this->assertSame('foo', $this->getClassConfig()['arch']['history_uids']['bbn_active']);
@@ -511,14 +511,14 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getColumn_method_gets_the_active_column_name()
+  public function testGetcolumnMethodGetsTheActiveColumnName()
   {
     $this->history->setColumn('foo');
     $this->assertSame('foo', $this->history->getColumn());
   }
 
   /** @test */
-  public function setDate_method_sets_the_current_date()
+  public function testSetdateMethodSetsTheCurrentDate()
   {
     $this->setNonPublicPropertyValue('date', null);
 
@@ -539,7 +539,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getDate_method_gets_the_date_property()
+  public function testGetdateMethodGetsTheDateProperty()
   {
     $this->setNonPublicPropertyValue('date', 12345);
     $this->assertSame((float)12345, $this->history->getDate());
@@ -549,7 +549,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function unsetDate_method_unsets_the_date_property()
+  public function testUnsetdateMethodUnsetsTheDateProperty()
   {
    $this->setNonPublicPropertyValue('date', (float)12345);
     $this->history->unsetDate();
@@ -558,7 +558,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function setUser_method_sets_the_user_id_that_will_fill_the_user_id_field()
+  public function testSetuserMethodSetsTheUserIdThatWillFillTheUserIdField()
   {
     $this->setNonPublicPropertyValue('user', null);
 
@@ -570,14 +570,14 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function getUser_method_returns_the_current_user_id()
+  public function testGetuserMethodReturnsTheCurrentUserId()
   {
     $this->setNonPublicPropertyValue('user', $this->user);
     $this->assertSame($this->user, $this->history->getUser());
   }
   
   /** @test */
-  public function getAllHistory_method_returns_an_array_of_paginated_history_results_from_db()
+  public function testGetallhistoryMethodReturnsAnArrayOfPaginatedHistoryResultsFromDb()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -630,7 +630,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getAllHistory_method_returns_an_empty_array_if_table_id_is_null()
+  public function testGetallhistoryMethodReturnsAnEmptyArrayIfTableIdIsNull()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -651,7 +651,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastModifiedLines_method_returns_an_array_of_last_modified_lines_from_db()
+  public function testGetlastmodifiedlinesMethodReturnsAnArrayOfLastModifiedLinesFromDb()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -706,7 +706,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastModifiedLines_method_returns_an_empty_array_if_table_id_is_null()
+  public function testGetlastmodifiedlinesMethodReturnsAnEmptyArrayIfTableIdIsNull()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -728,7 +728,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextUpdate_method_test_with_column_input_specified()
+  public function testGetnextupdateMethodTestWithColumnInputSpecified()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -802,7 +802,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextUpdate_method_test_with_column_input_not_specified()
+  public function testGetnextupdateMethodTestWithColumnInputNotSpecified()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -881,19 +881,19 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextUpdate_method_returns_null_when_table_name_is_not_valid()
+  public function testGetnextupdateMethodReturnsNullWhenTableNameIsNotValid()
   {
     $this->assertNull($this->history->getNextUpdate('%table_name', 'id_input', '2021-06-01'));
   }
 
   /** @test */
-  public function getNextUpdate_method_returns_null_when_date_is_not_valid()
+  public function testGetnextupdateMethodReturnsNullWhenDateIsNotValid()
   {
     $this->assertNull($this->history->getNextUpdate('table_name', 'id_input', 'foo'));
   }
 
   /** @test */
-  public function getNextUpdate_method_returns_null_when_id_table_is_not_valid()
+  public function testGetnextupdateMethodReturnsNullWhenIdTableIsNotValid()
   {
     $this->db_obj_mock->shouldReceive('tableId')->with('table_name')->once()->andReturnNull();
 
@@ -901,7 +901,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevUpdate_method_with_column_input_is_specified()
+  public function testGetprevupdateMethodWithColumnInputIsSpecified()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -946,7 +946,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevUpdate_method_with_column_input_not_specified()
+  public function testGetprevupdateMethodWithColumnInputNotSpecified()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -996,7 +996,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevUpdate_method_returns_null_when_table_name_is_not_valid()
+  public function testGetprevupdateMethodReturnsNullWhenTableNameIsNotValid()
   {
     $result = $this->history->getPrevUpdate('%table_name%', $this->id_table, '2021-06-11');
 
@@ -1004,7 +1004,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevUpdate_method_returns_null_when_date_is_not_valid()
+  public function testGetprevupdateMethodReturnsNullWhenDateIsNotValid()
   {
     $result = $this->history->getPrevUpdate('table_name', $this->id_table, 'foo');
 
@@ -1012,7 +1012,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextValue_method_returns_the_ref_key_returned_from_getNextValue_method()
+  public function testGetnextvalueMethodReturnsTheRefKeyReturnedFromGetnextvalueMethod()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -1040,7 +1040,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextValue_method_returns_the_val_key_returned_from_getNextValue_method()
+  public function testGetnextvalueMethodReturnsTheValKeyReturnedFromGetnextvalueMethod()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -1068,7 +1068,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getNextValue_method_return_false_if_the_getNextUpdate_method_returns_null()
+  public function testGetnextvalueMethodReturnFalseIfTheGetnextupdateMethodReturnsNull()
   {
     $history_partial_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -1083,7 +1083,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevValue_method_returns_the_ref_key_returned_from_getPrevUpdate_method()
+  public function testGetprevvalueMethodReturnsTheRefKeyReturnedFromGetprevupdateMethod()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -1105,7 +1105,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevValue_method_returns_the_val_key_returned_from_getPrevUpdate_method()
+  public function testGetprevvalueMethodReturnsTheValKeyReturnedFromGetprevupdateMethod()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -1127,7 +1127,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getPrevValue_method_returns_false_when_the_getPrevUpdate_method_returns_null()
+  public function testGetprevvalueMethodReturnsFalseWhenTheGetprevupdateMethodReturnsNull()
   {
     $history_partial_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -1142,7 +1142,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_an_array_of_one_row_if_exists_when_provided_time_is_greater_than_current_time()
+  public function testGetrowbackMethodReturnsAnArrayOfOneRowIfExistsWhenProvidedTimeIsGreaterThanCurrentTime()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1180,7 +1180,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_null_when_provided_time_is_before_creation_time()
+  public function testGetrowbackMethodReturnsNullWhenProvidedTimeIsBeforeCreationTime()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1225,7 +1225,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_an_array_of_one_row_if_exists_when_provided_time_is_after_creation_time_and_empty_columns_is_provided_and_ref_value_is_no_null_from_db()
+  public function testGetrowbackMethodReturnsAnArrayOfOneRowIfExistsWhenProvidedTimeIsAfterCreationTimeAndEmptyColumnsIsProvidedAndRefValueIsNoNullFromDb()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1277,7 +1277,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_an_array_of_one_row_if_exists_when_provided_time_is_after_creation_time_and_empty_columns_is_provided_and_ref_value_is_null_from_db()
+  public function testGetrowbackMethodReturnsAnArrayOfOneRowIfExistsWhenProvidedTimeIsAfterCreationTimeAndEmptyColumnsIsProvidedAndRefValueIsNullFromDb()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1327,7 +1327,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_an_array_of_one_row_if_exists_when_provided_time_is_after_creation_time_and_empty_columns_is_provided_and_rselect_tmp_value_is_null()
+  public function testGetrowbackMethodReturnsAnArrayOfOneRowIfExistsWhenProvidedTimeIsAfterCreationTimeAndEmptyColumnsIsProvidedAndRselectTmpValueIsNull()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1378,7 +1378,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_an_array_of_one_row_if_exists_when_provided_time_is_after_creation_time_and_columns_not_empty_array_is_provided()
+  public function testGetrowbackMethodReturnsAnArrayOfOneRowIfExistsWhenProvidedTimeIsAfterCreationTimeAndColumnsNotEmptyArrayIsProvided()
   {
     $this->init(null, function ($db_mock) {
       $db_mock->shouldReceive('getCurrent')->twice()->andReturn($this->cuerrent_db);
@@ -1431,7 +1431,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_null_when_modelize_method_returns_null()
+  public function testGetrowbackMethodReturnsNullWhenModelizeMethodReturnsNull()
   {
     $this->db_obj_mock->shouldReceive('modelize')->once()->andReturnNull();
 
@@ -1444,7 +1444,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getRowBack_method_returns_null_when_getTableCfg_method_returns_null()
+  public function testGetrowbackMethodReturnsNullWhenGettablecfgMethodReturnsNull()
   {
     $this->db_obj_mock->shouldReceive('modelize')->once()->andReturn(
       [
@@ -1466,7 +1466,7 @@ MYSQL;
 
 
   /** @test */
-  public function getRowBack_throws_an_exception_when_date_is_not_valid()
+  public function testGetrowbackThrowsAnExceptionWhenDateIsNotValid()
   {
     $this->expectException(\Exception::class);
 
@@ -1476,7 +1476,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getValBack_method_returns_column_value_retrieved_from_getRowBack_method()
+  public function testGetvalbackMethodReturnsColumnValueRetrievedFromGetrowbackMethod()
   {
     // Will partially mock the getRowBack method since the getValBack method is tested in isolation.
     $history_mock = \Mockery::mock(History::class)->makePartial();
@@ -1492,7 +1492,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getValBack_method_returns_false_when_column_not_exists_from_getRowBack_method()
+  public function testGetvalbackMethodReturnsFalseWhenColumnNotExistsFromGetrowbackMethod()
   {
     // Will partially mock the getRowBack method since the getValBack method is tested in isolation.
     $history_mock = \Mockery::mock(History::class)->makePartial();
@@ -1508,7 +1508,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getValBack_method_returns_false_when_getRowBack_returns_null()
+  public function testGetvalbackMethodReturnsFalseWhenGetrowbackReturnsNull()
   {
     // Will partially mock the getRowBack method since the getValBack method is tested in isolation.
     $history_mock = \Mockery::mock(History::class)->makePartial();
@@ -1524,7 +1524,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreationDate_method_returns_creation_date()
+  public function testGetcreationdateMethodReturnsCreationDate()
   {
     $history_partial_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -1540,7 +1540,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreationDate_method_returns_null_if_date_key_is_missing_returned_from_getCreation()
+  public function testGetcreationdateMethodReturnsNullIfDateKeyIsMissingReturnedFromGetcreation()
   {
     $history_partial_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -1553,7 +1553,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreationDate_method_returns_null_when_getCreation_returns_null()
+  public function testGetcreationdateMethodReturnsNullWhenGetcreationReturnsNull()
   {
     $history_partial_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -1566,7 +1566,7 @@ MYSQL;
   }
   
   /** @test */
-  public function getCreation_method_returns_creation_date()
+  public function testGetcreationMethodReturnsCreationDate()
   {
     // first will set expectations of methods called in
     // getTableCfg() and getIdColumn() methods
@@ -1634,7 +1634,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreation_method_returns_null_when_getTableCfg_returns_null()
+  public function testGetcreationMethodReturnsNullWhenGettablecfgReturnsNull()
   {
     $this->db_mock->shouldReceive('tfn')->once()->andReturnNull();
 
@@ -1646,7 +1646,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreation_method_returns_null_when_getIdColumn_returns_null()
+  public function testGetcreationMethodReturnsNullWhenGetidcolumnReturnsNull()
   {
     // first will set expectations of methods called in
     // getTableCfg() and getIdColumn() methods
@@ -1684,7 +1684,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getCreation_method_returns_null_when_rselect_from_db_returns_null()
+  public function testGetcreationMethodReturnsNullWhenRselectFromDbReturnsNull()
   {
     // first will set expectations of methods called in
     // getTableCfg() and getIdColumn() methods
@@ -1750,7 +1750,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastDate_method_returns_last_date_when_column_is_specified()
+  public function testGetlastdateMethodReturnsLastDateWhenColumnIsSpecified()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
     $history_mock->shouldReceive('getIdColumn')
@@ -1785,7 +1785,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastDate_method_returns_last_date_when_column_is_not_specified()
+  public function testGetlastdateMethodReturnsLastDateWhenColumnIsNotSpecified()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -1831,7 +1831,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastDate_method_returns_null_when_column_is_provided_but_id_column_is_null()
+  public function testGetlastdateMethodReturnsNullWhenColumnIsProvidedButIdColumnIsNull()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
     $history_mock->shouldReceive('getIdColumn')
@@ -1845,7 +1845,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLastDate_method_returns_null_when_column_is_not_provided_and_get_table_where_method_returns_null()
+  public function testGetlastdateMethodReturnsNullWhenColumnIsNotProvidedAndGetTableWhereMethodReturnsNull()
   {
     $this->assertNull(
       $this->history->getLastDate('%table_name%', $this->uid)
@@ -1853,7 +1853,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_returns_history_from_db_when_column_is_not_specified()
+  public function testGethistoryMethodReturnsHistoryFromDbWhenColumnIsNotSpecified()
   {
     $this->db_mock->shouldReceive('tfn')
       ->twice()
@@ -1930,7 +1930,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_returns_history_from_db_when_column_is_specified_and_is_not_uid()
+  public function testGethistoryMethodReturnsHistoryFromDbWhenColumnIsSpecifiedAndIsNotUid()
   {
     $this->db_mock->shouldReceive('tfn')
       ->twice()
@@ -2011,7 +2011,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_returns_history_from_db_when_column_is_specified_and_is_uid()
+  public function testGethistoryMethodReturnsHistoryFromDbWhenColumnIsSpecifiedAndIsUid()
   {
     $this->db_mock->shouldReceive('tfn')
       ->twice()
@@ -2087,7 +2087,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_throws_exception_when_column_is_specified_and_is_uid_but_not_found_in_id_option_field()
+  public function testGethistoryMethodThrowsExceptionWhenColumnIsSpecifiedAndIsUidButNotFoundInIdOptionField()
   {
     $this->expectException(\Error::class);
 
@@ -2119,7 +2119,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_returns_empty_array_when_check_returns_false()
+  public function testGethistoryMethodReturnsEmptyArrayWhenCheckReturnsFalse()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -2132,7 +2132,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistory_method_returns_empty_array_when_getTableCfg_returns_null()
+  public function testGethistoryMethodReturnsEmptyArrayWhenGettablecfgReturnsNull()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -2146,7 +2146,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getFullHistory_method_returns_and_array_of_history()
+  public function testGetfullhistoryMethodReturnsAndArrayOfHistory()
   {
     $this->db_obj_mock->shouldReceive('modelize')
       ->once()
@@ -2205,7 +2205,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getFullHistory_returns_empty_array_when_get_table_where_method_returns_null()
+  public function testGetfullhistoryReturnsEmptyArrayWhenGetTableWhereMethodReturnsNull()
   {
     $result = $this->history->getFullHistory('%table_name%', $this->uid);
 
@@ -2214,7 +2214,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_array_when_upd_key_exists_in_history()
+  public function testGetcolumnhistoryMethodReturnsAnArrayWhenUpdKeyExistsInHistory()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -2295,7 +2295,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_array_when_upd_key_is_empty_and_ins_key_exists_in_history()
+  public function testGetcolumnhistoryMethodReturnsAnArrayWhenUpdKeyIsEmptyAndInsKeyExistsInHistory()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -2366,7 +2366,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_throws_an_exception_when_the_provided_column_is_not_uid_and_not_exists_in_id_option_field()
+  public function testGetcolumnhistoryMethodThrowsAnExceptionWhenTheProvidedColumnIsNotUidAndNotExistsInIdOptionField()
   {
     $this->expectException(\Error::class);
 
@@ -2405,7 +2405,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_throws_an_exception_when_the_provided_column_is_uid_and_not_exists_in_id_option_field()
+  public function testGetcolumnhistoryMethodThrowsAnExceptionWhenTheProvidedColumnIsUidAndNotExistsInIdOptionField()
   {
     $this->expectException(\Error::class);
 
@@ -2444,7 +2444,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_empty_array_when_getCreation_method_returns_null()
+  public function testGetcolumnhistoryMethodReturnsAnEmptyArrayWhenGetcreationMethodReturnsNull()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -2487,7 +2487,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_empty_array_when_check_method_returns_null()
+  public function testGetcolumnhistoryMethodReturnsAnEmptyArrayWhenCheckMethodReturnsNull()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
     $history_mock->shouldReceive('check')->once()->andReturnFalse();
@@ -2499,7 +2499,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_empty_array_when_getPrimary_method_returns_empty_array()
+  public function testGetcolumnhistoryMethodReturnsAnEmptyArrayWhenGetprimaryMethodReturnsEmptyArray()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -2515,7 +2515,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getColumnHistory_method_returns_an_empty_array_when_getTableCfg_method_returns_null()
+  public function testGetcolumnhistoryMethodReturnsAnEmptyArrayWhenGettablecfgMethodReturnsNull()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
 
@@ -2532,7 +2532,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_method_returns_all_information_of_a_given_table()
+  public function testGettablecfgMethodReturnsAllInformationOfAGivenTable()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2620,7 +2620,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_method_returns_null_when_tfn_method_returns_null()
+  public function testGettablecfgMethodReturnsNullWhenTfnMethodReturnsNull()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2633,7 +2633,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_the_current_table_structure_when_exists_without_calling_modelize_method()
+  public function testGettablecfgReturnsTheCurrentTableStructureWhenExistsWithoutCallingModelizeMethod()
   {
     $structures = [
       'db.table_name' => $expected_result = [
@@ -2668,7 +2668,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_full_information_about_the_given_table_even_if_it_is_already_saved_when_force_is_true()
+  public function testGettablecfgReturnsFullInformationAboutTheGivenTableEvenIfItIsAlreadySavedWhenForceIsTrue()
   {
     $saved_structures = [
       'db.table_name' => $old_results = [
@@ -2766,7 +2766,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_method_returns_null_when_modelize_method_returns_null()
+  public function testGettablecfgMethodReturnsNullWhenModelizeMethodReturnsNull()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2785,7 +2785,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_method_returns_null_when_modelize_method_returns_null_and_force_is_true()
+  public function testGettablecfgMethodReturnsNullWhenModelizeMethodReturnsNullAndForceIsTrue()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2804,7 +2804,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_null_when_isLinked_method_returns_false()
+  public function testGettablecfgReturnsNullWhenIslinkedMethodReturnsFalse()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2843,7 +2843,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_null_when_PRIMARY_key_does_not_exist_in_the_model_array()
+  public function testGettablecfgReturnsNullWhenPrimaryKeyDoesNotExistInTheModelArray()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2870,7 +2870,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_null_when_columns_key_in_PRIMARY_array_count_does_not_equal_to_one()
+  public function testGettablecfgReturnsNullWhenColumnsKeyInPrimaryArrayCountDoesNotEqualToOne()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2904,7 +2904,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getTableCfg_returns_null_when_fields_primary_column_array_is_empty()
+  public function testGettablecfgReturnsNullWhenFieldsPrimaryColumnArrayIsEmpty()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -2942,7 +2942,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getDbCfg_method_returns_information_about_all_tables_in_the_given_database()
+  public function testGetdbcfgMethodReturnsInformationAboutAllTablesInTheGivenDatabase()
   {
     $history_mock = \Mockery::mock(History::class)->makePartial();
     $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
@@ -2991,7 +2991,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getDbCfg_method_returns_empty_array_when_no_tables_found()
+  public function testGetdbcfgMethodReturnsEmptyArrayWhenNoTablesFound()
   {
     $this->db_mock->shouldReceive('getTables')
       ->once()
@@ -3005,7 +3005,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getDbCfg_method_returns_empty_array_when_getTables_returns_null()
+  public function testGetdbcfgMethodReturnsEmptyArrayWhenGettablesReturnsNull()
   {
     $this->db_mock->shouldReceive('getTables')
       ->once()
@@ -3019,7 +3019,7 @@ MYSQL;
   }
 
   /** @test */
-  public function isLinked_method_returns_true_if_a_table_exists_in_the_links_array()
+  public function testIslinkedMethodReturnsTrueIfATableExistsInTheLinksArray()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -3032,7 +3032,7 @@ MYSQL;
   }
 
   /** @test */
-  public function isLinked_method_returns_false_if_tfn_returns_null()
+  public function testIslinkedMethodReturnsFalseIfTfnReturnsNull()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -3045,7 +3045,7 @@ MYSQL;
   }
 
   /** @test */
-  public function isLinked_method_returns_false_if_table_does_not_exists_in_the_links_array()
+  public function testIslinkedMethodReturnsFalseIfTableDoesNotExistsInTheLinksArray()
   {
     $this->db_mock->shouldReceive('tfn')
       ->once()
@@ -3058,7 +3058,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getLinks_method_returns_all_the_linked_tables()
+  public function testGetlinksMethodReturnsAllTheLinkedTables()
   {
     $this->setNonPublicPropertyValue('links', $expected_result = [
       'db.table_name' => 'columns','db.another_table_name' => ['columns']
@@ -3068,7 +3068,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_kind_is_select_and_its_a_right_join_with_no_write_param_in_config()
+  public function testTriggerMethodTestWhenKindIsSelectAndItsARightJoinWithNoWriteParamInConfig()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -3243,7 +3243,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_kind_is_select_and_its_a_left_join()
+  public function testTriggerMethodTestWhenKindIsSelectAndItsALeftJoin()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -3453,7 +3453,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_kind_is_insert_and_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_is_defined()
+  public function testTriggerMethodTestWhenKindIsInsertAndItsARightJoinAndThereIsAWriteParamInConfigAndMomentIsBeforeAndPrimaryIsDefined()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -3616,7 +3616,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_kind_is_insert_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_is_not_defined()
+  public function testTriggerMethodTestWhenKindIsInsertAndThereIsAWriteParamInConfigAndMomentIsBeforeAndPrimaryIsNotDefined()
   {
     $class_cfg = $this->getClassConfig();
 
@@ -3849,7 +3849,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_update_and_primary_is_defined()
+  public function testTriggerMethodTestWhenItsARightJoinAndThereIsAWriteParamInConfigAndMomentIsBeforeAndKindIsUpdateAndPrimaryIsDefined()
   {
     $cfg = [
       'tables' => ['table_name'],
@@ -3969,7 +3969,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_update_and_primary_is_not_defined()
+  public function testTriggerMethodTestWhenItsARightJoinAndThereIsAWriteParamInConfigAndMomentIsBeforeAndKindIsUpdateAndPrimaryIsNotDefined()
   {
     $cfg = [
       'tables' => ['table_name'],
@@ -4086,7 +4086,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_delete_and_primary_where_is_false()
+  public function testTriggerMethodTestWhenItsARightJoinAndThereIsAWriteParamInConfigAndMomentIsBeforeAndKindIsDeleteAndPrimaryWhereIsFalse()
   {
     $cfg = [
       'tables' => ['table_name'],
@@ -4199,7 +4199,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_when_kind_is_delete_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_where_is_true()
+  public function testTriggerMethodTestWhenKindIsDeleteAndThereIsAWriteParamInConfigAndMomentIsBeforeAndPrimaryWhereIsTrue()
   {
     $cfg = [
       'tables' => ['table_name'],
@@ -4317,7 +4317,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_test_there_is_a_write_param_in_config_and_moment_is_after()
+  public function testTriggerMethodTestThereIsAWriteParamInConfigAndMomentIsAfter()
   {
     $cfg = [
       'tables' => ['table_name'],
@@ -4438,7 +4438,7 @@ MYSQL;
   }
 
   /** @test */
-  public function trigger_method_returns_the_provided_cfg_without_any_processing_when_enabled_is_false()
+  public function testTriggerMethodReturnsTheProvidedCfgWithoutAnyProcessingWhenEnabledIsFalse()
   {
     $this->setNonPublicPropertyValue('enabled', false);
 
@@ -4450,7 +4450,7 @@ MYSQL;
   }
   
   /** @test */
-  public function getHistoryTableName_method_returns_history_table_name()
+  public function testGethistorytablenameMethodReturnsHistoryTableName()
   {
     $this->assertSame(
       $this->getClassConfig()['tables']['history'],
@@ -4459,7 +4459,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryTableColumns_method_returns_history_table_columns()
+  public function testGethistorytablecolumnsMethodReturnsHistoryTableColumns()
   {
     $this->assertSame(
       $this->getClassConfig()['arch']['history'],
@@ -4468,7 +4468,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryTableColumnName_method_returns_the_column_name_in_history_table_from_the_given_key()
+  public function testGethistorytablecolumnnameMethodReturnsTheColumnNameInHistoryTableFromTheGivenKey()
   {
     $this->assertSame(
       $this->getClassConfig()['arch']['history']['tst'],
@@ -4477,7 +4477,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryTableColumnName_method_returns_null_when_column_does_not_exist_from_the_given_key()
+  public function testGethistorytablecolumnnameMethodReturnsNullWhenColumnDoesNotExistFromTheGivenKey()
   {
     $this->assertNull(
       $this->getNonPublicMethod('getHistoryTableColumnName')->invoke($this->history, 'foo')
@@ -4485,7 +4485,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryUidsTableName_method_returns_history_uids_table_name()
+  public function testGethistoryuidstablenameMethodReturnsHistoryUidsTableName()
   {
     $this->assertSame(
       $this->getClassConfig()['tables']['history_uids'],
@@ -4494,7 +4494,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryUidsColumns_method_returns_history_uids_table_columns()
+  public function testGethistoryuidscolumnsMethodReturnsHistoryUidsTableColumns()
   {
     $this->assertSame(
       $this->getClassConfig()['arch']['history_uids'],
@@ -4503,7 +4503,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryUidsColumnName_method_returns_column_name_in_history_uids_from_the_given_key()
+  public function testGethistoryuidscolumnnameMethodReturnsColumnNameInHistoryUidsFromTheGivenKey()
   {
     $this->assertSame(
       $this->getClassConfig()['arch']['history_uids']['bbn_uid'],
@@ -4512,7 +4512,7 @@ MYSQL;
   }
 
   /** @test */
-  public function getHistoryUidsColumnName_returns_null_when_column_does_not_exists_in_history_uids_table_from_the_given_key()
+  public function testGethistoryuidscolumnnameReturnsNullWhenColumnDoesNotExistsInHistoryUidsTableFromTheGivenKey()
   {
     $this->assertNull(
       $this->getNonPublicMethod('getHistoryUidsColumnName')->invoke($this->history, 'foo')
@@ -4520,7 +4520,7 @@ MYSQL;
   }
 
   /** @test */
-  public function ensureUserIsSet_method_throws_an_exception_when_user_is_not_set()
+  public function testEnsureuserissetMethodThrowsAnExceptionWhenUserIsNotSet()
   {
     $this->expectException(\Exception::class);
 
@@ -4530,7 +4530,7 @@ MYSQL;
   }
 
   /** @test */
-  public function makeHash_method_creates_hash_from_the_given_configurations()
+  public function testMakehashMethodCreatesHashFromTheGivenConfigurations()
   {
     $expected_result = "";
     foreach ($this->getClassConfig() as $item) {

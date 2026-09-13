@@ -69,7 +69,7 @@ trait Api {
   }
 
 
-  public function initApi(array $cfg): self
+  public function initApi(array $cfg): static
   {
     if (empty($cfg['service'])
       || empty(static::$apis[$cfg['service']])

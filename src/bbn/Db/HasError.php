@@ -82,7 +82,7 @@ trait HasError
             $msg[] = $v ? 'TRUE' : 'FALSE';
           }
           elseif (\is_string($v)) {
-            $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
+            $msg[] = Str::isBuid($v) ? '0x' . bin2hex($v) : Str::cut($v, 30);
           }
           else{
             $msg[] = $v;
@@ -95,7 +95,16 @@ trait HasError
       $msg[] = self::getLogLine('BACKTRACE');
       $last = '';
       $i = 0;
-      $btr = array_map(function($a) use (&$last, &$i) {
+      $btr = array_map(function($a) use ($e, &$last, &$i) {
+        if (!isset($a['file'])) {
+          $a['file'] = 'unknown';
+          $closure = '{closure:';
+          if (isset($a['function']) && Str::startsWith($a['function'], $closure)) {
+            $tmp = substr($a['function'], strlen($closure), -1);
+            [$a['file'], $a['line']] = X::split($tmp, ':');
+            $a['function'] = 'closure';
+          }
+        }
         $r = [
           'dfile' => X::basename(
             X::dirname($a['file'])).'/'.
@@ -172,7 +181,7 @@ trait HasError
    * @param mixed $st
    * @return self
    */
-  public function log($st): self
+  public function log($st): static
   {
     $args = \func_get_args();
     foreach ($args as $a){

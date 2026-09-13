@@ -13,6 +13,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Models\Entities;
+use bbn\Models\Cls\Nullall;
 use bbn\Entities\Entity;
 use bbn\Models\Tts\TmpFiles;
 
@@ -59,8 +60,10 @@ class Changes extends EntityTable
         'date_added' => 'date_added'
       ],
       'links' => [
+        'id' => 'id',
         'id_link' => 'id_link',
         'id_file' => 'id_file',
+        'id_entity' => 'id_entity',
         'mandatory' => 'mandatory'
       ]
     ]
@@ -68,19 +71,18 @@ class Changes extends EntityTable
 
   protected static $eaFields = [];
 
-  protected $tables = [];
+  protected static $tables = [];
 
   /** Compatibility with the old version */
-  protected $tablesOld = [
-  ];
+  protected static $tablesOld = [];
 
   protected $skipEmailVerfication = false;
 
 
-  public function __construct(Db &$db, Entities $entities, Entity $entity)
+  public function __construct(Db &$db, Entities $entities, Entity|Nullall $entity)
   {
     parent::__construct($db, $entities, $entity);
-    $this->getTables();
+    self::setTables();
   }
 
 
@@ -192,7 +194,8 @@ class Changes extends EntityTable
           }
 
           $data[$filesFields['files']] = json_encode($data[$filesFields['files']]);
-          return $this->updateFile($f[$filesFields['id']], $data);
+          return $this->updateFile($f[$filesFields['id']], $data)
+            && $this->entity->updateRecord($cCfg['tables']['files'], $fl[$linksFields['id']]);
         }
       }
     }
@@ -470,7 +473,6 @@ class Changes extends EntityTable
       }
 
       // Data
-      $table  = $this->tables[$cfg['table']];
       $data   = [];
       foreach ($cfg['data'] as $d){
         $data[$d['field']] = $d['value'];
@@ -492,13 +494,13 @@ class Changes extends EntityTable
           else {
             $error = _('Error during the identity') . ' ';
             switch ($cfg['type']){
-              case 'insert';
+              case 'insert':
                 $error .= _('inserting.');
                 break;
-              case 'update';
+              case 'update':
                 $error .= _('updating.');
                 break;
-              case 'delete';
+              case 'delete':
                 $error .= _('deleting.');
                 break;
             }
@@ -520,13 +522,13 @@ class Changes extends EntityTable
           else {
             $error = _('Error during the address') . ' ';
             switch ($cfg['type']){
-              case 'insert';
+              case 'insert':
                 $error .= _('inserting.');
                 break;
-              case 'update';
+              case 'update':
                 $error .= _('updating.');
                 break;
-              case 'delete';
+              case 'delete':
                 $error .= _('deleting.');
                 break;
             }
@@ -542,11 +544,9 @@ class Changes extends EntityTable
 
       return empty($error)
         && $this->deleteFileAndLink($id)
-        && $this->db->update($this->class_table, [
+        && $this->dbTraitUpdate($id, [
           $this->fields['state'] => static::$states['accepted'],
           $this->fields['cfg'] => json_encode($cfg)
-        ], [
-          $this->fields['id'] => $id
         ]);
     }
 
@@ -556,7 +556,6 @@ class Changes extends EntityTable
 
   /**
    * @param string   $id
-   * @param null|int
    */
   public function refuse(string $id): ?int
   {
@@ -565,10 +564,8 @@ class Changes extends EntityTable
       && $this->get($id, [$this->fields['id_entity'] => $this->getId()])
       && $this->deleteFileAndLink($id)
     ) {
-      return $this->db->update($this->class_table, [
+      return $this->dbTraitUpdate($id, [
         $this->fields['state'] => static::$states['refused']
-      ], [
-        $this->fields['id'] => $id
       ]);
     }
 
@@ -576,10 +573,10 @@ class Changes extends EntityTable
   }
 
 
-  public function forceState(string $id, $state): bool
+  public function forceState(string $id, ?int $state): bool
   {
     if (\in_array($state, array_values(static::$states), true)) {
-      return !!$this->db->update($this->class_table, [$this->fields['state'] => $state], [$this->fields['id'] => $id]);
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['state'] => $state]);
     }
 
     return false;
@@ -592,7 +589,15 @@ class Changes extends EntityTable
    */
   public function getState(string $id)
   {
-    return Str::isUid($id) ? $this->db->selectOne($this->class_table, $this->fields['state'], [$this->fields['id'] => $id]) : false;
+    if (!Str::isUid($id)) {
+      return false;
+    }
+
+    if ($r = $this->getOne([$this->fields['id'] => $id])) {
+      return $r[$this->fields['state']];
+    }
+
+    return false;
   }
 
 
@@ -641,7 +646,7 @@ class Changes extends EntityTable
 
   public function get(string $id, array $filters = []): ?array
   {
-    return $this->db->rselect($this->class_table, [], X::mergeArrays([
+    return $this->getOne(X::mergeArrays([
       $this->fields['id'] => $id
     ], $filters));
   }
@@ -712,32 +717,38 @@ class Changes extends EntityTable
     $cfgField = $this->fields['cfg'];
     return array_map(
       function ($change) use($cfgField) {
-        if (!empty($change[$cfgField]) && ($cfg = json_decode($change[$cfgField], true))) {
-          if (!empty($cfg['data'])) {
-            $cfg['data'] = array_map(
-              function ($d) {
-                if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::cryptCode($d['email']);
-                }
-
-                return $d;
-              }, $cfg['data']
-            );
+        if (!empty($change[$cfgField])) {
+          if (Str::isJson($change[$cfgField])) {
+            $change[$cfgField] = json_decode($change[$cfgField], true);
           }
 
-          if (!empty($cfg['subdata']) && !empty($cfg['subdata']['data'])) {
-            $cfg['subdata']['data'] = array_map(
-              function ($d) {
-                if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::cryptCode($d['email']);
-                }
+          if ($cfg = $change[$cfgField]) {
+            if (!empty($cfg['data'])) {
+              $cfg['data'] = array_map(
+                function ($d) {
+                  if (array_key_exists('email', $d) && ($d['email'] !== true)) {
+                    $d['email'] = static::cryptCode($d['email']);
+                  }
 
-                return $d;
-              }, $cfg['subdata']['data']
-            );
+                  return $d;
+                }, $cfg['data']
+              );
+            }
+
+            if (!empty($cfg['subdata']) && !empty($cfg['subdata']['data'])) {
+              $cfg['subdata']['data'] = array_map(
+                function ($d) {
+                  if (array_key_exists('email', $d) && ($d['email'] !== true)) {
+                    $d['email'] = static::cryptCode($d['email']);
+                  }
+
+                  return $d;
+                }, $cfg['subdata']['data']
+              );
+            }
+
+            $change[$cfgField] = json_encode($cfg);
           }
-
-          $change[$cfgField] = json_encode($cfg);
         }
 
         return $change;
@@ -836,14 +847,14 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  public function getAll(array $filter = [], string|array $order= [], int $limit = 0, int $start = 0, $fields = []): array
   {
     $cfgField = $this->fields['cfg'];
     $all = parent::getAll(...func_get_args());
     return array_map(
       function ($change) use($cfgField) {
         if (!empty($change[$cfgField])
-          && ($cfg = json_decode($change[$cfgField], true))
+          && ($cfg = is_string($change[$cfgField]) ? json_decode($change[$cfgField], true) : $change[$cfgField])
         ) {
           if (!empty($cfg['data'])) {
             $cfg['data'] = array_map(
@@ -886,7 +897,7 @@ class Changes extends EntityTable
 
   protected static function getFieldsList()
   {
-    return static::getEAFields();
+    return [];
   }
 
 
@@ -899,21 +910,18 @@ class Changes extends EntityTable
   {
     if ($this->check()) {
       $t =& $this;
-      return array_map(
-        function ($e) use ($t, $withFiles) {
-          if ($withFiles) {
-            $cfg = json_decode($e[$t->fields['cfg']], true);
-            $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
-          }
-
+      $records = X::filter($this->getRecords(), $where);
+      X::sortBy($records, $this->fields['moment'], 'DESC');
+      return $withFiles ? array_map(
+        function ($e) use ($t) {
+          $cfg = \is_array($e[$t->fields['cfg']])
+            ? $e[$t->fields['cfg']]
+            : ($e[$t->fields['cfg']] ? json_decode($e[$t->fields['cfg']], true) : []);
+          $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
           return $e;
-        }, $this->db->rselectAll([
-          'table' => $this->class_table,
-          'fields' => [],
-          'where' => $where,
-          'order' => [$this->fields['moment'] => 'DESC']
-        ])
-      );
+        },
+        $records
+      ) : $records;
     }
 
     return null;
@@ -927,19 +935,17 @@ class Changes extends EntityTable
    */
   protected function _insert(string $moment, array $cfg): ?string
   {
-    if ($id_adh = $this->getId()) {
-      if ($this->db->insert($this->class_table, [
-          $this->fields['id_entity'] => $id_adh,
-          $this->fields['moment'] => $moment,
-          $this->fields['state'] => null,
-          $this->fields['cfg'] => \json_encode($cfg)
-        ])
-        && ($id = $this->db->lastId())
-      ) {
-        $this->setRequiredFiles($id);
-        $this->_setState($id, $this->getCurrentState($id, $cfg));
-        return $id;
-      }
+    if (($idAdh = $this->getId())
+      && ($id = $this->dbTraitInsert([
+        $this->fields['id_entity'] => $idAdh,
+        $this->fields['moment'] => $moment,
+        $this->fields['state'] => null,
+        $this->fields['cfg'] => \json_encode($cfg)
+      ]))
+    ) {
+      $this->setRequiredFiles($id);
+      $this->_setState($id, $this->getCurrentState($id, $cfg));
+      return $id;
     }
 
     return null;
@@ -967,15 +973,7 @@ class Changes extends EntityTable
         }
       }
 
-      return !!$this->db->update(
-        $this->class_table,
-        [
-          $this->fields['state'] => $state
-        ],
-        [
-          $this->fields['id'] => $id
-        ]
-      );
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['state'] => $state]);
     }
 
     return false;
@@ -990,15 +988,7 @@ class Changes extends EntityTable
   protected function _setMoment(string $id, string $moment = ''): bool
   {
     if (Str::isUid($id)) {
-      return !!$this->db->update(
-        $this->class_table,
-        [
-          $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s')
-        ],
-        [
-          $this->fields['id'] => $id
-        ]
-      );
+      return (bool)$this->dbTraitUpdate($id, [$this->fields['moment'] => $moment ?: date('Y-m-d H:i:s')]);
     }
 
     return false;
@@ -1024,16 +1014,10 @@ class Changes extends EntityTable
       if (($idx = X::search($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata, $cfg['type']));
         $cfg['subdata']    = $subdata;
-        if ($this->db->update(
-          $this->class_table,
-          [
-            $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
-            $this->fields['cfg'] => \json_encode($cfg)
-          ],
-          [
-            $this->fields['id'] => $id
-          ]
-        )) {
+        if ($this->dbTraitUpdate($id, [
+          $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
+          $this->fields['cfg'] => \json_encode($cfg)
+        ])) {
           $this->setRequiredFiles($id);
           $this->_setState($id, $this->getCurrentState($id, $cfg));
           return 1;
@@ -1108,10 +1092,16 @@ class Changes extends EntityTable
       $linksFields = $cCfg['arch']['links'];
       $linksTable = $cCfg['tables']['links'];
       $res = [];
-      $cfg = json_decode($change[$this->fields['cfg']], true);
+      $cfg = is_array($change[$this->fields['cfg']])
+        ? $change[$this->fields['cfg']]
+        : json_decode($change[$this->fields['cfg']], true);
       $all = array_map(function ($f) {
           if (!empty($f['code'])) {
             $f['code'] = (string)$f['code'];
+          }
+
+          if (!empty($f['files']) && !is_array($f['files'])) {
+            $f['files'] = json_decode($f['files']);
           }
 
           return $f;
@@ -1181,7 +1171,7 @@ class Changes extends EntityTable
               ) {
                 $res[] = [
                   'code' => (string)$c,
-                  'files' => json_decode($all[$idx][$filesFields['files']]),
+                  'files' => $all[$idx][$filesFields['files']],
                   'mandatory' => !!$all[$idx][$linksFields['mandatory']]
                 ];
                 $found = true;
@@ -1209,7 +1199,7 @@ class Changes extends EntityTable
               if (($idx = X::search($all, ['code' => (string)$code])) !== null) {
                 $res[] = [
                   'code' => (string)$code,
-                  'files' => json_decode($all[$idx][$filesFields['files']]),
+                  'files' => $all[$idx][$filesFields['files']],
                   'mandatory' => !!$all[$idx][$linksFields['mandatory']]
                 ];
               }
@@ -1285,8 +1275,9 @@ class Changes extends EntityTable
       $id_file = $this->insertFile($type);
       if (Str::isUid($id_file)
         && !$this->hasFileLink($id_link, $id_file)
+        && ($idFileLink = $this->insertFileLink($id_link, $id_file, $mandatory))
       ) {
-        $this->insertFileLink($id_link, $id_file, $mandatory);
+        $this->entity->updateRecord($this->class_cfg['tables']['links'], $idFileLink);
       }
 
       return $id_file;
@@ -1304,12 +1295,13 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)) {
       $cCfg = $this->getClassCfg();
-      return $this->db->getColumnValues(
-        $cCfg['tables']['links'],
-        $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links']),
-        [
-          $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']) => $id
-        ]
+      return array_map(
+        fn($r) => $r[$cCfg['arch']['links']['id_link']] ?? null,
+        X::filter(
+          $this->getRecords($cCfg['tables']['links']),
+          fn($r) => !empty($r[$cCfg['arch']['links']['id_file']])
+            && ($r[$cCfg['arch']['links']['id_file']] === $id)
+        )
       );
     }
 
@@ -1320,83 +1312,60 @@ class Changes extends EntityTable
   /**
    * @param string $table
    * @param string $id
-   * @param array  $data
-   * @return string
+   * @param array $data
+   * @return string|false
    */
-  protected function checkExists(string $table, string $id, array $data, string $type = 'update')
+  protected function checkExists(
+    string $table,
+    string $id,
+    array $data,
+    string $type = 'update'
+  ): string|false
   {
     switch ($type){
       case 'update':
         if (!empty($data['field'])) {
-        $conditions = [[
-          'field' => $this->fields['id_entity'],
-          'value' => $this->getId()
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
-          'value' => 'update'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
-          'value' => $table
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
-          empty($id) ? 'operator' : 'value' => $id ?: 'isnull'
-        ], [
-          'field' => "JSON_SEARCH(".$this->fields['cfg'].", 'all', '$data[field]', null, '$.data[*].field')",
-          'operator' => 'isnotnull'
-        ], [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $this->fields['state'],
-            'value' => static::$states['untreated']
-          ], [
-            'field' => $this->fields['state'],
-            'value' => static::$states['email']
-          ], [
-            'field' => $this->fields['state'],
-            'operator' => 'isnull'
-          ]]
-        ]];
+          $records = $this->getRecords($this->class_table);
+          return X::getField(
+            $records,
+            fn($r) => !empty($r[$this->fields['cfg']]['type'])
+              && ($r[$this->fields['cfg']]['type'] === $type)
+              && !empty($r[$this->fields['cfg']]['table'])
+              && ($r[$this->fields['cfg']]['table'] === $table)
+              && (empty($id)
+                || (!empty($r[$this->fields['cfg']]['table'])
+                  && ($r[$this->fields['cfg']]['id'] === $id)))
+              && !empty($r[$this->fields['cfg']]['data'])
+              && !empty($data['field'])
+              && X::getRow($r[$this->fields['cfg']]['data'], ['field' => $data['field']])
+              && (($r[$this->fields['state']] === static::$states['untreated'])
+                || ($r[$this->fields['state']] === static::$states['email'])
+                || is_null($r[$this->fields['state']])),
+            $this->fields['id']
+          ) ?: false;
         }
+
         break;
 
       case 'delete':
-        $conditions = [[
-          'field' => $this->fields['id_entity'],
-          'value' => $this->getId()
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
-          'value' => 'delete'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
-          'value' => $table
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
-          'value' => $id
-        ], [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $this->fields['state'],
-            'value' => static::$states['untreated']
-          ], [
-            'field' => $this->fields['state'],
-            'value' => static::$states['email']
-          ], [
-            'field' => $this->fields['state'],
-            'operator' => 'isnull'
-          ]]
-        ]];
-        break;
+        $records = $this->getRecords($this->class_table);
+        return X::getField(
+            $records,
+            fn($r) => !empty($r[$this->fields['cfg']]['type'])
+              && ($r[$this->fields['cfg']]['type'] === $type)
+              && !empty($r[$this->fields['cfg']]['table'])
+              && ($r[$this->fields['cfg']]['table'] === $table)
+              && !empty($id)
+              && !empty($r[$this->fields['cfg']]['id'])
+              && ($r[$this->fields['cfg']]['id'] === $id)
+              && (($r[$this->fields['state']] === static::$states['untreated'])
+                || ($r[$this->fields['state']] === static::$states['email'])
+                || is_null($r[$this->fields['state']])),
+            $this->fields['id']
+          ) ?: false;
     }
 
-    return isset($conditions) ? $this->db->selectOne(
-      [
-        'table' => $this->class_table,
-        'fields' => [$this->fields['id']],
-        'where' => [
-          'conditions' => $conditions
-        ]
-      ]
-    ) : false;
+    return false;
   }
 
 
@@ -1443,7 +1412,7 @@ class Changes extends EntityTable
    */
   protected function _identity(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $exists = $this->db->rselect($this->tables['identities'], [], ['id' => $id]);
+    $exists = $this->identity()->getInfo($id);
     if (!empty($exists)
       && ($action === 'insert')
       && !empty($is_sub)
@@ -1501,7 +1470,7 @@ class Changes extends EntityTable
    */
   protected function _address(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $exists = $this->db->rselect($this->tables['addresses'], [], ['id' => $id]);
+    $exists = $this->address()->getInfo($id);
     if (($action === 'update') && empty($exists)) {
       $action = 'insert';
     }
@@ -1532,23 +1501,22 @@ class Changes extends EntityTable
     return $ret ? $id : null;
   }
 
-
-  protected function getTables()
+  protected static function setTables()
   {
-    if (empty($this->tables)) {
-      $fields = static::getFieldsList();
+    if (empty(self::$tables)) {
+      $fields = self::getFieldsList();
       foreach ($fields as $field) {
         $cn =& $field['changes'];
         if (!empty($field['table'])
           && !empty($cn['table'])
-          && empty($this->tables[$cn['table']])
+          && empty(self::$tables[$cn['table']])
         ) {
-          $this->tables[$cn['table']] = $field['table'];
+          self::$tables[$cn['table']] = $field['table'];
         }
       }
     }
 
-    return X::mergeArrays($this->tablesOld, $this->tables);
+    return X::mergeArrays(self::$tablesOld, self::$tables);
   }
 
 }

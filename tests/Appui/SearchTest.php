@@ -320,7 +320,7 @@ CONTENT
 
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertSame(
       $this->db_mock,
@@ -357,7 +357,7 @@ CONTENT
   }
 
   /** @test */
-  public function getSearchCfg_method_returns_search_config_from_cache_when_exists()
+  public function testGetsearchcfgMethodReturnsSearchConfigFromCacheWhenExists()
   {
     $this->setNonPublicPropertyValue('functions', [], Search::class);
 
@@ -381,7 +381,7 @@ CONTENT
   }
   
   /** @test */
-  public function getSearchCfg_method_returns_search_config_and_save_it_in_cache()
+  public function testGetsearchcfgMethodReturnsSearchConfigAndSaveItInCache()
   {
     $this->cleanTestingDir($this->getTestingDirName() . 'cache');
 
@@ -421,7 +421,7 @@ CONTENT
   }
 
   /** @test */
-  public function executeFunctions_method_executes_all_functions_in_the_search_cfg_using_the_given_search_string()
+  public function testExecutefunctionsMethodExecutesAllFunctionsInTheSearchCfgUsingTheGivenSearchString()
   {
     $method = $this->getNonPublicMethod('executeFunctions');
 
@@ -437,7 +437,7 @@ CONTENT
   }
 
   /** @test */
-  public function get_method_launches_the_search_with_the_given_search_string_and_save_it_in_cache_for_the_user()
+  public function testGetMethodLaunchesTheSearchWithTheGivenSearchStringAndSaveItInCacheForTheUser()
   {
     $this->user_mock->shouldReceive('getId')
       ->andReturn($user_id = '634a2c70bcac11eba47652540000cfaa');
@@ -548,7 +548,7 @@ CONTENT
   }
 
   /** @test */
-  public function get_method_returns_the_next_step_when_query_time_limit_is_passed()
+  public function testGetMethodReturnsTheNextStepWhenQueryTimeLimitIsPassed()
   {
     $this->user_mock->shouldReceive('getId')
       ->andReturn('634a2c70bcac11eba47652540000cfaa');
@@ -598,7 +598,7 @@ CONTENT
   }
 
   /** @test */
-  public function get_method_does_not_return_the_next_step_if_time_out_has_passed_but_there_is_no_other_steps_remaining()
+  public function testGetMethodDoesNotReturnTheNextStepIfTimeOutHasPassedButThereIsNoOtherStepsRemaining()
   {
     $this->user_mock->shouldReceive('getId')
       ->andReturn('634a2c70bcac11eba47652540000cfaa');
@@ -682,7 +682,7 @@ CONTENT
   }
 
   /** @test */
-  public function get_method_launches_the_search_with_the_given_search_string_and_there_were_previous_similar_search_found()
+  public function testGetMethodLaunchesTheSearchWithTheGivenSearchStringAndThereWerePreviousSimilarSearchFound()
   {
     // We will use a real database here for the test
     $this->setUpDb();
@@ -734,7 +734,7 @@ CONTENT
   }
 
   /** @test */
-  public function register_method_registers_a_function_in_the_functions_static_property()
+  public function testRegisterMethodRegistersAFunctionInTheFunctionsStaticProperty()
   {
     $this->setNonPublicPropertyValue('functions', []);
 
@@ -787,7 +787,7 @@ CONTENT
   }
 
   /** @test */
-  public function register_method_creates_a_signature_of_the_closure_result_and_it_should_match_with_other_call_to_same_closure()
+  public function testRegisterMethodCreatesASignatureOfTheClosureResultAndItShouldMatchWithOtherCallToSameClosure()
   {
     $this->setNonPublicPropertyValue('functions', []);
 

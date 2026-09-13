@@ -10,7 +10,7 @@ interface SqlFormatters
    * @param array $cfg The configuration array
    * @return string
    */
-  public function getSelect(array $cfg): string;
+  public function getSelect(array $cfg, bool $subCfg = false): string;
 
   /**
    * Generates a string starting with SELECT ... FROM (SELECT ... UNION SELECT...) AS alias

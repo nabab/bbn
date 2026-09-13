@@ -208,7 +208,7 @@ class NoteTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test()
+  public function testConstructorTest()
   {
     $this->assertSame(
       $this->getNonPublicProperty('default_class_cfg'),
@@ -221,7 +221,7 @@ class NoteTest extends TestCase
   }
 
   /** @test */
-  public function getMediaInstance_method_initialize_and_returns_media_instance_if_not_already_initialized()
+  public function testGetmediainstanceMethodInitializeAndReturnsMediaInstanceIfNotAlreadyInitialized()
   {
     $this->option_mock->shouldReceive('fromRootCode')
       ->once()
@@ -232,7 +232,7 @@ class NoteTest extends TestCase
   }
 
   /** @test */
-  public function getMediaInstance_method_returns_media_instance_when_already_initialized()
+  public function testGetmediainstanceMethodReturnsMediaInstanceWhenAlreadyInitialized()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -240,7 +240,7 @@ class NoteTest extends TestCase
   }
 
   /** @test */
-  public function getExcerpt_method_returns_excerpt_from_the_given_title_and_content()
+  public function testGetexcerptMethodReturnsExcerptFromTheGivenTitleAndContent()
   {
     $expected = <<<OUTPUT
 foo
@@ -281,7 +281,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_inserts_the_given_data_in_to_db_when_only_title_and_content_provided()
+  public function testInsertMethodInsertsTheGivenDataInToDbWhenOnlyTitleAndContentProvided()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -336,7 +336,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_inserts_the_given_data_in_to_db_when_arguments_are_given_as_an_array()
+  public function testInsertMethodInsertsTheGivenDataInToDbWhenArgumentsAreGivenAsAnArray()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -393,7 +393,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_returns_null_when_content_is_not_provided()
+  public function testInsertMethodReturnsNullWhenContentIsNotProvided()
   {
     $this->assertNull(
       $this->note->insert('title', '')
@@ -409,7 +409,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_returns_false_when_failed_to_insert_in_db()
+  public function testInsertMethodReturnsFalseWhenFailedToInsertInDb()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -449,7 +449,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_returns_false_when_user_instance_cannot_be_retrieved()
+  public function testInsertMethodReturnsFalseWhenUserInstanceCannotBeRetrieved()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -461,7 +461,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_method_returns_false_when_last_id_cannot_be_retrieved_from_db()
+  public function testInsertMethodReturnsFalseWhenLastIdCannotBeRetrievedFromDb()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -505,7 +505,7 @@ OUTPUT;
   }
   
   /** @test */
-  public function insertVersion_method_adds_a_new_version_to_the_given_note_if_content_is_different()
+  public function testInsertversionMethodAddsANewVersionToTheGivenNoteIfContentIsDifferent()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -558,7 +558,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_adds_a_new_version_to_the_given_note_if_title_is_different()
+  public function testInsertversionMethodAddsANewVersionToTheGivenNoteIfTitleIsDifferent()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -611,7 +611,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_adds_a_new_version_to_the_given_note_if_version_not_found()
+  public function testInsertversionMethodAddsANewVersionToTheGivenNoteIfVersionNotFound()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -663,7 +663,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_does_not_add_a_new_version_to_the_given_note_if_there_is_a_version_with_same_title_and_content()
+  public function testInsertversionMethodDoesNotAddANewVersionToTheGivenNoteIfThereIsAVersionWithSameTitleAndContent()
   {
     $this->initAndMockUserClass();
 
@@ -687,7 +687,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_does_not_add_a_new_version_to_the_given_note_if_insert_new_version_failed()
+  public function testInsertversionMethodDoesNotAddANewVersionToTheGivenNoteIfInsertNewVersionFailed()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -732,7 +732,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_returns_null_when_there_is_an_error()
+  public function testInsertversionMethodReturnsNullWhenThereIsAnError()
   {
     $this->setNonPublicPropertyValue('error', true);
 
@@ -742,7 +742,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_returns_null_when_user_instance_cannot_be_retrieved()
+  public function testInsertversionMethodReturnsNullWhenUserInstanceCannotBeRetrieved()
   {
     $this->assertNull(
       $this->note->insertVersion('123', 'title', 'content')
@@ -750,7 +750,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertVersion_method_returns_null_when_note_does_not_exist()
+  public function testInsertversionMethodReturnsNullWhenNoteDoesNotExist()
   {
     $this->initAndMockUserClass();
     $this->partiallyMockNoteClass();
@@ -766,7 +766,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_updates_private_and_lock_fields_in_db_if_changed_and_calls_the_insertVersion_method_if_old_version_exists()
+  public function testUpdateMethodUpdatesPrivateAndLockFieldsInDbIfChangedAndCallsTheInsertversionMethodIfOldVersionExists()
   {
     $this->partiallyMockNoteClass();
 
@@ -806,7 +806,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_updates_private_and_lock_fields_in_db_if_changed_and_does_not_call_the_insertVersion_method_if_no_old_version_exists()
+  public function testUpdateMethodUpdatesPrivateAndLockFieldsInDbIfChangedAndDoesNotCallTheInsertversionMethodIfNoOldVersionExists()
   {
     $this->partiallyMockNoteClass();
 
@@ -838,7 +838,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_only_updates_the_lock_field_in_db_when_different_and_the_private_field_did_not_change()
+  public function testUpdateMethodOnlyUpdatesTheLockFieldInDbWhenDifferentAndThePrivateFieldDidNotChange()
   {
     $this->partiallyMockNoteClass();
 
@@ -870,7 +870,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_only_updates_the_private_field_in_db_when_different_and_the_lock_field_did_not_change()
+  public function testUpdateMethodOnlyUpdatesThePrivateFieldInDbWhenDifferentAndTheLockFieldDidNotChange()
   {
     $this->partiallyMockNoteClass();
 
@@ -902,7 +902,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_does_not_update_the_bbn_notes_table_when_no_private_and_lock_argument_is_provided()
+  public function testUpdateMethodDoesNotUpdateTheBbnNotesTableWhenNoPrivateAndLockArgumentIsProvided()
   {
     $this->partiallyMockNoteClass();
 
@@ -927,7 +927,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_does_not_call_the_insertVersion_method_when_title_and_content_not_changed()
+  public function testUpdateMethodDoesNotCallTheInsertversionMethodWhenTitleAndContentNotChanged()
   {
     $this->partiallyMockNoteClass();
 
@@ -953,7 +953,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function update_method_returns_null_if_id_does_not_exists_in_bbn_notes()
+  public function testUpdateMethodReturnsNullIfIdDoesNotExistsInBbnNotes()
   {
     $this->db_mock->shouldReceive('rselect')
       ->once()
@@ -966,7 +966,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function latest_method_returns_the_latest_version_record_from_the_given_id()
+  public function testLatestMethodReturnsTheLatestVersionRecordFromTheGivenId()
   {
     $cf = $this->getClassCfg();
 
@@ -983,7 +983,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function get_method_returns_note_and_medias_for_the_given_id_and_version_from_db()
+  public function testGetMethodReturnsNoteAndMediasForTheGivenIdAndVersionFromDb()
   {
     $cf = $this->getClassCfg();
 
@@ -1040,7 +1040,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function get_method_returns_note_and_not_medias_for_the_given_id_and_version_from_db_when_simple_is_true()
+  public function testGetMethodReturnsNoteAndNotMediasForTheGivenIdAndVersionFromDbWhenSimpleIsTrue()
   {
     $cf = $this->getClassCfg();
 
@@ -1081,7 +1081,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function get_method_gets_the_latest_version_when_no_version_is_provided()
+  public function testGetMethodGetsTheLatestVersionWhenNoVersionIsProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -1130,7 +1130,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function get_method_sets_version_to_one_if_latest_version_returns_null_when_no_version_is_provided()
+  public function testGetMethodSetsVersionToOneIfLatestVersionReturnsNullWhenNoVersionIsProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -1179,7 +1179,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function get_method_returns_null_when_note_does_not_exist()
+  public function testGetMethodReturnsNullWhenNoteDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -1198,7 +1198,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getFull_method_returns_note_and_medias_from_the_provided_id_and_version()
+  public function testGetfullMethodReturnsNoteAndMediasFromTheProvidedIdAndVersion()
   {
     $cf = $this->getClassCfg();
 
@@ -1266,7 +1266,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getFull_method_will_get_the_latest_version_when_no_version_is_provided()
+  public function testGetfullMethodWillGetTheLatestVersionWhenNoVersionIsProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -1339,7 +1339,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getFull_method_returns_null_when_note_does_not_exist()
+  public function testGetfullMethodReturnsNullWhenNoteDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -1391,7 +1391,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlExists_method_checks_if_the_given_url_exists()
+  public function testUrlexistsMethodChecksIfTheGivenUrlExists()
   {
     $this->partiallyMockNoteClass();
 
@@ -1406,7 +1406,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToId_method_returns_id_from_the_given_url_from_db()
+  public function testUrltoidMethodReturnsIdFromTheGivenUrlFromDb()
   {
     $cf = $this->getClassCfg();
 
@@ -1423,7 +1423,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToId_returns_null_when_db_look_up_returns_false()
+  public function testUrltoidReturnsNullWhenDbLookUpReturnsFalse()
   {
     $cf = $this->getClassCfg();
 
@@ -1442,7 +1442,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToId_returns_null_when_url_is_empty()
+  public function testUrltoidReturnsNullWhenUrlIsEmpty()
   {
     $this->assertNull(
       $this->note->urlToId('')
@@ -1450,7 +1450,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToNote_return_note_from_the_given_url()
+  public function testUrltonoteReturnNoteFromTheGivenUrl()
   {
     $cf = $this->getClassCfg();
 
@@ -1474,7 +1474,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToNote_return_full_note_details_from_the_given_url()
+  public function testUrltonoteReturnFullNoteDetailsFromTheGivenUrl()
   {
     $cf = $this->getClassCfg();
 
@@ -1498,7 +1498,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function urlToNote_method_returns_null_when_note_does_not_exists()
+  public function testUrltonoteMethodReturnsNullWhenNoteDoesNotExists()
   {
     $this->partiallyMockNoteClass();
 
@@ -1513,7 +1513,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasUrl_method_returns_true_if_the_given_note_is_linked_to_an_url()
+  public function testHasurlMethodReturnsTrueIfTheGivenNoteIsLinkedToAnUrl()
   {
     $cf = $this->getClassCfg();
 
@@ -1532,7 +1532,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getUrl_method_returns_the_url_of_the_given_note_if_exists()
+  public function testGeturlMethodReturnsTheUrlOfTheGivenNoteIfExists()
   {
     $this->partiallyMockNoteClass();
 
@@ -1561,7 +1561,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getUrl_method_returns_null_when_the_given_id_does_not_has_url()
+  public function testGeturlMethodReturnsNullWhenTheGivenIdDoesNotHasUrl()
   {
     $this->partiallyMockNoteClass();
 
@@ -1574,7 +1574,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertOrUpdateUrl_method_inserts_the_given_url_to_the_given_note_if_it_has_no_url()
+  public function testInsertorupdateurlMethodInsertsTheGivenUrlToTheGivenNoteIfItHasNoUrl()
   {
     $this->partiallyMockNoteClass();
     $cf = $this->getClassCfg();
@@ -1599,7 +1599,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insertOrUpdateUrl_method_updates_the_given_url_to_the_given_note_if_it_has_a_url()
+  public function testInsertorupdateurlMethodUpdatesTheGivenUrlToTheGivenNoteIfItHasAUrl()
   {
     $this->partiallyMockNoteClass();
     $cf = $this->getClassCfg();
@@ -1624,7 +1624,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function deleteUrl_method_deletes_url_for_the_given_note()
+  public function testDeleteurlMethodDeletesUrlForTheGivenNote()
   {
     $cf = $this->getClassCfg();
 
@@ -1644,7 +1644,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_notes_from_the_given_type()
+  public function testGetbytypeMethodReturnsNotesFromTheGivenType()
   {
     $cf = $this->getClassCfg();
 
@@ -1699,7 +1699,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_notes_when_the_given_type_is_null_and_id_user_is_provided()
+  public function testGetbytypeMethodReturnsNotesWhenTheGivenTypeIsNullAndIdUserIsProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -1759,7 +1759,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_notes_when_the_given_type_is_not_valid()
+  public function testGetbytypeMethodReturnsNotesWhenTheGivenTypeIsNotValid()
   {
     $cf = $this->getClassCfg();
 
@@ -1819,7 +1819,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_notes_with_no_medias_when_not_found()
+  public function testGetbytypeMethodReturnsNotesWithNoMediasWhenNotFound()
   {
     $cf = $this->getClassCfg();
 
@@ -1855,7 +1855,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_notes_with_empty_medias_when_no_corresponding_media_found()
+  public function testGetbytypeMethodReturnsNotesWithEmptyMediasWhenNoCorrespondingMediaFound()
   {
     $cf = $this->getClassCfg();
 
@@ -1898,7 +1898,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_empty_array_when_no_notes_found()
+  public function testGetbytypeMethodReturnsEmptyArrayWhenNoNotesFound()
   {
     $this->db_mock->shouldReceive('rselectAll')
       ->once()
@@ -1910,7 +1910,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getByType_method_returns_false_when_the_retrieved_type_is_not_valid_uid()
+  public function testGetbytypeMethodReturnsFalseWhenTheRetrievedTypeIsNotValidUid()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -1921,7 +1921,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getVersions_method_returns_versions_from_the_given_note_id()
+  public function testGetversionsMethodReturnsVersionsFromTheGivenNoteId()
   {
     $cf = $this->getClassCfg();
 
@@ -1959,7 +1959,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getVersions_method_returns_null_if_the_given_note_id_is_not_valid_uid()
+  public function testGetversionsMethodReturnsNullIfTheGivenNoteIdIsNotValidUid()
   {
     $this->assertNull(
       $this->note->getVersions('12345')
@@ -1967,7 +1967,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function countByType_method_returns_the_count_of_notes_for_the_given_type_and_user_id()
+  public function testCountbytypeMethodReturnsTheCountOfNotesForTheGivenTypeAndUserId()
   {
     $cf = $this->getClassCfg();
 
@@ -1997,7 +1997,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function countByType_method_returns_the_count_of_notes_when_type_and_user_id_are_not_provided()
+  public function testCountbytypeMethodReturnsTheCountOfNotesWhenTypeAndUserIdAreNotProvided()
   {
     $cf = $this->getClassCfg();
 
@@ -2029,7 +2029,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function countByType_method_returns_the_count_of_notes_when_the_given_type_is_not_valid_uid()
+  public function testCountbytypeMethodReturnsTheCountOfNotesWhenTheGivenTypeIsNotValidUid()
   {
     $cf = $this->getClassCfg();
 
@@ -2061,7 +2061,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function countByType_method_returns_false_when_the_retrieved_type_is_not_valid_uid()
+  public function testCountbytypeMethodReturnsFalseWhenTheRetrievedTypeIsNotValidUid()
   {
     $this->option_mock->shouldReceive('fromCode')
       ->once()
@@ -2072,7 +2072,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_adds_media_to_db_and_returns_the_id_from_the_given_note_id_and_version_and_media_contents()
+  public function testAddmediaMethodAddsMediaToDbAndReturnsTheIdFromTheGivenNoteIdAndVersionAndMediaContents()
   {
     $user_mock  = $this->initAndMockUserClass();
     $cf         = $this->getClassCfg();
@@ -2124,7 +2124,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_adds_media_to_db_and_returns_the_id_from_the_given_note_id_and_media_contents()
+  public function testAddmediaMethodAddsMediaToDbAndReturnsTheIdFromTheGivenNoteIdAndMediaContents()
   {
     $user_mock  = $this->initAndMockUserClass();
     $cf         = $this->getClassCfg();
@@ -2185,7 +2185,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_sets_the_version_to_one_when_not_provided_and_not_latest_version_found()
+  public function testAddmediaMethodSetsTheVersionToOneWhenNotProvidedAndNotLatestVersionFound()
   {
     $user_mock  = $this->initAndMockUserClass();
     $cf         = $this->getClassCfg();
@@ -2239,7 +2239,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_returns_null_when_note_id_does_not_exist()
+  public function testAddmediaMethodReturnsNullWhenNoteIdDoesNotExist()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -2259,7 +2259,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_returns_null_when_failed_to_insert_media()
+  public function testAddmediaMethodReturnsNullWhenFailedToInsertMedia()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -2285,7 +2285,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMedia_method_returns_null_when_failed_to_add_media_to_the_note()
+  public function testAddmediaMethodReturnsNullWhenFailedToAddMediaToTheNote()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -2331,7 +2331,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMediaToNote_method_adds_nmedias_record_for_the_given_note_and_media_ids_with_the_given_version()
+  public function testAddmediatonoteMethodAddsNmediasRecordForTheGivenNoteAndMediaIdsWithTheGivenVersion()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -2362,7 +2362,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function addMediaToNote_method_returns_null_when_user_instance_is_null()
+  public function testAddmediatonoteMethodReturnsNullWhenUserInstanceIsNull()
   {
     $this->assertNull(
       $this->note->addMediaToNote($this->id_media, $this->id_note, 3)
@@ -2370,7 +2370,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function removeMedia_method_removes_record_for_the_given_note_and_media_ids_with_the_given_version()
+  public function testRemovemediaMethodRemovesRecordForTheGivenNoteAndMediaIdsWithTheGivenVersion()
   {
     $cf = $this->getClassCfg();
 
@@ -2410,7 +2410,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function removeMedia_method_removes_record_for_the_given_note_and_media_ids_with_the_given_version_is_false()
+  public function testRemovemediaMethodRemovesRecordForTheGivenNoteAndMediaIdsWithTheGivenVersionIsFalse()
   {
     $cf = $this->getClassCfg();
 
@@ -2458,7 +2458,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function removeMedia_method_removes_record_for_the_given_note_and_media_ids_with_the_given_version_is_true()
+  public function testRemovemediaMethodRemovesRecordForTheGivenNoteAndMediaIdsWithTheGivenVersionIsTrue()
   {
     $cf = $this->getClassCfg();
 
@@ -2497,7 +2497,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function removeMedia_method_returns_null_when_the_provided_media_id_does_not_exist()
+  public function testRemovemediaMethodReturnsNullWhenTheProvidedMediaIdDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -2515,7 +2515,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function removeMedia_method_returns_null_when_the_provided_note_id_does_not_exist()
+  public function testRemovemediaMethodReturnsNullWhenTheProvidedNoteIdDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -2542,7 +2542,7 @@ OUTPUT;
 
 
   /** @test */
-  public function getMedias_method_returns_medias_from_the_given_note_id_and_version()
+  public function testGetmediasMethodReturnsMediasFromTheGivenNoteIdAndVersion()
   {
     $media_mock = $this->mockAndReplaceMediaInstance();
     $cf         = $this->getClassCfg();
@@ -2579,7 +2579,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMedias_method_returns_medias_from_the_given_note_id_and_version_is_true()
+  public function testGetmediasMethodReturnsMediasFromTheGivenNoteIdAndVersionIsTrue()
   {
     $media_mock = $this->mockAndReplaceMediaInstance();
     $cf         = $this->getClassCfg();
@@ -2615,7 +2615,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMedias_method_returns_medias_from_the_given_note_id_and_version_is_false()
+  public function testGetmediasMethodReturnsMediasFromTheGivenNoteIdAndVersionIsFalse()
   {
     $media_mock = $this->mockAndReplaceMediaInstance();
     $cf         = $this->getClassCfg();
@@ -2660,7 +2660,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMedias_method_returns_empty_array_when_no_medias_found()
+  public function testGetmediasMethodReturnsEmptyArrayWhenNoMediasFound()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -2693,7 +2693,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMedias_method_returns_empty_array_when_the_provided_note_does_not_exist()
+  public function testGetmediasMethodReturnsEmptyArrayWhenTheProvidedNoteDoesNotExist()
   {
     $this->mockAndReplaceMediaInstance();
 
@@ -2713,7 +2713,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasMedias_method_checks_whether_the_provided_note_and_media_ids_have_medias_with_the_given_version()
+  public function testHasmediasMethodChecksWhetherTheProvidedNoteAndMediaIdsHaveMediasWithTheGivenVersion()
   {
     $cf = $this->getClassCfg();
 
@@ -2739,7 +2739,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasMedias_method_checks_whether_the_provided_note_id_has_medias_with_the_given_version()
+  public function testHasmediasMethodChecksWhetherTheProvidedNoteIdHasMediasWithTheGivenVersion()
   {
     $cf = $this->getClassCfg();
 
@@ -2764,7 +2764,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasMedias_method_checks_whether_the_provided_note_id_has_medias_with_the_given_version_when_the_provided_media_id_is_not_valid()
+  public function testHasmediasMethodChecksWhetherTheProvidedNoteIdHasMediasWithTheGivenVersionWhenTheProvidedMediaIdIsNotValid()
   {
     $cf = $this->getClassCfg();
 
@@ -2789,7 +2789,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasMedias_method_checks_whether_the_provided_note_id_has_medias_when_the_given_version_is_false()
+  public function testHasmediasMethodChecksWhetherTheProvidedNoteIdHasMediasWhenTheGivenVersionIsFalse()
   {
     $cf = $this->getClassCfg();
 
@@ -2822,7 +2822,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function hasMedias_method_returns_null_when_the_provided_note_id_does_not_exists()
+  public function testHasmediasMethodReturnsNullWhenTheProvidedNoteIdDoesNotExists()
   {
     $cf = $this->getClassCfg();
 
@@ -2837,7 +2837,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function count_method_returns_count_of_all_notes_for_the_user()
+  public function testCountMethodReturnsCountOfAllNotesForTheUser()
   {
     $user_mock = $this->initAndMockUserClass();
     $cf        = $this->getClassCfg();
@@ -2900,13 +2900,13 @@ OUTPUT;
   }
 
   /** @test */
-  public function count_method_returns_null_when_the_user_instance_is_null()
+  public function testCountMethodReturnsNullWhenTheUserInstanceIsNull()
   {
     $this->assertNull($this->note->count());
   }
 
   /** @test */
-  public function remove_method_removes_note_row_from_the_given_id_with_related_versions_and_media_when_keep_argument_is_false()
+  public function testRemoveMethodRemovesNoteRowFromTheGivenIdWithRelatedVersionsAndMediaWhenKeepArgumentIsFalse()
   {
     $cf = $this->getClassCfg();
 
@@ -2946,7 +2946,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function remove_method_updates_the_active_field_to_zero_for_the_given_note_id_when_keep_is_true()
+  public function testRemoveMethodUpdatesTheActiveFieldToZeroForTheGivenNoteIdWhenKeepIsTrue()
   {
     $cf = $this->getClassCfg();
 
@@ -2962,7 +2962,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function remove_method_returns_false_when_the_provided_note_id_is_not_valid()
+  public function testRemoveMethodReturnsFalseWhenTheProvidedNoteIdIsNotValid()
   {
     $this->assertFalse(
       $this->note->remove('123acc')
@@ -2970,7 +2970,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function copy_method_inserts_a_copy_from_the_given_note_id_and_version_and_returns_the_new_note_id()
+  public function testCopyMethodInsertsACopyFromTheGivenNoteIdAndVersionAndReturnsTheNewNoteId()
   {
     $this->partiallyMockNoteClass();
 
@@ -3005,7 +3005,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function copy_method_inserts_a_copy_from_the_given_note_id_and_version_and_private_and_returns_the_new_note_id()
+  public function testCopyMethodInsertsACopyFromTheGivenNoteIdAndVersionAndPrivateAndReturnsTheNewNoteId()
   {
     $this->partiallyMockNoteClass();
 
@@ -3040,7 +3040,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function copy_method_returns_null_when_the_provided_note_id_does_not_exist()
+  public function testCopyMethodReturnsNullWhenTheProvidedNoteIdDoesNotExist()
   {
     $this->partiallyMockNoteClass();
 
@@ -3055,7 +3055,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediasNotes_method_selects_from_db_all_medias_that_have_the_property_content_not_null()
+  public function testGetmediasnotesMethodSelectsFromDbAllMediasThatHaveThePropertyContentNotNull()
   {
     $cf         = $this->getClassCfg();
     $media_mock = $this->mockAndReplaceMediaInstance();
@@ -3187,7 +3187,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediasNotes_method_does_not_return_the_notes_if_media_file_does_not_exist()
+  public function testGetmediasnotesMethodDoesNotReturnTheNotesIfMediaFileDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -3222,7 +3222,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediasNotes_method_does_not_return_the_notes_if_media_content_is_not_json()
+  public function testGetmediasnotesMethodDoesNotReturnTheNotesIfMediaContentIsNotJson()
   {
     $cf = $this->getClassCfg();
 
@@ -3262,7 +3262,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediasNotes_method_returns_empty_array_when_no_media_found()
+  public function testGetmediasnotesMethodReturnsEmptyArrayWhenNoMediaFound()
   {
     $cf = $this->getClassCfg();
 
@@ -3289,7 +3289,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediaNotes_method_returns_all_notes_linked_to_the_provided_media_id()
+  public function testGetmedianotesMethodReturnsAllNotesLinkedToTheProvidedMediaId()
   {
     $cf = $this->getClassCfg();
 
@@ -3363,7 +3363,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getMediaNotes_method_returns_empty_array_when_the_provided_media_id_does_not_exist()
+  public function testGetmedianotesMethodReturnsEmptyArrayWhenTheProvidedMediaIdDoesNotExist()
   {
     $cf = $this->getClassCfg();
 
@@ -3384,7 +3384,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function remove_note_events_method_removes_the_row_corresponding_to_the_given_arguments_in_notes_events_table()
+  public function testRemoveNoteEventsMethodRemovesTheRowCorrespondingToTheGivenArgumentsInNotesEventsTable()
   {
     $cf = $this->getClassCfg();
 
@@ -3405,7 +3405,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_notes_events_method_inserts_row_in_notes_events_table_if_the_provided_arguments_does_not_exist()
+  public function testInsertNotesEventsMethodInsertsRowInNotesEventsTableIfTheProvidedArgumentsDoesNotExist()
   {
     $cf     = $this->getClassCfg();
 
@@ -3437,7 +3437,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function insert_notes_events_method_does_not_insert_row_when_the_given_arguments_exists()
+  public function testInsertNotesEventsMethodDoesNotInsertRowWhenTheGivenArgumentsExists()
   {
     $cf     = $this->getClassCfg();
 
@@ -3458,7 +3458,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getEventIdFromNote_method_returns_event_id_for_the_given_note()
+  public function testGeteventidfromnoteMethodReturnsEventIdForTheGivenNote()
   {
     $cf = $this->getClassCfg();
 
@@ -3474,7 +3474,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function getNoteIdFromEvent_method_returns_note_id_for_the_given_event()
+  public function testGetnoteidfromeventMethodReturnsNoteIdForTheGivenEvent()
   {
     $cf = $this->getClassCfg();
 
@@ -3491,7 +3491,7 @@ OUTPUT;
   }
 
   /** @test */
-  public function check_date_method_checks_if_the_provided_end_date_is_after_the_start_date()
+  public function testCheckDateMethodChecksIfTheProvidedEndDateIsAfterTheStartDate()
   {
     $method = $this->getNonPublicMethod('_check_date');
 

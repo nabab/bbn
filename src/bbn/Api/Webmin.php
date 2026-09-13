@@ -45,7 +45,6 @@ class Webmin
       throw new Exception(_('The password is mandatory'));
     }
 
-    $this->cacheInit();
     $this->user     = $cfg['user'];
     $this->pass     = $cfg['pass'];
     $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';

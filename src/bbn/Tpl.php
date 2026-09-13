@@ -3,6 +3,7 @@ namespace bbn;
 
 use Exception;
 use LightnCandy\LightnCandy;
+use LightnCandy\Flags;
 use bbn\File\Dir;
 
 class Tpl {
@@ -32,17 +33,20 @@ class Tpl {
 
     $md5 = md5($st);
     $file = $dir.'/tpl.'.$md5.'.php';
-    if (!file_exists($file)) {
+    $fp = @fopen($file, 'x');
+
+    if ($fp !== false) {
       $tpl = LightnCandy::compile(
         $st,
         [
-          'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |
-            LightnCandy::FLAG_PARENT |
-            LightnCandy::FLAG_HANDLEBARSJS |
-            LightnCandy::FLAG_ERROR_LOG
+          'flags' => Flags::FLAG_MUSTACHELOOKUP |
+            Flags::FLAG_PARENT |
+            Flags::FLAG_HANDLEBARSJS |
+            Flags::FLAG_ERROR_LOG
         ]
       );
-      file_put_contents($file, '<?php '.$tpl.'?>');
+      fwrite($fp, '<?php '.$tpl.'?>');
+      fclose($fp);
     }
 
     return include($file);

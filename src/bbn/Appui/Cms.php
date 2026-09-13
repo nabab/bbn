@@ -38,7 +38,7 @@ class Cms extends DbCls
   protected $media;
 
   /** @var array $class_cfg */
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /** @var string The option's ID of the type of notes for CMS (pages) */
   protected $noteType;
@@ -50,13 +50,12 @@ class Cms extends DbCls
    * Cms constructor.
    *
    * @param Db $db
-   * @param null $notes
+   * @param Note|null $note
    * @throws Exception
    */
-  public function __construct(Db $db, Note $note = null)
+  public function __construct(Db $db, ?Note $note = null)
   {
     parent::__construct($db);
-    $this->cacheInit();
     $this->event = new Event($this->db);
     $this->opt   = Option::getInstance();
     $this->url   = new Url($this->db);
@@ -508,7 +507,7 @@ class Cms extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array
+  public function getAll(bool $with_content = false, array $filter = [], string|array $order= [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array
   {
     $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);
     $type_cond = [];
@@ -749,7 +748,7 @@ class Cms extends DbCls
    *
    * @param string $id_note
    * @param string $url
-   * @return Boolean
+   * @return bool
    * @throws Exception
    */
   public function setUrl(string $id_note, string $url, $ignore = false): ?bool
@@ -1173,7 +1172,7 @@ class Cms extends DbCls
    *
    * @param string|null $start
    * @param null|string $end
-   * @return Boolean
+   * @return bool
    */
   private function _check_date(?string $start, ?string $end): bool
   {

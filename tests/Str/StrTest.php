@@ -14,14 +14,14 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function cast_method_converts_a_variable_to_a_string()
+  public function testCastMethodConvertsAVariableToAString()
   {
     $this->assertSame('122', Str::cast(122));
   }
 
 
   /** @test */
-  public function cast_method_converts_arrays_and_objects_to_empty_string()
+  public function testCastMethodConvertsArraysAndObjectsToEmptyString()
   {
     $this->assertSame('', Str::cast(['foo' => 'bar']));
     $this->assertSame('', Str::cast((object)['foo' => 'bar']));
@@ -29,7 +29,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function change_case_method_converts_the_case_of_string()
+  public function testChangeCaseMethodConvertsTheCaseOfString()
   {
     // Loser case
     $this->assertSame('foo bar', Str::changeCase('FOO BAR', 'lower'));
@@ -51,7 +51,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function escapeAllQuotes_methods_escapes_single_and_double_quotes()
+  public function testEscapeallquotesMethodsEscapesSingleAndDoubleQuotes()
   {
     $this->assertSame('foo \\\'bar\\\' \"baz\"', Str::escapeAllQuotes("foo 'bar' \"baz\""));
     $this->assertSame('foo \"bar\"', Str::escapeAllQuotes('foo "bar"'));
@@ -61,7 +61,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function escapeSquotes_method_escapes_single_quotes()
+  public function testEscapesquotesMethodEscapesSingleQuotes()
   {
     $this->assertSame("foo \'bar\'", Str::escapeSquotes("foo 'bar'"));
     $this->assertSame('foo \\\n \\\t \\\'bar\\\'', Str::escapeSquotes('foo \n \t \'bar\''));
@@ -73,7 +73,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function escapeDquotes_method_escapes_double_quotes()
+  public function testEscapedquotesMethodEscapesDoubleQuotes()
   {
     $this->assertSame('foo \"bar\"', Str::escapeDquotes('foo "bar"'));
     $this->assertSame('foo \\\n \\\t \"bar\"', Str::escapeDquotes('foo \n \t "bar"'));
@@ -84,7 +84,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function unescapesquotes_method_unescapes_quoted_strings()
+  public function testUnescapesquotesMethodUnescapesQuotedStrings()
   {
     $this->assertSame('foo "bar"', Str::unescapeSquote('foo \"bar\"'));
     $this->assertSame('foo \n \t "bar"', Str::unescapeSquote('foo \\\n \\\t \"bar\"'));
@@ -98,7 +98,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function cleanSpaces_trims_and_remove_extra_spaces()
+  public function testCleanspacesTrimsAndRemoveExtraSpaces()
   {
     $this->assertSame(
       'Hello World !!!', Str::cleanSpaces(
@@ -110,7 +110,7 @@ class StrTest extends TestCase
 
 
   /** @test  */
-  public function cut_method_strips_html_and_php_tags_from_a_string()
+  public function testCutMethodStripsHtmlAndPhpTagsFromAString()
   {
     $string = "<h1>foo bäz</h1> Example text <b>Foobar. </b>";
     $this->assertSame('foo bäz Example...', Str::cut($string));
@@ -120,7 +120,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function sanitize_method_strips_special_character_except_for_specific_characters()
+  public function testSanitizeMethodStripsSpecialCharacterExceptForSpecificCharacters()
   {
     $string = "foo bär 1256 - ~ , ; [ ] ( ) .+*='";
     $this->assertSame('foo bär 1256 - ~ , ; [ ] ( ) .', Str::sanitize($string));
@@ -132,7 +132,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function encodeFilename_method_returns_a_cross_platform_filename_for_a_file()
+  public function testEncodefilenameMethodReturnsACrossPlatformFilenameForAFile()
   {
     $string = 'test" "file/,1 è..txt';
     // Remove accents and non allowed characters like quotes and dots
@@ -151,7 +151,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function encodeDbname_method_returns_a_corrected_string_for_db_naming()
+  public function testEncodedbnameMethodReturnsACorrectedStringForDbNaming()
   {
     $this->assertSame(
       'my_database_name_test_plus',
@@ -166,7 +166,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function fileExt_method_returns_the_file_extension()
+  public function testFileextMethodReturnsTheFileExtension()
   {
     $this->assertSame('txt', Str::fileExt("/test/test.txt"));
     $this->assertSame('txt', Str::fileExt("/test/test.TXT"));
@@ -177,7 +177,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function genpwd_method_returns_a_random_password()
+  public function testGenpwdMethodReturnsARandomPassword()
   {
     $this->assertIsString($password = Str::genpwd());
     // Default min and max
@@ -189,7 +189,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isJson_method_checks_if_a_string_is_json()
+  public function testIsjsonMethodChecksIfAStringIsJson()
   {
     $this->assertTrue(Str::isJson('{"firstName": "John", "lastName": "Smith", "age": 25}'));
     $this->assertFalse(Str::isJson('foo bar'));
@@ -200,7 +200,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isNumber_method_checks_if_item_is_a_number()
+  public function testIsnumberMethodChecksIfItemIsANumber()
   {
     $this->assertFalse(Str::isNumber());
     $this->assertTrue(Str::isNumber(3));
@@ -211,7 +211,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isInteger_method_checks_if_item_is_an_integer()
+  public function testIsintegerMethodChecksIfItemIsAnInteger()
   {
     $this->assertTrue(Str::isInteger(1));
     $this->assertFalse(Str::isInteger(1.44));
@@ -221,7 +221,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isCleanPath_method_checks_if_a_path_is_valid()
+  public function testIscleanpathMethodChecksIfAPathIsValid()
   {
     $this->assertTrue(Str::isCleanPath('/home/user/Images'));
     $this->assertFalse(Str::isCleanPath('../home/user/Images'));
@@ -231,7 +231,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isDecimal_method_checks_if_item_is_a_decimal()
+  public function testIsdecimalMethodChecksIfItemIsADecimal()
   {
     $this->assertTrue(Str::isDecimal(11.4));
     $this->assertTrue(Str::isDecimal(11.40));
@@ -244,7 +244,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isUid_method_checks_if_a_string_is_valid_uid()
+  public function testIsuidMethodChecksIfAStringIsValidUid()
   {
     $this->assertTrue(Str::isUid($this->app_ids[0]));
     $this->assertFalse(Str::isUid('22e4f42122e4f4212'));
@@ -254,7 +254,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isBuid_method_checks_if_a_string_is_a_valid_binary_uid()
+  public function testIsbuidMethodChecksIfAStringIsAValidBinaryUid()
   {
     $this->assertTrue(Str::isBuid(hex2bin($this->app_ids[0])));
     $this->assertFalse(Str::isBuid(hex2bin($this->app_ids[0] . 'ee')));
@@ -264,7 +264,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isEmail_method_checks_if_a_string_is_valid_email_address()
+  public function testIsemailMethodChecksIfAStringIsValidEmailAddress()
   {
     $this->assertTrue(Str::isEmail('foo@bar.com'));
     $this->assertFalse(Str::isEmail('foo@bar'));
@@ -274,7 +274,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isUrl_method_checks_if_a_string_is_a_valid_url()
+  public function testIsurlMethodChecksIfAStringIsAValidUrl()
   {
     $this->assertTrue(Str::isUrl('http://foo.bar'));
     $this->assertFalse(Str::isUrl('foo.bar'));
@@ -283,7 +283,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isDomain_method_checks_if_a_string_is_a_valid_domain_name()
+  public function testIsdomainMethodChecksIfAStringIsAValidDomainName()
   {
     $this->assertTrue(Str::isDomain('foo.bar'));
     $this->assertFalse(Str::isDomain('http://foo.bar'));
@@ -291,7 +291,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isIp_method_checks_if_a_string_is_a_valid_ip_address()
+  public function testIsipMethodChecksIfAStringIsAValidIpAddress()
   {
     $this->assertTrue(Str::isIp('198.162.0.1'));
     $this->assertTrue(Str::isIp('29e4:4068:a401:f273:dcec:af8f:c8b3:c01c'));
@@ -302,7 +302,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function isDateSql_method_checks_if_a_string_is_a_valid_sql_date_format()
+  public function testIsdatesqlMethodChecksIfAStringIsAValidSqlDateFormat()
   {
     $this->assertTrue(Str::isDateSql('2021-05-24'));
     $this->assertTrue(Str::isDateSql('2021-05-24 23:12:23'));
@@ -313,7 +313,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function correctTypes_method_returns_the_correct_type()
+  public function testCorrecttypesMethodReturnsTheCorrectType()
   {
     $this->assertSame(12, Str::correctTypes(12));
     $this->assertSame(12, Str::correctTypes('12'));
@@ -343,7 +343,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function parseUrl_method_returns_an_array_of_the_provided_url_component()
+  public function testParseurlMethodReturnsAnArrayOfTheProvidedUrlComponent()
   {
     $result = Str::parseUrl(
       'http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981'
@@ -369,7 +369,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function parsePath_method_replaces_backslashes_to_slashes()
+  public function testParsepathMethodReplacesBackslashesToSlashes()
   {
     $this->assertSame('/home/user/Desktop', Str::parsePath('\home\user\Desktop'));
     $this->assertSame('', Str::parsePath('..\home\user\Desktop'));
@@ -378,7 +378,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function removeAccents_method_removes_accesnts_from_characters()
+  public function testRemoveaccentsMethodRemovesAccesntsFromCharacters()
   {
     $this->assertSame('TA¨st FA¬lA¨ A²A¨A A¹e', Str::removeAccents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
     $this->assertSame('baz', Str::removeAccents('bäz'));
@@ -387,7 +387,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function checkName_method_checks_if_a_string_complies_with_sql_naming_convention()
+  public function testChecknameMethodChecksIfAStringCompliesWithSqlNamingConvention()
   {
     $this->assertTrue(Str::checkName('foobar'));
     $this->assertTrue(Str::checkName('foo_bar'));
@@ -399,7 +399,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function checkFilename_method_checks_if_a_string_does_not_contain_a_filesystem_path()
+  public function testCheckfilenameMethodChecksIfAStringDoesNotContainAFilesystemPath()
   {
     $this->assertTrue(Str::checkFilename('foo'));
     $this->assertFalse(Str::checkFilename('foo/'));
@@ -416,7 +416,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function checkPath_method_checks_if_every_bit_of_a_string_does_not_contain_a_filesystem_path()
+  public function testCheckpathMethodChecksIfEveryBitOfAStringDoesNotContainAFilesystemPath()
   {
     $this->assertTrue(Str::checkPath('foo'));
     $this->assertTrue(Str::checkPath('foo/bar'));
@@ -432,7 +432,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function hasSlash_method_checks_if_a_slash_or_backslash_is_present()
+  public function testHasslashMethodChecksIfASlashOrBackslashIsPresent()
   {
     $this->assertTrue(Str::hasSlash('foo/bar'));
     $this->assertTrue(Str::hasSlash('foo\bar'));
@@ -444,7 +444,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function getNumbers_method_extracts_all_digits_from_a_string()
+  public function testGetnumbersMethodExtractsAllDigitsFromAString()
   {
     $this->assertSame('123', Str::getNumbers('foo 12 bar 3'));
     $this->assertSame('', Str::getNumbers('foo bar'));
@@ -452,7 +452,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function makeReadable_method_()
+  public function testMakereadableMethod()
   {
     $object = (object)[
       'foo' => 'bar',
@@ -494,7 +494,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function export_method_returns_a_variable_in_a_mode_usable_by_php()
+  public function testExportMethodReturnsAVariableInAModeUsableByPhp()
   {
     $object = (object)[
       'foo' => 'bar',
@@ -565,7 +565,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function replaceOnce_method_replaces_part_of_a_string()
+  public function testReplaceonceMethodReplacesPartOfAString()
   {
     $this->assertSame('bar', Str::replaceOnce('foo ', '', 'foo bar'));
     $this->assertSame('foo baz', Str::replaceOnce('bar', 'baz', 'foo bar'));
@@ -574,7 +574,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function removeComments_method_removes_comment_from_a_string()
+  public function testRemovecommentsMethodRemovesCommentFromAString()
   {
     $this->assertSame('', Str::removeComments("<!--this is a comment-->"));
     $this->assertSame('', Str::removeComments("//this is a comment"));
@@ -615,7 +615,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function saySize_method_converts_bytes_to_another_unit()
+  public function testSaysizeMethodConvertsBytesToAnotherUnit()
   {
     $this->assertSame('46.57 G', Str::saySize(50000000000, 'G'));
     $this->assertSame('46.57 G', Str::saySize(50000000000, 'g'));
@@ -632,7 +632,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function saySize_method_throws_an_exception_when_unit_is_invalid()
+  public function testSaysizeMethodThrowsAnExceptionWhenUnitIsInvalid()
   {
     $this->expectException(\Exception::class);
     Str::saySize(1048576, 'GG');
@@ -640,7 +640,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function convertSize_method_converts_size_from_unit_to_another()
+  public function testConvertsizeMethodConvertsSizeFromUnitToAnother()
   {
     $this->assertSame('1073741824B', Str::convertSize(1, 'GB', 'B'));
     $this->assertSame('1048576MB', Str::convertSize(1024, 'GB', 'MB'));
@@ -665,7 +665,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function convertSize_method_throws_exception_if_original_unit_is_invalid()
+  public function testConvertsizeMethodThrowsExceptionIfOriginalUnitIsInvalid()
   {
     $this->expectException(\Exception::class);
 
@@ -674,7 +674,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function convertSize_method_throws_exception_if_destination_unit_is_invalid()
+  public function testConvertsizeMethodThrowsExceptionIfDestinationUnitIsInvalid()
   {
     $this->expectException(\Exception::class);
 
@@ -683,7 +683,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function checkJson_method_checks_if_a_string_is_a_valid_json()
+  public function testCheckjsonMethodChecksIfAStringIsAValidJson()
   {
     $this->assertTrue(Str::checkJson(json_encode(['foo' => 'bar'])));
     $this->assertFalse(Str::checkJson('foo'));
@@ -693,7 +693,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function asVar_method_places_quotes_around_a_string()
+  public function testAsvarMethodPlacesQuotesAroundAString()
   {
     $this->assertSame('"foo"', Str::asVar("foo"));
     $this->assertSame("'foo'", Str::asVar("foo", "'"));
@@ -707,7 +707,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function markdown2html_method_transforms_markdown_to_html()
+  public function testMarkdown2htmlMethodTransformsMarkdownToHtml()
   {
     $this->assertSame('<h1>foo</h1>', Str::markdown2html("# foo"));
     $this->assertSame('<h2>foo</h2>', Str::markdown2html("## foo"));
@@ -718,7 +718,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function toCamel_method_convert_a_string_to_camel_case()
+  public function testTocamelMethodConvertAStringToCamelCase()
   {
     $this->assertSame('fooBar', Str::toCamel('foo bar'));
     $this->assertSame('fooBarBaz', Str::toCamel('fOo BaR bAz'));
@@ -727,7 +727,7 @@ class StrTest extends TestCase
 
 
   /** @test */
-  public function html2text_method_converts_html_to_text_replacing_paragraphs_and_new_lines()
+  public function testHtml2textMethodConvertsHtmlToTextReplacingParagraphsAndNewLines()
   {
     $this->assertSame(
       'foo bar
@@ -741,7 +741,7 @@ baz',
 
 
   /** @test */
-  public function text2html_converts_text_to_html_replacing_new_lines()
+  public function testText2htmlConvertsTextToHtmlReplacingNewLines()
   {
     $this->assertSame('<p>foo<br> bar</p>', Str::text2html("foo\n bar"));
     $this->assertSame('foo<br> bar', Str::text2html("foo\n bar", false));

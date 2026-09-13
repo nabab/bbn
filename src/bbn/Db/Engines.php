@@ -27,7 +27,7 @@ interface Engines
   /*
    * @param array $cfg The user's options
    * @return array|null The final configuration
-  public function getConnection(array $cfg = []): ?array;
+  public function getConnectionParams(array $cfg = []): ?array;
    */
 
 
@@ -110,6 +110,13 @@ interface Engines
    * @return bool
    */
   public function isColFullName(string $col): bool;
+
+
+  /**
+   * Set the connection timezone
+   *
+   */
+  public function setTimezone(string $tz): void;
 
 
   /**
@@ -242,6 +249,15 @@ interface Engines
   public function dropDatabase(string $database): bool;
 
   /**
+   * Checks if a table exists
+   *
+   * @param string $table
+   * @param string $database
+   * @return bool
+   */
+  public function tableExists(string $table, string $database = ''): bool;
+
+  /**
    * Creates a table
    *
    * @param string $table
@@ -309,14 +325,14 @@ interface Engines
    *
    * @return $this
    */
-  public function startFancyStuff(): self;
+  public function startFancyStuff(): static;
 
   /**
    * Stops fancy stuff.
    *
    * @return $this
    */
-  public function stopFancyStuff(): self;
+  public function stopFancyStuff(): static;
 
   /**
    * @param array $args
@@ -337,7 +353,7 @@ interface Engines
    * @param string $id
    * @return $this
    */
-  public function setLastInsertId($id = ''): self;
+  public function setLastInsertId($id = ''): static;
 
   /**
    * Return the last inserted ID.
@@ -380,14 +396,14 @@ interface Engines
    *
    * @return self
    */
-  public function enableTrigger(): self;
+  public function enableTrigger(): static;
 
   /**
    * Disable the triggers' functions
    *
    * @return $this
    */
-  public function disableTrigger(): self;
+  public function disableTrigger(): static;
 
   /**
    * @return bool
@@ -406,7 +422,7 @@ interface Engines
    * @param null|string|array $tables
    * @return self
    */
-  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self;
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): static;
 
   /**
    * @return array
@@ -458,16 +474,17 @@ interface Engines
 
   /**
    * @param $statement
+   * @param mixed $additionalArgs
    * @return mixed
    */
-  public function query($statement);
+  public function query(string $statement, ...$additionalArgs);
 
   /**
    * Executes the given query with given vars, and extracts the first cell's result.
    *
    * @return mixed
    */
-  public function getOne();
+  public function getOne(string $statement, ...$additionalArgs);
 
   /**
    * Return an array indexed on the first field of the request.
@@ -475,7 +492,7 @@ interface Engines
    *
    * @return array|null
    */
-  public function getKeyVal(): ?array;
+  public function getKeyVal(string $statement, ...$additionalArgs): ?array;
 
   /**
    * Return an array with the values of single field resulting from the query.
@@ -484,7 +501,7 @@ interface Engines
    * @param mixed values
    * @return array
    */
-  public function getColArray(): array;
+  public function getColArray(string $statement, ...$additionalArgs): array;
 
   /**
    * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.
@@ -495,7 +512,7 @@ interface Engines
    * @param array $order
    * @return array|null
    */
-  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array;
+  public function countFieldValues($table, string|null $field = null,  array $where = [], string|array $order= []): ?array;
 
   /**
    * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
@@ -514,12 +531,12 @@ interface Engines
    * @param string|array $table The table's name or a configuration array
    * @param string|null $field The field's name
    * @param array $where The "where" condition
-   * @param array $order The "order" condition
+   * @param string|array $orderThe "order" condition
    * @param int $limit
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+  public function getColumnValues($table, string|null $field = null,  array $where = [], string|array $order= [], int $limit = 0, int $start = 0): ?array;
 
   /**
    * Return an indexed array with the first result of the query or false if there are no results.
@@ -527,28 +544,24 @@ interface Engines
    * @param string $query
    * @return array|false
    */
-  public function fetch(string $query);
+  public function fetch(string $query, ...$additionalArgs);
 
   /**
    * Return an array of indexed array with all results of the query or false if there are no results.
    *
-   * @param string $query
    * @return array|false
    */
-  public function fetchAll(string $query);
+  public function fetchAll(string $query, ...$additionalArgs);
 
   /**
-   * @param $query
-   * @param int $num
    * @return mixed
    */
-  public function fetchColumn($query, int $num = 0);
+  public function fetchColumn(string $query, int $num = 0, ...$additionalArgs);
 
   /**
-   * @param $query
    * @return bool|\stdClass
    */
-  public function fetchObject($query);
+  public function fetchObject(string $query, ...$additionalArgs);
 
 
   /**
@@ -618,5 +631,5 @@ interface Engines
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array;
+  public function getConnectionParams(array $cfg = []): ?array;
 }

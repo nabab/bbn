@@ -78,7 +78,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_model_file_exists()
+  public function testConstructorTestWhenModelFileExists()
   {
     $this->initWithModelFile();
 
@@ -94,7 +94,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_model_file_does_not_exists()
+  public function testConstructorTestWhenModelFileDoesNotExists()
   {
     $this->init();
 
@@ -110,7 +110,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function constructor_test_when_db_is_null()
+  public function testConstructorTestWhenDbIsNull()
   {
     $this->controller_mock  = \Mockery::mock(Controller::class);
     $this->mvc_mock         = \Mockery::mock(Mvc::class);
@@ -131,7 +131,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function constructor_throws_an_exception_if_the_path_does_not_exist_in_the_provided_info()
+  public function testConstructorThrowsAnExceptionIfThePathDoesNotExistInTheProvidedInfo()
   {
     $this->expectException(\Exception::class);
 
@@ -139,7 +139,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function checkAction_method_checks_if_action_exists_and_not_empty_if_specified()
+  public function testCheckactionMethodChecksIfActionExistsAndNotEmptyIfSpecified()
   {
     $this->init();
 
@@ -161,7 +161,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isControlledBy_checks_whether_if_called_from_cli_or_not_when_the_given_path_is_valid_and_type_is_cli()
+  public function testIscontrolledbyChecksWhetherIfCalledFromCliOrNotWhenTheGivenPathIsValidAndTypeIsCli()
   {
     $this->init();
 
@@ -177,7 +177,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isControlledBy_returns_true_when_the_given_mode_is_same_as_the_current_one_and_the_provided_path_is_valid_and_type_is_not_cli()
+  public function testIscontrolledbyReturnsTrueWhenTheGivenModeIsSameAsTheCurrentOneAndTheProvidedPathIsValidAndTypeIsNotCli()
   {
     $this->init();
 
@@ -193,7 +193,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isControlledBy_returns_false_when_the_given_mode_is_not_the_same_as_the_current_one_and_the_provided_path_is_valid_and_type_is_not_cli()
+  public function testIscontrolledbyReturnsFalseWhenTheGivenModeIsNotTheSameAsTheCurrentOneAndTheProvidedPathIsValidAndTypeIsNotCli()
   {
     $this->init();
 
@@ -209,7 +209,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isControlledBy_method_returns_false_when_controller_instance_is_null()
+  public function testIscontrolledbyMethodReturnsFalseWhenControllerInstanceIsNull()
   {
     $this->init();
 
@@ -219,7 +219,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isControlledBy_method_returns_false_when_the_given_path_is_not_valid()
+  public function testIscontrolledbyMethodReturnsFalseWhenTheGivenPathIsNotValid()
   {
     $this->init();
 
@@ -231,7 +231,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getControllerPath_method_retrieves_controller_path_if_controller_instance_exists()
+  public function testGetcontrollerpathMethodRetrievesControllerPathIfControllerInstanceExists()
   {
     $this->init();
 
@@ -243,7 +243,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getControllerPath_method_returns_false_if_controller_instance_does_not_exists()
+  public function testGetcontrollerpathMethodReturnsFalseIfControllerInstanceDoesNotExists()
   {
     $this->init();
 
@@ -253,7 +253,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasVar_method_checks_if_the_data_property_has_the_given_key_and_not_empty_if_specified()
+  public function testHasvarMethodChecksIfTheDataPropertyHasTheGivenKeyAndNotEmptyIfSpecified()
   {
     $this->init();
 
@@ -266,7 +266,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasVars_method_checks_if_the_data_property_has_the_given_keys_and_not_empty_if_specified()
+  public function testHasvarsMethodChecksIfTheDataPropertyHasTheGivenKeysAndNotEmptyIfSpecified()
   {
     $this->init();
 
@@ -280,7 +280,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function registerPluginClasses_method_registers_the_given_class()
+  public function testRegisterpluginclassesMethodRegistersTheGivenClass()
   {
     $this->init();
 
@@ -293,7 +293,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function get_method_test_when_plugin_is_not_set()
+  public function testGetMethodTestWhenPluginIsNotSet()
   {
     $this->initWithModelFile();
 
@@ -309,7 +309,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function get_method_test_when_plugin_is_set()
+  public function testGetMethodTestWhenPluginIsSet()
   {
     $this->initWithModelFile();
 
@@ -342,7 +342,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function get_method_returns_null_when_the_included_model_has_empty_content()
+  public function testGetMethodReturnsNullWhenTheIncludedModelHasEmptyContent()
   {
     $this->model_file_path = $this->createFile(
       'model.php',
@@ -358,7 +358,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getContent_method_returns_the_content_of_a_file_located_within_the_controller_data_path()
+  public function testGetcontentMethodReturnsTheContentOfAFileLocatedWithinTheControllerDataPath()
   {
     $this->init();
 
@@ -371,7 +371,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getModel_method_returns_the_model_with_the_provided_arguments()
+  public function testGetmodelMethodReturnsTheModelWithTheProvidedArguments()
   {
     $this->init();
 
@@ -384,7 +384,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getCachedModel_method_returns_the_cached_model_with_the_provided_arguments()
+  public function testGetcachedmodelMethodReturnsTheCachedModelWithTheProvidedArguments()
   {
     $this->init();
 
@@ -397,7 +397,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getPluginModel_method_retrieves_a_model_of_the_plugin()
+  public function testGetpluginmodelMethodRetrievesAModelOfThePlugin()
   {
     $this->init();
 
@@ -413,7 +413,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getSubpluginModel_method_returns_a_sub_plugin_model_of_the_current_plugin()
+  public function testGetsubpluginmodelMethodReturnsASubPluginModelOfTheCurrentPlugin()
   {
     $this->init();
 
@@ -435,7 +435,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasSubpluginModel_method_returns_true_if_sub_plugin_model_exists()
+  public function testHassubpluginmodelMethodReturnsTrueIfSubPluginModelExists()
   {
     $this->init();
 
@@ -450,7 +450,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasPlugin_method_returns_true_if_the_given_plugin_exists()
+  public function testHaspluginMethodReturnsTrueIfTheGivenPluginExists()
   {
     $this->init();
 
@@ -463,7 +463,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function isPlugin_method_returns_true_if_the_given_plugin_exists()
+  public function testIspluginMethodReturnsTrueIfTheGivenPluginExists()
   {
     $this->init();
 
@@ -476,7 +476,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function pluginPath_method_returns_the_path_of_the_given_plugin()
+  public function testPluginpathMethodReturnsThePathOfTheGivenPlugin()
   {
     $this->init();
 
@@ -489,7 +489,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function pluginUrl_method_returns_the_url_part_of_the_given_plugin()
+  public function testPluginurlMethodReturnsTheUrlPartOfTheGivenPlugin()
   {
     $this->init();
 
@@ -502,7 +502,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function addInc_method_adds_a_property_to_the_mvc_object_inc()
+  public function testAddincMethodAddsAPropertyToTheMvcObjectInc()
   {
     $this->init();
 
@@ -514,7 +514,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasData_method_checks_if_data_exists_or_if_a_specific_index_exists_in_the_data_and_checks_if_empty_when_specified()
+  public function testHasdataMethodChecksIfDataExistsOrIfASpecificIndexExistsInTheDataAndChecksIfEmptyWhenSpecified()
   {
     $this->init();
 
@@ -527,7 +527,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasData_method_returns_false_if_the_data_property_is_not_an_array()
+  public function testHasdataMethodReturnsFalseIfTheDataPropertyIsNotAnArray()
   {
     $this->init();
 
@@ -537,7 +537,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function hasData_method_checks_if_the_data_property_is_empty_or_not_when_the_given_index_is_null()
+  public function testHasdataMethodChecksIfTheDataPropertyIsEmptyOrNotWhenTheGivenIndexIsNull()
   {
     $this->init();
 
@@ -551,7 +551,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function setData_method_sets_the_data()
+  public function testSetdataMethodSetsTheData()
   {
     $this->init();
 
@@ -562,7 +562,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function addData_method_merges_the_given_data_with_the_current_one_if_exists()
+  public function testAdddataMethodMergesTheGivenDataWithTheCurrentOneIfExists()
   {
     $this->init();
 
@@ -575,7 +575,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function addData_method_does_not_merge_the_given_data_with_the_current_one_if_the_given_data_is_not_an_array()
+  public function testAdddataMethodDoesNotMergeTheGivenDataWithTheCurrentOneIfTheGivenDataIsNotAnArray()
   {
     $this->init();
 
@@ -588,7 +588,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function _cache_name_method_generates_cache_name_from_the_given_data_and_optionally_spec()
+  public function testCacheNameMethodGeneratesCacheNameFromTheGivenDataAndOptionallySpec()
   {
     $this->initWithModelFile();
 
@@ -620,7 +620,7 @@ class ModelTest extends TestCase
   }
 
   /** @test  */
-  public function _cache_name_method_returns_null_when_the_path_property_is_not_set()
+  public function testCacheNameMethodReturnsNullWhenThePathPropertyIsNotSet()
   {
     // Init the model object without a file will not set the path property
     $this->init();
@@ -631,7 +631,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function setCache_method_sets_the_cache_from_the_given_data()
+  public function testSetcacheMethodSetsTheCacheFromTheGivenData()
   {
     $this->initWithModelFile();
 
@@ -661,7 +661,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function deleteCache_method_deletes_a_cache_with_the_given_data()
+  public function testDeletecacheMethodDeletesACacheWithTheGivenData()
   {
     $this->initWithModelFile();
 
@@ -689,7 +689,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getFromCache_method_returns_the_cache_for_given_item_and_creates_it_if_expired()
+  public function testGetfromcacheMethodReturnsTheCacheForGivenItemAndCreatesItIfExpired()
   {
     $this->initWithModelFile();
 
@@ -707,7 +707,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getFromCache_method_returns_null_if_it_fails_to_generate_cache_name()
+  public function testGetfromcacheMethodReturnsNullIfItFailsToGenerateCacheName()
   {
     $this->init();
 
@@ -717,7 +717,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getSetFromCache_method_returns_the_cache_for_given_item_and_creates_it_if_expired()
+  public function testGetsetfromcacheMethodReturnsTheCacheForGivenItemAndCreatesItIfExpired()
   {
     $this->initWithModelFile();
 
@@ -742,7 +742,7 @@ class ModelTest extends TestCase
   }
 
   /** @test */
-  public function getSetFromCache_method_returns_null_if_it_fails_to_generate_cache_name()
+  public function testGetsetfromcacheMethodReturnsNullIfItFailsToGenerateCacheName()
   {
     $this->init();
 

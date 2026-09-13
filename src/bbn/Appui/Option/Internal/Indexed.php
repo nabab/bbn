@@ -65,7 +65,11 @@ trait Indexed
         // Iterate over each item in the list and add its ID to the result array.
         foreach ($list as $i){
           $o               = $this->option($i);
-          $res[$o[$this->fields['code']]] = $o[$this->fields['id']];
+          $code = $o[$this->fields['code']];
+          if (is_null($code)) {
+            throw new \Exception("Option with ID {$o[$this->fields['id']]} has no code");
+          }
+          $res[$code] = $o[$this->fields['id']];
         }
 
         return $res;

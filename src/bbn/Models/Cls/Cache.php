@@ -34,7 +34,8 @@ abstract class Cache extends Basic
   public function __construct(protected Db $db)
   {
     $this->cacher = CacheCls::getEngine();
-    $this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
+    $sep = CacheCls::getSeparator();
+    $this->_cache_prefix = str_replace('\\', $sep, \get_class($this)).$sep;
   }
 
 	protected function _cache_name($uid, $method = '', string $locale = ''){

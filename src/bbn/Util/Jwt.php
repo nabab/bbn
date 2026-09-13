@@ -34,7 +34,7 @@ class Jwt extends Basic
     $this->reset();
   }
 
-  public function reset(): self
+  public function reset(): static
   {
     $this->payload = [
       "iss" => defined('BBN_SERVER_NAME') ? constant('BBN_SERVER_NAME') : gethostname(),
@@ -47,7 +47,7 @@ class Jwt extends Basic
     return $this;
   }
 
-  public function setKey($cert): self
+  public function setKey($cert): static
   {
     $this->key = $cert;
     return $this;

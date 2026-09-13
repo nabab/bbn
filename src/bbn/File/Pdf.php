@@ -3,11 +3,17 @@
  * @package file
  */
 namespace bbn\File;
-use bbn;
+
 use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 use bbn\File\Dir;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
+
+use function is_array;
+use function is_string;
+use function defined;
 
 /**
  * This class generates PDF with the mPDF class
@@ -62,18 +68,18 @@ EOF
       'signature' => '<div style="text-align:right">Your signing here</div>'
   ];
 
-  private
-    $pdf = false,
-    $last_cfg = [];
+  private Mpdf $pdf;
+  private $last_cfg = [];
 
   public $cfg;
 
-  private function check(){
-    return ( \get_class($this->pdf) === 'Mpdf\Mpdf' );
+  private function check(): bool
+  {
+    return isset($this->pdf);
   }
 
   private function fixCfg(array $cfg){
-    if ( \is_array($cfg) ){
+    if ( is_array($cfg) ){
       $to_check = [
         'size' => 'default_font_size',
         'font' => 'default_font',
@@ -101,12 +107,12 @@ EOF
   public function __construct($cfg = null){
     // Temp path for PDF generation (MPDF)
     if (!defined('_MPDF_TEMP_PATH') && defined('BBN_DATA_PATH')) {
-      define('_MPDF_TEMP_PATH', BBN_DATA_PATH . 'tmp/');
+      define('_MPDF_TEMP_PATH', constant('BBN_DATA_PATH') . 'tmp/');
     }
     $this->resetConfig($cfg);
-    $this->pdf = new \Mpdf\Mpdf($this->cfg);
+    $this->pdf = new Mpdf($this->cfg);
     //$this->pdf->SetImportUse();
-    if ( \is_string($cfg) ){
+    if ( is_string($cfg) ){
       $this->addPage($cfg);
     }
 	}
@@ -116,14 +122,14 @@ EOF
   }
   
   public function getConfig(array|null $cfg = null){
-    if ( \is_array($cfg) ){
+    if ( is_array($cfg) ){
       return X::mergeArrays($this->cfg, $this->fixCfg($cfg));
     }
     return $this->cfg;
   }
   
   public function resetConfig($cfg){
-    if ( \is_array($cfg) ){
+    if ( is_array($cfg) ){
       $this->cfg = X::mergeArrays(self::$default_cfg, $this->fixCfg($cfg));
     }
     else{
@@ -184,14 +190,14 @@ EOF
 
   public function show($file = 'MyPDF.pdf'){
 		if ( $this->check() ){
-			$this->pdf->Output($file, \Mpdf\Output\Destination::INLINE);
+			$this->pdf->Output($file, Destination::INLINE);
       die();
 		}
 	}
 
   public function download($file = 'MyPDF.pdf'){
 		if ( $this->check() ){
-			$this->pdf->Output($file, \Mpdf\Output\Destination::DOWNLOAD);
+			$this->pdf->Output($file, Destination::DOWNLOAD);
       die();
 		}
 	}
@@ -228,7 +234,7 @@ EOF
   
 	public function makeAttachment(){
 		if ( $this->check() ){
-			$pdf = $this->pdf->Output("", \Mpdf\Output\Destination::STRING_RETURN);
+			$pdf = $this->pdf->Output("", Destination::STRING_RETURN);
 			return chunk_split(base64_encode($pdf));
 		}
 	}
@@ -239,14 +245,14 @@ EOF
       if ( !is_dir(X::dirname($filename)) ){
         die("Error! No destination directory");
       }
-      $this->pdf->Output($filename, \Mpdf\Output\Destination::FILE);
+      $this->pdf->Output($filename, Destination::FILE);
       return is_file($filename);
     }
   }
 
   public function import($files){
     if ( $this->check() ){
-      if ( !\is_array($files) ){
+      if ( !is_array($files) ){
         $files = [$files];
       }
       //$this->pdf->SetImportUse();
@@ -291,10 +297,11 @@ EOF
    * @param array $fonts
    */
   public function addFonts(array $fonts){
-    if ( !\defined('BBN_LIB_PATH') ){
+    if ( !defined('BBN_LIB_PATH') ){
       die('You must define BBN_LIB_PATH!');
     }
-    if ( !is_dir(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/') ){
+    $lib = constant('BBN_LIB_PATH');
+    if ( !is_dir("{$lib}mpdf/mpdf/ttfonts/") ){
       die("You don't have the mpdf/mpdf/ttfonts directory.");
     }
     foreach ($fonts as $f => $fs) {
@@ -302,8 +309,8 @@ EOF
       foreach ( $fs as $i => $v ){
         if ( !empty($v) ){
           // check if file exists in mpdf/ttfonts directory
-          if ( !is_file(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . X::basename($v)) ){
-            Dir::copy($v, BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . X::basename($v));
+          if ( !is_file("{$lib}mpdf/mpdf/ttfonts/" . X::basename($v)) ){
+            Dir::copy($v, "{$lib}mpdf/mpdf/ttfonts/" . X::basename($v));
           }
           $fs[$i] = X::basename($v);
           if ( $i === 'R' ){

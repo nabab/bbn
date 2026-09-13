@@ -187,7 +187,7 @@ class Cdn extends Models\Cls\Basic
    * @param string  $request The original request sent to the server
    * @param db|null $db      The DB connection with the libraries tables
    */
-  public function __construct(string $request, Db $db = null)
+  public function __construct(string $request, ?Db $db = null)
   {
     // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if (!defined('BBN_PUBLIC')) {
@@ -197,17 +197,13 @@ class Cdn extends Models\Cls\Basic
 
     /** @todo Remove? */
     $this->_set_prefix();
-    if (!$db) {
-      $db = Db::getInstance();
-    }
-
     if ($db) {
       $this->db = $db;
     }
 
     $this->request = $request;
     // Creation of a config object
-    $config = new Cdn\Config($request, $this->db);
+    $config = new Cdn\Config($this->db, $request);
     // Checking request validity
     if ($config->check()) {
       // Getting a configuration array

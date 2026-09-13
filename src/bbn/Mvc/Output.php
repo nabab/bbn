@@ -102,7 +102,7 @@ final class Output extends Basic {
    *
    * @return void
    */
-  public function run()
+  public function run(array $additionalHeaders = []): void
   {
     if (\count((array)$this->obj) === 0) {
       self::statusHeader(404);
@@ -218,9 +218,14 @@ final class Output extends Basic {
       $mdParser = new Markdown();
       $this->obj->help = $mdParser->compile($this->obj->help);
     }
-    
-    switch ( $this->mode ){
 
+    if (count($additionalHeaders)) {
+      foreach ($additionalHeaders as $k => $v) {
+        header("$k: $v");
+      }
+    }
+
+    switch ($this->mode) {
       case 'public':
         header('Content-type: application/json; charset=utf-8');
         if (BBN_IS_DEV) {
@@ -232,7 +237,7 @@ final class Output extends Basic {
         break;
 
       case 'js':
-        header('Content-type: text/javascript');
+        header('Content-type: application/javascript');
         echo $this->obj->content;
         break;
 
@@ -273,7 +278,23 @@ final class Output extends Basic {
 
       default:
         header('Content-type: text/html; charset=utf-8');
+        header(
+          "Content-Security-Policy: " .
+          "default-src 'self'; " .
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
+          "style-src 'self' 'unsafe-inline'; " .
+          "img-src 'self' data:; " .
+          "font-src 'self'; " .
+          "worker-src 'self'; " .
+          "connect-src 'self'; " .
+          "object-src 'none'; " .
+          "base-uri 'self'; " .
+          "frame-ancestors 'none'; " .
+          "form-action 'self';"
+          //" 'nonce-$nonce';"
+        );
         echo isset($this->obj->content) ? $this->obj->content : '';
+
     }
   }
 }

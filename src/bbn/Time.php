@@ -93,7 +93,7 @@ class Time extends Models\Cls\Basic
    *
    * @param String|Object $date the string of the date to compare or an object of this class
    * @param string $comparator allowed comparators '>','>=', '<','<=', '='
-   * @return Boolean
+   * @return bool
    */
   public function compare($date, $comparator)
   {

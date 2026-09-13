@@ -7,12 +7,7 @@
 
 namespace bbn\Cron;
 
-use bbn\Str;
-use bbn\Mvc;
-use bbn\Db;
-use bbn\File\System;
-use bbn\Mvc\Controller;
-use function count;
+use bbn\X;
 
 trait Filesystem {
   /**
@@ -56,7 +51,7 @@ trait Filesystem {
         $path .= '/';
       }
       else {
-        $path = \bbn\X::makeStoragePath($path);
+        $path = X::makeStoragePath($path);
       }
     }
 
@@ -84,11 +79,9 @@ trait Filesystem {
    */
   public function isCronActive(): bool
   {
-    if ( $this->check() ){
-      return file_exists($this->getStatusPath('cron'));
-    }
-
-    return false;
+    return $this->check() 
+      && $this->isActive()
+      && file_exists($this->getStatusPath('cron'));
   }
 
   /**
@@ -98,11 +91,9 @@ trait Filesystem {
    */
   public function isPollActive(): bool
   {
-    if ( $this->check() ){
-      return file_exists($this->getStatusPath('poll'));
-    }
-
-    return false;
+    return $this->check()
+      && $this->isActive()
+      && file_exists($this->getStatusPath('poll'));
   }
 
 }

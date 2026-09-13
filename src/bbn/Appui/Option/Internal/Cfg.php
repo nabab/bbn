@@ -35,8 +35,8 @@ trait Cfg
     }
 
     // Check if the ID is valid and if the result is cached.
-    if ($tmp = $this->cacheGetRaw($id, __FUNCTION__)) {
-      return $tmp['value'];
+    if ($tmp = $this->cacheGet($id, __FUNCTION__)) {
+      return $tmp;
     }
 
     // Get references to class configuration and fields.
@@ -170,7 +170,7 @@ trait Cfg
 
     // Cache the result and return it.
     $this->setCache($originalId, __FUNCTION__, $cfg);
-    //X::ddump("YYYY", $id, $this->cacheGetRaw($id, __FUNCTION__));
+    //X::ddump("YYYY", $id, $this->cacheGet($id, __FUNCTION__));
     return $cfg;
   }
 
@@ -201,6 +201,10 @@ trait Cfg
             if (!empty($v['title']) && empty($v['label'])) {
               $v['label'] = $v['title'];
               unset($v['title']);
+              $change = true;
+            }
+            if (isset($v['options']) && empty($v['options']) && is_array($v['options'])) {
+              $v['options'] = null;
               $change = true;
             }
           }

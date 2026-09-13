@@ -70,6 +70,12 @@ class Cron extends Basic
         }
 
       }
+      elseif (empty($this->exe_path)) {
+        $pluginUrl = Mvc::getPluginUrl('appui-cron');
+        if ($pluginUrl) {
+          $this->exe_path = $pluginUrl.'/run';
+        }
+      }
     }
   }
 
@@ -79,7 +85,7 @@ class Cron extends Basic
    */
   public function getLauncher(): ?Launcher
   {
-    if (!$this->launcher && $this->check() && $this->exe_path && $this->controller) {
+    if (!$this->launcher && $this->check() && $this->exe_path) {
       $this->launcher = new Launcher($this);
     }
 
@@ -94,7 +100,7 @@ class Cron extends Basic
   public function getRunner(array $cfg = []): ?Runner
   {
     X::log($cfg, 'cron');
-    if ($this->check() && $this->controller) {
+    if ($this->check()) {
       return new Runner($this, $cfg);
     }
 
@@ -121,7 +127,7 @@ class Cron extends Basic
    */
   public function getManager(): ?Manager
   {
-    if (!$this->manager && $this->check() && $this->controller) {
+    if (!$this->manager && $this->check()) {
       $this->manager = new Manager($this->db);
     }
 
@@ -282,6 +288,17 @@ class Cron extends Basic
   {
     if ($launcher = $this->getLauncher()) {
       return $launcher->launch(['type' => 'cron']);
+    }
+
+    return null;
+  }
+
+  public function launchSocketServer()
+  {
+    X::log('Launch socket server', 'socket-start');
+    if ($launcher = $this->getLauncher()) {
+      X::log('Launching socket server', 'socket-start');
+      return $launcher->launch(['type' => 'socket']);
     }
 
     return null;

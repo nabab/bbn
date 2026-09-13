@@ -8,7 +8,8 @@ use bbn\Str;
 use bbn\Db;
 use bbn\Appui\History;
 use bbn\Appui\Uauth;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Models\Tts\DbUauth;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Tables\Link;
@@ -22,7 +23,8 @@ use bbn\Models\Cls\Nullall;
  */
 class Identity extends DbCls
 {
-  use DbActions;
+  use Cache;
+  use DbPublicCache;
   use DbUauth;
   /**
    * The default configuration for database interaction, specifying the table and fields.
@@ -77,7 +79,7 @@ class Identity extends DbCls
    */
   protected static $stes = [];
 
- 
+
   /**
    * A mapping of alternate civility representations to standard forms.
    */
@@ -87,8 +89,8 @@ class Identity extends DbCls
     protected Entity|Nullall $entity = new Nullall()
   )
   {
-    parent::__construct($db);
     $this->initClassCfg();
+    parent::__construct($db);
     $this->dbUauthInit();
   }
 
@@ -187,7 +189,6 @@ class Identity extends DbCls
   {
     $res = $this->dbTraitRselect($id);
     if (!empty($res)) {
-      $arc = &$this->class_cfg['arch']['identities'];
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
         $arr = $this->dbUauthRetrieve($id, $mode);
         if (in_array($this->class_cfg['uauth_system'], ['one-to-many', 'many-to-many'])) {
@@ -203,6 +204,13 @@ class Identity extends DbCls
 
     return $res;
   }
+
+
+  public function exists(array|string $filter): bool
+  {
+    return $this->dbTraitExists($filter);
+  }
+
 
   /**
    * Adds or updates a person record in the database.
@@ -242,7 +250,7 @@ class Identity extends DbCls
     return $id;
   }
 
-  public function search(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
+  public function search(array|string $filter, array $cols = [], array $fields = [], string|array $order= [], bool $strict = false, int $limit = 0, int $start = 0): array
   {
     $ccfg = $this->getClassCfg();
     $uauthCfg = self::$dbUauth->getClassCfg();
@@ -283,6 +291,7 @@ class Identity extends DbCls
     return $this->db->rselectAll($cfg);
   }
 
+
   public function getByUauth(string $id_uauth): array
   {
     return $this->dbUauthGetByUauth($id_uauth);
@@ -294,11 +303,10 @@ class Identity extends DbCls
    *
    * @param mixed $id The ID of the person to update.
    * @param mixed $fn The new data for the person.
-   * @return string|null The ID of the updated person.
+   * @return int The ID of the updated person.
    */
   public function update($id, $fn): int
   {
-    $arc = &$this->class_cfg['arch']['identities'];
     $ok = 0;
     if ($info = $this->getInfo($id)) {
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
@@ -324,14 +332,21 @@ class Identity extends DbCls
 
     }
 
+    if ($ok) {
+      $this->cDelete($id);
+    }
+
     return (int)$ok;
   }
+
 
   public function getTableRelations(string|null $table = null): array
   {
     return $this->dbTraitGetTableRelations($table);
 
   }
+
+
   public function getRelations($id): ?array
   {
     return $this->dbTraitGetRelations($id);
@@ -342,6 +357,7 @@ class Identity extends DbCls
   {
     return $this->dbTraitDelete($id);
   }
+
 
   public function setEmail($id, $email): ?string
   {
@@ -381,6 +397,7 @@ class Identity extends DbCls
     return null;
   }
 
+
   public function get(string $id): array
   {
     $arc = &$this->class_cfg['arch']['identities'];
@@ -404,6 +421,7 @@ class Identity extends DbCls
     return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
   }
 
+
   public function getUauth(): Uauth
   {
     return $this->dbUauthGetClass();
@@ -415,10 +433,12 @@ class Identity extends DbCls
     return $this->dbUauthRetrieve($identity, $type);
   }
 
+
   public function addUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthAdd($identity, $value, $type);
   }
+
 
   public function searchUauth(string $value, string $type): ?array
   {
@@ -429,6 +449,84 @@ class Identity extends DbCls
   public function removeUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthRemove($identity, $value, $type);
+  }
+
+
+  public function pickMany(array $ids, ?string $id_entity = null): array
+  {
+    return [];
+  }
+
+
+  public function pickByEntity(string $id_entity, bool $allRelations = false): array
+  {
+    return [];
+  }
+
+
+  public function pickOne(string $id, ?string $id_entity = null, bool $allRelations = false): array
+  {
+    return [];
+  }
+
+
+  public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
+  {
+    return [];
+  }
+
+
+  public function cDelete(string $id): self
+  {
+    return $this->cacheDelete($id);
+  }
+
+
+  /**
+   * Return adherent's cache.
+   *
+   * @param string $method
+   * @return mixed
+   */
+  public function cGet($id, $method = '')
+  {
+    return $this->cacheGet($id, $method);
+  }
+
+
+  /**
+   * Sets adherent cache.
+   *
+   * @param string $id
+   * @param string $method
+   * @param $data
+   * @return string|null
+   */
+  public function cSet($id, $method, $data): ?string
+  {
+    if ($this->cacheSet($id, $method, $data, 0)) {
+      return $this->cacheHash($id, $method);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if the given cache method exists.
+   *
+   * @param string $method
+   *
+   * @return bool
+   */
+  public function cHas($id, $method = '')
+  {
+    return $this->cacheHas($id, $method);
+  }
+
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
   }
 
 

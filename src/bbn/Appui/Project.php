@@ -74,7 +74,6 @@ class Project extends DbCls
   {
     parent::__construct($db);
     self::optionalInit();
-    self::cacheInit();
     $this->options = Option::getInstance();
     $this->fs      = new System();
     if (Str::isUid($id)) {
@@ -440,7 +439,7 @@ class Project extends DbCls
   }
 
 
-  public function check()
+  public function check(): bool
   {
     return parent::check() && !empty($this->id);
   }
@@ -1396,16 +1395,22 @@ class Project extends DbCls
   /**
    * Makes the repositories' configurations.
    *
-   * @param string $code The repository's name (code)
+   * @param string $project_name The repository's name (code)
+   * @param bool $force Whether to force refresh the cache
    * @return array
    */
-  public function getRepositories(string $project_name = ''): array
+  public function getRepositories(string $project_name = '', bool $force = false): array
   {
     $cats         = [];
     $repositories = [];
-    if (Str::len($project_name) === 0) {
+    if (!Str::len($project_name)) {
       $project_name = $this->name;
     }
+
+    if (!$force && $this->cacheHas($project_name, 'repositories')) {
+      return $this->cacheGet($project_name, 'repositories');
+    }
+
 
     $roots = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));
     if (!empty($roots) && !empty($roots['items'])) {
@@ -1446,6 +1451,7 @@ class Project extends DbCls
           }
         }
       }
+      $this->cacheSet($project_name, 'repositories', $repositories, 3600);
     }
 
     return $repositories;

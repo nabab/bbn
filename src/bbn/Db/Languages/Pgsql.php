@@ -212,7 +212,7 @@ class Pgsql extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     if (!X::hasProps($cfg, ['host', 'user'])) {
       if (!defined('BBN_DB_HOST')) {
@@ -311,11 +311,23 @@ class Pgsql extends Sql
 
 
   /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    $this->query('SET TIME ZONE = ?', $tz);
+  }
+
+
+  /**
    * Disables foreign keys check.
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     // PostgreSQL does not provide any direct command or function to disable the Foreign key constraints.
 
@@ -328,7 +340,7 @@ class Pgsql extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     // PostgreSQL does not provide any direct command or function to enable the Foreign key constraints.
 
@@ -1682,6 +1694,53 @@ PGSQL
   }
 
   /**
+   * Get a string starting with ORDER BY with corresponding parameters to $order.
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function getOrder(array $cfg): string
+  {
+    $res = '';
+    if (!empty($cfg['order'])) {
+      if (\is_string($cfg['order'])) {
+        if (Str::startsWith($cfg['order'], 'rand', false)) {
+          return 'ORDER BY RANDOM()' . PHP_EOL;
+        }
+
+        return 'ORDER BY ' . $cfg['order'] . PHP_EOL;
+      }
+
+      foreach ($cfg['order'] as $col => $dir) {
+        if (\is_array($dir) && isset($dir['field'])) {
+          $col = $dir['field'];
+          $dir = $dir['dir'] ?? 'ASC';
+        }
+
+        if (isset($cfg['available_fields'][$col])) {
+          // If it's an alias we use the simple name
+          if (isset($cfg['fields'][$col])) {
+            $f = $this->colSimpleName($col, true);
+          } elseif ($cfg['available_fields'][$col] === false) {
+            $f = $col;
+          } else {
+            $f = $this->colFullName($col, $cfg['available_fields'][$col], true);
+          }
+
+          $res .= $f . ' ' . (strtolower($dir) === 'desc' ? 'DESC' : 'ASC') . ',' . PHP_EOL;
+        }
+      }
+
+      if (!empty($res)) {
+        return 'ORDER BY ' . Str::sub($res, 0, Strrpos($res, ',')) . PHP_EOL;
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
    * Get a string starting with LIMIT with corresponding parameters to $where
    *
    * @param array $cfg
@@ -1706,7 +1765,7 @@ PGSQL
    * @return self
    * @throws \Exception
    */
-  private function newInstance(array $cfg): self
+  private function newInstance(array $cfg): static
   {
     $instance = new self($cfg);
 

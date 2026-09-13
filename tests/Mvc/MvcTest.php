@@ -213,7 +213,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_db_is_null()
+  public function testConstructorTestWhenDbIsNull()
   {
     $this->constructorTest();
     $this->assertNull($this->getNonPublicProperty('db'));
@@ -221,7 +221,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_db_is_not_null()
+  public function testConstructorTestWhenDbIsNotNull()
   {
     $this->resetMvcInstance(new stdClass());
     $this->constructorTest();
@@ -249,7 +249,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function constructor_test_when_lang_is_not_defined()
+  public function testConstructorTestWhenLangIsNotDefined()
   {
     Locale::setDefault('sv');
     $this->assertSame('sv', Locale::getDefault());
@@ -257,7 +257,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function mvc_instance_can_be_destroyed()
+  public function testMvcInstanceCanBeDestroyed()
   {
     $reflectionClass = new ReflectionClass(self::$mvc);
 
@@ -282,21 +282,21 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_app_name()
+  public function testItReturnsAppName()
   {
     $this->assertSame(BBN_APP_NAME, Mvc::getAppName());
   }
 
 
   /** @test */
-  public function it_returns_app_prefix()
+  public function testItReturnsAppPrefix()
   {
     $this->assertSame(BBN_APP_PREFIX, Mvc::getAppPrefix());
   }
 
 
   /** @test */
-  public function it_returns_app_path()
+  public function testItReturnsAppPath()
   {
     $this->assertSame(BBN_APP_PATH . 'src/', Mvc::getAppPath(false));
     $this->assertSame(BBN_APP_PATH, Mvc::getAppPath(true));
@@ -304,21 +304,21 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_current_path()
+  public function testItReturnsCurrentPath()
   {
     $this->assertSame('/', Mvc::getCurPath());
   }
 
 
   /** @test */
-  public function it_returns_lib_path()
+  public function testItReturnsLibPath()
   {
     $this->assertSame(BBN_LIB_PATH, Mvc::getLibPath());
   }
 
 
   /** @test */
-  public function it_returns_data_path()
+  public function testItReturnsDataPath()
   {
     $this->assertSame(BBN_DATA_PATH, Mvc::getDataPath());
     $this->assertSame(BBN_DATA_PATH . 'plugins/dummy_plugin/', Mvc::getDataPath('dummy_plugin'));
@@ -326,7 +326,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_temp_path()
+  public function testItReturnsTempPath()
   {
     $this->assertSame(BBN_DATA_PATH . 'tmp/', Mvc::getTmpPath());
     $this->assertSame(BBN_DATA_PATH . 'tmp/dummy_plugin/', Mvc::getTmpPath('dummy_plugin'));
@@ -334,7 +334,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_log_path()
+  public function testItReturnsLogPath()
   {
     $this->assertSame(BBN_DATA_PATH . 'logs/', Mvc::getLogPath());
     $this->assertSame(BBN_DATA_PATH . 'logs/dummy_plugin/', Mvc::getLogPath('dummy_plugin'));
@@ -342,7 +342,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_cache_path()
+  public function testItReturnsCachePath()
   {
     $this->assertSame(BBN_DATA_PATH . 'cache/', Mvc::getCachePath());
     $this->assertSame(BBN_DATA_PATH . 'cache/dummy_plugin/', Mvc::getCachePath('dummy_plugin'));
@@ -350,7 +350,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_content_path()
+  public function testItReturnsContentPath()
   {
     $this->assertSame(BBN_DATA_PATH . 'content/', Mvc::getContentPath());
     $this->assertSame(
@@ -361,7 +361,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_register_plugins_and_returns_them_when_needed()
+  public function testItRegisterPluginsAndReturnsThemWhenNeeded()
   {
     $this->registerPlugin();
 
@@ -373,7 +373,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_checks_whether_or_not_it_has_a_plugin()
+  public function testItChecksWhetherOrNotItHasAPlugin()
   {
     $this->registerPlugin();
 
@@ -386,7 +386,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_plugin_url_if_exists_and_false_if_not()
+  public function testItReturnsPluginUrlIfExistsAndFalseIfNot()
   {
     $this->registerPlugin();
 
@@ -396,7 +396,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_the_path_of_a_given_plugin()
+  public function testItReturnsThePathOfAGivenPlugin()
   {
     $this->registerPlugin();
 
@@ -406,7 +406,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_plugin_name_and_false_if_not_found()
+  public function testItReturnsPluginNameAndFalseIfNotFound()
   {
     $this->registerPlugin();
 
@@ -416,7 +416,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_user_temp_path_if_user_id_provided_and_user_is_not_logged_in()
+  public function testItReturnsUserTempPathIfUserIdProvidedAndUserIsNotLoggedIn()
   {
     $this->assertSame(BBN_DATA_PATH . 'users/1/tmp/', Mvc::getUserTmpPath('1'));
     $this->assertSame(
@@ -427,7 +427,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function user_temp_path_returns_null_if_user_id_is_not_provided()
+  public function testUserTempPathReturnsNullIfUserIdIsNotProvided()
   {
     $this->assertNull(Mvc::getUserTmpPath());
     $this->assertNull(Mvc::getUserTmpPath(null, 'test_plugin'));
@@ -435,7 +435,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_user_data_path_if_user_id_provided_and_user_is_not_logged_in()
+  public function testItReturnsUserDataPathIfUserIdProvidedAndUserIsNotLoggedIn()
   {
     $this->assertSame(BBN_DATA_PATH . 'users/1/data/', Mvc::getUserDataPath('1'));
     $this->assertSame(
@@ -446,7 +446,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function user_data_path_returns_null_if_user_id_is_not_provided()
+  public function testUserDataPathReturnsNullIfUserIdIsNotProvided()
   {
     $this->assertNull(Mvc::getUserDataPath());
     $this->assertNull(Mvc::getUserDataPath(null, 'test_plugin'));
@@ -454,14 +454,14 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function include_model_method_returns_false_if_file_does_not_exist()
+  public function testIncludeModelMethodReturnsFalseIfFileDoesNotExist()
   {
     $this->assertFalse(Mvc::includeModel('dummy.php', self::$mvc));
   }
 
 
   /** @test */
-  public function include_model_method_returns_false_if_file_exists_but_not_an_object_nor_array()
+  public function testIncludeModelMethodReturnsFalseIfFileExistsButNotAnObjectNorArray()
   {
     $file_stub = '<?php return 333;';
 
@@ -472,7 +472,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function include_model_method_returns_an_array_if_file_exists_and_is_an_object()
+  public function testIncludeModelMethodReturnsAnArrayIfFileExistsAndIsAnObject()
   {
     $file_stub = '<?php
          namespace bbn\tests\storage\stubs;
@@ -489,7 +489,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function include_model_method_returns_an_array_if_file_exists_and_is_an_array()
+  public function testIncludeModelMethodReturnsAnArrayIfFileExistsAndIsAnArray()
   {
     $file_stub = '<?php
         return [\'key\' => \'value\'];
@@ -502,7 +502,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_cookie_returns_the_cookie_if_exists()
+  public function testGetCookieReturnsTheCookieIfExists()
   {
     $_COOKIE[BBN_APP_NAME] = json_encode(['value' => 'foo']);
     $this->assertSame('foo', self::$mvc->getCookie());
@@ -511,14 +511,14 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_cookie_returns_false_if_not_exists()
+  public function testGetCookieReturnsFalseIfNotExists()
   {
     $this->assertFalse(self::$mvc->getCookie());
   }
 
 
   /** @test */
-  public function it_adds_to_authorized_routes()
+  public function testItAddsToAuthorizedRoutes()
   {
     $result = self::$mvc->addAuthorizedRoute('route1', 'route2');
 
@@ -531,7 +531,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_adds_to_forbidden_routes()
+  public function testItAddsToForbiddenRoutes()
   {
     $result = self::$mvc->addForbiddenRoute('route3', 'route4');
 
@@ -544,7 +544,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function authorized_route_returns_true_if_the_route_exists_and_false_otherwise()
+  public function testAuthorizedRouteReturnsTrueIfTheRouteExistsAndFalseOtherwise()
   {
     self::$mvc->addAuthorizedRoute('route5', 'route6');
 
@@ -555,7 +555,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_false_if_route_has_a_wild_card_and_belongs_to_forbidden_routes()
+  public function testItReturnsFalseIfRouteHasAWildCardAndBelongsToForbiddenRoutes()
   {
     self::$mvc->addAuthorizedRoute('route8*');
     self::$mvc->addForbiddenRoute('route8');
@@ -573,7 +573,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_sets_the_root_and_get_root_returns_it()
+  public function testItSetsTheRootAndGetRootReturnsIt()
   {
     self::$mvc->setRoot('root');
     $this->assertSame('root/', self::$mvc->getRoot());
@@ -584,7 +584,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_executes_a_php_view()
+  public function testItExecutesAPhpView()
   {
     $result = Mvc::includePhpView('', '<?php echo $variable;', ['variable' => 'value']);
 
@@ -593,7 +593,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_does_not_execute_a_php_view_and_returns_empty_string_if_content_is_empty()
+  public function testItDoesNotExecuteAPhpViewAndReturnsEmptyStringIfContentIsEmpty()
   {
     $result = Mvc::includePhpView('', '', ['variable' => 'value']);
 
@@ -602,7 +602,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_sets_db_in_controller()
+  public function testItSetsDbInController()
   {
     Mvc::setDbInController(true);
     $this->assertTrue(
@@ -617,7 +617,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_change_debug_state_and_returns_it_with_debug_method()
+  public function testItChangeDebugStateAndReturnsItWithDebugMethod()
   {
     Mvc::debug(0);
     $this->assertFalse(Mvc::getDebug());
@@ -630,7 +630,7 @@ class MvcTest extends TestCase
   /** @test
    * @throws ReflectionException
    */
-  public function it_checks_whether_a_corresponding_file_has_been_found_or_not()
+  public function testItChecksWhetherACorrespondingFileHasBeenFoundOrNot()
   {
     // Mock the Router class and set expectations that the `route` method
     // Should be called once and return an array
@@ -657,7 +657,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_the_file()
+  public function testItReturnsTheFile()
   {
     // Mock the Router class method and set expectations
     // That the `route` method should be called once and return an array
@@ -673,7 +673,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_url_value()
+  public function testItReturnsEnvUrlValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getUrl` method should be called once and return a string
@@ -687,7 +687,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_request_value()
+  public function testItReturnsEnvRequestValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getRequest` method should be called once and return a string
@@ -701,7 +701,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_params_value()
+  public function testItReturnsEnvParamsValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getParams` method should be called once and return an array
@@ -715,7 +715,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_post_value()
+  public function testItReturnsEnvPostValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getPost` method should be called once and return an array
@@ -729,7 +729,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_get_value()
+  public function testItReturnsEnvGetValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getGet` method should be called once and return an array
@@ -743,7 +743,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_files_value()
+  public function testItReturnsEnvFilesValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getFiles` method should be called once and return an array
@@ -757,7 +757,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_env_mode_value()
+  public function testItReturnsEnvModeValue()
   {
     // Mock the Environment class method and set expectations
     // That the `getFiles` method should be called once and return a string
@@ -771,7 +771,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_sets_env_mode_value()
+  public function testItSetsEnvModeValue()
   {
     self::$mvc->setMode('public');
     $this->assertSame('public', self::$mvc->getMode());
@@ -779,7 +779,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_check_whether_is_called_cli_or_not()
+  public function testItCheckWhetherIsCalledCliOrNot()
   {
     // Mock the Environment class method and set expectations
     // That the `isCli` method should be called once and return boolean
@@ -793,7 +793,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_should_reroute_and_arguments_added_to_info_property_if_provided()
+  public function testItShouldRerouteAndArgumentsAddedToInfoPropertyIfProvided()
   {
     // Swap the `router` property in Mvc with a mocked version of Router
     $router_mock = $this->replaceRouterInstanceWithMockery();
@@ -813,7 +813,7 @@ class MvcTest extends TestCase
     // Swap the controller property with the mocked version
     $this->setNonPublicPropertyValue('controller', $controller_mock);
 
-    self::$mvc->reroute('foo/bar', false, ['arg' => 'arg_value']);
+    self::$mvc->reroute('foo/bar', null, ['arg' => 'arg_value']);
 
     $info = $this->getNonPublicProperty('info');
 
@@ -831,7 +831,7 @@ class MvcTest extends TestCase
     );
 
     // Reroute again with arguments is false
-    self::$mvc->reroute('foo/baz', false, false);
+    self::$mvc->reroute('foo/baz', null, null);
 
     $this->assertSame('foo/baz', self::$mvc->getUrl());
     $this->assertSame('foo/baz', self::$mvc->getRequest());
@@ -849,7 +849,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_will_throw_an_exception_when_reroute_and_controller_is_not_set()
+  public function testItWillThrowAnExceptionWhenRerouteAndControllerIsNotSet()
   {
     $this->expectException(Exception::class);
 
@@ -866,7 +866,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_can_add_and_check_for_a_view()
+  public function testItCanAddAndCheckForAView()
   {
     // Mock a View class
     $view_mock = Mockery::mock(Mvc\View::class);
@@ -883,7 +883,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_view_throws_an_exception_if_mode_not_found()
+  public function testGetViewThrowsAnExceptionIfModeNotFound()
   {
     $this->expectException(Exception::class);
 
@@ -892,7 +892,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_view_returns_content_when_a_view_exits()
+  public function testGetViewReturnsContentWhenAViewExits()
   {
     // Mock the View class
     $view_mock = Mockery::mock(Mvc\View::class);
@@ -912,14 +912,14 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_view_return_empty_string_when_a_view_does_not_exist()
+  public function testGetViewReturnEmptyStringWhenAViewDoesNotExist()
   {
     $this->assertSame('', self::$mvc->getView('unknown_path', 'html'));
   }
 
 
   /** @test */
-  public function it_checks_whether_a_view_exists_or_not()
+  public function testItChecksWhetherAViewExistsOrNot()
   {
     $view_mock = Mockery::mock(Mvc\View::class);
     self::$mvc->addToViews('test_path3', 'html', $view_mock);
@@ -935,7 +935,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_checks_if_a_model_exists_or_not()
+  public function testItChecksIfAModelExistsOrNot()
   {
     $this->assertFalse(self::$mvc->modelExists('test_model'));
 
@@ -945,7 +945,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_external_view_throws_exception_when_mode_not_found_and_path_is_parseable()
+  public function testGetExternalViewThrowsExceptionWhenModeNotFoundAndPathIsParseable()
   {
     $this->expectException(Exception::class);
 
@@ -954,7 +954,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_external_view_returns_content_if_view_exists()
+  public function testGetExternalViewReturnsContentIfViewExists()
   {
     $view_mock = Mockery::mock(Mvc\View::class);
     $view_mock->shouldReceive('check')->andReturn(true);
@@ -968,14 +968,14 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_external_view_returns_empty_string_when_view_does_not_exist()
+  public function testGetExternalViewReturnsEmptyStringWhenViewDoesNotExist()
   {
     $this->assertSame('', self::$mvc->getExternalView('dummy_path'));
   }
 
 
   /** @test */
-  public function getPluginFromComponent_method_returns_plugin_name_from_component_if_exists_and_null_otherwise()
+  public function testGetpluginfromcomponentMethodReturnsPluginNameFromComponentIfExistsAndNullOtherwise()
   {
     $this->registerPlugin(
       $plugin = [
@@ -992,7 +992,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function routeComponent_method_returns_component_from_the_given_name_if_exists()
+  public function testRoutecomponentMethodReturnsComponentFromTheGivenNameIfExists()
   {
     $data = [
       'js' => [
@@ -1014,7 +1014,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function routeComponent_method_returns_null_if_the_given_name_does_not_exist()
+  public function testRoutecomponentMethodReturnsNullIfTheGivenNameDoesNotExist()
   {
     // Mock the `routeComponent` method in the Router class to return null.
     $router_mock = $this->replaceRouterInstanceWithMockery();
@@ -1025,7 +1025,7 @@ class MvcTest extends TestCase
 
 
     /** @test */
-    public function customPluginView_method_returns_content_if_custom_view_plugin_exists()
+    public function testCustompluginviewMethodReturnsContentIfCustomViewPluginExists()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('routeCustomPlugin')->andReturnNull();
@@ -1039,7 +1039,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function customPluginModel_method_returns_content_if_custom_plugin_model_exists()
+  public function testCustompluginmodelMethodReturnsContentIfCustomPluginModelExists()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('routeCustomPlugin')->andReturnNull();
@@ -1057,7 +1057,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function hasSubpluginModel_method_checks_if_a_sub_plugin_model_exists()
+  public function testHassubpluginmodelMethodChecksIfASubPluginModelExists()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('routeSubplugin')->andReturn([
@@ -1083,7 +1083,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function subpluginModel_method_returns_a_sub_plugin_model_if_exists()
+  public function testSubpluginmodelMethodReturnsASubPluginModelIfExists()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('routeSubplugin')->andReturnNull();
@@ -1114,7 +1114,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getModel_method_gets_the_model_if_exists_and_empty_array_otherwise()
+  public function testGetmodelMethodGetsTheModelIfExistsAndEmptyArrayOtherwise()
   {
     $this->replaceRouterInstanceWithMockery(null, 2);
 
@@ -1125,7 +1125,7 @@ class MvcTest extends TestCase
   }
 
 /** @test */
-  public function getCachedModel_method_returns_the_model_in_cache_if_exists_or_save_it_otherwise()
+  public function testGetcachedmodelMethodReturnsTheModelInCacheIfExistsOrSaveItOtherwise()
   {
     $this->replaceRouterInstanceWithMockery(null, 2);
 
@@ -1136,7 +1136,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function addInc_method_adds_a_property_to_the_mvc_object_if_not_already_declared()
+  public function testAddincMethodAddsAPropertyToTheMvcObjectIfNotAlreadyDeclared()
   {
     $bar = new stdClass();
     self::$mvc->addInc('foo', $bar);
@@ -1149,7 +1149,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function addInc_method_throws_an_exception_if_property_already_declared()
+  public function testAddincMethodThrowsAnExceptionIfPropertyAlreadyDeclared()
   {
     $bar = new stdClass();
     $baz = new stdClass();
@@ -1159,7 +1159,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function process_method_returns_the_rendered_result_from_current_mvc_if_successful()
+  public function testProcessMethodReturnsTheRenderedResultFromCurrentMvcIfSuccessful()
   {
     $this->replaceRouterInstanceWithMockery();
 
@@ -1175,7 +1175,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function process_method_throws_an_exception_if_info_is_not_array()
+  public function testProcessMethodThrowsAnExceptionIfInfoIsNotArray()
   {
     $this->expectException(\Exception::class);
 
@@ -1184,7 +1184,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function hasContent_method_returns_true_if_the_registered_controller_has_content()
+  public function testHascontentMethodReturnsTrueIfTheRegisteredControllerHasContent()
   {
     $this->replaceRouterInstanceWithMockery();
 
@@ -1198,7 +1198,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function hasContent_method_returns_false_if_the_registered_controller_has_no_content()
+  public function testHascontentMethodReturnsFalseIfTheRegisteredControllerHasNoContent()
   {
     $this->replaceRouterInstanceWithMockery();
 
@@ -1212,7 +1212,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function transform_method_test()
+  public function testTransformMethodTest()
   {
     $this->replaceRouterInstanceWithMockery();
 
@@ -1230,7 +1230,7 @@ class MvcTest extends TestCase
   }
 
 /** @test */
-  public function output_method_outputs_controller_instance_object()
+  public function testOutputMethodOutputsControllerInstanceObject()
   {
     // The method cannot be tested when it's successful as it's creating a new concrete
     // Output object inside which cannot be mocked.
@@ -1238,7 +1238,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function output_method_throws_an_exception_if_object_property_is_not_an_object()
+  public function testOutputMethodThrowsAnExceptionIfObjectPropertyIsNotAnObject()
   {
     $this->expectException(\Exception::class);
 
@@ -1260,7 +1260,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getDb_method_returns_db_if_exists()
+  public function testGetdbMethodReturnsDbIfExists()
   {
     Mvc::setDbInController(true);
 
@@ -1275,7 +1275,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getDb_method_returns_null_if_db_is_null()
+  public function testGetdbMethodReturnsNullIfDbIsNull()
   {
     Mvc::setDbInController(true);
 
@@ -1283,7 +1283,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getDb_method_returns_null_if_db_in_controller_is_false()
+  public function testGetdbMethodReturnsNullIfDbInControllerIsFalse()
   {
     Mvc::setDbInController(false);
 
@@ -1297,7 +1297,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_return_true_if_not_exists_and_can_be_set()
+  public function testSetprepathMethodReturnTrueIfNotExistsAndCanBeSet()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
@@ -1314,7 +1314,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_return_true_if_exists()
+  public function testSetprepathMethodReturnTrueIfExists()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
@@ -1324,7 +1324,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_if_not_exists_and_env_setPrepath_returns_false()
+  public function testSetprepathMethodThrowsAnExceptionIfNotExistsAndEnvSetprepathReturnsFalse()
   {
     $this->expectException(\Exception::class);
 
@@ -1339,7 +1339,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_if_not_exists_and_router_setPrepath_returns_false()
+  public function testSetprepathMethodThrowsAnExceptionIfNotExistsAndRouterSetprepathReturnsFalse()
   {
     $this->expectException(\Exception::class);
 
@@ -1355,7 +1355,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function setPrepath_method_throws_an_exception_check_method_fails()
+  public function testSetprepathMethodThrowsAnExceptionCheckMethodFails()
   {
     $this->setNonPublicPropertyValue('info', null);
     $this->expectException(\Exception::class);
@@ -1364,7 +1364,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getPrepath_method_returns_prepath()
+  public function testGetprepathMethodReturnsPrepath()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
@@ -1373,7 +1373,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getPrepath_method_returns_empty_string_when_check_method_fails()
+  public function testGetprepathMethodReturnsEmptyStringWhenCheckMethodFails()
   {
     $this->setNonPublicPropertyValue('info', null);
 
@@ -1381,7 +1381,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getRoutes_method_returns_routes_if_exist()
+  public function testGetroutesMethodReturnsRoutesIfExist()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('getRoutes')->once()->andReturn(['foo' => 'bar']);
@@ -1390,7 +1390,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getRoutes_method_returns_false_routes_does_not_exist()
+  public function testGetroutesMethodReturnsFalseRoutesDoesNotExist()
   {
     $router_mock = $this->replaceRouterInstanceWithMockery();
     $router_mock->shouldReceive('getRoutes')->once()->andReturn(['foo' => 'bar']);
@@ -1399,7 +1399,7 @@ class MvcTest extends TestCase
   }
 
   /** @test */
-  public function getRoutes_method_returns_false_when_check_method_fails()
+  public function testGetroutesMethodReturnsFalseWhenCheckMethodFails()
   {
     $this->setNonPublicPropertyValue('info', null);
 

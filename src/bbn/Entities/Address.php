@@ -7,7 +7,8 @@ use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Appui\Option;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\DbPublicCache;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Nullall;
@@ -15,7 +16,8 @@ use bbn\Models\Cls\Nullall;
 
 class Address extends DbCls
 {
-  use DbActions;
+  use Cache;
+  use DbPublicCache;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -50,8 +52,8 @@ class Address extends DbCls
     protected ?Entities $entities = null,
     protected Entity|Nullall $entity = new Nullall()
   ) {
-    parent::__construct($db);
     $this->initClassCfg();
+    parent::__construct($db);
   }
 
 
@@ -107,6 +109,19 @@ class Address extends DbCls
         ]);
       }
     }
+    return $d;
+  }
+
+  public function get($id)
+  {
+    $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
+    if ($d) {
+      if (!empty($d['tel'])) {
+        $d['tel'] = (string)$d['tel'];
+      }
+      $d['fadresse'] = $this->fadresse($d);
+    }
+
     return $d;
   }
 
@@ -286,6 +301,11 @@ class Address extends DbCls
       }
     }
     return $r;
+  }
+
+  public function exists(array|string $filter): bool
+  {
+    return $this->dbTraitExists($filter);
   }
 
 
@@ -500,6 +520,7 @@ class Address extends DbCls
       if (!$changed) {
         return $id;
       } else if ((count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id])) {
+        $this->cDelete($id);
         return $id;
       }
     }
@@ -673,6 +694,85 @@ class Address extends DbCls
       );
     }
     return 1;
+  }
+
+
+  public function pickMany(array $ids): array
+  {
+    return [];
+  }
+
+
+  public function pickByEntity(string $id_entity): array
+  {
+    return [];
+  }
+
+
+  public function pickOne(string $id, ?string $id_entity = null): array
+  {
+    return [];
+  }
+
+
+  public function getList(array $tableCfg, ?string $id_entity = null, ?array $ids = null): array
+  {
+    return [];
+  }
+
+
+  public function cDelete(string $id): self
+  {
+    return $this->cacheDelete($id);
+  }
+
+
+  /**
+   * Return adherent's cache.
+   *
+   * @param string $method
+   * @return mixed
+   */
+  public function cGet($id, $method = '')
+  {
+    return $this->cacheGet($id, $method);
+  }
+
+
+  /**
+   * Sets adherent cache.
+   *
+   * @param string $id
+   * @param string $method
+   * @param $data
+   * @return string|null
+   */
+  public function cSet($id, $method, $data): ?string
+  {
+    if ($this->cacheSet($id, $method, $data, 0)) {
+      return $this->cacheHash($id, $method);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks if the given cache method exists.
+   *
+   * @param string $method
+   *
+   * @return bool
+   */
+  public function cHas($id, $method = '')
+  {
+    return $this->cacheHas($id, $method);
+  }
+
+
+  public function cName($id, $method = ''): ?string
+  {
+    return $this->_cache_name($id, $method);
   }
 
 

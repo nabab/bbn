@@ -121,7 +121,7 @@ class Sqlite extends Sql
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function getConnection(array $cfg = []): ?array
+  public function getConnectionParams(array $cfg = []): ?array
   {
     $cfg['engine'] = 'sqlite';
 
@@ -288,11 +288,23 @@ class Sqlite extends Sql
   }
 
   /**
+   * Sets the timezone for the connection.
+   * 
+   * @param string $tz The timezone to set, e.g. 'Europe/Paris'
+   * @throws Exception if the query fails
+   */
+  public function setTimezone(string $tz): void
+  {
+    // It doesn't exist in sqlite
+  }
+
+
+  /**
    * Disable foreign keys check
    *
    * @return self
    */
-  public function disableKeys(): self
+  public function disableKeys(): static
   {
     $this->rawQuery('PRAGMA foreign_keys = OFF;')->closeCursor();
 
@@ -305,7 +317,7 @@ class Sqlite extends Sql
    *
    * @return self
    */
-  public function enableKeys(): self
+  public function enableKeys(): static
   {
     $this->rawQuery('PRAGMA foreign_keys = ON;')->closeCursor();
 
@@ -603,6 +615,14 @@ class Sqlite extends Sql
   {
     $res = '';
     if (!empty($cfg['order'])) {
+      if (is_string($cfg['order'])) {
+        if (Str::startsWith($cfg['order'], 'rand', false)) {
+          return 'ORDER BY RANDOM()' . PHP_EOL;
+        }
+
+        return 'ORDER BY ' . $cfg['order'] . PHP_EOL;
+      }
+
       foreach ($cfg['order'] as $col => $dir) {
         if (\is_array($dir) && isset($dir['field'])) {
           $col = $dir['field'];

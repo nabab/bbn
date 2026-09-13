@@ -22,7 +22,6 @@ abstract class Rest extends bbn\Models\Cls\Basic{
    */
   public function __construct($cfg = null)
   {
-    $this->cacheInit();
     $this->cfg = $cfg;
     if ($this->cfg['pass']) {
       $this->authenticate();

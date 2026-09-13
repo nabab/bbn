@@ -13,6 +13,10 @@ use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 
+use function func_get_args;
+use function count;
+use function get_class;
+
 trait Common
 {
   /**
@@ -35,7 +39,7 @@ trait Common
    */
   private function checkPath()
   {
-    $ar = \func_get_args();
+    $ar = func_get_args();
     foreach ($ar as $a){
       $b = Str::parsePath($a, true);
       if (empty($b) && !empty($a)) {
@@ -54,7 +58,7 @@ trait Common
    */
   private function error($msg)
   {
-    $msg = "Error from ".\get_class($this).": ".$msg;
+    $msg = "Error from ".get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
     throw new Exception(X::_($msg));
   }
@@ -63,10 +67,10 @@ trait Common
   /**
    * Log to a specific log with debug info
    */
-  public function log(...$args)
+  public function log(...$args): void
   {
     if (Mvc::getDebug()) {
-      X::log(\count($args) > 1 ? $args : $args[0], 'mvc');
+      X::log(count($args) > 1 ? $args : $args[0], 'mvc');
     }
   }
 
@@ -292,6 +296,16 @@ trait Common
     return Mvc::getCurPath();
   }
 
+  public function getStartTime(): float
+  {
+    return $this->_mvc->getStartTime();
+  }
+
+  public function getDuration(): float
+  {
+    return $this->_mvc->getDuration();
+  }
+
 
   public function userTmpPath(string|null $id_user = null, string|null $plugin = null):? string
   {
@@ -304,4 +318,38 @@ trait Common
     return Mvc::getUserDataPath($id_user, $plugin);
   }
 
+  public function deleteModelCache(string $path, array $data): bool
+  {
+    return $this->_mvc->deleteModelCache($path, $data);
+  }
+
+  public function deletepluginModelCache(string $path, array $data, string $plugin): bool
+  {
+    return $this->_mvc->deletePluginModelCache($path, $data, $plugin);
+  }
+
+  public function deleteSubpluginModelCache(string $path, array $data, string $plugin, string $subplugin): bool
+  {
+    return $this->_mvc->deleteSubpluginModelCache($path, $data, $plugin, $subplugin);
+  }
+
+  public function getConstant(string $name): mixed
+  {
+    return $this->_mvc->getConstant($name);
+  }
+
+  public function setConstant(string $name, mixed $value): bool
+  {
+    return $this->_mvc->setConstant($name, $value);
+  }
+
+  public function getGlobal(string $name): mixed
+  {
+    return Mvc::getGlobal($name);
+  }
+
+  public function setGlobal(string $name, mixed $value): void
+  {
+    Mvc::setGlobal($name, $value);
+  }
 }

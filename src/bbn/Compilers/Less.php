@@ -22,7 +22,7 @@ class Less extends Basic
 			$res = $less->getCss();
 		}
 		catch (Exception $e) {
-			X::logError($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+			X::logError($e);
 		}
 
 		return $res;

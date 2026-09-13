@@ -10,9 +10,9 @@ use Exception;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
-use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\DbRetriever;
 use bbn\Models\Tts\Cache;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Cls\Db as DbCls;
 
 /**
@@ -32,9 +32,9 @@ use bbn\Models\Cls\Db as DbCls;
 class Option extends DbCls
 {
   // Traits used in this class
-  use Retriever;
+  use DbRetriever;
   use Cache;
-  use DbActions;
+  use DbOps;
   use Option\Internal\Alias;
   use Option\Internal\Cache;
   use Option\Internal\Cat;
@@ -60,42 +60,42 @@ class Option extends DbCls
 
   // Default class configuration
   protected static $default_class_cfg = [
-    'errors' => [],
-    'table' => 'bbn_options',
-    'tables' => [
-      'options' => 'bbn_options'
+    "errors" => [],
+    "table" => "bbn_options",
+    "tables" => [
+      "options" => "bbn_options",
     ],
-    'arch' => [
-      'options' => [
-        'id' => 'id',
-        'id_parent' => 'id_parent',
-        'id_alias' => 'id_alias',
-        'num' => 'num',
-        'text' => 'text',
-        'code' => 'code',
-        'value' => 'value',
-        'cfg' => 'cfg'
-      ]
-    ]
+    "arch" => [
+      "options" => [
+        "id" => "id",
+        "id_parent" => "id_parent",
+        "id_alias" => "id_alias",
+        "num" => "num",
+        "text" => "text",
+        "code" => "code",
+        "value" => "value",
+        "cfg" => "cfg",
+      ],
+    ],
   ];
 
   // Flag to check if the class is initialized
   private $is_init = false;
 
   // Fields from the options table that are not returned by default
-  private $non_selected = ['cfg'];
+  private $non_selected = ["cfg"];
 
   // Class configuration array
-  protected $class_cfg;
+  protected array $class_cfg;
 
   /**
    * Returns the existing instance of the Option class.
    *
    * @return self
    */
-  public static function getOptions(): self
+  public static function getOptions(?Db $db = null): static
   {
-    return self::getInstance();
+    return self::getInstance($db);
   }
 
   /**
@@ -104,19 +104,26 @@ class Option extends DbCls
    * Initializes the class with a database connection object and an optional configuration array.
    *
    * @param Db $db A database connection object
-   * @param array $cfg An optional configuration array
    * @throws Exception If there is an error initializing the class
    */
-  public function __construct(Db $db, array $cfg = [])
+  public function __construct(Db $db)
   {
     // Initialize the class configuration
-    $this->initClassCfg($cfg);
+    $this->initClassCfg();
 
     // Initialize the parent class with the database connection object
     parent::__construct($db);
 
     // Initialize the retriever
     self::retrieverInit($this);
+  }
+
+  /**
+   * Destructor – clears static state.
+   */
+  public function destruct(): void
+  {
+    self::retrieverRemove($this);
   }
 
   /**
@@ -167,7 +174,9 @@ class Option extends DbCls
     // Check if the ID is a valid UID
     if (Str::isUid($id)) {
       // Return the number of children for the given option
-      return $this->db->count($this->class_cfg['table'], [$this->fields['id_parent'] => $id]);
+      return $this->db->count($this->class_cfg["table"], [
+        $this->fields["id_parent"] => $id,
+      ]);
     }
 
     // Return null if the option is not found

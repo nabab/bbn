@@ -12,8 +12,7 @@ use bbn\Str;
 use bbn\User;
 use bbn\User\Common;
 use bbn\User\Implementor;
-use bbn\Models\Tts\DbActions;
-
+use bbn\Models\Tts\DbOps;
 
 /**
  * A user authentication Class
@@ -31,7 +30,7 @@ use bbn\Models\Tts\DbActions;
 final class Fake extends Basic implements Implementor
 {
   use Common;
-  //use DbActions;
+  //use DbOps;
 
   /** @var User $realUser */
   protected $realUser;
@@ -47,21 +46,23 @@ final class Fake extends Basic implements Implementor
     //$this->initClassCfg([]);
     $this->realUser = $usr;
     $this->class_cfg = $this->realUser->getClassConfig();
-    $f = $this->class_cfg['arch']['users'];
+    $f = $this->class_cfg["arch"]["users"];
     $this->db = $this->realUser->getDbInstance();
     $this->id = $id;
-    $this->id_group = $this->db->selectOne($this->class_cfg['table'], $f['id_group'], [
-      $f['id'] => $id
-    ]);
+    $this->id_group = $this->db->selectOne(
+      $this->class_cfg["table"],
+      $f["id_group"],
+      [
+        $f["id"] => $id,
+      ],
+    );
     $this->auth = true;
   }
-
 
   public function isReset(): bool
   {
     return false;
   }
-
 
   /**
    * Returns the salt string kept in session.
@@ -70,9 +71,8 @@ final class Fake extends Basic implements Implementor
    */
   public function getSalt(): ?string
   {
-    return '';
+    return "";
   }
-
 
   /**
    * Confronts the given string with the salt string kept in session.
@@ -84,18 +84,16 @@ final class Fake extends Basic implements Implementor
     return true;
   }
 
-
   /**
    * Returns the current user's configuration.
    *
    * @param string $attr
    * @return mixed
    */
-  public function getCfg($attr = '')
+  public function getCfg($attr = "")
   {
-    return $attr ? '' : [];
+    return $attr ? "" : [];
   }
-
 
   /**
    * Stores or deletes data in the object for the current authenticated user.
@@ -105,11 +103,10 @@ final class Fake extends Basic implements Implementor
    *
    * @return self Chainable
    */
-  public function setData($index, $data = null): self
+  public function setData($index, $data = null): static
   {
     return $this;
   }
-
 
   /**
    * Returns the current configuration of this very class.
@@ -121,7 +118,6 @@ final class Fake extends Basic implements Implementor
     return $this->class_cfg;
   }
 
-
   /**
    * Returns the list of tables used by the current class.
    * @return array
@@ -129,12 +125,11 @@ final class Fake extends Basic implements Implementor
   public function getTables(): ?array
   {
     if (!empty($this->class_cfg)) {
-      return $this->class_cfg['tables'];
+      return $this->class_cfg["tables"];
     }
 
     return null;
   }
-
 
   /**
    * Returns the list of fields of the given table, and if empty for each table.
@@ -142,19 +137,18 @@ final class Fake extends Basic implements Implementor
    * @param string $table
    * @return array|null
    */
-  public function getFields(string $table = ''): ?array
+  public function getFields(string $table = ""): ?array
   {
     if (!empty($this->class_cfg)) {
       if ($table) {
-        return $this->class_cfg['arch'][$table] ?? null;
+        return $this->class_cfg["arch"][$table] ?? null;
       }
 
-      return $this->class_cfg['arch'];
+      return $this->class_cfg["arch"];
     }
 
     return null;
   }
-
 
   /**
    * Changes the data in the user's table.
@@ -195,7 +189,6 @@ final class Fake extends Basic implements Implementor
     return false;
   }
 
-
   /**
    * Encrypts the given string to match the password.
    *
@@ -204,9 +197,8 @@ final class Fake extends Basic implements Implementor
    */
   public function getPassword(string $st): string
   {
-    return '';
+    return "";
   }
-
 
   /**
    * Returns true after the log in moment.
@@ -218,28 +210,25 @@ final class Fake extends Basic implements Implementor
     return false;
   }
 
-
   /**
    * Sets the given attribute(s) in the user's session.
    *
    * @return self
    */
-  public function setSession($attr): self
+  public function setSession($attr): static
   {
     return $this;
   }
-
 
   /**
    * Unsets the given attribute(s) in the user's session if exists.
    *
    * @return self
    */
-  public function unsetSession(): self
+  public function unsetSession(): static
   {
     return $this;
   }
-
 
   /**
    * Returns session property from the session's user array (userIndex).
@@ -252,7 +241,6 @@ final class Fake extends Basic implements Implementor
     return null;
   }
 
-
   /**
    * Gets an attribute or the whole the "session" part of the session  (sessIndex).
    *
@@ -264,17 +252,15 @@ final class Fake extends Basic implements Implementor
     return null;
   }
 
-
   /**
    * Sets an attribute the "session" part of the session (sessIndex).
    *
    * @return self
    */
-  public function setOsession(): self
+  public function setOsession(): static
   {
     return $this;
   }
-
 
   /**
    * Checks if the given attribute exists in the user's session.
@@ -286,17 +272,15 @@ final class Fake extends Basic implements Implementor
     return true;
   }
 
-
   /**
    * Updates last activity value for the session in database.
    *
    * @return self
    */
-  public function updateActivity(): self
+  public function updateActivity(): static
   {
     return $this;
   }
-
 
   /**
    * Saves the session config in the database.
@@ -304,11 +288,10 @@ final class Fake extends Basic implements Implementor
    * @todo Use it only when needed!
    * @return self
    */
-  public function saveSession(bool $force = false): self
+  public function saveSession(bool $force = false): static
   {
     return $this;
   }
-
 
   /**
    * Closes the session in the database.
@@ -316,11 +299,10 @@ final class Fake extends Basic implements Implementor
    * @param bool $with_session If true deletes also the session information
    * @return self
    */
-  public function closeSession($with_session = false): self
+  public function closeSession($with_session = false): static
   {
     return $this;
   }
-
 
   /**
    * Returns false if the max number of connections attempts has been reached
@@ -331,36 +313,33 @@ final class Fake extends Basic implements Implementor
     return true;
   }
 
-
   /**
    * Saves the user's config in the cfg field of the users' table.
    *
    * return self
    */
-  public function saveCfg(): self
+  public function saveCfg(): static
   {
     if ($this->check()) {
       $this->db->update(
-        $this->class_cfg['tables']['users'],
-        [$this->fields['cfg'] => json_encode($this->cfg)],
-        [$this->fields['id'] => $this->id]
+        $this->class_cfg["tables"]["users"],
+        [$this->fields["cfg"] => json_encode($this->cfg)],
+        [$this->fields["id"] => $this->id],
       );
     }
 
     return $this;
   }
 
-
   /**
    * Saves the attribute(s) values into the session config.
    *
    * return self
    */
-  public function setCfg($attr): self
+  public function setCfg($attr): static
   {
     return $this;
   }
-
 
   /**
    * Unsets the attribute(s) in the session config.
@@ -368,22 +347,20 @@ final class Fake extends Basic implements Implementor
    * @param $attr
    * @return self
    */
-  public function unsetCfg($attr): self
+  public function unsetCfg($attr): static
   {
     return $this;
   }
-
 
   /**
    * Regathers information from the database.
    *
    * @return self
    */
-  public function refreshInfo(): self
+  public function refreshInfo(): static
   {
     return $this;
   }
-
 
   /**
    * Retrieves user's info from session if needed and checks if authenticated.
@@ -395,7 +372,6 @@ final class Fake extends Basic implements Implementor
     return true;
   }
 
-
   /**
    * Checks whether the user is an admin or not.
    *
@@ -405,7 +381,6 @@ final class Fake extends Basic implements Implementor
   {
     return false;
   }
-
 
   /**
    * Checks whether the user is an (admin or developer) or not.
@@ -417,7 +392,6 @@ final class Fake extends Basic implements Implementor
     return false;
   }
 
-
   /**
    * Gets a bbn\User\Manager instance.
    *
@@ -427,7 +401,6 @@ final class Fake extends Basic implements Implementor
   {
     return new Manager($this->realUser);
   }
-
 
   /**
    * Change the password in the database after checking the current one.
@@ -440,7 +413,6 @@ final class Fake extends Basic implements Implementor
   {
     return $this->forcePassword($new_pass);
   }
-
 
   /**
    * Returns the full name of the given user or the current one.
@@ -459,14 +431,13 @@ final class Fake extends Basic implements Implementor
         $usr = $mgr->getUser($usr);
       }
 
-      if (isset($this->class_cfg['show'], $usr[$this->class_cfg['show']])) {
-        return $usr[$this->class_cfg['show']];
+      if (isset($this->class_cfg["show"], $usr[$this->class_cfg["show"]])) {
+        return $usr[$this->class_cfg["show"]];
       }
     }
 
     return null;
   }
-
 
   /**
    * Generates and insert a token in database.
@@ -477,7 +448,6 @@ final class Fake extends Basic implements Implementor
   {
     return null;
   }
-
 
   /**
    * Returns the email of the given user or the current one.
@@ -493,13 +463,11 @@ final class Fake extends Basic implements Implementor
         $usr = $mgr->getUser($usr);
       }
 
-      if (isset($this->fields['email'], $usr[$this->fields['email']])) {
-        return $usr[$this->fields['email']];
+      if (isset($this->fields["email"], $usr[$this->fields["email"]])) {
+        return $usr[$this->fields["email"]];
       }
     }
 
     return null;
   }
-
-
 }
