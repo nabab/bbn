@@ -13,15 +13,13 @@ use bbn\X;
 use bbn\Str;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Models\Entities;
-use bbn\Models\Cls\Nullall;
+use bbn\Entities\Tables\ChangesFiles;
 use bbn\Entities\Entity;
-use bbn\Models\Tts\TmpFiles;
+use bbn\Models\Cls\Nullall;
 
 
 class Changes extends EntityTable
 {
-  use TmpFiles;
-
   /** @todo is it used?? */
   public static $editable = [
   ];
@@ -78,10 +76,14 @@ class Changes extends EntityTable
 
   protected $skipEmailVerfication = false;
 
+  /** @var ChangesFiles */
+  protected ChangesFiles $files;
+
 
   public function __construct(Db &$db, Entities $entities, Entity|Nullall $entity)
   {
     parent::__construct($db, $entities, $entity);
+    $this->files = new ChangesFiles($db, $entities, $entity);
     self::setTables();
   }
 
@@ -173,53 +175,21 @@ class Changes extends EntityTable
    */
   public function attachFile(string $id, string $code, string $file): bool
   {
-    if (Str::isUid($id)) {
-      $filesLinked = $this->getFilesLink($id);
-      $cCfg = $this->getClassCfg();
-      $filesFields = $cCfg['arch']['files'];
-      $linksFields = $cCfg['arch']['links'];
-      foreach ($filesLinked as $fl) {
-        $f = $this->_getFile([
-          $this->db->cfn($filesFields['id'], $cCfg['tables']['files']) => $fl[$linksFields['id_file']]
-        ]);
-        if (!empty($f)
-          && ((string)$f['code'] === $code)
-        ) {
-          $data = [
-            $filesFields['files'] => empty($f['files']) ? [] : \json_decode($f[$filesFields['files']], true),
-            $filesFields['date_added'] => $f[$filesFields['date_added']] ?: date('Y-m-d H:i:s')
-          ];
-          if (!\in_array($file, $data[$filesFields['files']], true)) {
-            $data[$filesFields['files']][] = $file;
-          }
-
-          $data[$filesFields['files']] = json_encode($data[$filesFields['files']]);
-          return $this->updateFile($f[$filesFields['id']], $data)
-            && $this->entity->updateRecord($cCfg['tables']['files'], $fl[$linksFields['id']]);
-        }
-      }
-    }
-
-    return false;
+    return $this->files->attachFile($id, $code, $file);
   }
 
 
   /**
-   * @param string $id_type
+   * @param string $idType
    * @return bool
    */
-  public function resetFileByType(string $id_type): bool
+  public function resetFileByType(string $idType): bool
   {
     $filesFields = $this->getClassCfg()['arch']['files'];
-    if (($file = $this->getFileByType($id_type))
-      && $this->updateFile(
-        $file[$filesFields['id']], [
-          $filesFields['files'] => null,
-          $filesFields['date_added'] => null
-        ]
-      )
+    if (($file = $this->files->getFileByType($idType))
+      && $this->files->resetFileByType($idType)
     ) {
-      foreach ($this->getIdsByFile($file[$filesFields['id']]) as $id){
+      foreach ($this->files->getIdsByFile($file[$filesFields['id']]) as $id) {
         $this->_setState($id);
       }
 
@@ -391,7 +361,7 @@ class Changes extends EntityTable
    */
   public function delete(string|array $id): int
   {
-    if (Str::isUid($id) && $this->deleteFileAndLink($id)) {
+    if (Str::isUid($id) && $this->files->deleteFileAndLink($id)) {
       return $this->dbTraitDelete($id);
     }
 
@@ -412,7 +382,7 @@ class Changes extends EntityTable
         $this->fields['state'] => static::$states['untreated']
       ]))
       && !empty($change[$this->fields['cfg']])
-      && ($cfg = json_decode($change[$this->fields['cfg']], true))
+      && ($cfg = Str::isJson($change[$this->fields['cfg']]) ? json_decode($change[$this->fields['cfg']], true) : $change[$this->fields['cfg']])
       && !empty($cfg['table'])
       && !empty($cfg['type'])
     ) {
@@ -543,10 +513,10 @@ class Changes extends EntityTable
       }
 
       return empty($error)
-        && $this->deleteFileAndLink($id)
+        && $this->files->deleteFileAndLink($id)
         && $this->dbTraitUpdate($id, [
           $this->fields['state'] => static::$states['accepted'],
-          $this->fields['cfg'] => json_encode($cfg)
+          $this->fields['cfg'] => $cfg
         ]);
     }
 
@@ -562,7 +532,7 @@ class Changes extends EntityTable
     if (Str::isUid($id)
       && $this->check()
       && $this->get($id, [$this->fields['id_entity'] => $this->getId()])
-      && $this->deleteFileAndLink($id)
+      && $this->files->deleteFileAndLink($id)
     ) {
       return $this->dbTraitUpdate($id, [
         $this->fields['state'] => static::$states['refused']
@@ -854,7 +824,7 @@ class Changes extends EntityTable
     return array_map(
       function ($change) use($cfgField) {
         if (!empty($change[$cfgField])
-          && ($cfg = is_string($change[$cfgField]) ? json_decode($change[$cfgField], true) : $change[$cfgField])
+          && ($cfg = Str::isJson($change[$cfgField]) ? json_decode($change[$cfgField], true) : $change[$cfgField])
         ) {
           if (!empty($cfg['data'])) {
             $cfg['data'] = array_map(
@@ -940,7 +910,7 @@ class Changes extends EntityTable
         $this->fields['id_entity'] => $idAdh,
         $this->fields['moment'] => $moment,
         $this->fields['state'] => null,
-        $this->fields['cfg'] => \json_encode($cfg)
+        $this->fields['cfg'] => $cfg
       ]))
     ) {
       $this->setRequiredFiles($id);
@@ -962,7 +932,9 @@ class Changes extends EntityTable
     if (Str::isUid($id)) {
       if ($state === false) {
         if ($c = $this->_get([$this->fields['id'] => $id], false)) {
-          $cfg = json_decode($c[0][$this->fields['cfg']], true);
+          $cfg = Str::isJson($c[0][$this->fields['cfg']])
+            ? json_decode($c[0][$this->fields['cfg']], true)
+            : $c[0][$this->fields['cfg']];
         }
 
         if (isset($cfg) && is_array($cfg)) {
@@ -1009,14 +981,14 @@ class Changes extends EntityTable
       && (($old[$this->fields['state']] === static::$states['unready'])
         || ($old[$this->fields['state']] === static::$states['untreated'])
         || ($old[$this->fields['state']] === static::$states['email']))
-      && ($cfg = \json_decode($old[$this->fields['cfg']], true))
+      && ($cfg = Str::isJson($old[$this->fields['cfg']]) ? json_decode($old[$this->fields['cfg']], true) : $old[$this->fields['cfg']])
     ) {
       if (($idx = X::search($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata, $cfg['type']));
         $cfg['subdata']    = $subdata;
         if ($this->dbTraitUpdate($id, [
           $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
-          $this->fields['cfg'] => \json_encode($cfg)
+          $this->fields['cfg'] => $cfg
         ])) {
           $this->setRequiredFiles($id);
           $this->_setState($id, $this->getCurrentState($id, $cfg));
@@ -1060,24 +1032,6 @@ class Changes extends EntityTable
 
 
   /**
-   * @param array|string $id_type
-   * @param bool         $files
-   * @return null|array
-   */
-  protected function getFileByType($id_type, bool $files = true): ?array
-  {
-    return $this->_getFileByType(
-      $id_type,
-      $files,
-      [[
-        'field' => $this->db->cfn($this->fields['id_entity'], $this->class_table),
-        'value' => $this->getId()
-      ]]
-    );
-  }
-
-
-  /**
    * @param string $id_change
    * @param string $type
    * @return null|array
@@ -1092,15 +1046,15 @@ class Changes extends EntityTable
       $linksFields = $cCfg['arch']['links'];
       $linksTable = $cCfg['tables']['links'];
       $res = [];
-      $cfg = is_array($change[$this->fields['cfg']])
-        ? $change[$this->fields['cfg']]
-        : json_decode($change[$this->fields['cfg']], true);
+      $cfg = Str::isJson($change[$this->fields['cfg']])
+        ? json_decode($change[$this->fields['cfg']], true)
+        : $change[$this->fields['cfg']];
       $all = array_map(function ($f) {
           if (!empty($f['code'])) {
             $f['code'] = (string)$f['code'];
           }
 
-          if (!empty($f['files']) && !is_array($f['files'])) {
+          if (!empty($f['files']) && Str::isJson($f['files'])) {
             $f['files'] = json_decode($f['files']);
           }
 
@@ -1223,13 +1177,14 @@ class Changes extends EntityTable
 
 
   /**
-   * @param string $id_change
-   * @param string $type
+   * @param string $idChange
    */
   protected function setRequiredFiles(string $idChange)
   {
     if ($change = $this->get($idChange)) {
-      $cfg    = json_decode($change[$this->fields['cfg']], true);
+      $cfg = Str::isJson($change[$this->fields['cfg']])
+        ? json_decode($change[$this->fields['cfg']], true)
+        : $change[$this->fields['cfg']];
       $codes = [];
       if (empty($cfg['data'])) {
         if ($c = $this->fieldRequiresFile($cfg['type'], $cfg['table'])) {
@@ -1252,62 +1207,16 @@ class Changes extends EntityTable
 
           if (\is_array($code)) {
             foreach ($code as $c){
-              $this->_fileInsert($idChange, $c, $mandatory);
+              $this->files->fileInsert($idChange, $c, $mandatory);
             }
           }
           else {
-            $this->_fileInsert($idChange, $code, $mandatory);
+            $this->files->fileInsert($idChange, $code, $mandatory);
           }
         }
       }
     }
   }
-
-  /**
-   * @param string $id_link
-   * @param string $type
-   * @param bool   $mandatory
-   * @return string|null
-   */
-  protected function _fileInsert(string $id_link, string $type, bool $mandatory): ?string
-  {
-    if (Str::isUid($id_link)) {
-      $id_file = $this->insertFile($type);
-      if (Str::isUid($id_file)
-        && !$this->hasFileLink($id_link, $id_file)
-        && ($idFileLink = $this->insertFileLink($id_link, $id_file, $mandatory))
-      ) {
-        $this->entity->updateRecord($this->class_cfg['tables']['links'], $idFileLink);
-      }
-
-      return $id_file;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @param string $id
-   * @return array
-   */
-  protected function getIdsByFile(string $id): array
-  {
-    if (Str::isUid($id)) {
-      $cCfg = $this->getClassCfg();
-      return array_map(
-        fn($r) => $r[$cCfg['arch']['links']['id_link']] ?? null,
-        X::filter(
-          $this->getRecords($cCfg['tables']['links']),
-          fn($r) => !empty($r[$cCfg['arch']['links']['id_file']])
-            && ($r[$cCfg['arch']['links']['id_file']] === $id)
-        )
-      );
-    }
-
-    return [];
-  }
-
 
   /**
    * @param string $table
@@ -1440,7 +1349,10 @@ class Changes extends EntityTable
 
         if (!empty($exists)) {
           if (!empty($exists['cfg'])) {
-            $exists = X::mergeArrays(\json_decode($exists['cfg'], true), $exists);
+            $exists = X::mergeArrays(
+              Str::isJson($exists['cfg']) ? json_decode($exists['cfg'], true) : $exists['cfg'],
+              $exists
+            );
           }
 
           unset($exists['cfg']);

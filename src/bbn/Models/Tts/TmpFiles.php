@@ -17,40 +17,36 @@ trait TmpFiles
   private function _getFile(array $where): ?array
   {
     $cCfg = $this->getClassCfg();
+    $filesTable = $cCfg['tables']['files'];
+    $filesFields = $cCfg['arch']['files'];
     $oCfg = $this->options()->getClassCfg();
+    $optTable = $oCfg['table'];
+    $optFields = $oCfg['arch']['options'];
     $file = $this->db->rselect(
       [
-      'table' => $cCfg['tables']['files'],
+      'table' => $filesTable,
       'fields' => [
-        $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),
-        $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),
-        $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),
-        $this->db->cfn($cCfg['arch']['files']['labels'], $cCfg['tables']['files']),
-        $this->db->cfn($cCfg['arch']['files']['date_added'], $cCfg['tables']['files']),
-        'code' => 'CAST('.$this->db->cfn($oCfg['arch']['options']['code'], $oCfg['table']).' AS CHAR)'
+        $this->db->cfn($filesFields['id'], $filesTable),
+        $this->db->cfn($filesFields['files'], $filesTable),
+        $this->db->cfn($filesFields['type_doc'], $filesTable),
+        $this->db->cfn($filesFields['labels'], $filesTable),
+        $this->db->cfn($filesFields['date_added'], $filesTable),
+        'code' => 'CAST('.$this->db->cfn($optFields['code'], $optTable).' AS CHAR)'
       ],
       'join' => [[
-        'table' => $cCfg['tables']['links'],
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
-            'exp' => $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files'])
-          ]]
-        ]
-      ], [
         'table' => $this->class_table,
         'on' => [
           'conditions' => [[
-            'field' => $this->db->cfn($this->fields['id'], $this->class_table),
-            'exp' => $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links'])
+            'field' => $this->db->cfn($this->fields['id_file'], $this->class_table),
+            'exp' => $this->db->cfn($filesFields['id'], $filesTable)
           ]]
         ]
       ], [
         'table' => $oCfg['table'],
         'on' => [
           'conditions' => [[
-            'field' => $this->db->cfn($oCfg['arch']['options']['id'], $oCfg['table']),
-            'exp' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files'])
+            'field' => $this->db->cfn($optFields['id'], $optTable),
+            'exp' => $this->db->cfn($filesFields['type_doc'], $filesTable)
           ]]
         ]
       ]],
@@ -68,22 +64,24 @@ trait TmpFiles
 
 
   /**
-   * @param array|string $id_type
+   * @param array|string $idType
    * @param bool         $files
    * @param array        $conditions
    * @return null|array
    */
-  private function _getFileByType($id_type, bool $files = true, array $conditions = []): ?array
+  private function _getFileByType(string|array $idType, bool $files = true, array $conditions = []): ?array
   {
     $cCfg = $this->getClassCfg();
-    if (\is_array($id_type)) {
+    $table = $cCfg['tables']['files'];
+    $fields = $cCfg['arch']['files'];
+    if (\is_array($idType)) {
       $tmp = [
         'logic' => 'OR',
         'conditions' => []
       ];
-      foreach ($id_type as $t) {
+      foreach ($idType as $t) {
         $tmp['conditions'][] = [
-          'field' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),
+          'field' => $this->db->cfn($fields['type_doc'], $table),
           'value' => !Str::isUid($t) ? $this->options()->fromCode($t, 'documents') : $t
         ];
       }
@@ -92,14 +90,14 @@ trait TmpFiles
     }
     else {
       $conditions[] = [
-        'field' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),
-        'value' => !Str::isUid($id_type) ? $this->options()->fromCode($id_type, 'documents') : $id_type
+        'field' => $this->db->cfn($fields['type_doc'], $table),
+        'value' => !Str::isUid($idType) ? $this->options()->fromCode($idType, 'documents') : $idType
       ];
     }
 
     if ($files) {
       $conditions[] = [
-        'field' => $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),
+        'field' => $this->db->cfn($fields['files'], $table),
         'operator' => 'isnotnull'
       ];
     }
@@ -113,15 +111,16 @@ trait TmpFiles
    * @param array  $files
    * @return null|string
    */
-  private function insertFile(string $type, array $files = [], string $labels = ''): ?string
+  public function insertFile(string $type, array $files = [], string $labels = ''): ?string
   {
     $cCfg = $this->getClassCfg();
+    $filesFields = $cCfg['arch']['files'];
     return $this->db->insert(
       $cCfg['tables']['files'], [
-        $cCfg['arch']['files']['files'] => empty($files) ? null : json_encode($files),
-        $cCfg['arch']['files']['type_doc'] => Str::isUid($type) ? $type : $this->options()->fromCode($type, 'documents'),
-        $cCfg['arch']['files']['labels'] => $labels,
-        $cCfg['arch']['files']['date_added'] => date('Y-m-d H:i:s')
+        $filesFields['files'] => empty($files) ? null : json_encode($files),
+        $filesFields['type_doc'] => Str::isUid($type) ? $type : $this->options()->fromCode($type, 'documents'),
+        $filesFields['labels'] => $labels,
+        $filesFields['date_added'] => date('Y-m-d H:i:s')
       ]
     ) ? $this->db->lastId() : null;
   }
@@ -132,10 +131,11 @@ trait TmpFiles
    * @param array  $data
    * @return bool
    */
-  private function updateFile(string $id, array $data): bool
+  public function updateFile(string $id, array $data): bool
   {
     $cCfg = $this->getClassCfg();
-    return Str::isUid($id) && $this->db->update($cCfg['tables']['files'], $data, [$cCfg['arch']['files']['id'] => $id]);
+    return Str::isUid($id)
+      && $this->db->update($cCfg['tables']['files'], $data, [$cCfg['arch']['files']['id'] => $id]);
   }
 
 
@@ -156,27 +156,24 @@ trait TmpFiles
 
 
   /**
-   * @param string $id_link
-   * @param string $id_file
+   * @param string $idLink
+   * @param string $idFile
    * @param bool   $mandatory
-   * @return nul|int
+   * @return null|string
    */
-  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?string
+  public function insertFileLink(string $idLink, string $idFile, bool $mandatory = true): ?string
   {
-    if (Str::isUid($id_link) && Str::isUid($id_file)) {
-      $cCfg = $this->getClassCfg();
+    if (Str::isUid($idLink) && Str::isUid($idFile)) {
       $d = [
-        $cCfg['arch']['links']['id_link'] => $id_link,
-        $cCfg['arch']['links']['id_file'] => $id_file,
-        $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1
+        $this->fields['id_link'] => $idLink,
+        $this->fields['id_file'] => $idFile,
+        $this->fields['mandatory'] => empty($mandatory) ? 0 : 1
       ];
-      if (isset($cCfg['arch']['links']['id_entity'])) {
-        $d[$cCfg['arch']['links']['id_entity']] = $this->getId();
+      if (isset($this->fields['id_entity'])) {
+        $d[$this->fields['id_entity']] = $this->getId();
       }
 
-      if ($this->db->insert($cCfg['tables']['links'], $d)) {
-        return $this->db->lastId();
-      }
+      return $this->dbTraitInsert($d);
     }
 
     return null;
@@ -184,20 +181,13 @@ trait TmpFiles
 
 
   /**
-   * @param string $id_change
-   * @param string $id_file
+   * @param string $id
    * @return bool
    */
-  private function deleteFileLink(string $id_link, string $id_file): bool
+  private function deleteFileLink(string $id): bool
   {
-    if (Str::isUid($id_link) && Str::isUid($id_file)) {
-      $cCfg = $this->getClassCfg();
-      return !!$this->db->delete(
-        $cCfg['tables']['links'], [
-          $cCfg['arch']['links']['id_link'] => $id_link,
-          $cCfg['arch']['links']['id_file'] => $id_file
-        ]
-      );
+    if (Str::isUid($id)) {
+      return !!$this->dbTraitDelete($id);
     }
 
     return false;
@@ -205,26 +195,26 @@ trait TmpFiles
 
 
   /**
-   * @param string $id_link
+   * @param string $idLink
    * @param string $type
    * @param bool   $mandatory
    * @return string|null
    */
-  private function _fileExistsOrInsert(string $id_link, string $type, bool $mandatory): ?string
+  private function _fileExistsOrInsert(string $idLink, string $type, bool $mandatory): ?string
   {
-    if (Str::isUid($id_link)) {
+    if (Str::isUid($idLink)) {
       if ($exists = $this->_getFileByType($type, false)) {
-        $id_file = $exists[$this->getClassCfg()['arch']['links']['id_link']];
+        $idFile = $exists[$this->fields['id_file']];
       }
       else {
-        $id_file = $this->insertFile($type);
+        $idFile = $this->insertFile($type);
       }
 
-      if (Str::isUid($id_file) && !$this->hasFileLink($id_link, $id_file)) {
-        $this->insertFileLink($id_link, $id_file, $mandatory);
+      if (Str::isUid($idFile) && !$this->hasFileLink($idLink, $idFile)) {
+        $this->insertFileLink($idLink, $idFile, $mandatory);
       }
 
-      return $id_file;
+      return $idFile;
     }
 
     return null;
@@ -241,34 +231,34 @@ trait TmpFiles
     if (Str::isUid($id)) {
       $cCfg = $this->getClassCfg();
       return $this->db->rselectAll([
-        'table' => $cCfg['tables']['links'],
+        'table' => $this->class_table,
         'fields' => X::mergeArrays(
           [
-            $this->db->cfn($cCfg['arch']['links']['id'], $cCfg['tables']['links']),
-            $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
-            $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),
-            'other_link' => 'IF(l.'.$cCfg['arch']['links']['id_link'].' IS NULL, false, true)'
+            $this->db->cfn($this->fields['id'], $this->class_table),
+            $this->db->cfn($this->fields['id_file'], $this->class_table),
+            $this->db->cfn($this->fields['mandatory'], $this->class_table),
+            'other_link' => 'IF(l.'.$this->fields['id_link'].' IS NULL, false, true)'
           ],
-          array_map(fn($f) => $this->db->cfn($f, $cCfg['tables']['links']), $this->tableLinksExtrafields)
+          array_map(fn($f) => $this->db->cfn($f, $this->class_table), $this->tableLinksExtrafields)
         ),
         'join' => [[
           'table' => $cCfg['tables']['files'],
           'on' => [
             'conditions' => [[
-              'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
+              'field' => $this->db->cfn($this->fields['id_file'], $this->class_table),
               'exp' => $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),
             ]]
           ]
         ], [
-          'table' => $cCfg['tables']['links'],
+          'table' => $this->class_table,
           'type' => 'left',
           'alias' => 'l',
           'on' => [
             'conditions' => [[
-              'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
-              'exp' => 'l.'.$cCfg['arch']['links']['id_file']
+              'field' => $this->db->cfn($this->fields['id_file'], $this->class_table),
+              'exp' => 'l.'.$this->fields['id_file']
             ], [
-              'field' => 'l.'.$cCfg['arch']['links']['id_link'],
+              'field' => 'l.'.$this->fields['id_link'],
               'operator' => '!=',
               'value' => $id
             ]]
@@ -276,11 +266,11 @@ trait TmpFiles
         ]],
         'where' => [
           'conditions' => [[
-            'field' => $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links']),
+            'field' => $this->db->cfn($this->fields['id_link'], $this->class_table),
             'value' => $id
           ]]
         ],
-        'group_by' => [$this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links'])]
+        'group_by' => [$this->db->cfn($this->fields['id_file'], $this->class_table)]
       ]);
     }
 
@@ -289,20 +279,17 @@ trait TmpFiles
 
 
   /**
-   * @param string $id_link
-   * @param string $id_file
+   * @param string $idLink
+   * @param string $idFile
    * @return null|bool
    */
-  private function hasFileLink(string $id_link, string $id_file): ?bool
+  public function hasFileLink(string $idLink, string $idFile): ?bool
   {
-    if (Str::isUid($id_link) && Str::isUid($id_file)) {
-      $cCfg = $this->getClassCfg();
-      return !!$this->db->selectOne(
-        $cCfg['tables']['links'],
-        $cCfg['arch']['links']['id_file'],
+    if (Str::isUid($idLink) && Str::isUid($idFile)) {
+      return $this->dbTraitExists(
         [
-          $cCfg['arch']['links']['id_link'] => $id_link,
-          $cCfg['arch']['links']['id_file'] => $id_file
+          $this->fields['id_link'] => $idLink,
+          $this->fields['id_file'] => $idFile
         ]
       );
     }
@@ -310,19 +297,11 @@ trait TmpFiles
     return null;
   }
 
-  public function hasLinks(string $id_file): bool
+  public function hasLinks(string $idFile): bool
   {
-    if (Str::isUid($id_file)) {
-      $cCfg = $this->getClassCfg();
-      return !!$this->db->selectAll([
-        'table' => $cCfg['tables']['links'],
-        'fields' => [],
-        'where' => [
-          'conditions' => [[
-            'field' => $cCfg['arch']['links']['id_file'],
-            'value' => $id_file
-          ]]
-        ]
+    if (Str::isUid($idFile)) {
+      return $this->dbTraitExists([
+        $this->fields['id_file'] => $idFile
       ]);
     }
 
@@ -339,13 +318,12 @@ trait TmpFiles
   {
     if (Str::isUid($id)) {
       if ($links = $this->getFilesLink($id)) {
-        $cCfg = $this->getClassCfg();
         foreach ($links as $link){
-          if (!$this->deleteFileLink($id, $link[$cCfg['arch']['links']['id_file']])) {
+          if (!$this->deleteFileLink($link[$this->fields['id']])) {
             return false;
           }
 
-          $this->deleteFile($link[$cCfg['arch']['links']['id_file']]);
+          $this->deleteFile($link[$this->fields['id_file']]);
         }
       }
 
