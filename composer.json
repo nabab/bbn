@@ -19,7 +19,7 @@
     "ext-yaml": "*",
     "zordius/lightncandy": "^1.2",
     "greenlion/php-sql-parser": "^4.7",
-    "mpdf/mpdf": "^8.2",
+    "mpdf/mpdf": "^8.3",
     "natxet/cssmin": "^3.0",
     "sunra/php-simple-html-dom-parser": "^1.5",
     "tedivm/jshrink": "^1.7",
