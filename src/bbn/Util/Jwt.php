@@ -5,7 +5,7 @@ namespace bbn\Util;
 use Exception;
 use bbn\X;
 use bbn\Models\Cls\Basic;
-use Firebase\JWT\JWT as FibebaseJWT;
+use Firebase\JWT\JWT as FirebaseJWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\BeforeValidException;
@@ -58,10 +58,10 @@ class Jwt extends Basic
     $this->payload['data'] = $data;
     try {
       if ($this->key) {
-        $jwt = FibebaseJWT::encode($this->payload, $this->key, 'RS512');
+        $jwt = FirebaseJWT::encode($this->payload, $this->key, 'RS512');
       }
       else {
-        $jwt = FibebaseJWT::encode($this->payload, $this->payload['sub'], 'HS256');
+        $jwt = FirebaseJWT::encode($this->payload, $this->payload['sub'], 'HS256');
       }
     }
     catch (ExpiredException $e) {
@@ -80,7 +80,7 @@ class Jwt extends Basic
   {
 
     try {
-      $payload = FibebaseJWT::decode($jwt, new Key($this->key, 'RS512'));
+      $payload = FirebaseJWT::decode($jwt, new Key($this->key, 'RS512'));
     }
     catch (InvalidArgumentException $e) {
       // provided key/key-array is empty or malformed.

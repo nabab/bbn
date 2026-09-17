@@ -36,7 +36,7 @@
     "sepia/po-parser": "^6.0",
     "tplaner/when": "^3.2",
     "czproject/git-php": "^4.3",
-    "firebase/php-jwt": "^6.11",
+    "firebase/php-jwt": "^7.1",
     "brick/phonenumber": "^0.8.0",
     "psr/simple-cache": "^3.0",
     "wikimedia/less.php": "^5.2",
