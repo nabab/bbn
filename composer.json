@@ -18,6 +18,7 @@
     "ext-json": "*",
     "ext-yaml": "*",
     "zordius/lightncandy": "^1.2",
+    "guzzlehttp/guzzle": "^8.0",
     "greenlion/php-sql-parser": "^4.7",
     "mpdf/mpdf": "^8.3",
     "natxet/cssmin": "^3.0",
