@@ -950,7 +950,7 @@ class Appui
       foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if ($this->_currentFs->exists($path.'database.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
               foreach ($list as $t => $it) {
@@ -987,7 +987,7 @@ class Appui
       foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if ($this->_currentFs->exists($path.'database.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
               foreach ($list as $t => $it) {
@@ -1025,11 +1025,11 @@ class Appui
       foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if (('appui-core' !== $plugin['name'])
               && ('appui-options' !== $plugin['name'])
               && $this->_currentFs->exists($path.'options.json')
-              /* && file_exists(BBN_LIB_PATH.'bbn/'.$p.'/src/cfg/options.json') */
+              /* && file_exists(BBN_LIB_PATH.'bbn/'.$p.'/cfg/options.json') */
           ) {
             if ($list = $this->_currentFs->decodeContents($path.'options.json', 'json', true)) {
               if (X::isAssoc($list)) {
@@ -1069,7 +1069,7 @@ class Appui
       foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if ($this->_currentFs->exists($path.'permissions.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'permissions.json', 'json', true)) {
               if (X::isAssoc($list)) {
@@ -1109,7 +1109,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if ($this->_currentFs->exists($path . 'menu.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
               if (!empty($list['items'])) {
@@ -1160,7 +1160,7 @@ class Appui
       foreach ($routes['root'] as $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/cfg/';
           if ($this->_currentFs->exists($path . 'dashboards.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'dashboards.json', 'json', true)) {
               foreach ($list as $i => $item) {
@@ -1678,7 +1678,7 @@ class Appui
 
       if ($routes[$idx]) {
         $opt->deleteCache(null, true);
-        $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
+        $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/cfg/templates.json';
         $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
         foreach ($opt->import($tmp, $root) as $res) {
           $num += $res;
@@ -1705,7 +1705,7 @@ class Appui
         $todo = [];
         $plugins = array_values($routes);
         foreach ($plugins as &$r) {
-          $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
+          $idFile = $this->libPath() . $r['path'] . '/cfg/plugin.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1732,7 +1732,7 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
-            $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
+            $optionsFile = $this->libPath() . $r['path'] . '/cfg/options.json';
             $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
@@ -1760,7 +1760,7 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
-            $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
+            $templatesFile = $this->libPath() . $r['path'] . '/cfg/templates.json';
             if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
               $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
               if (!$tmp) {
@@ -1794,7 +1794,7 @@ class Appui
         foreach ($plugins as $r) {
           if (!empty($r['id'])) {
             $id_plugin = $r['id'];
-            $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
+            $pluginsFile = $this->libPath() . $r['path'] . '/cfg/plugins.json';
             if ($this->_currentFs->exists($pluginsFile)) {
               $tmp = $this->_currentFs->decodeContents($pluginsFile, 'json', true);
               if (!$tmp) {

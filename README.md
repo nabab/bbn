@@ -81,13 +81,13 @@ An **installer** will be released in the future.
 ## 📁 Typical Directory Structure
 
 ```
-app-ui/
+app
+├── cfg/
+│   ├── environments.yml
+│   ├── settings.yml
+│   └── custom2.php
 ├── data/
 ├── src/
-│   ├── cfg/
-│   │   ├── environments.yml
-│   │   ├── settings.yml
-│   │   └── custom2.php
 │   ├── cli/
 │   ├── components/
 │   ├── lib/
@@ -102,9 +102,10 @@ app-ui/
 │   ├── plugins/
 │   ├── router.php
 │
-├── public_html/
+├── public/
 │   ├── .htaccess
-│   └── index.php
+│   ├── index.php
+│   └── static/
 ```
 
 ---
@@ -128,7 +129,7 @@ app-ui/
 
 1. The framework identifies its environment from:
    - `hostname`
-   - `app_path` in `src/cfg/environment.yml`
+   - `app_path` in `cfg/environment.yml`
 
 2. Constants are defined and **autoload** is initialized.
 
@@ -234,7 +235,7 @@ my-app/
 }
 ```
 
-#### `src/cfg/environments.yml`
+#### `cfg/environments.yml`
 ```yaml
 environments:
   dev:
@@ -248,7 +249,7 @@ environments:
       dbname: myapp
 ```
 
-#### `src/cfg/settings.yml`
+#### `cfg/settings.yml`
 ```yaml
 mode: dev
 timezone: UTC

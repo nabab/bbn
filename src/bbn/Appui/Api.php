@@ -14,16 +14,16 @@ class Api extends Basic
 {
 
   /** @var string The certificate used to decrypt messages from appui server without own cert */
-  public const RSA_IN_TMP = 'src/cfg/from_appui_rsa.pub';
+  public const RSA_IN_TMP = 'cfg/from_appui_rsa.pub';
 
   /** @var string The certificate used to encrypt messages to appui server without own cert */
-  public const RSA_OUT_TMP = 'src/cfg/to_appui_rsa';
+  public const RSA_OUT_TMP = 'cfg/to_appui_rsa';
 
   /** @var string The certificate used to encrypt messages */
-  public const RSA_OUT = 'src/cfg/cert_rsa';
+  public const RSA_OUT = 'cfg/cert_rsa';
 
   /** @var string The public certificate used to decrypt the messages */
-  public const RSA_PUBLIC = 'src/cfg/cert_rsa.pub';
+  public const RSA_PUBLIC = 'cfg/cert_rsa.pub';
 
   /** The address of the appui server */
   public const REMOTE = 'https://central.app-ui.com/api/home';
