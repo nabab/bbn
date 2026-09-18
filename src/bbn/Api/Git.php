@@ -158,7 +158,7 @@ class Git extends GitRepoCz
 
   public function pushInRemoteT(string $repository, string $user, string $token, string $server = "github.com")
   {
-    if ($repository && $user && $passw && $server) {
+    if ($repository && $user && $token && $server) {
       $remote = NULL;
       //https://[USERNAME]:[NEW TOKEN]@github.com/[USERNAME]/[REPO].git
       $params['--repo'] = 'https://' . $user . ':' . $token . '@' . $server . '/' . $user . '/' . $repository . '.git';
