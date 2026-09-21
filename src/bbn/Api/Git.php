@@ -316,30 +316,21 @@ class Git extends GitRepoCz
       %cN committer
       %N note commit
     */
-    $cmd = 'git log --pretty=format:"%h%n%H%n%an%n%s%n%ae%n%ad%n%cN%n%N%n__commit__" --date=format-local:"%Y-%m-%d %H:%M:%S" --skip=' . $start;
 
-    if ($limit > 0) {
-      $cmd .= ' --max-count=' . $limit;
-    }
-    $field = ['sha1', 'commit', 'author', 'title_commit', 'email_author', 'date', 'committer', 'notes'];
-    $commits = [];
-    $arr = [];
-    $i = 0;
-    $logs = $this->extractFromCommand([$cmd]);
-
-    foreach ($logs as $val) {
-      if ($val !== '__commit__') {
-        $arr[$field[$i]] = $val;
-        $i++;
-      } else {
-        $commits[] = $arr;
-        $i = 0;
+    $cmd = 'git log--date=format-local:"%Y-%m-%d %H:%M:%S" --skip=' . $start . ($limit ? ' --max-count=' . $limit : '') . ' --pretty=format:\'{%n  "commit": "%H",%n  "author": "%aN <%aE>",%n  "date": "%ad",%n  "message": "%f"%n},\' $@ | perl -pe \'BEGIN{print "["}; END{print "]\n"}\' perl -pe \'s/},]/}]/\'';
+    if ($json = shell_exec($cmd)) {
+      try {
+        $commits = json_decode($json, true);
+      }
+      catch (\Exception $e) {
+        $commits = [];
       }
     }
 
     return [
       'commits' => $commits,
-      'total' => (int)$this->extractFromCommand(['git rev-list --all --count'])[0]
+      'data' => $commits,
+      'total' => shell_exec('git rev-list --all --count') ?: 0
     ];
   }
 }
