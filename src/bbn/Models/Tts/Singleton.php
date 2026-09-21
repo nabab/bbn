@@ -45,7 +45,6 @@ trait Singleton
   /**
    * Initialize the singleton by putting its own instance as static property.
    *
-   * @param self $instance The instance object.
    * @return void
    */
   protected static function singletonUnset()
@@ -73,7 +72,7 @@ trait Singleton
    */
   public static function singletonExists(): bool
   {
-    return self::$singleton_exists ? true : false;
+    return (bool)self::$singleton_exists;
   }
 
 }

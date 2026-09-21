@@ -105,6 +105,7 @@ class User extends DbCls implements Implementor
         "expire" => "expire",
       ],
       "passwords" => [
+        "id" => "id",
         "id_user" => "id_user",
         "pass" => "pass",
         "added" => "added",
