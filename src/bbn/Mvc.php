@@ -1396,6 +1396,16 @@ final class Mvc implements Api
   }
 
   /**
+   * Get the root URL, what should be in base href, including user port.
+   *
+   * @return string
+   */
+  public function getRootUrl(): string
+  {
+    return $this->env->getRootUrl();
+  }
+
+  /**
    * Get the raw request string.
    *
    * @return string

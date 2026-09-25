@@ -1826,7 +1826,7 @@ class Cache extends Basic implements CacheInterface
    */
   private static function _init(?string $engine = null): bool
   {
-    if (!self::$is_init) {
+    if (!self::$instance) {
       $tmp = false;
       try {
         $tmp = new Cache($engine);
@@ -1841,7 +1841,7 @@ class Cache extends Basic implements CacheInterface
       }
     }
 
-    return (bool)self::$is_init;
+    return (bool)self::$instance;
   }
 
 

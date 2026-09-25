@@ -179,6 +179,16 @@ trait Common
   }
 
 
+  /**
+   * Get the root URL, what should be in base href, including user port.
+   *
+   * @return string
+   */
+  public function getRootUrl(): string
+  {
+    return $this->_mvc->getRootUrl();
+  }
+
   public function getCookie()
   {
     return $this->_mvc->getCookie();

@@ -2937,7 +2937,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
    */
   public static function sum(array $ar, string $field, $where = null): float
   {
-    $tot = 0;
+    $tot = (float)0;
     if ($res = $where ? self::filter($ar, $where) : $ar) {
       foreach ($res as $r) {
         $r    = (array)$r;

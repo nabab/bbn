@@ -391,6 +391,21 @@ class Environment
 
 
   /**
+   * Get the root URL, what should be in base href, including user port.
+   *
+   * @return string
+   */
+  public function getRootUrl(): string
+  {
+    if ($_SERVER['HTTP_HOST']) {
+      return str_replace(constant('BBN_SERVER_NAME'), $_SERVER['HTTP_HOST'], constant('BBN_URL'));
+    }
+
+    return constant('BBN_URL');
+  }
+
+
+  /**
    * @param $url
    * @param ?array $post
    * @param ?array $arguments
