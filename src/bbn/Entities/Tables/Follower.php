@@ -49,14 +49,14 @@ class Follower extends EntityTable
   public function addFollower(string $id_user): ?bool
   {
     if ($this->check()) {
-      $this->entity->cDelete();
-      return (bool)$this->dbTraitInsert([
+      $res = (bool)$this->dbTraitInsert([
         $this->fields["id_entity"] => $this->getId(),
         $this->fields["id_user"] => $id_user,
       ]);
+      $this->entity->cDelete();
     }
 
-    return null;
+    return $res ?? null;
   }
 
   /**
@@ -67,14 +67,16 @@ class Follower extends EntityTable
    */
   public function removeFollower($id_user): ?bool
   {
-    if ($this->check() && ($id = $this->dbTraitSelectOne('id', [
-      $this->fields["id_entity"] => $this->getId(),
-      $this->fields["id_user"] => $id_user,
-    ]))) {
+    if ($this->check()
+      && ($id = $this->dbTraitSelectOne('id', [
+        $this->fields["id_entity"] => $this->getId(),
+        $this->fields["id_user"] => $id_user
+      ]))
+    ) {
+      $res = (bool)$this->dbTraitDelete($id);
       $this->entity->cDelete();
-      return (bool)$this->dbTraitDelete($id);
     }
 
-    return null;
+    return $res ?? null;
   }
 }

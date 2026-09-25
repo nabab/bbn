@@ -409,10 +409,9 @@ trait DbUauth
         $uauthCfg['arch']['uauth']['typology'] => self::$dbUauth->getIdTypology($type)
       ]
     ]);
-
     if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {
       if (count($res) > 1) {
-        throw new Exception(X::_("The record is associated to more than one uauth"));
+        throw new Exception(X::_("The record is associated to more than one uauth: %s type %s", $id_associate, $type));
       }
 
       return $res[0] ?? null;
@@ -432,7 +431,6 @@ trait DbUauth
   protected function dbUauthGetValue($id_auth): ?string
   {
     $this->dbUauthInitCheck();
-    
     return self::$dbUauth->getValue($id_auth);
   }
 
@@ -453,6 +451,8 @@ trait DbUauth
         [$this->class_cfg['arch']['uauth']['id_uauth'] => $id_uauth]
       );
     }
+
+    return null;
   }
 
 

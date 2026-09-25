@@ -979,7 +979,9 @@ class Medias extends DbCls
       ]))
       && ($link_type !== $media[$cf["arch"]["medias"]["type"]])
     ) {
-      $media["content"] = json_decode($media["content"], true);
+      $media["content"] = !empty($media["content"]) && Str::isJson($media["content"])
+        ? json_decode($media["content"], true)
+        : $media["content"];
       $file = $this->getPath($media);
       $media["file"] = $file;
       $media["full_path"] = $file;
