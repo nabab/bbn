@@ -8,6 +8,7 @@ use stdClass;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
+use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\DbPublicCache;
 use bbn\Models\Tts\DbPublicOps;
 use bbn\Entities\Entity;
@@ -210,31 +211,6 @@ abstract class Entities extends DbCls
   }
 
   /**
-   * Deletes records based on the given condition.
-   *
-   * @param string|array $where Condition for deletion.
-   *
-   * @return bool
-   */
-  public function delete(string|array $where)
-  {
-    return $this->dbTraitDelete($this->treatWhere($where));
-  }
-
-  /**
-   * Updates records based on the given condition and data.
-   *
-   * @param string|array $where Condition for update.
-   * @param array $data Data to update.
-   *
-   * @return bool
-   */
-  public function update(string|array $where, array $data)
-  {
-    return $this->dbTraitUpdate($this->treatWhere($where), $data);
-  }
-
-  /**
    * Updates records based on the given condition and data.
    *
    * @param string|array $where Condition for update.
@@ -265,139 +241,6 @@ abstract class Entities extends DbCls
     return null;
   }
 
-  /**
-   * Checks if a record exists based on the given condition.
-   *
-   * @param string|array $where Condition for existence check.
-   *
-   * @return bool
-   */
-  public function exists(string|array $where)
-  {
-    return $this->dbTraitExists($this->treatWhere($where));
-  }
-
-  /**
-   * Retrieves a single value based on the field and condition.
-   *
-   * @param string $field The field to select.
-   * @param string|array $filter Condition for selection.
-   * @param string|array $orderOrder for sorting results.
-   *
-   * @return mixed
-   */
-  public function selectOne(string $field, $filter = [], string|array $order= [])
-  {
-    return $this->dbTraitSelectOne($field, $filter, $order);
-  }
-
-  /**
-   * Selects a row as an object from the table through its condition.
-   *
-   * @param string|array $filter Condition for selection.
-   * @param string|array $orderOrder for sorting results.
-   * @param array $fields Fields to select.
-   *
-   * @return stdClass|null
-   */
-  public function select(
-    $filter = [],
-    string|array $order= [],
-    array $fields = [],
-  ): ?stdClass {
-    return $this->dbTraitSelect($filter, $order, $fields);
-  }
-
-  /**
-   * Selects a row as an array from the table through its condition.
-   *
-   * @param string|array $filter Condition for selection.
-   * @param string|array $orderOrder for sorting results.
-   * @param array $fields Fields to select.
-   *
-   * @return array|null
-   */
-  public function rselect(
-    $filter = [],
-    string|array $order= [],
-    array $fields = [],
-  ): ?array {
-    return $this->dbTraitRselect($filter, $order, $fields);
-  }
-
-  /**
-   * Selects multiple values based on a field and condition.
-   *
-   * @param string $field The field to select.
-   * @param array $filter Condition for selection.
-   * @param string|array $orderOrder for sorting results.
-   * @param int $limit Maximum number of results.
-   * @param int $start Starting point for results.
-   *
-   * @return array
-   */
-  public function selectValues(
-    string $field,
-    array $filter = [],
-    string|array $order= [],
-    int $limit = 0,
-    int $start = 0,
-  ): array {
-    return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
-  }
-
-  /**
-   * Returns the number of rows from the table for the given conditions.
-   *
-   * @param array $filter
-   *
-   * @return int
-   */
-  public function count(array $filter = []): int
-  {
-    return $this->dbTraitCount($filter);
-  }
-
-  /**
-   * Returns an array of rows as objects from the table for the given conditions.
-   *
-   * @param array $filter
-   * @param array $order
-   * @param int $limit
-   * @param int $start
-   * @param array $fields
-   *
-   * @return array
-   */
-  public function selectAll(
-    array $filter = [],
-    string|array $order= [],
-    int $limit = 0,
-    int $start = 0,
-    array $fields = [],
-  ): array {
-    return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
-  }
-
-  /**
-   * Returns an array of rows as arrays from the table for the given conditions.
-   *
-   * @param array $filter
-   * @param array $order
-   * @param int $limit
-   * @param int $start
-   * @param array $fields
-   * @return array
-   */
-  public function rselectAll(
-    array $filter = [],
-    string|array $order= [],
-    int $limit = 0,
-    int $start = 0,
-    array $fields = [],
-  ): array {
-    return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
-  }
 
   public function getRelations(string $id, string|null $table = null): ?array
   {

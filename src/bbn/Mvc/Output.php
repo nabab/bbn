@@ -289,7 +289,7 @@ final class Output extends Basic {
           "connect-src 'self'; " .
           "object-src 'none'; " .
           "base-uri 'self'; " .
-          "frame-ancestors 'none'; " .
+          "frame-ancestors 'self'; " .
           "form-action 'self';"
           //" 'nonce-$nonce';"
         );
