@@ -308,7 +308,7 @@ You can click the following link to access directly your account:<br>
 
     if ($user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
-      $u,
+      array_values($u),
       $where
     )
     ) {
@@ -449,15 +449,20 @@ You can click the following link to access directly your account:<br>
     }
 
     if (\is_array($user)) {
-      $idx = 'email';
+      $idx = $this->class_cfg['arch']['users']['email'];
+      $idx2 = 'email';
       if (!empty($this->class_cfg['arch']['users']['username'])) {
-        $idx = 'username';
+        $idx = $this->class_cfg['arch']['users']['username'];
+        $idx2 = 'username';
       }
       elseif (!empty($this->class_cfg['arch']['users']['login'])) {
-        $idx = 'login';
+        $idx = $this->class_cfg['arch']['users']['login'];
+        $idx2 = 'login';
       }
 
-      return $user[$idx];
+      return array_key_exists($idx, $user)
+        ? $user[$idx]
+        : (array_key_exists($idx2, $user) ? $user[$idx2] : '');
     }
 
     return '';
