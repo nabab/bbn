@@ -1102,6 +1102,10 @@ class Mailing extends DbCls
       self::$_cfgs = [];
       foreach ($cfgs as $cfg) {
         if (X::hasProps($cfg, ["host", "from"])) {
+          if (!empty($cfg['template'])) {
+            $cfg['template'] = Mvc::getContentPath() . 'mails/' . trim($cfg['template']);
+          }
+
           self::$_cfgs[] = $cfg;
         }
       }
