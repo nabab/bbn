@@ -513,6 +513,7 @@ class Runner extends Basic
   {
     X::log('Run socket server', 'socket-start');
     $socket = new Websocket();
+    $socket->useRedisStream('redis');
     $socket->on(
       'ping',
       fn(mixed $data, int $fd, Websocket $socket)
