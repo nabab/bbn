@@ -282,9 +282,9 @@ final class Output extends Basic {
           "Content-Security-Policy: " .
           "default-src 'self'; " .
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
-          "style-src 'self' 'unsafe-inline'; " .
-          "img-src 'self' data:; " .
-          "font-src 'self'; " .
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
+          "img-src 'self' data: https:; " .
+          "font-src 'self' https://fonts.gstatic.com; " .
           "worker-src 'self'; " .
           "connect-src 'self'; " .
           "object-src 'none'; " .

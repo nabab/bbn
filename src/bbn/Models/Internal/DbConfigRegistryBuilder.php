@@ -520,7 +520,8 @@ class DbConfigRegistryBuilder
       if (!empty($junction['junctions']) && is_array($junction['junctions'])) {
         $this->appendReverseDependencies(
           $registry,
-          $sourceTable,
+          //$sourceTable,
+          $junction['table'],
           $junction['junctions']
         );
       }
