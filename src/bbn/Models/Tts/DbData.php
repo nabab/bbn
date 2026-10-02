@@ -5,6 +5,7 @@ namespace bbn\Models\Tts;
 use Exception;
 use StdClass;
 use bbn\X;
+use bbn\Str;
 
 use function array_key_exists;
 
@@ -43,6 +44,10 @@ trait DbData
         foreach ($ccfg['cfg'] as $v) {
           if (array_key_exists($v['field'], $data)) {
             $cfg[$v['field']] = $data[$v['field']] ?? null;
+            if (Str::isJson($cfg[$v['field']])) {
+              $cfg[$v['field']] = json_decode($cfg[$v['field']], true);
+            }
+
             unset($data[$v['field']]);
           }
         }

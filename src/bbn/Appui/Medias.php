@@ -331,9 +331,9 @@ class Medias extends DbCls
       $filters = [];
       if (isset($cfg["filters"], $cfg["filters"]["conditions"])) {
         $filters = $cfg["filters"]["conditions"];
-        if (
-          count($filters) === 1 &&
-          $filters[0]["field"] === $cf["arch"]["medias"]["title"]
+        if ((count($filters) === 1)
+          && !empty($filters[0]["field"])
+          && ($filters[0]["field"] === $cf["arch"]["medias"]["title"])
         ) {
           unset($cfg["filters"]);
           return $this->search($filters[0]["value"], $cfg, $limit, $start);
