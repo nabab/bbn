@@ -13,6 +13,7 @@ use bbn\Str;
 use bbn\File\System;
 use bbn\Models\Tts\Retriever;
 use bbn\Models\Tts\DbOps;
+use bbn\Models\Tts\Event;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\User\Common;
 use bbn\User\Implementor;
@@ -44,6 +45,7 @@ class User extends DbCls implements Implementor
   use Retriever;
   use DbOps;
   use Common;
+  use Event;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -299,17 +301,24 @@ class User extends DbCls implements Implementor
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(Db $db, array $params = [])
+  public function __construct(Db $db)
   {
     // Setting up the class configuration
     $this->initClassCfg();
     // The database connection
     parent::__construct($db);
-
-
-    $f = &$this->class_cfg["fields"];
     self::retrieverInit($this);
+  }
 
+  public function destruct(): void
+  {
+    $this->session?->destruct();
+    self::retrieverRemove($this);
+  }
+
+  public function init(array $params = []) {
+    $f = $this->class_cfg["fields"];
+    $isCli = X::isCli();
     if ($this->isToken() && !empty($params[$f["token"]])) {
       if (!isset($this->class_cfg["tables"]["api_tokens"])) {
         throw new Exception(
@@ -509,35 +518,23 @@ class User extends DbCls implements Implementor
         ]);
 
         // Now the user is authenticated
-        $this->auth = true;
-        $this->id = $user[$this->class_cfg["arch"]["users"]["id"]];
-        $this->id_group = $user[$this->class_cfg["arch"]["users"]["id_group"]];
-
+        $this->_authenticate($user[$this->class_cfg["arch"]["users"]["id"]], true);
         $this->api_request_output = [
           "token" => $params[$f["token"]],
           "success" => true,
         ];
       }
-    } else {
+    }
+    else {
       // The client environment variables
-      $this->user_agent =
-        $_SERVER["HTTP_USER_AGENT"] ??
-        (isset($_SERVER["argv"][1]) ? "CLI" : "Unknown");
-      $this->ip_address =
-        $this->class_cfg["ip_address"] && isset($_SERVER["REMOTE_ADDR"])
-          ? $_SERVER["REMOTE_ADDR"]
-          : (isset($_SERVER["shell"])
-            ? "127.0.0.1"
-            : "");
-      $this->accept_lang =
-        $_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ($_SERVER["LANG"] ?? "");
+      $this->user_agent = $_SERVER["HTTP_USER_AGENT"] ?? ($isCli ? "CLI" : "Unknown");
+      $this->ip_address = $_SERVER["REMOTE_ADDR"] ?? ($isCli ? "127.0.0.1" : "");
+      $this->accept_lang = $_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? ($_SERVER["LANG"] ?? "");
       // Creating the session's variables if they don't exist yet
       $this->_init_session();
-
       // CLI user
-      if (x::isCli() && isset($params["id"])) {
-        $this->id = $params["id"];
-        $this->auth = true;
+      if ($isCli && isset($params["id"])) {
+        $this->_authenticate($params["id"], true);
       }
 
       // The user logs in
@@ -555,7 +552,6 @@ class User extends DbCls implements Implementor
           $this->session->destroy();
         }
       }
-
       /** @todo revise the process: dying is not the solution! */
       // The user is not known yet
       elseif ($this->isResetPasswordRequest($params)) {
@@ -577,7 +573,8 @@ class User extends DbCls implements Implementor
         } elseif ($this->check()) {
           $this->setError(18);
         }
-      } elseif (
+      }
+      elseif (
         !empty($params[$f["access_token"]]) &&
         !empty($params[$f["access_token_pass"]]) &&
         ($idUser = $this->getIdByAccessToken(
@@ -585,23 +582,13 @@ class User extends DbCls implements Implementor
           $params[$f["access_token_pass"]],
         ))
       ) {
-        $this->id = $idUser;
-        $this->id_group = $this->db->selectOne(
-          $this->class_cfg["tables"]["users"],
-          $this->class_cfg["arch"]["users"]["id_group"],
-          [$this->class_cfg["arch"]["users"]["id"] => $idUser],
-        );
-        $this->auth = true;
-      } else {
+        $this->_authenticate($idUser, true);
+      }
+      else {
         $this->checkSession();
       }
     }
-  }
 
-  public function destruct(): void
-  {
-    $this->session?->destruct();
-    self::retrieverRemove($this);
   }
 
   /**
@@ -958,6 +945,7 @@ class User extends DbCls implements Implementor
           );
         }
       } else {
+        
         $this->setError(13);
       }
     }
@@ -973,7 +961,7 @@ class User extends DbCls implements Implementor
    */
   public function closeSession($with_session = false): static
   {
-    if ($this->id && !X::isCli()) {
+    if ($this->id) {
       if ($this->session) {
         $p = &$this->class_cfg["arch"]["sessions"];
         $this->db->update(
@@ -997,8 +985,10 @@ class User extends DbCls implements Implementor
         $this->session->set([], $this->userIndex);
       }
 
+      $this->emit('disconnect');
       $this->auth = false;
       $this->id = null;
+      $this->id_group = null;
       $this->sess_cfg = null;
       $this->session->destruct();
       $this->session = null;
@@ -1444,6 +1434,16 @@ class User extends DbCls implements Implementor
   }
 
   /**
+   * Returns the database ID for the session's row if it is in the session.
+   *
+   * @return null|string
+   */
+  public function getSessionDbId(): ?string
+  {
+    return $this->_get_session("id_session");
+  }
+
+  /**
    * Completes the steps for a full authentication of the user.
    *
    * @param string $id
@@ -1480,16 +1480,6 @@ class User extends DbCls implements Implementor
     }
 
     return null;
-  }
-
-  /**
-   * Returns the database ID for the session's row if it is in the session.
-   *
-   * @return null|string
-   */
-  protected function getSessionDbId(): ?string
-  {
-    return $this->_get_session("id_session");
   }
 
   /**
@@ -1765,6 +1755,10 @@ class User extends DbCls implements Implementor
       }
     }
 
+    if ($this->auth) {
+      $this->emit('connect');
+    }
+
     return $this->auth;
   }
 
@@ -1979,11 +1973,16 @@ class User extends DbCls implements Implementor
    * @param string $id
    * @return self
    */
-  private function _authenticate(string $id): static
+  private function _authenticate(string $id, bool $force = false): static
   {
-    if ($this->check() && $id) {
-      $this->id = $id;
+    if (($force || $this->check()) && $id) {
       $this->auth = true;
+      $this->id = $id;
+      $this->id_group = $this->db->selectOne(
+        $this->class_cfg["tables"]["users"],
+        $this->class_cfg["arch"]["users"]["id_group"],
+        [$this->class_cfg["arch"]["users"]["id"] => $id],
+      );
       if (!X::isCli() && !$this->isFake()) {
         $update = [
           $this->class_cfg["arch"]["sessions"]["id_user"] => $id,
@@ -2005,6 +2004,7 @@ class User extends DbCls implements Implementor
         $this->db->update($this->class_cfg["tables"]["sessions"], $update, [
           $this->class_cfg["arch"]["sessions"]["id"] => $this->getSessionDbId(),
         ]);
+        $this->emit('activity');
       }
     }
 

@@ -14,12 +14,18 @@ final class InternalEvent
 
   public function __construct(
     private string $name,
+    private mixed $target,
     private array $data = []
   )
   {
     
   }
 
+  public function getTarget()
+  {
+    return $this->target;
+  }
+  
   public function getName(): string
   {
     return $this->name;

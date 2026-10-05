@@ -11,6 +11,8 @@ use bbn\Util\Timer;
 use bbn\Net\Websocket;
 use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
+use Swoole\Http\Request;
+
 use function count;
 use function defined;
 use function call_user_func;
@@ -513,6 +515,67 @@ class Runner extends Basic
   {
     X::log('Run socket server', 'socket-start');
     $socket = new Websocket();
+    $socket->useRedisStream('redis');
+
+
+
+    $demo = 1;
+    if ($demo) {
+      // LOCAL DEMO ONLY. Every visitor is user 42. Never expose this mode publicly.
+      $socket->allowOrigins(['https://apst-app-local.bbn.io', 'http://apst-app-local.bbn.io']);
+      $socket->authenticateWith(static fn(Request $request): int => 42);
+    } else {
+      // Production must supply the application's real session validation callback.
+      // The file must return callable(Request, Websocket): int|string|null.
+      // Null rejects; a validated user ID binds the connection to that user.
+      $authFile = getenv('WS_AUTH_BOOTSTRAP');
+      $origin = getenv('WS_ORIGIN');
+      if (!$authFile || !is_file($authFile) || !$origin) {
+        throw new RuntimeException('Set WS_AUTH_BOOTSTRAP and WS_ORIGIN, or WS_DEMO=1 locally.');
+      }
+      $authenticate = require $authFile;
+      if (!is_callable($authenticate)) {
+        throw new RuntimeException('WS_AUTH_BOOTSTRAP must return a session-validation callback.');
+      }
+      $socket->allowOrigins([$origin])->authenticateWith($authenticate);
+    }
+
+    // Only authenticated clients may subscribe, and only to these public topics.
+    // Extend this policy with tenant/room permissions for private events.
+    $socket->authorizeSubscriptions(static function (int $fd, string $event, Websocket $ws): bool {
+      return $ws->getUserId($fd) !== null && in_array($event, ['chat.message', 'orders.updated'], true);
+    });
+
+    $socket->on('ping', static function (mixed $data, int $fd, Websocket $ws): void {
+      $ws->send($fd, 'pong', ['time' => time()]);
+    });
+    $socket->on('message', static function (mixed $data, int $fd, Websocket $ws): void {
+      $ws->send($fd, 'message', $data);
+    });
+    $socket->on('clients', static function (mixed $data, int $fd, Websocket $ws): void {
+      if (!is_array($data) || !is_array($data['clients'] ?? null)) {
+        throw new InvalidArgumentException('Expected data.clients to be an object.');
+      }
+      // This acknowledges metadata only. It does NOT execute your old poll endpoint.
+      $ws->send($fd, 'clients.updated', ['count' => count($data['clients'])]);
+    });
+    $socket->on('chat.send', static function (mixed $data, int $fd, Websocket $ws): void {
+      if (!is_array($data) || !is_string($data['text'] ?? null)) {
+        throw new InvalidArgumentException('Expected data.text.');
+      }
+      $text = trim($data['text']);
+      if ($text === '' || strlen($text) > 2000) {
+        throw new InvalidArgumentException('Chat text must be between 1 and 2000 bytes.');
+      }
+      // Example in-memory public chat. Persist/authorize real messages in your application.
+      $ws->emit('chat.message', [
+        'id' => bin2hex(random_bytes(16)),
+        'user_id' => $ws->getUserId($fd),
+        'text' => $text,
+        'time' => time(),
+      ]);
+    });
+
     $socket->on(
       'ping',
       fn(mixed $data, int $fd, Websocket $socket)

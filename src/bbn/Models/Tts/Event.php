@@ -70,7 +70,7 @@ trait Event
       $o->setData($args);
     }
     else {
-      $o = new InternalEvent($event, $args);
+      $o = new InternalEvent($event, $this, $args);
     }
     foreach ($this->listeners[$event] ?? [] as $listener) {
       $listener($o);
