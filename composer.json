@@ -22,7 +22,7 @@
     "zordius/lightncandy": "^1.2",
     "guzzlehttp/guzzle": "^8.0",
     "greenlion/php-sql-parser": "^4.7",
-    "mpdf/mpdf": "^8.3",
+    "mpdf/mpdf": "^8.2",
     "natxet/cssmin": "^3.0",
     "sunra/php-simple-html-dom-parser": "^1.5",
     "tedivm/jshrink": "^1.7",
