@@ -18,7 +18,7 @@
     "ext-mbstring": "*",
     "ext-json": "*",
     "ext-yaml": "*",
-    "composer/composer": "^2.9",
+    "composer/composer": "^2.10",
     "zordius/lightncandy": "^1.2",
     "guzzlehttp/guzzle": "^8.0",
     "greenlion/php-sql-parser": "^4.7",
