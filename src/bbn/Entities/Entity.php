@@ -529,6 +529,7 @@ class Entity
 
   public function createRecords(string $table, array $ids): array
   {
+    $cfg = $this->entities->getClassCfg();
     $identity = $this->identity();
     $address = $this->address();
     $medias = new Medias($this->db);
@@ -615,7 +616,7 @@ class Entity
       }
     }
     else {
-      foreach ($ids as $id) {
+      foreach ($ids as $i => $id) {
         try {
           if ($d = $this->db->rselect($table, [], ['id' => $id])) {
             $res[$id] = [
@@ -726,7 +727,9 @@ class Entity
 
     $res = $this->createRecords($table, [$id]);
     $this->records[$table][$id] = $res[$id] ?? null;
-    $this->cacheSet($this->getId(), $sr, $this->records);
+    $recs = $this->records;
+    $this->cDelete();
+    $this->cacheSet($this->getId(), $sr, $recs);
     return true;
   }
 
@@ -750,7 +753,9 @@ class Entity
     }
 
     unset($this->records[$table][$id]);
-    $this->cacheSet($this->getId(), $sr, $this->records);
+    $recs = $this->records;
+    $this->cDelete();
+    $this->cacheSet($this->getId(), $sr, $recs);
     return true;
   }
 

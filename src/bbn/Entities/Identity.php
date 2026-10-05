@@ -185,7 +185,7 @@ class Identity extends DbCls
    * @param mixed $id The ID of the person.
    * @return array|null Detailed information about the person.
    */
-  public function getInfo($id): ?array
+  public function getInfo(string $id): ?array
   {
     $res = $this->dbTraitRselect($id);
     if (!empty($res)) {
@@ -305,7 +305,7 @@ class Identity extends DbCls
    * @param mixed $fn The new data for the person.
    * @return int The ID of the updated person.
    */
-  public function update($id, $fn): int
+  public function update(string $id, array $fn): int
   {
     $ok = 0;
     if ($info = $this->getInfo($id)) {
