@@ -6,11 +6,12 @@ namespace bbn\Net;
 use InvalidArgumentException;
 use JsonException;
 use RuntimeException;
+use Throwable;
+use bbn\X;
 use Swoole\Http\Request;
 use Swoole\Process;
 use Swoole\WebSocket\Frame;
 use Swoole\WebSocket\Server;
-use Throwable;
 
 /** One Swoole worker, local user/subscription indexes, optional Redis bridge. */
 final class Websocket
@@ -101,11 +102,11 @@ final class Websocket
     try {
       WebsocketProtocol::name($type);
       if (!isset($this->activeFds[$fd])) {
-        $this->log("Send skipped: fd={$fd} type={$type}; no active application connection");
+        X::log("Send skipped: fd={$fd} type={$type}; no active application connection", str_replace('\\', '-', __CLASS__));
         return false;
       }
       if (!$this->server->isEstablished($fd)) {
-        $this->log("Send skipped: fd={$fd} type={$type}; WebSocket is not established");
+        X::log("Send skipped: fd={$fd} type={$type}; WebSocket is not established", str_replace('\\', '-', __CLASS__));
         return false;
       }
       $json = json_encode(['type' => $type, 'data' => $data],
@@ -113,13 +114,67 @@ final class Websocket
       if (strlen($json) > 2 * 1024 * 1024) {
         throw new RuntimeException('Outgoing message is too large.');
       }
-      $sent = (bool) $this->server->push($fd, $json);
-      if (!$sent) {
-        $this->log("WebSocket push returned false: fd={$fd} type={$type}");
+
+      $pushStarted = hrtime(true);
+      $result = $this->server->push($fd, $json);
+
+      if ($result === true) {
+        return true;
       }
-      return $sent;
-    } catch (Throwable $e) {
-      $this->log('Send failed for fd ' . $fd . ': ' . $e->getMessage());
+
+      // Capture errors BEFORE logging or making other server calls.
+      $errorCode = $this->server->getLastError();
+
+      $systemErrno = function_exists('swoole_errno')
+        ? \swoole_errno()
+        : null;
+
+      $pushMs = (hrtime(true) - $pushStarted) / 1_000_000;
+
+      $errorMessage = function_exists('swoole_strerror')
+        ? \swoole_strerror($errorCode, 9)
+        : null;
+
+      // This is a snapshot AFTER the failed write.
+      $info = $this->server->getClientInfo($fd);
+
+      X::log(
+        'WebSocket push diagnostic: ' . json_encode(
+          [
+            'time' => microtime(true),
+            'container' => gethostname(),
+            'pid' => getmypid(),
+            'worker_id' => $this->server->worker_id,
+            'fd' => $fd,
+            'type' => $type,
+            'bytes' => strlen($json),
+            'return_type' => get_debug_type($result),
+            'error_code' => $errorCode,
+            'error_message' => $errorMessage,
+            'last_system_errno' => $systemErrno,
+            'push_ms' => round($pushMs, 3),
+            'established_after' => $this->server->isEstablished($fd),
+            'websocket_status' => is_array($info)
+              ? ($info['websocket_status'] ?? null)
+              : null,
+            'socket_fd' => is_array($info)
+              ? ($info['socket_fd'] ?? null)
+              : null,
+            'close_errno' => is_array($info)
+              ? ($info['close_errno'] ?? null)
+              : null,
+          ],
+          JSON_THROW_ON_ERROR
+          | JSON_UNESCAPED_SLASHES
+          | JSON_INVALID_UTF8_SUBSTITUTE
+        ), str_replace('\\', '-', __CLASS__)
+      );
+
+      return false;
+
+    }
+    catch (Throwable $e) {
+      X::log('Send failed for fd ' . $fd . ': ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
       return false;
     }
   }
@@ -286,7 +341,7 @@ final class Websocket
       $bridge = new RedisStreamBridge(
         $config,
         static fn(string $json): bool => (bool) $server->sendMessage($json, 0),
-        fn(string $message) => $this->log($message)
+        fn(string $message) => X::log($message, str_replace('\\', '-', __CLASS__))
       );
       $bridge->run();
     }, false, 2, false); // Blocking isolated process; no coroutine/event-loop dependency.
@@ -298,59 +353,59 @@ final class Websocket
   private function registerEvents(): void
   {
     $this->server->on('Start', function (): void {
-      $this->log("WebSocket server listening on {$this->host}:{$this->port}");
+      X::log("WebSocket server listening on {$this->host}:{$this->port}", str_replace('\\', '-', __CLASS__));
     });
     $this->server->on('Open', function (Server $server, Request $request): void {
       $fd = (int) $request->fd;
-      $this->log("WebSocket Open fd={$fd}");
+      X::log("WebSocket Open fd={$fd}", str_replace('\\', '-', __CLASS__));
       $this->cleanupFd($fd);
       unset($this->activeFds[$fd]);
       try {
         if ($this->origins !== null
           && !in_array($request->header['origin'] ?? '', $this->origins, true)
         ) {
-          $this->log("WebSocket origin rejected fd={$fd}");
+          X::log("WebSocket origin rejected fd={$fd}", str_replace('\\', '-', __CLASS__));
           $server->disconnect($fd, 4003, 'Origin not allowed');
           return;
         }
         if ($this->authenticator !== null) {
-          $this->log("WebSocket authentication started fd={$fd}");
+          X::log("WebSocket authentication started fd={$fd}", str_replace('\\', '-', __CLASS__));
           $id = ($this->authenticator)($request, $this);
           if ($id === null) {
-            $this->log("WebSocket authentication rejected fd={$fd}");
+            X::log("WebSocket authentication rejected fd={$fd}", str_replace('\\', '-', __CLASS__));
             $server->disconnect($fd, 4001, 'Authentication required');
             return;
           }
           $this->bindUser($fd, WebsocketProtocol::userId($id));
-          $this->log("WebSocket authentication completed fd={$fd}");
+          X::log("WebSocket authentication completed fd={$fd}", str_replace('\\', '-', __CLASS__));
         } else {
-          $this->log("WebSocket authentication not configured fd={$fd}");
+          X::log("WebSocket authentication not configured fd={$fd}", str_replace('\\', '-', __CLASS__));
         }
         if (!$server->isEstablished($fd)) {
-          $this->log("WebSocket setup aborted: fd={$fd} is not established");
+          X::log("WebSocket setup aborted: fd={$fd} is not established", str_replace('\\', '-', __CLASS__));
           $this->cleanupFd($fd);
           return;
         }
         $this->activeFds[$fd] = true;
         foreach ($this->connectedCallbacks as $index => $callback) {
-          $this->log("WebSocket connected callback {$index} started fd={$fd}");
+          X::log("WebSocket connected callback {$index} started fd={$fd}", str_replace('\\', '-', __CLASS__));
           $callback($fd, $request);
-          $this->log("WebSocket connected callback {$index} completed fd={$fd}");
+          X::log("WebSocket connected callback {$index} completed fd={$fd}", str_replace('\\', '-', __CLASS__));
           if (!isset($this->activeFds[$fd])) {
-            $this->log("WebSocket setup stopped by callback fd={$fd}");
+            X::log("WebSocket setup stopped by callback fd={$fd}", str_replace('\\', '-', __CLASS__));
             return;
           }
         }
         // This means application-ready, not merely HTTP upgrade completed.
         // A failed readiness frame must not leave a silent, unready connection.
         if (!$this->send($fd, self::EVT_CONNECTED, ['fd' => $fd, 'time' => time()])) {
-          $this->log("WebSocket connected envelope FAILED fd={$fd}");
+          X::log("WebSocket connected envelope FAILED fd={$fd}", str_replace('\\', '-', __CLASS__));
           $this->disconnect($fd, 4000, 'Unable to send server readiness');
           return;
         }
-        $this->log("WebSocket connected envelope queued fd={$fd}");
+        X::log("WebSocket connected envelope queued fd={$fd}", str_replace('\\', '-', __CLASS__));
       } catch (Throwable $e) {
-        $this->log('Connection setup failed: ' . $e->getMessage());
+        X::log('Connection setup failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
         $this->disconnect($fd, 4001, 'Connection rejected');
       }
     });
@@ -376,16 +431,16 @@ final class Websocket
             break;
         }
       } catch (Throwable $e) {
-        $this->log('Pipe dispatch failed: ' . $e->getMessage());
+        X::log('Pipe dispatch failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
       }
     });
     $this->server->on('Close', function (Server $server, int $fd): void {
       $this->handleDisconnect($fd, 'close');
     });
     $this->server->on('WorkerError', function (Server $server, int $id, int $pid, int $code, int $signal): void {
-      $this->log("Worker failure: id=$id pid=$pid exit=$code signal=$signal");
+      X::log("Worker failure: id=$id pid=$pid exit=$code signal=$signal", str_replace('\\', '-', __CLASS__));
     });
-    $this->server->on('Shutdown', function (): void { $this->log('WebSocket server stopped'); });
+    $this->server->on('Shutdown', function (): void { X::log('WebSocket server stopped', str_replace('\\', '-', __CLASS__)); });
   }
 
   private function handleMessage(Frame $frame): void
@@ -400,7 +455,7 @@ final class Websocket
         throw new InvalidArgumentException('Message must be an object.');
       }
       $type = WebsocketProtocol::name($message['type'] ?? null);
-      $this->log("WebSocket Message fd={$fd} type={$type}");
+      X::log("WebSocket Message fd={$fd} type={$type}", str_replace('\\', '-', __CLASS__));
       $data = $message['data'] ?? null;
       if ($type === self::MSG_SUBSCRIBE) {
         if (!is_string($data) && !is_array($data)) {
@@ -434,7 +489,7 @@ final class Websocket
     } catch (InvalidArgumentException $e) {
       $this->send($fd, self::EVT_ERROR, ['message' => $e->getMessage()]);
     } catch (Throwable $e) {
-      $this->log('Message processing failed: ' . $e->getMessage());
+      X::log('Message processing failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
       $this->send($fd, self::EVT_ERROR, ['message' => 'Internal server error']);
     }
   }
@@ -447,7 +502,7 @@ final class Websocket
     if ($wasActive) {
       foreach ($this->disconnectedCallbacks as $callback) {
         try { $callback($fd, $reason); }
-        catch (Throwable $e) { $this->log('Disconnect callback failed: ' . $e->getMessage()); }
+        catch (Throwable $e) { X::log('Disconnect callback failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__)); }
       }
     }
   }
@@ -471,16 +526,5 @@ final class Websocket
       unset($this->eventSubscribers[$event]);
     }
     return true;
-  }
-
-  private function log(mixed $message): void
-  {
-    try {
-      if (class_exists(\bbn\X::class)) {
-        \bbn\X::log($message, 'websocket');
-      }
-    } catch (Throwable) {}
-    $text = is_string($message) ? $message : json_encode($message, JSON_PARTIAL_OUTPUT_ON_ERROR);
-    error_log('[' . date('Y-m-d H:i:s') . '] ' . ($text ?: '[unprintable]'));
   }
 }
