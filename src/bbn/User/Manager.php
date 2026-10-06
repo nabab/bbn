@@ -765,11 +765,16 @@ You can click the following link to access directly your account:<br>
       );
       $id_link = $this->db->lastId();
       $url = constant('BBN_URL');
-      if (Str::sub($url, -1) === '/') {
-        $url = Str::sub($url, 0, -1);
+      if (!str_starts_with($url, '/')) {
+        $url .= '/';
       }
 
-      $url .= constant("BBN_CUR_PATH");
+      if (str_starts_with(constant("BBN_CUR_PATH"), '/')) {
+        $url .= Str::sub(constant("BBN_CUR_PATH"), 1);
+      }
+      else {
+        $url .= constant("BBN_CUR_PATH");
+      }
 
       if (!empty($usr['id_group'])
         && ($group = $this->getGroup($usr['id_group']))

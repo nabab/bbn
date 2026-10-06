@@ -198,10 +198,7 @@ class Address extends DbCls
     if ($this->getInfo($id)) {
       $rels = $this->relations($id);
       if ($with_links || empty($rels)) {
-        foreach ($rels as $k => $r) {
-          //$this->db->delete('amiral_liens', ['id' => $k]);
-        }
-        return $this->db->delete('bbn_addresses', ['id' => $id]);
+        return $this->dbTraitDelete($id);
       }
     }
     return false;
@@ -519,7 +516,7 @@ class Address extends DbCls
       }
       if (!$changed) {
         return $id;
-      } else if ((count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id])) {
+      } else if ((count($fn) > 0) && $this->dbTraitUpdate($id, $fn)) {
         $this->cDelete($id);
         return $id;
       }

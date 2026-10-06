@@ -254,14 +254,11 @@ class Link extends EntityTable
     if (!empty($this->cfg["single"]) && ($ex = $this->get())) {
       if (
         (!empty($this->cfg["identity"]) &&
-          $data[$this->fields[$rel["identity"]]] !==
-            $ex[$this->fields[$rel["identity"]]]) ||
+          $data[$this->fields[$rel["identity"]]] !== $ex[$this->fields[$rel["identity"]]]) ||
         (!empty($this->cfg["address"]) &&
-          $data[$this->fields[$rel["address"]]] !==
-            $ex[$this->fields[$rel["address"]]]) ||
+          $data[$this->fields[$rel["address"]]] !== $ex[$this->fields[$rel["address"]]]) ||
         (!empty($this->cfg["option"]) &&
-          $data[$this->fields[$rel["option"]]] !==
-            $ex[$this->fields[$rel["option"]]])
+          $data[$this->fields[$rel["option"]]] !== $ex[$this->fields[$rel["option"]]])
       ) {
         if ($this->dbTraitDelete($ex[$this->fields["id"]])) {
           return $this->dbTraitInsert($data);
