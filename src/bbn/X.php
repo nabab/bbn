@@ -2618,10 +2618,10 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
         return $v1 !== null;
 
       case 'isempty':
-        return $v1 === '';
+        return empty($v1);
 
       case 'isnotempty':
-        return $v1 !== '';
+        return !empty($v1);
 
       case 'loose_eq':
       default:

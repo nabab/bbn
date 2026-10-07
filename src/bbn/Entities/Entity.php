@@ -708,17 +708,18 @@ class Entity
   public function updateRecord(string $table, string $id): bool
   {
     $sr = "relatedRecords";
+    $sr2 = "relatedIds";
     $cfg = Entities::dbConfigGetTableClasses($this->db);
     if (!isset($cfg[$table])) {
       throw new Exception(X::_("The table %s is not configured", $table));
     }
+
     $this->getRecords($table);
+    $rIds = false;
     if (!isset($this->records[$table][$id])) {
-      $sr2 = "relatedIds";
       if ($this->cacheHas($this->getId(), $sr2)) {
-        $cached = $this->cacheGet($this->getId(), $sr2);
-        $cached[$table][] = $id;
-        $this->cacheSet($this->getId(), $sr2, $cached);
+        $rIds = $this->cacheGet($this->getId(), $sr2);
+        $rIds[$table][] = $id;
       }
     }
 
@@ -726,6 +727,10 @@ class Entity
     $this->records[$table][$id] = $res[$id] ?? null;
     $recs = $this->records;
     $this->cDelete();
+    if (!empty($rIds)) {
+      $this->cacheSet($this->getId(), $sr2, $rIds);
+    }
+
     $this->cacheSet($this->getId(), $sr, $recs);
     return true;
   }
@@ -733,25 +738,29 @@ class Entity
   public function deleteRecord(string $table, string $id): bool
   {
     $sr = "relatedRecords";
+    $sr2 = "relatedIds";
     $cfg = Entities::dbConfigGetTableClasses($this->db);
     if (!isset($cfg[$table])) {
       throw new Exception(X::_("The table %s is not configured", $table));
     }
-    $this->getRecords($table);
-    $sr2 = "relatedIds";
-    if ($this->cacheHas($this->getId(), $sr2)) {
-      $cached = $this->cacheGet($this->getId(), $sr2);
-      $idx = array_search($id, $cached[$table]);
-      if ($idx !== false) {
-        array_splice($cached[$table], $idx, 1);
-      }
 
-      $this->cacheSet($this->getId(), $sr2, $cached);
+    $this->getRecords($table);
+    $rIds = false;
+    if ($this->cacheHas($this->getId(), $sr2)) {
+      $rIds = $this->cacheGet($this->getId(), $sr2);
+      $idx = array_search($id, $rIds[$table]);
+      if ($idx !== false) {
+        array_splice($rIds[$table], $idx, 1);
+      }
     }
 
     unset($this->records[$table][$id]);
     $recs = $this->records;
     $this->cDelete();
+    if (!empty($rIds)) {
+      $this->cacheSet($this->getId(), $sr2, $rIds);
+    }
+
     $this->cacheSet($this->getId(), $sr, $recs);
     return true;
   }
