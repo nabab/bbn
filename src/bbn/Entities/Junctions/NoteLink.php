@@ -60,6 +60,16 @@ class NoteLink extends EntityTable
     }
   }
 
+  public function get(string $id_note): ?array
+  {
+    return $this->note->get($id_note);
+  }
+
+  public function latest(string $id_note): ?int
+  {
+    return $this->note->latest($id_note);
+  }
+
   private static function noteLinkSetNote(Note $note)
   {
     self::$_note = $note;

@@ -542,13 +542,10 @@ class Entity
         $table === 'bbn_identities_uauth' => new $cfg[$table]['class']($this->db, $identity),
         true => $this->entities->getDbObject($table, $cfg[$table], $this->db, $this->entities, $this)
       };
-      if (method_exists($obj, 'dbCacheGetSet')) {
+      if (method_exists($obj, 'dbCacheSet')) {
         foreach ($ids as $i => $id) {
           try {
-            $tmp = $obj->dbCacheGetSet($id);
-            if (!$tmp) {
-              $tmp = $obj->dbCacheSet($id);
-            }
+            $tmp = $obj->dbCacheSet($id);
             if (!$tmp) {
               throw new Exception(X::_("The record with id %s at index %d in table %s does not exist or is unreachable through class %s", $id, $i, $table, $cfg[$table]['class']));
             }

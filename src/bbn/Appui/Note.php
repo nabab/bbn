@@ -278,7 +278,8 @@ class Note extends DbCls
     string|null $excerpt = "",
     bool $pinned = false,
     bool $important = false,
-  ): ?string {
+  ): ?string
+  {
     $props = [
       "content",
       "id_type",
@@ -501,11 +502,7 @@ class Note extends DbCls
   public function setType(string $id_note, string $type): int
   {
     $cf = &$this->class_cfg;
-    return $this->db->update(
-      $cf["tables"]["notes"],
-      [$cf["arch"]["notes"]["id_type"] => $type],
-      [$cf["arch"]["notes"]["id"] => $id_note],
-    );
+    return $this->dbTraitUpdate($id_note, [$cf["arch"]["notes"]["id_type"] => $type]);
   }
 
   /**
@@ -518,28 +515,24 @@ class Note extends DbCls
   public function setOption(string $id_note, string $id_option): int
   {
     $cf = &$this->class_cfg;
-    return $this->db->update(
-      $cf["tables"]["notes"],
-      [$cf["arch"]["notes"]["id_option"] => $id_option],
-      [$cf["arch"]["notes"]["id"] => $id_note],
-    );
+    return $this->dbTraitUpdate($id_note, [$cf["arch"]["notes"]["id_option"] => $id_option]);
   }
 
   /**
-   * @param $id
-   * @return mixed
+   * @param string $id
+   * @return ?int
    */
-  public function latest($id)
+  public function latest(string $id): ?int
   {
     $cf = &$this->class_cfg;
 
-    return $this->db->selectOne(
+    return (int)$this->db->selectOne(
       $cf["tables"]["versions"],
       "MAX(" . $cf["arch"]["versions"]["version"] . ")",
       [
         $cf["arch"]["versions"]["id_note"] => $id,
       ],
-    );
+    ) ?: null;
   }
 
   public function updateToLatest(string $id): bool
@@ -591,21 +584,14 @@ class Note extends DbCls
     string $id,
     ?int $version = null,
     bool $simple = false,
-  ): ?array {
+  ): ?array
+  {
     $cf = &$this->class_cfg;
     if (!\is_int($version)) {
       $version = $this->latest($id) ?: 1;
     }
 
-    if (
-      $res = $this->db->rselect(
-        $cf["tables"]["notes"],
-        [],
-        [
-          $cf["arch"]["notes"]["id"] => $id,
-        ],
-      )
-    ) {
+    if ($res = $this->dbTraitRselect($id)) {
       if (
         $tmp = $this->db->rselect(
           $cf["tables"]["versions"],
@@ -906,13 +892,7 @@ class Note extends DbCls
         ];
       }
 
-      return $db->selectOne([
-        "table" => $cf["table"],
-        "fields" => ["COUNT(DISTINCT " . $cf["arch"]["notes"]["id"] . ")"],
-        "where" => [
-          "conditions" => $where,
-        ],
-      ]);
+      return $this->dbTraitSelectOne("COUNT(DISTINCT " . $cf["arch"]["notes"]["id"] . ")", $where);
     }
 
     return false;
@@ -2209,11 +2189,7 @@ class Note extends DbCls
    */
   public function pin(string $id): bool
   {
-    return (bool) $this->db->update(
-      $this->class_table,
-      [$this->fields["pinned"] => 1],
-      [$this->fields["id"] => $id],
-    );
+    return (bool) $this->dbTraitUpdate($id, [$this->fields["pinned"] => 1]);
   }
 
   /**
@@ -2223,11 +2199,7 @@ class Note extends DbCls
    */
   public function unpin(string $id): bool
   {
-    return (bool) $this->db->update(
-      $this->class_table,
-      [$this->fields["pinned"] => 0],
-      [$this->fields["id"] => $id],
-    );
+    return (bool) $this->dbTraitUpdate($id, [$this->fields["pinned"] => 0]);
   }
 
   /**
@@ -2237,11 +2209,7 @@ class Note extends DbCls
    */
   public function setImportant(string $id): bool
   {
-    return (bool) $this->db->update(
-      $this->class_table,
-      [$this->fields["important"] => 1],
-      [$this->fields["id"] => $id],
-    );
+    return (bool) $this->dbTraitUpdate($id, [$this->fields["important"] => 1]);
   }
 
   /**
@@ -2251,11 +2219,7 @@ class Note extends DbCls
    */
   public function unsetImportant(string $id): bool
   {
-    return (bool) $this->db->update(
-      $this->class_table,
-      [$this->fields["important"] => 0],
-      [$this->fields["id"] => $id],
-    );
+    return (bool) $this->dbTraitUpdate($id, [$this->fields["important"] => 0]);
   }
 
   /**

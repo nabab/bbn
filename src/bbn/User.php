@@ -2004,6 +2004,7 @@ class User extends DbCls implements Implementor
         $this->db->update($this->class_cfg["tables"]["sessions"], $update, [
           $this->class_cfg["arch"]["sessions"]["id"] => $this->getSessionDbId(),
         ]);
+        X::log('authenticate', 'user-auth');
         $this->emit('activity');
       }
     }

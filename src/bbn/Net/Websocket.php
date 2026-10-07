@@ -350,6 +350,9 @@ final class Websocket
     return $this;
   }
 
+  /**
+   * Register server events (back-end)
+   */
   private function registerEvents(): void
   {
     $this->server->on('Start', function (): void {
