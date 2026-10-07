@@ -522,7 +522,7 @@ class Runner extends Basic
     $demo = 1;
     if ($demo) {
       // LOCAL DEMO ONLY. Every visitor is user 42. Never expose this mode publicly.
-      $socket->allowOrigins(['https://apst-app-local.bbn.io', 'http://apst-app-local.bbn.io']);
+      $socket->allowOrigins(['https://' . constant('BBN_SERVER_NAME')]);
       $socket->authenticateWith(static fn(Request $request): int => 42);
     } else {
       // Production must supply the application's real session validation callback.

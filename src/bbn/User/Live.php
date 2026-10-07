@@ -61,6 +61,7 @@ class Live
   public static function userConnect(Redis $redis, User $user): void
   {
     if ($userId = $user->getId()) {
+      $t = time();
       $key = 'appui:users:online';
       $redis->zAdd($key, time(), $userId);
     }
@@ -77,8 +78,11 @@ class Live
   public static function userActivity(Redis $redis, User $user): void
   {
     if ($userId = $user->getId()) {
+      $t = time();
       $key = 'appui:users:online';
-      $redis->zAdd($key, time(), $userId);
+      $redis->zAdd($key, $t, $userId);
+      $key = 'appui:users:activity';
+      $redis->zAdd($key, $t, $userId);
     }
   }
 }
