@@ -109,10 +109,9 @@ class Cron extends Basic
 
 
   /**
-   * @param array $cfg
    * @return Controller|null
    */
-  public function getController(array $cfg = []): ?Controller
+  public function getController(): ?Controller
   {
     if ($this->check() && $this->controller) {
       return $this->controller;

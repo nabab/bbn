@@ -1,5 +1,5 @@
 <?php
-/* @var $this mvc */
+/** @var $this mvc */
 
 namespace bbn\Ide;
 

@@ -939,7 +939,7 @@ class Router
           }
           // Otherwise $file will remain undefined
           else {
-            /* @todo throw an alert as there is no default index */
+            /** @todo throw an alert as there is no default index */
             $this->log(X::_('Impossible to find a route'));
 
             return null;

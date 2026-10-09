@@ -2,15 +2,18 @@
 namespace bbn\Cron;
 
 use Exception;
+use RuntimeException;
+use InvalidArgumentException;
 use bbn\Str;
 use bbn\X;
 use bbn\Db;
 use bbn\Cron;
 use bbn\Mvc\Controller;
+use bbn\User\Live;
 use bbn\Util\Timer;
-use bbn\Net\Websocket;
 use bbn\Appui\Observer;
 use bbn\Models\Cls\Basic;
+use bbn\Net\Websocket;
 use Swoole\Http\Request;
 
 use function count;
@@ -519,26 +522,10 @@ class Runner extends Basic
 
 
 
-    $demo = 1;
-    if ($demo) {
-      // LOCAL DEMO ONLY. Every visitor is user 42. Never expose this mode publicly.
-      $socket->allowOrigins(['https://' . constant('BBN_SERVER_NAME')]);
-      $socket->authenticateWith(static fn(Request $request): int => 42);
-    } else {
-      // Production must supply the application's real session validation callback.
-      // The file must return callable(Request, Websocket): int|string|null.
-      // Null rejects; a validated user ID binds the connection to that user.
-      $authFile = getenv('WS_AUTH_BOOTSTRAP');
-      $origin = getenv('WS_ORIGIN');
-      if (!$authFile || !is_file($authFile) || !$origin) {
-        throw new RuntimeException('Set WS_AUTH_BOOTSTRAP and WS_ORIGIN, or WS_DEMO=1 locally.');
-      }
-      $authenticate = require $authFile;
-      if (!is_callable($authenticate)) {
-        throw new RuntimeException('WS_AUTH_BOOTSTRAP must return a session-validation callback.');
-      }
-      $socket->allowOrigins([$origin])->authenticateWith($authenticate);
-    }
+    // LOCAL DEMO ONLY. Every visitor is user 42. Never expose this mode publicly.
+    $socket->allowOrigins(['https://' . constant('BBN_SERVER_NAME')]);
+    $socket->authenticateWith(fn(Request $request, Websocket $socket): ?string => Live::checkSocketTicket($request, $socket));
+
 
     // Only authenticated clients may subscribe, and only to these public topics.
     // Extend this policy with tenant/room permissions for private events.
@@ -546,50 +533,20 @@ class Runner extends Basic
       return $ws->getUserId($fd) !== null && in_array($event, ['chat.message', 'orders.updated'], true);
     });
 
-    $socket->on('ping', static function (mixed $data, int $fd, Websocket $ws): void {
-      $ws->send($fd, 'pong', ['time' => time()]);
-    });
-    $socket->on('message', static function (mixed $data, int $fd, Websocket $ws): void {
-      $ws->send($fd, 'message', $data);
-    });
-    $socket->on('clients', static function (mixed $data, int $fd, Websocket $ws): void {
-      if (!is_array($data) || !is_array($data['clients'] ?? null)) {
-        throw new InvalidArgumentException('Expected data.clients to be an object.');
+    $ctrl = $this->cron->getController();
+    $models = [];
+    foreach ($ctrl->getPlugins() as $p) {
+      if ($ctrl->hasSubpluginModel('socket', $p['name'], 'appui-core')) {
+        if ($events = $ctrl->getSubpluginModel('socket', [], $p['name'], 'appui-core')) {
+          self::addEventsToSocket($socket, $events, $models);
+        }
       }
-      // This acknowledges metadata only. It does NOT execute your old poll endpoint.
-      $ws->send($fd, 'clients.updated', ['count' => count($data['clients'])]);
-    });
-    $socket->on('chat.send', static function (mixed $data, int $fd, Websocket $ws): void {
-      if (!is_array($data) || !is_string($data['text'] ?? null)) {
-        throw new InvalidArgumentException('Expected data.text.');
-      }
-      $text = trim($data['text']);
-      if ($text === '' || strlen($text) > 2000) {
-        throw new InvalidArgumentException('Chat text must be between 1 and 2000 bytes.');
-      }
-      // Example in-memory public chat. Persist/authorize real messages in your application.
-      $ws->emit('chat.message', [
-        'id' => bin2hex(random_bytes(16)),
-        'user_id' => $ws->getUserId($fd),
-        'text' => $text,
-        'time' => time(),
-      ]);
-    });
-
-    $socket->on(
-      'ping',
-      fn(mixed $data, int $fd, Websocket $socket)
-        => $socket->send($fd, 'pong', ['time' => time()])
-    );
-
-    $socket->on(
-      'message',
-      fn(mixed $data, int $fd, Websocket $socket)
-        => $socket->send($fd, 'message', $data)
-    );
+    }
+    if ($events = $ctrl->getPluginModel('socket', [], 'appui-core')) {
+      self::addEventsToSocket($socket, $events, $models);
+    }
 
     $socket->start();
-    X::log('socket ended', 'socket-end');
   }
 
   /**
@@ -612,6 +569,25 @@ class Runner extends Basic
 
     return $time;
   }
+
+  private static function addEventsToSocket(Websocket $socket, array $events, array &$models): void
+  {
+    foreach ($events as $event => $fn) {
+      if (!is_string($event)) {
+        throw new InvalidArgumentException(X::_('Expected event to be a string.'));
+      }
+      if (!is_callable($fn)) {
+        throw new InvalidArgumentException(X::_('Expected fn to be a function.'));
+      }
+
+      if (isset($models[$event])) {
+        throw new InvalidArgumentException(X::_("The event %s is already in use"), $event);
+      }
+      $models[$event] = true;
+      $socket->on($event, $fn);
+    }
+  }
+
 
   private function isTestingEnvironment(): bool
   {

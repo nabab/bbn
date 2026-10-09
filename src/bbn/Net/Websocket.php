@@ -460,6 +460,7 @@ final class Websocket
       $type = WebsocketProtocol::name($message['type'] ?? null);
       X::log("WebSocket Message fd={$fd} type={$type}", str_replace('\\', '-', __CLASS__));
       $data = $message['data'] ?? null;
+      X::log($data, str_replace('\\', '-', __CLASS__));
       if ($type === self::MSG_SUBSCRIBE) {
         if (!is_string($data) && !is_array($data)) {
           throw new InvalidArgumentException('Subscription data must be a string or array.');

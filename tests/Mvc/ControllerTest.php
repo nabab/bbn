@@ -2349,7 +2349,7 @@ let data = {
     $this->assertFalse($this->controller->hasArguments(11));
   }
 
-  /* @test */
+  /** @test */
   public function testGetMethodReturnsTheOutputObject()
   {
     $this->assertSame(

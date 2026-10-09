@@ -562,7 +562,7 @@ class Environment
         }
       }
 
-      /* @todo Maybe something for managing PUT requests
+      /** @todo Maybe something for managing PUT requests
       else if (!empty(self::$_input) && !bbn\Str::isJson(self::$_input)) {
         $this->_files[] = [
           'name' => $v,
