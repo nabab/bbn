@@ -727,7 +727,7 @@ class Entity
     $this->records[$table][$id] = $res[$id] ?? null;
     $recs = $this->records;
     $this->cDelete();
-    if (!empty($rIds)) {
+    if ($rIds !== false) {
       $this->cacheSet($this->getId(), $sr2, $rIds);
     }
 
@@ -757,7 +757,7 @@ class Entity
     unset($this->records[$table][$id]);
     $recs = $this->records;
     $this->cDelete();
-    if (!empty($rIds)) {
+    if ($rIds !== false) {
       $this->cacheSet($this->getId(), $sr2, $rIds);
     }
 
