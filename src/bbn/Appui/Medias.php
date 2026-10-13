@@ -609,9 +609,7 @@ class Medias extends DbCls
           $cf["arch"]["medias"]["type"] => $id_type,
           $cf["arch"]["medias"]["mimetype"] => $mime,
           $cf["arch"]["medias"]["title"] => normalizer_normalize($title),
-          $cf["arch"]["medias"]["description"] => normalizer_normalize(
-            $description,
-          ),
+          $cf["arch"]["medias"]["description"] => !empty($description) ? normalizer_normalize($description) : null,
           $cf["arch"]["medias"]["name"] => $name ?: null,
           $cf["arch"]["medias"]["content"] => $content
             ? json_encode($content)
