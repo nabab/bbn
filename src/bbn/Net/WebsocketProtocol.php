@@ -1,38 +1,50 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace bbn\Net;
 
 use InvalidArgumentException;
 
-/** Shared validation for the WebSocket server and Redis publisher. */
+/**
+ * Shared validation for the WebSocket server and Redis publisher.
+ */
 final class WebsocketProtocol
 {
   public const RESERVED = [
-    'subscribe', 'unsubscribe', 'connected', 'disconnected',
-    'subscribed', 'unsubscribed', 'error',
+    'subscribe',
+    'unsubscribe',
+    'connected',
+    'disconnected',
+    'subscribed',
+    'unsubscribed',
+    'error',
   ];
 
   public static function name(mixed $name, bool $application = false): string
   {
-    if (!is_string($name)
-      || !preg_match('/^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/D', $name)
-    ) {
-      throw new InvalidArgumentException('Invalid message/event name.');
+    if (!is_string($name) || !preg_match('/^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/D', $name)) {
+      $len = is_string($name) ? strlen($name) : 0;
+      $preview = is_string($name) ? substr($name, 0, 128) : get_debug_type($name);
+
+      throw new InvalidArgumentException(
+        'Invalid message/event name (type=' . get_debug_type($name) . ", len={$len}): {$preview}"
+      );
     }
+
     if ($application && in_array($name, self::RESERVED, true)) {
-      throw new InvalidArgumentException('This message/event name is reserved.');
+      throw new InvalidArgumentException("This message/event name $name is reserved.");
     }
+
     return $name;
   }
 
-  /** @return list<string> */
+  /**
+   * @return list<string>
+   */
   public static function events(string|array $raw): array
   {
     if (is_string($raw)) {
       $raw = [$raw];
-    }
-    if (array_key_exists('events', $raw)) {
+    } elseif (array_key_exists('events', $raw)) {
       if (!is_array($raw['events'])) {
         throw new InvalidArgumentException('events must be an array.');
       }
@@ -62,11 +74,12 @@ final class WebsocketProtocol
 
   public static function redis(mixed $message): array
   {
-    if (!is_array($message) || !is_string($message['type'] ?? null)
-      || !is_array($message['data'] ?? null)
-    ) {
+    if (!is_array($message) ||
+        !is_string($message['type'] ?? null) ||
+        !is_array($message['data'] ?? null)) {
       throw new InvalidArgumentException('Invalid Redis WebSocket envelope.');
     }
+
     $data = $message['data'];
     switch ($message['type']) {
       case 'user':
@@ -79,9 +92,26 @@ final class WebsocketProtocol
       case 'broadcast':
         self::name($data['type'] ?? null, true);
         break;
+      case 'handler':
+        self::name($data['type'] ?? null, true);
+
+        if (isset($data['fd']) && (!is_int($data['fd']) || $data['fd'] < 0)) {
+          throw new InvalidArgumentException('Handler fd must be a non-negative integer.');
+        }
+
+        break;
       default:
         throw new InvalidArgumentException('Unknown Redis delivery mode.');
     }
     return $message;
+  }
+
+  public static function redisKey(string $name): string
+  {
+    if (!preg_match('/^[A-Za-z0-9_:.-]{1,255}$/D', $name)) {
+      throw new InvalidArgumentException('Invalid Redis stream/group name.');
+    }
+
+    return $name;
   }
 }

@@ -1,85 +1,182 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace bbn\Net;
 
+use bbn\Cache;
+use bbn\X;
+use Closure;
 use Redis;
 use RuntimeException;
 use Throwable;
 
 /**
  * Blocking Redis consumer: run ONLY in the dedicated Swoole user process.
- * Requires Redis >= 6.2 and phpredis with xAutoClaim().
- * Exactly one bridge process must own each consumer group.
+ * Uses Cache::getEngine()->getObj() for the Redis connection.
  */
 final class RedisStreamBridge
 {
   private bool $running = true;
 
   public function __construct(
-    private array $config,
-    private \Closure $handoff,
-    private \Closure $log
+    private string $stream,
+    private string $group,
+    private Closure $handoff
   ) {}
 
   public function run(): void
   {
-    if (!method_exists(Redis::class, 'xAutoClaim')) {
-      throw new RuntimeException('Upgrade phpredis: xAutoClaim() is required.');
+    if (!class_exists(Redis::class)) {
+      throw new RuntimeException('phpredis is required for the Redis stream bridge.');
     }
+
+    $canAutoClaim = method_exists(Redis::class, 'xAutoClaim');
+
+    if (!$canAutoClaim) {
+      X::log(
+        'XAUTOCLAIM is not available in this phpredis version; stale consumer recovery is disabled.',
+        'socket-core'
+      );
+    }
+
     // pcntl is appropriate here: this process uses blocking I/O, not an event loop.
-    // Without pcntl, leave the default SIGTERM handling intact.
     if (function_exists('pcntl_async_signals')) {
       pcntl_async_signals(true);
-      pcntl_signal(SIGTERM, function (): void { $this->running = false; });
-      pcntl_signal(SIGINT, function (): void { $this->running = false; });
+      pcntl_signal(SIGTERM, function (): void {
+        $this->running = false;
+      });
+      pcntl_signal(SIGINT, function (): void {
+        $this->running = false;
+      });
     }
-    $consumer = 'bridge'; // Stable across restarts; one process per group only.
+
+    // Stable across restarts. For a single server this is enough.
+    $consumer = 'bridge';
     $delay = 1;
+
     while ($this->running) {
       $redis = null;
+
       try {
-        $redis = $this->connect();
+        $redis = Cache::getEngine()->getObj();
+
+        if (!$redis instanceof Redis) {
+          throw new RuntimeException('Cache engine did not return a Redis object.');
+        }
+
         $this->ensureGroup($redis);
-        ($this->log)('Redis consumer ready: stream=' . $this->config['stream'] . ' group=' . $this->config['group']);
+
+        X::log(
+          'Redis consumer ready: stream=' . $this->stream . ' group=' . $this->group,
+          'socket-core'
+        );
+
         $delay = 1;
         $cursor = '0-0';
         $nextClaim = 0.0;
+
         while ($this->running) {
-          // Replay this consumer's unacknowledged entries before requesting new ones.
+          // 1) Re-deliver this consumer's pending entries first.
           $pending = $this->read($redis, $consumer, '0');
-          $this->deliver($redis, $pending);
+          X::log(['pending', $pending], 'socket-core');
+          if (!$this->deliver($redis, $pending)) {
+            // Back off before retrying pending entries.
+            sleep(1);
+            continue;
+          }
+
+          // 2) Read new messages even if XAUTOCLAIM later fails.
+          $new = $this->read($redis, $consumer, '>');
+          $this->deliver($redis, $new);
+
           if (!$this->running) {
             break;
           }
-          // Also recover entries belonging to old PID-named consumers.
-          if (microtime(true) >= $nextClaim) {
-            $redis->clearLastError();
-            $claim = $redis->xAutoClaim(
-              $this->config['stream'], $this->config['group'], $consumer,
-              60000, $cursor, 20
-            );
-            if ($claim === false) {
-              throw new RuntimeException($redis->getLastError() ?: 'XAUTOCLAIM failed.');
+
+          // 3) Recover stale entries from old consumers, but never let this block normal reads.
+          if ($canAutoClaim && microtime(true) >= $nextClaim) {
+            try {
+              $redis->clearLastError();
+
+              $claim = $redis->xAutoClaim(
+                $this->stream,
+                $this->group,
+                $consumer,
+                1_000,
+                $cursor,
+                20
+              );
+
+              $error = (string) $redis->getLastError();
+
+              if ($error !== '') {
+                X::log(sprintf(
+                  'XAUTOCLAIM debug: stream=%s group=%s consumer=%s cursor=%s claim_type=%s last_error=%s',
+                  $this->stream,
+                  $this->group,
+                  $consumer,
+                  $cursor,
+                  get_debug_type($claim),
+                  $error === '' ? 'none' : $error
+                ), 'socket-core');
+              }
+
+              $unsupported = $error !== '' && str_contains($error, 'Unknown subcommand');
+
+              if ($unsupported) {
+                $canAutoClaim = false;
+                X::log(
+                  'XAUTOCLAIM is not supported by this Redis server; disabling auto-claim.',
+                  'socket-core'
+                );
+              }
+
+              // Only throw for a real Redis error.
+              if ($claim === false && $error !== '' && !$unsupported) {
+                throw new RuntimeException($error);
+              }
+
+              if (is_array($claim)) {
+                $cursor = (string) ($claim[0] ?? '0-0');
+                $claimed = is_array($claim[1] ?? null) ? $claim[1] : [];
+
+                if ($claimed !== []) {
+                  $this->deliver($redis, $claimed);
+                }
+
+                $nextClaim = microtime(true) + (($cursor === '0-0') ? 5.0 : 0.0);
+              } else {
+                // No Redis error: treat as "nothing claimed" and back off a little.
+                $nextClaim = microtime(true) + 5.0;
+              }
+            } catch (Throwable $claimError) {
+              X::log($claimError->getMessage(), 'socket-core');
+              $nextClaim = microtime(true) + 5.0;
             }
-            $cursor = (string) $claim[0];
-            $this->deliver($redis, $claim[1] ?? []);
-            $nextClaim = microtime(true) + ($cursor === '0-0' ? 5 : 0);
           }
-          if (!$this->running) {
-            break;
-          }
-          $this->deliver($redis, $this->read($redis, $consumer, '>'));
         }
       } catch (Throwable $e) {
         if ($this->running) {
-          ($this->log)('Redis bridge: ' . $e->getMessage());
+          X::log(
+            sprintf(
+              'Redis bridge error: %s: %s',
+              get_class($e),
+              substr($e->getMessage(), 0, 512)
+            ),
+            'socket-core'
+          );
+
+          // Optional: log a truncated trace if you need it.
+          X::log(substr($e->getTraceAsString(), 0, 4096), 'socket-core');
         }
       } finally {
         if ($redis instanceof Redis) {
-          try { $redis->close(); } catch (Throwable) {}
+          try {
+            $redis->close();
+          } catch (Throwable) {
+          }
         }
       }
+
       if ($this->running) {
         sleep($delay);
         $delay = min(10, $delay * 2);
@@ -87,97 +184,149 @@ final class RedisStreamBridge
     }
   }
 
-  private function connect(): Redis
-  {
-    $c = $this->config;
-    $redis = new Redis();
-    if (!$redis->connect($c['host'], $c['port'], 2.0)) {
-      throw new RuntimeException('Redis connection failed.');
-    }
-    // XREADGROUP blocks for at most 1 s; socket read timeout is longer.
-    $redis->setOption(Redis::OPT_READ_TIMEOUT, 5.0);
-    if ($c['password'] !== null && !$redis->auth(
-      $c['username'] === null ? $c['password'] : [$c['username'], $c['password']]
-    )) {
-      throw new RuntimeException('Redis authentication failed.');
-    }
-    if (!$redis->select($c['database'])) {
-      throw new RuntimeException('Redis SELECT failed.');
-    }
-    return $redis;
-  }
-
   private function ensureGroup(Redis $redis): void
   {
     $redis->clearLastError();
+
     try {
-      $ok = $redis->xGroup(
-        'CREATE', $this->config['stream'], $this->config['group'], '$', true
+      $result = $redis->xGroup(
+        'CREATE',
+        $this->stream,
+        $this->group,
+        '0',  // You asked for 0: replay existing entries on first group creation.
+        true
       );
-      if ($ok === false) {
-        throw new RuntimeException($redis->getLastError() ?: 'XGROUP CREATE failed.');
-      }
     } catch (Throwable $e) {
       if (!str_contains($e->getMessage(), 'BUSYGROUP')) {
         throw $e;
       }
+
+      return;
     }
+
+    $error = $redis->getLastError();
+
+    if ($result === false || $error) {
+      if (!$error || !str_contains((string) $error, 'BUSYGROUP')) {
+        throw new RuntimeException((string) ($error ?: 'XGROUP CREATE failed.'));
+      }
+    }
+
     $redis->clearLastError();
   }
 
   private function read(Redis $redis, string $consumer, string $id): array
   {
     $redis->clearLastError();
+
     // Do not specify BLOCK for pending-history reads.
-    $args = [$this->config['group'], $consumer, [$this->config['stream'] => $id], 20];
+    $args = [
+      $this->group,
+      $consumer,
+      [$this->stream => $id],
+      20,
+    ];
+
     if ($id === '>') {
-      $args[] = 1000;
+      $args[] = 1_000;
     }
+
     $result = $redis->xReadGroup(...$args);
-    if ($result === false && $redis->getLastError()) {
-      throw new RuntimeException($redis->getLastError());
+    if ($result === false || $result === null) {
+      $error = $redis->getLastError();
+
+      if ($error) {
+        throw new RuntimeException((string) $error);
+      }
+
+      return [];
     }
-    return $result[$this->config['stream']] ?? [];
+
+    if (!is_array($result)) {
+      return [];
+    }
+
+    $entries = $result[$this->stream] ?? null;
+
+    if (!empty($entries)) {
+      X::log($entries, 'socket-core');
+    }
+
+    return is_array($entries) ? $entries : [];
   }
 
-  private function deliver(Redis $redis, array $entries): void
+  private function deliver(Redis $redis, array $entries): bool
   {
     foreach ($entries as $id => $fields) {
       if (!$this->running) {
-        return;
+        return false;
       }
+
+      $json = null;
+
       try {
         $json = is_array($fields) ? ($fields['json'] ?? null) : null;
-        if (!is_string($json) || strlen($json) > 1024 * 1024) {
+
+        if (!is_string($json) || strlen($json) > 1_048_576) {
           throw new RuntimeException('Missing or oversized JSON payload.');
         }
+
         WebsocketProtocol::redis(json_decode($json, true, 512, JSON_THROW_ON_ERROR));
       } catch (Throwable $e) {
-        // Poison messages should not block the group forever. Preserve then ACK.
-        $deadId = $redis->xAdd($this->config['stream'] . ':dead', '*', [
-          'source_id' => (string) $id,
-          'group' => $this->config['group'],
-          'reason' => $e->getMessage(),
-          'json' => is_string($json ?? null) ? $json : '',
-        ]);
-        if ($deadId === false) {
-          throw new RuntimeException('Could not write dead-letter entry.');
+        // Poison message: preserve and ACK.
+        try {
+          $deadId = $redis->xAdd(
+            $this->stream . ':dead',
+            '*',
+            [
+              'source_id' => (string) $id,
+              'group' => $this->group,
+              'reason' => substr($e->getMessage(), 0, 512),
+              'json' => is_string($json) ? substr($json, 0, 64 * 1024) : '',
+            ]
+          );
+
+          if ($deadId === false) {
+            throw new RuntimeException('Could not write dead-letter entry.');
+          }
+
+          $this->ack($redis, (string) $id);
+        } catch (Throwable $deadError) {
+          X::log(
+            'Dead-letter failed for stream entry ' . $id . ': ' . substr($deadError->getMessage(), 0, 256),
+            'socket-core'
+          );
+
+          // If we cannot dead-letter or ACK, stop this batch.
+          return false;
         }
-        ($this->log)('Dead-lettered Redis message ' . $id);
-        $this->ack($redis, (string) $id);
+
         continue;
       }
-      if (!(($this->handoff)($json))) {
-        throw new RuntimeException('Worker IPC handoff failed; entry remains pending.');
+
+      try {
+        if (!(($this->handoff)($json))) {
+          X::log("Worker IPC handoff failed for entry {$id}; will retry later.", 'socket-core');
+          return false;  // do not ACK, stop this batch
+        }
+
+        $this->ack($redis, (string) $id);
+      } catch (Throwable $e) {
+        X::log(
+          "Worker IPC handoff exception for entry {$id}: " . substr($e->getMessage(), 0, 256),
+          'socket-core'
+        );
+
+        return false;  // do not ACK, stop this batch
       }
-      // This ACK means IPC accepted the message, NOT that a browser received it.
-      $this->ack($redis, (string) $id);
     }
+
+    return true;
   }
 
   private function ack(Redis $redis, string $id): void
   {
-    if ($redis->xAck($this->config['stream'], $this->config['group'], [$id]) === false) {
+    if ($redis->xAck($this->stream, $this->group, [$id]) === false) {
       throw new RuntimeException('XACK failed.');
     }
   }

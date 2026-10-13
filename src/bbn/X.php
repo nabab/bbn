@@ -1168,8 +1168,8 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
   {
     foreach ($arrays as $a2) {
       if (
-        !(self::isAssoc($a1) || empty($a1)) &&
-        !(self::isAssoc($a2) || empty($a2))
+        !(!array_is_list($a1) || empty($a1)) &&
+        !(!array_is_list($a2) || empty($a2))
       ) {
           $a1 = array_merge($a1, $a2);
           continue;
@@ -1180,8 +1180,8 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
           array_key_exists($k, $a1) &&
           is_array($a1[$k]) &&
           is_array($v2) &&
-          (empty($a1[$k]) || self::isAssoc($a1[$k])) &&
-          (empty($v2) || self::isAssoc($v2))
+          (empty($a1[$k]) || !array_is_list($a1[$k])) &&
+          (empty($v2) || !array_is_list($v2))
         ) {
           self::mergeArraysInPlace($a1[$k], $v2);
         } else {
@@ -1521,7 +1521,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
    */
   public static function removeEmpty($arr, $remove_space = false)
   {
-    $isAssoc = X::isAssoc($arr);
+    $isAssoc = !array_is_list($arr);
     foreach ($arr as $k => $v) {
       if (is_object($arr)) {
         if (is_array($v) || is_object($v)) {
@@ -1606,9 +1606,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
    */
   public static function isAssoc(array $r): bool
   {
-    $keys = array_keys($r);
-    $c    = count($keys);
-    return (bool)($c && ($keys !== range(0, $c - 1)));
+    return !array_is_list($r);
   }
 
 
@@ -1994,7 +1992,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
       $r .= '<option value="">' . $empty_label . '</option>';
     }
 
-    $is_assoc = self::isAssoc($values);
+    $is_assoc = !array_is_list($values);
     foreach ($values as $k => $v) {
       if (is_array($v) && count($v) == 2) {
         $value = $v[0];
@@ -2418,7 +2416,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
 
               $res['conditions'][] = $tmp;
             }
-          } elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
+          } elseif ($is_array && array_is_list($f) && count($f) >= 2) {
             $tmp = [
               'field' => $f[0],
               'operator' => $f[1]
@@ -2749,7 +2747,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
    */
   public static function search(array $ar, $where, int $from = 0)
   {
-    if (self::isAssoc($ar)) {
+    if (!array_is_list($ar)) {
       //throw new Exception(self::_("The first parameter of search function should be an indexed array"));
     }
 
@@ -3137,7 +3135,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
     // Process arguments
     if (is_array($key)) {
       $args = [];
-      if (X::isAssoc($key)) {
+      if (!array_is_list($key)) {
         foreach ($key as $k => $v) {
           if (!is_string($v) || !$k) {
             throw new Exception(X::_("Invalid order for sortBy"));
@@ -3763,7 +3761,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
       $todo    = [];
       $checked = false;
       foreach ($data as $d) {
-        if (!$checked && self::isAssoc($d)) {
+        if (!$checked && !array_is_list($d)) {
           if ($with_titles) {
             $line1 = [];
             $line2 = [];
@@ -4658,9 +4656,7 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
     if (is_array($value)) {
 
       // Detect associative array
-      $isAssoc = array_keys($value) !== range(0, count($value) - 1);
-
-      if ($isAssoc) {
+      if (!array_is_list($value)) {
         ksort($value); // normalize key order
       }
 

@@ -1,19 +1,21 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace bbn\Net;
 
-use InvalidArgumentException;
-use JsonException;
-use RuntimeException;
-use Throwable;
 use bbn\X;
 use Swoole\Http\Request;
-use Swoole\Process;
 use Swoole\WebSocket\Frame;
 use Swoole\WebSocket\Server;
+use Swoole\Process;
+use InvalidArgumentException;
+use JsonException;
+use Redis;
+use RuntimeException;
+use Throwable;
 
-/** One Swoole worker, local user/subscription indexes, optional Redis bridge. */
+/**
+ * One Swoole worker, local user/subscription indexes, optional Redis bridge.
+ */
 final class Websocket
 {
   public const MSG_SUBSCRIBE = 'subscribe';
@@ -53,7 +55,7 @@ final class Websocket
       'worker_num' => 1,
       'heartbeat_check_interval' => 30,
       'heartbeat_idle_time' => 90,
-      'package_max_length' => 2 * 1024 * 1024,
+      'package_max_length' => 2 * 1024 * 1024
     ]);
     $this->registerEvents();
   }
@@ -76,21 +78,27 @@ final class Websocket
     return $this;
   }
 
-  /** Callback(Request $request, self $socket): int|string|null. Null rejects. */
+  /**
+   * Callback(Request $request, self $socket): int|string|null. Null rejects.
+   */
   public function authenticateWith(callable $callback): self
   {
     $this->authenticator = \Closure::fromCallable($callback);
     return $this;
   }
 
-  /** Exact browser Origin allowlist. Missing Origin is rejected when configured. */
+  /**
+   * Exact browser Origin allowlist. Missing Origin is rejected when configured.
+   */
   public function allowOrigins(array $origins): self
   {
     $this->origins = $origins;
     return $this;
   }
 
-  /** Callback(int $fd, string $event, self $socket): bool. Client subscriptions default to DENY. */
+  /**
+   * Callback(int $fd, string $event, self $socket): bool. Client subscriptions default to DENY.
+   */
   public function authorizeSubscriptions(callable $callback): self
   {
     $this->subscriptionAuthorizer = \Closure::fromCallable($callback);
@@ -165,15 +173,13 @@ final class Websocket
               : null,
           ],
           JSON_THROW_ON_ERROR
-          | JSON_UNESCAPED_SLASHES
-          | JSON_INVALID_UTF8_SUBSTITUTE
+            | JSON_UNESCAPED_SLASHES
+            | JSON_INVALID_UTF8_SUBSTITUTE
         ), str_replace('\\', '-', __CLASS__)
       );
 
       return false;
-
-    }
-    catch (Throwable $e) {
+    } catch (Throwable $e) {
       X::log('Send failed for fd ' . $fd . ': ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
       return false;
     }
@@ -194,6 +200,7 @@ final class Websocket
   {
     WebsocketProtocol::name($event, true);
     $sent = 0;
+    X::log(array_keys($this->eventSubscribers[$event] ?? []), 'socket-core');
     foreach (array_keys($this->eventSubscribers[$event] ?? []) as $fd) {
       if ($fd === $exceptFd) {
         continue;
@@ -209,7 +216,9 @@ final class Websocket
     return $sent;
   }
 
-  /** Trusted server-side subscription. Client requests additionally require authorization. */
+  /**
+   * Trusted server-side subscription. Client requests additionally require authorization.
+   */
   public function subscribe(int $fd, string|array $events): array
   {
     if (!isset($this->activeFds[$fd]) || !$this->server->isEstablished($fd)) {
@@ -310,43 +319,65 @@ final class Websocket
   public function shutdown(): void
   {
     foreach ($this->server->connections as $fd) {
-      try { $this->server->close((int) $fd); } catch (Throwable) {}
+      try {
+        $this->server->close((int) $fd);
+      } catch (Throwable) {
+      }
     }
     $this->server->shutdown();
   }
 
+  public function event(string $event, mixed $data = null, ?int $exceptFd = null): int
+  {
+    return $this->emit($event, $data, $exceptFd);
+  }
+
+  public function user(int|string $userId, string $type, mixed $data = null): void
+  {
+    $this->sendToUser($userId, $type, $data);
+  }
+
   public function useRedisStream(
-    string $host = '127.0.0.1',
-    int $port = 6379,
-    string $stream = 'bbn:websocket',
-    string $group = 'websocket',
-    ?string $password = null,
-    int|string $database = 0,
-    ?string $username = null
+    string $stream = 'appui:websocket',
+    string $group = 'websocket'
   ): self {
     if ($this->started || $this->redisProcessRegistered) {
       throw new RuntimeException('Configure Redis exactly once, before start().');
     }
-    $db = filter_var($database, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-    if ($db === false) {
-      throw new InvalidArgumentException('Invalid Redis database.');
+
+    $stream = WebsocketProtocol::redisKey($stream);
+    $group = WebsocketProtocol::redisKey($group);
+
+    if (!class_exists(Redis::class)) {
+      throw new RuntimeException('phpredis is required for the Redis stream bridge.');
     }
-    if (!class_exists(\Redis::class) || !method_exists(\Redis::class, 'xAutoClaim')) {
-      throw new RuntimeException('phpredis with xAutoClaim() support is required.');
-    }
-    $config = compact('host', 'port', 'stream', 'group', 'password', 'username');
-    $config['database'] = $db;
+
     $server = $this->server;
-    $process = new Process(function () use ($config, $server): void {
+    $loggerName = str_replace('\\', '-', self::class);
+
+    $process = new Process(function () use ($stream, $group, $server, $loggerName): void {
       $bridge = new RedisStreamBridge(
-        $config,
-        static fn(string $json): bool => (bool) $server->sendMessage($json, 0),
-        fn(string $message) => X::log($message, str_replace('\\', '-', __CLASS__))
+        stream: $stream,
+        group: $group,
+        handoff: static function (string $json) use ($server, $loggerName): bool {
+          X::log('inside process', 'socket-core');
+          $result = $server->sendMessage($json, 0);
+
+          if (!$result) {
+            X::log('Redis bridge handoff to Swoole worker failed', $loggerName);
+          }
+
+          X::log([$result, array_keys(json_decode($json, true))], 'socket-core');
+          return (bool) $result;
+        }
       );
+
       $bridge->run();
-    }, false, 2, false); // Blocking isolated process; no coroutine/event-loop dependency.
+    }, true, 2, true);  // Blocking isolated process.
+
     $server->addProcess($process);
     $this->redisProcessRegistered = true;
+
     return $this;
   }
 
@@ -364,9 +395,8 @@ final class Websocket
       $this->cleanupFd($fd);
       unset($this->activeFds[$fd]);
       try {
-        if ($this->origins !== null
-          && !in_array($request->header['origin'] ?? '', $this->origins, true)
-        ) {
+        if ($this->origins !== null &&
+            !in_array($request->header['origin'] ?? '', $this->origins, true)) {
           X::log("WebSocket origin rejected fd={$fd}", str_replace('\\', '-', __CLASS__));
           $server->disconnect($fd, 4003, 'Origin not allowed');
           return;
@@ -417,20 +447,30 @@ final class Websocket
     });
     $this->server->on('PipeMessage', function (Server $server, int $sourceWorkerId, mixed $raw): void {
       try {
+        X::log('PipeMessage', 'socket-core');
         if (!is_string($raw)) {
           throw new InvalidArgumentException('Pipe payload must be JSON.');
         }
         $message = WebsocketProtocol::redis(json_decode($raw, true, 512, JSON_THROW_ON_ERROR));
         $data = $message['data'];
+        X::log($message['type'], 'socket-core');
         switch ($message['type']) {
           case 'user':
             $this->sendToUser($data['user_id'], $data['type'], $data['data'] ?? null);
             break;
           case 'event':
+            X::log($data, 'socket-core');
             $this->emit($data['event'], $data['data'] ?? null);
             break;
           case 'broadcast':
             $this->broadcast($data['type'], $data['data'] ?? null);
+            break;
+          case 'handler':
+            $this->dispatchServerEvent(
+              (string) $data['type'],
+              $data['data'] ?? null,
+              (int) ($data['fd'] ?? 0)
+            );
             break;
         }
       } catch (Throwable $e) {
@@ -443,11 +483,14 @@ final class Websocket
     $this->server->on('WorkerError', function (Server $server, int $id, int $pid, int $code, int $signal): void {
       X::log("Worker failure: id=$id pid=$pid exit=$code signal=$signal", str_replace('\\', '-', __CLASS__));
     });
-    $this->server->on('Shutdown', function (): void { X::log('WebSocket server stopped', str_replace('\\', '-', __CLASS__)); });
+    $this->server->on('Shutdown', function (): void {
+      X::log('WebSocket server stopped', str_replace('\\', '-', __CLASS__));
+    });
   }
 
   private function handleMessage(Frame $frame): void
   {
+    X::log('Message received', 'socket-core');
     $fd = (int) $frame->fd;
     if (!isset($this->activeFds[$fd])) {
       return;
@@ -458,6 +501,7 @@ final class Websocket
         throw new InvalidArgumentException('Message must be an object.');
       }
       $type = WebsocketProtocol::name($message['type'] ?? null);
+      X::log('Type: ' . (string) $type, 'socket-core');
       X::log("WebSocket Message fd={$fd} type={$type}", str_replace('\\', '-', __CLASS__));
       $data = $message['data'] ?? null;
       X::log($data, str_replace('\\', '-', __CLASS__));
@@ -467,9 +511,8 @@ final class Websocket
         }
         $events = WebsocketProtocol::events($data);
         foreach ($events as $event) {
-          if ($this->subscriptionAuthorizer === null
-            || !($this->subscriptionAuthorizer)($fd, $event, $this)
-          ) {
+          if ($this->subscriptionAuthorizer === null ||
+              !($this->subscriptionAuthorizer)($fd, $event, $this)) {
             throw new InvalidArgumentException('Subscription not authorized.');
           }
         }
@@ -505,8 +548,11 @@ final class Websocket
     $this->cleanupFd($fd);
     if ($wasActive) {
       foreach ($this->disconnectedCallbacks as $callback) {
-        try { $callback($fd, $reason); }
-        catch (Throwable $e) { X::log('Disconnect callback failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__)); }
+        try {
+          $callback($fd, $reason);
+        } catch (Throwable $e) {
+          X::log('Disconnect callback failed: ' . $e->getMessage(), str_replace('\\', '-', __CLASS__));
+        }
       }
     }
   }
@@ -530,5 +576,40 @@ final class Websocket
       unset($this->eventSubscribers[$event]);
     }
     return true;
+  }
+
+  private function dispatchServerEvent(string $type, mixed $data, int $fd): void
+  {
+    X::log(
+      "Dispatch event $type",
+      'socket-core'
+    );
+    if (!isset($this->handlers[$type])) {
+      X::log(
+        "Server event skipped: no handler for {$type}",
+        str_replace('\\', '-', __CLASS__)
+      );
+
+      return;
+    }
+
+    // Do not let a stale/unknown fd masquerade as an active client.
+    if ($fd !== 0 && !isset($this->activeFds[$fd])) {
+      X::log(
+        "Server event fd ignored: fd={$fd} is not active",
+        str_replace('\\', '-', __CLASS__)
+      );
+
+      $fd = 0;
+    }
+
+    try {
+      ($this->handlers[$type])($data, $fd, $this);
+    } catch (Throwable $e) {
+      X::log(
+        'Server event failed: ' . $e->getMessage(),
+        str_replace('\\', '-', __CLASS__)
+      );
+    }
   }
 }

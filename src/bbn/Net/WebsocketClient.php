@@ -1,79 +1,138 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace bbn\Net;
 
+use bbn\Cache;
+use bbn\Str;
+use bbn\X;
+use InvalidArgumentException;
+use JsonException;
 use Redis;
 use RuntimeException;
-use Throwable;
 
-/** Redis publisher, NOT a WebSocket client. */
+/**
+ * Redis publisher, NOT a WebSocket client.
+ */
 final class WebsocketClient
 {
-  private Redis $redis;
+  private const MODES = [
+    'user',
+    'event',
+    'broadcast',
+    'handler',
+  ];
 
   public function __construct(
-    string $host = '127.0.0.1',
-    int $port = 6379,
-    private string $stream = 'bbn:websocket',
-    ?string $password = null,
-    int|string $database = 0,
-    ?string $username = null
+    private string $stream = 'appui:websocket'
   ) {
-    $this->redis = new Redis();
-    try {
-      if (!$this->redis->connect($host, $port, 2.0)) {
-        throw new RuntimeException('Redis connection failed.');
-      }
-      $this->redis->setOption(Redis::OPT_READ_TIMEOUT, 5.0);
-      if ($password !== null && !$this->redis->auth(
-        $username === null ? $password : [$username, $password]
-      )) {
-        throw new RuntimeException('Redis authentication failed.');
-      }
-      $db = filter_var($database, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-      if ($db === false || !$this->redis->select($db)) {
-        throw new RuntimeException('Invalid Redis database or SELECT failed.');
-      }
-    } catch (Throwable $e) {
-      $this->close();
-      throw $e;
-    }
+    $this->stream = WebsocketProtocol::redisKey($stream);
   }
 
-  /** Returns a stream entry ID; this is NOT a browser-delivery receipt. */
-  public function send(string $type, mixed $data = null): string|false
-  {
-    $message = WebsocketProtocol::redis(['type' => $type, 'data' => $data]);
-    $json = json_encode($message, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
-    if (strlen($json) > 1024 * 1024) {
-      throw new RuntimeException('Redis WebSocket messages are limited to 1 MiB.');
-    }
-    // Deliberately no automatic trimming: retention is an operational policy.
-    return $this->redis->xAdd($this->stream, '*', ['json' => $json]);
-  }
-
-  public function user(int|string $userId, string $type, mixed $data = null): string|false
-  {
-    return $this->send('user', ['user_id' => $userId, 'type' => $type, 'data' => $data]);
-  }
-
+  /**
+   * Send an application event to browser clients subscribed to that event.
+   */
   public function event(string $event, mixed $data = null): string|false
   {
-    return $this->send('event', ['event' => $event, 'data' => $data]);
+    return $this->dispatch('event', [
+      'event' => $event,
+      'data' => $data,
+    ]);
   }
 
+  /**
+   * Send a message to all active connections of one user.
+   */
+  public function user(int|string $userId, string $type, mixed $data = null): string|false
+  {
+    return $this->dispatch('user', [
+      'user_id' => $userId,
+      'type' => $type,
+      'data' => $data,
+    ]);
+  }
+
+  /**
+   * Send a message to all active browser clients.
+   */
   public function broadcast(string $type, mixed $data = null): string|false
   {
-    return $this->send('broadcast', ['type' => $type, 'data' => $data]);
+    return $this->dispatch('broadcast', [
+      'type' => $type,
+      'data' => $data,
+    ]);
   }
 
-  public function close(): void
+  /**
+   * Trigger a server-side handler registered with Websocket::on().
+   * This is NOT sent directly to browser clients.
+   */
+  public function trigger(string $type, mixed $data = null, ?int $fd = null): string|false
   {
-    try {
-      $this->redis->close();
-    } catch (Throwable) {
-      // Closing a disconnected connection is harmless.
+    return $this->dispatch('handler', [
+      'type' => $type,
+      'data' => $data,
+      'fd' => (int) ($fd ?? 0),
+    ]);
+  }
+
+  /**
+   * Low-level Redis dispatcher.
+   *
+   * If you do not need this publicly, make it private or protected.
+   */
+  public function dispatch(string $mode, array $payload): string|false
+  {
+    if (!in_array($mode, self::MODES, true)) {
+      throw new InvalidArgumentException("Unknown WebSocket Redis delivery mode: {$mode}");
     }
+
+    $message = WebsocketProtocol::redis([
+      'type' => $mode,
+      'data' => $payload,
+    ]);
+
+    try {
+      $json = json_encode(
+        $message,
+        JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES
+      );
+    } catch (JsonException $e) {
+      throw new RuntimeException('Redis WebSocket message is not JSON serializable.', 0, $e);
+    }
+
+    if (strlen($json) > 1_048_576) {
+      $logFile = Str::genpwd();
+
+      X::log("Redis WebSocket message is too large, check {$logFile}", '_IMPORTANT-too-large');
+      X::log($json, $logFile);
+
+      throw new RuntimeException('Redis WebSocket messages are limited to 1 MiB.');
+    }
+
+    $result = $this->redis()->xAdd(
+      $this->stream,
+      '*',
+      ['json' => $json]
+    );
+
+    if ($result === false) {
+      X::log(
+        'Redis WebSocket xAdd failed for stream ' . $this->stream,
+        str_replace('\\', '-', self::class)
+      );
+    }
+
+    return $result;
+  }
+
+  private function redis(): Redis
+  {
+    $redis = Cache::getEngine()->getObj();
+
+    if (!$redis instanceof Redis) {
+      throw new RuntimeException('Cache engine did not return a Redis object.');
+    }
+
+    return $redis;
   }
 }

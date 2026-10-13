@@ -66,6 +66,7 @@ class Live
   {
     $ticket = $request->get['ticket'] ?? null;
     $origin = $request->header['origin'] ?? '';
+    X::log("Ticket $ticket", 'socket-core');
     if (
       !is_string($ticket) ||
       !preg_match('/\A[a-f0-9]{64}\z/', $ticket) ||
@@ -85,6 +86,7 @@ class Live
 
     // Missing, expired, or already consumed.
     if (!is_string($json)) {
+      X::log("Not Connected 2 user", 'socket-core');
       return null;
     }
 
@@ -113,12 +115,14 @@ class Live
       return null;
     }
 
-    if (!self::userIsConnected($identity['id_user'])) {
-      return null;
+    $connected = self::userIsConnected($identity['id_user']);
+    if (!$connected) {
+      X::log("Not Connected user $identity[id_user]", 'socket-core');
     }
-
+      
+    X::log("Connected user $identity[id_user]", 'socket-core');
     // Your wrapper calls bindUser() with the returned identity.
-    return $identity['id_user'];
+    return $connected ? $identity['id_user'] : null;
   }
 
   public static function userConnect(Redis $redis, User $user): void

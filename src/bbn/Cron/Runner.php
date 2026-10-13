@@ -63,6 +63,8 @@ class Runner extends Basic
    */
   protected string $type;
 
+  protected array $socketEvents = [];
+
 
   /**
    * Runner constructor.
@@ -518,7 +520,7 @@ class Runner extends Basic
   {
     X::log('Run socket server', 'socket-start');
     $socket = new Websocket();
-    $socket->useRedisStream('redis');
+    $socket->useRedisStream();
 
 
 
@@ -534,18 +536,17 @@ class Runner extends Basic
     });
 
     $ctrl = $this->cron->getController();
-    $models = [];
     foreach ($ctrl->getPlugins() as $p) {
       if ($ctrl->hasSubpluginModel('socket', $p['name'], 'appui-core')) {
         if ($events = $ctrl->getSubpluginModel('socket', [], $p['name'], 'appui-core')) {
-          self::addEventsToSocket($socket, $events, $models);
+          self::addEventsToSocket($socket, $events, $this->socketEvents);
         }
       }
     }
     if ($events = $ctrl->getPluginModel('socket', [], 'appui-core')) {
-      self::addEventsToSocket($socket, $events, $models);
+      self::addEventsToSocket($socket, $events, $this->socketEvents);
     }
-
+    X::log(array_keys($this->socketEvents, 'socket-core'));
     $socket->start();
   }
 
