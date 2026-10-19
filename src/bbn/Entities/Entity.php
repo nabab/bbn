@@ -716,9 +716,9 @@ class Entity
 
     $this->getRecords($table);
     $rIds = false;
-    if (!isset($this->records[$table][$id])) {
-      if ($this->cacheHas($this->getId(), $sr2)) {
-        $rIds = $this->cacheGet($this->getId(), $sr2);
+    if ($this->cacheHas($this->getId(), $sr2)) {
+      $rIds = $this->cacheGet($this->getId(), $sr2);
+      if (!isset($this->records[$table][$id])) {
         $rIds[$table][] = $id;
       }
     }
