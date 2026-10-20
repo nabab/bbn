@@ -803,7 +803,7 @@ class User extends DbCls implements Implementor
    */
   public function setSession($attr): static
   {
-    if ($this->session->has($this->userIndex)) {
+    if ($this->session && $this->session->has($this->userIndex)) {
       $args = \func_get_args();
       if (\count($args) === 2 && \is_string($args[0])) {
         $attr = [$args[0] => $args[1]];
