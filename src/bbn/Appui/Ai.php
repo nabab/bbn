@@ -21,6 +21,12 @@ class Ai extends DbCls
   use DbOps;
   use Optional;
 
+  /** Maximum attachment size: 20 MB */
+  protected const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+  /** Maximum extracted text size */
+  protected const MAX_FILE_TEXT_SIZE = 200000;
+
   /**
    * Default Dbconfig configuration for the class
    *
@@ -99,6 +105,18 @@ class Ai extends DbCls
   /** @var array $cfg */
   protected array $cfg;
 
+  /** Endpoint file capabilities */
+  protected array $fileCapabilities = [
+    'mode' => 'auto',
+    'images' => 1,
+    'pdf_inline' => 0,
+    'file_ids' => 0,
+    'max_size' => self::MAX_FILE_SIZE
+  ];
+
+  /** Files uploaded to the provider during the current request */
+  protected array $temporaryRemoteFiles = [];
+
   /** @var Note $note Note instance */
   private Note $note;
 
@@ -126,7 +144,6 @@ class Ai extends DbCls
    * Ai constructor.
    *
    * @param Db $db The database connection
-   * @param array $cfg Configuration array for the class
    *
    * @throws Exception If OpenAI key is not defined
    */
@@ -160,6 +177,8 @@ class Ai extends DbCls
       if (!$pass) {
         throw new Exception("Password not found");
       }
+
+      $this->setFileCapabilities($endpoint['data']['fileCapabilities'] ?? []);
     }
 
     if (!$endpoint) {
@@ -317,17 +336,24 @@ class Ai extends DbCls
     string $url,
     string $pass,
     bool $public = false,
-  ): ?array {
+    array $fileCapabilities = []
+  ): ?array
+  {
     if ($idEndpoint = self::getOptionId("endpoints")) {
       $this->ai = new OpenAi($pass);
       $this->ai->setBaseURL($url);
-      if (
-        ($idPref = $this->prefs->addToGroup($idEndpoint, [
+      $fileCapabilities = X::mergeArrays($this->fileCapabilities, $fileCapabilities);
+      if (empty($fileCapabilities['max_size'])) {
+        unset($fileCapabilities['max_size']);
+      }
+
+      if (($idPref = $this->prefs->addToGroup($idEndpoint, [
           "text" => $name,
           "url" => $url,
           "public" => $public ? 1 : 0,
-        ])) &&
-        $this->pass->userStore($pass, $idPref, $this->user)
+          "fileCapabilities" => $fileCapabilities,
+        ]))
+        && $this->pass->userStore($pass, $idPref, $this->user)
       ) {
         $this->setEndpoint($idPref);
         $this->syncModels();
@@ -354,6 +380,7 @@ class Ai extends DbCls
     string $input,
     bool $insert = true,
     ?array $cfg = null,
+    array $files = []
   ): array {
     // check if input and id_prompt are not empty and not null
     if (empty($input) || empty($id_prompt)) {
@@ -372,7 +399,7 @@ class Ai extends DbCls
       ];
     }
 
-    $response = $this->getPromptResponse($prompt, $input, $cfg);
+    $response = $this->getPromptResponse($prompt, $input, $cfg, $files);
     if (!empty($response) && !empty($response["success"]) && $insert) {
       $this->insertItem($id_prompt, $input, $cfg, false);
       $this->insertItem(
@@ -398,6 +425,7 @@ class Ai extends DbCls
     array $prompt,
     string $input,
     ?array $cfg = null,
+    array $files = []
   ): array {
     // check if input and id_prompt are not empty and not null
     if (empty($input) || empty($prompt)) {
@@ -408,12 +436,15 @@ class Ai extends DbCls
     }
 
     $built_prompt = $this->buildPromptFromRow($prompt);
-    $messages = $this->createMessages($input, $built_prompt);
-    $request = $this->createRequest($messages, $cfg);
+    try {
+      $messages = $this->createMessages($input, $built_prompt, $files);
+      $request = $this->createRequest($messages, $cfg ?: []);
+      $response = $this->request($request);
+    }
+    finally {
+      $this->cleanupRemoteFiles();
+    }
 
-    X::log($request, "ai_logs");
-
-    $response = $this->request($request);
     $res = [
       "success" => !isset($response["error"]),
       "input" => $built_prompt,
@@ -432,22 +463,48 @@ class Ai extends DbCls
    *
    * @param string $input User input
    * @param string $prompt System prompt
+   * @param array $files Array of file paths to include in the message
    * @return array Array of messages
    */
-  public function createMessages(string $input, string $prompt = ""): array
+  public function createMessages(
+    string $input,
+    string $prompt = "",
+    array $files = []
+  ): array
   {
     $messages = [];
 
-    if ($prompt) {
+    if (!empty($prompt)) {
       $messages[] = [
-        "role" => "system",
-        "content" => $prompt,
+        'role' => 'system',
+        'content' => $prompt
       ];
     }
 
+    if (empty($files)) {
+      $messages[] = [
+        'role' => 'user',
+        'content' => $input
+      ];
+
+      return $messages;
+    }
+
+    $content = [
+      [
+        'type' => 'text',
+        'text' => $input
+      ]
+    ];
+
+    foreach ($files as $path) {
+      $file = $this->validateAttachment($path);
+      $content[] = $this->createFileContent($file);
+    }
+
     $messages[] = [
-      "role" => "user",
-      "content" => $input,
+      'role' => 'user',
+      'content' => $content
     ];
 
     return $messages;
@@ -466,7 +523,19 @@ class Ai extends DbCls
     $tokenizer = new Gpt3Tokenizer($config);
     $max_tokens = self::MAX_TOKENS;
     foreach ($messages as $message) {
-      $max_tokens -= $tokenizer->count($message["content"]);
+      $content = $message['content'] ?? '';
+      if (is_string($content)) {
+        $max_tokens -= $tokenizer->count($content);
+      }
+      elseif (is_array($content)) {
+        foreach ($content as $part) {
+          if (($part['type'] ?? '') === 'text') {
+            $max_tokens -= $tokenizer->count(
+              $part['text'] ?? ''
+            );
+          }
+        }
+      }
     }
 
     $model = $this->model;
@@ -511,7 +580,7 @@ class Ai extends DbCls
       $complete = json_decode($complete, true);
     }
 
-    X::log(["request" => $query, "complete" => $complete], "ai_logs");
+    //X::log(["request" => $query, "complete" => $complete], "ai_logs");
 
     if (!$complete || !empty($complete["error"])) {
       return [
@@ -521,7 +590,7 @@ class Ai extends DbCls
     }
 
     $content = $complete["choices"][0]["message"]["content"];
-    X::log($content, "ai_logs");
+    //X::log($content, "ai_logs");
 
     return [
       "success" => true,
@@ -563,12 +632,23 @@ class Ai extends DbCls
    * @param string $id Optional conversation ID
    * @return array Response array containing success flag and result or error message
    */
-  public function chat(string $input, array $cfg, string $id = ""): array
+  public function chat(
+    string $input,
+    array $cfg,
+    string $id = "",
+    array $files = []
+  ): array
   {
     $startTime = time();
-    $messages = $this->createMessages($input);
-    $query = $this->createRequest($messages, $cfg);
-    $result = $this->request($query);
+    try {
+      $messages = $this->createMessages($input, '', $files);
+      $query = $this->createRequest($messages, $cfg);
+      $result = $this->request($query);
+    }
+    finally {
+      $this->cleanupRemoteFiles();
+    }
+
     if ($result["success"]) {
       $responseTime = time();
       $result["text"] = $result["result"]["content"];
@@ -644,7 +724,7 @@ class Ai extends DbCls
       $row["last"] = $responseTime;
       $lastMessage = [
         "messages" => [
-          ...$query["messages"],
+          ...$this->sanitizeMessagesForStorage($query['messages']),
           [
             "role" => "assistant",
             "content" => $result["text"],
@@ -1170,6 +1250,209 @@ class Ai extends DbCls
     }
 
     return $res;
+  }
+
+  public function setFileCapabilities(array $capabilities): void
+  {
+    $this->fileCapabilities = array_replace(
+      $this->fileCapabilities,
+      array_intersect_key(
+        $capabilities,
+        $this->fileCapabilities
+      )
+    );
+  }
+
+  public function uploadFile(
+    string $path,
+    string $purpose = 'assistants'
+  ): array
+  {
+    $file = $this->validateAttachment($path);
+    $response = $this->ai->uploadFile([
+      'file' => curl_file_create(
+        $file['path'],
+        $file['mime'],
+        $file['name']
+      ),
+      'purpose' => $purpose
+    ]);
+    $result = json_decode($response, true);
+    if (!is_array($result) || empty($result['id'])) {
+      throw new Exception($result['error']['message'] ?? 'Error uploading file to AI provider');
+    }
+
+    $this->temporaryRemoteFiles[] = $result['id'];
+    return $result;
+  }
+
+  private function deleteRemoteFile(string $id): bool
+  {
+    $response = $this->ai->deleteFile($id);
+    $result = json_decode($response, true);
+    return !empty($result['deleted']);
+  }
+
+  private function cleanupRemoteFiles(): void
+  {
+    foreach ($this->temporaryRemoteFiles as $id) {
+      try {
+        $this->deleteRemoteFile($id);
+      }
+      catch (\Throwable $e) {
+        X::log("Unable to delete temporary AI file: " . $id, "ai_errors");
+      }
+    }
+
+    $this->temporaryRemoteFiles = [];
+  }
+
+  private function validateAttachment(string $path): array
+  {
+    if (!is_file($path) || !is_readable($path)) {
+      throw new Exception("File not found or unreadable");
+    }
+
+    $size = filesize($path);
+
+    if ($size === false || !$size) {
+      throw new Exception("Invalid or empty file");
+    }
+
+    $limit = min(
+      self::MAX_FILE_SIZE,
+      (int)$this->fileCapabilities['max_size']
+    );
+
+    if ($size > $limit) {
+      throw new Exception("File too large");
+    }
+
+    $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+
+    if (!$mime) {
+      throw new Exception("Unable to detect file type");
+    }
+
+    return [
+      'path' => $path,
+      'name' => basename($path),
+      'mime' => $mime,
+      'size' => $size
+    ];
+  }
+
+  private function createFileContent(array $file): array
+  {
+    $mime = $file['mime'];
+    $path = $file['path'];
+
+    // Images: use inline Base64
+    if (str_starts_with($mime, 'image/')) {
+      if (!$this->fileCapabilities['images']) {
+        throw new Exception("Images not supported");
+      }
+
+      return [
+        'type' => 'image_url',
+        'image_url' => [
+          'url' => 'data:' . $mime . ';base64,' .
+            base64_encode(file_get_contents($path))
+        ]
+      ];
+    }
+
+    // Files API: upload and reference by file_id
+    if ($this->fileCapabilities['file_ids']) {
+      $uploaded = $this->uploadFile($path);
+
+      return [
+        'type' => 'file',
+        'file' => [
+          'file_id' => $uploaded['id']
+        ]
+      ];
+    }
+
+    // PDF inline
+    if ($mime === 'application/pdf'
+      && $this->fileCapabilities['pdf_inline']
+    ) {
+      return [
+        'type' => 'file',
+        'file' => [
+          'filename' => $file['name'],
+          'file_data' => 'data:application/pdf;base64,' .
+            base64_encode(file_get_contents($path))
+        ]
+      ];
+    }
+
+    // Text files
+    if ($this->isTextAttachment($file)) {
+      return [
+        'type' => 'text',
+        'text' => "Attached file: " .
+          $file['name'] . "\n\n" .
+          file_get_contents($path)
+      ];
+    }
+
+    throw new Exception(
+      "Unsupported file type: " . $mime
+    );
+  }
+
+  private function isTextAttachment(array $file): bool
+  {
+    $mime = $file['mime'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $applicationTypes = [
+      'application/json',
+      'application/xml',
+      'application/x-ndjson'
+    ];
+    $exts = [
+      'md', 'txt', 'csv', 'json',
+      'xml', 'php', 'js', 'ts',
+      'py', 'css', 'html', 'sql'
+    ];
+    return str_starts_with($mime, 'text/')
+      || in_array($mime, $applicationTypes, true)
+      || (($mime === 'application/octet-stream')
+        && in_array($ext, $exts, true));
+  }
+
+  private function sanitizeMessagesForStorage(array $messages): array
+  {
+    foreach ($messages as &$message) {
+      if (!is_array($message['content'] ?? null)) {
+        continue;
+      }
+
+      foreach ($message['content'] as &$part) {
+        if (($part['type'] ?? '') === 'image_url') {
+          $part['image_url']['url'] = '[temporary image]';
+        }
+        elseif (($part['type'] ?? '') === 'file') {
+          $part['file'] = [
+            'filename' => $part['file']['filename'] ?? null,
+            'temporary' => true
+          ];
+        }
+        elseif (($part['type'] ?? '') === 'text'
+          && str_starts_with(
+            $part['text'] ?? '',
+            'Attached file: '
+          )) {
+          $part['text'] = '[temporary text attachment]';
+        }
+      }
+      unset($part);
+    }
+    unset($message);
+
+    return $messages;
   }
 
   /**
