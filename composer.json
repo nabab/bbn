@@ -47,7 +47,8 @@
     "xemlock/htmlpurifier-html5": "^0.1.11",
     "mollie/oauth2-mollie-php": "^2.8",
     "ezyang/htmlpurifier": "^4.18",
-    "phpdocumentor/reflection-docblock": "^6.0"
+    "phpdocumentor/reflection-docblock": "^6.0",
+    "orhanerday/open-ai": "^6.3"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "*",
