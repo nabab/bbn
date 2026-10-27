@@ -13,8 +13,8 @@ use bbn\Models\Tts\DbOps;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Db as DbCls;
 use Orhanerday\OpenAi\OpenAi;
-use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
-use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
+//use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
+//use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 class Ai extends DbCls
 {
@@ -519,7 +519,7 @@ class Ai extends DbCls
    */
   public function createRequest(array $messages, array $cfg = []): array
   {
-    $config = new Gpt3TokenizerConfig();
+    /* $config = new Gpt3TokenizerConfig();
     $tokenizer = new Gpt3Tokenizer($config);
     $max_tokens = self::MAX_TOKENS;
     foreach ($messages as $message) {
@@ -536,7 +536,7 @@ class Ai extends DbCls
           }
         }
       }
-    }
+    } */
 
     $model = $this->model;
     if (!empty($cfg["model"])) {
