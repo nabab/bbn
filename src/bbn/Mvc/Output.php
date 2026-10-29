@@ -311,8 +311,8 @@ final class Output extends Basic {
       if (!empty($cfg[$k])) {
         $v = $cfg[$k];
       }
-      elseif (defined(strtoupper(str_replace('-', '_', $k)))) {
-        $v = constant(strtoupper(str_replace('-', '_', $k)));
+      elseif (defined('BBN_' . strtoupper(str_replace('-', '_', $k)))) {
+        $v = constant('BBN_' . strtoupper(str_replace('-', '_', $k)));
       }
       if (!empty($v)) {
         $res .= "$k $v; ";
