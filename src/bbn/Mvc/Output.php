@@ -87,6 +87,21 @@ final class Output extends Basic {
     ];
   }
 
+  static $csp = [
+    'default-src' => "'self'",
+    'script-src' => "'self' 'unsafe-inline' 'unsafe-eval'",
+    'style-src' => "'self' 'unsafe-inline' https://fonts.googleapis.com",
+    'img-src' => "'self' data: https:",
+    'font-src' => "'self' https://fonts.gstatic.com",
+    'worker-src' => "'self'",
+    'connect-src' => "'self'",
+    'object-src' => "'none'",
+    'base-uri' => "'self'",
+    'frame-ancestors' => "'self'",
+    'frame-src' => "'self'",
+    'form-action' => "'self'",
+  ];
+
 
   public function __construct(
     private stdClass $obj,
@@ -225,6 +240,8 @@ final class Output extends Basic {
       }
     }
 
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    header('X-Content-Type-Options: nosniff');
     switch ($this->mode) {
       case 'public':
         header('Content-type: application/json; charset=utf-8');
@@ -279,22 +296,29 @@ final class Output extends Basic {
       default:
         header('Content-type: text/html; charset=utf-8');
         header(
-          "Content-Security-Policy: " .
-          "default-src 'self'; " .
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " .
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
-          "img-src 'self' data: https:; " .
-          "font-src 'self' https://fonts.gstatic.com; " .
-          "worker-src 'self'; " .
-          "connect-src 'self'; " .
-          "object-src 'none'; " .
-          "base-uri 'self'; " .
-          "frame-ancestors 'self'; " .
-          "form-action 'self';"
-          //" 'nonce-$nonce';"
+          'Content-Security-Policy: ' . self::getCsp()
+            //" 'nonce-$nonce';"
         );
         echo isset($this->obj->content) ? $this->obj->content : '';
 
     }
+  }
+
+  private static function getCsp($cfg = []): string
+  {
+    $res = '';
+    foreach (self::$csp as $k => $v) {
+      if (!empty($cfg[$k])) {
+        $v = $cfg[$k];
+      }
+      elseif (defined(strtoupper(str_replace('-', '_', $k)))) {
+        $v = constant(strtoupper(str_replace('-', '_', $k)));
+      }
+      if (!empty($v)) {
+        $res .= "$k $v; ";
+      }
+    }
+
+    return $res;
   }
 }
