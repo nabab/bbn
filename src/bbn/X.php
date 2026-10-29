@@ -2529,7 +2529,9 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
       'isnotnull' => 'isnotnull',
       'isempty' => 'isempty',
       'isnotempty' => 'isnotempty',
-      '==' => 'loose_eq'
+      '==' => 'loose_eq',
+
+      'between' => 'between'
     ];
 
     $operator = strtolower($operator);
@@ -2620,6 +2622,13 @@ private static function synthesizeBits(string $bitsDir, string $summaryFile, str
 
       case 'isnotempty':
         return !empty($v1);
+
+      case 'between':
+        if (!is_array($v2) || count($v2) !== 2) {
+          return false;
+        }
+
+        return $v1 >= $v2[0] && $v1 <= $v2[1];
 
       case 'loose_eq':
       default:
