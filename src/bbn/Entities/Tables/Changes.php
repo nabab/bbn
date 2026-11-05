@@ -616,9 +616,16 @@ class Changes extends EntityTable
 
   public function get(string $id, array $filters = []): ?array
   {
-    return $this->getOne(X::mergeArrays([
-      $this->fields['id'] => $id
-    ], $filters));
+    $filters = [
+      'conditions' => [
+        [
+          'field' => $this->fields['id'],
+          'value' => $id
+        ],
+        $filters
+      ]
+    ];
+    return $this->db->rselect($this->class_table, [], $filters);
   }
 
 
