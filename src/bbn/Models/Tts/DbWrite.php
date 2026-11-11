@@ -144,25 +144,26 @@ trait DbWrite
 
     if ($data = $this->dbTraitPrepare($data)) {
       // JSON cfg partial update support.
-      if (!empty($f["cfg"])) {
+      if (!empty($f["cfg"])
+        && !empty($ccfg['cfg'])
+        && !empty($data[$f["cfg"]])
+      ) {
         $col = $f["cfg"];
-        if (!empty($data[$col])) {
-          if (is_string($data[$col]) && Str::isJson($data[$col])) {
-            $data[$col] = json_decode($data[$col], true);
-          }
-
-          $jsonUpdate = "JSON_SET(IFNULL(" . $this->db->csn($col, true) . ' ,"{}")';
-          foreach ($data[$col] as $k => $v) {
-            $jsonUpdate .= ', "$.' . $k . '", ' . (
-              is_iterable($v)
-                ? "JSON_EXTRACT('" . Str::escapeSquotes(json_encode($v)) . "', '$')"
-                : '"' . Str::escapeDquotes($v) . '"'
-            );
-          }
-
-          $jsonUpdate .= ")";
-          $data[$col] = [null, $jsonUpdate];
+        if (is_string($data[$col]) && Str::isJson($data[$col])) {
+          $data[$col] = json_decode($data[$col], true);
         }
+
+        $jsonUpdate = "JSON_SET(IFNULL(" . $this->db->csn($col, true) . ' ,"{}")';
+        foreach ($data[$col] as $k => $v) {
+          $jsonUpdate .= ', "$.' . $k . '", ' . (
+            is_iterable($v)
+              ? "JSON_EXTRACT('" . Str::escapeSquotes(json_encode($v)) . "', '$')"
+              : '"' . Str::escapeDquotes($v) . '"'
+          );
+        }
+
+        $jsonUpdate .= ")";
+        $data[$col] = [null, $jsonUpdate];
       }
 
       $f = $this->dbTraitGetFilterCfg($filter);

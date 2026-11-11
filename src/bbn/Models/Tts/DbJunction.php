@@ -112,17 +112,22 @@ trait DbJunction
     $ccfg = $this->getClassCfg();
     $f = $ccfg['arch'][$this->class_table_index];
     if ($data = $this->dbTraitPrepare($data)) {
-      if (!empty($f['cfg'])) {
+      if (!empty($f["cfg"])
+        && !empty($ccfg['cfg'])
+        && !empty($data[$f["cfg"]])
+      ) {
         $col = $f['cfg'];
-        if (!empty($data[$col])) {
-          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
-          foreach ($data[$col] as $k => $v) {
-            $jsonUpdate .= ', "$.' . $k . '", ' . (is_iterable($v) ? "JSON_EXTRACT('".Str::escapeSquotes(json_encode($v))."', '$')" : ('"'.Str::escapeDquotes($v).'"'));
-          }
-
-          $jsonUpdate .= ")";
-          $data[$col] = [null, $jsonUpdate];
+        $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
+        foreach ($data[$col] as $k => $v) {
+          $jsonUpdate .= ', "$.' . $k . '", ' . (
+            is_iterable($v)
+              ? "JSON_EXTRACT('" . Str::escapeSquotes(json_encode($v)) . "', '$')"
+              : ('"' . Str::escapeDquotes($v) . '"')
+          );
         }
+
+        $jsonUpdate .= ")";
+        $data[$col] = [null, $jsonUpdate];
       }
 
       return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
