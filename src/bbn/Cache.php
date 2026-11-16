@@ -605,10 +605,10 @@ class Cache extends Basic implements CacheInterface
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $key): mixed
+  private function getRaw(string $key, bool $fromLocal = true): mixed
   {
     $t = null;
-    if (array_key_exists($key, $this->localCache)) {
+    if ($fromLocal && array_key_exists($key, $this->localCache)) {
       if (time() < $this->localCache[$key]['expire']) {
         return $this->localCache[$key]['value'];
       } else {
@@ -935,7 +935,7 @@ class Cache extends Basic implements CacheInterface
   {
     $sep = self::$sep;
     $infoKey = "{$key}{$sep}__info";
-    return $this->getRaw($infoKey) ?? null;
+    return $this->getRaw($infoKey, false) ?? null;
   }
 
   /**
