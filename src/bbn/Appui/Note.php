@@ -892,7 +892,11 @@ class Note extends DbCls
         ];
       }
 
-      return $this->dbTraitSelectOne("COUNT(DISTINCT " . $cf["arch"]["notes"]["id"] . ")", $where);
+      return $this->db->selectOne(
+        $this->class_table,
+        "COUNT(DISTINCT " . $cf["arch"]["notes"]["id"] . ")",
+        $where
+      );
     }
 
     return false;
